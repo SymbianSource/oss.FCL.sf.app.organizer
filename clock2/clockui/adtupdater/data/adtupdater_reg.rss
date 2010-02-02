@@ -1,0 +1,36 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   The application registration resource file.
+*
+*/
+
+// System includes
+#include <appinfo.rh>
+
+UID2 KUidAppRegistrationResourceFile
+UID3 0x2001114C 			// Define your application UID here
+
+RESOURCE APP_REGISTRATION_INFO
+    {
+    app_file = "adtupdater";
+    localisable_resource_file = APP_RESOURCE_DIR"\\adtupdater_loc";
+    
+    // Need to hide application from app-shell.
+    hidden = KAppIsHidden;
+    
+    // First we'll launch the application in background.
+    launch = KAppLaunchInBackground;
+    }
+
+// End of File

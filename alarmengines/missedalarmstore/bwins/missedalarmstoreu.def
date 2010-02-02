@@ -1,0 +1,10 @@
+EXPORTS
+	?CountL@CMissedAlarmStore@@QAEXAAK@Z @ 1 NONAME ; void CMissedAlarmStore::CountL(unsigned long &)
+	?AddL@CMissedAlarmStore@@QAEXAAV?$RPointerArray@VCMissedAlarm@@@@@Z @ 2 NONAME ; void CMissedAlarmStore::AddL(class RPointerArray<class CMissedAlarm> &)
+	?RemoveAllL@CMissedAlarmStore@@QAEXXZ @ 3 NONAME ; void CMissedAlarmStore::RemoveAllL(void)
+	?RemoveL@CMissedAlarmStore@@QAEXAAVCMissedAlarm@@@Z @ 4 NONAME ; void CMissedAlarmStore::RemoveL(class CMissedAlarm &)
+	?NewL@CMissedAlarmStore@@SAPAV1@AAVCRepository@@@Z @ 5 NONAME ; class CMissedAlarmStore * CMissedAlarmStore::NewL(class CRepository &)
+	?NewLC@CMissedAlarmStore@@SAPAV1@XZ @ 6 NONAME ; class CMissedAlarmStore * CMissedAlarmStore::NewLC(void)
+	?NewL@CMissedAlarm@@SAPAV1@HVTTime@@ABVTDesC16@@@Z @ 7 NONAME ; class CMissedAlarm * CMissedAlarm::NewL(int, class TTime, class TDesC16 const &)
+	?GetL@CMissedAlarmStore@@QAEXAAV?$RPointerArray@VCMissedAlarm@@@@@Z @ 8 NONAME ; void CMissedAlarmStore::GetL(class RPointerArray<class CMissedAlarm> &)
+

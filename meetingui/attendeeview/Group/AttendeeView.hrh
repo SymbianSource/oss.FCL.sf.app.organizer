@@ -1,0 +1,58 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Contains declarations for constants of attendee view.
+*                This file can be included in C++ or resource file.
+*
+*/
+
+
+
+#ifndef __ATTENDEE_VIEW_HRH_
+#define __ATTENDEE_VIEW_HRH_
+
+
+enum TAttendeeViewCommandIds
+    {    
+	EAttCallCmd = 6001,
+	EAttAddToContacsCmd,
+	// Reserve at least two(2) command Ids right after the marker item
+	EAttAddToContacsCmd1,	// Phonebook data save command 1
+	EAttAddToContacsCmd2,		
+	EAttDetails,
+	EAttSendDummyCmd,
+	EAttCmdSend,	
+	EAttAddAttendeesCmd,
+	EAttAddFromContactsCmd,
+	EAttAddNewAttendeeCmd,
+	EAttDeleteAttendeesCmd,	
+	EAttSetAsRequireCmd,
+	EAttSetAsOptionalCmd,
+	EAttRespondAccept,
+	EAttRespondTentative,
+	EAttRespondDecline,
+	EAttCmdRespond,
+	EAttCmdSendMeetingRequest,
+	EAttCmdSendMeetingUpdate
+    }; 
+
+enum TAttendeeViewIcons
+    {
+    EAttOrganizer = 2,
+    EAttAccepted,
+    EAttTentative,
+    EAttRejected,
+    EAttNotAnswered
+    };
+
+#endif      // __ATTENDEE_VIEW_HRH_

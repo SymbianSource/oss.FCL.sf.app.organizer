@@ -1,0 +1,71 @@
+/*
+* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Project specification file of contactsplugin.
+*
+*/
+
+
+
+
+#include <platform/app/searchcommon.hrh>
+#include <platform_paths.hrh>
+
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+TARGET        contactssearchplugin.dll
+TARGETTYPE    PLUGIN
+UID           0x10009D8D KSearchCClassContacts
+
+//RESOURCE
+START  RESOURCE ../data/contactssearchplugin.rss
+TARGET          contactssearchplugin.rsc
+END
+
+//RESOURCE
+START  RESOURCE ../data/contactssearchresource.rss
+HEADER
+TARGET          contactssearchresource.rsc
+LANGUAGE_IDS
+END
+
+SOURCEPATH    ../src
+SOURCE        proxy.cpp
+SOURCE        contactssearchplugin.cpp
+SOURCE        contactssearcher.cpp
+
+
+USERINCLUDE   ../inc
+SYSTEMINCLUDE   /epoc32/include/ecom
+APP_LAYER_SYSTEMINCLUDE
+
+
+LIBRARY       euser.lib
+LIBRARY       searchutilities.lib
+LIBRARY       ecom.lib
+LIBRARY       efsrv.lib 
+LIBRARY       estor.lib
+LIBRARY		  charconv.lib
+LIBRARY		  cone.lib 
+LIBRARY	      vpbkeng.lib
+LIBRARY	      viewcli.lib
+LIBRARY	      pbk2commonui.lib
+LIBRARY       apparc.lib
+LIBRARY       eikcore.lib  
+LIBRARY       eikcoctl.lib
+LIBRARY       avkon.lib  
+LIBRARY       bafl.lib
+LIBRARY       eikctl.lib
+LIBRARY       flogger.lib
+LIBRARY       featmgr.lib
+

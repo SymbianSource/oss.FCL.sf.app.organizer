@@ -1,0 +1,41 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   This file provides the information required 
+*               for building filesplugin.
+*
+*/
+
+
+
+PRJ_EXPORTS
+
+../loc/filessearchplugin.loc 				APP_LAYER_LOC_EXPORT_PATH(filessearchplugin.loc)
+
+../rom/filessearchplugin.iby	 			CORE_APP_LAYER_IBY_EXPORT_PATH(filessearchplugin.iby)
+../rom/filessearchpluginresources.iby 		LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(filessearchpluginresources.iby)
+
+PRJ_MMPFILES
+
+//#if defined(RD_GENERAL_SEARCH)
+filesplugin.mmp
+//#endif // RD_GENERAL_SEARCH
+
+PRJ_EXTENSIONS
+
+START EXTENSION s60/mifconv
+OPTION TARGETFILE filessearchplugin.mif
+OPTION HEADERFILE filessearchplugin.mbg
+OPTION SOURCES    -c24,8  qgn_prop_search_file_names
+
+END

@@ -1,0 +1,9 @@
+component	app-engines_documentation
+
+source	\sf\app\organizer\pimappservices\appenginesdocs\
+
+notes_source	\component_defs\release.src
+
+
+ipr E 
+

@@ -1,0 +1,10 @@
+component	app-engines_calendar
+source	\sf\app\organizer\pimappservices\calendar
+binary	\sf\app\organizer\pimappservices\calendar\group	all
+exports	\sf\app\organizer\pimappservices\calendar\group
+
+notes_source	\component_defs\release.src
+
+ipr E 
+ipr T \sf\app\organizer\pimappservices\calendar\tsrc
+ipr T \sf\app\organizer\pimappservices\calendar\test

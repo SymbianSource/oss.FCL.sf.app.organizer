@@ -1,0 +1,2597 @@
+/*
+* Copyright (c) 2002-2004 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   This is a localisation file for Calendar
+*                A _loc file is the one and only place where the logical
+*                strings to be localised are defined
+*
+*/
+
+
+
+// LOCALISATION STRINGS
+
+
+//d:Application title for listview
+//l:list_single_large_graphic_pane_t1
+//
+#define qtn_apps_calendar_list  "Calendar"
+
+//d:Application title for general settings pane
+//l:list_single_large_graphic_pane_t1_cp2
+//
+#define qtn_cale_title_calendar  "Calendar"
+
+//d:Application title for grid
+//l:cell_app_pane_t1
+//
+#define qtn_apps_calendar_grid  "Calendar"
+
+//d:Opens New entry SubMenu
+//l:list_single_pane_t1_cp2
+//
+#define qtn_cale_opt_make_note  "New entry"
+
+//d:Opens delete SubMenu in MonthView
+//l:list_single_pane_t1_cp2
+//
+#define qtn_cale_opt_delete  "Delete"
+
+//d:Deletes a note
+//l:list_single_pane_t1_cp2
+//
+#define qtn_cale_om_delete  "Delete"
+
+//d:Discard changes to a note
+//l:list_single_pane_t1_cp2
+//
+#define qtn_cale_om_cancel_changes "Discard changes"
+
+//d:Confirmation text when discarding changes to a note
+//l:popup_note_window
+//
+#define qtn_cale_query_cancel_changes "Discard changes?"
+
+//d:Opens SettingView
+//l:list_single_pane_t1_cp2
+//
+#define text_calendar_settings  "Settings"
+
+//d:Opens DayView
+//l:list_single_pane_t1_cp2
+//
+#define qtn_cale_opt_open  "Open"
+
+//d:Opens WeekView
+//l:list_single_pane_t1_cp2
+//
+#define qtn_cale_opt_view_week  "View by weeks"
+
+//d:Jumps to a specific date
+//l:list_single_pane_t1_cp2
+//
+#define text_calendar_goto_date  "Go to date"
+
+//d:Opens Meeting note
+//l:list_single_popup_submenu_pane_t1
+//
+#define qtn_cale_meeting_note  "Meeting"
+
+
+//d:Opens Meeting Request note
+//d:Option list item for this is "Make Note"
+//l:list_single_popup_submenu_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_cale_meeting_request_note  "Meeting Request"
+
+
+//d:Opens Anniversary Note
+//l:list_single_popup_submenu_pane_t1
+//
+#define qtn_cale_note_anniversary  "Anniversary"
+
+//d:Opens Day Note
+//l:list_single_popup_submenu_pane_t1
+//
+#define qtn_cale_day_note  "Day note"
+
+//d:Opens MonthView
+//l:list_single_pane_t1_cp2
+//
+#define qtn_cale_opt_view_month  "View month"
+
+//d:Deletes all notes
+//l:list_single_popup_submenu_pane_t1
+//
+#define qtn_cale_sub_all  "All notes"
+
+//d:the date before the notes are to be deleted.
+//l:list_single_popup_submenu_pane_t1
+//
+#define qtn_cale_sub_setdate  "Before set date"
+
+//d:Settings is changed
+//l:list_single_pane_t1_cp2
+//
+#define qtn_cale_om_change  "Change"
+
+//d:Subject item text of Meeting
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_note_subject  "subject"
+
+//d:Start date item text of Meeting form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_note_meeting_date  "start date"
+
+//d:End date item text of Meeting form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_note_meeting_end  "end date"
+
+//d:Start date and time item text of entry editor
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_note_start_time_date "start time and date"
+
+//d:End date and time item text of entry editor
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_note_end_time_date "end time and date"
+
+//d:Alarm date and time item text of entry editor
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_note_alarm_time_date "alarm time and date"
+
+//d:Start time item text of Meeting form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_note_meeting_start  "start time"
+
+//d:End time item text of Meeting form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_note_end_meet_time  "end time"
+
+//d:Alarm item text of Meeting, Anniversary form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_alarm_activity  "alarm"
+
+//d:Alarm time item text of Meeting, Anniversary form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_note_meeting_alarm  "alarm time"
+
+//d:Alarm date item text of Meeting, Anniversary form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_note_meeting_alarmdate  "alarm date"
+
+//d:Repeat item text of Meeting, Day form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_note_meeting_repeat  "repeat"
+
+//d:Repeat until item text of Meeting, Day form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_note_meeting_until  "repeat until"
+
+//d:Confidentiality item text of Meeting form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_note_meeting_confident  "synchronisation"
+
+//d:Subject item text of Anniversary form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_anniversary_occasion  "occasion"
+
+//d:Start date item text of Anniversary form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_anniversary_start_date  "date"
+
+//d:Subject item text of Day form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_day_description  "description"
+
+//d:Start date item text of Day form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_day_start_date  "start date"
+
+//d:End date item text of Day form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_day_end_date  "end date"
+
+//d:Occasion item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_occasion "Occasion:"
+
+//d:Date item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_date "Date:"
+
+//d:Subject item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_subject "Subject:"
+
+//d:Location item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_location "Location:"
+
+//d:Synchronisation item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_sync "Synchronisation:"
+
+//d:Alarm item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_alarm "Alarm:"
+
+//d:Repeat item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_repeat_daily "Repeats daily:"
+
+//d:Repeat item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_repeat_weekly "Repeats weekly:"
+
+//d:Repeat item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_repeat_fortnightly "Repeats fortnightly:"
+
+//d:Repeat item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_repeat_monthly "Repeats monthly:"
+
+//d:Repeat item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_repeat_yearly "Repeats yearly:"
+
+//d:Repeat item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_repeat_other "Recurring entry:"
+
+//d:Repeat item text of note viewer when no end date (repeat from ...)
+//d:%0U is date entry repeats from
+//l:list_form_graphic_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_valid_forever "From %0U"
+
+//d:Navi pane decoration for event viewers
+//d:%0U is current instance date
+//d:%1U is index of current instance
+//d:%2U is total instance count for current day
+//l:navi_text_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_navi "%0U   %1U/%2U"
+
+//d:Repeat item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_repeat "Repeat:"
+
+//d:Time item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_time "Time:"
+
+//d:Due date item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_due_date "Due date:"
+
+//d:Since item text of note viewer (anniversaries only)
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_since "Since:"
+
+//d:Priority item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_prio "Priority:"
+
+//d:Description item text of note viewer
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_desc "Description:"
+
+//d:Private item text of note viewer (Sync)
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_sync_private "Private"
+
+//d:Public item text of note viewer (Sync)
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_sync_public "Public"
+
+//d:None item text of note viewer (Sync)
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_sync_none "None"
+
+//d:High item text of note viewer (Priority)
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_prio_high "High"
+
+//d:Normal item text of note viewer (Priority)
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_prio_normal "Normal"
+
+//d:Low item text of note viewer (Priority)
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_prio_low "Low"
+
+//d:Completed item text of note viewer (Priority)
+//l:list_double_graphic_heading_pane_t1
+//r:3.2
+//
+#define qtn_cale_viewer_completed "Completed:"
+
+//d:Date and time when appointment starts and ends on the same day
+//d:The string is small enough to fit onto one line
+//d:%0U is start time
+//d:%1U is end time
+//d:%2U is start date
+//l:popup_preview_text_window/opt1
+//r:3.2
+//
+#define qtn_cale_viewer_time_day "%0U - %1U %2U"
+
+//d:Date and time when appointment starts and ends on the same day
+//d:The string is too long to fit onto one line so must include a linebreak
+//d:%0U is start time
+//d:%1U is end time
+//d:%2U is start date
+//d:<\x2028> is line break
+//l:popup_preview_text_window/opt1
+//r:3.2
+//
+#define qtn_cale_viewer_time_day_wrapped "%0U - %1U"<0x2028>"%2U"
+
+//d:Date and time when appointment starts and ends on different days
+//d:The string is small enough to fit onto one line
+//d:%0U is start time
+//d:%1U is start date
+//d:%2U is end time
+//d:%3U is end date
+//l:popup_preview_text_window/opt1
+//r:3.2
+//
+#define qtn_cale_viewer_time_days "%0U %1U - %2U %3U"
+
+//d:Date and time when appointment starts and ends on different days
+//d:The string is too long to fit onto one line so must include a linebreak
+//d:%0U is start time
+//d:%1U is start date
+//d:%2U is end time
+//d:%3U is end date
+//d:<\x2028> is line break
+//l:popup_preview_text_window/opt1
+//r:3.2
+//
+#define qtn_cale_viewer_time_days_wrapped "%0U %1U -"<0x2028>"%2U %3U"
+
+//d:Date and time of alarm (when alarm is on different day to event)
+//d:%0U is alarm time
+//d:%1U is alarm date
+//l:popup_preview_text_window/opt1
+//r:3.2
+//
+#define qtn_cale_viewer_alarm_time "%0U %1U"
+
+//d:Start and end date of event, when event lasts for more than one day
+//d:%0U is start date
+//d:%1U is end date
+//l:msg_body_pane/opt
+//r:3.2
+//
+#define qtn_cale_viewer_valid_limited "%0U - %1U"
+
+//d:Error text when adjusting repeating meeting instance times
+//l:popup_note_window
+//r:3.2
+//
+#define qtn_cale_note_cannot_occur_daily "%N day meeting cannot repeat daily"
+
+//d:Error text when adjusting repeating meeting instance times
+//l:popup_note_window
+//r:3.2
+//
+#define qtn_cale_note_cannot_occur_weekly "%N day meeting cannot repeat weekly"
+
+//d:Error text when adjusting repeating meeting instance times
+//l:popup_note_window
+//r:3.2
+//
+#define qtn_cale_note_cannot_occur_fortnightly "%N day meeting cannot repeat fortnightly"
+
+//d:Error text when adjusting repeating meeting instance times
+//l:popup_note_window
+//r:3.2
+//
+#define qtn_cale_note_cannot_occur_monthly "%N day meeting cannot repeat monthly"
+
+//d:Error text when adjusting repeating meeting instance times
+//l:popup_note_window
+//r:3.2
+//
+#define qtn_cale_note_cannot_occur_yearly "%N day meeting cannot repeat yearly"
+
+//d:Error text when attempting to move a meeting out of sequence
+//l:popup_note_window
+//r:3.2
+//
+#define qtn_cale_note_child_out_of_sequence "Unable to move a meeting out of sequence"
+
+//d:Error note when attempting to move an instance of a meeting to a day when an instance already exists
+//l:popup_note_window
+//r:3.2
+//
+#define qtn_cale_note_child_same_day "Two occurrences of a meeting cannot occur on the same day"
+
+//d:Error note when attempting to move a meeting to overlap another instance of the meeting
+//l:popup_note_window
+//r:3.2
+//
+#define qtn_cale_note_child_overlap "Meeting cannot overlap another instance of itself"
+
+//d:Alarm active text of Note form
+//l:list_form_graphic_pane_t1
+//
+#define qtn_cale_alarm_active  "Active"
+
+//d:Alarm off text of the Note form
+//l:list_form_graphic_pane_t1
+//
+#define qtn_cale_alarm_off  "Off"
+
+//d:Synchronisation type text of the Note form
+//l:list_form_graphic_pane_t1
+//
+#define qtn_cale_confident_public  "Public"
+
+//d:Synchronisation type text of the Note form
+//l:list_form_graphic_pane_t1
+//
+#define qtn_cale_confident_private  "Private"
+
+//d:Synchronisation type text of the Note form
+//l:list_form_graphic_pane_t1
+//
+#define qtn_cale_confident_none  "None"
+
+//d:Repeat type "Not repeated" text of note form
+//l:list_set_graphic_pane_t1
+//
+#define qtn_cale_not_repeated  "Not repeated"
+
+//d:Repeat type "Every day" text of note form
+//l:list_set_graphic_pane_t1
+//
+#define text_calendar_every_day  "Every day"
+
+//d:Repeat type "Every week" text of note form
+//l:list_set_graphic_pane_t1
+//
+#define text_calendar_every_week  "Every week"
+
+//d:Repeat type "Every two weeks" text of note form
+//l:list_set_graphic_pane_t1
+//
+#define text_calendar_bi_weekly  "Every 2 weeks"
+
+//d:Repeat type "Monthly" text of note form
+//l:list_set_graphic_pane_t1
+//
+#define qtn_cale_repeat_monthly  "Monthly"
+
+//d:Repeat type "Yearly" text of note form
+//l:list_set_graphic_pane_t1
+//
+#define text_calendar_every_year  "Every year"
+
+//d:Repeat type "Other" text of note form
+//l:list_set_graphic_pane_t1
+//
+#define qtn_cale_other  "Other"
+
+//d:Title pane text of Meeting form
+//l:title_pane_t2/opt9
+//
+#define text_calendar_title_meeting  "Meeting"
+
+//d:Title pane text of Anniversary form
+//l:title_pane_t2/opt9
+//
+#define qtn_cale_anniversary_title  "Anniversary"
+
+//d:Title pane text of Day form
+//l:title_pane_t2/opt9
+//
+#define qtn_cale_title_daynote  "Day note"
+
+//d:After confirming the saving,the confirmation note
+//d:Calendar note savedis shown
+//l:popup_note_window
+//
+#define text_calendar_note_saved  "Note saved"
+
+//d:The List_Query with the prompt text Save Repeat Note?
+//l:heading_pane_t1
+//
+#define qtn_cale_lq_save_chang_repeated  "Save changes?"
+
+//d:The List_Query with the prompt text "Edit:" (choices being Series or Occurrence)
+//l:heading_pane_t1
+//
+#define qtn_cale_lq_edit_recurring  "Edit:"
+
+//d:All notes delete prompt
+//l:popup_note_window
+//
+#define qtn_cale_quest_delete_all_notes  "Delete all notes"
+
+//d:A note delete prompt
+//l:popup_note_window
+//
+#define qtn_cale_quest_delete_event  "Delete note?"
+
+//d:Data query for inputting the date before the notes are to be deleted.
+//l:popup_query_data_window
+//
+#define qtn_cale_prmpt_del_before_date  "Delete before set date"
+
+//d:When deleting a repeated note,
+//d:the phone prompts the List_Query
+//l:heading_pane_t1
+//
+#define qtn_cale_lq_del_repeated_note  "Delete repeated note"
+
+//d:After deleting of notes phone displays the information note
+//l:popup_note_window
+//
+#define qtn_cale_conf_past_note_deleted  "Notes from past to set date deleted"
+
+//d:After deleting of notes phone displays the information note
+//l:popup_note_window
+//
+#define qtn_cale_conf_all_notes_deleted  "All notes deleted from Calendar"
+
+//d:Erase or update note selection list of choice items
+//l:list_single_pane_t1_cp2
+//
+#define qtn_cale_lq_all_occurences  "All occurrences"
+
+//d:Erase or update selection list of choice items
+//l:list_single_pane_t1_cp2
+//
+#define qtn_cale_lq_this_occurence  "Only this occurrence"
+
+//d:Edit note selection list of choice items
+//l:list_single_pane_t1_cp2
+//
+#define qtn_cale_lq_edit_series  "All occurrences"
+
+//d:Edit note selection list of choice items
+//l:list_single_pane_t1_cp2
+//
+#define qtn_cale_lq_edit_this  "Only this occurrence"
+
+//d:Specified Out of range of date
+//l:popup_note_window
+//
+#define qtn_cale_info_year_limit  "Year limit is from 1900 to 2100"
+
+//d:Error prompt for alarm date too past
+//l:popup_note_window
+//
+#define qtn_cale_date_alarm_past  "Alarm date is too past"
+
+//d:Error prompt for alarm time earlier than note
+//l:popup_note_window
+//
+#define qtn_cale_later_date  "Alarm later than note"
+
+//d:Error prompt for setting alarm time which is past.
+//l:popup_note_window
+//
+#define qtn_cale_not_expired  "The time for the note alarm has already expired"
+
+//d:Error prompt for repeat until date earlier than start date.
+//l:popup_note_window
+//
+#define qtn_cale_info_repeat_invalid  "Repeat until has to be later than the start date"
+
+//d:Confirmaiton prompt for updating start date on repeat note.
+//l:popup_note_window
+//
+#define qtn_cale_quest_change_start_day  "Are you sure to change start date of selected recurring note?"
+
+//d:Error prompt "Note ends before than starts"
+//l:popup_note_window
+//
+#define qtn_cale_info_note_ends_before  "Note ends before than starts"
+
+//d:Error prompt. Date limit could be set only to the past.
+//l:popup_note_window
+//
+#define qtn_cale_date_not_future  "Date in the future not allowed"
+
+//d:Calendar Settings title pane
+//l:title_pane_t2/opt9
+//
+#define text_calendar_setting_title  "Settings"
+
+//d:Calendar Settings main pane item
+//l:list_setting_pane_t1/opt1
+//
+#define qtn_cale_default_view  "Default view"
+
+//d:Calendar Settings main pane item
+//l:list_setting_pane_t1/opt1
+//
+#define qtn_cale_week_format  "Week format"
+
+//d:Calendar Settings main pane item
+//l:list_setting_pane_t1/opt1
+//
+#define text_calendar_week_title_format  "Title of week view"
+
+//d: Calendar Settings "Default view" item
+//l:list_set_graphic_pane_t1
+//
+#define qtn_cale_default_day_view  "Day View"
+
+//d: Calendar Settings "Default view" item
+//l:list_set_graphic_pane_t1
+//
+#define qtn_cale_default_week_view  "Week View"
+
+//d: Calendar Settings "Default view" item
+//l:list_set_graphic_pane_t1
+//
+#define qtn_cale_default_month_view  "Month View"
+
+//d: Calendar Settings "Title of week view" item
+//l:list_set_graphic_pane_t1
+//
+#define text_calendar_week_title_numb  "Week number"
+
+//d: Calendar Settings "Title of week view" item
+//l:list_set_graphic_pane_t1
+//
+#define text_calendar_week_title_dur  "Duration of week"
+
+//d:Calendar Settings "Default Mailbox" item
+//l:heading_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_cale_lq_select_mailbox  "Select Default Mailbox: "
+
+//d:Calendar "Default Mailbox" setting item name.
+//l:list_setting_pane_t1/opt1
+//w:
+//r:3.0
+//
+#define qtn_cale_default_mailbox  "Default mailbox"
+
+//d:Calendar no default mailboxes defined prompt
+//l:popup_note_window
+//w:
+//r:3.0
+//
+#define qtn_cale_query_define_mailbox  "No mailboxes defined, define now?"
+
+
+//d:Calendar Settings main pane item
+//l:list_setting_pane_t1
+//r:3.2
+//
+#define qtn_cale_sett_arabic_cale "Arabic calendar"
+
+//d:Opens external calendar application
+//l:list_single_pane_t1_cp2
+//r:3.2
+//
+#define qtn_cale_om_external_cale "External calendar"
+
+//d: Calendar date query prompt
+//l:popup_query_data_window
+//
+#define text_calendar_date_prompt  "Date:"
+
+//d:Title pane text in WeekView main state
+//d:currently highlighted day's Week %N
+//d:%N was setted week number
+//l:title_pane_t2/opt9
+//
+#define qtn_cale_week_view_title  "Week %N"
+
+//d:Title pane text in WeekView main state
+//d:currently highlighted day's %0U - %1U
+//d:The date of dd/mm/yy form is set to %0U or %1U.
+//l:title_pane_t2/opt9
+//
+#define qtn_cale_title_week_days  "%0U -\n %1U"
+
+//d:Confirmation note. 
+//d:Message is shown after system time change, but no alarms were missed.
+//l:popup_note_window
+//
+#define qtn_cale_note_system_time_changed  "System time changed, Calendar events are updated accordingly"
+
+//d:Deleting wait note text
+//l:popup_note_wait_window
+//
+#define qtn_cale_wait_deleting_notes  "Deleting notes..."
+
+//d:Location item text of Meeting form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_cale_note_meeting_location  "location"
+
+//d:Calendar Settings main pane item
+//l:list_setting_pane_t1/opt1
+//
+#define qtn_chi_cale_sett_lunar_cale  "Lunar calendar"
+
+//d: Calendar Settings "Lunar calendar" item
+//l:list_set_graphic_pane_t1
+//
+#define qtn_chi_cale_lunar_cale_on  "On"
+
+//d: Calendar Settings "Lunar calendar" item
+//l:list_set_graphic_pane_t1
+//
+#define qtn_chi_cale_lunar_cale_off  "Off"
+
+//d:Chinese Animal year - Rat
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_animal_rat  "Year of the Rat"
+
+//d:Chinese Animal year - Ox
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_animal_ox  "Year of the Ox"
+
+//d:Chinese Animal year - Tiger
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_animal_tiger  "Year of the Tiger"
+
+//d:Chinese Animal year - Rabbit
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_animal_rabbit  "Year of the Rabbit"
+
+//d:Chinese Animal - Rabbit
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_animal_dragon  "Year of the Dragon"
+
+//d:Chinese Animal - Snake
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_animal_snake  "Year of the Snake"
+
+//d:Chinese Animal - Horse
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_animal_horse  "Year of the Horse"
+
+//d:Chinese Animal - Sheep
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_animal_sheep  "Year of the Sheep"
+
+//d:Chinese Animal - Monkey
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_animal_monkey  "Year of the Monkey"
+
+//d:Chinese Animal - Rooster
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_animal_rooster  "Year of the Rooster"
+
+//d:Chinese Animal - Dog
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_animal_dog  "Year of the Dog"
+
+//d:Chinese Animal - Pig
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_animal_pig  "Year of the Pig"
+
+//d:Chinese Heavenly stem 1
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_heav_stem_1  "Jia"
+
+//d:Chinese Heavenly stem 2
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_heav_stem_2  "Yi"
+
+//d:Chinese Heavenly stem 3
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_heav_stem_3  "Bing"
+
+//d:Chinese Heavenly stem 4
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_heav_stem_4  "Ding"
+
+//d:Chinese Heavenly stem 5
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_heav_stem_5  "Wu"
+
+//d:Chinese Heavenly stem 6
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_heav_stem_6  "Ji"
+
+//d:Chinese Heavenly stem 7
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_heav_stem_7  "Geng"
+
+//d:Chinese Heavenly stem 8
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_heav_stem_8  "Xing"
+
+//d:Chinese Heavenly stem 9
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_heav_stem_9  "Reng"
+
+//d:Chinese Heavenly stem 10
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_heav_stem_10  "Gui"
+
+//d:Chinese Terrestrial branch 1
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_terr_branch_1  "Zi"
+
+//d:Chinese Terrestrial branch 2
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_terr_branch_2  "Chou"
+
+//d:Chinese Terrestrial branch 3
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_terr_branch_3  "Yin"
+
+//d:Chinese Terrestrial branch 4
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_terr_branch_4  "Mao"
+
+//d:Chinese Terrestrial branch 5
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_terr_branch_5  "Chen"
+
+//d:Chinese Terrestrial branch 6
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_terr_branch_6  "Si"
+
+//d:Chinese Terrestrial branch 7
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_terr_branch_7  "Wu"
+
+//d:Chinese Terrestrial branch 8
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_terr_branch_8  "Wei"
+
+//d:Chinese Terrestrial branch 9
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_terr_branch_9  "Shen"
+
+//d:Chinese Terrestrial branch 10
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_terr_branch_10  "You"
+
+//d:Chinese Terrestrial branch 11
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_terr_branch_11  "Xu"
+
+//d:Chinese Terrestrial branch 12
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_terr_branch_12  "Hai"
+
+//d:Chinese solar items 1
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_1  "Li Chun"
+
+//d:Chinese solar items 2
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_2  "Yu Shui"
+
+//d:Chinese solar items 3
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_3  "Jing Zhe"
+
+//d:Chinese solar items 4
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_4  "Chun Fen"
+
+//d:Chinese solar items 5
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_5  "Qing Ming"
+
+//d:Chinese solar items 6
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_6  "Gu Yu"
+
+//d:Chinese solar items 7
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_7  "Li Xia"
+
+//d:Chinese solar items 8
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_8  "Xiao Man"
+
+//d:Chinese solar items 9
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_9  "Mang Zhong"
+
+//d:Chinese solar items 10
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_10  "Xia Zhi"
+
+//d:Chinese solar items 11
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_11  "Xiao Shu"
+
+//d:Chinese solar items 12
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_12  "Da Shu"
+
+//d:Chinese solar items 13
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_13  "Li Qiu"
+
+//d:Chinese solar items 14
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_14  "Chu Shu"
+
+//d:Chinese solar items 15
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_15  "Bai Lu"
+
+//d:Chinese solar items 16
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_16  "Qiu Fen"
+
+//d:Chinese solar items 17
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_17  "Han Lu"
+
+//d:Chinese solar items 18
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_18  "Shuang Jiang"
+
+//d:Chinese solar items 19
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_19  "Li Dong"
+
+//d:Chinese solar items 20
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_20  "Xiao Xue"
+
+//d:Chinese solar items 21
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_21  "Da Xue"
+
+//d:Chinese solar items 22
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_22  "Dong Zhi"
+
+//d:Chinese solar items 23
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_23  "Xiao Han"
+
+//d:Chinese solar items 24
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_solar_item_24  "Da Han"
+
+//d:Lunar festivals 1
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_festival_name_1  "Spring festival"
+
+//d:Lunar festivals 2
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_festival_name_2  "Lantern festival"
+
+//d:Lunar festivals 3
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_festival_name_3  "Dragon boat festival"
+
+//d:Lunar festivals 4
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_festival_name_4  "Seventh night festival"
+
+//d:Lunar festivals 5
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_festival_name_5  "Ghost festival"
+
+//d:Lunar festivals 6
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_festival_name_6  "Mid autumn festival"
+
+//d:Lunar festivals 7
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_festival_name_7  "Double ninth festival"
+
+//d:Lunar festivals 8
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_festival_name_8  "Eighth day of twelfth month festival"
+
+//d:Lunar festivals 9
+//l:navi_text_pane_t1
+//
+#define qtn_chi_cale_festival_name_9  "New year's eve"
+
+//d:Opens Lunar data dialog
+//l:list_single_pane_t1_cp2
+//
+#define qtn_chi_cale_lunar_data  "Show lunar data"
+
+//d:Title pane sting in "Show lunar data" dialog
+//l:heading_pane_t1
+//
+#define qtn_chi_cale_lunar_calendar  "Lunar calendar"
+
+//d:Calendar Settings main pane item
+//l:list_setting_pane_t1
+//
+#define qtn_cale_alarm_tone  "Calendar alarm tone"
+
+//d: Empty listbox
+//l: main_list_empty_pane
+//
+#define qtn_cale_no_events  "(No Events)"
+
+//d: The subject text when the item subject is empty in DayView
+//l: list_single_heading_pane_t1
+//
+#define qtn_cale_no_subject  "<Unnamed>"
+
+//d: Profile Settings Item Edit - setting selection data
+//l: list_set_graphic_pane_t1
+#define qtn_tc_off  "Off"
+
+//d: File list dialog header
+//l: heading_pane_t1
+#define qtn_tc_popup_heading  "Select tone: "
+
+//d:Default tone selection choice in alarm tone list  for Calendar and Clock
+//l:list_set_graphic_pane_t1
+//
+#define qtn_mode_default_tone  "Default tone"
+
+//d:Options menu item. 
+//d:Opens Add Description submenu in note editor
+//l:list_single_pane_t1_cp2
+//
+#define qtn_cale_om_add_descript  "Add Description"
+
+//d:Submenu item for adding new description text to Calendar entry
+//d:Opens Notepad Editor.
+//l:list_single_popup_submenu_pane_t1
+//
+#define qtn_cale_om_descript_new  "New"
+
+//d:Submenu item for adding description text to Calendar entry 
+//d:from existing Notepad memos. Launches Notepad memo fetch.
+//l:list_single_popup_submenu_pane_t1
+//
+#define qtn_cale_om_descript_exist  "Use existing"
+
+//d:Options menu item. 
+//d:Shows Calendar entry description text in Notepad viewer. 
+//d:Opens Notepad viewer.
+//l:list_single_pane_t1_cp2
+//
+#define qtn_cale_om_desc_show  "Show Description"
+
+//d:Options menu item. 
+//d:Removes description text from Calendar entry.
+//d:Launches confirmation query before removing.
+//l:list_single_pane_t1_cp2
+//
+#define qtn_cale_om_desc_remove  "Remove Description"
+
+//d:Title text, when editing Calendar description in Notepad
+//l:title_pane_t2/opt9
+//
+#define qtn_cale_note_title  "Calendar Description"
+
+//d:Confirmation text, when deleting Calendar description data from
+//d:Notepad editor
+//l:popup_note_window
+//
+#define qtn_cale_q_del_notep_desc  "Delete Calendar Description?"
+
+//d:Informatio note text shown, when Calendar description is deleted from
+//d:Notepad editor or viewer
+//l:popup_note_window
+//
+#define qtn_cale_inote_desc_del_memo  "Calendar description deleted"
+
+//d:Confirmation text, when deleting Calendar description data from
+//d:Calendar meeting editor
+//l:popup_note_window
+//
+#define qtn_cale_query_remove_descr  "Remove Description?"
+
+//d:Header text for Description form item.
+//d:One truncated line of description is visible below this.
+//l:data_form_wide_pane_t1
+//
+#define qtn_cale_meeting_description  "Description"
+
+//d:Title text of title pane
+//d:Note View
+//l:title_pane_t2/opt9
+//
+#define qtn_todo_note_header  "To-Do Note"
+
+//d:Command in options menu.
+//d:Delete the selected item.
+//l:list_single_pane_t1_cp2
+//
+#define qtn_todo_om_delete  "Delete"
+
+//d:Command in options sub-menu.
+//d:Set a priority high to selected item.
+//l:list_form_graphic_pane_t1
+//
+#define qtn_todo_attr_high  "High" 
+
+//d:Command in options sub-menu.
+//d:Set a priority normal to selected item.
+//l:list_form_graphic_pane_t1
+//
+#define qtn_todo_attr_normal  "Normal"
+
+//d:Command in options sub-menu.
+//d:Set a priority low to selected item.
+//l:list_form_graphic_pane_t1
+//
+#define qtn_todo_attr_low  "Low"
+
+//d:Command in options menu.
+//d:Marked the To-Do item done in List View
+//l:list_single_pane_t1_cp2
+//
+#define qtn_todo_cmd_task_completed  "Task completed"
+
+//d:Command in options menu.
+//d:Unmarked the To-Do item done in List View
+//l:list_single_pane_t1_cp2
+//
+#define qtn_todo_cmd_restore_task  "Restore task"
+
+//d:Confirmation query prompt.
+//d:Deleting the selected one note.
+//l:popup_note_window
+//
+#define qtn_todo_quest_delete_note  "Delete note?"
+
+//d:Confirmation query prompt.
+//d:Deleting the marked one or more notes.
+//l:popup_note_window
+//
+#define qtn_todo_quest_delete_notes  "Delete\n%N notes?"
+
+//d:Wait note text in deleting items.
+//l:popup_note_wait_window
+//
+#define qtn_todo_wait_deleting_notes  "Deleting notes..."
+
+//d:Item texts of form
+//d:Priority field of To-Do Note form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_todo_note_view_priority  "priority"
+
+//d:Item texts of form
+//d:Due date field of To-Do Note form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_todo_note_duedate  "due date"
+
+//d:Item texts of form
+//d:Subject field of To-Do Note form
+//l:list_double_graphic_heading_pane_t1
+//
+#define qtn_todo_note_subject  "subject"
+
+//d: Information note text shown in Calendar application start, 
+//d: when alarms have been passed due system time change
+//l:popup_note_window
+//w:
+//r:3.0
+#define qtn_cale_note_missed_alarms  "1 or more alarms missed due to time change"
+
+//d: Setting item choice to select Todo view as Calendar default view
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.0
+//
+#define qtn_cale_default_todo_view  "Todo view"
+
+
+//d: Options Submenu item to create new Todo note
+//l:list_single_popup_submenu_pane_t1
+//w:
+//r:3.0
+#define qtn_cale_note_todo  "Todo"
+
+//d: Confirmation note shown, when edited Todo note is saved
+//l:popup_note_window
+//w:
+//r:3.0
+#define qtn_cale_note_todo_saved  "Todo Note saved"
+
+//d: Options menu item to open Calendar day view from Todo view
+//l:list_single_pane_t1_cp2
+//w:
+//r:3.0
+#define qtn_cale_opt_view_day  "Day view"
+
+//d: Options menu item to open Todo view from other Calendar views
+//l:list_single_pane_t1_cp2
+//w:
+//r:3.0
+#define qtn_cale_opt_view_todo  "Todo view"
+
+//d: Title pane text for Calendar Todo view that shows all users Todo entries
+//l:title_pane_t2/opt9
+//w:
+//r:3.0
+#define qtn_cale_title_todos  "All Todos"
+
+//d:Snooze time setting header.
+//l:list_setting_pane_t1/opt1
+//w:
+//r:3.1
+#define qtn_cale_set_snooze_time  "Calendar Alarm Snooze Time"
+
+//d:Context-specific text for the current snooze time value in Calendar Settings.
+//l:setting_slider_pane_t2
+//w:
+//r:3.1
+#define qtn_sanim_time_out_slider_ykcur  "1 minute"
+
+//d:Context-specific text for the current snooze time value in Calendar Settings.
+//d:%U in minutes, plural.
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.1
+#define qtn_cale_sanim_time_out_slider_cur  "%U minutes"
+
+//d:Context-specific text for the minimum snooze time value in Calendar Settings.
+//l:setting_slider_pane_t2
+//w:
+//r:3.1
+#define qtn_cale_sanim_time_out_slider_min  "1 min."
+
+//d:Context-specific text for the maximum snooze time value in Calendar Settings.
+//l:setting_slider_pane_t2
+//w:
+//r:3.1
+#define qtn_snooze_time_max  "60 min."
+
+
+//d: Format string for lunar calendar information in Calendar day, week and month views
+//d: Format string is used dynamically to display as much information as possible.
+//d: If all information doesn't fit some information and separators are dropped.  
+//d: Localization can affect order of information.
+//d: If data element is dropped, empty string is supplied for it.
+//d: and either for preceding (or following) separator (%0U) 
+//d: 
+//d: e.g. in Chinese, order should be somethinglike (201030405): "%2U%0U%1U%0U%3U%0U%4U%0U%5U"
+//d: e.g. in Vietnamese, (304050201): "%3U%0U%4U%0U%5U%0U%2U%0U%1U"
+//d: %0U separator between data elements,  qtn_cale_lunar_separator
+//d: %1U animal year format, qtn_cale_animal_year_in_extra_row
+//d: %2U lunar year, qtn_cale_lunar_year
+//d: %3U lunar date, either qtn_cale_lunar_date or qtn_cale_lunar_leap_date
+//d: %4U festival, qtn_chi_cale_festival_name_X
+//d: %5U solar term, qtn_chi_cale_solar_item_X
+//l: None
+//w:
+//r:3.2
+//
+#define qtn_cale_extra_row_lunar "%1U%0U%2U%0U%3U%0U%4U%0U%5U"
+
+
+//d: Separator between data elements in Lunar Calendar extra row.
+//d: E.g. in Chinese, " "
+//d: E.g. in Vietnamese, ", "  
+//l: (None)
+//w:
+//r:3.2
+//
+#define qtn_cale_lunar_separator ", "
+
+
+//d: Chinese lunar date with day, month and year.
+//d: %0U is lunar date. either qtn_cale_lunar_date or qtn_cale_lunar_leap_date
+//d: %1U lunar year.  qtn_cale_lunar_year
+//d: 
+//l: (None)  
+//w:
+//r:3.2
+//
+#define qtn_cale_lunar_full_date "%0U %1U"
+
+
+//d: Chinese lunar date for dates. Used for non-leap month dates. 
+//d: Localication can add language specific separator and extra symbols.
+//d: E.g. in Chinese, character for month should be used: "%0U·%1U"
+//d: E.g. in Vietnamese, order is different and separator is slash "%1U/%0U"
+//d: %0U is lunar month 
+//d: %1U lunar day 
+//l: (None)
+//w:
+//r:3.2
+//
+#define qtn_cale_lunar_date "%0U/%1U"
+
+
+//d: Chinese lunar date for dates that are on leap months. 
+//d: This should be similar to qtn_cale_lunar_date, 
+//d: but language specific leap month indicator should be added to correct place.
+//d: E.g. in Vietnamese:  "%1U/%0U N"
+//d: %0U is lunar month 
+//d: %1U lunar day 
+//l: (None)
+//w:
+//r:3.2
+//
+#define qtn_cale_lunar_leap_date "%0UL/%1U"
+
+
+//d: Chinese lunar year, combination of heavenly stem and terrestial branch 
+//d: %0U is heavenly stem (qtn_chi_cale_heav_stem_X)
+//d: %1U is terrestial branch (qtn_chi_cale_terr_branch_X)
+//d: Localization can add language specific separator between words  
+//d: and if words are written together, space can be removed (e.g. in Chinese).
+//d: E.g. in Chinese "%0U%1U·"
+//d: E.g. in Vietnamese "Nam %0U %1U"
+//l: (None)
+//w:
+//r:3.2
+//
+#define qtn_cale_lunar_year "%0U %1U"
+
+
+//d: Heading text for chinese festival 
+//d: in Lunar calendar information pop-up.
+//d: It's not shown for dates that do not have festival. 
+//l: list_single_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_cale_lunar_info_festival "Festival:"
+
+
+//d: Heading text for chinese solar term
+//d: in Lunar calendar information pop-up.
+//d: It's not shown for dates that do not have solar term.
+//l: list_single_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_cale_lunar_info_solar "Solar term:"
+
+
+//d: Heading text for chinese lunar calendar date
+//d: in Lunar calendar information pop-up.
+//d: Data for this header is qtn_cale_lunar_full_date.
+//l: list_single_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_cale_info_lunar_date "Lunar date:"
+
+
+//d: Heading text for animal year
+//d: in Lunar calendar information pop-up.
+//d: Data for this header is qtn_chi_cale_animal_X
+//l: list_single_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_cale_info_animal_year "Animal year:"
+
+
+//d: Heading text for Gregorian (normal) date 
+//d: in Lunar calendar information pop-up.
+//d: Data for this header is qtn_date_usual_with_zero
+//l: list_single_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_cale_info_western_date "Gregorian date:"
+
+
+//d: Year of Cat. 
+//d: In Vietnamese Lunar Calendar, year of rabbit of Chinese Lunar Calendar is instead a year of cat. 
+//l: list_single_pane_t1_cp2
+//w:
+//r:3.2
+//
+#define qtn_chi_cale_animal_cat "Year of the Cat" 
+
+
+//d: Setting item header for Thai Buddhist year display. 
+//d: Values are On and Off. 
+//d: If setting is on, Buddhist year is shown on 
+//d: separate area in month, week and day views
+//l: list_set_graphic_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_cale_sett_thai_year "Show Buddhist year"
+
+//d: Database conflict note: entry was deleted by other application
+//l: popup_note_window
+//r: 3.2/5.0
+#define qtn_cale_note_db_conflict "Calendar database conflict.  This entry has been deleted by another application."
+
+//d: Database conflict note: entry was modified by other application
+//l: popup_note_window
+//r: 3.2/5.0
+#define qtn_cale_note_db_modified "Calendar database conflict.  This entry has been modified by another application."
+
+//d: Menu item for grouping views. 
+//d: Values are month, week, day and todo. 
+//l: list_single_pane_t1_cp2
+//w:
+//r:4.0
+//
+#define qtn_cale_opt_change_view "Change view"
+
+//d: Menu item for changing to month view. 
+//d: Value is month.
+//l: list_single_popup_submenu_pane_t1
+//w:
+//r:4.0
+//
+#define qtn_cale_opt_change_month "Month"
+
+//d: Menu item for changing to week view. 
+//d: Value is week.
+//l: list_single_popup_submenu_pane_t1
+//w:
+//r:4.0
+//
+#define qtn_cale_opt_change_week "Week"
+
+//d: Menu item for changing to day view. 
+//d: Value is day.
+//l: list_single_popup_submenu_pane_t1
+//w:
+//r:4.0
+//
+#define qtn_cale_opt_change_day "Day"
+
+//d: Menu item for changing to todo view. 
+//d: Value is todo.
+//l: list_single_popup_submenu_pane_t1
+//w:
+//r:4.0
+//
+#define qtn_cale_opt_change_todo "To-Do"
+
+//d: Tooltip text for previous view button. 
+//l: popup_preview_text_window_t1
+//w:
+//r:3.2
+//
+#define qtn_cale_tooltip_prev_view "Previous view"
+
+//d: Tooltip text for month view button. 
+//l: popup_preview_text_window_t1
+//w:
+//r:3.2
+//
+#define qtn_cale_tooltip_month_view "Month view"
+
+//d: Tooltip text for week view button. 
+//l: popup_preview_text_window_t1
+//w:
+//r:3.2
+//
+#define qtn_cale_tooltip_week_view "Week view"
+
+//d: Tooltip text for day view button. 
+//l: popup_preview_text_window_t1
+//w:
+//r:3.2
+//
+#define qtn_cale_tooltip_day_view "Day view"
+
+//d: Tooltip text for todo view button. 
+//l: popup_preview_text_window_t1
+//w:
+//r:3.2
+//
+#define qtn_cale_tooltip_todo_view "ToDo view"
+
+//d: Tooltip text for next view button. 
+//l: popup_preview_text_window_t1
+//w:
+//r:3.2
+//
+#define qtn_cale_tooltip_next_view "Next view"
+
+//d: Tooltip text for new entry button. 
+//l: popup_preview_text_window_t1
+//w:
+//r:3.2
+//
+#define qtn_cale_tooltip_new_entry "New entry"
+
+//d: New note query heading, which shows up when MSK is pressed, when day view or to do view is empty
+//d: Value is New Entry
+//l: heading_pane_t1
+//w:
+//r:5.0
+//
+#define qtn_cale_lq_new_entry "New entry"
+
+//d: List item in new note query, which shows up when MSK is pressed when day view or to do view is empty
+//d: Value is meeting
+//l: list_single_pane_t1_cp2
+//w:
+//r:5.0
+//
+#define qtn_cale_lq_new_meeting "Meeting"
+
+//d: List item in new note query, which shows up when MSK is pressed when day view or to do view is empty
+//d: Value is mr
+//l: list_single_pane_t1_cp2
+//w:
+//r:5.0
+//
+#define qtn_cale_lq_new_mr "Meeting Request"
+
+//d: List item in new note query, which shows up when MSK is pressed when day view or to do view is empty
+//d: Value is memo
+//l: list_single_pane_t1_cp2
+//w:
+//r:5.0
+//
+#define qtn_cale_lq_new_memo "Memo"
+
+//d: List item in new note query, which shows up when MSK is pressed when day view or to do view is empty
+//d: Value is anniv
+//l: list_single_pane_t1_cp2
+//w:
+//r:5.0
+//
+#define qtn_cale_lq_new_anniversary "Anniversary"
+
+//d: List item in new note query, which shows up when MSK is pressed, when day view or to do view is empty
+//d: Value is todo
+//l: list_single_pane_t1_cp2
+//w:
+//r:5.0
+//
+#define qtn_cale_lq_new_todo "To-Do"
+
+//d: Edits a note
+//d: Value is Edit
+//l: list_single_pane_t1_cp2
+//r 3.2
+//
+#define qtn_cale_om_edit "Edit"
+
+//d: Calendar Go to date query prompt
+//l: popup_query_data_window_t3/opt2
+//
+#define qtn_cale_go_to_date  "Go to date:"
+
+//d: Msk label displayed in Todo/Day view when there are no events for a day
+//d: Value is New
+//l: control_pane_t3/opt7
+//r: 5.0
+//
+#define qtn_cale_msk_new_entry "New"
+
+//d: Tooltip text for Next View
+//l: popup_preview_text_window_t1
+//w:
+//r: 5.0
+//
+#define qtn_cale_tb_next_view "Next view"
+
+//d: Tooltip text for New Meeting 
+//l: popup_preview_text_window_t1
+//w:
+//r: 5.0
+//
+#define qtn_cale_tb_new_meeting "New meeting"
+
+//d: Tooltip text for New ToDo 
+//l: popup_preview_text_window_t1
+//w:
+//r: 5.0
+//
+#define qtn_cale_tb_new_todo "New to-do"
+
+//d:Long tap on day opens Long tap menu to create new Meeting note
+//l:list_single_pane_t1_cp2
+//w:
+//r: 5.0
+//
+#define qtn_cale_long_tap_meeting "New meeting"
+
+//d:Long tap on day opens Long tap menu to create new Anniversary Note
+//l:list_single_pane_t1_cp2
+//w:
+//r: 5.0
+//
+#define qtn_cale_long_tap_anniversary  "New anniversary"
+
+//dLong tap on day opens Long tap menu to create new  Day Note
+//l:list_single_pane_t1_cp2
+//w:
+//r: 5.0
+//
+#define qtn_cale_long_tap_memo  "New memo"
+
+//d: Long tap on day opens Long tap menu to create new Todo note
+//l:list_single_pane_t1_cp2
+//w:
+//r: 5.0
+//
+#define qtn_cale_long_tap_todo  "New todo"
+
+//d: Format string for data shown in preview pane
+//d: %0U is start time
+//d: %1U is hyphen or space
+//d: %2U is end time
+//d: %3U is subject
+//d: %4U is location
+//d: %5U is description
+//d: %6U is language specific separator
+//d: %7U is space
+//l: list_single_fp_cale_pane_t2/opt1
+//w:
+//r: 5.0
+//
+#define qtn_cale_pane_event_data "%0U%1U%2U%7U%3U%6U%4U%6U%5U"
+
+//d: Title for the preview pane
+//d: %0U is currently focused week day
+//d: %1U is currently focused date
+//l: popup_fixed_preview_cale_window_t1
+//w: 
+//r: 5.0
+//
+#define qtn_cale_pane_title "%0U %1U"
+
+//d: No events in preview pane
+//l: popup_fixed_preview_cale_window_t2/opt1 
+//w:
+//r: 5.0
+//
+#define qtn_cale_pane_no_events "(No events)"
+
+//d: Popup Event Separator
+//l: None
+//w:
+//r: 5.0
+//
+#define qtn_cale_popup_event_separator ","
+
+//d: Options menu item for clearing a missed alarm
+//l: list_single_pane_t1_cp2
+//w: 
+//r: 5.0 
+#define qtn_cale_mav_opt_clear  "Clear"
+
+//d: Options menu items for clearing all the missed alarms
+//l: list_single_pane_t1_cp2
+//w: 
+//r: 5.0 
+#define qtn_cale_mav_opt_clear_all  "Clear all"
+
+//d: Go to previous view from where Missed Alarms View is launched
+//l: list_single_pane_t1_cp2
+//w: 
+//r: 5.0 
+#define qtn_cale_mav_opt_goto_cale  "Go to Calendar"
+
+//d: Options menu item to open Calendar's Missed Alarms View 
+//l: list_single_pane_t1_cp2
+//w:
+//r: 5.0
+#define qtn_cale_opt_mav  "Missed alarms"
+
+//d: Title pane text for Calendar's Missed Alarms view that shows all the missed alarms
+//l: title_pane_t2/opt9
+//w:
+//r: 5.0
+#define qtn_cale_title_missed_alarms  "Missed Alarms"
+
+//d: Start date and time of the missed alarm event
+//l: list_double_graphic_pane_t2
+//w:
+//r: 5.0 
+#define qtn_cale_mav_start_time "%0U %1U"
+
+//d: Tooltip text for Clearing a Missed Alarm
+//l: popup_preview_text_window_t1
+//w:
+//r: 5.0
+//
+#define qtn_cale_mav_tb_clear "Clear"
+
+//d: Tooltip text for Clearing all the Missed Alarms 
+//l: popup_preview_text_window_t1
+//w:
+//r: 5.0
+//
+#define qtn_cale_mav_tb_clearall "Clear all"
+
+//d: Tooltip text for activating the previous view from where Missed Alarms View is launched
+//l: popup_preview_text_window_t1
+//w:
+//r: 5.0
+//
+#define qtn_cale_mav_tb_goto_cale "Go to Calendar"
+
+//d: Query for viewing the missed alarms view for one missed alarm
+//l: popup_note_window
+//w: 
+//r: 5.0
+//
+#define qtn_cale_query_view_missed  "One missed Calendar event.Do you want to view it?"
+
+//d: Query for viewing the missed alarms view for multiple missed alarms
+//l: popup_note_window
+//w: 
+//r: 5.0
+//
+#define qtn_cale_query_view_missed_n  "%N missed Calendar events.Do you want to view them?"
+
+//d: The subject text when the item subject is empty in Missed alarms view
+//l: list_double_large_graphic_pane_t1
+//w: 
+//r: 5.0
+//
+#define qtn_cale_mav_unnamed  "(Unnamed)"
+
+//d:Command in stylus popup menu.
+//d:Marked the To-Do item done in List View and Preview popup.
+//l:list_single_touch_menu_pane_t1
+//w: 
+//r: 5.0
+//
+#define qtn_cale_stylus_popup_cmd_task_completed  "Mark as done" 
+
+//d:Command in stylus popup menu.
+//d:Unmarked the To-Do item done in List View.
+//l:list_single_touch_menu_pane_t1
+//w: 
+//r: 5.0
+//
+#define qtn_cale_stylus_cmd_restore_task  "Mark as not done"
+
+//d:Command in stylus popup menu.
+//d:Delete the selected item.
+//l:list_single_touch_menu_pane_t1
+//w: 
+//r: 5.0
+//
+#define qtn_cale_stylus_popup_delete  "Delete"
+
+//d:Command in stylus popup menu.
+//d:Send the selected item.
+//l:list_single_touch_menu_pane_t1
+//w: 
+//r: 5.0
+//
+#define qtn_cale_stylus_popup_send  "Send"
+
+//d:Command in stylus popup menu.
+//d:Mark-operation. Marks selected item.
+//l:list_single_touch_menu_pane_t1
+//w: 
+//r: 5.0
+//
+#define qtn_cale_stylus_popup_mark  "Mark"
+
+//d:Command in stylus popup menu.
+//d:Unmark-operation. Unmarks selected marked item.
+//l:list_single_touch_menu_pane_t1
+//w: 
+//r: 5.0
+//
+#define qtn_cale_stylus_popup_unmark  "Unmark"
+
+//d: Tooltip text for editing current calendar note
+//l: popup_preview_text_window_t1
+//w:
+//r: 5.0
+//
+#define qtn_cale_tb_edit "Edit"
+
+//d: Tooltip text for deleting current calendar note
+//l: popup_preview_text_window_t1
+//w:
+//r: 5.0
+//
+#define qtn_cale_tb_delete "Delete"
+
+//d: Tooltip text for sending calendar note
+//l: popup_preview_text_window_t1
+//w:
+//r: 5.0
+//
+#define qtn_cale_tb_send "Send"
+
+//d: Default tone selection choice in alarm tone list for Calendar and Clock
+//l: list_single_graphic_pane_t1_cp2
+//w:
+//r: 5.0
+#define qtn_cale_tc_no_personal_tone "Default tone"
+
+//d: "Off" tone selection choice in alarm tone list for Calendar and Clock
+//l: list_single_graphic_pane_t1_cp2
+//w:
+//r: 5.0
+#define qtn_cale_tc_none  "Off"
+
+//d:Opens Maps application for choosing new location
+//l:list_single_pane_t1_cp2
+//w:
+//r: 5.1
+#define qtn_cale_om_assign_from_map  "Assign from map"
+
+//d: Msk label displayed in Editors when there is no map location
+//d: Value is From map
+//l: control_pane_t3/opt7
+//r: 5.1
+//
+#define text_softkey_from_map "From map"
+
+//d:Opens Maps application for choosing new location
+//l:list_single_pane_t1_cp2
+//w:
+//r: 5.1
+#define qtn_cale_om_find_on_map  "Find on map"
+
+//d:Opens Maps application fto show the location
+//l:list_single_pane_t1_cp2
+//w:
+//r: 5.1
+#define qtn_cale_om_show_on_map  "Show on map"
+
+//d:Shows Update location query
+//l:heading_pane_t1
+//w:
+//r: 5.1
+#define qtn_cale_update_location  "Update location:"
+
+//d:Adds selected address to existing location details
+//l:list_single_pane_t1_cp2
+//w:
+//r: 5.1
+#define qtn_cale_addto_existing_location  "Add to existing"
+
+//d:Replaces existing location details with selected address
+//l:list_single_pane_t1_cp2
+//w:
+//r: 5.1
+#define qtn_replace_existing_location  "Replace existing"
+
+//d:Confirmation query prompt.
+//d:Replace the exisitng map location with new one
+//d: %0U is the name of the location with which existing one is being replaced
+//l:popup_note_window
+//w:
+//r: 5.1
+#define qtn_cale_confirm_change_address  "Update Address to %U?"
+
+//d: Confirmation note shown, when address is replaced with new one
+//l:popup_note_window
+//w:
+//r:5.1
+#define qtn_cale_note_address_updated  "Address Updated"
+
+//d: Confirmation note shown, when address with coordinates is manually changed
+//l:popup_note_window
+//w:
+//r:5.1
+#define qtn_cale_confirm_keep_coordinates  "Address will be updated. Keep existing map location?"
+
+//d:Context-specific text for the current snooze time value in Calendar Settings.
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.1
+#define qtn_cale_sanim_time_out_slider_ykcur  "1 minute"
+
+//d:Context-specific text for the current snooze time value in Calendar Settings.
+//d:%U in minutes, plural.
+//l:setting_slider_pane_t2 
+//w:
+//r:3.1
+#define qtn_set_cale_sanim_time_out_slider_cur  "%U minutes"
+
+//d: Title pane text in calendar management view
+//l: title_pane_t2/opt9
+//w:
+//r: 9.2
+#define qtn_cale_title_calendars  "Calendars"
+
+//d: Tooltip string for "today" toolbar item
+//l: popup_preview_text_window_t1
+//w:
+//r: 9.2
+#define qtn_cale_tb_today_tooltip  "Today"
+
+//d: Tooltip string for "New entry" toolbar item
+//l: popup_preview_text_window_t1
+//w:
+//r: 9.2
+#define qtn_cale_tb_new_entry_tooltip "New entry"
+
+//d: Tooltip string for "Change view" toolbar item
+//l: popup_preview_text_window_t1
+//w:
+//r: 9.2
+#define qtn_cale_tb_change_view_tooltip "Change view"
+
+//d: Icon text for "Month view" button 
+//d: in the permanent touch extension toolbar. 
+//l: cell_tb_ext_pane_t1/opt1
+//w:
+//r: 9.2
+#define qtn_cale_tb_month_view "Month view"
+
+//d: Tooltip string for "Month view" toolbar item
+//l: popup_preview_text_window_t1
+//w:
+//r: 9.2
+#define qtn_cale_tb_month_view_tooltip "Open month view"
+
+//d: Icon text for "Week view" button 
+//d: in the permanent touch extension toolbar. 
+//l: cell_tb_ext_pane_t1/opt1
+//w:
+//r: 9.2
+#define qtn_cale_tb_week_view "Week view"
+
+//d: Tooltip string for "Week view" toolbar item
+//l: popup_preview_text_window_t1
+//w:
+//r: 9.2
+#define qtn_cale_tb_week_view_tooltip "Open week view"
+
+//d: Icon text for "Day view" button 
+//d: in the permanent touch extension toolbar. 
+//l: cell_tb_ext_pane_t1/opt1
+//w:
+//r: 9.2
+#define qtn_cale_tb_day_view "Day view"
+
+//d: Tooltip string for "Day view" toolbar item
+//l: popup_preview_text_window_t1
+//w:
+//r: 9.2
+#define qtn_cale_tb_day_view_tooltip "Open day view"
+
+//d: Icon text for "Todo view" button 
+//d: in the permanent touch extension toolbar. 
+//l: cell_tb_ext_pane_t1/opt1
+//w:
+//r: 9.2
+#define qtn_cale_tb_todo_view "Todo view"
+
+//d: Tooltip string for "New entry" toolbar item
+//l: popup_preview_text_window_t1
+//w:
+//r: 9.2
+#define qtn_cale_tb_todo_view_tooltip "Open todo view"
+
+//d:'Entry belongs to' item text of unified editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_db_entry_belongs_to "Entry belongs to"
+
+//d: Option item for deleting all entries in month view
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define qtn_cale_opt_delete_entries "Delete Entries"
+
+//d: List query heading for deleting all entries when multiple
+//d: visible calendars exists in calendar app
+//l: heading_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_opt_delete_entries_from_visible_heading "Delete entries from visible calendars:"
+
+//d: List query heading for deleting all entries when only one 
+//d: visible calendar exists in calendar app
+//l: heading_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_opt_delete_entries_heading "Delete entries:"
+
+//d: Option item for launching calendar management view
+//d: shown in all native views
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define qtn_cale_opt_calendars "Calendars"
+
+//d: Info note for the user if the calendar name is too long,
+//d: if the name consists solely of single or double dot 
+//d: or if the name contains any special characters 
+//l: popup_note_window
+//w:
+//r: 9.2
+#define qtn_cale_db_invalid_calendar_name "Invalid calendar name"
+
+//d: Shown if the calendar selected as Visible.Displayed in the second row of 
+//d: of listbox item in calendar management view
+//l: list_double_graphic_pane_t2
+//w:
+//r: 9.2
+#define qtn_cale_db_shown "Visible"
+
+//d: Shown if the calendar selected as Hidden.Displayed in the second row of 
+//d: of listbox item in calendar management view
+//d: list_double_graphic_pane_t2
+//w:
+//r: 9.2
+#define qtn_cale_db_hidden "Hidden"
+
+//d: Tooltip string for "Show calendar" toolbar item
+//d: in calendar management view
+//l: popup_preview_text_window_t1
+//w:
+//r: 9.2
+#define qtn_cale_tb_show_calendar_tooltip "Show calendar"
+
+//d: Tooltip string for "Hide calendar" toolbar item
+//d: in calendar management view
+//l: popup_preview_text_window_t1
+//w:
+//r: 9.2
+#define qtn_cale_tb_hide_calendar_tooltip "Hide calendar"
+
+//d: Tooltip string for "Edit calendar" toolbar item
+//d: in calendar management view
+//l: popup_preview_text_window_t1
+//w:
+//r: 9.2
+#define qtn_cale_tb_edit_cale_db_tooltip "Edit calendar"
+
+//d: Tooltip string for "New calendar" toolbar item
+//d: in calendar management view
+//l: popup_preview_text_window_t1
+//w:
+//r: 9.2
+#define qtn_cale_tb_add_new_calendar_tooltip "New calendar"
+
+//d: Option item for hiding the calendar 
+//d: in calendar management view
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define qtn_cale_db_opt_hide_calendar "Hide"
+
+//d: Option item for showing the calendar 
+//d: in calendar management view
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define qtn_cale_db_opt_show_calendar "Show"
+
+//d: Option item for editing the calendar 
+//d: in calendar management view
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define qtn_cale_db_opt_edit_calendar "Edit"
+
+//d: Option item for adding new calendar 
+//d: in calendar management view
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define qtn_cale_db_opt_add_new_calendar "Add new calendar"
+
+//d: Option item for deleting the calendar 
+//d: in calendar management view
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define qtn_cale_db_opt_delete_calendar "Delete"
+
+//d: Confirmation query displayed for the user while deleting the 
+//d: calendar and its entries
+//l: popup_note_window
+//w:
+//r: 9.2
+#define qtn_cale_db_delete_calendar_conf_query "Delete calendar %U and all entries in it?"
+
+//d: Label for the calendar name in calendar editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_db_set_calendar_name "Calendar name"
+
+//d: Label for calendar colour selection in calendar editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_db_set_colour "Calendar colour"
+
+//d: Label for toggling show/hide calendar
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_db_show_hide_setting "Shown in views"
+
+//d: "Visible" text for selecting calendar events to be shown in all views 
+//l: list_form_graphic_pane_t1/opt1
+//w:
+//r: 9.2
+#define qtn_cale_db_shown_setting "Visible"
+
+//d: "Hidden" text for unselecting calendar events from all native views
+//l: list_form_graphic_pane_t1/opt1
+//w:
+//r: 9.2
+#define qtn_cale_db_hidden_setting "Hidden"
+
+//d: Title for event viewer, for Allday event
+//l: title_pane_t2/opt9
+//w:
+//r: 9.2
+#define qtn_cale_title_meeting_all_day	"Meeting-All Day"
+
+//d: Label for EventType in calendar editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_label_event_type "Event Type"
+
+//d: Label for AllDay field in calendar editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_label_all_day "All Day"
+
+//d: "Yes" text for AllDay field in calendar editor
+//l: list_form_graphic_pane_t1/opt1
+//w:
+//r: 9.2
+#define qtn_cale_item_yes "Yes"
+
+//d: "No" text for AllDay field in calendar editor
+//l: list_form_graphic_pane_t1/opt1
+//w:
+//r: 9.2
+#define qtn_cale_item_no "No"
+
+//d: Label for StartTime field in calendar editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_label_start_time "Start Time"
+
+//d: Label for StartDate field in calendar editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_label_start_date "Start Date"
+
+//d: Label for 'Date of Birth' field in calendar editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_label_date "Date of Birth"
+
+//d: Label for Reminder field in calendar editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_label_reminder "Reminder"
+
+//d: Label for ReminderTime field in calendar editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_label_reminder_time "Reminder Time"
+
+//d: Label for ReminderDate field in calendar editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_label_reminder_date "Reminder Date"
+
+//d: Label for Place field in calendar editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_label_place "Place"
+
+//d: Label for Attachment field in calendar editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_label_attachment "Attachment"
+
+//d: Label for People field in calendar editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_label_people "People"
+
+//d: Label for Description field in calendar editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_label_description "Description"
+
+//d: "Meeting" text for EventType field pop-up in calendar editor
+//l: list_form_graphic_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_item_meeting "Meeting"
+
+//d: "Birthday" text for EventType field pop-up in calendar editor
+//l: list_form_graphic_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_item_birthday "Birthday"
+
+//d: "To-Do" text for EventType field pop-up in calendar editor
+//l: list_form_graphic_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_item_todo "To-Do"
+
+//d:Calendar DB info item text of note viewer
+//l:main_pane_empty_t1/opt2
+//r:5.0
+//
+#define qtn_cale_viewer_calendar_info "Calendar:"
+
+//d:Repeat type "Does not repeat" text of unified editor
+//l:list_form_graphic_pane_1
+//r:9.2
+#define qtn_calen_does_not_repeat   "Does not repeat"                  
+
+//d:Repeat type "Daily" text of unified editor
+//l:list_form_graphic_pane_1
+//r:9.2                                                               
+#define qtn_calen_repeat_daily  "Daily"
+
+//d:Repeat type "weekdays" text of unified editor
+//l:list_form_graphic_pane_1
+//r:9.2                                                               
+#define qtn_calen_repeat_weekdays   "Weekdays"
+
+//d:Repeat type "Weekly" text of unified editor
+//l:list_form_graphic_pane_1
+//r:9.2                                                               
+#define qtn_calen_repeat_weekly "Weekly"
+
+//d:Repeat type "Forthnightly" text of unified editor
+//l:list_form_graphic_pane_1
+//r:9.2                                                               
+#define qtn_calen_repeat_forthnightly   "Forthnightly"
+
+//d:Repeat type "Yearly" text of unified editor
+//l:list_form_graphic_pane_1
+//r:9.2                                                               
+#define qtn_calen_repeat_yearly "Yearly"
+
+//d:To add people form contact book
+//l:list_single_pane_t1_cp2
+//r:9.2
+#define qtn_calen_add_people_from_contact_book "Add people from contact book"
+
+//d: Confirmation note shown, when Show on Map hard key is pressed on an event with empty location text
+//l:popup_note_window
+//w:
+//r:5.1
+#define qtn_cale_define_location  "Location of calendar event is not defined.Would you like to define it now?"
+
+//d:Unified editor menu option 'Add attachment'
+//l:list_single_pane_t1_cp2
+//r:9.2
+#define qtn_calen_editor_opt_add_attachment "Add attachment"
+
+//d: Title for the attachment list view.
+//l: title_pane_t2/opt9
+//w:
+//r: 9.2
+#define qtn_cale_attachments_title "Attachments" 
+
+//d: Choice item "Image" for the Add attachment selection list query
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define	qtn_msg_insert_qry_image	"Image"
+
+//d: Choice item "Video clip" for the Add attachment selection list query
+//l: list_single_pane_t1_cp2 
+//w:
+//r: 9.2
+#define	qtn_msg_insert_qry_video	"Video clip"
+
+//d: Choice item "Sound clip" for the Add attachment selection list query
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define	qtn_msg_insert_qry_sound	"Sound clip"
+
+//d: Choice item "Note as attachment" for the Add attachment selection list query
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define	qtn_msg_insert_qry_note_as_attachment	"Note"
+
+//d: Choice item "Other files" for the Add attachment selection list query
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define	qtn_msg_insert_qry_other_files	"Other files"	
+
+//d: saves the focused attachments, its an stylus popup menu option in attachments list view.
+//l: list_single_touch_menu_pane_t1
+//w:
+//r: 9.2
+#define	qtn_cale_stylus_popup_save	"Save"
+
+//d: removes the focused attachment from the calendar note, its an stylus popup menu option in attachments list view.
+//l: list_single_touch_menu_pane_t1
+//w:
+//r: 9.2
+#define	qtn_cale_stylus_popup_remove_attachment	"Remove"
+
+//d: confirmation query text, in case the content selected is DRM protected and not allowed to insert as attachment.
+//l: popup_note_window
+//w:
+//r: 9.2
+#define	qtn_cale_drm_protected_attachment	"Unable to insert object. Object is DRM protected"
+
+//d: Option in the menu of Event viewer to show the Attachments.
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define	qtn_cale_opt_view_attachments	"View attachments"
+
+//d:Attachment info in the event viewer
+//l:main_pane_empty_t1/opt2
+//r:5.0
+//
+#define qtn_cale_viewer_attachment_info "Attachment:"
+
+//d: MSK text in case there are no attachments in the attachments list view.
+//l: control_pane_t3/opt7
+//w:
+//r: 9.2
+#define	qtn_cale_msk_new_attachment	"Add new"
+
+//d: If the list is empty, the text No attachments is shown in the attachments list view.
+//l: main_list_empty_pane
+//w:
+//r: 9.2
+#define	qtn_cale_attach_no_attachments	"No attachments"
+
+//d: Add attachment selection list query.
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define	qtn_cale_attachment_query_heading	"Add attachment:"
+
+//d: Choice items in the Options menu of attachment list view.
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define	qtn_cale_opt_remove_attachment	"Remove attachment"
+
+//d: Choice items in the Options menu of attachment list view.
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define	qtn_cale_opt_save_attachment	"Save attachment"
+
+//d: Info note, when try to attach the same file.
+//l: popup_note_window
+//w:
+//r: 9.2
+#define	qtn_calen_info_already_attached	"File already attached"
+
+//d: opens the focused attachment to the application specific attachment viewer.
+//l: popup_note_window
+//w:
+//r: 9.2
+#define	qtn_calen_file_not_supported	"File not supported"
+
+//d: No name for the file attached
+//l: popup_note_window
+//w:
+//r: 9.2
+#define	qtn_calen_no_file_name	"No name"
+
+//d: In case the content selected does not fit to the maximum size of the attachment supported when inserting.
+//l: popup_note_window
+//w:
+//r: 9.2
+#define	qtn_cale_max_attachment_size	"Maximum size for calendar attachments exceeds 1MB"
+
+//d: Info note when attachment size exceeds 1 MB
+//l: popup_note_window
+//w:
+//r: 9.2
+#define qtn_calen_info_size_exceeded "Total Limit: %0U MB Available: %1U KB"
+
+//d: Label for toggling sync status of the calendar
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_multidb_synchronization "Sync"
+
+//d: "On" text for selected calendar sync status.
+//l: list_form_graphic_pane_t1/opt1
+//w:
+//r: 9.2
+#define qtn_cale_sync_on "On"
+
+//d: "Off" text for selected calendar sync status.
+//l: list_form_graphic_pane_t1/opt1
+//w:
+//r: 9.2
+#define qtn_cale_sync_off "Off"
+
+//d: Menupane item shown for todo and dayview.
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define qtn_calen_copy_to_calendars "Copy to calendars"
+
+//d:Opens Mark done undone submenu
+//l: list_single_pane_t1_cp2
+//w:
+//r: 9.2
+#define qtn_options_done_list   "Mark as "
+
+//d: Menu Item for marking the To-Do item done in List View
+//l: list_single_popup_submenu_pane_t1
+//w:
+//r: 9.2
+#define qtn_options_mark_done   "Done"
+
+//d: Menu Item for unmarking the To-Do item done in List View
+//l: list_single_popup_submenu_pane_t1
+//w:
+//r: 9.2
+#define qtn_options_mark_undone "Not Done"
+        
+// End of File

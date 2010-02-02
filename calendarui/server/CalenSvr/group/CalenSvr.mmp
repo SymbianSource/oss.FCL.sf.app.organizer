@@ -1,0 +1,90 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   This is project specification file for the CalenSvr.exe.
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+
+//Activate this macro to get traces
+//MACRO           TRACE_ENTRY_EXIT_POINT
+//MACRO           TRACE_MODULE_CALENSVR
+
+TARGET          calensvr.exe
+TARGETTYPE      EXE
+
+TARGETPATH      /sys/bin
+
+UID             0x1000008D 0x100059A1
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../../inc
+USERINCLUDE     ../../CalenSvrClient/inc
+USERINCLUDE     ../../CalenShared/Inc
+USERINCLUDE     ../../../cenrep  // central repository headers
+
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   ../../../../inc  //organizer include
+SYSTEMINCLUDE   ../../../../alarmengines/inc
+SYSTEMINCLUDE   /epoc32/include/connect
+SYSTEMINCLUDE   /epoc32/include/ecom
+
+SOURCEPATH      ../src
+
+SOURCE          CalenSvrMain.cpp
+SOURCE          CalSvrSession.cpp
+SOURCE          CalSvrScheduler.cpp
+SOURCE          CalenServer.cpp
+SOURCE          CalenSvrBootManager.cpp
+SOURCE          CalenSvrDBManager.cpp
+SOURCE          CalenSvrAlarmManager.cpp
+SOURCE          calensvrmissedalarmmanager.cpp
+
+LIBRARY         alarmclient.lib
+LIBRARY         alarmshared.lib
+LIBRARY         calinterimapi.lib
+LIBRARY         bafl.lib
+LIBRARY         calenglobaldata.lib
+LIBRARY         centralrepository.lib
+LIBRARY         euser.lib
+LIBRARY         featmgr.lib
+LIBRARY         tzclient.lib
+LIBRARY         aknnotify.lib
+LIBRARY         aknnotifyplugin.lib
+LIBRARY     	cenrepnotifhandler.lib  // CenRep Notify Handler
+LIBRARY         missedalarmstore.lib
+LIBRARY         calencommonutils.lib
+LIBRARY         caleninterimutils2.lib
+
+
+sourcepath      ../data
+start resource  calensvrmissedalarmmanagerresource.rss
+header
+targetpath      RESOURCE_FILES_DIR
+LANGUAGE_IDS 
+end
+
+// Really neads following capabilities:
+// CAPABILITY 
+//   ProtServ // This server is started on startup
+//   ReadDeviceData // For using central repository
+//   WriteDeviceData // For using central repository
+//   ReadUserData // For accessing Calendar db 
+CAPABILITY      CAP_SERVER
+VENDORID        VID_DEFAULT
+
+
+// End of File

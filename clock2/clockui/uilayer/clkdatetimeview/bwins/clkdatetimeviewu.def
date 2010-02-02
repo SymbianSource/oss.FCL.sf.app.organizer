@@ -1,0 +1,8 @@
+EXPORTS
+	??1CClkDateTimeView@@UAE@XZ @ 1 NONAME ; CClkDateTimeView::~CClkDateTimeView(void)
+	?DoActivateL@CClkDateTimeViewInher@@UAEXABVTVwsViewId@@VTUid@@ABVTDesC8@@@Z @ 2 NONAME ; void CClkDateTimeViewInher::DoActivateL(class TVwsViewId const &, class TUid, class TDesC8 const &)
+	?DoDeactivate@CClkDateTimeViewInher@@UAEXXZ @ 3 NONAME ; void CClkDateTimeViewInher::DoDeactivate(void)
+	?InitCurrentItem@CClkDateTimeView@@QAEXXZ @ 4 NONAME ; void CClkDateTimeView::InitCurrentItem(void)
+	?NewLC@CClkDateTimeView@@SAPAV1@VTUid@@H@Z @ 5 NONAME ; class CClkDateTimeView * CClkDateTimeView::NewLC(class TUid, int)
+	?NewLC@CClkDateTimeViewInher@@SAPAV1@VTUid@@H@Z @ 6 NONAME ; class CClkDateTimeViewInher * CClkDateTimeViewInher::NewLC(class TUid, int)
+

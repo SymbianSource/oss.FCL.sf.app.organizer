@@ -1,0 +1,98 @@
+/*
+* Copyright (c) 2002-2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Settings dll for calendar application
+*
+*/
+
+
+
+#include <platform_paths.hrh>
+#include <data_caging_paths_strings.hrh>
+#include "../../../inc/CalendarVariant.hrh"
+#include "../inc/calensettingsuid.h"
+
+TARGET          calensettingsui.dll
+TARGETTYPE      dll
+UID             0x1000008d KCalenSettingsUiDllUid
+TARGETPATH      SHARED_LIB_DIR
+
+//MACRO _PIM_FILE_LOG
+//MACRO TRACE_ENTRY_EXIT_POINT
+//MACRO _DISPLAY_WARNINGS
+
+
+SOURCEPATH      ../src
+
+SOURCE          calensettingsuicontainer.cpp
+SOURCE          CalenFileListSettingItem.cpp
+SOURCE          calensetting.cpp
+SOURCE          CalenSliderSettingItem.cpp
+SOURCE          calencheckboxsettingitem.cpp
+SOURCE          calennestedsettingitem.cpp
+SOURCE          calennestedsettingdialog.cpp
+//Added for corolla release
+SOURCE          calenbooleansettingitem.cpp
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../../inc
+USERINCLUDE     ../../../application/inc
+USERINCLUDE     ../../../cenrep
+
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   ../../../../inc  //organizer include
+//SYSTEMINCLUDE   ../../../RegionalPlugins/interface
+SYSTEMINCLUDE   /epoc32/include/ecom
+
+LIBRARY             calencustomisationmanager.lib
+LIBRARY             calenglobaldata.lib
+LIBRARY             caleninterimutils2.lib
+
+
+LIBRARY             aknskins.lib
+LIBRARY             aknskinsrv.lib
+LIBRARY             aknswallpaperutils.lib 
+LIBRARY             avkon.lib
+LIBRARY             bafl.lib
+LIBRARY             centralrepository.lib
+LIBRARY             cenrepnotifhandler.lib
+LIBRARY             charconv.lib
+LIBRARY             cone.lib
+LIBRARY             commonengine.lib
+LIBRARY             ecom.lib
+LIBRARY             eikdlg.lib
+LIBRARY             eikcore.lib
+LIBRARY             efsrv.lib
+LIBRARY             eikcoctl.lib
+LIBRARY             eikctl.lib 
+LIBRARY             euser.lib
+LIBRARY             featmgr.lib
+LIBRARY             filelist.lib
+LIBRARY             hlplch.lib
+LIBRARY             platformenv.lib
+LIBRARY             servicehandler.lib // AIW service handler
+// DRM libraries
+LIBRARY             caf.lib
+LIBRARY             cafutils.lib
+LIBRARY             drmhelper.lib
+
+// File logging
+LIBRARY flogger.lib
+LIBRARY aknnotify.lib
+
+
+CAPABILITY      CAP_GENERAL_DLL
+
+LANG            SC
+
+// End of File

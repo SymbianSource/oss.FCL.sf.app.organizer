@@ -1,0 +1,35 @@
+EXPORTS
+	?Hide@CCalenViewInfo@@QAEXH@Z @ 1 NONAME ; void CCalenViewInfo::Hide(int)
+	?HiddenView@CCalenCustomisationManager@@QBEHVTUid@@@Z @ 2 NONAME ; int CCalenCustomisationManager::HiddenView(class TUid) const
+	?CanBeEnabledDisabledL@CCalenCustomisationManager@@QAEHVTUid@@@Z @ 3 NONAME ; int CCalenCustomisationManager::CanBeEnabledDisabledL(class TUid)
+	?SetPluginAvailabilityL@CCalenCustomisationManager@@QAEXVTUid@@H@Z @ 4 NONAME ; void CCalenCustomisationManager::SetPluginAvailabilityL(class TUid, int)
+	?NewL@CCalenCustomisationManager@@SAPAV1@AAVMCalenServicesFactory@@AAV?$RArray@UTCalenPluginAvailability@CCalenCustomisationManager@@@@AAVMCalenServices@@AAV?$RPointerArray@VCCalenViewInfo@@@@@Z @ 5 NONAME ; class CCalenCustomisationManager * CCalenCustomisationManager::NewL(class MCalenServicesFactory &, class RArray<struct CCalenCustomisationManager::TCalenPluginAvailability> &, class MCalenServices &, class RPointerArray<class CCalenViewInfo> &)
+	?GetHiddenViewIdL@CCalenCustomisationManager@@QAEXVTUid@@AAV?$RArray@H@@@Z @ 6 NONAME ; void CCalenCustomisationManager::GetHiddenViewIdL(class TUid, class RArray<int> &)
+	?SettingsName@CCalenViewInfo@@QBEABVTDesC16@@XZ @ 7 NONAME ; class TDesC16 const & CCalenViewInfo::SettingsName(void) const
+	?Hidden@CCalenViewInfo@@QBEHXZ @ 8 NONAME ; int CCalenViewInfo::Hidden(void) const
+	?GetPluginSettingsL@CCalenCustomisationManager@@QAEXVTUid@@AAV?$RPointerArray@VCAknSettingItem@@@@@Z @ 9 NONAME ; void CCalenCustomisationManager::GetPluginSettingsL(class TUid, class RPointerArray<class CAknSettingItem> &)
+	?GetReplacePluginViewIdL@CCalenCustomisationManager@@QAE?AVTUid@@V2@@Z @ 10 NONAME ; class TUid CCalenCustomisationManager::GetReplacePluginViewIdL(class TUid)
+	?DoPluginLoadingL@CCalenCustomisationManager@@QAEXXZ @ 11 NONAME ; void CCalenCustomisationManager::DoPluginLoadingL(void)
+	?Views@CCalenCustomisationManager@@QBEABV?$RPointerArray@VCCalenViewInfo@@@@XZ @ 12 NONAME ; class RPointerArray<class CCalenViewInfo> const & CCalenCustomisationManager::Views(void) const
+	?DisableAllPluginsL@CCalenCustomisationManager@@QAEXXZ @ 13 NONAME ; void CCalenCustomisationManager::DisableAllPluginsL(void)
+	?PluginInfoArray@CCalenCustomisationManager@@QBEABV?$RPointerArray@VCImplementationInformation@@@@XZ @ 14 NONAME ; class RPointerArray<class CImplementationInformation> const & CCalenCustomisationManager::PluginInfoArray(void) const
+	?GetCustomViewsL@CCalenCustomisationManager@@QAEXVTUid@@AAV?$RPointerArray@VCCalenView@@@@@Z @ 15 NONAME ; void CCalenCustomisationManager::GetCustomViewsL(class TUid, class RPointerArray<class CCalenView> &)
+	?PreviewPane@CCalenCustomisationManager@@QAEPAVCCoeControl@@AAVTRect@@@Z @ 16 NONAME ; class CCoeControl * CCalenCustomisationManager::PreviewPane(class TRect &)
+	?CyclePositionComparison@CCalenViewInfo@@SAHABV1@0@Z @ 17 NONAME ; int CCalenViewInfo::CyclePositionComparison(class CCalenViewInfo const &, class CCalenViewInfo const &)
+	?IsViewRomBased@CCalenCustomisationManager@@QBEHVTUid@@@Z @ 18 NONAME ; int CCalenCustomisationManager::IsViewRomBased(class TUid) const
+	?Infobar@CCalenCustomisationManager@@QAEABVTDesC16@@XZ @ 19 NONAME ; class TDesC16 const & CCalenCustomisationManager::Infobar(void)
+	?ActivePlugins@CCalenCustomisationManager@@QBEABV?$RArray@VTUid@@@@XZ @ 20 NONAME ; class RArray<class TUid> const & CCalenCustomisationManager::ActivePlugins(void) const
+	?UnloadPluginsL@CCalenCustomisationManager@@QAEXABV?$RArray@VTUid@@@@@Z @ 21 NONAME ; void CCalenCustomisationManager::UnloadPluginsL(class RArray<class TUid> const &)
+	?Infobar@CCalenCustomisationManager@@QAEPAVCCoeControl@@ABVTRect@@@Z @ 22 NONAME ; class CCoeControl * CCalenCustomisationManager::Infobar(class TRect const &)
+	?PluginUid@CCalenViewInfo@@QBE?AVTUid@@XZ @ 23 NONAME ; class TUid CCalenViewInfo::PluginUid(void) const
+	??1CCalenCustomisationManager@@UAE@XZ @ 24 NONAME ; CCalenCustomisationManager::~CCalenCustomisationManager(void)
+	?ViewUid@CCalenViewInfo@@QBE?AVTUid@@XZ @ 25 NONAME ; class TUid CCalenViewInfo::ViewUid(void) const
+	?NewL@CCalenViewInfo@@SAPAV1@VTUid@@0ABVTDesC16@@1W4TCyclePosition@CCalenView@@@Z @ 26 NONAME ; class CCalenViewInfo * CCalenViewInfo::NewL(class TUid, class TUid, class TDesC16 const &, class TDesC16 const &, enum CCalenView::TCyclePosition)
+	?GetCommandHandlerL@CCalenCustomisationManager@@QAEPAVMCalenCommandHandler@@H@Z @ 27 NONAME ; class MCalenCommandHandler * CCalenCustomisationManager::GetCommandHandlerL(int)
+	?ViewInfoIdentifier@CCalenViewInfo@@SAHPBVTUid@@ABV1@@Z @ 28 NONAME ; int CCalenViewInfo::ViewInfoIdentifier(class TUid const *, class CCalenViewInfo const &)
+	?MenuName@CCalenViewInfo@@QBEABVTDesC16@@XZ @ 29 NONAME ; class TDesC16 const & CCalenViewInfo::MenuName(void) const
+	?CyclePosition@CCalenViewInfo@@QBE?AW4TCyclePosition@CCalenView@@XZ @ 30 NONAME ; enum CCalenView::TCyclePosition CCalenViewInfo::CyclePosition(void) const
+	?ViewPluginIdentifier@CCalenViewInfo@@SAHPBVTUid@@ABV1@@Z @ 31 NONAME ; int CCalenViewInfo::ViewPluginIdentifier(class TUid const *, class CCalenViewInfo const &)
+	?OfferMenuPaneL@CCalenCustomisationManager@@QAEXHPAVCEikMenuPane@@@Z @ 32 NONAME ; void CCalenCustomisationManager::OfferMenuPaneL(int, class CEikMenuPane *)
+	?CustomPreviewPaneL@CCalenCustomisationManager@@QAEPAVMCalenPreview@@AAVTRect@@@Z @ 33 NONAME ; class MCalenPreview * CCalenCustomisationManager::CustomPreviewPaneL(class TRect &)
+

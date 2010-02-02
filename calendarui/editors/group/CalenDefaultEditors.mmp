@@ -1,0 +1,136 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    This is project specification file for CalenEditors.dll
+*
+*/
+
+
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+
+//Activate this macro to get traces
+//MACRO           TRACE_ENTRY_EXIT_POINT
+//MACRO           TRACE_MODULE_CALENDEFAULTEDITORS
+
+//CodeTest macros
+//EPOCALLOWDLLDATA
+//EPOCDATALINKADDRESS	0x3FC00000
+
+TARGET          calendefaulteditors.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D 0x10207198
+
+//MACRO _PIM_FILE_LOG
+//MACRO TRACE_ENTRY_EXIT_POINT
+//MACRO _DISPLAY_WARNINGS
+
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../inc
+USERINCLUDE     ../../cenrep  // central repository headers
+
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   ../../../inc   //organizer include
+SYSTEMINCLUDE   ../../../calendarengines/inc   //calendarengine inc
+SYSTEMINCLUDE   /epoc32/include/ecom
+
+// For RD_CALEN_VIEWERS
+#include "../../inc/CalendarVariant.hrh"
+
+SOURCEPATH      ../data
+START RESOURCE  CalenDefaultEditorsData.rss
+HEADER
+TARGETPATH      RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END  // RESOURCE
+
+START RESOURCE 10207198.rss
+TARGET calendefaulteditors.rsc
+END
+
+
+SOURCEPATH      ../src
+// Plugin classes
+SOURCE          CalenDefaultEditors.cpp
+SOURCE          CalenDefaultEditorsProxy.cpp
+
+// Implementation
+SOURCE          CalenDescription.cpp
+SOURCE          CalenDescriptionField.cpp
+SOURCE          CalenEditorDataHandler.cpp
+SOURCE          CalenEntryUpdater.cpp
+SOURCE 			calenunifiededitor.cpp
+SOURCE 			caleneventtypefield.cpp
+SOURCE      	calenreminderfield.cpp
+SOURCE 			calenrepeatfield.cpp
+SOURCE 	    	calendbfield.cpp 
+SOURCE      	calenalldayfield.cpp 
+SOURCE          calenpriorityfield.cpp
+SOURCE			calenunifiededitorcontrol.cpp
+
+
+LIBRARY         caleninterimutils2.lib
+LIBRARY         calenglobaldata.lib
+
+LIBRARY         avkon.lib
+LIBRARY         bafl.lib
+LIBRARY         calinterimapi.lib
+LIBRARY         commonengine.lib
+LIBRARY         commonui.lib // For CErrorUi
+LIBRARY         cone.lib
+LIBRARY         featmgr.lib
+LIBRARY         hlplch.lib
+LIBRARY         ecom.lib
+LIBRARY         eikctl.lib
+LIBRARY         eikcoctl.lib
+LIBRARY         eikcore.lib
+LIBRARY         eikdlg.lib
+LIBRARY         etext.lib
+LIBRARY         euser.lib
+LIBRARY         npdlib.lib
+LIBRARY         sysutil.lib
+LIBRARY         estor.lib
+LIBRARY         form.lib
+LIBRARY         platformenv.lib
+LIBRARY         efsrv.lib
+LIBRARY         fepbase.lib
+LIBRARY			calencommonutils.lib
+LIBRARY			lbs.lib					// TLocality support
+LIBRARY			eposlandmarks.lib 		// Landmark support
+LIBRARY			gdi.lib
+LIBRARY         fbscli.lib
+LIBRARY         aknicon.lib 
+LIBRARY    		egul.lib 
+LIBRARY         cdlengine.lib
+LIBRARY         aknlayout2scalable.lib
+LIBRARY         centralrepository.lib   // Central Repository
+LIBRARY			apmime.lib
+
+// File logging
+LIBRARY flogger.lib
+LIBRARY aknnotify.lib
+
+CAPABILITY      CAP_ECOM_PLUGIN
+// Really neads following capabilities:
+// CAPABILITY 
+//   ProtServ // When connecting Agenda Server?
+//   AllFiles // When accessing Calendar db ? 
+//   ReadUserData // Accessing Calendar db ?
+//   WriteUserData // Accessing Calendar db ? 
+
+VENDORID        VID_DEFAULT
+
+
+// End of File

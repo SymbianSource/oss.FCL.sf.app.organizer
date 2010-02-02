@@ -1,0 +1,32 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description:	For alarameditor component.
+;
+
+; Languages
+&EN
+
+; Header
+#{"Alarm Editor"}, (0x2001CC11), 1, 0, 0
+
+; Localised Vendor name
+%{"Nokia"}
+
+; Unique Vendor name
+:"Nokia"
+
+"\epoc32\release\armv5\urel\alarmeditorapp.exe"							-"!:\sys\bin\alarmeditorapp.exe"
+"\epoc32\data\Z\private\10003a3f\import\apps\alarmeditorapp_reg.rsc"	-"!:\private\10003a3f\import\apps\alarmeditorapp_reg.rsc"
+"\epoc32\data\Z\resource\apps\alarmeditorapp.rsc"						-"!:\resource\apps\alarmeditorapp.rsc"
+"\epoc32\data\Z\resource\apps\alarmeditorapp_loc.rsc"					-"!:\resource\apps\alarmeditorapp_loc.rsc"

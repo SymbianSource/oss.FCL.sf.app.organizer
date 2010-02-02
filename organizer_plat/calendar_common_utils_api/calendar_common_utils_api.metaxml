@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<api id="c3fcff6d1146d6910d220bf6454be77b" dataversion="2.0">
+<name>calendar_common_utils_api</name>
+<description>Calendar common utils api</description>
+<type>c++</type>
+<collection>calendarui</collection>
+<libs></libs>
+<release category="domain" sinceversion=""/>
+<attributes>
+<htmldocprovided>no</htmldocprovided>
+<adaptation>no</adaptation>
+</attributes>
+</api>

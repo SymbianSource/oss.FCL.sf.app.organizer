@@ -1,0 +1,117 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description: pkg file  of Calendar Application.
+;
+&EN
+
+; standard SIS file header
+#{"Calendar"}, (0x10005901), 1, 0, 0, TYPE=SA, RU
+
+;Supports S60 v5.x
+[0x101F7961], 1, 0, 0, {"Series60ProductID"}
+
+;Localised Vendor name
+%{"Nokia EN"}
+
+;Unique Vendor name
+:"Nokia"
+
+;Calendar engine part
+"\epoc32\release\armv5\urel\AgnVersit2.dll" 								- "!:\sys\bin\AgnVersit2.dll"
+"\epoc32\release\armv5\urel\CalenImp.dll" 									- "!:\sys\bin\CalenImp.dll"
+"\epoc32\release\armv5\urel\CalenInterimUtils2.dll" 						- "!:\sys\bin\CalenInterimUtils2.dll"
+"\epoc32\release\armv5\urel\calenlauncher.dll" 								- "!:\sys\bin\calenlauncher.dll"
+"\epoc32\release\armv5\urel\Versit2.dll" 						  			- "!:\sys\bin\Versit2.dll"
+"\epoc32\release\armv5\urel\missedalarmstore.dll" 						  	- "!:\sys\bin\missedalarmstore.dll"
+
+"\epoc32\data\z\resource\agnversit2strings.rsc" 							- "!:\resource\agnversit2strings.rsc"
+"\epoc32\data\z\resource\plugins\AGNVERSIT2.rsc" 							- "!:\resource\plugins\AGNVERSIT2.rsc"
+
+;Calendar files to be installed
+"\epoc32\release\armv5\urel\calendar.exe" 									- "!:\sys\bin\calendar.exe"
+"\epoc32\release\armv5\urel\calensettingsui.dll" 							- "!:\sys\bin\calensettingsui.dll"
+"\epoc32\release\armv5\urel\calengsplugin.dll" 								- "!:\sys\bin\calengsplugin.dll"
+"\epoc32\release\armv5\urel\calencustomisationmanager.dll" 					- "!:\sys\bin\calencustomisationmanager.dll"
+"\epoc32\release\armv5\urel\calencommonutils.dll" 							- "!:\sys\bin\calencommonutils.dll"
+"\epoc32\release\armv5\urel\calenviews.dll" 								- "!:\sys\bin\calenviews.dll"
+"\epoc32\release\armv5\urel\calencontroller.dll" 							- "!:\sys\bin\calencontroller.dll"
+"\epoc32\release\armv5\urel\calendefaulteditors.dll" 						- "!:\sys\bin\calendefaulteditors.dll"
+
+;no server eclipsing 
+;"\epoc32\release\armv5\urel\calensvrclient.dll" 							- "!:\sys\bin\calensvrclient.dll"
+;"\epoc32\release\armv5\urel\calensvr.exe" 									- "!:\sys\bin\calensvr.exe"
+
+"\epoc32\release\armv5\urel\calenglobaldata.dll" 							- "!:\sys\bin\calenglobaldata.dll"
+"\epoc32\release\armv5\urel\missedalarmindicatorplugin.dll" 				- "!:\sys\bin\missedalarmindicatorplugin.dll"
+"\epoc32\release\armv5\urel\calenlunarvietnameseplugin.dll" 				- "!:\sys\bin\calenlunarvietnameseplugin.dll"
+"\epoc32\release\armv5\urel\calenthaiplugin.dll" 							- "!:\sys\bin\calenthaiplugin.dll"
+"\epoc32\release\armv5\urel\calenlunarchineseplugin.dll" 					- "!:\sys\bin\calenlunarchineseplugin.dll"
+
+;Resource files to be installed
+"\epoc32\data\Z\private\10003a3f\apps\calendar_reg.rsc" 					- "!:\private\10003a3f\import\apps\calendar_reg.rsc"
+
+"\epoc32\data\z\resource\apps\calendar.rsc"                        - "!:\resource\apps\calendar.rsc"
+"\epoc32\data\z\resource\apps\calendar.r01"                        - "!:\resource\apps\calendar.r01"
+
+"\epoc32\data\z\resource\plugins\calengsplugin.rsc"                - "!:\resource\plugins\calengsplugin.rsc"
+"\epoc32\data\z\resource\plugins\calengsplugin.r01"                - "!:\resource\plugins\calengsplugin.r01"
+
+"\epoc32\data\z\resource\plugins\calendefaulteditors.rsc"					- "!:\resource\plugins\calendefaulteditors.rsc"
+"\epoc32\data\z\resource\calendefaulteditorsdata.rsc"									- "!:\resource\calendefaulteditorsdata.rsc"
+"\epoc32\data\z\resource\calendefaulteditorsdata.r01"									- "!:\resource\calendefaulteditorsdata.r01"
+
+"\epoc32\data\z\resource\calencommonui.rsc"                       - "!:\resource\calencommonui.rsc" 
+"\epoc32\data\z\resource\calencommonui.r01"                       - "!:\resource\calencommonui.r01" 
+
+;;no server eclipsing 
+;"\epoc32\data\z\resource\CalenSvrMissedAlarmManagerResource.rsc"  - "!:\resource\CalenSvrMissedAlarmManagerResource.rsc"
+;"\epoc32\data\z\resource\CalenSvrMissedAlarmManagerResource.r01"  - "!:\resource\CalenSvrMissedAlarmManagerResource.r01"
+
+"\epoc32\data\z\resource\missedalarmindicatorplugin.rsc"         - "!:\resource\missedalarmindicatorplugin.rsc"
+"\epoc32\data\z\resource\missedalarmindicatorplugin.r01"         - "!:\resource\missedalarmindicatorplugin.r01"
+
+
+"\epoc32\data\z\resource\agnversit2strings.rsc"                  - "!:\resource\agnversit2strings.rsc"
+"\epoc32\data\z\resource\agnversit2strings.r01"                  - "!:\resource\agnversit2strings.r01"
+
+"\epoc32\data\z\resource\plugins\CalenLunarChinesePlugin.rsc"				- "!:\resource\plugins\CalenLunarChinesePlugin.rsc"
+"\epoc32\data\z\resource\CalenLunarChinesePlugindata.rsc"				- "!:\resource\CalenLunarChinesePlugindata.rsc"
+"\epoc32\data\z\resource\CalenLunarChinesePlugindata.r01"				- "!:\resource\CalenLunarChinesePlugindata.r01"
+
+"\epoc32\data\z\resource\plugins\CalenThaiPlugin.rsc"						- "!:\resource\plugins\CalenThaiPlugin.rsc"
+
+
+"\epoc32\data\z\resource\plugins\CalenLunarVietnamesePlugin.rsc"			- "!:\resource\plugins\CalenLunarVietnamesePlugin.rsc"
+"\epoc32\data\z\resource\CalenLunarVietnamesePlugindata.rsc"			- "!:\resource\CalenLunarVietnamesePlugindata.rsc"
+"\epoc32\data\z\resource\CalenLunarVietnamesePlugindata.r01"			- "!:\resource\CalenLunarVietnamesePlugindata.r01"
+
+
+"\epoc32\data\z\resource\apps\calendar.mif" 								- "!:\resource\apps\calendar.mif"
+"\epoc32\data\z\resource\apps\calendar_aif.mif" 							- "!:\resource\apps\calendar_aif.mif"
+"\epoc32\data\z\resource\apps\aicalendarplugin2.mif" 						- "!:\resource\apps\aicalendarplugin2.mif"
+"\epoc32\data\z\resource\apps\calendarsettings.mif" 						- "!:\resource\apps\calendarsettings.mif"
+
+;"\epoc32\data\z\resource\apps\calendefaulteditors.mif" 						- "!:\resource\apps\calendefaulteditors.mif"
+"\epoc32\release\armv5\urel\multicaluidialog.dll" 							- "!:\sys\bin\multicaluidialog.dll"
+"\epoc32\data\z\resource\multicaluidialog.rsc"         - "!:\resource\multicaluidialog.rsc"
+"\epoc32\data\z\resource\multicaluidialog.r01"                  - "!:\resource\multicaluidialog.r01"
+"\epoc32\data\z\resource\apps\multicaluidialog.mif" 								- "!:\resource\apps\multicaluidialog.mif"
+
+"\epoc32\release\armv5\urel\calenaiwprovider.dll" 							- "!:\sys\bin\calenaiwprovider.dll"
+"\epoc32\data\z\resource\plugins\calenaiwprovider.rsc"         - "!:\resource\plugins\calenaiwprovider.rsc"
+"\epoc32\data\z\resource\plugins\calenaiwprovider.r01"         - "!:\resource\plugins\calenaiwprovider.r01"
+
+"\epoc32\data\z\resource\apps\calenaiwprovidermenu.r01"         - "!:\resource\apps\calenaiwprovidermenu.r01"
+"\epoc32\data\z\resource\apps\calenaiwprovidermenu.rsc"         - "!:\resource\apps\calenaiwprovidermenu.rsc"
+;END OF FILE

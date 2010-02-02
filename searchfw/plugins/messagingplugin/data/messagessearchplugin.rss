@@ -1,0 +1,56 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Resource file used to register ecom dll's with registry.
+*
+*/
+
+
+
+#include <ecom/registryinfo.rh>
+
+// #include <SearchEcomDefines.hrh>
+// #include "MessagesSearchPlugIn.hrh"
+
+//  CONSTANTS 
+
+#define KMessagesSearchPlugInEcomDllUid            0x102823FB
+
+RESOURCE REGISTRY_INFO theInfo
+{
+	// UID for the DLL
+	dll_uid = KMessagesSearchPlugInEcomDllUid;
+
+	// Declare array of interface info 
+	interfaces = 
+	{
+		INTERFACE_INFO
+		{
+		// UID of interface that is implemented
+		interface_uid = 0x102823F6; //KSearchEcomInterfaceUid;
+		implementations = 
+			{
+			// Info for Search test implementation
+			IMPLEMENTATION_INFO
+			 {
+				implementation_uid = 0x102823FC;
+				version_no         = 1;
+				display_name       = "Messages";
+				default_data       = "0x102823FC"; // || 10272D28" ; // KMessagesSearchContentTypeUid /KEmailSearchContentTypeUidAsTUid
+				opaque_data        = "Opaque messages data";
+				}
+			};
+		}
+	};
+}
+

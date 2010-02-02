@@ -1,0 +1,13 @@
+component	app-services_versit
+source	\sf\app\organizer\pimappsupport\vcardandvcal
+binary	\sf\app\organizer\pimappsupport\vcardandvcal\group	all
+exports	\sf\app\organizer\pimappsupport\vcardandvcal\group
+notes_source	\component_defs\release.src
+
+
+ipr E 
+ipr T \sf\app\organizer\pimappsupport\vcardandvcal\TestFiles
+ipr T \sf\app\organizer\pimappsupport\vcardandvcal\TestvCals
+ipr T \sf\app\organizer\pimappsupport\vcardandvcal\TestvCards
+ipr T \sf\app\organizer\pimappsupport\vcardandvcal\tsrc
+

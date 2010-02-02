@@ -1,0 +1,40 @@
+/*
+* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Defines constant value.
+*
+*/
+
+
+
+#ifndef CALENDARSEARCHPLUGINDEFINES_HRH
+#define CALENDARSEARCHPLUGINDEFINES_HRH
+
+/**
+* Interface Uid of the calendar PlugIn.
+*/
+#define KCalendarSearchInterfaceUidAsTuid       0x102823F6
+
+/**
+* Dll Uid of the calendar PlugIn.
+*/
+#define KCalendarSearchDllUidAsTuid             0x102823F7
+
+/**
+* Implementation Uid of the calendar PlugIn.
+*/
+#define KCalendarSearchImplementationUidAsTuid      0x102823F8
+
+#endif // CALENDARSEARCHPLUGINDEFINES_HRH
+
+// End of File<textarea></textarea>

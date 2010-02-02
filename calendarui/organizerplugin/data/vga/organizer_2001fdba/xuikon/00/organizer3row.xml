@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xmluiml SYSTEM "organizer.dtd">
+<xmluiml xmlns="http://www.series60.com/xml/xmluiml/1" version="1.0">
+  <widget id="calendar3rowPluginContainer" focusable="true" _s60-initial-focus="1">
+    <!-- UI resources for Organizer3Row -->
+    <desc id="Organizer/NoEventsForToday">&qtn_ai_cale_no_eve_positive_short;</desc>
+    <desc id="Organizer/NoMoreEventsForToday">&qtn_ai_cale_no_more_ev_positive_short;</desc>
+    <desc id="Organizer/NextEventTomorrow">&qtn_hs_cale_next_tomorrow;</desc>
+    <desc id="Organizer3Row/IconAnniv" path="SKIN(268458241 2)"/>
+    <desc id="Organizer3Row/IconAppt" path="SKIN(268458241 4)"/>
+    <desc id="Organizer3Row/IconMemo" path="SKIN(268458241 6)"/>
+    <desc id="Organizer3Row/IconTodo" path="SKIN(270501603 5126)"/>
+    <desc id="Organizer3Row/IconMeetAccepted" path="SKIN(270501603 5508)"/>
+    <desc id="Organizer3Row/IconMeetNotAnswered" path="SKIN(270501603 5511)"/>
+    <desc id="Organizer3Row/IconMeetTentative" path="SKIN(270501603 5514)"/>
+    
+    <contentsource name="Organizer3Row" value="0x102750FE" />  
+    
+    <!-- #################################
+         ## Organizer3Row plug-in settings  ##
+         ################################# -->
+  
+    <!-- Item count and size settings -->
+    <!-- Total line count -->
+    <property class="Settings/Organizer3Row" name="0x01" value="3"/>
+  
+    <!-- Timed item line count -->
+    <property class="Settings/Organizer3Row" name="0x02" value="1"/>
+  
+    <!-- Non Timed item line count -->
+    <property class="Settings/Organizer3Row" name="0x03" value="1"/>
+  
+    <!-- Line count reserved for non timed items -->
+    <property class="Settings/Organizer3Row" name="0x04" value="0"/>
+  
+    <!-- Publish end time for upcoming timed items -->
+    <property class="Settings/Organizer3Row" name="0x05" value="1"/>
+  
+    <!-- Use alternate publishing for upcoming and ongoing items -->
+    <property class="Settings/Organizer3Row" name="0x06" value="0"/>
+  
+    <!-- Open event to viewer 0 / editor 1 -->
+    <property class="Settings/Organizer3Row" name="0x07" value="0"/>
+
+    <!-- Days to handle as not today. After which "Next event on DAY DATE" is displayed.
+         Here one means tomorrow only. So we display detailed info for not today events for
+         tomorrow only. -->
+    <property class="Settings/Organizer3Row" name="0x08" value="1"/>
+
+    <!-- Open first valid event on launch event index 0 -->
+    <property class="Settings/Organizer3Row" name="0x09" value="1"/>
+
+    <!-- Publish info text (no more events...) using InfoText and InfoIcon ids -->
+    <property class="Settings/Organizer3Row" name="0x0A" value="1"/>
+    
+    <!--######################################
+        ####       Organizer3Row plugin       ####
+        ######################################-->
+    <actions>
+        <action>
+            <trigger name="activate"/>
+            <trigger name="keyevent">
+                    <property name="scancode" value="3"/> <!-- enter key / EStdKeyEnter -->
+                <property name="eventtype" value="1"/>
+            </trigger>
+            <event name="Organizer3Row/ItemSelected(0)"/>
+      </action>
+    </actions>
+  <!-- #1 -->
+    <button id="calendar3rowEntryBox1" class="calendar3rowEntryBox">
+      <image id="calendar3rowEntryIcon1" class="calendar3rowEntryIcon">
+        <property class="Organizer3Row/EventIcon" name="ordinal" value="0x01"/>
+            <property class="policy/emptyContent" name="calendar3rowEntryBox1" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowEntryBox1" value="display: block;"/>
+            <!-- hide the infobox when we have some events to show -->
+            <property class="policy/Content" name="calendar3rowInfoTextBox" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowInfoText" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowInfoIcon" value="display: none;"/>
+      </image>
+      <text id="calendar3rowEntryText1_1" class="calendar3rowEntryText1">
+        <property class="Organizer3Row/StartTimeAndSubject" name="ordinal" value="0x01"/>
+        <!-- If there is no text, the entry box is not shown at all -->
+            <property class="policy/Content" name="calendar3rowEntryText1_1" value="display: block;"/>
+            <property class="policy/emptyContent" name="calendar3rowEntryText1_1" value="display: none;"/>
+            <!-- hide the infobox when we have some events to show -->
+            <property class="policy/Content" name="calendar3rowInfoTextBox" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowInfoText" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowInfoIcon" value="display: none;"/>
+        </text>
+    </button>
+    <!-- #2 -->
+    <button id="calendar3rowEntryBox2" class="calendar3rowEntryBox">
+      <image id="calendar3rowEntryIcon2" class="calendar3rowEntryIcon">
+        <property class="Organizer3Row/EventIcon" name="ordinal" value="0x02"/>
+            <property class="policy/emptyContent" name="calendar3rowEntryBox2" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowEntryBox2" value="display: block;"/>
+            <!-- hide the infobox when we have some events to show -->
+            <property class="policy/Content" name="calendar3rowInfoTextBox" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowInfoText" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowInfoIcon" value="display: none;"/>
+      </image>
+      <text id="calendar3rowEntryText2_1" class="calendar3rowEntryText1">
+        <property class="Organizer3Row/StartTimeAndSubject" name="ordinal" value="0x02"/>
+            <!-- If there is no text, the entry box is not shown at all -->
+            <property class="policy/Content" name="calendar3rowEntryText2_1" value="display: block;"/>
+            <property class="policy/emptyContent" name="calendar3rowEntryText2_1" value="display: none;"/>
+            <!-- hide the infobox when we have some events to show -->
+            <property class="policy/Content" name="calendar3rowInfoTextBox" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowInfoText" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowInfoIcon" value="display: none;"/>
+      </text>         
+    </button>
+    <!-- #3 -->
+    <button id="calendar3rowEntryBox3" class="calendar3rowEntryBox">
+      <image id="calendar3rowEntryIcon3" class="calendar3rowEntryIcon">
+        <property class="Organizer3Row/EventIcon" name="ordinal" value="0x03"/>
+            <property class="policy/emptyContent" name="calendar3rowEntryBox3" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowEntryBox3" value="display: block;"/>
+            <!-- hide the infobox when we have some events to show -->
+            <property class="policy/Content" name="calendar3rowInfoTextBox" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowInfoText" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowInfoIcon" value="display: none;"/>
+      </image>
+      <text id="calendar3rowEntryText3_1" class="calendar3rowEntryText1">
+        <property class="Organizer3Row/StartTimeAndSubject" name="ordinal" value="0x03"/>
+            <!-- If there is no text, the entry box is not shown at all -->
+            <property class="policy/Content" name="calendar3rowEntryText3_1" value="display: block;"/>
+            <property class="policy/emptyContent" name="calendar3rowEntryText3_1" value="display: none;"/>
+            <!-- hide the infobox when we have some events to show -->
+            <property class="policy/Content" name="calendar3rowInfoTextBox" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowInfoText" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowInfoIcon" value="display: none;"/>
+      </text>        
+    </button>    
+    <!-- Info text. Hidden by default, shown in case info text is shown. Then
+         other buttons are hidden -->
+    <button id="calendar3rowInfoTextBox" class="calendar3rowInfoBox">
+      <image id="calendar3rowInfoIcon" class="calendar3rowEntryIcon">
+        <property class="Organizer3Row/InfoIcon"/>
+            <!-- hide the above buttons and show just this info button -->
+            <property class="policy/Content" name="calendar3rowEntryBox1" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowEntryBox2" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowEntryBox3" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowInfoIcon" value="display: block;"/>                              
+            <property class="policy/Content" name="calendar3rowInfoTextBox" value="display: block;"/>
+            <property class="policy/emptyContent" name="calendar3rowInfoIcon" value="display: none;"/>                                              
+      </image>
+      <text id="calendar3rowInfoText">
+        <property class="Organizer3Row/InfoText"/>
+            <!-- hide the above buttons and show just this info button -->
+            <property class="policy/Content" name="calendar3rowEntryBox1" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowEntryBox2" value="display: none;"/>
+            <property class="policy/Content" name="calendar3rowEntryBox3" value="display: none;"/>            
+            <property class="policy/Content" name="calendar3rowInfoText" value="display: block;"/>                              
+            <property class="policy/Content" name="calendar3rowInfoTextBox" value="display: block;"/>
+      </text>
+    </button>       
+    <menuextension>
+        <softkey type="middle" target="hs_widget_msk_open"/>
+        <menuitem target="hs_widget_menuitem_open">
+            <actions>
+                <action>
+                    <trigger name="activate"/>
+                    <event name="system/activateselecteditem"/>
+                </action>
+            </actions>
+        </menuitem>
+    </menuextension>        
+  </widget>
+</xmluiml>

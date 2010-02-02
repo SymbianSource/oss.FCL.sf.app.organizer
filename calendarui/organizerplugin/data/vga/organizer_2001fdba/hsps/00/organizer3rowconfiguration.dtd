@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+============================================================================
+<FileName: "organizer3rowconfiguration.dtd">
+
+<FileDescription: "Localization strings for the configuration">
+<FileVersion    : >
+
+<Copyright:
+"Copyright © 2007 Nokia Corporation.
+This material, including documentation and any related
+computer programs, is protected by copyright controlled by
+Nokia Corporation. All rights are reserved. Copying,
+including reproducing, storing,  adapting or translating, any
+or all of this material requires the prior written consent of
+Nokia Corporation. This material also contains confidential
+information which may not be disclosed to others without the
+prior written consent of Nokia Corporation.">
+============================================================================
+-->
+
+<!-- NOTE: make sure that there is at last one space character (hex 20) after the entity name -->
+
+<!--
+qtn_organizer_configuration_name.attributes
+qtn_organizer_configuration_name.layout "ai_gene_pane_1_t1"
+qtn_organizer_configuration_name.release "TB9.2"
+qtn_organizer_configuration_name.description "Calendar widget"
+qtn_organizer_configuration_name.parents "ai_gene_pane_1"
+-->
+<!ENTITY qtn_organizer_configuration_name "Calendar">
+
+<!-- End of File-->

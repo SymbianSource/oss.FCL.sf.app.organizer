@@ -1,0 +1,119 @@
+EXPORTS
+	_ZN11CNotepadApi10FetchMemoLEPK7TDesC16 @ 1 NONAME
+	_ZN11CNotepadApi10ProbeMemoLEi @ 2 NONAME
+	_ZN11CNotepadApi11AddContentLERK7TDesC16 @ 3 NONAME
+	_ZN11CNotepadApi11ExistsMemoLEi @ 4 NONAME
+	_ZN11CNotepadApi12CreateModelLEi @ 5 NONAME
+	_ZN11CNotepadApi14ExecTemplatesLEv @ 6 NONAME
+	_ZN11CNotepadApi14FetchTemplateLEPK7TDesC16 @ 7 NONAME
+	_ZN11CNotepadApi15ExecFileViewerLERK7TDesC16PS1_iij @ 8 NONAME
+	_ZN11CNotepadApi15ExecTextEditorLERiRK7TDesC16S3_S3_ @ 9 NONAME
+	_ZN11CNotepadApi15ExecTextViewerLERiRK7TDesC16S3_S3_ @ 10 NONAME
+	_ZN11CNotepadApi15SaveFileAsMemoLERK7TDesC16 @ 11 NONAME
+	_ZN11CNotepadApi17CreateListDialogLEi @ 12 NONAME
+	_ZN11CNotepadApi17NumberOfTemplatesEv @ 13 NONAME
+	_ZN11CNotepadApi19CreateViewerDialogLERK7TDesC16PS1_iij @ 14 NONAME
+	_ZN11CNotepadApi19CreateViewerDialogLEi @ 15 NONAME
+	_ZN11CNotepadApi20CNotepadApi_ReservedEv @ 16 NONAME
+	_ZN11CNotepadApi23CreateTextEditorDialogLEPP7HBufC16RiRK7TDesC16S6_S6_ @ 17 NONAME
+	_ZN11CNotepadApi23CreateTextViewerDialogLEPP7HBufC16RiiRK7TDesC16S6_S6_ @ 18 NONAME
+	_ZN11CNotepadApi23ExecReadOnlyTextViewerLERK7TDesC16S2_S2_ @ 19 NONAME
+	_ZN11CNotepadApi27CNotepadApi_Reserved_StaticEv @ 20 NONAME
+	_ZN11CNotepadApi4NewLEv @ 21 NONAME
+	_ZN11CNotepadApi5ModelEv @ 22 NONAME
+	_ZN11CNotepadApi5NewLCEv @ 23 NONAME
+	_ZN11CNotepadApi6DialogEv @ 24 NONAME
+	_ZN11CNotepadApiD0Ev @ 25 NONAME
+	_ZN11CNotepadApiD1Ev @ 26 NONAME
+	_ZN11CNotepadApiD2Ev @ 27 NONAME
+	_ZN13CNotepadModel11AddContentLERK7TDesC16 @ 28 NONAME
+	_ZN13CNotepadModel22CNotepadModel_ReservedEv @ 29 NONAME
+	_ZN13CNotepadModel4NewLER3RFsi @ 30 NONAME
+	_ZN13CNotepadModel5CloseEv @ 31 NONAME
+	_ZN13CNotepadModel5OpenLEv @ 32 NONAME
+	_ZN13CNotepadModel6IsOpenEv @ 33 NONAME
+	_ZN13CNotepadModel7SeekKeyEi @ 34 NONAME
+	_ZN13CNotepadModelD0Ev @ 35 NONAME
+	_ZN13CNotepadModelD1Ev @ 36 NONAME
+	_ZN13CNotepadModelD2Ev @ 37 NONAME
+	_ZN18CNotepadDialogBase27CNotepadDialogBase_ReservedEv @ 38 NONAME
+	_ZN18CNotepadDialogBase9ExecuteLDEv @ 39 NONAME
+	_ZN18CNotepadDialogBaseD0Ev @ 40 NONAME
+	_ZN18CNotepadDialogBaseD1Ev @ 41 NONAME
+	_ZN18CNotepadDialogBaseD2Ev @ 42 NONAME
+	_ZN18CNotepadListDialog10EditByKeyLEi @ 43 NONAME
+	_ZN18CNotepadListDialog27CNotepadListDialog_ReservedEv @ 44 NONAME
+	_ZN18CNotepadListDialog4NewLEiPP10CEikDialog @ 45 NONAME
+	_ZN18CNotepadListDialog5SaveLEv @ 46 NONAME
+	_ZN18CNotepadListDialogD0Ev @ 47 NONAME
+	_ZN18CNotepadListDialogD1Ev @ 48 NONAME
+	_ZN18CNotepadListDialogD2Ev @ 49 NONAME
+	_ZN20CNotepadEditorDialog29CNotepadEditorDialog_ReservedEv @ 50 NONAME
+	_ZN20CNotepadEditorDialog4NewLEiP13CNotepadModelP18CNotepadListDialogP7CSendUi @ 51 NONAME
+	_ZN20CNotepadEditorDialog9ExecuteLDEv @ 52 NONAME
+	_ZN20CNotepadEditorDialogD0Ev @ 53 NONAME
+	_ZN20CNotepadEditorDialogD1Ev @ 54 NONAME
+	_ZN20CNotepadEditorDialogD2Ev @ 55 NONAME
+	_ZN20CNotepadViewerDialog29CNotepadViewerDialog_ReservedEv @ 56 NONAME
+	_ZN20CNotepadViewerDialog4NewLEiPP10CEikDialog @ 57 NONAME
+	_ZN20CNotepadViewerDialog8SetFileLERK7TDesC16PS1_ij @ 58 NONAME
+	_ZN20CNotepadViewerDialog9LoadFileLEv @ 59 NONAME
+	_ZN20CNotepadViewerDialog9OpenFileLERK7TDesC16PS1_ij @ 60 NONAME
+	_ZN20CNotepadViewerDialogD0Ev @ 61 NONAME
+	_ZN20CNotepadViewerDialogD1Ev @ 62 NONAME
+	_ZN20CNotepadViewerDialogD2Ev @ 63 NONAME
+	_ZN26CNotepadExternalTextDialog4NewLEPP7HBufC16RiRK7TDesC16S6_S6_PP10CEikDialog @ 64 NONAME
+	_ZN26CNotepadExternalTextDialogD0Ev @ 65 NONAME
+	_ZN26CNotepadExternalTextDialogD1Ev @ 66 NONAME
+	_ZN26CNotepadExternalTextDialogD2Ev @ 67 NONAME
+	_ZNK13CNotepadModel9MdcaCountEv @ 68 NONAME
+	_ZNK13CNotepadModel9MdcaPointEi @ 69 NONAME
+	_ZTI11CNotepadApi @ 70 NONAME ; #<TI>#
+	_ZTI13CNotepadEdwin @ 71 NONAME ; #<TI>#
+	_ZTI13CNotepadModel @ 72 NONAME ; #<TI>#
+	_ZTI15CNotepadListBox @ 73 NONAME ; #<TI>#
+	_ZTI17CNotepadCoreModel @ 74 NONAME ; #<TI>#
+	_ZTI17CNotepadEditorLaf @ 75 NONAME ; #<TI>#
+	_ZTI17CNotepadPopupList @ 76 NONAME ; #<TI>#
+	_ZTI17CNotepadViewerLaf @ 77 NONAME ; #<TI>#
+	_ZTI18CNotepadDialogBase @ 78 NONAME ; #<TI>#
+	_ZTI18CNotepadListDialog @ 79 NONAME ; #<TI>#
+	_ZTI20CNotepadEditorDialog @ 80 NONAME ; #<TI>#
+	_ZTI20CNotepadViewerDialog @ 81 NONAME ; #<TI>#
+	_ZTI26CNotepadExternalTextDialog @ 82 NONAME ; #<TI>#
+	_ZTIN13CNotepadModel23CDatabaseChangeNotifierE @ 83 NONAME ; #<TI>#
+	_ZTIN18CNotepadDialogBase15CTemporaryFilesE @ 84 NONAME ; #<TI>#
+	_ZTIN18CNotepadListDialog12CNotepadIdleE @ 85 NONAME ; #<TI>#
+	_ZTIN18CNotepadListDialog22CNotepadProgressDialogE @ 86 NONAME ; #<TI>#
+	_ZTV11CNotepadApi @ 87 NONAME ; #<VT>#
+	_ZTV13CNotepadEdwin @ 88 NONAME ; #<VT>#
+	_ZTV13CNotepadModel @ 89 NONAME ; #<VT>#
+	_ZTV15CNotepadListBox @ 90 NONAME ; #<VT>#
+	_ZTV17CNotepadCoreModel @ 91 NONAME ; #<VT>#
+	_ZTV17CNotepadEditorLaf @ 92 NONAME ; #<VT>#
+	_ZTV17CNotepadPopupList @ 93 NONAME ; #<VT>#
+	_ZTV17CNotepadViewerLaf @ 94 NONAME ; #<VT>#
+	_ZTV18CNotepadDialogBase @ 95 NONAME ; #<VT>#
+	_ZTV18CNotepadListDialog @ 96 NONAME ; #<VT>#
+	_ZTV20CNotepadEditorDialog @ 97 NONAME ; #<VT>#
+	_ZTV20CNotepadViewerDialog @ 98 NONAME ; #<VT>#
+	_ZTV26CNotepadExternalTextDialog @ 99 NONAME ; #<VT>#
+	_ZTVN13CNotepadModel23CDatabaseChangeNotifierE @ 100 NONAME ; #<VT>#
+	_ZTVN18CNotepadDialogBase15CTemporaryFilesE @ 101 NONAME ; #<VT>#
+	_ZTVN18CNotepadListDialog12CNotepadIdleE @ 102 NONAME ; #<VT>#
+	_ZTVN18CNotepadListDialog22CNotepadProgressDialogE @ 103 NONAME ; #<VT>#
+	_ZThn40_N13CNotepadModelD0Ev @ 104 NONAME ; #<thunk>#
+	_ZThn40_N13CNotepadModelD1Ev @ 105 NONAME ; #<thunk>#
+	_ZThn40_NK13CNotepadModel9MdcaCountEv @ 106 NONAME ; #<thunk>#
+	_ZThn40_NK13CNotepadModel9MdcaPointEi @ 107 NONAME ; #<thunk>#
+	_ZN11CNotepadApi15SaveFileAsMemoLERK7TDesC16j @ 108 NONAME
+	_ZN11CNotepadApi15ExecFileViewerLER5RFilePK7TDesC16iij @ 109 NONAME
+	_ZN11CNotepadApi15SaveFileAsMemoLER5RFile @ 110 NONAME
+	_ZN11CNotepadApi15SaveFileAsMemoLER5RFilej @ 111 NONAME
+	_ZN11CNotepadApi19CreateViewerDialogLER5RFilePK7TDesC16iij @ 112 NONAME
+	_ZN20CNotepadViewerDialog8SetFileLER5RFilePK7TDesC16ij @ 113 NONAME
+	_ZN20CNotepadViewerDialog9LoadFileLER5RFile @ 114 NONAME
+	_ZN20CNotepadViewerDialog9OpenFileLER5RFilePK7TDesC16ij @ 115 NONAME
+	_ZTI23CNotepadTemplateListBox @ 116 NONAME ; #<TI>#
+	_ZTV23CNotepadTemplateListBox @ 117 NONAME ; #<VT>#
+

@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<api id="861c0e239ebb0cfab4ffcb5ce7edd92c" dataversion="2.0">
+<name>Meeting request utillities API</name>
+<description>Meeting request utilities API</description>
+<type>c++</type>
+<collection>meetingui</collection>
+<libs></libs>
+<release category="domain"/>
+<attributes>
+<htmldocprovided>no</htmldocprovided>
+<adaptation>no</adaptation>
+</attributes>
+</api>

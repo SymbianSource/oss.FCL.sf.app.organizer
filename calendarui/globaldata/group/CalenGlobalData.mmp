@@ -1,0 +1,77 @@
+/*
+* Copyright (c) 2002-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Global Data for calendar application
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+
+//Activate this macro to get traces
+//MACRO           TRACE_ENTRY_EXIT_POINT
+//MACRO           TRACE_MODULE_CALENGLOBALDATA
+
+//CodeTest macros
+//EPOCALLOWDLLDATA
+//EPOCDATALINKADDRESS	0x3FE00000
+TARGET          calenglobaldata.dll
+TARGETTYPE      dll
+UID             0x1000008d 0x1020E866
+TARGETPATH      SHARED_LIB_DIR
+
+SOURCEPATH      ../src
+SOURCE          calenglobaldata.cpp
+SOURCE          calensend.cpp
+SOURCE          calenvcalexport.cpp
+
+SOURCE          calencontextimpl.cpp
+SOURCE          calenfilemapping.cpp
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   ../../../inc   //organizer include
+SYSTEMINCLUDE   /epoc32/include/ecom
+
+LIBRARY         euser.lib
+LIBRARY         ecom.lib
+LIBRARY         caleninterimutils2.lib
+LIBRARY         calinterimapi.lib
+LIBRARY         calenimp.lib
+LIBRARY         charconv.lib
+LIBRARY         estor.lib
+LIBRARY         efsrv.lib
+LIBRARY         sendui.lib
+LIBRARY         avkon.lib
+LIBRARY         sysutil.lib
+LIBRARY         eikcoctl.lib
+LIBRARY         eikcore.lib
+//LIBRARY         CommonUI.lib
+LIBRARY         bafl.lib
+LIBRARY         commonengine.lib
+LIBRARY         cone.lib
+LIBRARY         etext.lib
+LIBRARY         featmgr.lib
+LIBRARY			lbs.lib
+LIBRARY			calencommonutils.lib
+LIBRARY         centralrepository.lib
+
+CAPABILITY      CAP_GENERAL_DLL
+
+LANG            SC
+
+
+// End of File

@@ -1,0 +1,9 @@
+component	app-engines_agnversit2
+source	\sf\app\organizer\pimappservices\calendarvcalplugin
+binary	\sf\app\organizer\pimappservices\calendarvcalplugin\group	all
+exports	\sf\app\organizer\pimappservices\calendarvcalplugin\group
+notes_source	\component_defs\release.src
+
+
+ipr E 
+
