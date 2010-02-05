@@ -1,0 +1,50 @@
+/*
+* Copyright (c) 2010 Sun Microsystems, Inc. and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributor:
+* Maximilian Odendahl
+*
+* Contributors:
+* 
+* Description: This is the project specification file for the
+*				Caldav test application
+*/
+
+TARGET		  CalDavTest.exe
+TARGETTYPE	  exe
+UID			 0 0x2002B81C
+
+USERINCLUDE	 ..\inc
+USERINCLUDE   ..\..\..\calendarui\globaldata\inc
+
+SYSTEMINCLUDE \Epoc32\include
+SYSTEMINCLUDE \Epoc32\include\app
+SYSTEMINCLUDE \Epoc32\include\mw
+SYSTEMINCLUDE \Epoc32\include\platform
+SYSTEMINCLUDE \Epoc32\include\platform\mw
+SYSTEMINCLUDE \Epoc32\include\platform\app
+
+SOURCEPATH	  	..\src
+SOURCE			caldavengine.cpp httpclient.cpp caldavutils.cpp
+
+SOURCEPATH	  	..\tsrc
+SOURCE			CalDavTest.cpp
+
+LIBRARY			euser.lib apparc.lib cone.lib eikcore.lib avkon.lib charconv.lib
+LIBRARY			commonengine.lib efsrv.lib estor.lib eikcoctl.lib eikdlg.lib 
+LIBRARY			eikctl.lib bafl.lib fbscli.lib aknnotify.lib aknicon.lib
+LIBRARY			etext.lib gdi.lib egul.lib insock.lib
+LIBRARY			ecom.lib InetProtUtil.lib http.lib esock.lib xmlengineDOM.lib calinterimapi.lib calenimp.lib CalenInterimUtils2.lib commdb.lib flogger.lib 
+LIBRARY			caldavclient.lib
+LIBRARY			calenglobaldata.lib
+LIBRARY			extendedconnpref.lib netmeta.lib
+
+EPOCHEAPSIZE        0x5000 0x400000
+EPOCSTACKSIZE        0x5000
+
+CAPABILITY NetworkServices ReadDeviceData ReadUserData WriteDeviceData WriteUserData
