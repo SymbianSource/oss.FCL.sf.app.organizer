@@ -1669,6 +1669,11 @@ TInt CCalDavEngine::DeleteEntryL(const TCalLocalUid &aUid)
 			// someone deleted this already
 			Ret = KErrGeneral;
 			}
+		else if (Return == FORBIDDEN)
+			{
+			// event read-only
+			Ret = KErrGeneral;
+			}
 		else
 			{
 			Ret = KErrGeneral;
