@@ -309,6 +309,7 @@ private:
     TInt iAsyncExitCmd;
     CCalenMultiDBEditor* iDbEditor;//Not not owned
     TBool iConflictOccured;
+    TBool iIsDbEditorOpen ; 
     };
 
 

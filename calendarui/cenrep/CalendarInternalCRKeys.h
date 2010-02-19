@@ -123,26 +123,21 @@ const TUint32 KCalendarSupressMissedAlarmSoftNotification = 0x0000000D;
 **/
 const TUint32 KCalendarStartupStatus = 0x0000000E;
 
-/**
-* Text string containing default calendar names separated by commas
-* Used for creating default calendars at the startup of the device
-* Default value: "Personal,Family,Friends"
-*/
-const TUint32 KCalendarDefaultCalendars = 0x0000000F;
+
 
 /**
 * Text string containing default calendar colors separated by commas
 * Used for creating default calendars at the startup of the device
 * Default value: "16711680,65280,255"
 */
-const TUint32 KCalendarDefaultColors = 0x00000010;
+const TUint32 KCalendarDefaultColors = 0x0000000F;
 
 /**
 * String value containing unique calendar value 
 * Used for identifying an entry by LUID + unique calendar value 
 * Default value:"0"
 */
-const TUint32 KCalendarAvailableValue = 0x00000011;
+const TUint32 KCalendarAvailableValue = 0x00000010;
 
 
 #endif  // CALENDARINTERNALCRKEYS_H

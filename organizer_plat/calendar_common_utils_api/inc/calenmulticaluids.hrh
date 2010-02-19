@@ -30,7 +30,8 @@ enum TCalenPropertyUid
 	EDeviceSyncServiceOwner,
 	EOwnerName,
 	EMarkAsDelete,
-	EDeviceSyncProfileID
+	EDeviceSyncProfileID,
+	ESyncConfigEnabled
 	};
 
 #endif /* CALENMULTICALUIDS_HRH_ */

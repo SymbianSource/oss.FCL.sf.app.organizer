@@ -288,11 +288,13 @@ void CCalenTodoView::HandleCommandL( TInt aCommand ) // command ID
         case ECalenViewCurrentEntry:
         case EAknSoftkeyOpen:
             SaveCurrentItemIndexL();
-           if(!Container()->IsEmptyView())
+          
+           if(!Container()->IsEmptyView() && !iEventViewCommandHandled)
                {
                if(!Container()->MarkedCount())
                    {
                    CCalenNativeView::HandleCommandL(ECalenEventView);
+                   iEventViewCommandHandled = ETrue;
                    break;
                    }
                
@@ -731,6 +733,7 @@ void CCalenTodoView::DoActivateImplL( const TVwsViewId& /*aPrevViewId*/,
         // dim clear and clear all toolbar buttons
         toolbar.SetItemDimmed(ECalenGotoToday,ETrue,ETrue);
         }
+    iEventViewCommandHandled = EFalse;
     
     TRACE_EXIT_POINT;
     }

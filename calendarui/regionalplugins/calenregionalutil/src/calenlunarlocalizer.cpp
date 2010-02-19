@@ -180,13 +180,17 @@ EXPORT_C CCalenLunarLocalizedInfo* CCalenLunarLocalizer::LocalizeL( TCalenLunarI
     yearSubs->AppendL( iTerrestialBranchNames->MdcaPoint( aInfo.iTerrestialBranch ) );
 
     HBufC* tmp = StringLoader::LoadLC( R_CALE_LUNAR_YEAR, *yearSubs, iEikEnv );
+#ifdef _DEBUG
     RDebug::Print( *tmp );
+#endif
     localized->iLunarYear = *tmp;
     CleanupStack::PopAndDestroy( tmp );
     CleanupStack::PopAndDestroy( yearSubs );
 
+#ifdef _DEBUG
     RDebug::Print(     localized->iLunarYear  );
-
+#endif
+    
     LocalizeMonthAndDayL(localized, aInfo);
     
     // Full lunar date

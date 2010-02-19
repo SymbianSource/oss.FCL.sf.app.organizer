@@ -72,43 +72,57 @@ void CCalenContextFWListener::ContextIndicationL(const CCFContextIndication& aCh
     TRACE_ENTRY_POINT;
     const CCFContextObject& co = aChangedContext.Context();
 
+#ifdef _DEBUG
     RDebug::Print( _L("----- CalendarUI - context indication:") );
     RDebug::RawPrint( co.Source() );
     RDebug::RawPrint( co.Type() );
     RDebug::RawPrint( co.Value() );
+#endif
 
     // exit alarm mode as soon as alarm is snoozed or stopped
     if( co.Source() == KAlarmUISource() && co.Type() == KAlarmUISourceResult() )
         {
+#ifdef _DEBUG
         RDebug::Print( _L("### source OK!") );
+#endif
         if( co.Value() == TPtrC( KAlarmUISourceResultValues[EResultAlarmStopped] ) )
             {
+#ifdef _DEBUG
             RDebug::Print( _L("### EResultAlarmStopped") );
+#endif
             // should close the Event view open
             iAlarmManager.StopAlarmContextListener();
             }
         else if( co.Value() == TPtrC( KAlarmUISourceResultValues[EResultAlarmSnoozed] ) )
             {
+#ifdef _DEBUG
             RDebug::Print( _L("### EResultAlarmSnoozed") );
+#endif
             // should leave the Event view
              iAlarmManager.StopAlarmContextListener(ETrue);             
             }
             //should close the event view in case of power on/off and missed alarm.
         else if( co.Value() == TPtrC( KAlarmUISourceResultValues[EResultAlarmStoppedAndExit] ) )
             {
+#ifdef _DEBUG
             RDebug::Print( _L("### EResultAlarmMissed") );
+#endif
             // should leave the Event view
              //iAlarmManager.StopAlarmContextListener(ETrue);    
             iAlarmManager.StopContextListenerForAutoSnooze(); 
             }    
         else
             {
+#ifdef _DEBUG
             RDebug::Print( _L("### value didn't match!") );
+#endif
             }
         }
     else
         {
+#ifdef _DEBUG
         RDebug::Print( _L("### source didn't match!") );
+#endif
         }
     UnsubscribeContexts();    
     CloseCFClient();
@@ -123,8 +137,10 @@ void CCalenContextFWListener::ContextIndicationL(const CCFContextIndication& aCh
 void CCalenContextFWListener::ActionIndicationL(const CCFActionIndication& aActionToExecute)
     {
     TRACE_ENTRY_POINT;
+#ifdef _DEBUG
     RDebug::Print( _L("----- CalendarUI - action:") );
     RDebug::RawPrint( aActionToExecute.Identifier() );
+#endif
     TRACE_EXIT_POINT;
     }
 
@@ -139,11 +155,13 @@ void CCalenContextFWListener::HandleContextFrameworkError( TCFError aError,
     {
     TRACE_ENTRY_POINT;
     // no implementation
+#ifdef _DEBUG
     RDebug::Print( _L("----- CalendarUI - CF error:") );
     RDebug::Print( _L("aError: %d"), aError );
     RDebug::RawPrint( aSource );
     RDebug::RawPrint( aType );
     RDebug::Print( _L("-----------------------------") );
+#endif
     ASSERT( !aError );
     TRACE_EXIT_POINT;
     }
@@ -201,7 +219,9 @@ void CCalenContextFWListener::PublishContextL( const TDesC& aSource,
 
     const TInt err = iCFClient->PublishContext( *co );
     CleanupStack::PopAndDestroy( co );
+#ifdef _DEBUG
     RDebug::Print( _L("### PublishContext - err: %d"), err );
+#endif
     User::LeaveIfError( err );
     TRACE_EXIT_POINT;
     }
@@ -313,7 +333,9 @@ TBool CCalenContextFWListener::IsCalendarAlarmActiveL()
         for( TInt i(0); i < arr.Count(); i++ )
             {
             CCFContextObject* obj = arr[i];
+#ifdef _DEBUG
             RDebug::Print( _L("### found alarm context: %S"), &(obj->Value()) );
+#endif
 
             if( obj->Value() == TPtrC( KAlarmUISourceStateValues[EStateCalendarAlarm] ) )
                 {

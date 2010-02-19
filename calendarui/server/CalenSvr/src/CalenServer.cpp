@@ -22,6 +22,10 @@
 #include <calcalendarinfo.h>
 #include <calenmulticalutil.h>
 #include <CalenInterimUtils2.h>
+#include <calensvrmissedalarmmanagerresource.rsg>
+#include <data_caging_path_literals.hrh>
+#include <bautils.h>
+#include <pathinfo.h>
 
 //debug
 #include "calendarui_debug.h"
@@ -35,13 +39,16 @@
 #include "CalenSvrBootManager.h"
 #include "CalenSvrDBManager.h"
 #include "calensvrmissedalarmmanager.h"
+#include "calenmissedalarmconstants.h"
 
 // LOCAL CONSTANTS AND MACROS
+
 const TInt KCalenServerPriority(CActive::EPriorityStandard);
 _LIT( KCalendarDatabaseFilePath, "c:calendar" );
 const TInt KBufferStartingSize( 128 ); 
 const TInt KBufferSizeIncrement( 64 );
 const TInt KBuffLength = 128;
+
 
 const TInt KComma( ',' );
 
@@ -302,7 +309,7 @@ TInt CCalenServer::CreateCalendarFilesL()
     CDesC16ArrayFlat* calendarNamesList = new (ELeave) CDesC16ArrayFlat(2);
     CleanupStack::PushL(calendarNamesList);
     // read calendar names from central repository
-    ReadCalendarNamesFromCenrepL(*calendarNamesList);
+    ReadCalendarNamesFromResourceL(*calendarNamesList);
     
     RArray<TInt> calendarColors;
     // read calendar colors from central repository
@@ -357,40 +364,50 @@ TInt CCalenServer::CreateCalendarFilesL()
 // Read calendar names from central repository
 // -----------------------------------------------------------------------------
 //
-void CCalenServer::ReadCalendarNamesFromCenrepL(CDesC16ArrayFlat& aCalendarNames)
+void CCalenServer::ReadCalendarNamesFromResourceL(CDesC16ArrayFlat& aCalendarNames)
     {
     TRACE_ENTRY_POINT;
     
-    CRepository* repository = CRepository::NewL( KCRUidCalendar );
-    CleanupStack::PushL( repository );
+    RFs fsSession;
+    CleanupClosePushL( fsSession );
+    RResourceFile resourceFile;
+    CleanupClosePushL( resourceFile );
+    User::LeaveIfError( fsSession.Connect() );
+    TFileName resourceFileName( KMissedAlarmResourceFile );
     
-    TInt bufSize( KBufferStartingSize );
-    TBool wasRead( EFalse );
-    do
-        {
-        RBuf buf;
-        CleanupClosePushL(buf);
-        buf.CreateL(bufSize);
-        // read default calendars information from cenrep
-        TInt err = repository->Get(KCalendarDefaultCalendars, buf);
-        if (err == KErrNone)
-            {
-            wasRead = ETrue;
-            PopulateCalendarNamesListL(buf, aCalendarNames);
-            }
-        else if (err == KErrOverflow)
-            {
-            bufSize += KBufferSizeIncrement;
-            }
-        else
-            {
-            User::Leave(err);
-            }
-        CleanupStack::PopAndDestroy(&buf);
-        }
-    while (!wasRead);
+    BaflUtils::NearestLanguageFile( fsSession, resourceFileName );
+    
+   // __PRINT(" resourcefileName : %s" , resourceFileName );
 
-    CleanupStack::PopAndDestroy(repository);
+    resourceFile.OpenL(fsSession, resourceFileName );
+    resourceFile.ConfirmSignatureL( 0 );
+    // personal
+        HBufC8* personalBuffer = resourceFile.AllocReadLC( R_CALE_DB_PERSONAL );    
+       const TPtrC16 ptrPBuffer(( TText16*) personalBuffer->Ptr(),
+                                         ( personalBuffer->Length()+1 )>>1 );    
+       HBufC *personalCalendar = ptrPBuffer.AllocL();    
+       aCalendarNames.AppendL( personalCalendar->Des() );    
+       CleanupStack::PopAndDestroy( personalBuffer );
+       
+    // famliy
+       HBufC8* familyBuffer=resourceFile.AllocReadLC( R_CALE_DB_FAMILY );
+       const TPtrC16 ptrFBuffer(( TText16*) familyBuffer->Ptr(),
+               ( familyBuffer->Length()+1 )>>1 );
+       HBufC *familyCalendar = ptrFBuffer.AllocL();
+       aCalendarNames.AppendL( familyCalendar->Des() );
+       CleanupStack::PopAndDestroy( familyBuffer );
+       
+    //friends
+       HBufC8* friendsBuffer = resourceFile.AllocReadLC( R_CALE_DB_FRIENDS );
+       const TPtrC16 ptrFrBuffer(( TText16*) friendsBuffer->Ptr(),
+               ( friendsBuffer->Length()+1 )>>1 );
+       HBufC *friendsCalendar = ptrFrBuffer.AllocL();
+       aCalendarNames.AppendL( friendsCalendar->Des() );
+       CleanupStack::PopAndDestroy( friendsBuffer );
+   
+    CleanupStack::PopAndDestroy(&resourceFile);
+    CleanupStack::PopAndDestroy(&fsSession);
+    
     TRACE_EXIT_POINT;
     }
 
@@ -433,33 +450,6 @@ void CCalenServer::ReadCalendarColorsFromCenrepL(RArray<TInt>& aCalendarColors)
     while (!wasRead);
 
     CleanupStack::PopAndDestroy(repository);
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenServer::PopulateCalendarNamesListL
-// Populate calendar names list from central repository buffer
-// -----------------------------------------------------------------------------
-//
-void CCalenServer::PopulateCalendarNamesListL( const TDesC& aRepositoryBuffer,
-                    CDesC16ArrayFlat& aCalendarNames)
-    {
-    TRACE_ENTRY_POINT;
-    
-    TPtrC marker = aRepositoryBuffer;
-    TInt calendarNameOffset;
-    while ((calendarNameOffset = marker.Locate(TChar(KComma)))
-            != KErrNotFound)
-        {
-        // append calendar name to list
-        aCalendarNames.AppendL(marker.Left(calendarNameOffset));
-        marker.Set(marker.Mid(calendarNameOffset + 1));
-
-        if (marker.Locate(TChar(KComma)) == KErrNotFound)
-            {
-            aCalendarNames.AppendL(marker.Left(marker.Length()));
-            }
-        }
     TRACE_EXIT_POINT;
     }
 

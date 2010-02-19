@@ -165,7 +165,14 @@ void CCalenBackgroundState::HandleNotificationL(const TCalenNotification& aNotif
         {
         case ECalenNotifyAppForegrounded:
         	{
-        	SetCurrentState( aStateMachine, iPreviousState );
+        	if( iPreviousState == CCalenStateMachine::ECalenSendingState )
+        	    {
+        	    SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
+        	    }
+        	else
+        	    {
+                SetCurrentState( aStateMachine, iPreviousState );
+        	    }
         	// We set iOutstandingNotifications for two reasons.
         	// 1. The new state i.e. the state we are moving back can have notification info.
         	// 2. When we move to newstate we broadcast all notification from iOutstandingNotifications

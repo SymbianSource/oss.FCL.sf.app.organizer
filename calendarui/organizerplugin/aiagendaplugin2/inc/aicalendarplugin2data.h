@@ -21,7 +21,6 @@
 
 // INCLUDES
 #include <e32base.h>
-#include <aipropertyextension.h>
 #include <aicontentobserver.h>
 #include "aicalendarplugin2eventitem.h"
 

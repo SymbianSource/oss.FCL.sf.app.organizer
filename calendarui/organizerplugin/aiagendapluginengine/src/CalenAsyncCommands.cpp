@@ -195,6 +195,11 @@ void COpenCommand::RunL()
                 {
                 iEngine.iInstanceView = CCalInstanceView::NewL( sessionArray, *this );
                 }
+            else
+                {
+                iState = ESignalCaller;
+                CompleteSelf();
+                }
             }
             break;
 
@@ -366,8 +371,8 @@ void CGetEntriesCommand::RunL(void)
             {
             if( !iEngine.iInstanceView )
                 {
-                // open command / instance view creation failed
-                User::Leave( KErrNotFound );
+                iState = EFinalize;
+                CompleteSelf();
                 }
             else
                 {
@@ -551,8 +556,15 @@ void CGetNextEventCommand::RunL(void)
         {
         case EFetch:
             {
-            // create date range and fetch entries
-
+            if( !iEngine.iInstanceView )
+                {
+                iState = EFinalize;
+                CompleteSelf();
+                }
+            else
+                {
+                // create date range and fetch entries
+    
                 CalCommon::TCalViewFilter filter = CalCommon::EIncludeAppts    | 
                                                    CalCommon::EIncludeReminder;
 
@@ -562,6 +574,7 @@ void CGetNextEventCommand::RunL(void)
 
                 iState = EFinalize;
                 CompleteSelf();
+                }
             }
             break;
 
@@ -726,9 +739,11 @@ void CGetTodosCommand::RunL(void)
 
             if( !iEngine.iInstanceView )
                 {
-                User::Leave( KErrBadHandle ); // we have a null pointer
+                iState = ESignalCaller;
+                CompleteSelf();
                 }
-
+            else
+                {
                 iEngine.iInstanceView->FindInstanceL( iInstanceArray, 
                                                       CalCommon::EIncludeIncompletedTodos |
                                                       // only fetch the first instance for repeating to-dos!
@@ -737,6 +752,7 @@ void CGetTodosCommand::RunL(void)
 
                 iState = ESignalCaller;
                 CompleteSelf();
+                }
             }
             break;
 
@@ -878,8 +894,8 @@ void CGetEntriesForDaysCommand::RunL(void)
             {
             if( !iEngine.iInstanceView )
                 {
-                // open command / instance view creation failed
-                User::Leave( KErrNotFound );
+                iState = EFinalize;
+                CompleteSelf();
                 }
             else
                 {

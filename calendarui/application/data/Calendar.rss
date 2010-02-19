@@ -2705,12 +2705,12 @@ RESOURCE TBUF r_cale_db_shown_setting
 
 RESOURCE TBUF r_cale_db_calendar
     {
-    buf = "Calendar"; 
+    buf = qtn_cale_db_calendar_name; 
     }
 
 RESOURCE TBUF r_cale_db_calendar_default_name
     {
-    buf = "Calendar(%U)";
+    buf = "Calendar(%U)"; //qtn_cale_db_calendar_default_name 
     }
 
 RESOURCE TBUF r_calen_illegal_characters

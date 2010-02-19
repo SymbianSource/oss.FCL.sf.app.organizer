@@ -191,7 +191,7 @@ TBool CCalenCmdLineLauncher::ProcessCommandParametersL(
     TCalTime focusTime;
     if( focusOnTime )
         {
-        focusTime.SetTimeUtcL( iCmdParameters.iTime );
+        focusTime.SetTimeLocalL( iCmdParameters.iTime );
         }
     else
         {

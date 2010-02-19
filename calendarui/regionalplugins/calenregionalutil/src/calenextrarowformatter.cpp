@@ -210,30 +210,40 @@ EXPORT_C TPtrC CCalenExtraRowFormatter::FormatExtraRowInformationL(
             TInt subIx = subLabels.Find( field );
             // Replace 
             subs->Delete(subIx);
-            RDebug::Print( _L("A sub count  %d"), subs->Count() );                       
+#ifdef _DEBUG
+            RDebug::Print( _L("A sub count  %d"), subs->Count() );         
+#endif
             subs->InsertL(subIx, TPtrC( aLocInfo.GetField( field ) ) );
+#ifdef _DEBUG
             RDebug::Print( _L("B sub count %d"), subs->Count() );                       
-            RDebug::Print( _L("B field %S"), &(subs->At(subIx)) );                       
+            RDebug::Print( _L("B field %S"), &(subs->At(subIx)) );
+#endif
             
             }
         
         // Format all fields to extra row     
         HBufC* extraRowFmt = StringLoader::LoadLC( R_CALE_EXTRA_ROW_LUNAR );
         
+#ifdef _DEBUG
         RDebug::RawPrint( *extraRowFmt );
+#endif
         
         TBuf<1000> fmt = *extraRowFmt;
         for (TInt i=0; i < subLabels.Count(); i++)
             {
+#ifdef _DEBUG
             RDebug::Print( _L("Before Format") );
             RDebug::RawPrint( fmt );
+#endif
             StringLoader::Format( iText, 
                                   fmt,
                                   i + 1, // %0U is a separator 
                                   subs->At( i ) );
             fmt = iText;
+#ifdef _DEBUG
             RDebug::Print( _L("After Format") );
             RDebug::RawPrint( fmt );
+#endif
             }
         
         // Now we have something like "Year of Dog%0U%0U6/11%0U%0U" 
@@ -241,15 +251,19 @@ EXPORT_C TPtrC CCalenExtraRowFormatter::FormatExtraRowInformationL(
         _LIT(KSeparatorFmt, "%0U");
         
         CollapseDuplicatesL( iText, 0, KSeparatorFmt );
+#ifdef _DEBUG
         RDebug::Print( _L("After collapse") );
         RDebug::RawPrint( iText );
+#endif
 
         // Remove leading and trailing %0U
         // By now, we are sure that there is max 1 %0U in the beginning
         // and in the end of string.
         RemoveLeadingAndTrailingL( iText, KSeparatorFmt );
+#ifdef _DEBUG
         RDebug::Print( _L("After leading and trailing removal") );
         RDebug::RawPrint( iText );
+#endif
         
 
         // If there are now separators anymore, then do not fill them
@@ -266,8 +280,10 @@ EXPORT_C TPtrC CCalenExtraRowFormatter::FormatExtraRowInformationL(
                                   0, // %0U is a separator 
                                   *separator );
         
+#ifdef _DEBUG
             RDebug::Print( _L("After separator insert") );
             RDebug::RawPrint( iText );
+#endif
             CleanupStack::PopAndDestroy( separator );
             }
 

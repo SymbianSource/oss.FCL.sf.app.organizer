@@ -380,8 +380,7 @@ TBool CCalenLunarVietnamesePlugin::CustomiseMenuPaneL( TInt /*aResourceId*/,
 												CEikMenuPane* aMenuPane )
 	{
 	TRACE_ENTRY_POINT;
-	HBufC* itemText =  HBufC::NewLC(100);//= StringLoader::LoadLC(R_CALENDAR_SHOW_LUNAR_DATA);
-	itemText->Des().Append(_L("Viet No Settings"));
+	HBufC* itemText = StringLoader::LoadLC(R_CALENDAR_SHOW_LUNAR_DATA);
     
     CEikMenuPaneItem::SData menuItem;
     menuItem.iCommandId = iStart; 

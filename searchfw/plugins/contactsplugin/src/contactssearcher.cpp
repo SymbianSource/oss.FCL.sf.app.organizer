@@ -51,6 +51,7 @@
 #include <CVPbkContactViewDefinition.h>
 #include <CVPbkSortOrder.h>
 #include <MVPbkContactViewFiltering.h>
+#include <CPbk2SortOrderManager.h>
 #include <barsc.h>
 #include <barsread.h>
 #include <contactssearchresource.rsg>
@@ -391,7 +392,7 @@ HBufC8* CContactsSearcher::LaunchInfoL( const CSearchDocumentId& aDocumentID )
 	       
            else
         	   {
-               User::Leave( KErrNotFound );
+        	   return NULL;
         	   }
          
          }
@@ -750,8 +751,8 @@ void CContactsSearcher::FetchContactItemsFromDbAndSearchL(void)
     // in the contact store. Once we get the links, we extract data from them 
     // to be searched, and then pass the same to the text searcher
     
-    CVPbkSortOrder* sortOrder = CVPbkSortOrder::NewL( iContactManager->FieldTypes() );
-    CleanupStack::PushL( sortOrder );
+	CPbk2SortOrderManager* sortOrderManager = CPbk2SortOrderManager::NewL( iContactManager->FieldTypes() );
+	CleanupStack::PushL( sortOrderManager );
         
     CVPbkContactViewDefinition* viewDef = CVPbkContactViewDefinition::NewL();
     CleanupStack::PushL( viewDef );
@@ -781,11 +782,11 @@ void CContactsSearcher::FetchContactItemsFromDbAndSearchL(void)
         SetActive();
         }
     iContactViewBase = iContactManager->CreateContactViewLC( 
-                   *this, *viewDef, *sortOrder );
+                   *this, *viewDef, sortOrderManager->SortOrder() );
                 
     CleanupStack::Pop(); // CreateContactViewLC
     CleanupStack::PopAndDestroy( viewDef );
-    CleanupStack::PopAndDestroy( sortOrder );
+    CleanupStack::PopAndDestroy( sortOrderManager );
     }
     
 

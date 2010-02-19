@@ -16,7 +16,6 @@
 */
 
 // system includes
-#include <aknlistquerydialog.h>
 #include <aknnotewrappers.h>
 #include <AknQueryDialog.h>
 #include <calentry.h>
@@ -193,14 +192,21 @@ TBool CCalenDescription::ProcessCommandL( TInt aCommandId )
     TBool processed = EFalse;
     switch( aCommandId )
         {
-        case ECalenCmdAddDescription:
-            {
-            processed = HandleAddDescriptionL();
-            break;
-            }
         case ECalenCmdShowDescription:
             {
             ShowL();
+            processed = ETrue;
+            break;
+            }
+        case ECalenCmdAddDescriptionNew:
+            {
+            AddNewL();
+            processed = ETrue;
+            break;
+            }
+        case ECalenCmdAddDescriptionExisting:
+            {
+            AddMemoL();
             processed = ETrue;
             break;
             }
@@ -576,46 +582,5 @@ HBufC* CCalenDescription::ExecTextViewerL( TInt& aStatus, const TDesC& aDescript
 
     TRACE_EXIT_POINT;
     return desc;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenDescription::HandleAddDescriptionL
-// Handles the command ECalenAddDescription
-// ----------------------------------------------------------------------------
-// 
-TBool CCalenDescription::HandleAddDescriptionL()
-    {
-    TRACE_ENTRY_POINT;
-    
-    TBool processed = EFalse;
-    TInt selectedIndex(0);
-    CAknListQueryDialog* dlg = new (ELeave) CAknListQueryDialog(&selectedIndex);
-    dlg->PrepareLC( R_DESCRIPTION_LIST_QUERY );
-    
-    if(dlg->RunLD())
-        {
-        switch(selectedIndex)
-            {
-            case 0:             //ECalenCmdAddDescriptionNew
-                {
-                AddNewL();
-                processed = ETrue;
-                break;
-                }
-            case 1:             //ECalenCmdAddDescriptionExisting
-                {
-                AddMemoL();
-                processed = ETrue;
-                break;
-                }
-            default:
-                break;
-            }
-        }
-	
-	TRACE_EXIT_POINT;
-	
-    return processed;
-    
     }
 //  End of File

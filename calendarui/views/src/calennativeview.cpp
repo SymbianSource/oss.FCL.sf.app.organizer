@@ -409,11 +409,9 @@ void CCalenNativeView::HandleCommandL(TInt aCommand)
             break;
 
         // The context should remain the same for these actions.
-        case ECalenEventView:
         case ECalenForwardsToDayView:
         case ECalenNextView:
         case ECalenPrevView:
-        case ECalenSwitchView:
         case ECalenViewCurrentEntry:
         case ECalenEditCurrentEntry: 
         case ECalenCompleteTodo:
@@ -422,14 +420,15 @@ void CCalenNativeView::HandleCommandL(TInt aCommand)
         case ECalenDeleteCurrentEntry:
         case ECalenDeleteEntriesBeforeDate:
         //case ECalenGlobalSendAsCmdId:
-        case ECalenSend:
+        
             
-            if( aCommand != ECalenSwitchView )
-                {
-                // Mark the flag telling that the command is being handled
                 SetCommandHandlingInProgress( ETrue );
-                }
-
+                iServices.IssueCommandL( aCommand );
+            break;
+            
+        case ECalenEventView:
+        case ECalenSwitchView:  
+		case ECalenSend:
             iServices.IssueCommandL( aCommand );
             break;
 

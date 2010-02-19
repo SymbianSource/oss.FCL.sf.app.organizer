@@ -44,6 +44,7 @@ public:
 public: // From MCalenEngineOpenCallback
     void DatabaseOpened();
     void DatabaseTemporarilyClosed();
+    void HandleError();  
 
 private:
     CCalenServer* Server() const;

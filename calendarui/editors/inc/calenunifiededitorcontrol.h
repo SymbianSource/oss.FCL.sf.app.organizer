@@ -270,6 +270,12 @@ NONSHARABLE_CLASS( CCalenUnifiedEditorControl ) : public CBase
         
         const TDesC& GetCalendarNameForEntryL();
         
+        /**
+         * @brief Handle error codes related to the editor fields.
+         * @param aError
+         */
+        void HandleErrorL( const TInt& aError );
+        
     private:
         
         /**

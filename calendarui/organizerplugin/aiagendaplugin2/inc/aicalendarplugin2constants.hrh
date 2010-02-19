@@ -89,21 +89,21 @@ const TInt KAIRangeTomorrowOnly = 1;
 const TInt KAICal2DefaultBufferLen = 35;
 
 _LIT( KAICal2WesternSummaryLocationSeparator, ", " );
-_LIT( KAICal2ArabicSummaryLocationSeparator, " /x060c" );
+_LIT( KAICal2ArabicSummaryLocationSeparator, " \x060c" );
 /**
  * KReplaceWhitespaceChars contains some characters that should be replaced by space
  * in Calendar popup, day view etc. 
  * Following characters are replaced with space
- * /x0009 horizontal tab
- * /x000a new line
- * /x000b line tabulation (vertical
- * /x000c form feed
- * /x000d carriage return
- * /x2028 line separator
- * /x2029 paragraph separator
+ * \x0009 horizontal tab
+ * \x000a new line
+ * \x000b line tabulation (vertical
+ * \x000c form feed
+ * \x000d carriage return
+ * \x2028 line separator
+ * \x2029 paragraph separator
  */
 _LIT( KAICal2ReplaceWhitespaceChars,
-"/x0009/x000A/x000B/x000C/x000D/x2028/x2029" );
+"\x0009\x000A\x000B\x000C\x000D\x2028\x2029" );
 
 _LIT16( KAICal2CmdTODAY, "TODAY" ); // Calendar command parameter
 _LIT16( KAICal2CmdDAY, "DAY " ); // Calendar command parameter

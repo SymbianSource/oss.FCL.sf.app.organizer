@@ -92,7 +92,7 @@ private:
      * 
      * @param aCalendarNames a reference to the calendar names list
      */
-    void ReadCalendarNamesFromCenrepL(CDesC16ArrayFlat& aCalendarNames);
+    void ReadCalendarNamesFromResourceL(CDesC16ArrayFlat& aCalendarNames);
     
     /**
      * @brief read calendar colors from central repository
@@ -100,15 +100,6 @@ private:
      * @param aCalendarColors a reference to calendar colors list
      */
     void ReadCalendarColorsFromCenrepL(RArray<TInt>& aCalendarColors);
-    
-    /**
-     * @brief populate calendar names list from central repository buffer
-     * 
-     * @param aRepositoryBuffer a reference to central repository buffer
-     * @param aCalendarNames a reference to calendar names list
-     */
-    void PopulateCalendarNamesListL( const TDesC& aRepositoryBuffer ,
-            CDesC16ArrayFlat& aCalendarNames );
     
     /**
      * @brief populate calendar colors list from central repository buffer

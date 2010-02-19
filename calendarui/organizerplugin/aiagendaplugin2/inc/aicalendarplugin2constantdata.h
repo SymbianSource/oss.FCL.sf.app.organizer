@@ -21,10 +21,11 @@
 
 // INCLUDES
 #include <e32base.h>
-#include <aipropertyextension.h>
+#include <hscontentpublisher.h>
 
 // FORWARD DECLARATIONS
 class MAiContentItemIterator;
+
 
 /**
  *  Constant data container.
@@ -51,9 +52,7 @@ NONSHARABLE_CLASS( CAICalendarPlugin2ConstantData ) : public CBase
 
         const TDesC& MakeEventOnL( const TTime& aTime );
         
-        TAny* GetPropertyL( TInt aProperty );
-        
-        void SetPropertyL( TInt aProperty, TAny* aValue );
+        TAny* GetPropertyL( CHsContentPublisher::TProperty aProperty );
 
         /**
          * Tell if we need to append end time to "not today timed" events.
@@ -112,12 +111,6 @@ NONSHARABLE_CLASS( CAICalendarPlugin2ConstantData ) : public CBase
          * Own.
          */
         HBufC*                              iDateFormatWithoutYearWithZero;
-
-        /**
-         * This plugins publisher info.
-         * Own.
-         */
-        TAiPublisherInfo                    iInfo;
 
         /**
          * Plugin content iterator.

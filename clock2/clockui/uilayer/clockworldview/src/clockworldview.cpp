@@ -952,21 +952,13 @@ void CClockWorldView::RemoveLocationL()
         // Update the world array.
         iWorldArray->RemoveCity( currentListItem );
                                     
-        if( currentListItem >= iWorldArray->MdcaCount() )
-            {
-            currentListItem = iWorldArray->MdcaCount() - 1;
-            }
-        if( KNoCities <= currentListItem )
-            {
-            // Make the list to display the previous item.
-            iContainer->ListBox()->SetCurrentItemIndex( currentListItem );
-            }
+       
 
         // Update the document.
         CClockDocument* clockDocument = static_cast< CClockDocument* > ( AppUi()->Document() );
         clockDocument->StoreDataL();
         // Update the container.
-        iContainer->ListBox()->HandleItemRemovalL();
+       
         // If there are no more cities present, update the empty list text.
         if( KNoCities == iWorldArray->MdcaCount() )
             {

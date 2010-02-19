@@ -143,8 +143,9 @@ void CCalenEngine::UpdateCalSessionsL()
     for (TInt index = 0; index < iCalInfoArray.Count(); index++)
         {
         TPtrC calFileName = iCalInfoArray[index].iFileName;
-        
+#ifdef _DEBUG
         RDebug::Print(calFileName);
+#endif
         if (!calFileName.CompareF(defaultSession->DefaultFileNameL()))
             {
             CleanupStack::PushL(defaultSession);

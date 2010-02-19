@@ -80,6 +80,8 @@ CCalenNotifier::~CCalenNotifier()
     // Release the global data
     if( iGlobalData )
         {
+        // stop listening for calendar file change notifications
+        iGlobalData->CalSessionL().StopFileChangeNotification();
         iGlobalData->Release();
         }
 
@@ -109,8 +111,7 @@ CCalenNotifier::~CCalenNotifier()
     iHandlers.Reset();
     iBroadcastQueue.Reset();
 
-	// stop listening for calendar file change notifications
-	iGlobalData->CalSessionL().StopFileChangeNotification();
+	
 	
 	iAsyncCallback->Cancel();
 	delete iAsyncCallback;

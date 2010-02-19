@@ -1710,15 +1710,9 @@ RESOURCE TIMEZONE_CITY_GROUP r_group_region_kiritimati
 	}
 
 
-RESOURCE TIMEZONE_CITY_GROUP r_group_country_western_sahara
-	{
-	city_group_id = 241;
-	city_group_name = qtn_clk_country_western_sahara;
-	}
-
 RESOURCE TIMEZONE_CITY_GROUP r_group_region_macau
 	{
-	city_group_id = 242;
+	city_group_id = 241;
 	city_group_name = qtn_clk_region_macau;
 	}
 

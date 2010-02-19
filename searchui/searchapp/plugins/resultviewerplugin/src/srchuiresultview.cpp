@@ -823,7 +823,10 @@ void CSrchUiResultView::LaunchApplicationL( const TDesC8& aLaunchInfo )
 //
 void CSrchUiResultView::LaunchContactApplicationL( const TDesC8& aLaunchInfo )
 	{
-
+	if( aLaunchInfo.Length() <= 0 )
+	    {
+	    return ;
+	    }
 	MCCAParameter* parameter = TCCAFactory::NewParameterL();
 	CleanupClosePushL( *parameter );
 	

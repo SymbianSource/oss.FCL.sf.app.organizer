@@ -1683,8 +1683,10 @@ void CCalenMonthContainer::HandlePointerEventL(const TPointerEvent& aPointerEven
             /* Handle pointer event in months day area */
             {
 
+#ifdef _DEBUG
             RDebug::Print( _L("pointerEvent.iModifiers = 0x%08x"),
                     aPointerEvent.iModifiers );
+#endif
             // Event modifiers are ignored for now because
             // those are not needed but cause problems
             TPointerEvent pointerEvent( aPointerEvent );

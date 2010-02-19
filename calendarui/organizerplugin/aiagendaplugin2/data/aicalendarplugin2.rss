@@ -18,7 +18,7 @@
 
 // INCLUDES
 #include "aicalendarplugin2uids.hrh"
-#include <aicontentpublisheruid.hrh>
+#include <hscontentpublisheruid.hrh>
 #include <ecom/registryinfov2.rh>
 
 // RESOURCE DEFINITIONS 
@@ -40,7 +40,7 @@ RESOURCE REGISTRY_INFO registry_info
         INTERFACE_INFO
         {
             // UID of the implemented interface
-            interface_uid = AI_UID_ECOM_INTERFACE_CONTENTPUBLISHER;
+            interface_uid = HS_UID_ECOM_INTERFACE_CONTENTPUBLISHER;
 
             implementations = 
             {

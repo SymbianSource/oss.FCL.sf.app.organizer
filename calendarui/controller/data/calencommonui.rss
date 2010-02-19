@@ -397,6 +397,33 @@ RESOURCE DIALOG r_calendar_switch_view_query
         }
     };
 }
+//----------------------------------------------------
+//
+// Button state extensions for toolbar and toolbar extension buttons.
+// These is required to support skinned graphics for the buttons.
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_BUTTON_STATE_EXTENSION r_calen_tb_ext_qgn_indi_cale_tb_repeat_add
+     {
+     bmbSkinIdMajor = EAknsMajorGeneric;
+     bmbSkinIdMinor = EAknsMinorGenericQgnIndiRepeatAdd;
+     //skin KAknsIIDQgnIndiRepeatAdd
+     } 
+
+RESOURCE AVKON_BUTTON_STATE_EXTENSION r_calen_tb_ext_qgn_indi_cale_tb_right
+     {
+     bmbSkinIdMajor = EAknsMajorGeneric;
+     bmbSkinIdMinor = EAknsMinorGenericQgnIndiCaleTbRight;
+     //skin KAknsIIDQgnIndiCaleTbRight
+     }
+
+RESOURCE AVKON_BUTTON_STATE_EXTENSION r_calen_tb_ext_qgn_indi_cale_tb_new_entry
+      {
+      bmbSkinIdMajor = EAknsMajorGeneric;
+      bmbSkinIdMinor = EAknsMinorGenericQgnIndiCaleTbNewEntry;
+      //skin KAknsIIDQgnIndiCaleTbNewEntry
+      }
 // ---------------------------------------------------------
 // r_calen_toolbar_extension
 // Resource for calendar toolbar
@@ -422,6 +449,7 @@ RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension
                         bmpfile = BITMAP_DIR"\\calendar.mif";
                         bmpid = EMbmCalendarQgn_indi_cale_tb_new_entry;
                         bmpmask = EMbmCalendarQgn_indi_cale_tb_new_entry_mask;
+                        extension = r_calen_tb_ext_qgn_indi_cale_tb_new_entry;
                         }
                     };
                 };
@@ -441,6 +469,7 @@ RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension
                         bmpfile = BITMAP_DIR"\\calendar.mif";
                         bmpid = EMbmCalendarQgn_indi_repeat_add;
                         bmpmask = EMbmCalendarQgn_indi_repeat_add_mask;
+                        extension = r_calen_tb_ext_qgn_indi_cale_tb_repeat_add;
                         }
                     };
                 };
@@ -455,6 +484,7 @@ RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension
                 bmpFile = BITMAP_DIR"\\calendar.mif";
                 bmpId = EMbmCalendarQgn_indi_cale_tb_right;
                 bmpMask = EMbmCalendarQgn_indi_cale_tb_right_mask ;
+                extension = r_calen_tb_ext_qgn_indi_cale_tb_right;
                 items =
                     {
                     TBAR_CTRL
@@ -472,6 +502,7 @@ RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension
                                     bmpfile = BITMAP_DIR"\\calendar.mif";
                                     bmpid = EMbmCalendarQgn_indi_cale_tb_right;
                                     bmpmask = EMbmCalendarQgn_indi_cale_tb_right_mask;
+                                    extension = r_calen_tb_ext_qgn_indi_cale_tb_right;
                                     }
                                 };
                             };
@@ -503,6 +534,7 @@ RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension_mirrored
                 bmpFile = BITMAP_DIR"\\calendar.mif";
                 bmpId = EMbmCalendarQgn_indi_cale_tb_right;
                 bmpMask = EMbmCalendarQgn_indi_cale_tb_right_mask ;
+                extension = r_calen_tb_ext_qgn_indi_cale_tb_right;
                 items =
                     {
                     TBAR_CTRL
@@ -520,6 +552,7 @@ RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension_mirrored
                                     bmpfile = BITMAP_DIR"\\calendar.mif";
                                     bmpid = EMbmCalendarQgn_indi_cale_tb_right;
                                     bmpmask = EMbmCalendarQgn_indi_cale_tb_right_mask;
+                                    extension = r_calen_tb_ext_qgn_indi_cale_tb_right;
                                     }
                                 };
                             };
@@ -542,6 +575,7 @@ RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension_mirrored
                         bmpfile = BITMAP_DIR"\\calendar.mif";
                         bmpid = EMbmCalendarQgn_indi_repeat_add;
                         bmpmask = EMbmCalendarQgn_indi_repeat_add_mask;
+                        extension = r_calen_tb_ext_qgn_indi_cale_tb_repeat_add;
                         }
                     };
                 };
@@ -561,6 +595,7 @@ RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension_mirrored
                         bmpfile = BITMAP_DIR"\\calendar.mif";
                         bmpid = EMbmCalendarQgn_indi_cale_tb_new_entry;
                         bmpmask = EMbmCalendarQgn_indi_cale_tb_new_entry_mask;
+                        extension = r_calen_tb_ext_qgn_indi_cale_tb_new_entry;
                         }
                     };
                 };
@@ -719,8 +754,7 @@ RESOURCE TBUF r_cale_multipledb_delete_single
 //
 RESOURCE TBUF r_cale_multipledb_delete
     {
-    buf = "Delete calendar %U and all entries in it?";
-    //qtn_cale_db_delete_calendar_conf_query;
+    buf = qtn_cale_db_delete_calendar_conf_query;
     }
 
 // ---------------------------------------------------------
@@ -778,7 +812,7 @@ RESOURCE AVKON_MULTISELECTION_LIST_QUERY r_attachment_list_query
                     {
                     array_id = r_attachment_list_query_array;
                     };
-                heading = "Select:";
+                heading = qtn_cale_attachment_query_heading;
                 };
             }
         };

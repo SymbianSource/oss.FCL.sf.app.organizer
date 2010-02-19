@@ -855,13 +855,20 @@ void CSearchServerSession::GetLaunchInfoL( const RMessage2& aMessage )
     CleanupClosePushL( readStream );
     readStream.Open( searchContentDesPtr );
     CSearchDocumentId* documentId = CSearchDocumentId::NewL(readStream);
-    TPtr8 launchInfoPtr  = iSearchManager->GetLaunchInfoL( *documentId )->Des();
-    aMessage.WriteL( 1, launchInfoPtr );
     HBufC8* launchInfo = iSearchManager->GetLaunchInfoL( *documentId );
-    delete launchInfo ;
-    launchInfo = NULL;
-    delete documentId;
-    documentId = NULL;
+    if( launchInfo )
+        {
+        TPtr8 launchInfoPtr=launchInfo->Des(); 
+        aMessage.WriteL( 1, launchInfoPtr );
+		
+        delete launchInfo ;
+        launchInfo = NULL;
+        }
+    if( documentId )
+        {
+        delete documentId;
+        documentId = NULL;
+        }
     CleanupStack::PopAndDestroy( &readStream );
     CleanupStack::PopAndDestroy( searchContentDes );
 	}

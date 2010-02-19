@@ -1478,5 +1478,48 @@ void CCalenUnifiedEditorControl::ReadRrule(TTime& firstRdatestartTime, TTime& en
     
     TRACE_EXIT_POINT;
     }
+// -----------------------------------------------------------------------------
+// CCalenUnifiedEditorControl::HandleErrorL()
+// Handles errors. This function may be called on saving note.
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+void CCalenUnifiedEditorControl::HandleErrorL(const TInt& aError)
+    {
+    TRACE_ENTRY_POINT;
+    if( aError == CCalenEditorDataHandler::EFormErrDurationGreaterThanRepeatInterval )
+        {
+        iUnifiedEditor.TryChangeFocusToL(ECalenEditorRepeat);
+        }
+    else if( aError == CCalenEditorDataHandler::EFormErrOutOfSequence )
+        {
+        iUnifiedEditor.TryChangeFocusToL(ECalenEditorStartDate);
+        }
+    else if( aError == CCalenEditorDataHandler::EFormErrOverlapsExistingInstance )
+        {
+        iUnifiedEditor.TryChangeFocusToL(ECalenEditorStartDate);
+        }
+    else
+        {
+        if( aError == CCalenEditorDataHandler::EFormErrInstanceAlreadyExistsOnThisDay )
+            {   
+            iUnifiedEditor.TryChangeFocusToL(ECalenEditorStartDate);
+            }    
+        }
 
+    if (iReminderField->HandleErrorL(aError) )
+        {
+        TRACE_EXIT_POINT;
+        return;
+        }
+    if ( iRepeatField->HandleErrorL(aError) )
+        {
+        TRACE_EXIT_POINT;
+        return;
+        }
+
+    TRACE_EXIT_POINT;
+    }
 // End of file
+
+
