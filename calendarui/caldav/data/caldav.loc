@@ -1,0 +1,55 @@
+/*
+* Copyright (c) 2010 Sun Microsystems, Inc. and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributor:
+* Maximilian Odendahl
+*
+* Contributors:
+* 
+* Description: caldav user interface strings
+*
+*/
+
+#define qtn_caldav						"CalDAV Synchronisation"
+
+#define qtn_caldav_query_disconnect		"This change will disable synchronisation. Do you want to continue?"
+#define qtn_caldav_query_fail			"Synchronization could not be enabled. Please check url, username and password"
+#define qtn_caldav_query_success		"Synchronization was enabled successfully."
+
+#define qtn_caldav_access_point			"Access Point"
+
+#define qtn_caldav_username				"Username"
+#define qtn_caldav_url					"Url"
+#define qtn_caldav_password				"Password"
+#define qtn_caldav_syncinterval 		"Sync Interval"
+
+#define qtn_caldav_conflictaction 		"Conflict resolution"
+#define qtn_caldav_keep_server 			"Keep server"
+#define qtn_caldav_keep_device 			"Keep device"
+
+#define qtn_caldav_immediatesync 		"New entries"
+#define qtn_caldav_immediatesync_yes 	"Sync immediatly"
+#define qtn_caldav_immediatesync_no 	"Wait until next sync"
+
+#define qtn_caldav_enable 				"Enabled synchronization"
+#define qtn_caldav_yes					"Yes"
+#define qtn_caldav_no					"No"
+
+#define qtn_caldav_range				"Time range"
+#define qtn_caldav_range_two			"2 weeks back"
+#define qtn_caldav_range_three			"3 month back"
+#define qtn_caldav_range_six			"6 month back"
+#define qtn_caldav_range_all			"all events"
+
+#define qtn_caldav_time					"Sync interval"
+
+#define qtn_caldav_time_always			"Always on"
+#define qtn_caldav_time_one				"One minute"
+#define qtn_caldav_time_five			"Five minutes"
+#define qtn_caldav_time_fifteen			"Fifteen minutes"
+#define qtn_caldav_time_thirty 			"Thirty minutes"
