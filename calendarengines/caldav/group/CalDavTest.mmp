@@ -22,12 +22,7 @@ UID			 0 0x2002B81C
 USERINCLUDE	 ..\inc
 USERINCLUDE   ..\..\..\calendarui\globaldata\inc
 
-SYSTEMINCLUDE \Epoc32\include
-SYSTEMINCLUDE \Epoc32\include\app
-SYSTEMINCLUDE \Epoc32\include\mw
-SYSTEMINCLUDE \Epoc32\include\platform
-SYSTEMINCLUDE \Epoc32\include\platform\mw
-SYSTEMINCLUDE \Epoc32\include\platform\app
+APP_LAYER_SYSTEMINCLUDE
 
 SOURCEPATH	  	..\src
 SOURCE			caldavengine.cpp httpclient.cpp caldavutils.cpp

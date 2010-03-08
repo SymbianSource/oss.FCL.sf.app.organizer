@@ -25,12 +25,7 @@ SOURCE        CalDavServer.cpp caldavutils.cpp httpclient.cpp CalDavServerSessio
 USERINCLUDE   ../inc
 USERINCLUDE   ../../../calendarui/globaldata/inc
 
-SYSTEMINCLUDE /Epoc32/include
-SYSTEMINCLUDE /Epoc32/include/app
-SYSTEMINCLUDE /Epoc32/include/mw
-SYSTEMINCLUDE /Epoc32/include/platform
-SYSTEMINCLUDE /Epoc32/include/platform/mw
-SYSTEMINCLUDE /Epoc32/include/platform/app
+APP_LAYER_SYSTEMINCLUDE
 
 LIBRARY			euser.lib apparc.lib cone.lib eikcore.lib avkon.lib charconv.lib
 LIBRARY			commonengine.lib efsrv.lib estor.lib eikcoctl.lib eikdlg.lib 
