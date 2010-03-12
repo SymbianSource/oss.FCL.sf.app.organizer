@@ -1457,7 +1457,7 @@ RESOURCE ARRAY r_calen_editor_event_type_popup_items
             },
         LBUF
             {
-            txt = qtn_cale_item_birthday;
+            txt = qtn_cale_note_anniversary;
             },
         LBUF
             {
@@ -1653,6 +1653,44 @@ RESOURCE MENU_PANE r_calen_editor_attachments_menupane
             command = ECalenCmdRemoveAttachment;
             txt = qtn_cale_opt_remove_attachment;
             }
+        };
+    }
+
+// ---------------------------------------------------------
+// Description list query
+// List query for the description types
+// ---------------------------------------------------------
+RESOURCE AVKON_MULTISELECTION_LIST_QUERY r_description_list_query
+    {
+    flags = EGeneralQueryFlags;
+    softkeys = R_AVKON_SOFTKEYS_SELECT_CANCEL__SELECT;
+    items =
+        {
+        AVKON_MULTISELECTION_LIST_QUERY_DLG_LINE
+            {
+            control = AVKON_LIST_QUERY_CONTROL
+                {
+                listtype = EAknCtSinglePopupMenuListBox;
+                listbox = AVKON_LIST_QUERY_LIST
+                    {
+                    array_id = r_description_list_query_array;
+                    };
+                heading = text_softkey_select;
+                };
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+// Description list query array
+// List of the description types
+// ---------------------------------------------------------
+RESOURCE ARRAY r_description_list_query_array
+    {
+    items=
+        {
+        LBUF { txt = qtn_cale_om_descript_new; },
+        LBUF { txt = qtn_cale_om_descript_exist; }
         };
     }
 

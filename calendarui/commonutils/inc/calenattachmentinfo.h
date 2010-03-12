@@ -167,7 +167,29 @@ class CCalenAttachmentInfo : public CBase
          * Performs icon updating.
          */
         void DoUpdateIconL();
-    
+        
+        /**
+         * Sets the file handle.
+         * @param aFile File handle to be set
+         * 
+         */
+        void SetFileHandle(RFile& aFile);
+        
+        /**
+         * Gets the file handle.
+         * @param File handle.
+         * 
+         */
+        void FileHandle( RFile& aFile );
+        
+        /**
+         * Check whether the file handle is set or not.
+         * @return The isSetFileHandle
+         * 
+         */
+        TBool IsFileHandleSet();
+        
+
     private:
         
         CCalenAttachmentModel& iAttachmentModel;
@@ -178,6 +200,8 @@ class CCalenAttachmentInfo : public CBase
         CGulIcon* iIcon;
         TBool iIsFetched;
         TCalenAttachmentStoreType iAttachmentStoreType;
+		RFile iFile;
+        TBool isSetFileHandle;
     };
 
 #endif // CALENATTACHMENTINFO_H

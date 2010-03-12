@@ -246,7 +246,7 @@ void CCalAsyncDelete::DeleteTidiedEntriesL()
 				CleanupStack::PopAndDestroy(entry);
 				}
 			}
-			
+		iModel.ResetDeleteRollbackArray();
 		iTidyDeleteArray->Reset();
 		iModel.FlushL();
 		}

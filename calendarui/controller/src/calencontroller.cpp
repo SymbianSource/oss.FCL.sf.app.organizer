@@ -299,41 +299,9 @@ CCalenController::CCalenController( CAknViewAppUi& aAppUi )
 // ----------------------------------------------------------------------------
 //
 CCalenController::~CCalenController()
-    {
+    {    
     TRACE_ENTRY_POINT;
-    
-    if ( iServices )
-        {
-        iServices->Release();
-        }
-        
-    delete iActionUi;
-    delete iNotifier;
 
-    delete iViewManager;
-    delete iStateMachine;
-    
-    if ( iSetting )
-        {
-        iSetting->Release();
-        }
-
-    if( iGlobalData )
-        {
-        iGlobalData->Release();
-        }
-
-    Dll::SetTls( NULL );
-
-    delete iCmdLineLauncher;
-    delete iCustomisationManager;
-
-    if( iResourceFileOffset )
-        {
-        CCoeEnv::Static()->DeleteResourceFile( iResourceFileOffset );
-        }
-    //delete iMultipleDbmanager;
-    
     if(iSystemTimeChangedMsgDelayer)
         {
         iSystemTimeChangedMsgDelayer->Cancel();
@@ -341,13 +309,68 @@ CCalenController::~CCalenController()
         iSystemTimeChangedMsgDelayer = NULL;
         }
     
-    delete iAlarmManager;
-    
     if(iAttachmentData)
         {
         delete iAttachmentData;
         iAttachmentData = NULL;
         }
+
+    if( iAlarmManager )
+        {
+        delete iAlarmManager;
+        }
+
+    if( iCustomisationManager )
+        {
+        delete iCustomisationManager;
+        }
+
+    if( iViewManager )
+        {
+        delete iViewManager;
+        }
+
+    if ( iSetting )
+        {
+        iSetting->Release();
+        }
+
+    if( iActionUi )
+        {
+        delete iActionUi;
+        }
+
+    if ( iServices )
+        {
+        iServices->Release();
+        }
+
+    if( iCmdLineLauncher )
+        {
+        delete iCmdLineLauncher;
+        }
+
+    if( iGlobalData )
+        {
+        iGlobalData->Release();
+        }
+
+    if( iNotifier )
+        {
+        delete iNotifier;
+        }
+
+    if( iStateMachine )
+        {
+        delete iStateMachine;
+        }
+
+   if( iResourceFileOffset )
+       {
+       CCoeEnv::Static()->DeleteResourceFile( iResourceFileOffset );
+       }
+    Dll::SetTls( NULL );
+    
     TRACE_EXIT_POINT;
     }
 

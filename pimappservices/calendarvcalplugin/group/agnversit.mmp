@@ -31,7 +31,7 @@ VENDORID	0x70000001
 SOURCEPATH	../src
 
 userinclude	../Inc
-USERINCLUDE     ../../calendar/inc
+userinclude ../../calendar/inc
 
 
 SOURCEPATH	../src

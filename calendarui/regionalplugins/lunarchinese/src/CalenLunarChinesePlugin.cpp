@@ -31,6 +31,10 @@
 #include <layoutmetadata.cdl.h>
 #include <mcalenpreview.h>
 
+#include <AknsSkinInstance.h>
+#include <AknsUtils.h>
+#include <gulcolor.h>
+
 #include "calendarui_debug.h" 
 #include "CalenLunarChinesePlugin.h"
 #include "calenlunarpanic.h"
@@ -155,7 +159,8 @@ void CCalenLunarChinesePlugin::ConstructL()
 // CCalenLunarChinesePlugin::SetLabelContentExtraL
 // -----------------------------------------------------------------------------
 //
-void CCalenLunarChinesePlugin::SetLabelContentExtraL( CEikLabel& aLabel ,TRect& aRect) 
+void CCalenLunarChinesePlugin::SetLabelContentExtraL(CEikLabel& aLabel,
+        TRect& aRect)
     {
     TRACE_ENTRY_POINT;
     
@@ -171,37 +176,45 @@ void CCalenLunarChinesePlugin::SetLabelContentExtraL( CEikLabel& aLabel ,TRect& 
     CleanupStack::PushL( lineWidths );
     
     TInt maxWidth = aRect.Size().iWidth;
-    lineWidths->AppendL( maxWidth );
-    
-    const CFont* fontLabel = AknLayoutUtils::FontFromId(EAknLogicalFontPrimarySmallFont,NULL);
-    
-    HBufC* visualText = AknBidiTextUtils::ConvertToVisualAndWrapToArrayWholeTextL(
-        iExtraRowText,
-        *lineWidths,
-        *fontLabel,
-        *textLines);
-        
-    if(textLines->Count() < 3 && textLines->Count() > 0)
-    	{
-    	 TInt nH =	textLines->Count();
-    	 aRect.iBr.iY = aRect.iBr.iY * nH;
-    	}
-       
-    HBufC* newLinedText = HBufC::NewLC( iExtraRowText.Length() + 4);
-        
-    for(TInt i = 0 ; i < textLines->Count();i++)
-    	{
-    	newLinedText->Des().Append(textLines->At(i));
-    	newLinedText->Des().Append( KFieldSeparator );
-    	}
-   
+    lineWidths->AppendL(maxWidth);
+
+    const CFont* fontLabel = AknLayoutUtils::FontFromId(
+            EAknLogicalFontPrimarySmallFont, NULL);
+
+    HBufC* visualText =
+            AknBidiTextUtils::ConvertToVisualAndWrapToArrayWholeTextL(
+                    iExtraRowText, *lineWidths, *fontLabel, *textLines);
+
+    if (textLines->Count() < 3 && textLines->Count() > 0)
+        {
+        TInt nH = textLines->Count();
+        aRect.iBr.iY = aRect.iBr.iY * nH;
+        }
+
+    HBufC* newLinedText = HBufC::NewLC(iExtraRowText.Length() + 4);
+
+    for (TInt i = 0; i < textLines->Count(); i++)
+        {
+        newLinedText->Des().Append(textLines->At(i));
+        newLinedText->Des().Append(KFieldSeparator);
+        }
+
     aLabel.UseLogicalToVisualConversion(ETrue);
     aLabel.SetLabelAlignment(ELayoutAlignCenter); 
     aLabel.SetTextL( *newLinedText);
     
-    CleanupStack::PopAndDestroy( newLinedText );
-    CleanupStack::PopAndDestroy( lineWidths );
-    CleanupStack::PopAndDestroy( textLines );
+    // Query the text colour based on the theme and update the label text
+    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
+    TRgb color;
+    TInt error = AknsUtils::GetCachedColor(skin, color,
+            KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6);
+    if (error == KErrNone)
+        {
+        aLabel.OverrideColorL(EColorLabelText, color);
+        }
+    CleanupStack::PopAndDestroy(newLinedText);
+    CleanupStack::PopAndDestroy(lineWidths);
+    CleanupStack::PopAndDestroy(textLines);
     delete visualText;
 
     TRACE_EXIT_POINT;
@@ -211,7 +224,8 @@ void CCalenLunarChinesePlugin::SetLabelContentExtraL( CEikLabel& aLabel ,TRect& 
 // CCalenLunarChinesePlugin::SetLabelContentL
 // -----------------------------------------------------------------------------
 //
-void CCalenLunarChinesePlugin::SetLabelContentL( CEikLabel& aLabel, const TRect& /*aRect*/ ) 
+void CCalenLunarChinesePlugin::SetLabelContentL(CEikLabel& aLabel,
+        const TRect& /*aRect*/)
     {
     TRACE_ENTRY_POINT;
     TRect nullRect(0,0,0,0);
@@ -222,6 +236,16 @@ void CCalenLunarChinesePlugin::SetLabelContentL( CEikLabel& aLabel, const TRect&
     aLabel.SetLabelAlignment(ELayoutAlignCenter);
     aLabel.SetTextL(  iExtraRowText );
     
+    // Query the text colour based on the theme and update the label text
+    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
+    TRgb color;
+    TInt error = AknsUtils::GetCachedColor(skin, color,
+            KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6);
+    if (error == KErrNone)
+        {
+        aLabel.OverrideColorL(EColorLabelText, color);
+        }
+
     TRACE_EXIT_POINT;
     }
     
@@ -671,12 +695,17 @@ void CCalenPluginLabel::Draw( const TRect& aRect) const
 // -----------------------------------------------------------------------------
 //
 void CCalenPluginLabel::HandlePointerEventL(const TPointerEvent& 
-                                                                /*aPointerEvent*/)
-	{
-	TRACE_ENTRY_POINT;
-	iPlugin.ShowDetailsL();	
-	TRACE_EXIT_POINT;
-	}
+                                                                aPointerEvent)
+    {
+    TRACE_ENTRY_POINT;
+
+    if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
+        {
+        iPlugin.ShowDetailsL();
+        }
+
+    TRACE_EXIT_POINT;
+    }
 
 //EOF
 

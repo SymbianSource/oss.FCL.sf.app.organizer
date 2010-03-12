@@ -99,8 +99,7 @@ LIBRARY		ws32.lib
 LIBRARY		aknlayout2scalable.lib
 LIBRARY		gdi.lib
 
-CAPABILITY      CAP_GENERAL_DLL \
-                DRM
+CAPABILITY      CAP_GENERAL_DLL
 
 VENDORID        VID_DEFAULT
 

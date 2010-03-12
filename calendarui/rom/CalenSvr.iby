@@ -22,7 +22,7 @@
 
 file=ABI_DIR\BUILD_DIR\CalenSvrClient.dll   SHARED_LIB_DIR\CalenSvrClient.dll
 file=ABI_DIR\BUILD_DIR\CalenSvr.exe         PROGRAMS_DIR\CalenSvr.exe
-data=DATAZ_\RESOURCE_FILES_DIR\CalenSvrMissedAlarmManagerResource.rsc    RESOURCE_FILES_DIR\CalenSvrMissedAlarmManagerResource.rsc
+
 
 
 #endif // CALENSVR_IBY

@@ -494,6 +494,13 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
          */
         void VerifyCollectionIdL(const TCalCollectionId aColId);
         
+        /*
+         * Return attachment names
+         * @param aAttachmentNames names of the attachments.
+         * @return HBufC 
+         */
+        void GetAttachmentNamesL(RPointerArray<HBufC>& aAttachmentNames);
+        
     protected:
         /**
          * From CEikDialog
@@ -659,7 +666,10 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
           *  
           */
          void HideFieldsForEditSingleInstance();
-
+         
+         static TInt AsyncProcessCommandL(TAny* aThisPtr); 
+         
+        
     private:
         /**
          * @var iEditedCalEntry
@@ -812,7 +822,10 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
          * @var isReplaceLocation
          * @brief Flag to indicate whenter to replace the location or to append it
          */
-        TBool isReplaceLocation;
+        TBool isReplaceLocation;        
+        
+        CAsyncCallBack* iAsyncCallback; 
+        
     };
 
 /**

@@ -71,36 +71,6 @@ CCalenNotifier::~CCalenNotifier()
     {
     TRACE_ENTRY_POINT;
 
-    // Stop database change notifications.
-    delete iDbChangeNotifier;
-
-    // Stop ECom change notifications
-    delete iEComWatcher;
-
-    // Release the global data
-    if( iGlobalData )
-        {
-        // stop listening for calendar file change notifications
-        iGlobalData->CalSessionL().StopFileChangeNotification();
-        iGlobalData->Release();
-        }
-
-    if( iSetting )
-        {
-        iSetting->Release();
-        }
-
-    // Stop environment change notifications
-    if( iEnvChangeNotifier )
-        {
-        iEnvChangeNotifier->Cancel();
-        delete iEnvChangeNotifier;
-        }
-
-    // Stop settings change notifications
-    delete iCenRepChangeNotifier;
-    delete iRepository;
-
     // Reset the handler array.
     // Before we reset , close hashset for each handler
     for(TInt i = 0 ; i < iHandlers.Count() ; i++)
@@ -111,13 +81,65 @@ CCalenNotifier::~CCalenNotifier()
     iHandlers.Reset();
     iBroadcastQueue.Reset();
 
-	
-	
-	iAsyncCallback->Cancel();
-	delete iAsyncCallback;
-	
-	delete iFilnameDeleted;
-	
+    if( iAsyncCallback )
+        {
+        iAsyncCallback->Cancel();
+        delete iAsyncCallback;
+        iAsyncCallback = NULL;
+        }
+    
+    if( iFilnameDeleted )
+        {
+        delete iFilnameDeleted;
+        iFilnameDeleted = NULL;
+        }
+    
+    // Stop ECom change notifications
+    if( iEComWatcher )
+        {
+        delete iEComWatcher;
+        iEComWatcher = NULL;
+        }
+
+    // Stop database change notifications.
+    if( iDbChangeNotifier )
+        {
+        delete iDbChangeNotifier;
+        iDbChangeNotifier = NULL;
+        }
+    
+    // Stop settings change notifications
+    if( iCenRepChangeNotifier )
+        {
+        delete iCenRepChangeNotifier;
+        iCenRepChangeNotifier = NULL;
+        }
+    
+    if( iRepository )
+        {
+        delete iRepository;
+        iRepository = NULL;
+        }
+    
+    // Stop environment change notifications
+    if( iEnvChangeNotifier )
+        {
+        iEnvChangeNotifier->Cancel();
+        delete iEnvChangeNotifier;
+        }
+    
+    if( iSetting )
+        {
+        iSetting->Release();
+        }
+    
+    // Release the global data
+    if( iGlobalData )
+        {
+        // stop listening for calendar file change notifications
+        iGlobalData->CalSessionL().StopFileChangeNotification();
+        iGlobalData->Release();
+        }
 	TRACE_EXIT_POINT;
 	}
 

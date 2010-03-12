@@ -885,12 +885,16 @@ void CCalenAlarmManager::RemoveAllViewedEventsL()
     {
     TRACE_ENTRY_POINT;
     
-    for(TInt index=0;index<iMissedAlarmList.Count();index++)
+    for(TInt index=0;index<iMissedAlarmList.Count();)
         {
         if(iMissedAlarmList[index].iInstanceViewed)
             {
             iMissedAlarmList.Remove(index);
             }
+        else
+			{
+        	index++;
+			}
         }
     
     TRACE_EXIT_POINT;

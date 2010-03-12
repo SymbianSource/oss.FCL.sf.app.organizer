@@ -120,6 +120,7 @@ void CCalenSendingState::HandleNotificationL(const TCalenNotification& aNotifica
 
     switch( aNotification )
         {
+        case ECalenNotifyEntrySendCancel:
         case ECalenNotifyDialogClosed:  // issued when send method query dialog is cancelled
         	{
         	// FIXME Should have a ECalenNotifyEntrySent?

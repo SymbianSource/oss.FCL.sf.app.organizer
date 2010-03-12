@@ -547,7 +547,9 @@ void CClockAlarmEditorImpl::DynInitMenuPaneL( TInt aResourceId, CEikMenuPane* aM
     // Execute the following commands if the resource belongs to alarmeditor.
     // Display the menu items based on the current focused control.
     if( ( EControlTextEditor == iSelectedControl ) ||
-        ( EControlTimeEditor == iSelectedControl ) )
+        ( EControlTimeEditor == iSelectedControl ) ||
+        ( EControlOccurancePopup == iSelectedControl ) ||
+        ( EControlAlarmDayPopup == iSelectedControl ) )
         {
         aMenuPane->SetItemDimmed( EClockAlarmChange, ETrue );
         }

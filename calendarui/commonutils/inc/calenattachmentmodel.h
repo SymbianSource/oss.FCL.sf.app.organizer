@@ -133,7 +133,7 @@ class CCalenAttachmentModel : public CBase
          * @param aDataType mime type of the attachment
          */
         IMPORT_C void AddAttachmentL( const TDesC& aFullName, const TDesC& aSystemFileName, TInt aSize,
-                   TBool aFetched, const TDataType& aDataType );
+                   TBool aFetched, const TDataType& aDataType, RFile &aFile);
         
         /**
          * Deletes attachment from internal array. Notifies attachment model

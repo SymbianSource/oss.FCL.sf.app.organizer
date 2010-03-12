@@ -50,7 +50,7 @@
 const TInt KCalenTextFileNameLength = 20;
 
 _LIT( KTextFilenameExtension, ".txt" );
-_LIT( KCalenUnifiedEditorTempDir, "c:\\data\\caleneditor\\" );
+_LIT( KCalenUnifiedEditorTempDir, "c:\\private\\10005901\\caleneditor\\" );
 _LIT8( KNotePadTextDataType, "text/plain" );
 
 // -----------------------------------------------------------------------------

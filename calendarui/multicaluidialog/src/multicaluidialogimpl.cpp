@@ -208,9 +208,17 @@ void CMultiCalUiDialogImpl::ConstructListL()
     {
     TRACE_ENTRY_POINT;
     
-    if(iDesArray && iListBox)
+    if(iListBox)
         {
-        return;
+        iListBox->Reset();
+        delete iListBox; 
+        iListBox = NULL;
+        }
+    
+    if(iDesArray)
+        {
+        delete iDesArray;
+        iDesArray = NULL;
         }
 
     iDesArray = new (ELeave) CDesCArrayFlat(5);
@@ -329,26 +337,29 @@ CGulIcon* CMultiCalUiDialogImpl::GetIconL( TCalenListDbIcons aIndex )
     TRgb nonSkinColor = AKN_LAF_COLOR(215);
     CFbsBitmap* bitmap = NULL;
     CFbsBitmap* mask = NULL;
-    
+    TAknsItemID KSearchCheckboxOff;
+    TAknsItemID KSearchCheckboxOn;    
     switch( aIndex )
         {
         case ECalenListDbIconUnMarked:
             {
-            icon = CreateBitmapSkinnedIconL( 
-                    KAknsIIDQgnPropCheckboxOn,
+            KSearchCheckboxOff.Set( 0x0A8461F4, 1 );
+            icon = CreateBitmapSkinnedIconL(                     
+                    KSearchCheckboxOff,
                     iIconFile,
                     EMbmMulticaluidialogQgn_prop_checkbox_off,
-                    EMbmMulticaluidialogQgn_prop_checkbox_off_mask );
-            }
+                    EMbmMulticaluidialogQgn_prop_checkbox_off_mask ); 
+            }            
             break;
 
         case ECalenListDbIconMarked:
             {
-            icon = CreateBitmapSkinnedIconL( 
-                                KAknsIIDQgnPropCheckboxOn,
+            KSearchCheckboxOn.Set( 0x0A8461F4, 2 ); 
+            icon = CreateBitmapSkinnedIconL(                                 
+                                KSearchCheckboxOn,
                                 iIconFile, 
                                 EMbmMulticaluidialogQgn_prop_checkbox_on,
-                                EMbmMulticaluidialogQgn_prop_checkbox_on_mask );
+                                EMbmMulticaluidialogQgn_prop_checkbox_on_mask );            
             }
             break;
             
@@ -375,12 +386,8 @@ CAknIconArray* CMultiCalUiDialogImpl::CreateIconsL()
     CAknIconArray* icons = new(ELeave) CAknIconArray( iconCount );
     CleanupStack::PushL( icons );
     icons->SetReserveL( iconCount );
-
-    for( TInt i=0; i<iconCount; ++i )
-        {
-        icons->AppendL( GetIconL( ECalenListDbIconMarked ) );
-        icons->AppendL( GetIconL( ECalenListDbIconUnMarked ) );
-        }
+    icons->AppendL( GetIconL( ECalenListDbIconMarked ) );
+    icons->AppendL( GetIconL( ECalenListDbIconUnMarked ) );
     CleanupStack::Pop( icons );
     TRACE_EXIT_POINT;
     return icons;
@@ -709,7 +716,7 @@ void CMultiCalUiDialogImpl::SizeChanged()
         else
             {
             iListBox->SetRect( rect );
-            }
+            }        
         }
     
     TRACE_EXIT_POINT;
@@ -766,10 +773,7 @@ void  CMultiCalUiDialogImpl::PreLayoutDynInitL()
     
     SetTitlePaneL( ETrue );
     ConstructListL();
-    UpdateListboxL();
-    //UpdateCbaL();
-    
-    
+    UpdateListboxL();    
     TInt orientation = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;      
     if( AknLayoutUtils::PenEnabled() )   
         {
@@ -842,14 +846,12 @@ TTypeUid::Ptr CMultiCalUiDialogImpl::MopSupplyObject(TTypeUid aId)
 void CMultiCalUiDialogImpl::HandleResourceChange(TInt aType)
     {
     TRACE_ENTRY_POINT;
-    
+    CAknDialog::HandleResourceChange( aType );
     if ( aType == KAknsMessageSkinChange || aType == KEikDynamicLayoutVariantSwitch )
         {
-        SizeChanged();
-        TRAP_IGNORE(UpdateListboxL());
-        }
+        SizeChanged();       
+        }    
     
-    CAknDialog::HandleResourceChange( aType );
     TRACE_EXIT_POINT;
     }
 

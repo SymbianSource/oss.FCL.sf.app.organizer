@@ -144,12 +144,8 @@ void CCalenContainerLayoutManager::GetLayoutAndExtensionL()
     // See if preview pane is available
     CheckPreviewL();
 
-    // If no preview pane, check for an info bar
-    if ( !iLayoutFlags.IsSet( ECalenContainerPreview ))
-        {
-        CheckInfobarL();
-        }
-
+    CheckInfobarL();
+    
     TRACE_EXIT_POINT;
     }
 
@@ -163,10 +159,9 @@ void CCalenContainerLayoutManager::CheckPreviewL()
     TRACE_ENTRY_POINT;
 
     TRect previewRect = iContainer.PreviewRectL();
-    if ( !iContainer.PreviewRectL().IsEmpty() )
+    if (!iContainer.PreviewRectL().IsEmpty() && iContainer.PreviewPane())
         {
-        iLayoutFlags.Set( ECalenContainerPreview );
-        iLayoutFlags.Clear( ECalenContainerInfobar );
+        iLayoutFlags.Set( ECalenContainerPreview );        
         }
     
     
@@ -200,8 +195,7 @@ void CCalenContainerLayoutManager::CheckInfobarL()
             {
             iInfobar = infoBarControl;
             // If the infobar exists, set the container window and activate.
-            iLayoutFlags.Set( ECalenContainerInfobar );
-            iLayoutFlags.Clear( ECalenContainerPreview );
+            iLayoutFlags.Set( ECalenContainerInfobar );           
             iInfobar->SetContainerWindowL( iContainer );
             }
        }

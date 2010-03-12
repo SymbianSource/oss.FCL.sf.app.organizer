@@ -44,6 +44,7 @@ class MCalenViewUiExtension;
 class CEikLabel;
 class MCalenContext;
 class CCalenContainerLayoutManager;
+class MCalenPreview;
 
 
 class MAknNaviDecoratorObserver;
@@ -241,6 +242,10 @@ public:     // New function
      */
     void UpdateTodayToolbarItemL();
     
+	/**
+     * returns previewpane pointer
+     */
+    virtual const MCalenPreview* PreviewPane(){return NULL; };
 private: // New functions
     /**
      * Return number of icons needed to be displayed

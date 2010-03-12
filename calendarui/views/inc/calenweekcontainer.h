@@ -178,6 +178,11 @@ public:  // New Function
 	* Cleanup instances
 	*/
     void CleanupInstances();
+    
+    /**
+     * returns previewpane pointer
+     */
+    const MCalenPreview* PreviewPane();
         
 public:
     /**
@@ -433,8 +438,7 @@ private:  // New variables
     
     TBool iTopRowDefault;
     TBool iRow;
-    TBool iValidDay;
-    TBool iNativePreview;
+    TBool iValidDay;   
     };
 
 #endif //CALENWEEKCONT_H

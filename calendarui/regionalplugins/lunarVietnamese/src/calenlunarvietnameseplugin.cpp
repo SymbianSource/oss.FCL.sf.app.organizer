@@ -32,6 +32,10 @@
 #include <layoutmetadata.cdl.h>
 #include <mcalenpreview.h>
 
+#include <AknsSkinInstance.h>
+#include <AknsUtils.h>
+#include <gulcolor.h>
+
 #include "calendarui_debug.h" 
 #include "calenlunarvietnameseplugin.h"
 #include "calenlunarvietnameselocalizer.h"
@@ -203,6 +207,16 @@ void CCalenLunarVietnamesePlugin::SetLabelContentExtraL( CEikLabel& aLabel ,TRec
     aLabel.SetLabelAlignment(ELayoutAlignCenter); 
     aLabel.SetTextL( *newLinedText);
     
+    // Query the text colour based on the theme and update the label text
+    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
+    TRgb color;
+    TInt error = AknsUtils::GetCachedColor(skin, color,
+            KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6);
+    if (error == KErrNone)
+        {
+        aLabel.OverrideColorL(EColorLabelText, color);
+        }
+    
     CleanupStack::PopAndDestroy( newLinedText );
     CleanupStack::PopAndDestroy( lineWidths );
     CleanupStack::PopAndDestroy( textLines );
@@ -226,6 +240,16 @@ void CCalenLunarVietnamesePlugin::SetLabelContentL( CEikLabel& aLabel,
     aLabel.UseLogicalToVisualConversion(ETrue);
     aLabel.SetLabelAlignment(ELayoutAlignCenter);
     aLabel.SetTextL(  iExtraRowText );
+    
+    // Query the text colour based on the theme and update the label text
+    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
+    TRgb color;
+    TInt error = AknsUtils::GetCachedColor(skin, color,
+            KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6);
+    if (error == KErrNone)
+        {
+        aLabel.OverrideColorL(EColorLabelText, color);
+        }
     
     TRACE_EXIT_POINT;
     }
@@ -673,10 +697,15 @@ void CCalenPluginLabel::Draw( const TRect& aRect) const
 // -----------------------------------------------------------------------------
 //
 void CCalenPluginLabel::HandlePointerEventL(const TPointerEvent& 
-                                            /*aPointerEvent*/)
+                                            aPointerEvent)
 	{
 	TRACE_ENTRY_POINT;
-	iPlugin.ShowDetailsL();	
+	
+	if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
+	        {
+	        iPlugin.ShowDetailsL();
+	        }
+	
 	TRACE_EXIT_POINT;
 	}
 

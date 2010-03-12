@@ -67,6 +67,10 @@ CCalenAttachmentInfo::~CCalenAttachmentInfo()
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
     delete iIcon;
+    if(isSetFileHandle)
+        {
+        iFile.Close();
+        }
     }
 
 // ----------------------------------------------------------------------------
@@ -290,6 +294,46 @@ EXPORT_C const TFileName& CCalenAttachmentInfo::SystemFileName() const
     TRACE_EXIT_POINT;
     
     return iSystemFileName;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenAttachmentInfo::SetFileHandle
+//
+//Sets the file handle
+// ----------------------------------------------------------------------------
+//
+void CCalenAttachmentInfo::SetFileHandle(RFile& aFile)
+    {
+    TRACE_ENTRY_POINT;
+    iFile.Duplicate(aFile);
+    isSetFileHandle = ETrue;
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenAttachmentInfo::FileHandle
+//
+//Gets the file handle.
+// ----------------------------------------------------------------------------
+//
+void CCalenAttachmentInfo::FileHandle( RFile& aFile )
+    {
+    TRACE_ENTRY_POINT;
+
+    aFile.Duplicate( iFile );
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenAttachmentInfo::IsFileHandleSet
+// ----------------------------------------------------------------------------
+//
+TBool CCalenAttachmentInfo::IsFileHandleSet()
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    
+    return isSetFileHandle;
     }
 
 //end of file

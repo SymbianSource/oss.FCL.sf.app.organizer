@@ -2366,7 +2366,7 @@
 //l: list_form_graphic_pane_t1
 //w:
 //r: 9.2
-#define qtn_cale_item_birthday "Birthday"
+#define qtn_cale_item_anniversary "Anniversary"
 
 //d: "To-Do" text for EventType field pop-up in calendar editor
 //l: list_form_graphic_pane_t1
@@ -2623,5 +2623,10 @@
 //w:
 //r: 9.2
 #define qtn_cale_db_friends "Friends"
+
+//d:Wait note text in to-do view.
+//l:popup_note_wait_window
+//
+#define qtn_todo_wait_updating_status_notes  "Updating status"
         
 // End of File

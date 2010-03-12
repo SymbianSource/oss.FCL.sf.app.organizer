@@ -826,29 +826,24 @@ TBool CCalenContainer::UsePreview() const
 TRect CCalenContainer::ReducePreview( TRect aRect ) const
     {
     TRACE_ENTRY_POINT;
-    if (UsePreview() )
-        {
-        // Find the application window
-        TRect screenRect;
-        TAknLayoutRect application_window;
-        AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EScreen, 
-                                           screenRect );
-        application_window.LayoutRect( 
-            screenRect, 
-            AknLayoutScalable_Apps::application_window().LayoutLine() ); 
-            
-        // Find the size of the main pane when the preview is valid.
-        TAknLayoutRect main_pane;
-        
-        TInt orientation = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
-        
-        main_pane.LayoutRect( 
-            application_window.Rect(), 
-            AknLayoutScalable_Apps::main_pane( orientation + 10 ).LayoutLine() );
+    
+    // Find the application window
+    TRect screenRect;
+    TAknLayoutRect application_window;
+    AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EScreen, screenRect);
+    application_window.LayoutRect(screenRect,
+            AknLayoutScalable_Apps::application_window().LayoutLine());
 
-        aRect.SetWidth( main_pane.Rect().Width() );
-        aRect.SetHeight( main_pane.Rect().Height() );
-        }
+    // Find the size of the main pane when the preview is valid.
+    TAknLayoutRect main_pane;
+
+    TInt orientation = Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0;
+
+    main_pane.LayoutRect(application_window.Rect(),
+            AknLayoutScalable_Apps::main_pane(orientation + 10).LayoutLine());
+
+    aRect.SetWidth(main_pane.Rect().Width());
+    aRect.SetHeight(main_pane.Rect().Height());     
         
     TRACE_EXIT_POINT;
     return aRect;

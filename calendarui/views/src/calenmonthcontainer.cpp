@@ -116,12 +116,7 @@ CCalenMonthContainer::~CCalenMonthContainer()
 
     delete iGrid;
     delete iMonthDataArray;
-    delete iBackgroundSkinContext;
-    if( iNativePreview && iPreview )
-        {
-        delete iPreview;
-        iPreview = NULL;
-        }
+    delete iBackgroundSkinContext;    
 
     TRACE_EXIT_POINT;
     }
@@ -510,7 +505,7 @@ void CCalenMonthContainer::HandleDayChangeL( TTime aNewActiveDay )
     SetActiveDayL( aNewActiveDay );
 
     // dont focus the preview popup/previewpane if any dialog or faster app is active
-    if( !iView->IsEditorActiveOrFasterAppExit())
+    if( iPreview && !iView->IsEditorActiveOrFasterAppExit())
     	{
     	iPreview->FocusChangedL( aNewActiveDay );
     	}
@@ -619,7 +614,7 @@ TKeyResponse CCalenMonthContainer::OfferKeyEventL( const TKeyEvent& aKeyEvent,
     {
     TRACE_ENTRY_POINT;
 
-    if (aType == EEventKeyDown)
+    if (iPreview && aType == EEventKeyDown) 
         {
         iPreview->Hide();
         }
@@ -1035,6 +1030,16 @@ void CCalenMonthContainer::HandleResourceChange(TInt aType)
     }
 
 // ----------------------------------------------------------------------------
+// CCalenMonthContainer::PreviewPane
+// Returns previewpane pointer
+// ----------------------------------------------------------------------------  
+const MCalenPreview* CCalenMonthContainer::PreviewPane()
+    {
+    TRACE_ENTRY_POINT
+    TRACE_EXIT_POINT
+    return iPreview;
+    }
+	
 // CCalenMonthContainer::ConstructImplL
 // Third phase constructor.
 // This function was called CCalenNativeView::ConstructL().
@@ -1055,12 +1060,7 @@ void CCalenMonthContainer::ConstructImplL()
     // Create preview pane
     TRect aRect = PreviewRectL();
     iPreview = iServices.CustomPreviewPaneL(aRect);
-    if (iPreview == NULL) 
-		{
-		iPreview = CCalenPreview::NewL( iView, locale, iServices );
-		iNativePreview = ETrue;
-		}
-     
+    
     // grid
     iGrid = new(ELeave) CCalenMonthGrid(iFirstDayOfGrid,this);
     iGrid->SetContainerWindowL(*this);
@@ -1658,6 +1658,19 @@ void CCalenMonthContainer::HandlePointerEventL(const TPointerEvent& aPointerEven
 
     if(AknLayoutUtils::PenEnabled())
         {
+        CCoeControl* control( NULL );
+        if(aPointerEvent.iType == TPointerEvent::EButton1Down)
+            {
+            control = iLayoutManager->ControlOrNull();
+            if(control)
+                {
+                if(control->Rect().Contains(aPointerEvent.iPosition))
+                    {
+                    control->HandlePointerEventL(aPointerEvent); 
+                    return;
+                    }
+                }
+            }
         TInt pointerIndex(-1);
         TBool isItem (iGrid->View()->XYPosToItemIndex(aPointerEvent.iPosition, pointerIndex));
         CAknGridM* gridModel = static_cast<CAknGridM*>(iGrid->Model());
@@ -1732,7 +1745,10 @@ void CCalenMonthContainer::HandlePointerEventL(const TPointerEvent& aPointerEven
                 if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
                     {
                     iGrid->HandlePointerEventL( pointerEvent );
-                    iPreview->Hide();
+                    if (iPreview)
+                        {
+                        iPreview->Hide();
+                        }
                     if ( pointerIndex != index )
                         {
                         iChangeMonth = EFalse;
@@ -1779,7 +1795,7 @@ void CCalenMonthContainer::HandleListBoxEventL(
     {
     switch ( aEventType )
         {
-        case ( MEikListBoxObserver::EEventItemDoubleClicked ):
+        case ( MEikListBoxObserver::EEventItemClicked ): 
             {
             if ( !iView->MenuBar()->IsDisplayed() )
                 {
@@ -1791,13 +1807,16 @@ void CCalenMonthContainer::HandleListBoxEventL(
     }
 
 
-
+// ----------------------------------------------------------------------------
+// CCalenMonthContainer::HidePopup
+// ----------------------------------------------------------------------------
 void CCalenMonthContainer::HidePopup()
     {
     TRACE_ENTRY_POINT;
-    
-    iPreview->Hide();
-    
+    if (iPreview)
+        {
+        iPreview->Hide();
+        }
     TRACE_EXIT_POINT;
     }
 
@@ -2131,7 +2150,7 @@ void CCalenMonthContainer::CompletePopulationL()
 		iView->SetEditorActive( EFalse );
 		
     // dont focus the preview popup/previewpane if any dialog or faster app is active
-    if(!iView->IsEditorActiveOrFasterAppExit())
+    if(iPreview && !iView->IsEditorActiveOrFasterAppExit())
        {
        // preview popup is shown when application comes to foreground
        iPreview->FocusChangedL( iServices.Context().FocusDateAndTimeL().TimeLocalL() );

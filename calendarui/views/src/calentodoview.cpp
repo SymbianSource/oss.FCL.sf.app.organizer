@@ -323,6 +323,7 @@ void CCalenTodoView::HandleCommandL( TInt aCommand ) // command ID
         //TODO: will be uncommented with copy to cal functionality.   
         case ECalenCopyToCalendars:
             {
+            SaveCurrentItemIndexL();
             CopyToCalendarsL();
             }
             break;

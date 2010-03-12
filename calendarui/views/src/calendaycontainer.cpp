@@ -1438,24 +1438,25 @@ void CCalenDayContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent
         return;
         }
         
-    if(aPointerEvent.iType == TPointerEvent::EButton1Up)
+    if(aPointerEvent.iType == TPointerEvent::EButton1Down)
         {
         control = iLayoutManager->ControlOrNull();
         if(control)
             {
             if(control->Rect().Contains(aPointerEvent.iPosition))
                 {
-                control->HandlePointerEventL(aPointerEvent);		        		
+                control->HandlePointerEventL(aPointerEvent);	
+                return;
                 }
+            }
+        if (iListBox->Model()->NumberOfItems() <= 0)
+            {
+            iView->HandleCommandL(ECalenCmdOpenMskDialog);
+            return;
             }
         }
 	        	
-    TInt pointerIndex(-1);
-    if(iListBox->Model()->NumberOfItems() <= 0)
-        {   
-        iView->HandleCommandL(ECalenCmdOpenMskDialog);
-        return;
-        }
+    TInt pointerIndex(-1);    
      // Single click integration
     if ( aPointerEvent.iType == TPointerEvent::EButton1Down
             && iListBox->View()->XYPosToItemIndex(

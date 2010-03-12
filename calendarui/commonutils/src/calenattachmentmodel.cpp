@@ -281,7 +281,8 @@ EXPORT_C void CCalenAttachmentModel::AddAttachmentL(
                                                     const TDesC& aSystemFileName,
                                                     TInt aSize,
                                                     TBool aFetched,
-                                                    const TDataType& aDataType )
+                                                    const TDataType& aDataType,
+                                                    RFile& aFile)
 	{
 	
 	TRACE_ENTRY_POINT;
@@ -294,6 +295,7 @@ EXPORT_C void CCalenAttachmentModel::AddAttachmentL(
 	                aDataType, 
 	                CCalenAttachmentInfo::ECalenAttachmentFetchedFromEntry );
 	CleanupStack::PushL(info);
+	info->SetFileHandle( aFile );
 	iAttachInfoArray.AppendL(info);
 	CleanupStack::Pop();
 	isAttachmentModelCleared = EFalse;
@@ -341,13 +343,16 @@ TBool CCalenAttachmentModel::DoDeleteAttachmentL( TInt aIndex )
 		// Get the attachment file name
 		TFileName fileName( attachmentInfo->FileName() );
 		
+		TParsePtrC fileNameParser(fileName);
+		TPtrC parsedFileName = fileNameParser.NameAndExt();
+		
 		// Confirm if needs to be deleted.
 		CAknQueryDialog* confirmQuery = NULL;
 		confirmQuery = CAknQueryDialog::NewL();
 		HBufC* stringBuf = NULL;
 		stringBuf = StringLoader::LoadLC( 
 		                                  R_QTN_QUERY_COMMON_CONF_REMOVE, 
-		                                  fileName,
+		                                  parsedFileName,
 		                                  CEikonEnv::Static() );
 		confirmQuery->SetPromptL( *stringBuf );
 		if( EAknSoftkeyYes != 
@@ -482,17 +487,24 @@ EXPORT_C RFile CCalenAttachmentModel::GetAttachmentFileL(TInt aIndex)
     
     RFile file;
     CCalenAttachmentInfo* attachmentInfo = iAttachInfoArray[aIndex];
-    TParsePtrC fileNameParser(attachmentInfo->SystemFileName());
-    CEikonEnv* eikonEnv = CEikonEnv::Static();
-    RFs& fs = eikonEnv->FsSession();
-    User::LeaveIfError(fs.ShareProtected());
-    TInt err = file.Open( fs, attachmentInfo->SystemFileName(), 
-                          EFileRead|EFileShareReadersOnly);
-    if(err == KErrInUse)
+    if( attachmentInfo->IsFileHandleSet() )
         {
-        file.Close();
-        User::LeaveIfError( file.Open( fs, attachmentInfo->SystemFileName(),
-                            EFileRead|EFileShareReadersOnly) );
+		attachmentInfo->FileHandle(file);
+        }
+    else
+        {
+        TParsePtrC fileNameParser(attachmentInfo->SystemFileName());
+        CEikonEnv* eikonEnv = CEikonEnv::Static();
+        RFs& fs = eikonEnv->FsSession();
+        User::LeaveIfError(fs.ShareProtected());
+        TInt err = file.Open( fs, attachmentInfo->SystemFileName(), 
+                              EFileRead|EFileShareReadersOnly);
+        if(err == KErrInUse)
+            {
+            file.Close();
+            User::LeaveIfError( file.Open( fs, attachmentInfo->SystemFileName(),
+                                EFileRead|EFileShareReadersOnly) );
+            }    
         }
     
     TRACE_EXIT_POINT;
@@ -593,7 +605,7 @@ EXPORT_C void CCalenAttachmentModel::CheckForExistingAttachmentsL( CCalEntry* aE
 					fileHandle.Size(fileSize);
 
 					AddAttachmentL( fileName, systemFileName, fileSize,
-					                ETrue, fileMimeType );
+					                ETrue, fileMimeType, fileHandle);
 					CleanupStack::PopAndDestroy(&fileHandle);
 					}
 				}

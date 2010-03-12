@@ -1010,10 +1010,12 @@ EXPORT_C TBool CCalenEntryUtil::CheckForAlldayEventL( TTime aStartTime, TTime aS
     TRACE_ENTRY_POINT;
 
     TBool allDayEvent(EFalse);
+    
+    TTimeIntervalDays differenceInTime = aStopTime.DaysFrom(aStartTime); // fix for AllDayEntry issue
 
     if( aStartTime == CalenDateUtils::BeginningOfDay( aStartTime ) 
             && aStopTime == CalenDateUtils::BeginningOfDay( aStopTime ) 
-            && aStartTime != aStopTime )
+            && aStartTime != aStopTime && differenceInTime.Int() == 1) // fix for AllDayEntry issue
         {
         allDayEvent = ETrue;
         }

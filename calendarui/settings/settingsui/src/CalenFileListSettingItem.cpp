@@ -41,6 +41,8 @@
 // KDC_RESOURCE_DIR definition
 #include <data_caging_path_literals.hrh>
 
+#include <mediafilelist.h>
+
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -214,6 +216,8 @@ void CCalenFileListSettingItem::EditItemL( TBool /*aCalledFromMenu*/ )
     {
     TRACE_ENTRY_POINT;
 
+#define NEW_MEDIA_FILE_LIST_API
+#ifndef NEW_MEDIA_FILE_LIST_API
     // Create instance of FileList using new FileList API
     CFLDFileListContainer* filelist = CFLDFileListContainer::NewLC();
 
@@ -228,14 +232,44 @@ void CCalenFileListSettingItem::EditItemL( TBool /*aCalledFromMenu*/ )
     
     TBool ok( filelist->LaunchL( iToneFile, *iPopupHeader ) );
 
-    if( ok )
+
+    CleanupStack::PopAndDestroy( filelist ); // filelist
+#else
+    CMediaFileList* list = CMediaFileList::NewL();
+    CleanupStack::PushL(list);
+    
+    
+    TInt nullItem = KErrNotFound;
+    
+    // off
+    list->SetNullItemL(*iToneOffText, iOffToneFile,
+            CMediaFileList::EMediaFileTypeAudio,
+            CMediaFileList::ENullItemIconOff);
+    
+    // default tone
+    list->SetNullItemL(*iToneDefaultText, iDefaultToneFile,
+            CMediaFileList::EMediaFileTypeAudio,
+            CMediaFileList::ENullItemIconOff);
+    
+    list->SetAttrL(CMediaFileList::EAttrExcludeMimeType, CMediaFileList::EMediaFileTypeVideo);
+    list->SetAttrL(CMediaFileList::EAttrAutomatedType, CDRMHelper::EAutomatedTypeCalendarAlarm);
+    
+    // Make sure that iOffToneFile is passed, in case iToneFile happens to be KNullDesC
+    ASSERT(!IsEmpty(iToneFile));
+    
+    TBool ok = !list->ShowMediaFileListL(&iToneFile, &nullItem,
+                NULL, NULL );
+    
+    
+    CleanupStack::PopAndDestroy(list);    
+#endif
+    
+    if (ok)
         {
         iAlarmSoundChanged = ETrue;
         StoreL();
-        UpdateListBoxTextL(); 
+        UpdateListBoxTextL();
         }
-
-    CleanupStack::PopAndDestroy( filelist ); // filelist
     
     TRACE_EXIT_POINT;
     }

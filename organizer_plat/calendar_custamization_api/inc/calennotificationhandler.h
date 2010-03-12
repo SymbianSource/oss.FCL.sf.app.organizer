@@ -77,6 +77,7 @@ enum TCalenNotification
 	ECalenNotifyCalendarInfoCreated,
 	ECalenNotifyCalendarInfoUpdated,
 	ECalenNotifyCalendarFileDeleted,
+	ECalenNotifyEntrySendCancel,
     ECalenNotifyUserDefined1,
     ECalenNotifyUserDefined2,
     ECalenNotifyUserDefined3,

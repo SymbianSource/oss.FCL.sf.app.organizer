@@ -1,0 +1,12 @@
+component	app-services_chinesecalendaralgorithm
+source	\sf\app\organizer\pimappsupport\chinesecalendaralg
+binary	\sf\app\organizer\pimappsupport\chinesecalendaralg\group	all
+exports	\sf\app\organizer\pimappsupport\chinesecalendaralg\group
+notes_source	\component_defs\release.src
+
+
+#  == IPR section auto-inserted from distribution.policy files  ==
+ipr T 
+ipr E \sf\app\organizer\pimappsupport\chinesecalendaralg\pluginsrc\table1900-2100
+
+# == end auto-inserted section ==

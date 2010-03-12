@@ -25,6 +25,11 @@
 #include <AknUtils.h>
 #include <avkon.hrh>
 
+#include <AknsSkinInstance.h>
+#include <AknsUtils.h>
+#include <gulcolor.h>
+
+
 #include "CalenThaiPlugin.h"
 
 
@@ -130,6 +135,14 @@ void CCalenThaiPlugin::SetLabelContentL( CEikLabel& aLabel )
     aLabel.SetFont( labelFont );
     aLabel.SetLabelAlignment(ELayoutAlignCenter);
     aLabel.SetTextL( iThaiYearText );
+    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
+    TRgb color;
+    TInt error = AknsUtils::GetCachedColor(skin, color,
+            KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6);
+    if (error == KErrNone)
+        {
+        aLabel.OverrideColorL(EColorLabelText, color);
+        }
     TRACE_EXIT_POINT;
     }
 

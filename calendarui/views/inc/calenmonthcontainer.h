@@ -127,6 +127,11 @@ public:     // New Function
     void HidePopup();
     
     void RedrawPreviewPane();
+    
+    /**
+     * returns previewpane pointer
+     */    
+    const MCalenPreview* PreviewPane();
 
 
 private:    // New function
@@ -364,8 +369,7 @@ private:  // New variables
     // View specific data, references to views data
     TTime& iDate;
     TTime iOldFirstDayOfGrid;
-	TBool iChangeMonth;
-	TBool iNativePreview;
+	TBool iChangeMonth;	
     };
 
 #endif //CALENMONTHCONT_H

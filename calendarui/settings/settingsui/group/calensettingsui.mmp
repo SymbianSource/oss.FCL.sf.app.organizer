@@ -85,6 +85,7 @@ LIBRARY             servicehandler.lib // AIW service handler
 LIBRARY             caf.lib
 LIBRARY             cafutils.lib
 LIBRARY             drmhelper.lib
+LIBRARY			MediaFileList.lib
 
 // File logging
 LIBRARY flogger.lib

@@ -30,3 +30,5 @@
 -c8,8  qgn_indi_tb_cale_alarm_dismiss
 -c8,8  qgn_indi_tb_cale_alarm_dismiss_all
 -c8,8  qgn_stat_sync.svg
+-c8,8  qgn_indi_cale_tb_today.svg
+-c8,8  qgn_indi_cale_tb_changeview.svg

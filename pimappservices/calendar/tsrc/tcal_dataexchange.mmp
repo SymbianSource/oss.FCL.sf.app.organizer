@@ -23,6 +23,7 @@ SOURCE			tcal_dataexchange.cpp
 
 USERINCLUDE		.
 SYSTEMINCLUDE	/epoc32/include
+APP_LAYER_SYSTEMINCLUDE_SYMBIAN
 
 LIBRARY			calinterimapi.lib
 LIBRARY			euser.lib estor.lib efsrv.lib caltestlib.lib

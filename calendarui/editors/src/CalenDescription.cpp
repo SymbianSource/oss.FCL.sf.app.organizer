@@ -192,12 +192,6 @@ TBool CCalenDescription::ProcessCommandL( TInt aCommandId )
     TBool processed = EFalse;
     switch( aCommandId )
         {
-        case ECalenCmdShowDescription:
-            {
-            ShowL();
-            processed = ETrue;
-            break;
-            }
         case ECalenCmdAddDescriptionNew:
             {
             AddNewL();
@@ -207,6 +201,28 @@ TBool CCalenDescription::ProcessCommandL( TInt aCommandId )
         case ECalenCmdAddDescriptionExisting:
             {
             AddMemoL();
+            processed = ETrue;
+            break;
+            }
+        case ECalenCmdAddDescription:
+            {
+            if(EntryHasDescription())
+                {
+                ShowL();
+                processed = ETrue;
+                }
+            else
+                {
+                processed = HandleAddDescriptionL();
+                }
+            
+            break;
+            }
+
+        case ECalenCmdShowDescription:
+            {
+
+            ShowL();
             processed = ETrue;
             break;
             }
@@ -582,5 +598,47 @@ HBufC* CCalenDescription::ExecTextViewerL( TInt& aStatus, const TDesC& aDescript
 
     TRACE_EXIT_POINT;
     return desc;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenDescription::HandleAddDescriptionL
+// Handles the command ECalenAddDescription
+// ----------------------------------------------------------------------------
+// 
+TBool CCalenDescription::HandleAddDescriptionL()
+    {
+    TRACE_ENTRY_POINT;
+    
+    TBool processed = EFalse;
+    TInt selectedIndex(0);
+    CAknListQueryDialog* dlg = new (ELeave) CAknListQueryDialog(&selectedIndex);
+    dlg->PrepareLC( R_DESCRIPTION_LIST_QUERY );
+    
+    if(dlg->RunLD())
+        {
+        switch(selectedIndex)
+            {
+            case 0:             //ECalenCmdAddDescriptionNew
+                {
+//                iCheck = 0;
+                AddNewL();
+                processed = ETrue;
+                break;
+                }
+            case 1:             //ECalenCmdAddDescriptionExisting
+                {
+//                iCheck = 1;
+                AddMemoL();
+                processed = ETrue;
+                break;
+                }
+            default:
+                break;
+            }
+        }
+    
+    TRACE_EXIT_POINT;
+    
+    return processed;   
     }
 //  End of File

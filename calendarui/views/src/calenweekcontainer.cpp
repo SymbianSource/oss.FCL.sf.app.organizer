@@ -211,11 +211,7 @@ CCalenWeekContainer::~CCalenWeekContainer()
     TRACE_ENTRY_POINT;
 
     delete iListBox;
-    if( iNativePreview && iPreview )
-        {
-        delete iPreview;
-        iPreview = NULL;
-        }
+    
     delete iDesArray;
 
     CleanupInstances();
@@ -1242,11 +1238,7 @@ void CCalenWeekContainer::ConstructImplL()
     // Create preview pane
     TRect aRect = PreviewRectL();
     iPreview = iServices.CustomPreviewPaneL(aRect);
-    if (iPreview == NULL) 
-		{
-		iPreview = CCalenPreview::NewL( iView, locale, iServices );
-		iNativePreview = ETrue;
-		}    
+    
     // ownership of builder transferred
 
     // 3) Listbox
@@ -1361,7 +1353,7 @@ void CCalenWeekContainer::SizeChanged()
                                             AknLayoutScalable_Apps::listscroll_cale_week_pane(layoutToolBarVariant).LayoutLine() );
                                             
 
-    TWeekListBoxLayout lay( UseInfobar(), UseToolbar(), ETrue, main_pane );
+    TWeekListBoxLayout lay( UseInfobar(), UseToolbar(), UsePreview(), main_pane ); 
 
     iListBox->SetRect( iListBox->LayoutRect() );
     TInt layoutVariant = lay.LayoutVariantIndex(TWeekListBoxLayout::EScrollPaneCp08);
@@ -1545,7 +1537,7 @@ TKeyResponse CCalenWeekContainer::OfferKeyEventL( const TKeyEvent& aKeyEvent,
     TRACE_ENTRY_POINT;
 
     // always hide popup on key events
-    if (aType == EEventKeyDown)
+    if (iPreview && aType == EEventKeyDown)
         {
         iPreview->Hide();
         }
@@ -1766,7 +1758,7 @@ void CCalenWeekContainer::FocusChangeForPopupL()
         CCalHourItem& itemInfo = *(*slotTable)[iListBox->CurrentItemIndex()];
         
         // dont focus the preview popup/previewpane if any dialog or faster app is active        
-		if(!iView->IsEditorActiveOrFasterAppExit())
+		if(iPreview && !iView->IsEditorActiveOrFasterAppExit())
 			{
 	        if( !itemInfo.IsTimed() )
 	            { 
@@ -2182,6 +2174,18 @@ void CCalenWeekContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent
             aPointerEvent.iType == TPointerEvent::EButton1Down )
             {
             IgnoreEventsUntilNextPointerUp();
+            CCoeControl* control(NULL);
+            if (aPointerEvent.iType == TPointerEvent::EButton1Down)
+                {
+                control = iLayoutManager->ControlOrNull();
+                if (control)
+                    {
+                    if (control->Rect().Contains(aPointerEvent.iPosition))
+                        {
+                        control->HandlePointerEventL(aPointerEvent);
+                        }
+                    }
+                }
             return;
             }
         
@@ -2204,10 +2208,7 @@ void CCalenWeekContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent
                             {
                             UpdateStatusPaneAndExtensionsL();
                             }
-                        iFirstTap = ETrue;
                         }
-                    else
-                        iFirstTap = EFalse;
                     }
                 else
                     {
@@ -2235,13 +2236,12 @@ void CCalenWeekContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent
                     if (newColumn != oldColumn)
                         {
                         WeekView().SetStatusPaneFromActiveContextL();
-                        }
-                    iFirstTap = ETrue;
+                        }                    
                     }
                 break;
                 }
             case TPointerEvent::EButton1Up:
-                if(isItem && iFirstTap == EFalse &&
+                if(isItem &&
                    iView->MenuBar()->IsDisplayed() == EFalse)
                     {
                     iServices.IssueCommandL( ECalenForwardsToDayView );
@@ -2267,9 +2267,10 @@ void CCalenWeekContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent
 void CCalenWeekContainer::HidePopup()
     {
     TRACE_ENTRY_POINT;
-    
-    iPreview->Hide();    
-    
+    if (iPreview)
+        {
+        iPreview->Hide();
+        }
     TRACE_EXIT_POINT;
     }
 
@@ -2285,8 +2286,10 @@ void CCalenWeekContainer::BeginPopulationWithInstanceViewL()
     SizeChanged();
     iViewPopulationComplete = EFalse;
     
-    iPreview->Hide();
-        
+    if (iPreview)
+        {
+        iPreview->Hide();
+        }
     iListBox->View()->SetDisableRedraw( ETrue );
     PopulatesDayListsL();
 
@@ -2465,6 +2468,18 @@ TInt CCalenWeekContainer::SearchTopIndexL(TInt /*aColumn*/)
 	
     return row;	
 	}
+	
+// -----------------------------------------------------------------------------
+// CCalenWeekContainer::PreviewPane
+// Return preview pane pointer
+// -----------------------------------------------------------------------------
+//	
+const MCalenPreview* CCalenWeekContainer::PreviewPane()
+    {
+    TRACE_ENTRY_POINT
+    TRACE_EXIT_POINT
+    return iPreview;
+    }	
 
 // ----------------------------------------------------------------------------
 // CCalenWeekContainer::UpdatePreviewPaneL
@@ -2482,7 +2497,7 @@ void CCalenWeekContainer::UpdatePreviewPaneL()
         CCalHourItem& itemInfo = *(*slotTable)[iListBox->CurrentItemIndex()];
         
         // dont focus the preview popup/previewpane if any dialog or faster app is active
-        if(!iView->IsEditorActiveOrFasterAppExit())
+        if( iPreview && !iView->IsEditorActiveOrFasterAppExit())
             {
             if( !itemInfo.IsTimed() )
                 { 

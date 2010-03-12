@@ -120,6 +120,14 @@ const CAgnServFile& CAgnEntryModel::AgnServFile()
 	return *iAgnServerFile;
 	}
 
+/**
+ * Resets delete rollback array before the callback
+ */	
+void CAgnEntryModel::ResetDeleteRollbackArray()
+	{
+	iDeleteRollbackArray.ResetAndDestroy();
+	}
+
 /** Load up the stream network
  */
 void CAgnEntryModel::DoOpenL(const TStreamId& aModelStreamId)
@@ -1398,22 +1406,20 @@ TBool CAgnEntryModel::GenerateIndexFileName(TFileName& aFileName)
 // file needs to be rebuilt and to no try to delete the file more than once.
 void CAgnEntryModel::MarkIndexFileAsDirtyL()
 	{
-	if (iIndexFileIsDirty)
-		{
-		return; // the file is already marked as dirty
-		}
-		
-	TFileName idxfilename;
-	if (!GenerateIndexFileName(idxfilename))
-		{
-		User::Leave(KErrBadName);
-		}
-	
-	TInt connectErr = iFs.Connect();
-	User::LeaveIfError(connectErr);
-	
-	iFs.Delete(idxfilename); // ignore return as there is nothing we can do with it
-	
+
+    if(IsIndexFileAvailableL())
+        {		
+            TFileName idxfilename;
+            if (!GenerateIndexFileName(idxfilename))
+                {
+                User::Leave(KErrBadName);
+                }
+            
+            TInt connectErr = iFs.Connect();
+            User::LeaveIfError(connectErr);
+            
+            iFs.Delete(idxfilename); // ignore return as there is nothing we can do with it
+        }        
 	iIndexFileIsDirty = ETrue;
 	}
 	
@@ -1512,6 +1518,32 @@ TBool CAgnEntryModel::LoadIndexFileL()
 	return EFalse;
 	}
 
+// This method check the index file is exist.
+// It returns:
+//      ETrue - File is already exist
+//      EFalse - File is not available
+TBool CAgnEntryModel::IsIndexFileAvailableL()
+    {
+    TFileName idxfilename;
+    if (!GenerateIndexFileName(idxfilename))
+        {
+        User::Leave(KErrBadName);
+        }
+    
+    TInt connectErr = iFs.Connect();
+    User::LeaveIfError(connectErr);
+    
+    RFile idxFile;
+    TInt errReadIdx = idxFile.Open(iFs, idxfilename, EFileRead);
+    CleanupClosePushL(idxFile);
+    if((errReadIdx == KErrNotFound))
+        {
+            CleanupStack::PopAndDestroy();
+            return EFalse;
+        }
+    CleanupStack::PopAndDestroy(&idxFile);
+    return ETrue;
+}
 
 // This method attempts to save all indices to the index file.
 // If any errors are encountered it will Leave.

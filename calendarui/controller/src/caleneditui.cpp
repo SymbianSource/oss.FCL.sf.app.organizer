@@ -242,7 +242,7 @@ TBool CCalenEditUi::HandleCommandL( const TCalenCommand& aCommand )
             // by the user.
             else
                 {
-                iController.BroadcastNotification( ECalenNotifyDialogClosed );
+                iController.BroadcastNotification( ECalenNotifyEntrySendCancel );
                 }
                 
             }

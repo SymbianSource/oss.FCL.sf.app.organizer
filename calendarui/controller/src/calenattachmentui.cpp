@@ -348,12 +348,7 @@ TBool CCalenAttachmentUi::FetchFileL(
     {
     TRACE_ENTRY_POINT;       
     
-    TAiwVariant sizeLimit( KCalenAttachmentOverhead );
-    TAiwGenericParam sizeLimitParam( EGenericParamMMSSizeLimit, sizeLimit );
-
-    CAiwGenericParamList* paramList = CAiwGenericParamList::NewLC();
-    paramList->AppendL( sizeLimitParam );
-    
+       
     CDesCArrayFlat* files = new( ELeave ) CDesC16ArrayFlat(1);
     CleanupStack::PushL(files);
     
@@ -371,7 +366,7 @@ TBool CCalenAttachmentUi::FetchFileL(
         {       
         // used for fetching media file and notes 
         fetchOk = CCalenAttachmentUtils::FetchFileL( aFetchType, *files,
-                                        paramList, EFalse, EFalse, this );
+                                        NULL, EFalse, EFalse, this );
     
         
         if(fetchOk && iSelectedCommand == ECalenAddNote)
@@ -379,7 +374,7 @@ TBool CCalenAttachmentUi::FetchFileL(
             AddAttachmentL(files->MdcaPoint(0));
             }                
         }
-    CleanupStack::PopAndDestroy( 2, paramList );
+    CleanupStack::PopAndDestroy( files );
     
     if(!fetchOk)
         {
@@ -659,15 +654,12 @@ void CCalenAttachmentUi::AddAttachmentsToEntryL()
                 if(attachmentInfo->StoreType() == CCalenAttachmentInfo::ECalenNewAttachment)
                     {
                     TParsePtrC fileNameParser(attachmentInfo->SystemFileName());
-                    RFile fileHandle;    
-                    CEikonEnv* eikonEnv = CEikonEnv::Static();
-                    RFs& fs = eikonEnv->FsSession();
-                    User::LeaveIfError(fs.ShareProtected());
+                    RFile fileHandle = iAttachmentModel->GetAttachmentFileL(index);
+                    CleanupClosePushL(fileHandle);
                     TInt aSize;
-                    TInt err = fileHandle.Open(fs, attachmentInfo->SystemFileName(), EFileWrite);
                     TInt error = fileHandle.Size(aSize);
                     HBufC8* data = HBufC8::NewLC(aSize);
-                    TPtr8 fileData = data->Des();
+                    TPtr8 fileData = data->Des();         
                     if (error == KErrNone)
                         {                
                         TInt readingError = fileHandle.Read(fileData,aSize);  
@@ -681,14 +673,11 @@ void CCalenAttachmentUi::AddAttachmentsToEntryL()
                             attachment->SetLabelL(fileNameParser.NameAndExt());
                             // sets mime type for the attachment
                             attachment->SetMimeTypeL(attachmentInfo->DataType().Des8());
-                            
-                            CleanupClosePushL(fileHandle);
-                            CleanupStack::PopAndDestroy(&fileHandle);
                             entry->AddAttachmentL(*attachment);
                             CleanupStack::Pop(attachment);
                             }                
                         }
-                    
+                        CleanupStack::PopAndDestroy(&fileHandle);
                     }
                 }
                         

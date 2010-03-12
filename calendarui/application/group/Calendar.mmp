@@ -91,8 +91,7 @@ LIBRARY aknnotify.lib
 //   NetworkServices // For sending vCalendars?
 //   ProtServ // For connecting Agenda Server? 
 //   DRM // Calendar alarm tones are DRM protected 
-CAPABILITY      CAP_APPLICATION \
-                NetworkControl AllFiles
+CAPABILITY      CAP_APPLICATION
 
 VENDORID        VID_DEFAULT
 

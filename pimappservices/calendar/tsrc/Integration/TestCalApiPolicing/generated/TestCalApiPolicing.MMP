@@ -82,9 +82,9 @@ SOURCE        EDeleteEntriesByLocalUid1_CSTEP.CPP
 SOURCE        EDeleteEntryByGuid1_CSTEP.CPP
 SOURCE        ECommit1_CSTEP.CPP
 SOURCE        ERollback1_CSTEP.CPP
-USERINCLUDE   ..\..\..\..\shared\inc
+USERINCLUDE   ../../../../shared/inc
 
-SYSTEMINCLUDE \epoc32\include \epoc32\include\test
+SYSTEMINCLUDE /epoc32/include /epoc32/include/test
 LIBRARY       euser.lib 
 
 //For TEF 

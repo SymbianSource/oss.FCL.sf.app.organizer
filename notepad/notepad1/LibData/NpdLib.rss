@@ -1524,19 +1524,23 @@ RESOURCE TBUF r_notepad_empty_list_secondary_text
     {
     buf = qtn_nmake_no_memos_secondary_text;    
     }
+// -----------------------------------------------------------------------------
+//
+// r_send_notepad_note
+// the resource process dialog when send notes via message and bluetooth
+//
+// -----------------------------------------------------------------------------
+//
 RESOURCE DIALOG r_send_notepad_note
     {
-    flags = EAknWaitNoteFlags | EEikDialogFlagModeless;
-//    buttons=R_AVKON_SOFTKEYS_EMPTY;
-	buttons=R_AVKON_SOFTKEYS_CANCEL;
+    flags = EAknWaitNoteFlags;
+    buttons=R_AVKON_SOFTKEYS_CANCEL;
     items=
         {
         DLG_LINE
             {
             type = EAknCtNote;
-            
-	//id = EGeneralNote;
-	  id      = ESendNotepadAttach;
+            id = ESendNotepadAttach;
             control= AVKON_NOTE
                 {
                 layout = EWaitLayout;

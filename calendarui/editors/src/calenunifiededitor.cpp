@@ -165,7 +165,10 @@ CCalenUnifiedEditor::~CCalenUnifiedEditor()
     delete iUnifiedEditorControl;
     
     iCollectionIds.Reset();
-
+    
+    iAsyncCallback->Cancel();
+    delete iAsyncCallback;
+    
     TRACE_EXIT_POINT;
     }
 
@@ -284,6 +287,11 @@ void CCalenUnifiedEditor::ConstructL()
     iUnifiedEditorControl = CCalenUnifiedEditorControl::NewL( *this,*iServices );
     
     isReplaceLocation = EFalse;
+    
+   
+    TCallBack callback(CCalenUnifiedEditor::AsyncProcessCommandL,this);
+    iAsyncCallback = new(ELeave) CAsyncCallBack(callback,CActive::EPriorityStandard);
+    
     
     iIdle = CIdle::NewL( CActive::EPriorityUserInput );
     iIdle->Start( TCallBack( KeyCallBack, this) );
@@ -1242,7 +1250,22 @@ void CCalenUnifiedEditor::HandleDialogPageEventL( TInt aEventID )
                             }
                         break;
                         }
-
+                       
+                    case ECalenEditorDescription:
+                        {
+//                        CEikEdwin* edwin = static_cast<CEikEdwin*>( Control( focusControl ) );  
+//                        if ( edwin && edwin->Text()->DocumentLength() == 0 )
+//                            {
+//                                ProcessCommandL( ECalenCmdAddDescription );
+//                            }
+//                        else
+//                            {
+//                                ProcessCommandL( ECalenCmdShowDescription );
+//                            }
+                        iAsyncCallback->CallBack();
+                        break;
+                        }
+                       
                     default:
                         {
                         break;
@@ -1274,6 +1297,24 @@ void CCalenUnifiedEditor::HandleDialogPageEventL( TInt aEventID )
             }
         }
     }
+
+
+TInt CCalenUnifiedEditor::AsyncProcessCommandL( TAny* aThisPtr )
+    {
+    TInt focusControl( static_cast<CCalenUnifiedEditor*>(aThisPtr)->IdOfFocusControl() );
+    CEikEdwin* edwin = static_cast<CEikEdwin*>( static_cast<CCalenUnifiedEditor*>(aThisPtr)->Control( focusControl ) );  
+        if ( edwin && edwin->Text()->DocumentLength() == 0 )
+            {
+            static_cast<CCalenUnifiedEditor*>(aThisPtr)->ProcessCommandL(ECalenCmdAddDescription);
+            }
+        else
+            {
+            static_cast<CCalenUnifiedEditor*>(aThisPtr)->ProcessCommandL(ECalenCmdShowDescription);
+            }
+    
+    return 0;
+    }
+
 
 // -----------------------------------------------------------------------------
 //  CCalenUnifiedEditor::HandleResourceChange
@@ -1525,13 +1566,10 @@ void CCalenUnifiedEditor::TryInsertSendMenuL( TInt aResourceId, CEikMenuPane* aM
     TRACE_ENTRY_POINT;
 
     // Only insert if there is some summary (or location)
-    if( !EditorDataHandler().AreTextFieldsEmptyL() )
+    // Changes done to remove Lunar calendar item from options menu
+    if( EditorDataHandler().AreTextFieldsEmptyL() )
         {
-        // Insert Send menu item
-        iServices->OfferMenuPaneL( aResourceId, aMenuPane );
-        }
-    else
-        {// Delete Send Menu item if exists
+        // Delete Send Menu item if exists
         aMenuPane->DeleteMenuItem( ECalenSend );
         }    
 
@@ -1981,7 +2019,8 @@ TBool CCalenUnifiedEditor::HandleDoneL()
         if( startDate == CalenDateUtils::BeginningOfDay( startDate ) &&
                 endDate == CalenDateUtils::BeginningOfDay( endDate ) )
             {
-            if( CCalEntry::EAppt == Edited().EntryType() && startDate != endDate )
+            TTimeIntervalDays differenceInTime = endDate.DaysFrom(startDate); // fix for AllDayEntry issue
+            if( CCalEntry::EAppt == Edited().EntryType() && startDate != endDate && differenceInTime.Int() == 1 )
                 {
                 Edited().SetEntryType( CCalEntry::EEvent );
                 }
@@ -2238,6 +2277,7 @@ TInt CCalenUnifiedEditor::TryToSaveEntryWithEntryChangeL( TBool aForcedExit)
     
     if(!IsCreatingNewEntry() && !iEditorDataHandler->IsCalendarEditedL())
         {
+        iServices->GetAttachmentData()->Reset();
         iServices->EntryViewL(iEditorDataHandler->PreviousDbCollectionId())
                                                 ->DeleteL(*iOriginalCalEntry);
         }
@@ -2268,6 +2308,7 @@ TInt CCalenUnifiedEditor::TryToSaveEntryWithEntryChangeL( TBool aForcedExit)
         }
     if(!IsCreatingNewEntry() && iEditorDataHandler->IsCalendarEditedL())
         {
+        iServices->GetAttachmentData()->Reset();
         iServices->EntryViewL(iEditorDataHandler->PreviousDbCollectionId())
                                                 ->DeleteL(*iOriginalCalEntry);
         }
@@ -3050,9 +3091,9 @@ void CCalenUnifiedEditor::SetAttachmentNamesToEditorL()
     if( attachmentCount )
         {
         RPointerArray<HBufC> attachmentNames;
-        Edited().AttachmentNamesL(attachmentNames);
-        TInt attachmentCount = attachmentNames.Count();
-        TInt attachmentLength(0);
+        GetAttachmentNamesL(attachmentNames);
+        attachmentCount = attachmentNames.Count();            
+        TInt attachmentLength(0);        
         for( TInt index =0; index<attachmentCount; index++ )
             {
             if(index>0)
@@ -3339,6 +3380,33 @@ void CCalenUnifiedEditor::AddPictureL(TInt isNotFirstTime)
     Control(ECalenEditorPlace)->DrawNow();
     
     TRACE_EXIT_POINT;   
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenUnifiedEditor::AttachmentNamesL
+// Provides all the attachments names
+// -----------------------------------------------------------------------------
+// 
+void CCalenUnifiedEditor::GetAttachmentNamesL(RPointerArray<HBufC>& aAttachmentNames)
+    {
+    TInt attachCount = iServices->GetAttachmentData()->NumberOfItems();
+    if( attachCount )
+        {    
+        RPointerArray<CCalenAttachmentInfo> attachmentInfoList;      
+        iServices->GetAttachmentData()->GetAttachmentListL(attachmentInfoList);
+        for( TInt index =0; index<attachCount; index++ )
+            {
+            CCalenAttachmentInfo* attachmentInfo = attachmentInfoList[index];
+            TParsePtrC fileNameParser( attachmentInfo->FileName() );
+            HBufC* attachmentName = HBufC::NewL(fileNameParser.NameAndExt().Length());
+            attachmentName->Des().Copy(fileNameParser.NameAndExt());
+            aAttachmentNames.Append(attachmentName);
+            }
+        }
+    else
+        {
+        Edited().AttachmentNamesL(aAttachmentNames);
+        }
     }
 	
 // -----------------------------------------------------------------------------

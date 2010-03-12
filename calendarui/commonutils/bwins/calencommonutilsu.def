@@ -29,7 +29,7 @@ EXPORTS
 	?SizeString@CCalenAttachmentInfo@@QBEPAVHBufC16@@XZ @ 28 NONAME ; class HBufC16 * CCalenAttachmentInfo::SizeString(void) const
 	?RemoveEntriesEndingAtMidnightL@CalenAgendaUtils@@SAXAAV?$RPointerArray@VCCalInstance@@@@ABVTTime@@@Z @ 29 NONAME ; void CalenAgendaUtils::RemoveEntriesEndingAtMidnightL(class RPointerArray<class CCalInstance> &, class TTime const &)
 	?Status@CCalenEntryUtil@@QBEABW4TStatus@CCalEntry@@XZ @ 30 NONAME ; enum CCalEntry::TStatus const & CCalenEntryUtil::Status(void) const
-	?AddAttachmentL@CCalenAttachmentModel@@QAEXABVTDesC16@@0HHABVTDataType@@@Z @ 31 NONAME ; void CCalenAttachmentModel::AddAttachmentL(class TDesC16 const &, class TDesC16 const &, int, int, class TDataType const &)
+	?AddAttachmentL@CCalenAttachmentModel@@QAEXABVTDesC16@@0HHABVTDataType@@AAVRFile@@@Z @ 31 NONAME ; void CCalenAttachmentModel::AddAttachmentL(class TDesC16 const &, class TDesC16 const &, int, int, class TDataType const &, class RFile &)
 	?OnSameDay@CalenDateUtils@@SAHABVTTime@@0@Z @ 32 NONAME ; int CalenDateUtils::OnSameDay(class TTime const &, class TTime const &)
 	?OpenAttachmentL@CCalenAttachmentUtils@@SAXAAVRFile@@AAVMAknServerAppExitObserver@@@Z @ 33 NONAME ; void CCalenAttachmentUtils::OpenAttachmentL(class RFile &, class MAknServerAppExitObserver &)
 	?LoadResourcesL@CCalenAttachmentModel@@QAEXXZ @ 34 NONAME ; void CCalenAttachmentModel::LoadResourcesL(void)

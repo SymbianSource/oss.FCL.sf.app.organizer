@@ -659,9 +659,6 @@ void CCalenSettingsUiContainer::CreateMailboxSettingsItemL( TInt aOrdinal )
     // Construct setting item with parametrized values
     HBufC* itemTitle = StringLoader::LoadLC( R_CALEN_SETTING_DEFAULTMAILBOX_TITLE );
     // The resources loaded up here are empty as the items need to be dynamically updated.
-    
-    settingItem->SetEmptyItemTextL( KNullDesC );
-    
     settingItem->ConstructL( EFalse, aOrdinal, *itemTitle, NULL,
                              R_CALEN_SETTING_DEFAULTMAILBOX, EAknCtPopupSettingList,
                              NULL, R_CALEN_EMPTY_POPUP_SETTING_TEXTS );
@@ -791,7 +788,7 @@ void CCalenSettingsUiContainer::CreateListBoxItemsL()
 
     // Always add this in. We will set it hidden when it's not needed (i.e. when the
     // week start is set to anything other than "Monday") at the bottom of this function.
-    AddEnumerationItemL( iWeekTitle,
+    AddBinaryItemL( iWeekTitle,
                          ECalenWeekTitleItemId,
                          R_CALEN_SETTING_WEEKTITLE_TITLE,
                          R_CALEN_SETTING_WEEKTITLE,

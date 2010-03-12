@@ -181,6 +181,11 @@ private:
      */
     HBufC* ExecTextViewerL(TInt& aStatus, const TDesC& aDescription);
     
+    /**
+     * Handles ECalenCmdAddDescription command 
+     */
+    TBool HandleAddDescriptionL();
+    
         
 private:
     

@@ -251,7 +251,9 @@ void CCalenViewAttachmentsDialog::ProcessCommandL( TInt aCommandId )
 
                 TDataType datatype( attInfo.DataType() );
                 RFile file = iAttachmentModel.GetAttachmentFileL( index );
-                OpenAttachmentViewerL(file, *this);                
+                CleanupClosePushL(file);
+                OpenAttachmentViewerL(file, *this);
+                CleanupStack::PopAndDestroy(&file);
                 }                                
             }
         break;
@@ -1084,50 +1086,32 @@ TBool CCalenViewAttachmentsDialog::CheckSpaceBelowCriticalLevelL()
 // Opens a particular attachment
 // -----------------------------------------------------------------------------
 //
-void CCalenViewAttachmentsDialog::OpenAttachmentViewerL(RFile& file, MAknServerAppExitObserver& /*aExitObserver*/)
+void CCalenViewAttachmentsDialog::OpenAttachmentViewerL(RFile& aFile, MAknServerAppExitObserver& /*aExitObserver*/)
     {
     TRACE_ENTRY_POINT;
     
     TBuf<250> fileName;
-    file.FullName(fileName);
-    TDataType datatype( CCalenAttachmentUtils::GetMimeTypeL(fileName) );
+    aFile.FullName(fileName);
+    TDataType datatype( CCalenAttachmentUtils::GetMimeType(aFile) );
     
     TInt ret = KErrNone;
     
-    file.Close();
-    RFs& fs = CEikonEnv::Static()->FsSession();
-                    
-    //open the file, before giving it to Notepad.
-    TInt err1 = file.Open( fs, fileName, EFileRead | EFileShareReadersOnly );
-    CleanupClosePushL( file );        
-    
     if(datatype == KNotePadTextDataType())
         {
-        const TDesC& notepadTitle = _L("NotePad");	
-        // file handle ownership transferred.
-        
-        // 1.File handle from arg has problem for notes since junk chars are reported in file.
-        // so we use another file handle exclusively open with filename an pass to note viewer.   
-        // 
-        // 2.Pass ETrue to 4th param  ExecFileViewerL , to guess encoding.
-        RFile fileForNotes;
-        TInt err = fileForNotes.Open( fs, fileName, EFileRead | EFileShareReadersOnly );
-        CleanupClosePushL( fileForNotes );
-        ret = CNotepadApi::ExecFileViewerL( fileForNotes, 
+        const TDesC& notepadTitle = _L("NotePad");
+        ret = CNotepadApi::ExecFileViewerL( aFile, 
                                            &notepadTitle,
                                            ETrue,
                                            ETrue,
                                            KCharacterSetIdentifierIso88591 );
         
-        CleanupStack::PopAndDestroy(&fileForNotes);
         }
     else
         {
         //doc handler will open the other files (other than text file).
-        TRAP( ret, iDocHandler->OpenFileEmbeddedL( file, datatype ) );
+        TRAP( ret, iDocHandler->OpenFileEmbeddedL( aFile, datatype ) );
         }
-    CleanupStack::PopAndDestroy(&file);
-    
+
     switch(ret)
         {
         case KErrNone:
