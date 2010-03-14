@@ -280,6 +280,7 @@ NONSHARABLE_CLASS( CCalenTodoView ) : public CCalenNativeView
         TInt iHighlightedRowNumber;     // The row number highlighted.
         TInt iFirstEntryOnScreenIndex;  // The offset of the topmost item on screen to the first entry.
         CListBoxView::CSelectionIndexArray* iMarkedTodoItems;
+        TBool iEventViewCommandHandled ;
     };
 
 #endif //  TODOVIEW_H

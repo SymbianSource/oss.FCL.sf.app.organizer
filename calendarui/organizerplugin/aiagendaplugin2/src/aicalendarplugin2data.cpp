@@ -19,7 +19,6 @@
 #include "aicalendarplugin2contentmodel.h"
 #include "aicalendarplugin2constants.hrh"
 #include <aicontentmodel.h>
-#include <aipropertyextension.h>
 #include <e32cmn.h>
 
 // Helper for sort method

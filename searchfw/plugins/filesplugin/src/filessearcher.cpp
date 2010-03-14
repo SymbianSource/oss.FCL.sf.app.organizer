@@ -340,7 +340,7 @@ void CFilesSearcher::HitL( TInt /*aResult*/ )
 	//Set the content class Id as KSearchCClassFilenamesUid
 	searchResult->SetContentClassId( KSearchCClassFilenamesUid );
 	//If file is found from memory card
-	_LIT( KMemCard, "E:" );
+	_LIT( KMemCard, "F:" );
 	TInt found = path->Find( KMemCard );
 	if ( !found )
 	    {

@@ -1347,9 +1347,11 @@ void CCalenMultipleDbUi::HandleListBoxEventL( CEikListBox* /*aListBox*/,
             aEventType == EEventItemSingleClicked )
            {
            const TInt index(iListBox->CurrentItemIndex());
-           if ( index != KErrNotFound )
+           if ( index != KErrNotFound && !iIsDbEditorOpen )
                {
+               iIsDbEditorOpen = ETrue ;
                ProcessCommandL( ECalenCmdEdit );
+               iIsDbEditorOpen = EFalse ;
                }
            }
        }

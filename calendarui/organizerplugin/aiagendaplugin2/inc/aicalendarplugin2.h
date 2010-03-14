@@ -21,9 +21,7 @@
 
 #include <AknsDrawUtils.h>
 #include <AknUtils.h> 
-#include <aicontentpublisher.h>
-#include <aipropertyextension.h>
-#include <aieventhandlerextension.h>
+#include <hscontentpublisher.h>
 #include "PluginDataChangeObserver.h"
 
 class CAIAgendaPluginEngineIf;
@@ -40,9 +38,7 @@ class MAiStrParser;
  *  @lib aicalendarplugin2
  *  @since S60 3.2
  */
-NONSHARABLE_CLASS( CAICalendarPlugin2 ): public CAiContentPublisher,
-                                         public MAiPropertyExtension,
-                                         public MAiEventHandlerExtension,
+NONSHARABLE_CLASS( CAICalendarPlugin2 ): public CHsContentPublisher,
                                          public MPluginDataChangeObserver
 {
     public:
@@ -53,30 +49,48 @@ NONSHARABLE_CLASS( CAICalendarPlugin2 ): public CAiContentPublisher,
 
         ~CAICalendarPlugin2();
 
-    // From CAiContentPublisher
+    // From CHsContentPublisher
 
-        void Resume( TAiTransitionReason aReason );
+        /**
+         * @see CHsContentPublisher
+         */
+        void Start( TStartReason aReason );
 
-        void Suspend( TAiTransitionReason aReason );
+        /**
+         * @see CHsContentPublisher
+         */
+        void Stop( TStopReason aReason );
 
-        void Stop( TAiTransitionReason aReason );
+        /**
+         * @see CHsContentPublisher
+         */    
+        void Resume( TResumeReason aReason );
 
+        /**
+         * @see CHsContentPublisher
+         */    
+        void Suspend( TSuspendReason aReason );
+
+        /**
+         * @see CHsContentPublisher
+         */    
         void SubscribeL( MAiContentObserver& aObserver );
 
+        /**
+         * @see CHsContentPublisher
+         */    
         void ConfigureL( RAiSettingsItemArray& aSettings );
 
-        TAny* Extension( TUid aUid );
+        /**
+         * @see CHsContentPublisher
+         */    
+        TAny* GetProperty( TProperty aProperty );
 
-    // from MAiPropertyExtension
-
-        TAny* GetPropertyL( TInt aProperty );
-
-        void SetPropertyL( TInt aProperty, TAny* aValue );
-
-    // from MAiEventHandlerExtension
-
+        /**
+         * @see CHsContentPublisher
+         */   
         void HandleEvent( TInt aEvent, const TDesC& aParam );
-
+        
     // From MPluginDataChangeObserver
 
         void PluginDataChanged( const RPointerArray<CCalInstance>& aEntryArray,
@@ -92,7 +106,7 @@ NONSHARABLE_CLASS( CAICalendarPlugin2 ): public CAiContentPublisher,
 
     // New methods
     
-        void DoResumeL( TAiTransitionReason aReason );
+        void DoResumeL( TResumeReason aReason );
         
         void CreateIconsL();
         

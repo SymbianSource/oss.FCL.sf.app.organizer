@@ -1242,19 +1242,7 @@ void CCalenUnifiedEditor::HandleDialogPageEventL( TInt aEventID )
                             }
                         break;
                         }
-                    case ECalenEditorDescription:
-                        {
-                        CEikEdwin* edwin = static_cast<CEikEdwin*>( Control( focusControl ) );  
-                        if ( edwin && edwin->Text()->DocumentLength() == 0 )
-                            {
-                                ProcessCommandL( ECalenCmdAddDescription );
-                            }
-                        else
-                            {
-                                ProcessCommandL( ECalenCmdShowDescription );
-                            }
-                        break;
-                        }
+
                     default:
                         {
                         break;
@@ -2185,7 +2173,7 @@ TBool CCalenUnifiedEditor::TryToSaveNoteL()
         {
         // If save error occurs, display error message.
         DisplayErrorMsgL( error );
-       // HandleErrorL(error);
+        iUnifiedEditorControl->HandleErrorL(error);
         TRACE_EXIT_POINT;
         return EFalse;
         }
@@ -2248,7 +2236,7 @@ TInt CCalenUnifiedEditor::TryToSaveEntryWithEntryChangeL( TBool aForcedExit)
             }
 		}
     
-    if(!IsCreatingNewEntry())
+    if(!IsCreatingNewEntry() && !iEditorDataHandler->IsCalendarEditedL())
         {
         iServices->EntryViewL(iEditorDataHandler->PreviousDbCollectionId())
                                                 ->DeleteL(*iOriginalCalEntry);
@@ -2278,7 +2266,11 @@ TInt CCalenUnifiedEditor::TryToSaveEntryWithEntryChangeL( TBool aForcedExit)
                    newInstanceEndDate,
                    iUnifiedEditorControl->GetCalendarNameForEntryL() ) );
         }
-
+    if(!IsCreatingNewEntry() && iEditorDataHandler->IsCalendarEditedL())
+        {
+        iServices->EntryViewL(iEditorDataHandler->PreviousDbCollectionId())
+                                                ->DeleteL(*iOriginalCalEntry);
+        }
     iEntryUiOutParams.iSpare = (TUint32) entry->LocalUidL();
 
     CleanupStack::PopAndDestroy(entry);
@@ -2314,7 +2306,6 @@ void CCalenUnifiedEditor::TryToSaveNoteOnForcedExitL()
 
         CCalenEditorDataHandler::TAction action =
             EditorDataHandler().ShouldSaveOrDeleteOrDoNothingL();
-        
         if( iHasChosenRepeatType && iRepeatType == CalCommon::EThisAndAll ) 
         {
         // Check for the errors, with the entered data

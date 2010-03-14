@@ -260,6 +260,8 @@ void CCalenSvrDBManager::RegisterUserL(CCalenSvrDBManager::MCalenDBUser& aUser)
 
         case EStateDBClosed:
             iState = EStateOpeningDB;
+            //Chances of leave due to file corruption or no memory.
+            TRAPD(err,
             if( !iGlobalData )
                 {
                 iGlobalData = CCalenGlobalData::Instance();
@@ -270,7 +272,8 @@ void CCalenSvrDBManager::RegisterUserL(CCalenSvrDBManager::MCalenDBUser& aUser)
                     }
                 }
             iGlobalData->InstanceViewL();
-            OpenDatabaseCompletedL();
+				  );
+			OpenDatabaseCompletedL(err);
             break;
 
         default:
@@ -359,7 +362,7 @@ void CCalenSvrDBManager::HandlePropertyChange(const TUid& /*aCategory*/, const T
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void CCalenSvrDBManager::OpenDatabaseCompletedL()
+void CCalenSvrDBManager::OpenDatabaseCompletedL(TInt aErrorVal)
     {
     TRACE_ENTRY_POINT;
     switch(iState)
@@ -368,7 +371,7 @@ void CCalenSvrDBManager::OpenDatabaseCompletedL()
             {
             if (iUsers.Count() > 0)
                 {
-                NotifyUsersL();
+                NotifyUsersL(aErrorVal);
                 iState = EStateDBOpen;
                 }
             else
@@ -581,7 +584,7 @@ void CCalenSvrDBManager::RestoreFinishedL()
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void CCalenSvrDBManager::NotifyUsersL(void)
+void CCalenSvrDBManager::NotifyUsersL(TInt aErrorVal)
     {
     TRACE_ENTRY_POINT;
 
@@ -595,7 +598,14 @@ void CCalenSvrDBManager::NotifyUsersL(void)
 
     for( TInt i(0); i < users.Count(); ++i )
         {
-        users[i]->DatabaseOpened();
+        if(aErrorVal != KErrNone)
+        	{
+        	users[i]->HandleError();
+        	}
+         else
+         	{
+         	users[i]->DatabaseOpened();
+         	}
         }
 
     CleanupStack::PopAndDestroy( &users );

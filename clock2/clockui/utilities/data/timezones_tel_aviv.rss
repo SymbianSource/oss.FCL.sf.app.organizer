@@ -5654,21 +5654,6 @@ RESOURCE LOCALIZED_TIMEZONE r_tz_wallis_futuna_wallis
 		};  }
 		
 	
-RESOURCE LOCALIZED_TIMEZONE r_tz_west_sahara_el_aaiun
-	{
-	time_zone_id = 256;
-	standard_name = "default";
-	daylight_name = "";
-	short_standard_name = "";
-	short_daylight_name = "";
-	cities = 
-		{
-		TIMEZONE_CITY
-			{
-			city_group_id = 241;
-			city_name = qtn_clk_city_west_sahara_el_aaiun;
-			}
-		};  }
 		
 		
 RESOURCE LOCALIZED_TIMEZONE r_tz_zambia_lusaka
@@ -5716,7 +5701,7 @@ RESOURCE LOCALIZED_TIMEZONE r_tz_macau_macau
 		{
 		TIMEZONE_CITY
 			{
-			city_group_id = 242;
+			city_group_id = 241;
 			city_name = qtn_clk_city_macau;
 			}
 		};  }
@@ -5732,7 +5717,7 @@ RESOURCE LOCALIZED_TIMEZONE r_tz_usa_louisville
 		{		
 		TIMEZONE_CITY
 			{
-			city_group_id = 243;
+			city_group_id = 242;
 			city_name = qtn_clk_city_usa_louisville;
 			}
 		};	}

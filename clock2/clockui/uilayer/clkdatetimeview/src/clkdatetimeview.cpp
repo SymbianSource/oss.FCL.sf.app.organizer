@@ -3310,8 +3310,7 @@ TBool CClkDateTimeView::CheckForDSTChangesL()
                 default:
                     break;
                 }
-
-            if( KHoursInDay > Abs( hourDifference.Int() ) )
+            if( ( KHoursInDay > Abs( hourDifference.Int() ) ) && tzHandle.IsDaylightSavingOnL( *timeZoneId,actualisedRule.iTimeOfChange ) )
                 {
                 // If there is a match, save the index and break.
                 // We've got the rule and there's no need to continue with other rules.

@@ -419,7 +419,7 @@ EXPORT_C CCalInstance* CalenActionUiUtils::FindPossibleInstanceL(
     // match the LocalUid to the incorrect instance in a series.
     for ( TInt i=0; i < instances.Count() && !result; ++i )
         {
-        if( instances[i]->Entry().LocalUidL() == aId.iEntryLocalUid )
+        if( (instances[i]->InstanceIdL().iCollectionId == aId.iColId) && (instances[i]->Entry().LocalUidL() == aId.iEntryLocalUid )) // comparing the collection id and Local Uid 
             {
             // Check the instance time matches.
             if( instances[i]->StartTimeL().TimeLocalL() == aId.iInstanceTime )

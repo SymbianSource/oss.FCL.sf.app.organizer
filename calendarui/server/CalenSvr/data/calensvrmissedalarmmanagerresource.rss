@@ -28,6 +28,7 @@ NAME CLMA
 #include <AvkonIcons.hrh>
 #include <avkon.mbg>
 #include <calensvrmissedalarmmanager.loc>
+#include <calendar.loc>
 
 RESOURCE RSS_SIGNATURE
     { 
@@ -65,5 +66,21 @@ RESOURCE AVKON_GROUPED_NOTE_TEXTS r_missed_alarm_ui_ungrouped
 	singular_label = r_missed_alarm_ungroup_singular;
 	plural_label   = r_missed_alarm_ungroup_plural;
 	}
+
+RESOURCE TBUF r_cale_db_personal
+    {
+    buf = qtn_cale_db_personal; 
+    }
+
+RESOURCE TBUF r_cale_db_family
+    {
+    buf = qtn_cale_db_family; 
+    }
+
+RESOURCE TBUF r_cale_db_friends
+    {
+    buf = qtn_cale_db_friends; 
+    }
+
 
 // End of File

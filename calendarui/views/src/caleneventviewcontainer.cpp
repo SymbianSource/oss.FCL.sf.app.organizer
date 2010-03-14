@@ -81,7 +81,7 @@
 #include "calendar.hrh"
 #include "calenentryutil.h"
 #include "CalenUid.h"   // KUidCalendar
-#include "calenlocationutil.h"
+#include <calenlocationutil.h>
 #include "CalendarPrivateCRKeys.h"
 #include "calenattachmentutils.h"
 #include "calenglobaldata.h"
@@ -561,17 +561,20 @@ void CCalenEventViewContainer::HandlePointerEventL(const TPointerEvent& aPointer
     			iTextEditor->SetFocus(ETrue);
     			
     			// TODO: Uncomment this when enabling attachment support
-    			
-    			if(iEventViewData->AttachmentCount())
+    			if(iEventViewData)
     			    {
-                    CTextView *textView = iTextEditor->TextView();
+    		
+    			    if(iEventViewData->AttachmentCount())
+    			        {
+    			        CTextView *textView = iTextEditor->TextView();
                     
-                    TTmPosInfo2 *posInfo = new(ELeave) TTmPosInfo2;
-                    textView->FindXyPosL(aPointerEvent.iPosition,*posInfo);
+    			        TTmPosInfo2 *posInfo = new(ELeave) TTmPosInfo2;
+    			        textView->FindXyPosL(aPointerEvent.iPosition,*posInfo);
                     
-                    // Check if it is tapped on any attachment name, if yes then open that attachment
-                    CheckAndOpenTappedAttachment(posInfo);
-                    delete posInfo;
+    			        // Check if it is tapped on any attachment name, if yes then open that attachment
+    			        CheckAndOpenTappedAttachment(posInfo);
+    			        delete posInfo;
+    			        }
     			    }
     			break;
     			}
@@ -2741,7 +2744,7 @@ void CCalenEventViewContainer::OpenViewerL(TInt attachmentToBeOpened)
     
     // Get the file handler
     RFile file = iServices.GetAttachmentData()->GetAttachmentFileL( attachmentToBeOpened );
-    
+    CleanupClosePushL(file);
     // Hide the toolbar before opening the attachment
     MCalenToolbar* toolbar = iServices.ToolbarOrNull();
     if(toolbar && toolbar->IsVisible())
@@ -2751,6 +2754,8 @@ void CCalenEventViewContainer::OpenViewerL(TInt attachmentToBeOpened)
     
     //open the attachment
     OpenAttachmentViewerL(file, *this);
+    CleanupStack::PopAndDestroy(&file);
+
     
     // Unhide the toolbar after coming back
     if(toolbar)
@@ -2923,49 +2928,31 @@ CCalInstance* CCalenEventViewContainer::FindPossibleInstanceL(
 // Opens a particular attachment
 // -----------------------------------------------------------------------------
 //
-void CCalenEventViewContainer::OpenAttachmentViewerL(RFile& file, MAknServerAppExitObserver& /*aExitObserver*/)
+void CCalenEventViewContainer::OpenAttachmentViewerL(RFile& aFile, MAknServerAppExitObserver& /*aExitObserver*/)
     {
     TRACE_ENTRY_POINT;
     
     TBuf<250> fileName;
-    file.FullName(fileName);
-    TDataType datatype( CCalenAttachmentUtils::GetMimeTypeL(fileName) );
-    
+    aFile.FullName(fileName);
+    TDataType datatype( CCalenAttachmentUtils::GetMimeType(aFile) );
+
     TInt ret = KErrNone;
-    
-    file.Close();
-    RFs& fs = CEikonEnv::Static()->FsSession();
-                    
-    //open the file, before giving it to Notepad.
-    TInt err1 = file.Open( fs, fileName, EFileRead | EFileShareReadersOnly );
-    CleanupClosePushL( file );        
     
     if(datatype == KNotePadTextDataType())
         {
         const TDesC& notepadTitle = _L("NotePad");
-        // file handle ownership transferred.
-        
-        // 1.File handle from arg has problem for notes since junk chars are reported in file.
-        // so we use another file handle exclusively open with filename an pass to note viewer.   
-        // 
-        // 2.Pass ETrue to 4th param  ExecFileViewerL , to guess encoding.
-        RFile fileForNotes;
-        TInt err = fileForNotes.Open( fs, fileName, EFileRead | EFileShareReadersOnly );
-        CleanupClosePushL( fileForNotes );
-        ret = CNotepadApi::ExecFileViewerL( fileForNotes, 
+        ret = CNotepadApi::ExecFileViewerL( aFile, 
                                            &notepadTitle,
                                            ETrue,
                                            ETrue,
                                            KCharacterSetIdentifierIso88591 );
         
-        CleanupStack::PopAndDestroy(&fileForNotes);
         }
     else
         {
         //doc handler will open the other files (other than text file).
-        TRAP( ret, iDocHandler->OpenFileEmbeddedL( file, datatype ) );
+        TRAP( ret, iDocHandler->OpenFileEmbeddedL( aFile, datatype ) );
         }
-    CleanupStack::PopAndDestroy(&file);
     
     switch(ret)
         {

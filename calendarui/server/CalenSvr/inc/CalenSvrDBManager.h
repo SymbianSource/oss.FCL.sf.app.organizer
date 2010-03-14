@@ -53,6 +53,7 @@ public:
     public:
         virtual void DatabaseOpened() = 0;
         virtual void DatabaseTemporarilyClosed() = 0;
+    	virtual void HandleError() = 0;  
         };
 
 public: // Construction and destruction
@@ -84,7 +85,7 @@ public: // from   MCalProgressCallBack
     void Progress(TInt aPercentageCompleted);
 
 private:
-    void OpenDatabaseCompletedL();
+    void OpenDatabaseCompletedL(TInt aErrorVal = KErrNone);
 
 private: // Timer handling
     void StartClosingTimer();
@@ -103,7 +104,7 @@ private: // new functions
     /**
      *
      **/
-    void NotifyUsersL();
+    void NotifyUsersL(TInt aErrorVal = KErrNone);
 
 private:
     enum TState 

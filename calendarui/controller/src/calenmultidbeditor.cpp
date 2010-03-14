@@ -430,6 +430,26 @@ void CCalenMultiDBEditor::PreLayoutDynInitL()
     {
     TRACE_ENTRY_POINT;
     
+    if(iEditFlag)
+        {
+        TBuf8<KBuffLength> keyBuff;    
+        keyBuff.AppendNum(ESyncConfigEnabled);
+        TBool syncConfigEnabled = EFalse;
+        TPckgC<TBool> pkgSyncConfigEnabled(syncConfigEnabled);
+        
+        TRAPD(err,pkgSyncConfigEnabled.Set(iCalendarInfo.PropertyValueL(keyBuff)));
+        syncConfigEnabled = pkgSyncConfigEnabled();
+        
+        //If this sync property(ESyncConfigEnabled) is set and enabled , 
+        //then sync on/off should not be shown be to the user.
+        //This behaviour is only for certain calendars created 
+        //from device sync with this property set.
+        if(err == KErrNone && syncConfigEnabled)
+            {
+            DeleteLine(ECalenMultiDbSyncStatus);
+            }
+        }
+    
     // Set data to controls in the editor.
     SetDataToFormL();
     
@@ -742,12 +762,15 @@ TBool CCalenMultiDBEditor::SaveNoteL( TInt aButtonId )
     		}
 
         //Filling the sync value into metadata
-        TBuf8<KBuffLength> keyBuff;
-        keyBuff.Zero();
-        keyBuff.AppendNum(ESyncStatus);
+       	if(ControlOrNull(ECalenMultiDbSyncStatus))
+       	    {
+            TBuf8<KBuffLength> keyBuff;
+            keyBuff.Zero();
+            keyBuff.AppendNum(ESyncStatus);
 
-        TPckgC<TBool> pkgSyncStatus(iSyncStatus);
-        iCalendarInfo.SetPropertyL(keyBuff, pkgSyncStatus);
+            TPckgC<TBool> pkgSyncStatus(iSyncStatus);
+            iCalendarInfo.SetPropertyL(keyBuff, pkgSyncStatus);
+       	    }
 
         if( IsVisiblityFieldEditedL( iCalendarStatus ) )
             {
@@ -1128,6 +1151,12 @@ void CCalenMultiDBEditor::SetTitlePaneL()
 void CCalenMultiDBEditor::SetSyncFieldL( TBool aSyncVal )
     {
     TRACE_ENTRY_POINT;
+    
+    if(!ControlOrNull(ECalenMultiDbSyncStatus))
+        {
+        return;
+        }
+    
     HBufC* syncString( NULL );
     CEikEdwin* syncFieldText =( CEikEdwin* )Control( ECalenMultiDbSyncStatus );
     if( EFalse == aSyncVal )

@@ -2593,5 +2593,35 @@
 //w:
 //r: 9.2
 #define qtn_options_mark_undone "Not Done"
+
+//d: Default calendar name.
+//l: list_double_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_db_calendar_name "Calendar"
+
+//d: Default calendar name with Calendar(01), Calendar(02) etc..
+//l: list_double_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_db_calendar_default_name "Calendar(%U)"
+
+//d: Name for personal calendar.
+//l: list_double_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_db_personal "Personal"
+
+//d: name for family calendar.
+//l: list_double_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_db_family "Family"
+
+//d: name for friends calendar.
+//l: list_double_pane_t1
+//w:
+//r: 9.2
+#define qtn_cale_db_friends "Friends"
         
 // End of File

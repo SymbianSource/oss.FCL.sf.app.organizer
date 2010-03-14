@@ -574,7 +574,7 @@ EXPORT_C CGulIcon* CCalenIcons::GetIconL( MCalenServices::TCalenIcons aIndex ) c
         	break;
         case MCalenServices::ECalenMeetingIconMissed:
             {
-            icon = CreateBitmapSkinnedIconL( KAknsIIDQgnIndiCdrMeeting, 
+            icon = CreateBitmapSkinnedIconL( KAknsIIDQgnIndiCdrMeetingMissedNew,
                                                           iIconFile, 
                                                           EMbmCalendarQgn_indi_cdr_meeting_missed_new, 
                                                           EMbmCalendarQgn_indi_cdr_meeting_missed_new_mask );
@@ -582,7 +582,7 @@ EXPORT_C CGulIcon* CCalenIcons::GetIconL( MCalenServices::TCalenIcons aIndex ) c
             break;     
         case MCalenServices::ECalenBirthdayIconMissed:
             {
-            icon = CreateBitmapSkinnedIconL( KAknsIIDQgnIndiCdrBirthday, 
+            icon = CreateBitmapSkinnedIconL(KAknsIIDQgnIndiCdrBirthdayMissedNew, 
                                                           iIconFile, 
                                                           EMbmCalendarQgn_indi_cdr_birthday_missed_new, 
                                                           EMbmCalendarQgn_indi_cdr_birthday_missed_new_mask );
@@ -590,7 +590,7 @@ EXPORT_C CGulIcon* CCalenIcons::GetIconL( MCalenServices::TCalenIcons aIndex ) c
             break;     
         case MCalenServices::ECalenDaynoteIconMissed:
             {
-            icon = CreateBitmapSkinnedIconL( KAknsIIDQgnIndiCdrReminder, 
+            icon = CreateBitmapSkinnedIconL( KAknsIIDQgnIndiCdrReminderMissedNew,
                                                           iIconFile, 
                                                           EMbmCalendarQgn_indi_cdr_reminder_missed_new, 
                                                           EMbmCalendarQgn_indi_cdr_reminder_missed_new_mask );
@@ -598,7 +598,7 @@ EXPORT_C CGulIcon* CCalenIcons::GetIconL( MCalenServices::TCalenIcons aIndex ) c
             break;     
         case MCalenServices::ECalenToDoIconMissed:
             {
-            icon = CreateBitmapSkinnedIconL( KAknsIIDQgnIndiCdrTodo, 
+            icon = CreateBitmapSkinnedIconL( KAknsIIDQgnIndiCdrTodoUndoneMissedNew, 
                                                           iIconFile, 
                                                           EMbmCalendarQgn_indi_cdr_todo_undone_missed_new, 
                                                           EMbmCalendarQgn_indi_cdr_todo_undone_missed_new_mask );

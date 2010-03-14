@@ -68,6 +68,8 @@ LIBRARY     	cenrepnotifhandler.lib  // CenRep Notify Handler
 LIBRARY         missedalarmstore.lib
 LIBRARY         calencommonutils.lib
 LIBRARY         caleninterimutils2.lib
+LIBRARY         efsrv.lib
+LIBRARY         PlatformEnv.lib
 
 
 sourcepath      ../data

@@ -320,23 +320,15 @@ void CAICalendarPlugin2::CreateIconsL(void)
     iMasks.Compress();
     }    
 
-void CAICalendarPlugin2::Resume( TAiTransitionReason aReason )
+void CAICalendarPlugin2::Resume( TResumeReason aReason )
     {
     TRAP_IGNORE( DoResumeL( aReason ) );
     }
 
-void CAICalendarPlugin2::DoResumeL( TAiTransitionReason aReason )
+void CAICalendarPlugin2::DoResumeL( TResumeReason aReason )
     {
-    if( aReason == EAiIdleForeground ||
-        aReason == EAiBacklightOn ||
-        aReason == EAiSystemStartup ||
-        aReason == EAiGeneralThemeChanged )
+    if( aReason == EForeground )
         {
-        if( aReason == EAiGeneralThemeChanged )
-            {
-            // Reset for republishing. Especially icons!
-            iPublishedDataStore.Reset();
-            }
         if( !iEngine )
             {
             iEngine = CAIAgendaPluginEngineIf::NewL( *this, ECalendarAndTodoObserver );
@@ -348,13 +340,20 @@ void CAICalendarPlugin2::DoResumeL( TAiTransitionReason aReason )
         }
     }
 
-void CAICalendarPlugin2::Suspend( TAiTransitionReason /*aReason*/ )
+void CAICalendarPlugin2::Suspend( TSuspendReason aReason )
     {
-    delete iEngine;
-    iEngine = NULL;
+    if ( aReason == EGeneralThemeChange )
+        {
+        // Reset for republishing. Especially icons!
+        iPublishedDataStore.Reset();
+        }
+    }
+	
+void CAICalendarPlugin2::Start( TStartReason /*aReason*/ )
+    {    
     }
 
-void CAICalendarPlugin2::Stop( TAiTransitionReason /*aReason*/ )
+void CAICalendarPlugin2::Stop( TStopReason /*aReason*/ )
     {
     delete iEngine;
     iEngine = NULL;
@@ -462,31 +461,15 @@ void CAICalendarPlugin2::ConfigureL( RAiSettingsItemArray& aSettings )
     aSettings.ResetAndDestroy();
     }
 
-TAny* CAICalendarPlugin2::Extension( TUid aUid )
+TAny* CAICalendarPlugin2::GetProperty( TProperty aProperty )
     {
-    if (aUid == KExtensionUidProperty)
-        {
-        return static_cast<MAiPropertyExtension*>(this);
-        }
-    else if (aUid == KExtensionUidEventHandler)
-        {
-        return static_cast<MAiEventHandlerExtension*>(this);
-        }
-    return NULL;
+    TAny* result( NULL );
+	
+    TRAP_IGNORE( result = iConstantData->GetPropertyL( aProperty ) );
+    
+	return result;
     }
 
-TAny* CAICalendarPlugin2::GetPropertyL( TInt aProperty )
-    {
-    return iConstantData->GetPropertyL( aProperty );
-    }
-
-void CAICalendarPlugin2::SetPropertyL( TInt aProperty, TAny* aValue )
-    {
-    if( aValue )
-        {
-        iConstantData->SetPropertyL( aProperty, aValue );
-        }
-    }
 
 void CAICalendarPlugin2::HandleEvent( TInt aEvent, const TDesC& aParam )
     {

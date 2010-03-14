@@ -108,7 +108,7 @@ void CCalenAttachmentUi::ConstructL()
     notificationArray.Append(ECalenNotifyInstanceDeleted);
     notificationArray.Append(ECalenNotifyMarkedEntryDeleted);
     notificationArray.Append(ECalenNotifyMultipleEntriesDeleted);
-    notificationArray.Append(ECalenNotifyDialogClosed);
+    //notificationArray.Append(ECalenNotifyDialogClosed);
     notificationArray.Append(ECalenNotifyAttachmentViewerClosed);
     iController.RegisterForNotificationsL( this, notificationArray );
     notificationArray.Reset();
@@ -161,12 +161,12 @@ TBool CCalenAttachmentUi::HandleCommandL(const TCalenCommand& aCommand)
                 {                                
                 iAttachmentModel->Reset();
                 iController.BroadcastNotification(ECalenNotifyAttachmentRemoved);
+                RemoveTemporaryFiles();
                 }                    
             else
                 {
                 iAttachmentModel->DeleteAttachment(0);
                 }
-            RemoveTemporaryFiles();
             attachmentInfoList.Close(); 
             }
             break;
@@ -231,7 +231,7 @@ void CCalenAttachmentUi::DoHandleNotificationL(const TCalenNotification aNotific
         case ECalenNotifyEntryClosed:
         case ECalenNotifyMarkedEntryDeleted:
         case ECalenNotifyMultipleEntriesDeleted:
-        case ECalenNotifyDialogClosed:
+        //case ECalenNotifyDialogClosed:
             {
             if(!(iAddAttachmentFromViewer) && !(iAttachmentAlreadyExists))
                 {
@@ -245,12 +245,13 @@ void CCalenAttachmentUi::DoHandleNotificationL(const TCalenNotification aNotific
             {
             if(iAddAttachmentFromViewer)
                 {
-                // add attachments to the entry being viewed in event viewer
-                AddAttachmentsToEntryL();
+                
                 
                 // Do not reset the model if the attachment list has been opened from the editor.
                 if(!iController.IsEditorActive())
                     {
+                    // add attachments to the entry being viewed in event viewer
+                    AddAttachmentsToEntryL();
                     // clear calendar editor's folder
                     RemoveTemporaryFiles();
                     
@@ -693,9 +694,7 @@ void CCalenAttachmentUi::AddAttachmentsToEntryL()
                         
             attachmentInfoList.Close();
             
-            // If user is adding it from editors, then dont save it now as there is a chance that user discards these
-            // changes. If user saves it, then editors will save these newly added attachments.
-            if(iController.IsEditorActive())
+            if(!iController.IsEditorActive())
                 {
                     CCalEntryView* entryView = iController.Services().EntryViewL(context.InstanceId().iColId);
                     CCalenInterimUtils2::StoreL( *entryView, *entry, ETrue );

@@ -22,7 +22,6 @@
 #include <StringLoader.h>
 #include <aicontentmodel.h>
 #include <aiutility.h>
-#include <aipropertyextension.h>
 #include <AknUtils.h>
 
 // CONSTANTS
@@ -136,38 +135,25 @@ const TDesC& CAICalendarPlugin2ConstantData::MakeEventOnL( const TTime& aTime )
     return *iNextEventOnCombined;
     }
 
-void CAICalendarPlugin2ConstantData::SetPropertyL( TInt aProperty, TAny* aValue )
+TAny* CAICalendarPlugin2ConstantData::GetPropertyL( CHsContentPublisher::TProperty aProperty )
     {
-    if( aProperty == EAiPublisherInfo )
+    if( aProperty == CHsContentPublisher::EPublisherContent )
         {
-        ASSERT( aValue );
-        
-        const TAiPublisherInfo* info( 
-                static_cast<const TAiPublisherInfo*>( aValue ) );
-                
-        iInfo = *info;
-        }        
-    }
-
-TAny* CAICalendarPlugin2ConstantData::GetPropertyL( TInt aProperty )
-    {
-    switch( aProperty )
-    {
-    case EAiPublisherInfo:
-        return &iInfo;
-
-    case EAiPublisherContent:
         return iContent;
-
-    case EAiPublisherResources:
+        }
+    else if( aProperty == CHsContentPublisher::EPublisherResources )
+        {
         return iResources;
-
-    case EAiPublisherEvents:
+        }
+    else if( aProperty == CHsContentPublisher::EPublisherEvents )
+        {
         return iEvents;
-
-    case EAiPluginName:
+        }
+    else if( aProperty == CHsContentPublisher::EPluginName )
+        {
         return StringLoader::LoadL( R_QTN_AI_CALE_PLUGIN_NAME );
-    }
+        }
+		
     return NULL;
     }
 

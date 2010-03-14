@@ -68,4 +68,4 @@ LIBRARY       bafl.lib
 LIBRARY       eikctl.lib
 LIBRARY       flogger.lib
 LIBRARY       featmgr.lib
-
+LIBRARY       Pbk2Presentation.lib

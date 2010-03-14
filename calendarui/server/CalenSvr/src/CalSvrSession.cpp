@@ -165,12 +165,16 @@ void CCalSvrSession::CancelInitializeL()
         TRACE_EXIT_POINT;
         return;
         }
-
-    Server()->UnregisterUserL(*this);
-    iRegistered = EFalse;
-
-    iInitMessage.Complete(KErrCancel);
-    iInitActive = EFalse;
+	if(iRegistered)
+    	{
+    	Server()->UnregisterUserL(*this);
+		iRegistered = EFalse;
+    	}
+	if(!iInitMessage.IsNull() )
+		{
+		iInitMessage.Complete(KErrCancel);
+        iInitActive = EFalse;
+		}
     
     TRACE_EXIT_POINT;
     }
@@ -230,6 +234,25 @@ void CCalSvrSession::DatabaseOpened()
     
     TRACE_EXIT_POINT;
     }
+
+
+// -----------------------------------------------------------------------------
+// ?classname::?member_function
+// ?implementation_description
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//srinath
+void CCalSvrSession::HandleError()
+	{
+	TRACE_ENTRY_POINT;
+	
+	if(!iInitMessage.IsNull() )
+		{
+		iInitMessage.Complete(KErrNone);
+		}
+	
+	TRACE_EXIT_POINT;
+	}
 
 // -----------------------------------------------------------------------------
 // ?classname::?member_function

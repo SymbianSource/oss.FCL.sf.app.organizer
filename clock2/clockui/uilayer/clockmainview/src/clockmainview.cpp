@@ -488,11 +488,10 @@ void CClockMainView::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
     // Re-initialize the alarm id array.
     iAlarmArray->InitIdList();
     
-    if( ( KClockAppMainViewId == aCustomMessageId ) && iContainer )
+    // To update the scroll bar when opened from indicator pane.
+    if( iContainer )
         {
-        AppUi()->RemoveFromStack( iContainer );
-        delete iContainer;
-        iContainer = NULL;
+        iContainer->ListBox()->SetCurrentItemIndexAndDraw( KZerothIndex );
         }
     
     CClockAppUi* clockAppUi( static_cast< CClockAppUi* > ( AppUi() ) );

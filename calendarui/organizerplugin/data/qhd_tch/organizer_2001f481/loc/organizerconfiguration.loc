@@ -25,4 +25,4 @@
 // l: listrow_wgtman_pane_t2
 // w:
 // r: TB9.2
-#define qtn_organizer_widget_description  "Organizer Widget"
+#define qtn_organizer_widget_description  "Informs you of calendar events. Provides quick access to calendar."
