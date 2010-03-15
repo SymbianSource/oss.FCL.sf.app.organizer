@@ -43,6 +43,8 @@
 #include <calsession.h>
 #include <calenviewutils.h>
 #include <calcalendarinfo.h>
+#include <caleninstanceid.h>            // TCalenInstanceId
+
 
 #include "calendarui_debug.h"           // Debug.
 #include "CalendarVariant.hrh"
@@ -56,6 +58,7 @@
 #include "calendar.hrh"
 #include "CalenUid.h"
 #include "CalendarPrivateCRKeys.h"
+#include "multicaluidialog.h"
 
 const TInt KAbbreviatedWeekNames[] =
     {
@@ -113,6 +116,13 @@ CCalenNativeView::~CCalenNativeView()
     
     delete iSPUtils;
 
+    if( iAsyncCallback )
+        {
+        iAsyncCallback->Cancel();
+        delete iAsyncCallback;
+        iAsyncCallback = NULL;
+        }
+    
     TRACE_EXIT_POINT;
     }
 
@@ -511,6 +521,143 @@ void CCalenNativeView::DynInitMenuBarL( TInt /*aResourceId*/, CEikMenuBar* aMenu
     }
 
 // ----------------------------------------------------------------------------
+// CCalenNativeView::CopytoCalendarsL
+// From CAknView
+// Return the UID of the day view
+// (other items were commented in a header)
+// ----------------------------------------------------------------------------
+//
+void CCalenNativeView::CopyToCalendarsL()
+    {
+    TRACE_ENTRY_POINT;
+    
+    iAsyncCallback->CallBack();
+    
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenNativeView::AsyncCopyToCalendarsL
+// From CAknView
+// Return the UID of the day view
+// (other items were commented in a header)
+// ----------------------------------------------------------------------------
+//
+TInt CCalenNativeView::AsyncCopyToCalendarsL( TAny* aThisPtr )
+    {
+    TRACE_ENTRY_POINT;
+    
+    static_cast<CCalenNativeView*>(aThisPtr)->CopyEntryToCalendarsL();
+    
+    TRACE_EXIT_POINT;
+    return 0;
+
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenNativeView::CopyEntryToCalendarsL
+// From CAknView
+// Return the UID of the day view
+// (other items were commented in a header)
+// ----------------------------------------------------------------------------
+//
+void CCalenNativeView::CopyEntryToCalendarsL()
+    {
+    TRACE_ENTRY_POINT;
+    
+    // Create settings own titlepane and navipane, and swap with existing ones
+    CEikStatusPane* sp = CEikonEnv::Static()->AppUiFactory()->StatusPane();
+
+    // Hide the toolbar before we display settings menu
+    MCalenToolbar* toolbar = iServices.ToolbarOrNull();
+    if(toolbar)
+        {
+        toolbar->SetToolbarVisibilityL(EFalse);  
+        }
+    iSPUtils->UnderLineTitleText( EFalse );
+
+    // Titlepane
+    CAknTitlePane* newtp = new( ELeave ) CAknTitlePane();
+    CleanupStack::PushL( newtp );
+    CCoeControl* oldtp = sp->SwapControlL( TUid::Uid(EEikStatusPaneUidTitle), newtp );
+    CleanupStack::Pop( newtp ); // ownership is passed to statuspane
+    TRect oldRect( 0, 0, 0, 0 );
+    if( oldtp )
+        {
+        CleanupStack::PushL( oldtp );
+        oldRect = oldtp->Rect();
+        CCoeControl* ctrl = sp->ContainerControlL( TUid::Uid( EEikStatusPaneUidTitle ));
+        newtp->SetContainerWindowL( *ctrl );
+        newtp->ConstructL();
+        newtp->SetRect(oldRect);
+        newtp->ActivateL();
+        }        
+
+    // NaviPane
+    CAknNavigationControlContainer* newnp = new( ELeave )CAknNavigationControlContainer();
+    CleanupStack::PushL( newnp );
+    CCoeControl* oldnp = sp->SwapControlL( TUid::Uid( EEikStatusPaneUidNavi ), newnp );
+    CleanupStack::Pop( newnp ); // ownership is passed to statuspane
+    if( oldnp )
+        {
+        CleanupStack::PushL( oldnp );
+        oldRect = oldnp->Rect();
+        CCoeControl* ctrl = sp->ContainerControlL( TUid::Uid( EEikStatusPaneUidNavi ) );
+        newnp->SetContainerWindowL( *ctrl );
+        newnp->ConstructL();
+        newnp->SetRect( oldRect );
+        newnp->PushDefaultL();
+        newnp->ActivateL();
+        }
+
+    MCalenContext& context = iServices.Context();
+    TCalLocalUid instanceId = context.InstanceId().iEntryLocalUid;
+
+    CCalEntry* entry = iServices.EntryViewL(context.InstanceId().iColId)->FetchL(instanceId);
+    CleanupStack::PushL(entry);
+
+    RPointerArray<CCalEntry> calentryArray;
+    calentryArray.Append( entry );
+
+    // Launch the Calendar List Dialiog.
+    CMultiCalUiDialog* calenDbListDialog = CMultiCalUiDialog::NewLC(calentryArray, EFalse);
+    TInt err = KErrNone;
+    // Execute.
+    TRAP( err,calenDbListDialog->LaunchL() );
+    CleanupStack::PopAndDestroy( calenDbListDialog );
+
+    iSPUtils->UnderLineTitleText( EFalse );
+    // Unhide the toolbar when settings is closed
+    if(toolbar)
+        {
+        toolbar->SetToolbarVisibilityL(ETrue); 
+        }
+    
+    CleanupStack::Pop(entry);
+    calentryArray.ResetAndDestroy(); 
+    
+    // When setting is closed, swap back old titlepane and navipane
+    if( oldnp && sp->SwapControlL( TUid::Uid(EEikStatusPaneUidNavi), oldnp ) )
+        {
+        CleanupStack::Pop( oldnp );
+        delete newnp;
+        oldnp->ActivateL();
+        }
+
+    if( oldtp && sp->SwapControlL( TUid::Uid(EEikStatusPaneUidTitle), oldtp ) )
+        {
+        CleanupStack::Pop( oldtp );
+        delete newtp;
+        oldtp->ActivateL();
+        }
+    
+    BeginRepopulationL();
+    
+    TRACE_EXIT_POINT;
+    
+    }
+
+// ----------------------------------------------------------------------------
 // C++ constructor can NOT contain any code, that
 // might leave.
 // ----------------------------------------------------------------------------
@@ -566,6 +713,8 @@ void CCalenNativeView::CommonConstructL( TInt aViewResource )
     notificationArray.Reset();
     
     iCommandProcessing = EFalse;
+    TCallBack callback(CCalenNativeView::AsyncCopyToCalendarsL,this);
+    iAsyncCallback = new(ELeave) CAsyncCallBack(callback,CActive::EPriorityStandard);
 
     TRACE_EXIT_POINT;
     }

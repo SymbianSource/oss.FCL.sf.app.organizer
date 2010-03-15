@@ -54,6 +54,8 @@ _LIT( KPhoneCalendar,"Personal" );
 _LIT( KExtCalendar,"Ext calendar" );
 const TInt KBuffLength = 24;
 
+_LIT(KPhoneCalendarName,"PhoneCalendar");
+
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
@@ -1469,9 +1471,17 @@ EXPORT_C void CCalenGlobalData::GetAllCalendarInfoL(
 	{
 	TRACE_ENTRY_POINT;
 		
-	for(TInt index=0;index<iCalendarInfoList.Count();index++)
+	for(TInt index=0;index < iCalendarInfoList.Count();index++)
 	    {
-	    aCalendarInfoList.AppendL(iCalendarInfoList[index]);
+        TPtrC fileNamePtr = iCalendarInfoList[index]->FileNameL();
+	    TPtrC calendarNamePtr = iCalendarInfoList[index]->NameL();
+	        
+	    //We dont want default calendar PhoneCalendar tobe shown in calendarui.
+	    if(fileNamePtr.CompareF(KCalendarDatabaseFilePath) 
+	                && calendarNamePtr.CompareF(KPhoneCalendarName))
+	            {
+                aCalendarInfoList.AppendL(iCalendarInfoList[index]);
+	            }
 	    }
 	
 	TRACE_EXIT_POINT;

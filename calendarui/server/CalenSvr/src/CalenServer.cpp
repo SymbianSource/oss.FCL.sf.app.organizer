@@ -51,6 +51,7 @@ const TInt KBuffLength = 128;
 
 
 const TInt KComma( ',' );
+_LIT(KPhoneCalendarName,"PhoneCalendar");
 
 // ================= MEMBER FUNCTIONS =======================
 //
@@ -337,6 +338,7 @@ TInt CCalenServer::CreateCalendarFilesL()
             {
             TBuf<KMaxFileName> calendarFileName;
             calendarFileName.Append(KCalendarDatabaseFilePath);
+            calendarInfo->SetEnabled(EFalse);
             TRAPD(error,session->CreateCalFileL(calendarFileName,*calendarInfo));
 			User::LeaveIfError(error);
             }
@@ -377,10 +379,14 @@ void CCalenServer::ReadCalendarNamesFromResourceL(CDesC16ArrayFlat& aCalendarNam
     
     BaflUtils::NearestLanguageFile( fsSession, resourceFileName );
     
-   // __PRINT(" resourcefileName : %s" , resourceFileName );
-
     resourceFile.OpenL(fsSession, resourceFileName );
     resourceFile.ConfirmSignatureL( 0 );
+    
+    //Phone calendar 
+       HBufC* phoneCalendarBuffer = KPhoneCalendarName().AllocLC();
+       aCalendarNames.AppendL(phoneCalendarBuffer->Des());
+       CleanupStack::PopAndDestroy( phoneCalendarBuffer );
+        
     // personal
         HBufC8* personalBuffer = resourceFile.AllocReadLC( R_CALE_DB_PERSONAL );    
        const TPtrC16 ptrPBuffer(( TText16*) personalBuffer->Ptr(),
@@ -465,6 +471,10 @@ void CCalenServer::PopulateCalendarColorListL( const TDesC& aRepositoryBuffer,
     
     TPtrC marker = aRepositoryBuffer;
     TInt calendarColorOffset;
+    
+    //For phone calendar 
+    aCalendarColors.Append(KRgbRed.Value());
+    
     while ((calendarColorOffset = marker.Locate(TChar(KComma)))
             != KErrNotFound)
         {

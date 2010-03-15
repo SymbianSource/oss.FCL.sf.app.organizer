@@ -503,52 +503,6 @@ TUid CCalenDayView::Id() const
     TRACE_EXIT_POINT;
     return KUidCalenDayView;
     }
-
-// ----------------------------------------------------------------------------
-// CCalenDayView::CopytoCalendarsL
-// From CAknView
-// Return the UID of the day view
-// (other items were commented in a header)
-// ----------------------------------------------------------------------------
-//
-void CCalenDayView::CopyToCalendarsL()
-    {
-
-    // Hide the toolbar before we display settings menu
-    MCalenToolbar* toolbar = iServices.ToolbarOrNull();
-    if(toolbar)
-        {
-        toolbar->SetToolbarVisibilityL(EFalse);  
-        }
-    iSPUtils->UnderLineTitleText( EFalse );
-    MCalenContext& context = iServices.Context();
-    TCalLocalUid instanceId = context.InstanceId().iEntryLocalUid;
-            
-    CCalEntry* entry = iServices.EntryViewL(context.InstanceId().iColId)->FetchL(instanceId);
-    CleanupStack::PushL(entry);
-    
-    RPointerArray<CCalEntry> calentryArray;
-    calentryArray.Append( entry );
-    
-    // Launch the Calendar List Dialiog.
-    CMultiCalUiDialog* calenDbListDialog = CMultiCalUiDialog::NewLC(calentryArray, ETrue);
-    TInt err = KErrNone;
-    // Execute.
-    TRAP( err,calenDbListDialog->LaunchL() );
-    CleanupStack::PopAndDestroy( calenDbListDialog );
-    
-    iSPUtils->UnderLineTitleText( EFalse );
-    // Unhide the toolbar when settings is closed
-    if(toolbar)
-        {
-        toolbar->SetToolbarVisibilityL(ETrue); 
-        }
-    CleanupStack::Pop(entry);
-    calentryArray.ResetAndDestroy();    
-    
-    BeginRepopulationL();
-    }
-
 // ----------------------------------------------------------------------------
 // CCalenDayView::ClearViewSpecificDataL
 // Clears any cached data for the specific view, e.g. currently

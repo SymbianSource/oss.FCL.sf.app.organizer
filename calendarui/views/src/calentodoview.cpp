@@ -906,50 +906,6 @@ TBool CCalenTodoView::IsViewSpecificDataNullL()
            ( iHighlightedRowNumber == KErrNotFound );
     }
 
-// ----------------------------------------------------------------------------
-// CCalenTodoView::CopyToCalendarsL
-// 
-// (other items were commented in a header)
-// ----------------------------------------------------------------------------
-//
-void CCalenTodoView::CopyToCalendarsL()
-    {
-    
-    // Hide the toolbar before we display settings menu
-       MCalenToolbar* toolbar = iServices.ToolbarOrNull();
-       if(toolbar)
-           {
-           toolbar->SetToolbarVisibilityL(EFalse);  
-           }
-
-       MCalenContext& context = iServices.Context();
-       TCalLocalUid instanceId = context.InstanceId().iEntryLocalUid;
-               
-       CCalEntry* entry = iServices.EntryViewL(context.InstanceId().iColId)->FetchL(instanceId);
-       CleanupStack::PushL(entry);
-       
-       RPointerArray<CCalEntry> entryArray;
-       entryArray.Append(entry);
-       
-       
-       // Launch the Calendar List Dialiog.
-       CMultiCalUiDialog* multiCalUiDialog = CMultiCalUiDialog::NewLC(entryArray , ETrue );
-       TInt err = KErrNone;
-       // Execute.
-       TRAP( err,multiCalUiDialog->LaunchL() );
-       CleanupStack::PopAndDestroy( multiCalUiDialog );
-       
-       // Unhide the toolbar when settings is closed
-       if(toolbar)
-           {
-           toolbar->SetToolbarVisibilityL(ETrue); 
-           }
-       
-       CleanupStack::Pop(entry);
-       entryArray.ResetAndDestroy();
-       
-       BeginRepopulationL();
-    }
 
 
 // ----------------------------------------------------------------------------

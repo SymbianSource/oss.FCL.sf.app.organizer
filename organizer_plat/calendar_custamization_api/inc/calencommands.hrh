@@ -68,6 +68,7 @@ enum TCalenCommandId
     ECalenNewDayNote,
     ECalenNewReminder,
     ECalenNewMeetingRequest,
+    ECalenNewMeetingTimeSpan,
     ECalenEditCurrentEntry,
     ECalenEditSeries,
     ECalenEditOccurrence,

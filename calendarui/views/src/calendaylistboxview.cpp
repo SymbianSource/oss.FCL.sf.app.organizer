@@ -234,7 +234,7 @@ void CCalenDayListBoxView::DrawItemL(TInt aItemIndex) const
             TInt nextCell(LastLineOfCell(iCurrentItemIndex) + 1);
 
         if ( !( iItemDrawer->Flags()
-                & CTextListItemDrawer::EDisableHighlight )
+                & CTextListItemDrawer::ESingleClickDisabledHighlight  )
                 && aItemIndex < nextCell )
             {
             highlight = ETrue;

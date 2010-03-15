@@ -511,9 +511,11 @@ TAgnEntryId CAgnEntryModel::StoreL(CAgnEntry& aEntry, TAgnChangeFilter* aChangeF
 				_DBGLOG_VERBOSE(AgmDebug::DebugLog("StoreL: Existing entry types is different to incoming entry's type");)
 				_DBGLOG_VERBOSE(AgmDebug::DebugLog("StoreL: Delete the existing entry and add the incoming entry as a new one");)
 				
-				// if the entry is a different type, delete the old entry and add the new one 
-				DeleteEntryL(*existingEntryToReplace, ETrue, iChangeFilter);
+				// if the entry is a different type, add the new one first and delete only later
+                // This change is needed if the entry having attachments, it will be shared by two 
+                //entries, so that attachments will not be deleted, while deleting it later. 
 				returnId = AddEntryL(aEntry);
+				DeleteEntryL(*existingEntryToReplace, ETrue, iChangeFilter);
 				}
 
 			CleanupStack::PopAndDestroy(existingEntryToReplace);

@@ -54,6 +54,8 @@
 #include <ProfileEngineDomainConstants.h>
 #include <clock.rsg>
 #include <AknGlobalNote.h>
+#include <featdiscovery.h>
+#include <ProfileEngineDomainCRKeys.h>
 
 // User Includes
 #include "clkuiclksrvmodel.h"
@@ -2448,7 +2450,24 @@ void CClkDateTimeView::HandleClockAlarmToneCmdL()
 	// Do not show videos.
 	alarmToneList->AddExclusiveMediaTypeL( ECLFMediaTypeVideo );
 	alarmToneList->SetAutomatedType( CDRMHelper::EAutomatedTypeClockAlarm );
-	
+    // Do not show items over the file size limit, if configured.
+    if ( CFeatureDiscovery::IsFeatureSupportedL(
+         KFeatureIdFfLimitedMessageAndAlarmToneSize ) )
+        {
+         // Max file size allowed (in KB).  0 == no limit.
+        TInt fileSizeLimit = 0;
+        CRepository* profilesCenRep = CRepository::NewLC( KCRUidProfileEngine );
+
+        // Reading the repository should not fail, but if it does, the default
+        // value we have for the file size limit is acceptable.
+        profilesCenRep->Get( KProEngRingingToneMaxSize, fileSizeLimit ); // codescanner::crepository
+        CleanupStack::PopAndDestroy( profilesCenRep );
+
+        if ( fileSizeLimit > 0 )
+            {
+            alarmToneList->SetMaxFileSize( fileSizeLimit * KKilo );
+            }
+        }
 	// Launch the list. ETrue is returned if OK is pressed. EFalse otherwise.
     if( alarmToneList->LaunchL( iAlarmToneName, *iToneListHeader ) )
 		{

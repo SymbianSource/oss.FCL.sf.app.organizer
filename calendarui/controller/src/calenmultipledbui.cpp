@@ -56,6 +56,8 @@ _LIT( KListSeparatorFormat, "\t" );
 const TInt KMultiDbMaxLength = 300;
 const TInt KBuffLength = 24;
 
+
+
 // ----------------------------------------------------------------------------
 // CCalenMultipleDbListboxItemDrawer::CCalenMultipleDbListboxItemDrawer
 // Constructor
@@ -484,7 +486,7 @@ void CCalenMultipleDbUi::DynInitMenuPaneL( TInt aResourceId,CEikMenuPane* aMenuP
               HBufC* calendarFileName = 
                   calendarInfoList[currentIndex]->FileNameL().AllocLC();
               if (!(calendarFileName->CompareF(
-                        iController.Services().SessionL().DefaultFileNameL())))
+                      _L("c:Calendar1"))))
                   {
                   aMenuPane->DeleteMenuItem(ECalenCmdDelete);
                   }
@@ -862,7 +864,7 @@ TKeyResponse CCalenMultipleDbUi::OfferKeyEventL(const TKeyEvent& aKeyEvent,
                 HBufC* calendarFileName = 
                         calendarInfoList[currentIndex]->FileNameL().AllocLC();
                 if (calendarFileName->CompareF(
-                        iController.Services().SessionL().DefaultFileNameL()))
+                        _L("c:Calendar1")))
                     {
                     DeleteItemL();
                     }

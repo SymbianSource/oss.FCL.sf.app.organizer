@@ -69,6 +69,11 @@ public: // API
      * Send an entry a vCal through sendui
      */
     IMPORT_C void SendAsVCalendarL(TInt aCommand, CCalEntry& aEntry);
+    
+	/**
+	* check whether messaging editor is open or not.
+	*/
+    IMPORT_C TBool IsMessagingEditorOpen();
 
 private: // utility functions
     /**
@@ -89,6 +94,7 @@ private: // data
     CSendUi* iSendUi;
     TInt iSendAsCmdId;
     TUid iSelectedMtmUid;
+    TBool iISEditorOpen;
 
     CArrayFixFlat<TUid>* iSendMtmsToDim;
     CCalSession& iSession;

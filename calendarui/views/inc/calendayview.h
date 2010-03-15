@@ -124,12 +124,7 @@ private:
     
     TUid Id() const;
 	
-	/**
-     * Enable the copy functionality for the entries 
-	  *.to single aur multiple calendars.    
-     */
-    
-    void CopyToCalendarsL();
+	
     
 private:  // From MEikMenuObserver
     /**

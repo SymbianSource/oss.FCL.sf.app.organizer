@@ -93,10 +93,19 @@ EXPORT_C void CalenViewUtils::GetSummaryLocationTextL(
     const TInt max = aMaxLength;
     TInt freeSpace = max - 2; // freeSpace is recalculated after each update
 
-    const TDesC& summary = aEntry.SummaryL();
-    const TDesC& location = aEntry.LocationL();
+    const TDesC& summary = aEntry.SummaryL();    
+    //const TDesC& location = aEntry.LocationL();    
     const TDesC& westernSeparator = KWesternSummaryLocationSeparator;
     const TDesC& arabicSeparator =  KArabicSummaryLocationSeparator;
+    
+    //location string is not available for anniversary and todo
+    HBufC16* text = HBufC16::NewLC( max );    
+    TPtrC location = text->Des();
+    if ( CCalEntry::ETodo != aEntry.EntryTypeL())
+        {
+            location.Set(aEntry.LocationL());
+        }
+    
 
     if(AknLayoutUtils::LayoutMirrored())
         {
@@ -150,7 +159,7 @@ EXPORT_C void CalenViewUtils::GetSummaryLocationTextL(
         freeSpace = max - aTarget.Length();
         CleanupStack::PopAndDestroy(emptytext);
         }
-
+    CleanupStack::PopAndDestroy( text );
     TRACE_EXIT_POINT;
     }
     

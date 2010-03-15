@@ -70,6 +70,7 @@ LIBRARY 		commonengine.lib
 LIBRARY         efsrv.lib
 LIBRARY			avkon.lib
 LIBRARY         hlplch.lib
+LIBRARY         featdiscovery.lib
 LIBRARY         featmgr.lib
 LIBRARY			drmhelper.lib
 LIBRARY 		tzclient.lib

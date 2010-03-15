@@ -23,6 +23,7 @@ SOURCE calcontable.cpp
 USERINCLUDE ../../calcontablesrc
 USERINCLUDE ../../originalinc
 SYSTEMINCLUDE /epoc32/include
+APP_LAYER_SYSTEMINCLUDE_SYMBIAN
 LIBRARY	euser.lib efsrv.lib cconoriginal.lib charconv.lib
 
 SMPSAFE

@@ -26,6 +26,8 @@
 #include "multicaluidialogmodel.h"
 #include "calendarui_debug.h"
 
+_LIT( KCalendarDatabaseFilePath, "c:calendar" );
+
 // ----------------------------------------------------------------------------
 // CMultiCalUiDialogModel::CMultiCalUiDialogModel
 // Constructor
@@ -148,7 +150,7 @@ void CMultiCalUiDialogModel::ConstructL()
         {
         iCalendarStatus.Append(0);
 
-        if (!index) //First create the default session
+       /* if (!index) //First create the default session
             {
             const TPtrC name = iCalendarInfoList[index]->FileNameL();
             defaultSession->OpenL(name);
@@ -158,7 +160,7 @@ void CMultiCalUiDialogModel::ConstructL()
             iCalEntryViewArray.Append(entryView);
             CleanupStack::Pop(entryView);
             }
-        else
+        else*/
             {
             CCalSession* session = CCalSession::NewL(*defaultSession);
             CleanupStack::PushL(session);
@@ -234,19 +236,19 @@ void CMultiCalUiDialogModel::StoreCalEntryL()
     TRACE_ENTRY_POINT
     //Create copy for entires.
     RPointerArray<CCalEntry> copyEntries;
-    CreateCopyL(copyEntries);
-
     //Store the copy into calendars
     for (TInt i = 0; i < iCalEntryViewArray.Count(); i++)
         {
         if (iCalendarStatus[i])
             {
-            TInt numSuccess;
+            TInt numSuccess;            
+            CreateCopyL(copyEntries);
             iCalEntryViewArray[i]->StoreL(copyEntries, numSuccess);
+            copyEntries.ResetAndDestroy();
             }
         }
 
-    copyEntries.ResetAndDestroy();
+    
     TRACE_EXIT_POINT;
     }
 
@@ -305,7 +307,15 @@ void CMultiCalUiDialogModel::GetAllCalendarInfoL(RPointerArray<
     CCalCalendarInfo* calendarInfo = calIter->FirstL();
     while (calendarInfo)
         {
-        aCalendarInfoList.AppendL(calendarInfo);
+        TPtrC fileNamePtr = calendarInfo->FileNameL();
+        if(fileNamePtr.CompareF(KCalendarDatabaseFilePath))
+           {
+           aCalendarInfoList.AppendL(calendarInfo);
+           }
+        else
+           {
+           delete calendarInfo;
+           }
         calendarInfo = calIter->NextL();
         }
     CleanupStack::PopAndDestroy(calIter);

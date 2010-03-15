@@ -85,30 +85,6 @@
             </publishContext>
         </actions>
     </elseIf>
-    <!-- deactivate sensor channels when alarm is dismissed -->
-    <elseIf>
-        <and>
-            <!-- ...an alarm that was just deactivated -->
-            <contextUpdated>
-                <contextRef source='AlarmUI' type='State'/>
-            </contextUpdated>
-            <equals>
-                <contextRef source='AlarmUI' type='State'/>
-                <string>Inactive</string>
-            </equals>
-        </and>
-        <actions>
-            <!-- deactivate doubletap channel -->
-            <publishContext>
-                <contextRef source='Sensor' type='Event' value='DoubleTap.Deactivate'/>
-            </publishContext>
-
-            <!-- deactivate orientation channel -->
-            <publishContext>
-                <contextRef source='Sensor' type='Event' value='Orientation.Deactivate'/>
-            </publishContext>
-        </actions>
-    </elseIf>
     <!-- stop an active alarm on a 'Stop' command -->
     <elseIf>
         <and>

@@ -891,7 +891,7 @@ RESOURCE TBUF r_calendar_week_period_title
 //
 RESOURCE TBUF r_calen_date_prompt
     {
-    buf = text_calendar_date_prompt;
+    buf = qtn_cale_go_to_date;
     }
 
 // ---------------------------------------------------------
@@ -2570,7 +2570,8 @@ RESOURCE MENU_PANE r_calen_multidb_menupane
     
     RESOURCE TBUF r_qtn_cale_db_already_exists_note
     {
-    buf = qtn_fldr_rename_query;
+    //buf = qtn_fldr_rename_query;
+    buf = qtn_fldr_name_already_used;
     }
 
 // ---------------------------------------------------------
@@ -2710,7 +2711,7 @@ RESOURCE TBUF r_cale_db_calendar
 
 RESOURCE TBUF r_cale_db_calendar_default_name
     {
-    buf = "Calendar(%U)"; //qtn_cale_db_calendar_default_name 
+    buf = qtn_cale_db_calendar_default_name;
     }
 
 RESOURCE TBUF r_calen_illegal_characters

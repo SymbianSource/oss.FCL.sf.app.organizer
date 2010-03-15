@@ -262,6 +262,12 @@ public:    // from MEikMenuObserver
     * @see MEikMenuObserver.
     */
     void DynInitMenuBarL( TInt aResourceId, CEikMenuBar* aMenuBar );
+    
+    /**
+    * @brief copies the calendar entry to respective calendar.
+    */
+    void CopyToCalendarsL();
+    
 
 protected:  // New functions
     /**
@@ -347,6 +353,18 @@ private:    // From CAknView
      * From CAknView View deactivation handler
      */
     void DoDeactivate();
+    
+    /**
+    * @brief asynchronous call back for copy to calendar functionality.
+    *        added because of err VGGG-82X8TV . 
+    * 
+    */
+    static TInt AsyncCopyToCalendarsL(TAny* aThisPtr);
+
+    /**
+    * @brief called from AsyncCopyToCalendarsL
+    */
+    void CopyEntryToCalendarsL();
 
 protected:  // Data
     CCalenContainer*                iContainer;
@@ -380,6 +398,8 @@ private:  // Data
      * @brief ETrue if some command handling is under progress, EFalse otherwise
      */
     TBool iCommandProcessing;
+    
+    CAsyncCallBack* iAsyncCallback; 
     };
 
 #endif  // CALENNATIVEVIEW_H

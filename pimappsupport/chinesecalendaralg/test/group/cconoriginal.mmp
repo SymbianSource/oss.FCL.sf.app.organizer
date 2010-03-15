@@ -23,6 +23,7 @@ SOURCE CConmain.cpp Calendar.cpp ArithmeticalCal.cpp Gregorian.cpp
 SOURCE ArithmeticalDate.cpp AstronomicalCal.cpp Chinese.cpp ChineseDate.cpp
 USERINCLUDE ../../OriginalInc
 SYSTEMINCLUDE /epoc32/include
+APP_LAYER_SYSTEMINCLUDE_SYMBIAN
 
 LIBRARY euser.lib
 

@@ -2256,6 +2256,13 @@ TInt CCalenUnifiedEditor::TryToSaveEntryWithEntryChangeL( TBool aForcedExit)
 
     CleanupStack::PushL( entry );
     iEditedCalEntry.DescriptionL();  // make sure entry is fully loaded
+    if (CCalEntry::ETodo == entry->EntryTypeL())//check the entry type
+        {//remove GeoValue and Location info from a ToDo as ToDo does specs
+    //does not include them
+        iEditedCalEntry.ClearGeoValueL();
+        iEditedCalEntry.SetLocationL(KNullDesC);
+        }
+    
     entry->CopyFromL(iEditedCalEntry, CCalEntry::EDontCopyId);
     entry->DescriptionL();  // make sure entry is fully copied
     
@@ -2275,12 +2282,7 @@ TInt CCalenUnifiedEditor::TryToSaveEntryWithEntryChangeL( TBool aForcedExit)
             }
 		}
     
-    if(!IsCreatingNewEntry() && !iEditorDataHandler->IsCalendarEditedL())
-        {
-        iServices->GetAttachmentData()->Reset();
-        iServices->EntryViewL(iEditorDataHandler->PreviousDbCollectionId())
-                                                ->DeleteL(*iOriginalCalEntry);
-        }
+
     
     TInt saveErr( KErrNone );
     if( aForcedExit )
@@ -2306,6 +2308,9 @@ TInt CCalenUnifiedEditor::TryToSaveEntryWithEntryChangeL( TBool aForcedExit)
                    newInstanceEndDate,
                    iUnifiedEditorControl->GetCalendarNameForEntryL() ) );
         }
+    
+    //Agenda server is taking care of deleting the old entry when only entrytype is changing
+    //so calendar is not deleting the old entry here, when only entry type has changed.
     if(!IsCreatingNewEntry() && iEditorDataHandler->IsCalendarEditedL())
         {
         iServices->GetAttachmentData()->Reset();
@@ -3345,6 +3350,7 @@ void CCalenUnifiedEditor::HideFieldsForEditSingleInstance()
 void CCalenUnifiedEditor::AddPictureL(TInt isNotFirstTime)
     {
     TRACE_ENTRY_POINT;
+    return;
     
     // Instantiate CMapIconPicture object 300x300 twips in size
     CEikRichTextEditor* locationControl = static_cast<CEikRichTextEditor*>(Control(ECalenEditorPlace));

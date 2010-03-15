@@ -680,6 +680,7 @@ void CCalenEventViewContainer::BuildTextEditorL()
         
     iTextEditor->SetFocus(EFalse);    
     iTextEditor->SetRect( Rect() );
+    iTextEditor->SetCursorPosL(0,EFalse);
     iTextEditor->RichText()->Reset();
     
     // Create the scroll bars.
@@ -861,6 +862,11 @@ void CCalenEventViewContainer::AddFieldsL()
             {
             // date field
             AddDateFieldL(iEventViewData->StartDateTime());
+            
+            // against the location field in the viewer
+            iTimeFieldLines = 1;
+            // location
+            AddLocationFieldL();
     		
             // Adds empty line
             AddEmptyLineL();
@@ -899,6 +905,13 @@ void CCalenEventViewContainer::AddFieldsL()
 				AddDateDateFieldL( startTime, endTime );
 				}
 
+			// Increment the time filed count to 1 so that maps icon is placed
+			// against the location field in the viewer
+                    iTimeFieldLines = 1;
+			
+			// location
+                    AddLocationFieldL();
+            
 		    // extra empty line between primary and secondary information
 		    AddEmptyLineL();
 		    

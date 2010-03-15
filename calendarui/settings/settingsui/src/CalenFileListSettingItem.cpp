@@ -35,12 +35,13 @@
 
 #include <ProfileEngineDomainConstants.h>
 #include <StringLoader.h>
+#include <featdiscovery.h> // CFeatureDiscovery
+#include <ProfileEngineDomainCRKeys.h> // KCRUidProfileEngine / KProEngRingingToneMaxSize
 
 // PathInfo for concatenating resource
 #include <pathinfo.h>
 // KDC_RESOURCE_DIR definition
 #include <data_caging_path_literals.hrh>
-
 #include <mediafilelist.h>
 
 
@@ -230,8 +231,25 @@ void CCalenFileListSettingItem::EditItemL( TBool /*aCalledFromMenu*/ )
     // Make sure that iOffToneFile is passed, in case iToneFile happens to be KNullDesC
     ASSERT(!IsEmpty(iToneFile));
     
-    TBool ok( filelist->LaunchL( iToneFile, *iPopupHeader ) );
+    // Do not show items over the file size limit, if configured.
+    if ( CFeatureDiscovery::IsFeatureSupportedL(
+         KFeatureIdFfLimitedMessageAndAlarmToneSize ) )
+        {
+         // Max file size allowed (in KB).  0 == no limit.
+        TInt fileSizeLimit = 0;
+        CRepository* profilesCenRep = CRepository::NewLC( KCRUidProfileEngine );
 
+        // Reading the repository should not fail, but if it does, the default
+        // value we have for the file size limit is acceptable.
+        profilesCenRep->Get( KProEngRingingToneMaxSize, fileSizeLimit ); // codescanner::crepository
+        CleanupStack::PopAndDestroy( profilesCenRep );
+
+        if ( fileSizeLimit > 0 )
+            {
+            filelist->SetMaxFileSize( fileSizeLimit * KKilo );
+            }
+        }
+    TBool ok( filelist->LaunchL( iToneFile, *iPopupHeader ) );
 
     CleanupStack::PopAndDestroy( filelist ); // filelist
 #else
@@ -251,9 +269,27 @@ void CCalenFileListSettingItem::EditItemL( TBool /*aCalledFromMenu*/ )
             CMediaFileList::EMediaFileTypeAudio,
             CMediaFileList::ENullItemIconOff);
     
-    list->SetAttrL(CMediaFileList::EAttrExcludeMimeType, CMediaFileList::EMediaFileTypeVideo);
+    list->SetAttrL(CMediaFileList::EAttrExcludeFolder, CMediaFileList::EMediaFileTypeVideo);
     list->SetAttrL(CMediaFileList::EAttrAutomatedType, CDRMHelper::EAutomatedTypeCalendarAlarm);
-    
+
+    // Do not show items over the file size limit, if configured.
+    if ( CFeatureDiscovery::IsFeatureSupportedL(
+         KFeatureIdFfLimitedMessageAndAlarmToneSize ) )
+        {
+        // Max file size allowed (in KB).  0 == no limit.
+        TInt fileSizeLimit = 0;
+        CRepository* profilesCenRep = CRepository::NewLC( KCRUidProfileEngine );
+
+        // Reading the repository should not fail, but if it does, the default
+        // value we have for the file size limit is acceptable.
+        profilesCenRep->Get( KProEngRingingToneMaxSize, fileSizeLimit ); // codescanner::crepository
+        CleanupStack::PopAndDestroy( profilesCenRep );
+
+        if ( fileSizeLimit > 0 )
+            {
+            list->SetAttrL( CMediaFileList::EAttrFileSize, fileSizeLimit );
+            }
+        }
     // Make sure that iOffToneFile is passed, in case iToneFile happens to be KNullDesC
     ASSERT(!IsEmpty(iToneFile));
     
@@ -263,13 +299,13 @@ void CCalenFileListSettingItem::EditItemL( TBool /*aCalledFromMenu*/ )
     
     CleanupStack::PopAndDestroy(list);    
 #endif
-    
-    if (ok)
+    if( ok )
         {
         iAlarmSoundChanged = ETrue;
         StoreL();
-        UpdateListBoxTextL();
+        UpdateListBoxTextL(); 
         }
+
     
     TRACE_EXIT_POINT;
     }

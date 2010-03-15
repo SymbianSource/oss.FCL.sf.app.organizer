@@ -76,6 +76,7 @@ LIBRARY             efsrv.lib
 LIBRARY             eikcoctl.lib
 LIBRARY             eikctl.lib 
 LIBRARY             euser.lib
+LIBRARY             featdiscovery.lib
 LIBRARY             featmgr.lib
 LIBRARY             filelist.lib
 LIBRARY             hlplch.lib

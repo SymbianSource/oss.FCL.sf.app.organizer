@@ -22,6 +22,7 @@ SOURCEPATH		../src
 USERINCLUDE		../inc
 USERINCLUDE		../../../inc
 SYSTEMINCLUDE		/epoc32/include
+APP_LAYER_SYSTEMINCLUDE_SYMBIAN
 
 SOURCE			TestExternalize.cpp
 SOURCE			TestUtils.cpp

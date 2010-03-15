@@ -188,7 +188,7 @@ void CCalenEngine::GetAllCalendarInfoL( )
     for(CCalCalendarInfo* calendarInfo = calIter->FirstL() ;
         calendarInfo != NULL ; calendarInfo = calIter->NextL() )
         {
-        if(calendarInfo->Enabled())
+        if(calendarInfo->Enabled() && calendarInfo->FileNameL().CompareF(_L("c:Calendar")))
             {
             TCalInfo calInfo;
             calInfo.iFileName = calendarInfo->FileNameL();

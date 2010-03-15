@@ -216,12 +216,7 @@ NONSHARABLE_CLASS( CCalenTodoView ) : public CCalenNativeView
          **/
         TInt ShowMarkedTodosDeleteConfirmationQueryL( TInt aCount );
 		
-		/**
-         * Enable the functionlity of copying entries to one or more calendars.         
-         **/
-        
-        void CopyToCalendarsL();
-
+	
     private:
         /**
          * Static callback function

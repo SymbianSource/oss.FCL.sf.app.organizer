@@ -262,7 +262,9 @@ EXPORT_C void CCalenSend::SendAsVCalendarL(TInt /*aCommand*/, CCalEntry& aEntry)
         CMessageData* messageData = CMessageData::NewL();
         CleanupStack::PushL( messageData );
         messageData->SetBodyTextL( text );
+        iISEditorOpen = ETrue;
         iSendUi->CreateAndSendMessageL( iSelectedMtmUid, messageData, KMsgBioUidVCalendar, ETrue );
+        iISEditorOpen = EFalse;
         CleanupStack::PopAndDestroy(); // messagedata
         CleanupStack::PopAndDestroy(bufCnv);
         }
@@ -271,6 +273,23 @@ EXPORT_C void CCalenSend::SendAsVCalendarL(TInt /*aCommand*/, CCalEntry& aEntry)
     
     TRACE_EXIT_POINT;
     }
+
+// ---------------------------------------------------------
+// CCalenSend::IsMessagingEditorOpen
+// Prcess "Send As" for attachment file
+// (other items were commented in a header).
+// ---------------------------------------------------------
+//
+
+EXPORT_C TBool CCalenSend::IsMessagingEditorOpen()
+    {
+    TRACE_ENTRY_POINT;
+    
+    return iISEditorOpen;
+    
+    TRACE_EXIT_POINT;
+    }
+
 
 // ---------------------------------------------------------
 // CCalenSend::DoSendAsAttachmentFileL
@@ -285,7 +304,9 @@ void CCalenSend::DoSendAsAttachmentFileL(TInt /*aCommand*/, TParse& aFilename)
     CMessageData* messageData = CMessageData::NewL();
     CleanupStack::PushL( messageData );
     messageData->AppendAttachmentL( aFilename.FullName() );
+    iISEditorOpen = ETrue;
     iSendUi->CreateAndSendMessageL( iSelectedMtmUid, messageData, KMsgBioUidVCalendar, ETrue );
+    iISEditorOpen = EFalse;
     CleanupStack::PopAndDestroy(); // messagedata
     
     TRACE_EXIT_POINT;
@@ -304,7 +325,9 @@ void CCalenSend::DoSendAsAttachmentHandleL(const RFile& aHandle)
     CMessageData* messageData = CMessageData::NewL();
     CleanupStack::PushL( messageData );
     messageData->AppendAttachmentHandleL(aHandle);
+    iISEditorOpen = ETrue;
     iSendUi->CreateAndSendMessageL( iSelectedMtmUid, messageData, KMsgBioUidVCalendar, ETrue );
+    iISEditorOpen = EFalse;
     CleanupStack::PopAndDestroy( messageData );
     
     TRACE_EXIT_POINT;

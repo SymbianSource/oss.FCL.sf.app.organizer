@@ -353,7 +353,9 @@ void CCalenEntryUpdater::UpdateInstanceL( CCalEntry& aEditedEntry,
     TCalenInstanceId instanceIdTemp = iServices.Context().InstanceId();
     instanceIdTemp.iColId = colId;
     instanceIdTemp.iType = aEditedEntry.EntryTypeL();
-    if( aNewInstanceStartDate.TimeLocalL() != aOrigInstanceDate.TimeLocalL() )
+    
+    if (aNewInstanceStartDate.TimeLocalL() != aOrigInstanceDate.TimeLocalL()
+            || instanceIdTemp.iInstanceTime <= 0)
         {
         instanceIdTemp.iInstanceTime = aNewInstanceStartDate.TimeLocalL();
         }

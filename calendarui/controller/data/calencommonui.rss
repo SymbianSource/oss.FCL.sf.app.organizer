@@ -404,17 +404,17 @@ RESOURCE DIALOG r_calendar_switch_view_query
 //
 //----------------------------------------------------
 //
-RESOURCE AVKON_BUTTON_STATE_EXTENSION r_calen_tb_ext_qgn_indi_cale_tb_repeat_add
+RESOURCE AVKON_BUTTON_STATE_EXTENSION r_calen_tb_ext_qgn_indi_cale_tb_today
      {
      bmbSkinIdMajor = EAknsMajorGeneric;
-     bmbSkinIdMinor = EAknsMinorGenericQgnIndiRepeatAdd;
+     bmbSkinIdMinor =  EAknsMinorGenericQgnIndiCaleTbToday;
      //skin KAknsIIDQgnIndiRepeatAdd
      } 
 
-RESOURCE AVKON_BUTTON_STATE_EXTENSION r_calen_tb_ext_qgn_indi_cale_tb_right
+RESOURCE AVKON_BUTTON_STATE_EXTENSION r_calen_tb_ext_qgn_indi_cale_tb_changeview
      {
      bmbSkinIdMajor = EAknsMajorGeneric;
-     bmbSkinIdMinor = EAknsMinorGenericQgnIndiCaleTbRight;
+     bmbSkinIdMinor = EAknsMinorGenericQgnIndiCaleTbChangeview;
      //skin KAknsIIDQgnIndiCaleTbRight
      }
 
@@ -469,7 +469,7 @@ RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension
                         bmpfile = BITMAP_DIR"\\calendar.mif";
                         bmpid = EMbmCalendarQgn_indi_cale_tb_today;
                         bmpmask = EMbmCalendarQgn_indi_cale_tb_today_mask;
-                        extension = r_calen_tb_ext_qgn_indi_cale_tb_repeat_add;
+                        extension = r_calen_tb_ext_qgn_indi_cale_tb_today;
                         }
                     };
                 };
@@ -484,7 +484,7 @@ RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension
                 bmpFile = BITMAP_DIR"\\calendar.mif";
                 bmpId = EMbmCalendarQgn_indi_cale_tb_changeview;
                 bmpMask = EMbmCalendarQgn_indi_cale_tb_changeview_mask ;
-                extension = r_calen_tb_ext_qgn_indi_cale_tb_right;
+                extension = r_calen_tb_ext_qgn_indi_cale_tb_changeview;
                 items =
                     {
                     TBAR_CTRL
@@ -502,7 +502,7 @@ RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension
                                     bmpfile = BITMAP_DIR"\\calendar.mif";
                                     bmpid = EMbmCalendarQgn_indi_cale_tb_changeview;
                                     bmpmask = EMbmCalendarQgn_indi_cale_tb_changeview_mask;
-                                    extension = r_calen_tb_ext_qgn_indi_cale_tb_right;
+                                    extension = r_calen_tb_ext_qgn_indi_cale_tb_changeview;
                                     }
                                 };
                             };
@@ -534,7 +534,7 @@ RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension_mirrored
                 bmpFile = BITMAP_DIR"\\calendar.mif";
                 bmpId = EMbmCalendarQgn_indi_cale_tb_changeview;
                 bmpMask = EMbmCalendarQgn_indi_cale_tb_changeview_mask ;
-                extension = r_calen_tb_ext_qgn_indi_cale_tb_right;
+                extension = r_calen_tb_ext_qgn_indi_cale_tb_changeview;
                 items =
                     {
                     TBAR_CTRL
@@ -552,7 +552,7 @@ RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension_mirrored
                                     bmpfile = BITMAP_DIR"\\calendar.mif";
                                     bmpid = EMbmCalendarQgn_indi_cale_tb_changeview;
                                     bmpmask = EMbmCalendarQgn_indi_cale_tb_changeview_mask;
-                                    extension = r_calen_tb_ext_qgn_indi_cale_tb_right;
+                                    extension = r_calen_tb_ext_qgn_indi_cale_tb_changeview;
                                     }
                                 };
                             };
@@ -575,7 +575,7 @@ RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension_mirrored
                         bmpfile = BITMAP_DIR"\\calendar.mif";
                         bmpid = EMbmCalendarQgn_indi_cale_tb_today;
                         bmpmask = EMbmCalendarQgn_indi_cale_tb_today_mask;
-                        extension = r_calen_tb_ext_qgn_indi_cale_tb_repeat_add;
+                        extension = r_calen_tb_ext_qgn_indi_cale_tb_today;
                         }
                     };
                 };
@@ -1043,7 +1043,7 @@ RESOURCE TBUF r_qtn_msk_fetch
     }
 
 RESOURCE TBUF r_qtn_calen_info_cannot_open        	   { buf = qtn_cale_drm_protected_attachment; }
-RESOURCE TBUF r_qtn_calen_info_already_attached        { buf = r_qtn_calen_info_already_attached; }
+RESOURCE TBUF r_qtn_calen_info_already_attached        { buf = qtn_calen_info_already_attached; }
 
 // ---------------------------------------------------------
 //

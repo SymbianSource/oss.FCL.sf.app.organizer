@@ -32,6 +32,7 @@
 #include "calencontroller.h"            // CCalenController
 #include "calencmdlineparser.h"         // CCalCmdLineParser
 #include "CalenUid.h"
+#include "calensend.h"
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -159,6 +160,14 @@ TBool CCalenCmdLineLauncher::ProcessCommandParametersL(
             key.iCode = EKeyEscape;
             key.iModifiers = 0;
             CCoeEnv::Static()->SimulateKeyEventL( key, EEventKey );
+            
+            // Break is added to close the messaging editor as the messagng editor is not 
+            // consuming the escape key event.
+            if( iGlobalData->CalenSendL().IsMessagingEditorOpen() )
+                {
+            break;
+                }
+                 
             }
 
         // Interpret 8bit data as 16bit unicode data

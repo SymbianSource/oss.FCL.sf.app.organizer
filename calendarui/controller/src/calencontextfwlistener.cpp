@@ -216,13 +216,16 @@ void CCalenContextFWListener::PublishContextL( const TDesC& aSource,
     {
     TRACE_ENTRY_POINT;
     CCFContextObject* co = CCFContextObject::NewLC( aSource, aType, aValue );
-
-    const TInt err = iCFClient->PublishContext( *co );
-    CleanupStack::PopAndDestroy( co );
+    if(iCFClient)
+      {
+        const TInt err = iCFClient->PublishContext( *co );
+        
 #ifdef _DEBUG
     RDebug::Print( _L("### PublishContext - err: %d"), err );
 #endif
     User::LeaveIfError( err );
+      }
+    CleanupStack::PopAndDestroy( co );
     TRACE_EXIT_POINT;
     }
 

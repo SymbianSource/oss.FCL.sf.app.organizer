@@ -32,6 +32,10 @@
 #include <aknlayoutscalable_apps.cdl.h>
 #include <aknappui.h>
 #include <NpdLib.rsg>
+#ifdef RD_SCALABLE_UI_V2
+#include <akntoolbar.h> 
+#include <eikcolib.h>
+#endif
 
 #include "NpdEdwin.h"
 #include "NpdRichTextEditor.h"
@@ -110,7 +114,25 @@ void CNotepadEdwinBase::DoEditorLayoutL()
 	TRect mainPane(TPoint(0, 0), tempMainPane.Size());
 	mainNotesPane.LayoutRect(mainPane, AknLayoutScalable_Apps::main_notes_pane().LayoutLine());
 	lineLayout.LayoutRect(mainNotesPane.Rect(),AknLayoutScalable_Apps::list_notes_pane().LayoutLine());
-	TAknLayoutScalableParameterLimits textLimits =AknLayoutScalable_Apps::list_notes_text_pane_ParamLimits();
+	TAknLayoutScalableParameterLimits textLimits; 
+	TBool isShowToolbar = EFalse;
+#ifdef RD_SCALABLE_UI_V2
+    CEikAppUiFactory* appUiFactory 
+        = static_cast<CEikAppUiFactory*>( CEikonEnv::Static()->AppUiFactory() );
+    CAknToolbar* oldFixedToolbar = appUiFactory->CurrentFixedToolbar();
+    if ( oldFixedToolbar != NULL )
+        {
+        isShowToolbar = oldFixedToolbar->IsShown();
+        }
+#endif
+    if ( isShowToolbar )
+        {
+        textLimits = AknLayoutScalable_Apps::list_notes_text_pane_ParamLimits(1);
+        }
+    else
+        {
+        textLimits =AknLayoutScalable_Apps::list_notes_text_pane_ParamLimits();
+        }
 	RArray<TAknTextComponentLayout> layouts;
 	for (TInt i = 0; i < textLimits.LastRow()+1 ; i++)
     		{
@@ -352,7 +374,7 @@ void CNotepadEdwinBase::UpdateScrollLayout()
 		TRect tempMainPane;
         	AknLayoutUtils::LayoutMetricsRect(AknLayoutUtils::EMainPane,tempMainPane);
 		TRect mainPane(TPoint(0, 0), tempMainPane.Size());
-		TAknWindowLineLayout scrollPane = AknLayoutScalable_Apps::scroll_pane_cp06().LayoutLine();
+        TAknWindowLineLayout scrollPane = AknLayoutScalable_Apps::scroll_pane_cp05(0).LayoutLine();
 		mainNotesPane.LayoutRect(mainPane, AknLayoutScalable_Apps::main_notes_pane().LayoutLine());
         	AknLayoutUtils::LayoutVerticalScrollBar(sbFrame, mainNotesPane.Rect(), scrollPane);
         	}

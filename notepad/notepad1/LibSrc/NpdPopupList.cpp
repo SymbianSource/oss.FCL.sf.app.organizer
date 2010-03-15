@@ -116,6 +116,11 @@ void CNotepadPopupList::AttemptExitL(TBool aAccept)
     if ( !iFinished || *iFinished ) // really finished
         {
         CAknPopupList::AttemptExitL(aAccept);
+        if ( iFlags & ENotepadIsViewDeactivated )
+        	{
+            iEikonEnv->RemoveFromStack(this);
+            CAknEnv::StopSchedulerWaitWithBusyMessage(iWait);	
+        	}        
         }
     else // empty -> non-empty
         {

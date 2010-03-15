@@ -37,6 +37,7 @@
 #include "calendar.hrh"
 #include <finditem.hrh>
 #include <finditemmenu.h>
+#include "calenattachmentmodel.h" 
 
 // Button position of the MSK CBA button
 const TInt KSK2CBAPosition = 2;
@@ -280,7 +281,12 @@ void CCalenEventView::DoActivateImplL( const TVwsViewId& aPrevViewId,
 void CCalenEventView::DoDeactivateImpl()
     {
     TRACE_ENTRY_POINT;
-    
+    // After forced exit need to Reset CCalenAttachmentModel 
+    //to refresh the model after opening the calender next time
+    if (iServices.GetAttachmentData()->NumberOfItems()) 
+        {
+        iServices.GetAttachmentData()->Reset();
+        }
     iPreviousViewId.iViewUid = KNullUid;
 
     // Remove the toolbar buttons for event viewer before exiting from event view

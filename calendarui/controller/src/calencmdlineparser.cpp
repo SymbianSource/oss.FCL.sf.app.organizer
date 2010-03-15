@@ -407,13 +407,13 @@ TInt CCalenCmdLineParser::DesToCmdParamTypeL( const TDesC& aCmdParamType )
         {
         res = EStartTypeUidViewer;
         }        
-    else if( des.Find(KCommandAlarmViewer) != KErrNotFound )
-        {
-        res = EStartTypeUidAlarmViewer;
-        }
     else if( des.Find(KCommandAlarmViewerNoSnooze) != KErrNotFound )
         {
         res = EStartTypeUidAlarmViewerNoSnooze;
+        }
+    else if( des.Find(KCommandAlarmViewer) != KErrNotFound )
+        {
+        res = EStartTypeUidAlarmViewer;
         }
     else if( des.Find( KCommandUid ) != KErrNotFound )
         {
