@@ -27,6 +27,7 @@ APP_LAYER_SYSTEMINCLUDE
 
 LIBRARY       euser.lib
 LIBRARY       bafl.lib
+LIBRARY http.lib	
 
 EXPORTUNFROZEN
 
