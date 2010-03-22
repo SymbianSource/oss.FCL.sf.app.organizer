@@ -1,0 +1,43 @@
+/*
+* Copyright (c) 2010 Sun Microsystems, Inc. and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributor:
+* Maximilian Odendahl
+*
+* Contributors:
+* 
+* Description: sis file to package all Caldav components
+*
+*/
+ 
+; Languages
+&EN
+
+; Header
+#{"CalDAV plugin"}, (0x2002B775), 1, 0, 0
+
+; Localised Vendor name
+%{"Sun Microsystems"}
+
+; Unique Vendor name
+:"Sun Microsystems"
+
+;Platform Dependency
+[0x1028315f],0 ,0 ,0,{"S60ProductID"}
+
+; ------ files -----
+
+; caldav client-server
+"\epoc32\release\armv5\urel\CalDavServer.exe "-"!:\sys\bin\CalDavServer.exe"
+"\epoc32\release\armv5\urel\CalDavClient.dll "-"!:\sys\bin\CalDavClient.dll"
+
+;caldav calendarui ecom plugin
+"\epoc32\release\armv5\urel\calencaldavplugin.dll"-"!:\sys\Bin\calencaldavplugin.dll"
+"\epoc32\data\z\resource\calencaldavplugindata.rsc"-"!:\resource\plugins\calencaldavplugindata.rsc"
+"\epoc32\data\z\resource\calencaldavplugindata.r01" - "!:\resource\calencaldavplugindata.r01"
+"\epoc32\data\z\resource\plugins\calencaldavplugin.rsc"-"!:\resource\plugins\calencaldavplugin.rsc" 
