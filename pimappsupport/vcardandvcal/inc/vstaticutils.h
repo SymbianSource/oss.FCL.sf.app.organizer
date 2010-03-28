@@ -66,7 +66,7 @@ public:
 
 private:
 	static void AddEscapedString(TBool aIsShiftJis,TDes& aDestination,const TDesC& aTextToEscape);
-	static const TDesC &VersitUtils::EscapeChar(TBool aIsShiftJis);
+	static const TDesC &EscapeChar(TBool aIsShiftJis);
 	};
 
 inline TBool VersitUtils::IsWhiteSpace(TUint aChar)

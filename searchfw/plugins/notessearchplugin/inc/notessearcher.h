@@ -73,7 +73,7 @@ public: // Constructors and destructor
         * Check if the entry exists in notes
         *
         */
-        TBool CNotesSearcher::CheckIfEntryExistsL (TInt aNoteKey);
+        TBool CheckIfEntryExistsL (TInt aNoteKey);
         /**
         * Cleanup internal resource
         *

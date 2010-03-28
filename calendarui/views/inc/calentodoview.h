@@ -125,7 +125,7 @@ NONSHARABLE_CLASS( CCalenTodoView ) : public CCalenNativeView
         virtual void CancelPopulation();
         virtual TCyclePosition CyclePosition() const;
         virtual const TDesC& LocalisedViewNameL( CCalenView::TViewName aViewName );
-        virtual CGulIcon* CCalenTodoView::ViewIconL() const;
+        virtual CGulIcon* ViewIconL() const;
         
         void CleanupInstancesL();
 

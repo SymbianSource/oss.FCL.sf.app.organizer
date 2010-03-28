@@ -287,7 +287,7 @@ NONSHARABLE_CLASS( CSrchUiResFolder ) : public CBase, public MSrchUiFolder
   		* Reset all folders
   		*
   		*/
-		IMPORT_C void CSrchUiResFolder::ResetAllFolders();
+		IMPORT_C void ResetAllFolders();
 
 		/** 
 		* Retuns the number of heavy results

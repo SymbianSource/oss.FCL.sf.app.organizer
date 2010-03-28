@@ -81,7 +81,7 @@ NONSHARABLE_CLASS( CCalenMissedAlarmsView ) : public CCalenNativeView
     	/**
     	 * Returns view icon
     	 */
-    	virtual CGulIcon* CCalenMissedAlarmsView::ViewIconL() const;
+    	virtual CGulIcon* ViewIconL() const;
     	
 	protected:  // From CCalenNativeView
 	    

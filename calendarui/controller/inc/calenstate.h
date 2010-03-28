@@ -62,7 +62,7 @@ class CCalenState : public CBase
 		/**
          * Interface to get the current state
          */        
-        CCalenStateMachine::TCalenStateIndex CCalenState::GetCurrentState(
+        CCalenStateMachine::TCalenStateIndex GetCurrentState(
         									CCalenStateMachine& aStateMachine);
         
         /**

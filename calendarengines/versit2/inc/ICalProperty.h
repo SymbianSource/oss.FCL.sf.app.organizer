@@ -55,7 +55,7 @@ public:	// Methods.
 	IMPORT_C const RPointerArray<CICalValue>& Values() const;
 	IMPORT_C const CICalPropertyParam* FindParam(const TDesC& aType) const;
 	
-	CICalPropertyParam& CICalProperty::AddPropertyParamL();
+	CICalPropertyParam& AddPropertyParamL();
 	void RemovePropertyParamL(const CICalPropertyParam& aParam);
 	void ExternalizeL(CICalContentLineWriter& aWriter);
 	

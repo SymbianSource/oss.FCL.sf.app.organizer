@@ -234,7 +234,7 @@ public:
 	static void GetFileName(const TDesC8 &aIcs, TDes8 &aUrl);
 
 	static HBufC8* EnsureSlashL(HBufC8* aIn);
-	static HBufC8* CalDavUtils::EnsureSlashL(const TDesC8 &aIn);
+	static HBufC8* EnsureSlashL(const TDesC8 &aIn);
 
 private:
 

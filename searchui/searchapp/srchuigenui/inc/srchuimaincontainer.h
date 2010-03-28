@@ -164,7 +164,7 @@ NONSHARABLE_CLASS( CSrchUiMainContainer ) : public CCoeControl, public MEikListB
     * Returns an array of icons for use in the listbox.
 	* @return	an array of icons.
     */		
-    CArrayPtr<CGulIcon>* CSrchUiMainContainer::ListBoxIconsArrayL();
+    CArrayPtr<CGulIcon>* ListBoxIconsArrayL();
     	
     /** 
     * Constructs the item text array.

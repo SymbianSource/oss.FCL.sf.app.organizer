@@ -37,7 +37,7 @@ NONSHARABLE_CLASS( CCalenLauncherImpl ) : public CBase
          * Creates an instance of CCalenLauncherImpl and places it
          * on the cleanup stack before passing ownership to the caller.
          */
-    	static CCalenLauncherImpl* CCalenLauncherImpl::NewLC();
+    	static CCalenLauncherImpl* NewLC();
 
     	/**
          * Class destructor

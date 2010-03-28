@@ -62,7 +62,7 @@ class CCalendarSearcher : public CActive,
             ESearching
          };
          
-        static CCalendarSearcher* CCalendarSearcher::NewL( 
+        static CCalendarSearcher* NewL( 
                                 const RArray<TUid>& aContentIdArray, 
                                 const CSearchCondition& aCondition, 
                                 const TUid& aPluginId,
@@ -205,7 +205,7 @@ class CCalendarSearcher : public CActive,
         *
         * @param    aPluginId   Plug-in's ID.
         */
-        CCalendarSearcher::CCalendarSearcher( const TUid& aPluginId );
+        CCalendarSearcher( const TUid& aPluginId );
              
      private:   // new functions
         /** 

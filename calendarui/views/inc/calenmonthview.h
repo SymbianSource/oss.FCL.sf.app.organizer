@@ -63,7 +63,7 @@ NONSHARABLE_CLASS( CCalenMonthView ) : public CCalenNativeView
         virtual void CancelPopulation();
         virtual TCyclePosition CyclePosition() const;
         virtual const TDesC& LocalisedViewNameL( CCalenView::TViewName aViewName );
-        virtual CGulIcon* CCalenMonthView::ViewIconL() const;
+        virtual CGulIcon* ViewIconL() const;
 
     protected:   // From CCalenNativeView
         /**

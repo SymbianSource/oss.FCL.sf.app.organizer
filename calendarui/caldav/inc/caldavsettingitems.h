@@ -132,7 +132,7 @@ class CCalDavAccessPointSettingItem : public CAknSettingItem
     	{
     	public:
             static CCalDavAccessPointSettingItem*
-             CCalDavAccessPointSettingItem::NewL( TInt aSettingId, CCalDavSession* aSession, const TDesC &aCalendar);
+             NewL( TInt aSettingId, CCalDavSession* aSession, const TDesC &aCalendar);
      	    ~CCalDavAccessPointSettingItem();
      	private:
      	    CCalDavAccessPointSettingItem ( TInt aSettingId, CCalDavSession* aSession);

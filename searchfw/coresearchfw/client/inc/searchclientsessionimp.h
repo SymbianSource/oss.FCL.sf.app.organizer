@@ -138,7 +138,7 @@ private: // More constructors
     /**
      * Continues asking Light results
      */
-    void CSearchClientSessionImp::ContinueSearchingLightL(); 	
+    void ContinueSearchingLightL(); 	
 
     // Functions from base classes
     /**

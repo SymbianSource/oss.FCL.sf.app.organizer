@@ -75,7 +75,7 @@ NONSHARABLE_CLASS( CCalenDummyView ) : public CCalenNativeView
     	/**
     	 * Returns view icon
     	 */
-    	virtual CGulIcon* CCalenDummyView::ViewIconL() const;
+    	virtual CGulIcon* ViewIconL() const;
     	
 	protected:  // From CCalenNativeView
 	    

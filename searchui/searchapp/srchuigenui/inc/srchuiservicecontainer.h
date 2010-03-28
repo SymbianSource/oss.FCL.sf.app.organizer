@@ -201,7 +201,7 @@ private:
     /**
      * Returns an array of icons for use in the listbox.
      */		
-     CArrayPtr<CGulIcon>* CSrchUiServiceContainer::ListBoxIconsArrayL();
+     CArrayPtr<CGulIcon>* ListBoxIconsArrayL();
     
     /**
      * Updates the "All in device" selection.
@@ -212,7 +212,7 @@ private:
      *
      * @param aIncludedContentTypes 
      */
-     void CSrchUiServiceContainer::UpdateAllInDeviceSelection( 
+     void UpdateAllInDeviceSelection( 
      				RArray<TBool>& aIncludedContentTypes );
 
     /**

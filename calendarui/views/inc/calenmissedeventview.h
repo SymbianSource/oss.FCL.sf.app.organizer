@@ -64,7 +64,7 @@ public:  // From CCalenView
     virtual void CancelPopulation();
     virtual TCyclePosition CyclePosition() const;
     virtual const TDesC& LocalisedViewNameL( CCalenView::TViewName aViewName );
-    virtual CGulIcon* CCalenMissedEventView::ViewIconL() const;
+    virtual CGulIcon* ViewIconL() const;
 
 protected:  // From CCalenNativeView
 
