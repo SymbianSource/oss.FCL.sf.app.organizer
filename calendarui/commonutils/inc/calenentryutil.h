@@ -154,7 +154,7 @@ private:
     void ConstructL(CCalEntry& aEntry, const TCalTime& aInstanceDateTime );
 
     void CopyDataFromEntryL( CCalEntry& aEntry, const TCalTime& aInstanceDateTime );
-    TSynchType CCalenEntryUtil::GetSynchTypeL(const CCalEntry& aEntry);
+    TSynchType GetSynchTypeL(const CCalEntry& aEntry);
 
 private: // data
 
