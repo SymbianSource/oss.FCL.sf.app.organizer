@@ -1369,8 +1369,17 @@ EXPORT_C void CCalenGlobalData::RemoveCalendarL(const TDesC& aCalendarFileName)
                 // Mark the CalFile as Hidden
                 caleninfo->SetEnabled( EFalse );
                             
-                // Set the SyncStatus to False
+                
                 TBuf8<KBuffLength> keyBuff;
+                
+                // Set the modification time as home time.
+                keyBuff.Zero();
+                TTime modificationTime;
+                modificationTime.HomeTime();
+                TPckgC<TTime> pkgModificationTime(modificationTime);
+                caleninfo->SetPropertyL(keyBuff, pkgModificationTime);
+                
+                // Set the SyncStatus to False
                 keyBuff.Zero();
                 keyBuff.AppendNum( ESyncStatus );
                 TBool syncstatus( EFalse );

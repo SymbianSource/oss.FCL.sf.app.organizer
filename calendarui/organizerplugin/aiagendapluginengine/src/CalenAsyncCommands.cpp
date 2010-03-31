@@ -95,11 +95,13 @@ void CMultistepCommandBase::CompleteSelf()
     TRACE_ENTRY_POINT;
     
     TRequestStatus* pStat = &iStatus;
-    User::RequestComplete( pStat, KErrNone );
-
     if( IsAdded() )
         {
-        SetActive();
+        if (!IsActive())
+            {
+            SetActive();
+            }
+        User::RequestComplete( pStat, KErrNone );
         }
     
     TRACE_EXIT_POINT;

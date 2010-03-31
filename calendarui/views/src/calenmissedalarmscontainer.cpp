@@ -139,7 +139,7 @@ void CCalenMissedAlarmsContainer::ConstructImplL()
     iListBox->CreateScrollBarFrameL(ETrue);
     iListBox->ScrollBarFrame()->SetScrollBarVisibilityL(CEikScrollBarFrame::EOff,
             CEikScrollBarFrame::EAuto);
-
+    iListBox->SetListBoxObserver( this ); // single click changes MK
     // set the model array
     iListBox->Model()->SetItemTextArray(iListBoxItemArray);
 
@@ -461,38 +461,31 @@ void CCalenMissedAlarmsContainer::HandlePointerEventL(
         {
         case TPointerEvent::EButton1Down:
             {
-            TInt oldCursor = iListBox->View()->CurrentItemIndex();
-            iListBox->HandlePointerEventL(aPointerEvent);
-            TInt newCursor = iListBox->View()->CurrentItemIndex();
-
-            if (oldCursor != newCursor)
+            TBool isItem (iListBox->View()->XYPosToItemIndex(aPointerEvent.iPosition, pointerIndex));
+            
+            if(isItem && MissedAlarmsCount() > 0)
                 {
-                // set the context
-                iHighlightedRowNumber = newCursor;
-                SetContextFromMissedAlarmEntryL(newCursor);
-                iFirstTap = EFalse;
+                iHighlightedRowNumber = iListBox->View()->CurrentItemIndex(); 
+                SetContextFromMissedAlarmEntryL(iListBox->View()->CurrentItemIndex());
                 }
-            else
-                {
-                iFirstTap = ETrue;
-                }
+            
             break;
             }
         case TPointerEvent::EDrag:
             {
-            iListBox->HandlePointerEventL(aPointerEvent);
+            /*iListBox->HandlePointerEventL(aPointerEvent);
             if (iFirstTap && index != iListBox->CurrentItemIndex())
                 {
                 iFirstTap = EFalse;
-                }
+                }*/
             break;
             }
 
         case TPointerEvent::EButton1Up:
             {
-            if (iFirstTap)
+           // if (iFirstTap)
                 {
-                iView->HandleCommandL(ECalenMissedEventView);
+               // iView->HandleCommandL(ECalenMissedEventView);
                 }
             break;
             }
@@ -500,6 +493,11 @@ void CCalenMissedAlarmsContainer::HandlePointerEventL(
             break;
         }
 
+   if ( aPointerEvent.iType != TPointerEvent::EButtonRepeat )
+        {
+        iListBox->HandlePointerEventL( aPointerEvent );
+        }
+  
     TRACE_EXIT_POINT;
     }
 
@@ -951,5 +949,44 @@ TInt CCalenMissedAlarmsContainer::FindMissedAlarmEntryIndexL(
     TRACE_EXIT_POINT;
     return KErrNotFound;
     }
+
+
+void CCalenMissedAlarmsContainer::HandleListBoxEventL(CEikListBox* /*aListBox*/, 
+                                                      TListBoxEvent aEventType)
+    {
+    TRACE_ENTRY_POINT;
+    switch( aEventType )
+        {
+        // Single click integration
+        case EEventItemSingleClicked:
+            {
+             iHighlightedRowNumber = iListBox->View()->CurrentItemIndex();
+            
+              SetContextFromMissedAlarmEntryL(iListBox->View()->CurrentItemIndex());
+            //Handle listbox item selection event
+           // iListBox->HandlePointerEventL(aPointerEvent);
+            if(iView->MenuBar()->IsDisplayed() == EFalse)
+                {
+                iView->HandleCommandL( ECalenMissedEventView );
+                }
+            break;
+            }
+            
+        // Single click integration
+        case EEventEnterKeyPressed:
+            {
+            iHighlightedRowNumber = iListBox->View()->CurrentItemIndex();
+            
+              SetContextFromMissedAlarmEntryL(iListBox->View()->CurrentItemIndex());
+            iView->HandleCommandL( ECalenMissedEventView );
+            break;
+            }
+        default:
+            break;
+        };
+    TRACE_EXIT_POINT;
+    }
+
+
 
 // End of File

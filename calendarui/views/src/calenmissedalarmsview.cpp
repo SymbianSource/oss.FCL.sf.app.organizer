@@ -131,11 +131,7 @@ CCalenView::TNextPopulationStep CCalenMissedAlarmsView::ActiveStepL()
        	    RedrawStatusPaneL();
        	    UpdateCbaL();
        	    
-       	    // dim clear and clear all buttons
-       	    if(Container()->MissedAlarmsCount()==0)
-       	        {
-       	        DimClearAndClearAllButtons();
-       	        }
+       	 
 
         	nextStep = CCalenView::EDone;
         	}
@@ -234,8 +230,18 @@ void CCalenMissedAlarmsView::HandleCommandL(TInt aCommand)
 		    break;
 		    }
         case ECalenCmdClearAll:
+            {
+            iHighlightedRowNumber = 0;
+            iServices.IssueCommandL(aCommand);
+            }
+            break;
         case ECalenCmdGotoCalendar:            
             {
+            MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
+            if(toolbar)
+             {
+             toolbar->SetToolbarVisibilityL(ETrue);  
+             } 
             iHighlightedRowNumber = 0;
             iServices.IssueCommandL(aCommand);
             }
@@ -243,8 +249,23 @@ void CCalenMissedAlarmsView::HandleCommandL(TInt aCommand)
         case EAknSoftkeyBack:
         case EAknSoftkeyClose:
             {
+            MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
+            if(toolbar)
+             {
+             toolbar->SetToolbarVisibilityL(ETrue);  
+             } 
             iHighlightedRowNumber = 0;
             iServices.IssueNotificationL(ECalenNotifyMissedAlarmViewClosed);
+            }
+            break;
+        case EAknSoftkeyExit:
+            {
+            MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
+            if(toolbar)
+             {
+             toolbar->SetToolbarVisibilityL(ETrue);  
+             } 
+            CCalenNativeView::HandleCommandL(aCommand);
             }
             break;
         default:
@@ -290,8 +311,12 @@ void CCalenMissedAlarmsView::DoActivateImplL( const TVwsViewId& aPrevViewId,
     
     UpdateCbaL();
     
-    // Draw Missed Alarm toolbar by adding clear, clearall and gotocalendar buttons
-    AddToolbarButtonsL();
+    // Hide the toolbar.
+    MCalenToolbar* toolbar = iServices.ToolbarOrNull();
+    if(toolbar)
+        {
+        toolbar->SetToolbarVisibilityL(EFalse);  
+        }  
     
     TRACE_EXIT_POINT;
     }
@@ -304,10 +329,6 @@ void CCalenMissedAlarmsView::DoActivateImplL( const TVwsViewId& aPrevViewId,
 void CCalenMissedAlarmsView::DoDeactivateImpl()
     {
     TRACE_ENTRY_POINT;
-    
-    // Remove the toolbar buttons from Missed Alarm View and
-    // enable native view toolbar buttons
-    TRAP_IGNORE(RemoveToolbarButtonsL());
     
     TRACE_EXIT_POINT;
     }
@@ -484,160 +505,5 @@ CCalenMissedAlarmsContainer* CCalenMissedAlarmsView::Container()
 	
 	return static_cast<CCalenMissedAlarmsContainer*>( iContainer );
 	}
-
-// ----------------------------------------------------------------------------
-// CCalenMissedAlarmsView::AddToolbarButtonsL
-// Adds missed alarms view's toolbar buttons 
-// ----------------------------------------------------------------------------
-//
-void CCalenMissedAlarmsView::AddToolbarButtonsL()
-    {
-    TRACE_ENTRY_POINT;
-    
-    // Get the existing toolbar from MCalenservices
-    MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
-    
-    if(toolbarImpl)  // If toolbar exists
-        {
-        CAknToolbar& toolbar = toolbarImpl->Toolbar();
-        
-        // Create the new buttons for Missed alarm view toolbar
-        // If layout is mirrored the button order is reversed.
-        // For Non mirrored layouts each button is appended to the toolbar
-        // For mirrored layouts each button is inserted at index 0.
-        TBool mirrored( AknLayoutUtils::LayoutMirrored() );
-        
-        CAknButton* button = NULL;
-        CGulIcon* icon = NULL;
-
-        // First button: Clear
-        icon = iServices.GetIconL( MCalenServices::ECalenClearMissedAlarms );
-        // put icon onto cleanup stack before its 
-        // ownership is transferred to CAknButton
-        button = CreateButtonL( icon, _L(""), R_CALE_MAV_TB_CLEAR, toolbar );
-        if( mirrored )
-            {
-            // Insert the button at index 0
-            toolbar.AddItemL( button, EAknCtButton, ECalenCmdClear, 0, 0 );
-            }
-        else
-            {
-            // Append the button
-            toolbar.AddItemL( button, EAknCtButton, ECalenCmdClear, 0, 0 );
-            }
-        
-        // Second button: Clear All
-        icon = iServices.GetIconL( MCalenServices::ECalenClearAllMissedAlarms );
-        // put icon onto cleanup stack before its
-        // ownership is transferred to CAknButton
-        button = CreateButtonL( icon, _L(""), R_CALE_MAV_TB_CLEARALL, toolbar );
-        if( mirrored )
-            {
-            // Insert the button at index 0
-            toolbar.AddItemL( button, EAknCtButton, ECalenCmdClearAll, 0, 0 );
-            }
-        else
-            {
-            // Append the button
-            toolbar.AddItemL( button, EAknCtButton, ECalenCmdClearAll, 0, 1 );
-            }
-        
-        // Third button: Go To Calendar
-        icon = iServices.GetIconL( MCalenServices::ECalenDayViewIcon );
-        // put icon onto cleanup stack before its
-        // ownership is transferred to CAknButton
-        button = CreateButtonL( icon, _L(""), R_CALE_MAV_TB_GOTO_CALE, toolbar );
-        if( mirrored )
-            {
-            // Insert the button at index 0
-            toolbar.AddItemL( button, EAknCtButton, ECalenCmdGotoCalendar, 0, 0 );
-            }
-        else
-            {
-            // Append the button
-            toolbar.AddItemL( button, EAknCtButton, ECalenCmdGotoCalendar, 0, 2 );
-            }
-        }
-    TRACE_EXIT_POINT;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenMissedAlarmsView::RemoveToolbarButtonsL
-// Removes the missed alarm view's toolbar buttons 
-// ----------------------------------------------------------------------------
-//
-void CCalenMissedAlarmsView::RemoveToolbarButtonsL()
-    {
-    TRACE_ENTRY_POINT;
-    
-    MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
-    if(toolbarImpl) // If toolbar exists
-        {
-        CAknToolbar& toolbar = toolbarImpl->Toolbar();
-        if(&toolbar)
-            {
-            // Remove the Missed alarm view's toolbar buttons
-            toolbar.RemoveItem(ECalenCmdClear); // Clear button
-            toolbar.RemoveItem(ECalenCmdClearAll);  // Clear All button
-            toolbar.RemoveItem(ECalenCmdGotoCalendar);  // Go To calendar button
-            }
-        }
-    
-    TRACE_EXIT_POINT;
-    }
-    
-// ----------------------------------------------------------------------------
-// CCalenMissedAlarmsView::CreateButtonL
-// Create missed alarms view toolbar buttons
-// ----------------------------------------------------------------------------
-CAknButton* CCalenMissedAlarmsView::CreateButtonL( CGulIcon* aIcon, 
-                                                   const TDesC& aText,
-                                                   TInt aTooltipID,
-                                                   CAknToolbar& aToolbar )
-    {
-    TRACE_ENTRY_POINT;
-
-    TInt flags = 0;
-    CAknButton* button = NULL;
-    
-    CleanupStack::PushL( aIcon );
-    HBufC* tooltipText = StringLoader::LoadLC( aTooltipID );
-    CleanupStack::Pop( tooltipText );
-    // put icon onto cleanup stack before its ownership is transferred to CAknButton
-    CleanupStack::Pop( aIcon );
-    CleanupStack::PushL( tooltipText );
-    button = CAknButton::NewL( aIcon, NULL, NULL, NULL, aText, 
-                               tooltipText->Des(), flags, 0 );
-    CleanupStack::PopAndDestroy( tooltipText );
-
-    button->SetIconScaleMode( EAspectRatioNotPreserved );
-    button->SetFocusing( EFalse );
-    button->SetBackground( &aToolbar );
-
-    TRACE_EXIT_POINT;
-    return button;
-    }    
-
-// ----------------------------------------------------------------------------
-// CCalenMissedAlarmsView::DimClearAndClearAllButtons
-// Dim clear and clear all toolbar buttons when there are no
-// missed alarm entries to clear
-// ----------------------------------------------------------------------------
-void CCalenMissedAlarmsView::DimClearAndClearAllButtons()
-    {
-    TRACE_ENTRY_POINT;
-    
-    MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
-    if(toolbarImpl) 
-        {
-        CAknToolbar& toolbar = toolbarImpl->Toolbar();
-
-        // dim clear and clear all toolbar buttons
-        toolbar.SetItemDimmed(ECalenCmdClear,ETrue,ETrue);
-        toolbar.SetItemDimmed(ECalenCmdClearAll,ETrue,ETrue);
-        }
-
-    TRACE_EXIT_POINT;
-    }
 
 // end of file	

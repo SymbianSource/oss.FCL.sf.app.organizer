@@ -815,6 +815,7 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
 			default:
 				break;
 			}
+		context.ResetCalendarFileName();
 		}
 
 	TRACE_EXIT_POINT;

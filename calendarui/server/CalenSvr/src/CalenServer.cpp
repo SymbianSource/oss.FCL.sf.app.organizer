@@ -545,7 +545,7 @@ void CCalenServer::SetCalendarAddPropertiesL(CCalCalendarInfo& aCalendarInfo)
     keyBuff.Zero();
     keyBuff.AppendNum(ESyncStatus);
 
-    TBool status = EFalse;
+    TBool status = ETrue;
     TPckgC<TBool> pkgSyncStatus(status);
     aCalendarInfo.SetPropertyL(keyBuff, pkgSyncStatus);
     

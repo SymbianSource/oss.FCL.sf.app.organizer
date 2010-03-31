@@ -18,6 +18,7 @@
 // system includes
 #include <AknPopupField.h>
 #include <AknQueryValueText.h>
+#include <AknQueryDialog.h>
 #include <badesca.h>
 #include <calentry.h>
 #include <centralrepository.h>
@@ -219,6 +220,25 @@ void CCalenDbField::HandleControlStateChangeL( TInt aControlId )
             ReadDataFromFormL( continueOnError );
             iUnifiedEditor.EditorDataHandler().SetCalendarFieldEditedL(IsCalendarEdited()
                                                             ,iPreviousColId,iCurrentColId);
+            //Check the child entries for the repeated entry
+            //The entry which is changing the calendar having any childs 
+            //show this information note to the user.  
+            CCalEntry& originalEntry = iUnifiedEditor.EditorDataHandler().Entry();
+            RPointerArray<CCalEntry> childEntries;
+            CleanupClosePushL(childEntries);
+            iServices->EntryViewL(iPreviousColId)->FetchL(originalEntry.UidL(), childEntries);            
+            if(IsCalendarEdited() && (childEntries.Count() > 1))
+                {
+                CAknQueryDialog* dlg = CAknQueryDialog::NewL();
+                if( !dlg->ExecuteLD( R_CALEN_DB_CHANGE_QUERY ) )
+                    {
+                    iCurrentColId = iPreviousColId;
+                    SetDataToEditorL();                    
+                    iUnifiedEditor.UpdateFormL();
+                    }
+                }            
+            CleanupStack::PopAndDestroy( &childEntries );
+            
             break;
             }
         default: 

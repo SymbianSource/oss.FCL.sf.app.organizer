@@ -29,12 +29,14 @@
 #include <hlplch.h>
 #include <calcalendarinfo.h>
 #include <Calendar.rsg>
+#include <calencommonui.rsg>
 
 #include "calenmultidbeditor.h"
 #include "calendarui_debug.h"
 #include "calendar.hrh"
 #include "calentitlepane.h"
 #include "calencontroller.h"
+#include "calenmultipledbui.h"
 
 // Constants.
 const TUint16 KIllegalChars[] = {
@@ -55,7 +57,6 @@ const TUint16 KIllegalChars[] = {
     0, // Array terminator
 };
 const TInt KCalenMaxELAFTextEditorLength(256);
-const TInt KCalenColorPalletteStartColor(35);
 const TInt KOne( 1 );
 const TInt KBuffLength ( 16 );
 const TInt KTen( 10 );
@@ -71,16 +72,17 @@ _LIT( KFormatString, "%d" );
 // Two-phased constructor.
 // ----------------------------------------------------------------------------
 // 
-CCalenMultiDBEditor* CCalenMultiDBEditor::NewL( CCalCalendarInfo& aCalendarInfo, 
-                                 CCalenController& aController, TBool aEditFlag)
+CCalenMultiDBEditor* CCalenMultiDBEditor::NewL(
+        CCalenMultipleDbUi& aMultipleDbui, CCalCalendarInfo& aCalendarInfo,
+        CCalenController& aController, TBool aEditFlag)
     {
     TRACE_ENTRY_POINT;
 
-    CCalenMultiDBEditor* self = 
-      new(ELeave) CCalenMultiDBEditor( aCalendarInfo, aController, aEditFlag);
-    CleanupStack::PushL( self );
+    CCalenMultiDBEditor* self = new (ELeave) CCalenMultiDBEditor(
+            aMultipleDbui, aCalendarInfo, aController, aEditFlag);
+    CleanupStack::PushL(self);
     self->ConstructL();
-    CleanupStack::Pop( self );
+    CleanupStack::Pop(self);
 
     TRACE_EXIT_POINT;
     return self;
@@ -93,7 +95,14 @@ CCalenMultiDBEditor* CCalenMultiDBEditor::NewL( CCalCalendarInfo& aCalendarInfo,
 //
 CCalenMultiDBEditor::~CCalenMultiDBEditor()
     {
-    TRACE_ENTRY_POINT;    
+    TRACE_ENTRY_POINT; 
+    
+    if(iRgbColors)
+        {
+        iRgbColors->Reset();
+        delete iRgbColors;
+        iRgbColors = NULL;
+        }
     
     if(iCalendarName)
         {
@@ -116,10 +125,12 @@ CCalenMultiDBEditor::~CCalenMultiDBEditor()
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-CCalenMultiDBEditor::CCalenMultiDBEditor( CCalCalendarInfo&  aCalendarInfo,
-        CCalenController& aController, TBool aEditFlag)
-	:iCalendarInfo( aCalendarInfo ) , iController( aController ),
-	iEditFlag( aEditFlag )
+CCalenMultiDBEditor::CCalenMultiDBEditor(CCalenMultipleDbUi& aMultipleDbui,
+        CCalCalendarInfo& aCalendarInfo, CCalenController& aController,
+        TBool aEditFlag) :
+            iCalendarInfo(aCalendarInfo), iController(
+            aController), iEditFlag(aEditFlag),
+			iMultipleDbUi(aMultipleDbui)
     {
     TRACE_ENTRY_POINT;
     
@@ -146,10 +157,10 @@ void CCalenMultiDBEditor::ConstructL()
         
     //Initial color value
     iColVal = iCalendarInfo.Color().Value();  
-    iColors = TRgb(iColVal);
+    iChoosenColor = TRgb(iColVal);
         
     iPicture = new( ELeave )CDbColorPicture( TSize( 0, 0 ) );
-    iPicture->SetRgbColorsL(iColors);
+    iPicture->SetRgbColorsL(iChoosenColor);
     
     //set sync value
     // ESyncStatus
@@ -161,7 +172,48 @@ void CCalenMultiDBEditor::ConstructL()
         {
         iSyncStatus = pkgSyncStatus();
         }
+    
+    LoadColorsL();
+    
     TRACE_EXIT_POINT;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenMultiDBEditor::LoadColorsL
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+void CCalenMultiDBEditor::LoadColorsL()
+    {
+    TRACE_ENTRY_POINT
+    
+    if(iRgbColors)
+        {
+        iRgbColors->Reset();
+        delete iRgbColors;
+        iRgbColors = NULL;
+        }
+    
+    iRgbColors = new(ELeave) CArrayFixFlat<TRgb>(2);
+    
+    iRgbColors->AppendL(KRgbRed);
+    iRgbColors->AppendL(KRgbDarkGray);
+    iRgbColors->AppendL(KRgbDarkRed);
+    iRgbColors->AppendL(KRgbDarkGreen);
+    iRgbColors->AppendL(KRgbDarkYellow);
+    iRgbColors->AppendL(KRgbDarkBlue);
+    iRgbColors->AppendL(KRgbDarkMagenta);
+    iRgbColors->AppendL(KRgbDarkCyan);
+    iRgbColors->AppendL(KRgbBlack);
+    iRgbColors->AppendL(KRgbGreen);
+    iRgbColors->AppendL(KRgbYellow);
+    iRgbColors->AppendL(KRgbBlue);
+    iRgbColors->AppendL(KRgbMagenta);
+    iRgbColors->AppendL(KRgbCyan);
+    iRgbColors->AppendL(KRgbGray);
+    iRgbColors->AppendL(KRgbWhite);
+    
+    TRACE_EXIT_POINT
     }
 
 // -----------------------------------------------------------------------------
@@ -218,8 +270,6 @@ void CCalenMultiDBEditor::ProcessCommandL( TInt aCommandId )
 		    else if ( ECalenMultiDbColor == IdOfFocusControl() )
 		        {
 		        GetColorL();
-		        iColors = TRgb(iColVal);
-		        GetLineByLineAndPageIndex(1,0)->DrawNow();
 		        }
 		    }
 		    break; 
@@ -227,8 +277,6 @@ void CCalenMultiDBEditor::ProcessCommandL( TInt aCommandId )
 		case EAknSoftkeyOpen:
 		    {
 		    GetColorL();
-		    iColors = TRgb(iColVal);
-		    GetLineByLineAndPageIndex(1,0)->DrawNow(); 
 		    } 
 		    break;
 			
@@ -255,8 +303,6 @@ void CCalenMultiDBEditor::ProcessCommandL( TInt aCommandId )
        case ECalenMultiDbColor:
           {
           GetColorL();
-          iColors = TRgb(iColVal);
-          GetLineByLineAndPageIndex(1,0)->DrawNow(); 
           }
           break;
 	  default:
@@ -314,8 +360,6 @@ TBool CCalenMultiDBEditor::OkToExitL(TInt aButtonId)
         case EAknSoftkeyOpen:
             {
             GetColorL();
-            iColors = TRgb(iColVal);
-            GetLineByLineAndPageIndex(1,0)->DrawNow(); 
             } 
             break;
             
@@ -354,8 +398,6 @@ TBool CCalenMultiDBEditor::OkToExitL(TInt aButtonId)
             else if ( ECalenMultiDbColor == IdOfFocusControl() )
                 {
                 GetColorL();
-                iColors = TRgb(iColVal);
-                GetLineByLineAndPageIndex(1,0)->DrawNow(); 
                 }
             }
             break;    
@@ -363,14 +405,22 @@ TBool CCalenMultiDBEditor::OkToExitL(TInt aButtonId)
         case EAknSoftkeyDone:
             {
             isExitForm = SaveNoteL(aButtonId);
+            if(isExitForm)
+                {
+                iMultipleDbUi.UpdateOnAddOrEditL(!iEditFlag);
+                }
             }
             break;
         case EAknSoftkeyExit:    
         case EAknCmdExit:
             {
-            SaveNoteL(aButtonId); 
-            isExitForm = ETrue;
-            }
+            isExitForm  = SaveNoteL(aButtonId); 
+            if(isExitForm)
+                {
+                iMultipleDbUi.UpdateOnAddOrEditL(!iEditFlag);
+                }
+             iMultipleDbUi.ExitDialogL();           
+			 }
             break;
         case EAknSoftkeyQuit:
             {
@@ -577,55 +627,33 @@ void CCalenMultiDBEditor::DynInitMenuPaneL( TInt aResourceId,
 void CCalenMultiDBEditor::GetColorL()
     {  
     TRACE_ENTRY_POINT;
-      
-    TBool retVal = EFalse;
-    
-    // Array for TRgb colour values
-    CArrayFixFlat<TRgb>* colors = new( ELeave ) CArrayFixFlat<TRgb>( 8 );
-    CleanupStack::PushL( colors );
-    
-    // array of colors.
-    colors->AppendL(KRgbRed);
-    colors->AppendL(KRgbDarkGray);
-    colors->AppendL(KRgbDarkRed);
-    colors->AppendL(KRgbDarkGreen);
-    colors->AppendL(KRgbDarkYellow);
-    colors->AppendL(KRgbDarkBlue);
-    colors->AppendL(KRgbDarkMagenta);
-    colors->AppendL(KRgbDarkCyan);
-    colors->AppendL(KRgbBlack);
-    colors->AppendL(KRgbGreen);
-    colors->AppendL(KRgbYellow);
-    colors->AppendL(KRgbBlue);
-    colors->AppendL(KRgbMagenta);
-    colors->AppendL(KRgbCyan);
-    colors->AppendL(KRgbGray);
-    colors->AppendL(KRgbWhite);
-   
-    // Get current colour
-    TRgb color = KCalenColorPalletteStartColor; //iDbInfo.GetCalendarColor(); 
-    TInt startValue = iColVal;
-    TBool noneChosen = ETrue;
+    iNoneChoosen = ETrue;
     
     // Construct colour selection grid
-    CAknColourSelectionGrid *dlg = CAknColourSelectionGrid::NewL(colors, EFalse,
-            noneChosen,color );
+    CAknDialog  *dlg = CAknColourSelectionGrid::NewL(iRgbColors, EFalse,
+            iNoneChoosen,iChoosenColor );
 
-    retVal = dlg->ExecuteLD();
+    dlg->ExecuteLD(R_CALEN_MULTIDB_EDITOR_COLOR_GRID_DLG);
     
-    iColVal = KErrNotFound;
-    if ( !noneChosen  && retVal )//If something is chosen
-  	    {
-		iColVal = color.Value();
-		}    
-    else//Else set the previous color.
+    TRACE_EXIT_POINT;
+    }
+
+// ---------------------------------------------------------------------------
+// CCalenMultiDBEditor::FocusChanged
+// ---------------------------------------------------------------------------
+//
+void CCalenMultiDBEditor::FocusChanged(TDrawNow /*aDrawNow*/)
+    {
+    TRACE_ENTRY_POINT
+    
+    if(IsFocused() && !iNoneChoosen)
         {
-        iColVal = startValue;
+        iColVal = iChoosenColor.Value();
+        iPicture->SetRgbColorsL(iChoosenColor);
+        GetLineByLineAndPageIndex(1, 0)->DrawNow();
         }
-    iColors = TRgb(iColVal);
-    iPicture->SetRgbColorsL(iColors);  
-    CleanupStack::PopAndDestroy( colors );	
-	TRACE_EXIT_POINT;
+    
+    TRACE_EXIT_POINT
     }
 
 // ---------------------------------------------------------------------------
@@ -803,13 +831,13 @@ void CCalenMultiDBEditor::ReadDataFromFormL( TBool /*aContinueOnError */)
     {
     TRACE_ENTRY_POINT;
     //Initial Name value
-     TPtr summary = iCalendarName->Des();    
-      
-     CEikEdwin* edwin =
-              reinterpret_cast<CEikEdwin*>(Control(ECalenMultiDbName));
-      GetEdwinText(summary, ECalenMultiDbName);
-      
-      TRACE_EXIT_POINT;
+    TPtr summary = iCalendarName->Des();
+
+    CEikEdwin* edwin = reinterpret_cast<CEikEdwin*> (Control(
+            ECalenMultiDbName));
+    GetEdwinText(summary, ECalenMultiDbName);
+
+    TRACE_EXIT_POINT;
     }
 // ---------------------------------------------------------------------------
 // CCalenMultiDBEditor::IsNameEditedL
@@ -968,8 +996,6 @@ void CCalenMultiDBEditor::HandleDialogPageEventL( TInt aEventID )
             case ECalenMultiDbColor:
                 {
                 GetColorL();
-                iColors = TRgb(iColVal);
-                GetLineByLineAndPageIndex(1,0)->DrawNow();
                 }
                 break;
                     
@@ -1209,6 +1235,10 @@ void CDbColorPicture::GetOriginalSizeInTwips(TSize& /*aSize*/ ) const
     TRACE_EXIT_POINT;	 
     }
 
+// -----------------------------------------------------------------------------
+// CDbColorPicture::SetRgbColorsL
+// -----------------------------------------------------------------------------
+//
 void CDbColorPicture::SetRgbColorsL(TRgb aColors)  
     {
     TRACE_ENTRY_POINT;

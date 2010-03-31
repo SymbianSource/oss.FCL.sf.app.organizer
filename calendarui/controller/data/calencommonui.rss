@@ -934,7 +934,7 @@ RESOURCE MENU_PANE r_calendar_attachment_menupane
         MENU_ITEM
             {
             command = ECalenViewAttachmentCmdSave;
-            txt = qtn_cale_opt_save_attachment;
+           txt = qtn_cale_stylus_popup_save;
              //Single click
             flags = EEikMenuItemSpecific;
             },
@@ -946,7 +946,7 @@ RESOURCE MENU_PANE r_calendar_attachment_menupane
         MENU_ITEM
             {
             command = ECalenViewAttachmentCmdRemove;
-            txt = qtn_cale_opt_remove_attachment;
+            txt = qtn_cale_stylus_popup_remove_attachment;
              //Single click 
             flags = EEikMenuItemSpecific;
             },
@@ -1113,5 +1113,47 @@ RESOURCE TBUF r_qtn_cale_tb_todo_view_tooltip
 RESOURCE TBUF r_qtn_cale_tb_custom_view 
     {
     buf = qtn_cale_opt_open;
-    }    
+    }  
+
+// ---------------------------------------------------------
+//      r_calen_multidb_editor_color_grid_dlg
+//      Color selection dialog with customized "none" text.
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_calen_multidb_editor_color_grid_dlg
+    {
+    flags = EEikDialogFlagNotifyEsc | 
+            EEikDialogFlagCbaButtons | EEikDialogFlagNoDrag | 
+            EEikDialogFlagNoBorder;
+    buttons=R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtPopupHeadingPane;
+            id = EColourGridPopup;
+            control = AVKON_HEADING
+                {
+                label = qtn_select_colour_prompt;
+                headinglayout = R_AVKON_LIST_HEADING_PANE;
+                };
+            },
+        DLG_LINE
+            {
+            type = EAknCtColourSelectionGridDialog;
+            id   = ECtrlGridType;
+            control = AVKON_COLOUR_SELECTION_GRID
+                {
+                nonetext = qtn_chat_set_colour_default;
+                gridcontrol = GRID
+                    {
+                    style = R_COLOUR_SEL_GRID_STYLE_NONE;
+                    flags = EEikDlgItemTakesEnterKey;
+                    height  = 4;
+                    width = 4 ;
+                    };
+                };
+            }
+        };
+    }
 // End of File

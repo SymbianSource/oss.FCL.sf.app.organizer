@@ -99,14 +99,6 @@ TBool CCalenPopulationState::HandleCommandL( const TCalenCommand& aCommand,
         RequestCallbackL( handler, aCommand );
         cmdUsed = ETrue;
         }
-    
-    else if( ECalenEventView == cmd )
-        {
-        SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
-        ActivateCurrentStateL(aStateMachine);
-        RequestCallbackL( handler, aCommand );
-        cmdUsed = ETrue;
-        }
 
     TRACE_EXIT_POINT;
     return cmdUsed;

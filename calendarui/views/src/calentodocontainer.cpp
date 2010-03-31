@@ -21,6 +21,8 @@
 #include <aknlists.h>
 #include <AknsUtils.h>
 #include <avkon.mbg>
+#include <aknbutton.h>
+#include <akntoolbar.h>
 #include <calalarm.h>
 #include <calentry.h>
 #include <calinstance.h>
@@ -944,6 +946,29 @@ void CCalenTodoContainer::MarkCurrentL(TBool aMark)
     // set marked todo items info
     static_cast<CCalenTodoView*>( iView )->SetMarkedToDoItems(newArray);
     
+    MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
+    if( MarkedCount() )
+        {
+        if(toolbarImpl) 
+          {
+            CAknToolbar& toolbar = toolbarImpl->Toolbar();
+
+            // dim clear and clear all toolbar buttons
+            toolbar.SetItemDimmed(ECalenNewMeeting,ETrue,ETrue);
+          }
+
+        }
+    else
+        {
+        if(toolbarImpl) 
+             {
+               CAknToolbar& toolbar = toolbarImpl->Toolbar();
+
+               // dim clear and clear all toolbar buttons
+               toolbar.SetItemDimmed(ECalenNewMeeting,EFalse,ETrue);
+             }
+        }
+    
     CleanupStack::Pop( newArray );
 
     TRACE_EXIT_POINT;
@@ -982,6 +1007,29 @@ void CCalenTodoContainer::MarkAllL(TBool aMark)
         // when all the todo items are unmarked,clear all marked todo items info from View
         static_cast<CCalenTodoView*>( iView )->ClearMarkedToDoItems();
         }
+    
+    MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
+    if( MarkedCount() )
+           {
+           if(toolbarImpl) 
+             {
+               CAknToolbar& toolbar = toolbarImpl->Toolbar();
+
+               // dim clear and clear all toolbar buttons
+               toolbar.SetItemDimmed(ECalenNewMeeting,ETrue,ETrue);
+             }
+
+           }
+       else
+           {
+           if(toolbarImpl) 
+                {
+                  CAknToolbar& toolbar = toolbarImpl->Toolbar();
+
+                  // dim clear and clear all toolbar buttons
+                  toolbar.SetItemDimmed(ECalenNewMeeting,EFalse,ETrue);
+                }
+           }
 
     TRACE_EXIT_POINT;
     }

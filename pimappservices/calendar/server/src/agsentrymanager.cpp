@@ -574,7 +574,7 @@ TInt CAgnEntryManager::RestoreBufferL(const TStreamId& aStreamId)
 		}
 	CleanupStack::PopAndDestroy();
 	iLastRestored = type;
-	return (count);
+	return (buffer->Count());
 	}
 
 CAgnEntry* CAgnEntryManager::SearchBuffers(const TAgnEntryId& aEntryId, TInt& aPos)

@@ -22,7 +22,6 @@
 // INCLUDES
 #include "CalEngineCallback.h"
 #include "CalenEngine.h"
-#include "CalSvrClient.h"
 #include "PropertyObserver.h"
 
 #include <calfilechangenotification.h>
@@ -37,7 +36,6 @@ class CCalSession;
 // CLASS DECLARATION
 NONSHARABLE_CLASS( CAIAgendaPluginEngineImpl ) : public CBase,
                                                  public MCalenEngineListener,
-                                                 public MCalSvrAgendaUpdateListener,
                                                  public MPropertyChangeHandler,
                                                  public MCalFileChangeObserver
                                                  
@@ -114,13 +112,6 @@ NONSHARABLE_CLASS( CAIAgendaPluginEngineImpl ) : public CBase,
      * @since S60 3.0
      **/
     void HandleError(TInt aError);
-
- public:  // From MCalSvrAgendaUpdateListener
-    /**
-     * ?member_description.
-     * @since Series 60 2.6
-     **/
-    void CalendarServerInitialized(void);
 
 public:  // From MPropertyChangeHandler
     /**
@@ -266,9 +257,6 @@ public:  // From MPropertyChangeHandler
 
     // ?one_line_short_description_of_data
     RPointerArray<CCalInstance> iInstanceArray;
-
-    // Calendar server session
-    RCalSvrSession iSession;
 
     // ?one_line_short_description_of_data
     MPluginDataChangeObserver& iDataChangeObserver;

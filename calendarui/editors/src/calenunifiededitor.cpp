@@ -569,6 +569,15 @@ TBool CCalenUnifiedEditor::OkToExitL( TInt aButtonId )
              // Intentional fall through to EEikBidCancel below
              iEntryUiOutParams.iAction = ENoAction;
              iEntryUiOutParams.iSpare = 0;
+             MCalenContext& context = iServices->Context();
+             HBufC* fileNamePtr = context.GetCalAlarmEntryFileNameL();             
+             TCalLocalUid localUid = context.CalAlarmLocalUidL();           
+             if (fileNamePtr != NULL && !fileNamePtr->CompareF(iGlobalData->GetCalFileNameForCollectionId(context.InstanceId().iColId)) 
+                     && localUid == context.InstanceId().iEntryLocalUid)
+                 {
+                 context.ResetCalAlarmEntryFileName();
+                 break;
+                 }
              // Fall through...
              }
          case ECalenEditSeries:
@@ -658,8 +667,8 @@ TBool CCalenUnifiedEditor::OkToExitL( TInt aButtonId )
 TKeyResponse CCalenUnifiedEditor::OfferKeyEventL( const TKeyEvent& aKeyEvent,
                                                   TEventCode aType )
     {
-    TRACE_ENTRY_POINT;
-    TBool isMapIconHandled = EFalse;
+    
+     TRACE_ENTRY_POINT;
     TKeyResponse keyResponse( EKeyWasNotConsumed );
     TInt ctrlid=IdOfFocusControl();
    
@@ -696,102 +705,18 @@ TKeyResponse CCalenUnifiedEditor::OfferKeyEventL( const TKeyEvent& aKeyEvent,
                 keyResponse = EKeyWasConsumed;
                 break;
             case EKeyEnter: // For Enter key
+            case EKeyDelete: // For Delete key
 				{
 				keyResponse = CAknForm::OfferKeyEventL(aKeyEvent,aType); // Let framework handle the key event
-				// when enter key is pressed on subject line or on location line, call AddPictureL to recalculate the map icon position properly
-				// as location field could habe moved up or down
-				if(ctrlid == ECalenEditorPlace || ctrlid == ECalenEditorSubject)
-					{
-					CCalGeoValue* geoValue = iEditorDataHandler->Entry().GeoValueL();
-					if(geoValue)
-						{
-						isMapIconHandled = ETrue;
-						AddPictureL();
-						delete geoValue;
-						}
-					}
-				}
-				break;
-			case EKeyDelete:
-				{
-				if(ctrlid == ECalenEditorPlace)
-					{
-					CCalGeoValue* geoValue = iEditorDataHandler->Entry().GeoValueL();
-					if(geoValue)
-						{
-						CEikRichTextEditor* locationControl = static_cast<CEikRichTextEditor*>(Control(ECalenEditorPlace));
-						CRichText* text = locationControl->RichText();
-						TPtrC ptr = text->Read(0,text->DocumentLength());
-						TInt pos = ptr.Locate(TChar(CEditableText::EPictureCharacter));
-						if(locationControl->CursorPos() == pos)
-							{
-							isMapIconHandled = ETrue;
-							keyResponse = EKeyWasConsumed;
-							delete geoValue;
-							break;
-							}
-						delete geoValue;
-						}
-					}
-					keyResponse = CAknForm::OfferKeyEventL(aKeyEvent,aType); // Let framework handle the key event
 				}
 				break;
 			case EKeyBackspace:  // For back space character
 				{
-				if(ctrlid == ECalenEditorPlace)
-					{
-					CCalGeoValue* geoValue = iEditorDataHandler->Entry().GeoValueL();
-					if(geoValue)
-						{
-						CEikRichTextEditor* locationControl = static_cast<CEikRichTextEditor*>(Control(ECalenEditorPlace));
-						CRichText* text = locationControl->RichText();
-						TPtrC ptr = text->Read(0,text->DocumentLength());
-						TInt pos = ptr.Locate(TChar(CEditableText::EPictureCharacter));
-						TInt curpos = locationControl->CursorPos();
-						
-						// When only one visible character is there and picture byte is there at second position, then
-						// empty the location field and redraw the map icon
-						if(text->DocumentLength() <= 2) 
-							{
-							TBuf<1> newLocation;
-							SetEdwinTextL(ECalenEditorPlace, &newLocation);
-							keyResponse = EKeyWasConsumed;
-							delete geoValue;
-							isMapIconHandled = ETrue;
-							AddPictureL();
-							break;
-							}
-						//  when cursor position is at the end, then since, picture byte is at the end
-						// delete last but one character (for user, it looks as if last visible character is being deleted)
-						// and redraw the icon
-						 else if( curpos == pos + 1)
-							{
-							text->DeleteL(text->DocumentLength() - 2,1);
-							
-							AddPictureL();
-							locationControl->SetCursorPosL(curpos - 1, EFalse);
-							isMapIconHandled = ETrue;
-							keyResponse = EKeyWasConsumed;
-							delete geoValue;
-							break;
-							}
-						delete geoValue;
-						}
-					}
-				// This is to handle backspaces in subject field when there nore that one lines,
-				// location field will move up, hence, need to redraw the map icon
-				else if(ctrlid == ECalenEditorSubject)
+				if(ctrlid == ECalenEditorPlace || ECalenEditorSubject)
 					{
 					keyResponse = CAknForm::OfferKeyEventL(aKeyEvent,aType);
-					CCalGeoValue* geoValue = iEditorDataHandler->Entry().GeoValueL();
-					if(geoValue)
-						{
-						AddPictureL();
-						isMapIconHandled = ETrue;
-						delete geoValue;
-						}
-					break;
 					}
+				break;
 				}
             case EKeyLeftArrow:
             case EKeyRightArrow:
@@ -810,19 +735,6 @@ TKeyResponse CCalenUnifiedEditor::OfferKeyEventL( const TKeyEvent& aKeyEvent,
             default:
                 {
                 keyResponse = CAknForm::OfferKeyEventL(aKeyEvent,aType); 
-                if(!isMapIconHandled)
-                    {
-                    if((ctrlid == ECalenEditorPlace) || (ctrlid == ECalenEditorSubject))
-                        {
-                        CCalGeoValue* geoValue = iEditorDataHandler->Entry().GeoValueL();
-                        if(geoValue)
-                            {
-                            isMapIconHandled = ETrue;
-                            AddPictureL();
-                            delete geoValue;
-                            }
-                        }
-                    }
                 }
                 break;
             }
@@ -1065,12 +977,7 @@ void CCalenUnifiedEditor::PostLayoutDynInitL()
     TRACE_ENTRY_POINT;
     
     SetEditableL(ETrue);
-    CCalGeoValue* geoValue = iEditorDataHandler->Entry().GeoValueL();
-	if(geoValue)
-		{
-		AddPictureL();	
-		delete geoValue;	
-		}
+
     TCallBack callback( LocaleCallback, this );
     iLocaleChangeNotifier =
         CEnvironmentChangeNotifier::NewL( EActivePriorityLogonA, callback );
@@ -1332,14 +1239,6 @@ void CCalenUnifiedEditor::HandleResourceChange( TInt aType )
 
     CCoeControl::HandleResourceChange( aType );
     
-    CCalGeoValue* geoValue = NULL;
-	TRAP_IGNORE(geoValue = iEditorDataHandler->Entry().GeoValueL());	
-	if(geoValue)
-		{
-		TRAP_IGNORE(AddPictureL());	
-		delete geoValue;	
-		}
-		
     TRACE_EXIT_POINT;
     }
 
@@ -2709,7 +2608,6 @@ void CCalenUnifiedEditor::UpdateLocationInfoToFormL()
 			{
 			isReplaceLocation = EFalse;
 			StoreLocationDetailsToEntryL(landmark);
-			AddPictureL(0);
 			}
 		}
 		
@@ -2733,7 +2631,6 @@ void CCalenUnifiedEditor::HandleEntryWithGeoValueEditionL(CPosLandmark* landmark
 	if(userResponse)
 		{
 		StoreLocationDetailsToEntryL(landmark);
-		AddPictureL();
 		}
 		
 	TRACE_EXIT_POINT;	
@@ -2797,7 +2694,6 @@ void CCalenUnifiedEditor::HandleEntryWithLocationEditionL(CPosLandmark* landmark
             break;
         }
         StoreLocationDetailsToEntryL(landmark);
-        AddPictureL(0);
         
     TRACE_EXIT_POINT;   
     }
@@ -2848,7 +2744,6 @@ void CCalenUnifiedEditor::StoreLocationDetailsToEntryL(CPosLandmark* landmark)
         ShowAddressUpdatedNoticeL();
         }
 	 
-	PreLayoutDynInitL();
 	
 	TRACE_EXIT_POINT;	
 	}
@@ -3174,14 +3069,7 @@ void CCalenUnifiedEditor::GetAllCollectionidsL(
 void CCalenUnifiedEditor::LineChangedL( TInt /* aControlId */ )
     {
     TRACE_ENTRY_POINT;
-    
-    CCalGeoValue* geoValue = iEditorDataHandler->Entry().GeoValueL();
-	if(geoValue)
-		{
-		AddPictureL();	
-		delete geoValue;	
-		}
-		
+
     SetMskFromResourceL();
     TRACE_EXIT_POINT;
     }
@@ -3342,51 +3230,6 @@ void CCalenUnifiedEditor::HideFieldsForEditSingleInstance()
     TRACE_EXIT_POINT;
     }
 
-// -----------------------------------------------------------------------------
-// CCalenUnifiedEditor::AddPictureL
-// Adds Map icon onto the editors
-// -----------------------------------------------------------------------------
-//      
-void CCalenUnifiedEditor::AddPictureL(TInt isNotFirstTime)
-    {
-    TRACE_ENTRY_POINT;
-    return;
-    
-    // Instantiate CMapIconPicture object 300x300 twips in size
-    CEikRichTextEditor* locationControl = static_cast<CEikRichTextEditor*>(Control(ECalenEditorPlace));
-    
-    CRichText* text = locationControl->RichText();
-    if(isNotFirstTime)
-        {
-        TPtrC ptr = text->Read(0,text->DocumentLength());
-        TInt pos = ptr.Locate(TChar(CEditableText::EPictureCharacter));
-        if(pos != -1) // If picture found, delete it so that it cna be drawn at new place
-            {
-            TRAP_IGNORE(text->DeleteL(pos,1));
-            }
-        }
-    
-    // Get the rect of the caption of ECalenEditorPlace control
-    CEikLabel* label = this->ControlCaption(ECalenEditorPlace);
-    TRect rect = label->Rect();
-    
-    CMapsIconPicture* picture = new( ELeave )CMapsIconPicture(/* TSize( 300, 300 )*/ *iServices, rect );
-    CleanupStack::PushL(picture);
-    //Prepare the picture header, which will be inserted into the rich text
-    TPictureHeader header;
-    header.iPicture = TSwizzle<CPicture>(picture);
-    
-    // Position where we insert picture is not valid as it always draws icon depending the rect we provide
-    
-        text->InsertL(text->DocumentLength(), header);
-        
-    locationControl->HandleTextChangedL();
-    CleanupStack::Pop(); // picture
-    
-    Control(ECalenEditorPlace)->DrawNow();
-    
-    TRACE_EXIT_POINT;   
-    }
 
 // -----------------------------------------------------------------------------
 // CCalenUnifiedEditor::AttachmentNamesL

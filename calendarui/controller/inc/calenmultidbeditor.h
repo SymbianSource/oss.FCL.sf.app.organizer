@@ -23,11 +23,15 @@
 //  INCLUDES
 #include <AknForm.h>
 #include <gdi.h>
+#include <calennotificationhandler.h>
 
 class CalenAppUi;
 class CAknNavigationControlContainer;
 class CCalenController;
 class CCalCalendarInfo;
+class CCalenMultipleDbUi;
+class CCalenColourSelectionGrid;
+
 
 /**
 * Class defining Map icon picture, derived from CPicture
@@ -104,8 +108,9 @@ public:  // New Functions
     /**
      * Two-phased constructor.
      */
-    static CCalenMultiDBEditor* NewL( CCalCalendarInfo& aCalendarInfo,
-            CCalenController& aController, TBool aEditFlag);
+    static CCalenMultiDBEditor* NewL(CCalenMultipleDbUi& aMultipleDbui,
+                                    CCalCalendarInfo& aCalendarInfo,
+                                    CCalenController& aController, TBool aEditFlag);
 
     /**
      * From Base class.
@@ -124,8 +129,9 @@ protected:
     /**
      * C++ constructor.
      */
-    CCalenMultiDBEditor( CCalCalendarInfo&  aCalendarInfo,
-            CCalenController& aController, TBool aEditFlag);
+    CCalenMultiDBEditor(CCalenMultipleDbUi& aMultipleDbui,
+                        CCalCalendarInfo&  aCalendarInfo,
+                        CCalenController& aController, TBool aEditFlag);
 
     
 protected:  // Functions from base classes
@@ -159,9 +165,12 @@ protected:  // Functions from base classes
      */
 	void ReadDataFromFormL( TBool aContinueOnError );
 	
-	
-	
 	void HandleDialogPageEventL( TInt aEventID );
+	
+	/*
+	 * from CAknDialog
+	 */
+	void FocusChanged(TDrawNow aDrawNow);
 	
 private:
 
@@ -234,6 +243,11 @@ private:
 	*/
 	void SetVisiblityFieldL( TBool aStatusVal );
 	
+	/*
+	 * Load colors for grid
+	 */
+	void LoadColorsL();
+	
 	/**
 	* setup title pane for the status pane
 	* @return void 
@@ -271,13 +285,18 @@ private://data
     CCalenController& iController;
     TInt iColVal;		// Color id
     TBool iCalendarStatus;
-    TRgb iColors;
     CDbColorPicture* iPicture;
     TBool iEditFlag;
     CAknNavigationControlContainer*   iNaviContainer;
     //Sync field, EFalse then Sync off else Sync On
     TBool                             iSyncStatus;
     TCalendarConflicts                iConflict;
+    
+    CCalenMultipleDbUi&               iMultipleDbUi;
+	 
+	CArrayFixFlat<TRgb>*              iRgbColors;
+    TBool                             iNoneChoosen;
+    TRgb                              iChoosenColor;
     };
 
 #endif // CALENMULTIDBEDITOR_H

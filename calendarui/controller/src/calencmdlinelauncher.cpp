@@ -27,6 +27,7 @@
 #include <caleninstanceid.h>            // TCalenInstanceId
 #include <calenactionuiutils.h>
 #include <aknappui.h>
+#include <AknDlgShut.h> 
 #include "calenviewmanager.h"
 #include "calencmdlinelauncher.h"
 #include "calencontroller.h"            // CCalenController
@@ -146,7 +147,7 @@ TBool CCalenCmdLineLauncher::ProcessCommandParametersL(
         // using the same 'try and save whatever we can' logic that is used on a forced close
         // and then open the new editor.  We also have to prevent the focus state being updated
         // and highlighting the old entry in the day view.
-        while( AppUi().IsDisplayingDialog() )
+        if( AppUi().IsDisplayingDialog() )
             {
             iIsExitOnDlgClose = EFalse;
             // Tell the editui that whatever it was doing, it should not alter
@@ -155,31 +156,31 @@ TBool CCalenCmdLineLauncher::ProcessCommandParametersL(
 
             // Send a key event to the currently open dialog (viewer / editor)
             // to dismiss it
-            TKeyEvent key;
+            /*TKeyEvent key;
             key.iRepeats = 0;
             key.iCode = EKeyEscape;
             key.iModifiers = 0;
-            CCoeEnv::Static()->SimulateKeyEventL( key, EEventKey );
-            
+            CCoeEnv::Static()->SimulateKeyEventL( key, EEventKey );*/
+            AknDialogShutter::ShutDialogsL( *CEikonEnv::Static() );
             // Break is added to close the messaging editor as the messagng editor is not 
             // consuming the escape key event.
-            if( iGlobalData->CalenSendL().IsMessagingEditorOpen() )
+            /*if( iGlobalData->CalenSendL().IsMessagingEditorOpen() )
                 {
             break;
-                }
+                }*/
                  
             }
 
         // Interpret 8bit data as 16bit unicode data
         //lint -e{826} Disable the lint warning of the pointer sizes being different
-        const TText* buf = reinterpret_cast<const TText*>(aTail.Ptr());
+        const TText* buf = reinterpret_cast<const TText*> (aTail.Ptr());
         TPtrC ptr(buf, aTail.Length() / (TInt) sizeof(TText));
 
         // create cmd line parser
         CCalenCmdLineParser* parser = CCalenCmdLineParser::NewL();
-        CleanupStack::PushL( parser );
+        CleanupStack::PushL(parser);
         // parse parameters
-        parser->ParseCommandLineL( ptr );
+        parser->ParseCommandLineL(ptr);
         iCmdParameters = parser->CommandLineParameters();
         CleanupStack::PopAndDestroy(); // parser
         }

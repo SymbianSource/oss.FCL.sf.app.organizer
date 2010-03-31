@@ -248,6 +248,8 @@ private: //Internal
      * Async exit for the dialog
      */
     static TInt DoAsyncExit(TAny* aPtr);
+    
+    static TInt DoAsyncDeleteTemL(TAny* aPtr);
 
 
     /*
@@ -292,7 +294,21 @@ public:   // from MEikListBoxObserver
     *                   may be obtained by accessing the list box itself.
     */
     void HandleListBoxEventL(CEikListBox* aListBox, TListBoxEvent aEventType);
-
+    
+public:
+    
+    /*
+     * Updates after add/edit had been performed.
+     * Called from editor before exiting the dialog.
+     * @param aItemAdded ETure if add else edit.
+     */
+    void UpdateOnAddOrEditL(TBool aItemAdded);
+    
+    /*
+     * Exit the dialog;
+     */
+    void ExitDialogL();
+    
 private:
     CCalenMultipleDbListbox* iListBox;
     CAknsBasicBackgroundControlContext* iBgContext; //Owns
@@ -300,16 +316,19 @@ private:
     CCalenController& iController;
     CDesCArrayFlat* iDesArray; //Owns
     TRect iRect;
-    TBool iFirstTap;
-    TBool iDialogLaunched;
     RArray<MCalenServices::TCalenIcons> iIconIndices;
     CAknIconArray* iIconList;
     RArray<TInt32> iColorUidArray;
     CAsyncCallBack* iAsyncExit;
+    CAsyncCallBack* iAsyncDeletequery;
     TInt iAsyncExitCmd;
     CCalenMultiDBEditor* iDbEditor;//Not not owned
     TBool iConflictOccured;
     TBool iIsDbEditorOpen ; 
+    
+    CCalCalendarInfo* iCalendarInfoNew;
+    CCalCalendarInfo* iCalendarInfoOriginal;
+    CCalCalendarInfo* iCalendarInfoEdited;
     };
 
 

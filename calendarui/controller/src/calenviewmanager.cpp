@@ -891,8 +891,10 @@ void CCalenViewManager::RequestActivationL( const TUid& aViewUid,
 		}
 	
 	// set the previous view id
-	iPreviousViewId.iViewUid = cachePreviousViewId;
-	
+	if(cachePreviousViewId != KUidCalenEventView) 
+	    {
+        iPreviousViewId.iViewUid = cachePreviousViewId; 
+	    }	
 	TRACE_EXIT_POINT;
     }
 
@@ -1514,7 +1516,14 @@ void CCalenViewManager::HandleEntryDeleteNotificationL()
         // the event view 
         if(iPreviousViewId.iViewUid != KNullUid)
             {
-            RequestActivationL(iPreviousViewId.iViewUid);   
+            if(iPreviousToDayView.iViewUid != KNullUid)
+                {
+                RequestActivationL(iPreviousViewId.iViewUid, KUidCalenShowBackCba);
+                }
+            else
+                {
+                RequestActivationL(iPreviousViewId.iViewUid);
+                }
             }
         }
     else

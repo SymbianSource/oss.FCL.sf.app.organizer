@@ -2173,11 +2173,15 @@ RESOURCE MENU_PANE r_missed_alarms_menupane
             {
             command = ECalenMissedEventView;
             txt = qtn_cale_opt_open;
+            //single click
+            flags = EEikMenuItemAction;
             },
 	    MENU_ITEM
             {
             command = ECalenCmdClear;
             txt = qtn_cale_mav_opt_clear;
+            //Single click 
+            flags = EEikMenuItemSpecific;
             },
 	    MENU_ITEM
             {
@@ -2376,7 +2380,6 @@ RESOURCE DIALOG r_calen_multidb_editor
         |   EEikDialogFlagFillAppClientRect 
         |   EEikDialogFlagButtonsRight 
         |   EEikDialogFlagCbaButtons
-        |   EEikDialogFlagWait 
         |   EEikDialogFlagNoTitleBar
         |   EEikDialogFlagDontEatUpDownEvents
         |   EEikDialogFlagNotifyEsc;
@@ -2534,7 +2537,7 @@ RESOURCE DIALOG r_calen_calendareditor_conflict_dialog
 RESOURCE TBUF r_qtn_calendareditor_note_db_conflict_delete
     {
     //TODO need to raise loc CR
-    buf = "Calendar conflict.  This calendar has been deleted by another application.";
+    buf = qtn_cale_note_db_conflict;
     }
 
 // ---------------------------------------------------------
@@ -2547,7 +2550,7 @@ RESOURCE TBUF r_qtn_calendareditor_note_db_conflict_delete
 RESOURCE TBUF r_qtn_calendareditor_note_db_conflict_update
     {
     //TODO need to raise loc CR
-    buf = "Calendar conflict.  This calendar has been updated by another application.";
+    buf = qtn_cale_note_db_modified;
     }
     
 RESOURCE MENU_BAR r_calen_multidb_menubar

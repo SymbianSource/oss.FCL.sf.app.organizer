@@ -183,8 +183,7 @@ void CCalenMultipleDbListbox::SizeChangedL()
 // ----------------------------------------------------------------------------
 //
 CCalenMultipleDbUi::CCalenMultipleDbUi(CCalenController& aController) : 
-    iController(aController),
-    iDialogLaunched(EFalse)
+    iController(aController)
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
@@ -228,7 +227,12 @@ void CCalenMultipleDbUi::ConstructL()
     notificationArray.Append(ECalenNotifyCalendarFileDeleted);
     iController.RegisterForNotificationsL(this, notificationArray);
     
+    notificationArray.Close();
+    
     iConflictOccured = EFalse;
+    
+    TCallBack callBackDeleteQuery(CCalenMultipleDbUi::DoAsyncDeleteTemL, this);
+    iAsyncDeletequery = new(ELeave) CAsyncCallBack(callBackDeleteQuery,CActive::EPriorityStandard);
     
     TRACE_EXIT_POINT;
     }
@@ -251,11 +255,14 @@ CCalenMultipleDbUi::~CCalenMultipleDbUi()
         }
     
     delete iBgContext;
+    iBgContext = NULL;
     
     iListBox->Reset();
-    delete iListBox; 
+    delete iListBox;
+    iListBox = NULL;
     
     delete iDesArray;
+    iDesArray = NULL;
     
     iColorUidArray.Close();
     
@@ -264,6 +271,23 @@ CCalenMultipleDbUi::~CCalenMultipleDbUi()
     
     iAsyncExit->Cancel();
     delete iAsyncExit;
+    iAsyncExit = NULL;
+    
+    iAsyncDeletequery->Cancel();
+    delete iAsyncDeletequery;
+    iAsyncDeletequery = NULL;
+        
+    if(iCalendarInfoNew)
+        {
+        delete iCalendarInfoNew;
+        iCalendarInfoNew = NULL;
+        }
+    
+    if(iCalendarInfoOriginal)
+        {
+        delete iCalendarInfoOriginal;
+        iCalendarInfoOriginal = NULL;
+        }
 
     TRACE_EXIT_POINT;
     }
@@ -324,6 +348,10 @@ void CCalenMultipleDbUi::ConstructListL()
 void CCalenMultipleDbUi::UpdateListboxL()
     {
     TRACE_ENTRY_POINT;
+    
+    if(!iListBox)
+        return;
+    
     iListBox->View()->SetDisableRedraw( ETrue );
     iDesArray->Reset();
     iColorUidArray.Close();
@@ -443,13 +471,22 @@ void CCalenMultipleDbUi::SetTitlePaneL()
    // Set title text
     CAknTitlePane* tp = static_cast<CAknTitlePane*>(
                                  sp->ControlL( TUid::Uid( EEikStatusPaneUidTitle ) ) );
-
-    HBufC* titleText = StringLoader::LoadLC( R_QTN_CALE_TITLE_CALENDARS , iCoeEnv );
+    HBufC* titleText;
+    if(iIsDbEditorOpen)
+        {
+        titleText = StringLoader::LoadLC( R_QTN_CALE_TITLE_CALENDAR , iCoeEnv );
+        }
+    else
+        {
+        titleText = StringLoader::LoadLC( R_QTN_CALE_TITLE_CALENDARS , iCoeEnv );
+        }
     tp->SetTextL( *titleText );  // r_qtn_cale_title_calendars
     CleanupStack::PopAndDestroy( titleText );
     
     TRACE_EXIT_POINT;
     }
+
+   
 
 
 // ----------------------------------------------------------------------------
@@ -538,15 +575,17 @@ void  CCalenMultipleDbUi::ProcessCommandL( TInt aCommandId )
           break;
       case ECalenCmdDelete:
           {
-          DeleteItemL();
-          }
+          iAsyncDeletequery->CallBack();
+		  }
           break;
       case ECalenCmdItemSelect:
+      case ECalenCmdShow:
           {
           DoSelectionL(ETrue);
           }
           break;
       case ECalenCmdItemDeselect:
+      case ECalenCmdHide:
           {
           DoSelectionL(EFalse);
           }
@@ -558,18 +597,6 @@ void  CCalenMultipleDbUi::ProcessCommandL( TInt aCommandId )
           iAsyncExit->CallBack();
           }
           break;
-     case ECalenCmdShow:
-          {
-          DoSelectionL( ETrue );
-          }
-          break;
-
-      case ECalenCmdHide:   
-          {
-          DoSelectionL( EFalse );
-          }
-          break;             
-          
       default:
           break;
       }
@@ -606,49 +633,88 @@ void CCalenMultipleDbUi::DoSelectionL( TBool aMark )
 TInt CCalenMultipleDbUi::AddItemL()
     {
     TRACE_ENTRY_POINT
-    TInt retValue = KErrNotFound;
+    TInt retValue = 0;
     
-    CCalCalendarInfo* calendarInfo = CCalCalendarInfo::NewL();
-    calendarInfo->SetNameL(KNullDesC16);
-    calendarInfo->SetColor(255);
-    calendarInfo->SetEnabled(ETrue);
-    iDbEditor = CCalenMultiDBEditor::NewL( *calendarInfo, iController, EFalse );
+    if(iCalendarInfoNew)
+        {
+        delete iCalendarInfoNew;
+        iCalendarInfoNew = NULL;
+        }
+    
+    iCalendarInfoNew = CCalCalendarInfo::NewL();
+    iCalendarInfoNew->SetNameL(KNullDesC16);
+    iCalendarInfoNew->SetColor(255);
+    iCalendarInfoNew->SetEnabled(ETrue);
+    iDbEditor = CCalenMultiDBEditor::NewL(*this,*iCalendarInfoNew, iController, EFalse );
   
-    iDialogLaunched = ETrue;
+    //Async dialog
     retValue = iDbEditor->ExecuteLD();
     iDbEditor = NULL;
-    iDialogLaunched = EFalse; 
-    
+     
     if(EAknCmdExit == retValue )
         {
         iController.BroadcastNotification(ECalenNotifyRealExit);
         }
     
-    HBufC* calendarName = calendarInfo->NameL().AllocLC();
-    calendarName->Des().Trim();
-    if(calendarName->Length() > 0)
+    TRACE_EXIT_POINT
+    return retValue;
+    }
+
+
+// ----------------------------------------------------------------------------
+// CCalenMultipleDbUi::UpdateAddOrEditL
+// ----------------------------------------------------------------------------
+//
+void CCalenMultipleDbUi::UpdateOnAddOrEditL(TBool aItemAdded)
+    {
+    TRACE_ENTRY_POINT
+    
+    if(aItemAdded)
         {
-        
         // Set calendar properties for new calendar being created.
-        SetCalendarAddPropertiesL(*calendarInfo);
-        
-        iController.AddCalendarL(calendarInfo);
-        
-        UpdateListboxL();
-        
+        SetCalendarAddPropertiesL(*iCalendarInfoNew);
+       
+        iController.AddCalendarL(iCalendarInfoNew);
+        iCalendarInfoNew = NULL;
+       
         //Highlight the newly created list item
         iListBox->ScrollToMakeItemVisible(iListBox->BottomItemIndex());
         iListBox->SetCurrentItemIndexAndDraw(iDesArray->Count()-1);
         }
-    else 
+    else
         {
-        delete calendarInfo;
+        //Before checking for changes , check if any conflict occured i.e calendar updated / deleted.
+        //if there is conflict iConflictOccured = true then skip below condition.
+        if (!iConflictOccured && iCalendarInfoOriginal &&
+                CheckForChangesL(*iCalendarInfoOriginal,
+                *iCalendarInfoEdited))
+            {
+            // update the calendar properties such as modification time, sync status.
+            SetCalendarUpdatePropertiesL(*iCalendarInfoEdited);
+            
+            iController.UpdateCalendarL(iCalendarInfoEdited);
+            }
+
+        iConflictOccured = EFalse;
+        delete iCalendarInfoOriginal,iCalendarInfoOriginal = NULL;
         }
-    
-    CleanupStack::PopAndDestroy(calendarName);  
+    iIsDbEditorOpen = EFalse ; //iIsDbEditorOpen should be set before calling UpdateListboxL() 
+    UpdateListboxL();
     
     TRACE_EXIT_POINT
-    return retValue;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenMultipleDbUi::ExitDialogL
+// Edit item from listbox 
+// ----------------------------------------------------------------------------
+//
+void CCalenMultipleDbUi::ExitDialogL()
+    {
+    TRACE_ENTRY_POINT
+    iAsyncExitCmd = EAknSoftkeyExit;
+    iAsyncExit->CallBack();
+    TRACE_EXIT_POINT
     }
 
 // ----------------------------------------------------------------------------
@@ -661,60 +727,41 @@ TInt CCalenMultipleDbUi::EditItemL()
     TRACE_ENTRY_POINT
     TInt retValue = KErrNotFound;
     TInt currentIndex = iListBox->CurrentItemIndex();
-    TInt listCount = iListBox->Model()->ItemTextArray()->MdcaCount();
-
+    
     RPointerArray<CCalCalendarInfo> calendarInfoList;
     iController.GetAllCalendarInfoL(calendarInfoList);
     CleanupClosePushL(calendarInfoList);
     
-    CCalCalendarInfo* calendarInfoedited = calendarInfoList[currentIndex];
+    iCalendarInfoEdited = calendarInfoList[currentIndex];
+    
+    CleanupStack::PopAndDestroy(&calendarInfoList);
     
     //Take a copy of original before editing
-    CCalCalendarInfo* calendarInfoOriginal = CCalCalendarInfo::NewL();
-    CleanupStack::PushL(calendarInfoOriginal);
-    calendarInfoOriginal->SetNameL(calendarInfoedited->NameL());
-    calendarInfoOriginal->SetColor(calendarInfoedited->Color());
-    calendarInfoOriginal->SetEnabled(calendarInfoedited->Enabled());
+    if(iCalendarInfoOriginal)
+        {
+        delete iCalendarInfoOriginal;
+        iCalendarInfoOriginal = NULL;
+        }
+    iCalendarInfoOriginal = CCalCalendarInfo::NewL();
+    
+    iCalendarInfoOriginal->SetNameL(iCalendarInfoEdited->NameL());
+    iCalendarInfoOriginal->SetColor(iCalendarInfoEdited->Color());
+    iCalendarInfoOriginal->SetEnabled(iCalendarInfoEdited->Enabled());
     TBuf8<KBuffLength> keyBuff;
     TBool syncstatus = EFalse;
     keyBuff.Zero();
     keyBuff.AppendNum( ESyncStatus ); 
     TPckgC<TBool> pckgSyncStatusValue(syncstatus);
-    pckgSyncStatusValue.Set(calendarInfoedited->PropertyValueL( keyBuff ));
-    calendarInfoOriginal->SetPropertyL( keyBuff, pckgSyncStatusValue );                
+    pckgSyncStatusValue.Set(iCalendarInfoEdited->PropertyValueL( keyBuff ));
+    iCalendarInfoOriginal->SetPropertyL( keyBuff, pckgSyncStatusValue );                
 
-    iDbEditor = CCalenMultiDBEditor::NewL(*calendarInfoedited, iController,
+    iDbEditor = CCalenMultiDBEditor::NewL(*this,*iCalendarInfoEdited, iController,
             ETrue);
 
-    iDialogLaunched = ETrue;
+    //Async dialog
     retValue = iDbEditor->ExecuteLD();
     iDbEditor = NULL;
-    iDialogLaunched = EFalse;
-
-    //Before checking for changes , check if any conflict occured i.e calendar updated / deleted.
-    //if there is conflict iConflictOccured = true then skip below condition.
-    if (!iConflictOccured && CheckForChangesL(*calendarInfoOriginal,
-            *calendarInfoedited))
-        {
-        // update the calendar properties such as modification time, sync status.
-        SetCalendarUpdatePropertiesL(*calendarInfoedited);
-        
-        iController.UpdateCalendarL(calendarInfoedited);
-        }
-
-    iConflictOccured = EFalse;
-
-    UpdateListboxL();
-
-    //If conflict occured i.e calendar deleted check for list count before and after
-    //and update focus accordingly
-    if (listCount != iListBox->Model()->ItemTextArray()->MdcaCount())
-        {
-        ReAdjustListItemFocusL(currentIndex);
-        }
-
-    CleanupStack::PopAndDestroy(calendarInfoOriginal);
-    CleanupStack::PopAndDestroy(&calendarInfoList);
+    
     return retValue;
     TRACE_EXIT_POINT
     }
@@ -840,7 +887,7 @@ TKeyResponse CCalenMultipleDbUi::OfferKeyEventL(const TKeyEvent& aKeyEvent,
         {
         if( aKeyEvent.iCode == EKeyEscape )
             {
-            TryExitL( EKeyNo );
+            TryExitL( EKeyEscape );
             return exitCode; // Chain this one up to the main app so it closes calendar app.
             }
          else if(aType == EEventKey && TChar(aKeyEvent.iCode).IsPrint() )
@@ -919,13 +966,9 @@ TBool CCalenMultipleDbUi::OkToExitL( TInt aButtonId )
            }
            break;
        case EAknSoftkeyBack:
+       case EKeyEscape:
            {
            iController.BroadcastNotification(ECalenNotifyDeleteInstanceView);
-           okExit = ETrue;
-           }
-           break;
-	   case EKeyEscape:
-           {
            okExit = ETrue;
            }
            break;
@@ -1123,6 +1166,19 @@ TInt CCalenMultipleDbUi::DoAsyncExit(TAny* aPtr)
     TRACE_ENTRY_POINT
     CCalenMultipleDbUi* self = static_cast<CCalenMultipleDbUi*>(aPtr);
     self->TryExitL(self->iAsyncExitCmd);
+    TRACE_EXIT_POINT
+    return 0;
+    }
+// ----------------------------------------------------------------------------
+// CCalenMultipleDbUi::CallBackForDeleteItemL
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+TInt CCalenMultipleDbUi::DoAsyncDeleteTemL(TAny* aPtr)
+    {
+    TRACE_ENTRY_POINT
+    CCalenMultipleDbUi* self = static_cast<CCalenMultipleDbUi*>(aPtr);
+    self->DeleteItemL();
     TRACE_EXIT_POINT
     return 0;
     }
@@ -1353,7 +1409,7 @@ void CCalenMultipleDbUi::HandleListBoxEventL( CEikListBox* /*aListBox*/,
                {
                iIsDbEditorOpen = ETrue ;
                ProcessCommandL( ECalenCmdEdit );
-               iIsDbEditorOpen = EFalse ;
+               
                }
            }
        }

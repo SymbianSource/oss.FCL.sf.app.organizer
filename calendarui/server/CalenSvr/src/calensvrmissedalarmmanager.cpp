@@ -237,16 +237,18 @@ void CCalenSvrMissedAlarmManager::GetCountOfMissedAlarmsL()
 	    }
 	else
 	    {
-		if(iNumOfMissedAlarms > TInt(newCount))
+		/*if(iNumOfMissedAlarms > TInt(newCount))
 		    {
 		    iShowSoftNotification = EFalse;
 		    }
 		else
 		    {
 		    iShowSoftNotification = ETrue;
-		    }
+		    }*/
 		
+	// changes done for missing popup in idle screen when alarm expires in editor mode
 		iNumOfMissedAlarms = TInt(newCount);
+		iShowSoftNotification = ETrue;
 	    }
 	
 	TRACE_EXIT_POINT;

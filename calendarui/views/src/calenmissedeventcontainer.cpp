@@ -754,7 +754,9 @@ void CCalenMissedEventContainer::AddFieldsL()
 		        AddRepeatFieldL();
 		        }
 		        
-		    iTitleTextId = R_CALEN_EVENT_VIEW_DAY_TITLE;  			
+		
+		    iTitleTextId = R_CALEN_EVENT_VIEW_ALLDAY_TITLE;
+		    
  			}
             break;
 

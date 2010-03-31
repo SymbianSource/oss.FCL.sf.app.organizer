@@ -234,10 +234,13 @@ void CCalenMissedEventView::DoActivateImplL( const TVwsViewId& aPrevViewId,
         }
     
     UpdateCbaL();
-    
-    // Draw even viewer toolbar by adding Edit, Delete and Send buttons
-	AddToolbarButtonsL();
-	
+    //no tool bar in missed event view
+    MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
+    if(toolbar)
+      {
+      toolbar->SetToolbarVisibilityL(EFalse);  
+      } 
+   
     TRACE_EXIT_POINT;
     }
 
@@ -252,9 +255,7 @@ void CCalenMissedEventView::DoDeactivateImpl()
     
     iPreviousViewId.iViewUid = KNullUid;
 
-    // Remove the toolbar buttons for event viewer before exiting from event view
-    TRAP_IGNORE(RemoveToolbarButtonsL());
-    
+        
     TRACE_EXIT_POINT;
     }
 
@@ -315,9 +316,24 @@ void CCalenMissedEventView::HandleCommandL(TInt aCommand)
         case EAknSoftkeyClose:   
         case EAknSoftkeyBack:
 			{
+			MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
+            if(toolbar)
+             {
+             toolbar->SetToolbarVisibilityL(ETrue);  
+             } 
 	        iServices.IssueNotificationL(ECalenNotifyMissedEventViewClosed);
 			break;
 			}
+        case EAknSoftkeyExit: 
+            {
+            MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
+            if(toolbar)
+             {
+             toolbar->SetToolbarVisibilityL(ETrue);  
+             }             
+            CCalenNativeView::HandleCommandL(aCommand);
+            }
+            break;
         default:
             if(cnt->GetFindItemMenu()->CommandIsValidL(aCommand))
                 {
@@ -372,7 +388,7 @@ void CCalenMissedEventView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMe
             	{
 	            if(cnt->IsEventHasMapLocationL() || cnt->IsEventHasNoLocationTextL())
 		            {
-		            aMenuPane->DeleteMenuItem( ECalenGetLocationAndSave );
+		            aMenuPane->DeleteMenuItem( ECalenGetLocationAndReplace );
 		            }
 		        if(!cnt->IsEventHasMapLocationL())
 			        {
@@ -384,6 +400,10 @@ void CCalenMissedEventView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMe
 	            aMenuPane->DeleteMenuItem( ECalenGetLocationAndReplace );
 	            aMenuPane->DeleteMenuItem( ECalenShowLocation );	
 	            }
+			//as no toolbar in missedeventview no need to handle thees commands
+		  	aMenuPane->DeleteMenuItem( ECalenCmdPromptThenEdit );
+		  	aMenuPane->DeleteMenuItem( ECalenDeleteCurrentEntry ); 
+		  	aMenuPane->DeleteMenuItem( ECalenSend );
 		    break;
 		  	}
 		 default:
