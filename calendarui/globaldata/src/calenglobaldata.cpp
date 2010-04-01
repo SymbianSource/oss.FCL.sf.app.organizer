@@ -462,7 +462,7 @@ EXPORT_C CCalInstanceView* CCalenGlobalData::InstanceViewL()
         {
         if ( iEntryViewCreation )
             {
-            iQueued = &CreateInstanceViewL;
+            iQueued = &CCalenGlobalData::CreateInstanceViewL;
             }
         else
             {
@@ -516,7 +516,7 @@ EXPORT_C CCalEntryView* CCalenGlobalData::EntryViewL()
         {
         if ( iInstanceViewCreation )
             {
-            iQueued = &CreateEntryViewL;
+            iQueued = &CCalenGlobalData::CreateEntryViewL;
             }
         else
             {
