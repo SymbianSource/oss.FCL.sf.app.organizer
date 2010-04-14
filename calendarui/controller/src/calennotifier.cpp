@@ -101,13 +101,6 @@ CCalenNotifier::~CCalenNotifier()
         iEComWatcher = NULL;
         }
 
-    // Stop database change notifications.
-    if( iDbChangeNotifier )
-        {
-        delete iDbChangeNotifier;
-        iDbChangeNotifier = NULL;
-        }
-    
     // Stop settings change notifications
     if( iCenRepChangeNotifier )
         {
@@ -170,10 +163,6 @@ void CCalenNotifier::ConstructL()
     iCenRepChangeNotifier = CCenRepNotifyHandler::NewL( *this, *iRepository );
     iCenRepChangeNotifier->StartListeningL();
     
-    // Register for changes to our database session
-    iDbChangeNotifier = CCalenDbChangeNotifier::NewL( *iGlobalData );
-    iDbChangeNotifier->RegisterObserverL( *this );
-  
     // Register for changes to the ECom registry
     iEComWatcher = CCalenEComWatcher::NewL( *this );
      
@@ -771,6 +760,7 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
 			case MCalFileChangeObserver::ECalendarFileCreated:
 			case MCalFileChangeObserver::ECalendarInfoCreated:
 				{
+				BroadcastNotification(ECalenNotifyDeleteInstanceView);
 				BroadcastNotification(ECalenNotifyCalendarInfoCreated);
 				}
 				break;

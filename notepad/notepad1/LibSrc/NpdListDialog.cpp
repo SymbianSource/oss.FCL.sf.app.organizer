@@ -427,14 +427,11 @@ void CNotepadListDialog::OnCmdSendL(TInt aCommandId)
         SaveCurrentAndSelectionsL();
         TUid serviceUid = SendByKeysL(*iSendUi, aCommandId, *iModel, iSavedSelectedKeys);
         iModel->SyncL(EFalse); // sync might be delayed while SendAsL.
-        RestoreCurrentAndSelectionsL();
-        //RestoreCurrent();
         TUid EmailUid = {0x10001028};
         if ( serviceUid == EmailUid )
         	{
         	iSendingEmail = ETrue;
         	}
-       
         }
     else
         {
@@ -444,7 +441,6 @@ void CNotepadListDialog::OnCmdSendL(TInt aCommandId)
         SendAsL( *iSendUi, aCommandId, EFalse, text );
         CleanupStack::PopAndDestroy(); // text
         iModel->SyncL(EFalse); // sync might be delayed while SendAsL.
-        RestoreCurrentAndSelectionsL();
         }
     }
 
@@ -1530,7 +1526,7 @@ void CNotepadListDialog::CNotepadProgressDialog::PrepareL(
             iInts = new(ELeave) CArrayFixFlat<TInt>(2);
             iInts->AppendL(0);
             iInts->AppendL(aCount);
-            IncrementL(0); // SetTextL
+            IncrementL( 1 ); // SetTextL
             }
             break;
         default:

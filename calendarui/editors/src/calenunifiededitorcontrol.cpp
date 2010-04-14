@@ -237,7 +237,10 @@ void CCalenUnifiedEditorControl::SetDataToEditorL()
         iRepeatField->SetDataToEditorL();
         }
     
-    iDbField->SetDataToEditorL();
+    if(!iDbField->IsCalendarEdited())
+        {
+        iDbField->SetDataToEditorL();
+        }
 
     if( CCalEntry::ETodo != iUnifiedEditor.GetEntryType() )
         {
@@ -1096,6 +1099,13 @@ TTime CCalenUnifiedEditorControl::GetStartDateTimeL()
         result = CalenDateUtils::BeginningOfDay( result );
         }
     
+    if( iAllDayField->IsAllDayEvent() )
+        {
+        TTime endDate = iUnifiedEditor.Edited().EndDateTime();
+        endDate = CalenDateUtils::BeginningOfDay( endDate );
+        iUnifiedEditor.Edited().SetEndDateTimeL(endDate);
+        }
+    
     resDT = result.DateTime();
     TRACE_EXIT_POINT;
     return result;
@@ -1139,6 +1149,8 @@ TTime CCalenUnifiedEditorControl::GetEndDateTimeL()
             // In Editor it should be displayed as "StartDate: 15-08-2010 & EndDate:15-08-2010" 
             // But, while saving EndDate is saved as 12:00am, 16-08-2010. 
             TTime startDate = iUnifiedEditor.Edited().StartDateTime();
+            startDate = CalenDateUtils::BeginningOfDay( startDate );
+            iUnifiedEditor.Edited().SetStartDateTimeL(startDate);
             if( result >= startDate )
                 {
                 result += TTimeIntervalDays( KOneDay );
@@ -1417,19 +1429,10 @@ void CCalenUnifiedEditorControl::UpdateEndTimeL()
         // For allday (1 day) event Eg. "Start:- 12:00am, 15-08-2010 &  End:-12:00am, 16-08-2010"
         // In Editor it should be displayed as "StartDate: 15-08-2010 & EndDate:15-08-2010" 
         // No time filed is displayed.
-        if ( end > start )                         
+        end -= TTimeIntervalDays( KOneDay );
+        if ( end < start )                         
             {
-            //end -= TTimeIntervalDays( KOneDay );
-            //end contains the time component also, even for same day end would be greater then start
-            //subtracting 1 from end will give end as one day before start.
-            //For All day event Start date and End Date are same so assigning start to end.
             end = start;
-            }
-        else if( end == start )
-            {
-            // For allday event minimum duration is 1day.
-            TTime endDate = start + TTimeIntervalDays( KOneDay );
-            iUnifiedEditor.Edited().SetEndDateTimeL( endDate );
             }
         }
     

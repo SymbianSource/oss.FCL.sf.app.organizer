@@ -48,6 +48,7 @@
 #include <wakeupalarm.h>
 #include <calalarm.h> // KUidAgendaModelAlarmCategory - the alarm category id for calendar alarms
 #include <AknUtils.h>
+#include <HWRMPowerStateSDKPSKeys.h>
 
 #ifndef SYMBIAN_CALENDAR_V2
 #include <agmalarm.h> // deprecated, use CalAlarm.h when SYMBIAN_CALENDAR_V2 flag is enabled
@@ -960,12 +961,20 @@ void CAlarmUtils::SetDeviceState(TPSGlobalSystemState aDeviceState)
 void CAlarmUtils::DeviceShutdown()
     {
     TRACE_ENTRY_POINT;
-    iShutdownTimer->Cancel();
-    if( StarterConnect() )
-        {
-        iStarter.Shutdown();
-        iStarter.Close();
-        }    
+    
+    // charging state added for the err EMDN-835CW2.
+    TInt chargingState;
+    RProperty::Get( KPSUidHWRMPowerState, KHWRMChargingStatus , chargingState );
+    
+    if( IsDeviceInAlarmState() && ( chargingState != EChargingStatusCharging ) )
+        {       
+            iShutdownTimer->Cancel();
+            if( StarterConnect() )
+                {
+                iStarter.Shutdown();
+                iStarter.Close();
+                }    
+        }
     TRACE_EXIT_POINT;
     }
 

@@ -245,12 +245,23 @@ private: //Internal
                 CCalCalendarInfo& aCalendarInfoModified);
     
     /*
-     * Async exit for the dialog
+     * Callback for CAsyncCallBack class
+     * @param aThisPtr* this pointer.
+     * @return TInt status.
      */
-    static TInt DoAsyncExit(TAny* aPtr);
+    static TInt AsyncCallBackL(TAny* aThisPtr);
     
-    static TInt DoAsyncDeleteTemL(TAny* aPtr);
+    /*
+     * Async method to handle all async commnds
+     * @param aCommand Async command
+     */
+    void HandleAsyncCommandL(const TInt aCommand);
 
+    /*
+     * Async method to handle all async commnds
+     * @param aCommand Async command
+     */
+    void DoAsyncActionL(const TInt aCommand);
 
     /*
      * @brief Creates button for the toolbar.
@@ -277,6 +288,12 @@ private: //Internal
      * Refocus the items in list when delete action happened. 
      */
     void ReAdjustListItemFocusL(const TInt aCurrentIndex);
+    
+    /**
+     * From CCoeControl Gets help context
+     * @param aContext Help context
+     */
+    void GetHelpContext(TCoeHelpContext& aContext) const;
 
 public:  // from MCalenNotificationHandler
 	/** 
@@ -319,9 +336,6 @@ private:
     RArray<MCalenServices::TCalenIcons> iIconIndices;
     CAknIconArray* iIconList;
     RArray<TInt32> iColorUidArray;
-    CAsyncCallBack* iAsyncExit;
-    CAsyncCallBack* iAsyncDeletequery;
-    TInt iAsyncExitCmd;
     CCalenMultiDBEditor* iDbEditor;//Not not owned
     TBool iConflictOccured;
     TBool iIsDbEditorOpen ; 
@@ -329,6 +343,10 @@ private:
     CCalCalendarInfo* iCalendarInfoNew;
     CCalCalendarInfo* iCalendarInfoOriginal;
     CCalCalendarInfo* iCalendarInfoEdited;
+    
+    CAsyncCallBack*  iAsyncAction;
+    TInt             iAsyncActionCmd;
+    TInt             iCurrentIndex;
     };
 
 

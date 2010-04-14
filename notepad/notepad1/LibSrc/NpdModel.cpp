@@ -385,6 +385,7 @@ void CNotepadModel::PrepareToDeleteByKeysL(const RArray<TInt>& aKeys)
         {
         User::LeaveIfError(iSavedDeleteKeys.Append(aKeys[i]));
         }
+    iProgressCount = 0;
     ExecuteDeleteStepL();
     iRetval = iFileSession.ReleaseReserveAccess( KDefaultDrive );
     iFileSession.Close();
@@ -397,7 +398,7 @@ void CNotepadModel::PrepareToDeleteByKeysL(const RArray<TInt>& aKeys)
 //
 void CNotepadModel::ExecuteDeleteStepL()
     {
-    iProgressCount = 0;
+    
     iStepCount = iSavedDeleteKeys.Count();
     if ( iStepCount > KNotepadMaxDeleteCountInStep )
         {
@@ -411,12 +412,6 @@ void CNotepadModel::ExecuteDeleteStepL()
     if ( IsTemplates() )
         {
         iSavedDeleteKeys.Remove(0);
-        for (TInt i(0); i < iStepCount - 1; i++)
-            {
-            sql.Append(KNotepadSqlDeleteByKeysAppend);
-            sql.AppendNum(iSavedDeleteKeys[0]);
-            iSavedDeleteKeys.Remove(0);
-            }
         }
     else // If Notepad, Remove is postponed until remove link phase
         {
@@ -512,6 +507,15 @@ TInt CNotepadModel::DoDeleteCallBackL()
             else // do next step
                 {
                 increment = iStepCount - iProgressCount;
+
+                iProgressCount += increment;
+                if ( iModelObserver )
+                    {
+                    iModelObserver->HandleNotepadModelEventL(
+                            MNotepadModelObserver::EProgressDeletion,
+                            1 );
+                    }
+
                 ExecuteDeleteStepL();
                 }
             }
@@ -530,15 +534,7 @@ TInt CNotepadModel::DoDeleteCallBackL()
         {
         increment = iDbUpdate.RowCount() - iProgressCount;
         }            
-    if ( increment > 0 )
-        {
-        iProgressCount += increment;
-        if ( iModelObserver )
-            {
-            iModelObserver->HandleNotepadModelEventL(
-                MNotepadModelObserver::EProgressDeletion, increment);
-            }
-        }
+    
     if ( deleteFinished || ( stat == 0 && 
         SysUtil::FFSSpaceBelowCriticalLevelL(&(iEnv->FsSession())) ) )
         {

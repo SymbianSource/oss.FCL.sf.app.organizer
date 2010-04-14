@@ -163,7 +163,7 @@ void CCalenController::ConstructL()
     iNotifier = new( ELeave )CCalenNotifier( *this );
 
     // Get an instance of the global data
-    iGlobalData = CCalenGlobalData::NewL( *iNotifier, iNotifier );
+    iGlobalData = CCalenGlobalData::NewL( *iNotifier, iNotifier, iNotifier );
     iGlobalData->InitializeGlobalDataL();
     
     RArray<TCalenNotification> notificationArray;

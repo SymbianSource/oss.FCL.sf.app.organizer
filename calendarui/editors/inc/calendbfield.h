@@ -116,6 +116,24 @@ NONSHARABLE_CLASS( CCalenDbField ) : public CBase
           */
          static TBool CalendarInfoNameIdentifierL( const HBufC* aName,
                                     const CCalCalendarInfo& aInfoItem );
+         
+         /**
+          * @brief show infonote when database changes and entry having
+          * childs.
+          */
+         void ShowChangeDBQueryL();
+         /*
+          * Callback for CAsyncCallBack class
+          * @param aThisPtr* this pointer.
+          * @return TInt status.
+          */         
+         static TInt DoAsyncShowChangeDBQueryL(TAny* aThisPtr);
+         
+         /**
+          * @brief Update data in editor
+          * @param aColId collection Id of selected database
+          */    
+         void SetDataToEditorL(const TCalCollectionId& aColId);
 
     public:
          //previous calendar collection id  
@@ -153,6 +171,7 @@ NONSHARABLE_CLASS( CCalenDbField ) : public CBase
         //services referance not owned
         MCalenServices* iServices;
         HBufC* iCalendarFileName;
+        CAsyncCallBack* iAsyncDBquery;        
         
     };
 

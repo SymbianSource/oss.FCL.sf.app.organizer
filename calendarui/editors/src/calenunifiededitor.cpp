@@ -583,6 +583,7 @@ TBool CCalenUnifiedEditor::OkToExitL( TInt aButtonId )
          case ECalenEditSeries:
          case ECalenEditOccurrence:
          case EAknCmdExit:
+         case EAknSoftkeyExit:
          case EEikBidCancel:
              {
              // EEikBidCancel is called when Red End key is pressed or
@@ -601,6 +602,9 @@ TBool CCalenUnifiedEditor::OkToExitL( TInt aButtonId )
                  {
                  PIM_TRAPD_HANDLE( TryToSaveNoteOnForcedExitL() );
                  }
+             if(EAknSoftkeyExit == aButtonId)
+                 iServices->IssueCommandL(aButtonId);
+             
              break;
              }
          case EAknSoftkeyDone:
@@ -1051,7 +1055,8 @@ void CCalenUnifiedEditor::ProcessCommandL( TInt aCommandId )
             OnCmdDeleteNoteL();
             break;
         case EAknCmdExit:
-            OnCmdExitL();
+        case EAknSoftkeyExit:            
+            OnCmdExitL(aCommandId);
             break;
         case EAknCmdHelp:
             OnCmdHelpL();
@@ -1420,12 +1425,12 @@ void CCalenUnifiedEditor::OnCmdHelpL()
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void CCalenUnifiedEditor::OnCmdExitL()
+void CCalenUnifiedEditor::OnCmdExitL(TInt aCmd)
     {
-    TRACE_ENTRY_POINT;
-
-    TryExitL( EAknCmdExit );
-
+    TRACE_ENTRY_POINT;   
+    
+            TryExitL( aCmd );
+       
     TRACE_EXIT_POINT;
     }
 
@@ -1437,7 +1442,13 @@ void CCalenUnifiedEditor::OnCmdExitL()
 //
 void CCalenUnifiedEditor::TryToDeleteNoteL( TBool /* aIsViaDeleteMenu */ )
     {
-    TRACE_ENTRY_POINT;    
+    TRACE_ENTRY_POINT;
+	
+	TInt attachmentCount = iServices->GetAttachmentData()->NumberOfItems(); 		   
+	 if(Edited().AttachmentCount() || attachmentCount)
+		 {
+		 iServices->GetAttachmentData()->Reset();
+		 }
     if (IsCreatingNewEntry())
         {
         iEntryUpdater->TryDeleteInstanceWithUiL( EditorDataHandler().Entry() ,
@@ -1919,7 +1930,7 @@ TBool CCalenUnifiedEditor::HandleDoneL()
                 endDate == CalenDateUtils::BeginningOfDay( endDate ) )
             {
             TTimeIntervalDays differenceInTime = endDate.DaysFrom(startDate); // fix for AllDayEntry issue
-            if( CCalEntry::EAppt == Edited().EntryType() && startDate != endDate && differenceInTime.Int() == 1 )
+            if( CCalEntry::EAppt == Edited().EntryType() && startDate != endDate && differenceInTime.Int() >= 1 )
                 {
                 Edited().SetEntryType( CCalEntry::EEvent );
                 }

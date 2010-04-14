@@ -54,7 +54,7 @@ NONSHARABLE_CLASS(CCalenDbChangeNotifier) : public CActive,
         * @param aGlobalData global data reference
         * @return a pointer to the new CCalenDbChangeNotifier instance
         */
-        static CCalenDbChangeNotifier* NewL( CCalenGlobalData& aGlobalData );
+        static CCalenDbChangeNotifier* NewL( CCalSession& aSession );
 
        /**
         * Destructor.
@@ -96,7 +96,7 @@ NONSHARABLE_CLASS(CCalenDbChangeNotifier) : public CActive,
         * C++ default constructor.
         * @param aGlobalData global data reference
         */
-        CCalenDbChangeNotifier( CCalenGlobalData& aGlobalData );
+        CCalenDbChangeNotifier( CCalSession& aSession );
 
         /**
         * By default Symbian 2nd phase constructor is private.
@@ -128,8 +128,7 @@ NONSHARABLE_CLASS(CCalenDbChangeNotifier) : public CActive,
         void DoCancel();
 
     private:    // Data
-        CCalenGlobalData& iGlobalData;
-        
+
         //Database change observer filter
         CCalChangeNotificationFilter* iCalChangeFilter;      
         
@@ -144,6 +143,8 @@ NONSHARABLE_CLASS(CCalenDbChangeNotifier) : public CActive,
         
         //Flag to restart the timer after cancelling last tiemr request
         TBool iRestartTimer;
+        
+        CCalSession& iSession;
     };
 
 #endif      // __CALENDBCHANGENOTIFIER_H

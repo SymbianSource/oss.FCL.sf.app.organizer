@@ -162,11 +162,11 @@ void CCalenAllDayField::SetDataToEditorL()
         // editor should display EndDate as 23/06/2009.
         if( endDate > startDate )
             {
-            //endDate -= TTimeIntervalDays( 1 );
-            //endDate contains the time component also, even for same day endDate would be greater then startDate
-            //subtracting 1 from endate will give endDate as one day before startDate.
-            //For All day event Start date and End Date are same so assigning startDate to endDate.
-            endDate = startDate;
+            endDate -= TTimeIntervalDays( 1 );
+            if( endDate < startDate )
+                {
+                endDate = startDate;
+                }
             }
 		
 		iUnifiedEditor.EditorFields().SetDateField( ECalenEditorStartDate, startDate, ETrue );

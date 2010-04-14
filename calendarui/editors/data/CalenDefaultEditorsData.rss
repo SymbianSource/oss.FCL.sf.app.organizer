@@ -202,7 +202,7 @@ RESOURCE MENU_PANE r_calen_noteview_default_menu_pane
             },
         MENU_ITEM
             {
-            command = EAknCmdExit;
+            command = EAknSoftkeyExit;
             txt = qtn_options_exit;
             }
         };
@@ -273,7 +273,7 @@ RESOURCE MENU_PANE r_calen_noteview_location_menu_pane
             },
         MENU_ITEM
             {
-            command = EAknCmdExit;
+            command = EAknSoftkeyExit;
             txt = qtn_options_exit;
             }
         };
@@ -1643,7 +1643,7 @@ RESOURCE MENU_PANE r_calen_unified_editor_default_menupane
             },
         MENU_ITEM
             {
-            command = EAknCmdExit;
+            command = EAknSoftkeyExit;
             txt = qtn_options_exit;
             }
         };

@@ -1015,7 +1015,7 @@ EXPORT_C TBool CCalenEntryUtil::CheckForAlldayEventL( TTime aStartTime, TTime aS
 
     if( aStartTime == CalenDateUtils::BeginningOfDay( aStartTime ) 
             && aStopTime == CalenDateUtils::BeginningOfDay( aStopTime ) 
-            && aStartTime != aStopTime && differenceInTime.Int() == 1) // fix for AllDayEntry issue
+            && aStartTime != aStopTime && differenceInTime.Int() >= 1) // fix for AllDayEntry issue
         {
         allDayEvent = ETrue;
         }

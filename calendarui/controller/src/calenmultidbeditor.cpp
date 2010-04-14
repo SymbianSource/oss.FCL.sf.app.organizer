@@ -419,6 +419,7 @@ TBool CCalenMultiDBEditor::OkToExitL(TInt aButtonId)
                 {
                 iMultipleDbUi.UpdateOnAddOrEditL(!iEditFlag);
                 }
+             isExitForm = ETrue;
              iMultipleDbUi.ExitDialogL();           
 			 }
             break;
@@ -752,15 +753,15 @@ TBool CCalenMultiDBEditor::SaveNoteL( TInt aButtonId )
                TInt index = calendarInfoList.Find( *iCalendarName,CCalenMultiDBEditor::CalenInfoIdentifierL );
                if(index != KErrNotFound)
                    {
-                   if( EAknCmdExit != aButtonId )
-                       {
                    retValue = EFalse;
-                   HBufC* infoText = StringLoader::LoadLC(
-                           R_QTN_CALE_DB_ALREADY_EXISTS_NOTE , iCalendarName->Des() );
-                   CAknInformationNote* dialog = new( ELeave ) CAknInformationNote(ETrue);
-                   dialog->ExecuteLD( *infoText );
-                   CleanupStack::PopAndDestroy( infoText );                        
-                       }                     
+                   if( EAknCmdExit != aButtonId )
+                       {                       
+                       HBufC* infoText = StringLoader::LoadLC(
+                               R_QTN_CALE_DB_ALREADY_EXISTS_NOTE , iCalendarName->Des() );
+                       CAknInformationNote* dialog = new( ELeave ) CAknInformationNote(ETrue);
+                       dialog->ExecuteLD( *infoText );
+                       CleanupStack::PopAndDestroy( infoText );                        
+                       }
                    }
                else
                    {
@@ -773,13 +774,13 @@ TBool CCalenMultiDBEditor::SaveNoteL( TInt aButtonId )
            {
            if( EAknCmdExit != aButtonId )
                {
-           retValue = EFalse;
-           HBufC* infoText(NULL);
-           infoText = AreIllegalChars( *iCalendarName ) ? StringLoader::LoadLC( R_CALEN_ILLEGAL_CHARACTERS ) : 
-                                                    StringLoader::LoadLC( R_CALEN_BAD_FILE_NAME );
-           CAknInformationNote* dialog = new( ELeave ) CAknInformationNote(ETrue);
-           dialog->ExecuteLD( *infoText );
-           CleanupStack::PopAndDestroy( infoText ); 
+               retValue = EFalse;
+               HBufC* infoText(NULL);
+               infoText = AreIllegalChars( *iCalendarName ) ? StringLoader::LoadLC( R_CALEN_ILLEGAL_CHARACTERS ) : 
+                                                        StringLoader::LoadLC( R_CALEN_BAD_FILE_NAME );
+               CAknInformationNote* dialog = new( ELeave ) CAknInformationNote(ETrue);
+               dialog->ExecuteLD( *infoText );
+               CleanupStack::PopAndDestroy( infoText ); 
                }
            }
 		    

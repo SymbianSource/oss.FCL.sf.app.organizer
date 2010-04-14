@@ -297,8 +297,9 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
 
         /**
          * @brief Handles "Exit" command.
+         * @param aCmd Holds the command issued.
          */
-        void OnCmdExitL();
+        void OnCmdExitL(TInt aCmd);
         
         /**
          * @brief Delete note from Calendar.

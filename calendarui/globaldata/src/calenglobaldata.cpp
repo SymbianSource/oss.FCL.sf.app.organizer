@@ -87,7 +87,8 @@ CCalenGlobalData::CCalenGlobalData( MCalProgressCallBack& aCalCallBack )
 // ----------------------------------------------------------------------------
 //
 EXPORT_C CCalenGlobalData* CCalenGlobalData::NewL( MCalProgressCallBack& aCalCallBack,
-                                                   MCalenContextChangeObserver* aNotifier )
+                                                   MCalenContextChangeObserver* aNotifier,
+                                                   MCalenDBChangeObserver* aDBNotifier)
     {
     TRACE_ENTRY_POINT;
 
@@ -106,7 +107,7 @@ EXPORT_C CCalenGlobalData* CCalenGlobalData::NewL( MCalProgressCallBack& aCalCal
         // calls CCalenGlobalData::InstanceL in ConstructL and then ConstructL
         // leaves, we will double delete the global data.
         ++self->iRefCount;
-        self->ConstructL( aNotifier );
+        self->ConstructL( aNotifier, aDBNotifier );
         CleanupStack::Pop( self );
         }
     else
@@ -206,13 +207,16 @@ EXPORT_C CCalenGlobalData* CCalenGlobalData::Instance()
 // Symbian 2nd phase constructor can leave.
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
-void CCalenGlobalData::ConstructL( MCalenContextChangeObserver* aNotifier )
+void CCalenGlobalData::ConstructL( MCalenContextChangeObserver* aNotifier,
+                                    MCalenDBChangeObserver* aDBNotifier)
     {
     TRACE_ENTRY_POINT;
 
     iContext = new (ELeave ) CCalenContextImpl( aNotifier );  
     
     iNewInstanceViewCreation = NULL;
+    
+    iDBChangeNotifier = aDBNotifier;
     
     TRACE_EXIT_POINT;
     }
@@ -829,7 +833,8 @@ EXPORT_C TBool CCalenGlobalData::ConstructFileMappingL()
         filemap->SetCalendarFileNameL(calendarFileName);
         
         iNewEntryView  = NULL;
-        iNewEntryViewCreation  = NULL;  
+        iNewEntryViewCreation  = NULL;
+        CCalenDbChangeNotifier* dbChangeNotifier = NULL;
         if(iCalSession)
             {
             iNewCalSession = NULL;
@@ -841,6 +846,9 @@ EXPORT_C TBool CCalenGlobalData::ConstructFileMappingL()
             filemap->SetCollectionId(tempSession.CollectionIdL());
             CreateEntryViewL(tempSession);
             filemap->SetEntryView( iNewEntryView );
+            dbChangeNotifier = CCalenDbChangeNotifier::NewL( tempSession );
+            dbChangeNotifier->RegisterObserverL(*iDBChangeNotifier);
+            filemap->SetDBChangeNotifier(dbChangeNotifier);
             }            
          else
             {
@@ -851,6 +859,9 @@ EXPORT_C TBool CCalenGlobalData::ConstructFileMappingL()
             filemap->SetEntryView( iNewEntryView );
             iGlobalDataOwnsEntryView = EFalse;
             iGlobalDataOwnsCalSession = EFalse;
+            dbChangeNotifier = CCalenDbChangeNotifier::NewL( tempSession );
+            dbChangeNotifier->RegisterObserverL(*iDBChangeNotifier);
+            filemap->SetDBChangeNotifier(dbChangeNotifier);
             }
         iFileMappingArray.Append(filemap);        
         CleanupStack::Pop(filemap);
@@ -1278,6 +1289,9 @@ EXPORT_C void CCalenGlobalData::AddCalendarL(CCalCalendarInfo* aCalendarInfo)
 			CreateEntryViewL(tempSession);
 			}
 		fileMapping->SetEntryView( iNewEntryView );
+		CCalenDbChangeNotifier* dbChangeNotifier = CCalenDbChangeNotifier::NewL( tempSession );
+		dbChangeNotifier->RegisterObserverL(*iDBChangeNotifier);
+		fileMapping->SetDBChangeNotifier(dbChangeNotifier);
 		CleanupStack::PopAndDestroy(aCalendarInfo);
 		iCalendarInfoList.Append(tempSession.CalendarInfoL());
 		}
@@ -1660,6 +1674,9 @@ void CCalenGlobalData::HandleCalendarInfoCreatedL()
 			fileMapper->SetEntryView( iNewEntryView );
 			
 			iCalendarInfoList.AppendL(newSession->CalendarInfoL());
+		    CCalenDbChangeNotifier* dbChangeNotifier = CCalenDbChangeNotifier::NewL( *newSession );
+		    dbChangeNotifier->RegisterObserverL(*iDBChangeNotifier);
+		    fileMapper->SetDBChangeNotifier(dbChangeNotifier);
 			}
 		else
 			{
@@ -1678,6 +1695,9 @@ void CCalenGlobalData::HandleCalendarInfoCreatedL()
 				}
 			
 			fileMapper->SetEntryView(iNewEntryView);
+	        CCalenDbChangeNotifier* dbChangeNotifier = CCalenDbChangeNotifier::NewL( *iCalSession );
+	        fileMapper->SetDBChangeNotifier(dbChangeNotifier);
+	        dbChangeNotifier->RegisterObserverL(*iDBChangeNotifier);
 			iGlobalDataOwnsEntryView = EFalse;
 			iGlobalDataOwnsCalSession = EFalse;
 			iCalendarInfoList.AppendL(iCalSession->CalendarInfoL());

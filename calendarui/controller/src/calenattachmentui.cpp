@@ -745,7 +745,8 @@ void CCalenAttachmentUi::DoAttachmentL()
 
     // Hide the toolbar before we display settings menu
     MCalenToolbar* toolbar = iController.Services().ToolbarOrNull();
-    if(toolbar&&toolbar->IsVisible())
+   
+    if(toolbar&&toolbar->IsVisible()&& !iController.IsEditorActive())
         {
         toolbar->SetToolbarVisibilityL(EFalse); 
         iShowToolbar = ETrue;

@@ -39,6 +39,8 @@
 #include <caleninstanceid.h>            // TCalenInstanceId
 #include <calenactionuiutils.h>
 #include <calcalendarinfo.h>
+#include <calentoolbar.h>
+#include <akntoolbar.h>
 
 #include "calendarui_debug.h"           // Debug
 #include "calendeleteui.h"
@@ -379,6 +381,14 @@ TBool CCalenDeleteUi::DeleteEntryWithoutQueryL()
 			    {
 			    MarkedEntriesDeletedL();    
 			    }
+			MCalenToolbar* toolbarImpl = iController.Services().ToolbarOrNull(); 
+            if (toolbarImpl)
+                {
+                CAknToolbar& toolbar = toolbarImpl->Toolbar();
+    
+                // dim clear and clear all toolbar buttons
+                toolbar.SetItemDimmed(ECalenNewMeeting, EFalse, ETrue);
+                }
 			}
         else
             {

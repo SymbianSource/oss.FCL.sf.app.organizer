@@ -37,7 +37,8 @@ SOURCE          calensend.cpp
 SOURCE          calenvcalexport.cpp
 
 SOURCE          calencontextimpl.cpp
-SOURCE          calenfilemapping.cpp
+SOURCE          calenfilemapping.cpp 
+SOURCE          calendbchangenotifier.cpp
 
 USERINCLUDE     ../inc
 USERINCLUDE     ../../inc

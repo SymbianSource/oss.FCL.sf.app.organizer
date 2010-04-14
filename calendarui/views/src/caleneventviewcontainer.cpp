@@ -118,7 +118,8 @@ CCalenEventViewContainer::CCalenEventViewContainer(CCalenNativeView* aView,
     : CCalenContainer( aView, aServices ),
     					  iEntry(NULL),
     					  iAutomaticHlValue(ETrue),
-    					  iAutomaticHlInitialized(EFalse)
+    					  iAutomaticHlInitialized(EFalse),
+    					  iEmbeddedFileOpened(EFalse)
     {
 	TRACE_ENTRY_POINT;
 	iNumOfLinesBeforeLocField = 0;
@@ -561,7 +562,7 @@ void CCalenEventViewContainer::HandlePointerEventL(const TPointerEvent& aPointer
     			iTextEditor->SetFocus(ETrue);
     			
     			// TODO: Uncomment this when enabling attachment support
-    			if(iEventViewData)
+    			if(iEventViewData && !iEmbeddedFileOpened)
     			    {
     		
     			    if(iEventViewData->AttachmentCount())
@@ -2786,6 +2787,7 @@ void CCalenEventViewContainer::HandleServerAppExit( TInt aReason)
     {
     TRACE_ENTRY_POINT;
     
+    iEmbeddedFileOpened = EFalse;
     if (aReason == EAknCmdExit)
         {
         //issue this notification, which will be handled by attachmentui.
@@ -2953,18 +2955,29 @@ void CCalenEventViewContainer::OpenAttachmentViewerL(RFile& aFile, MAknServerApp
     
     if(datatype == KNotePadTextDataType())
         {
+        if(iEmbeddedFileOpened)
+            {
+            return;
+            }
+        iEmbeddedFileOpened = ETrue; 
         const TDesC& notepadTitle = _L("NotePad");
         ret = CNotepadApi::ExecFileViewerL( aFile, 
                                            &notepadTitle,
                                            ETrue,
                                            ETrue,
                                            KCharacterSetIdentifierIso88591 );
+        iEmbeddedFileOpened = EFalse;
         
         }
     else
         {
         //doc handler will open the other files (other than text file).
         TRAP( ret, iDocHandler->OpenFileEmbeddedL( aFile, datatype ) );
+        
+        if(ret == KErrNone)
+            {
+            iEmbeddedFileOpened = ETrue;
+            }
         }
     
     switch(ret)

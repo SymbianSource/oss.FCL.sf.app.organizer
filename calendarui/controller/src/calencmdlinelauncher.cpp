@@ -508,6 +508,12 @@ TInt CCalenCmdLineLauncher::CalendarLaunchCallBackL()
 			    }
 			}
 		}
+	else if(iIsExitOnDlgClose && (aNotification == ECalenNotifyDialogClosed) )
+	    {
+            //dont do any thing
+            //This scenario hits, when the application launched from device search application,
+            //User issued a "Cancel" command while adding attachment. 
+	    }
     else if(aNotification == ECalenNotifyEntryClosed)
     	{
         // Exit when Escape pressed in Eventview

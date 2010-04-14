@@ -293,7 +293,7 @@ void CCalenFileListSettingItem::EditItemL( TBool /*aCalledFromMenu*/ )
     // Make sure that iOffToneFile is passed, in case iToneFile happens to be KNullDesC
     ASSERT(!IsEmpty(iToneFile));
     
-    TBool ok = !list->ShowMediaFileListL(&iToneFile, &nullItem,
+    TBool ok = list->ShowMediaFileListL(&iToneFile, &nullItem,
                 NULL, NULL );
     
     

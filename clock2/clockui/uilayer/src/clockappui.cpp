@@ -27,6 +27,8 @@
 #include <clockapp_tab.mbg>
 #include <AknsConstants.h>
 #include <featmgr.h>  
+#include <e32property.h>
+#include <startupdomainpskeys.h>
 
 // User includes
 #include "clock.h"
@@ -223,14 +225,26 @@ void CClockAppUi::HandleCommandL( TInt aCommandId )
     	case EClockAlarmExit:
     	case EAknSoftkeyExit:
     	    {
-    	    if( ExitHidesInBackground() )
+    	    TInt deviceState;
+    	    RProperty::Get( KPSUidStartup, KPSGlobalSystemState , deviceState );
+
+    	    if(  deviceState == ESwStateCharging || deviceState == ESwStateAlarm  ) 
     	        {
-    	        HandleCommandL( EAknCmdHideInBackground );
+
+                Exit();
+
     	        }
     	    else
-    	        {
-    	        Exit();
-    	        }
+                {
+                if( ExitHidesInBackground() )
+                    {
+                    HandleCommandL( EAknCmdHideInBackground );
+                    }
+                else
+                    {
+                    Exit();
+                    }
+                }
     	    }
     	    break;
     	    
@@ -336,7 +350,8 @@ void CClockAppUi::HandleForegroundEventL( TBool aForeground )
     {
     __PRINTS( "CClockAppUi::HandleForegroundEventL - Entry" );
     
-    if( aForeground )
+    // commented as a part of the error ESLM-83LG82.
+    /*if( aForeground )
         {
         __PRINTS( "CClockAppUi::HandleForegroundEventL - aForeground ETrue" );
         
@@ -352,7 +367,7 @@ void CClockAppUi::HandleForegroundEventL( TBool aForeground )
             iIADUpdateFlag = EFalse;
             __PRINTS( "CClockAppUi::HandleForegroundEventL - iIADUpdateFlag EFalse" );
             }
-        }
+        }*/
 
     // Inform the world clock view about the change
     CClockWorldView* clockWorldView = static_cast< CClockWorldView* > ( View( KClockAppWorldViewId ) );

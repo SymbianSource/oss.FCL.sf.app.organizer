@@ -601,6 +601,7 @@ private:
      TInt iTimeFieldLines;  // Number of lines occupied by time field on the viewer
      TBool iAutomaticHlValue;
      TBool iAutomaticHlInitialized;   
+     TBool iEmbeddedFileOpened;
      CItemFinder*  iAutoFinder; // text finder 
      CFindItemMenu* iFindMenu;  
      TCursorSelection iSelectedText; // Cursor selection for the text editor

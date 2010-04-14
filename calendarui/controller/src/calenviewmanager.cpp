@@ -1340,7 +1340,14 @@ MCalenToolbar* CCalenViewManager::ToolbarOrNull()
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
-    return iToolbar;
+    if (iToolbar)
+        {
+        if (iToolbar->IsICalenToolBar())
+            {
+            return iToolbar;
+            }
+        }
+    return NULL;
     }        
     
 // ----------------------------------------------------------------------------

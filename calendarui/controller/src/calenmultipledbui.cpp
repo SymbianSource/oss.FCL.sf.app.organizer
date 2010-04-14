@@ -42,6 +42,9 @@
 #include <CalenInterimUtils2.h>
 #include <calenmulticalutil.h>
 #include <calenmulticaluids.hrh>
+#include <featmgr.h>
+#include <hlplch.h>
+#include <csxhelp/cale.hlp.hrh>
 
 // User includes
 #include "calendarui_debug.h"
@@ -50,6 +53,7 @@
 #include "calenmultidbeditor.h"
 #include "CalendarPrivateCRKeys.h"
 #include "calencontroller.h"
+#include "CalenUid.h"
 
 // Constants
 _LIT( KListSeparatorFormat, "\t" );
@@ -217,9 +221,10 @@ void CCalenMultipleDbUi::ConstructL()
     TRACE_ENTRY_POINT;
     CAknDialog::ConstructL( R_CALEN_MULTIPLEDB_MENUBAR );
     SetTitlePaneL();
-    TCallBack callBack(CCalenMultipleDbUi::DoAsyncExit,this);
-    iAsyncExit = new(ELeave) CAsyncCallBack(callBack,CActive::EPriorityStandard);
     
+    TCallBack actionCallBack(CCalenMultipleDbUi::AsyncCallBackL, this);
+    iAsyncAction = new(ELeave) CAsyncCallBack(actionCallBack,CActive::EPriorityStandard);
+   
 	// register for calendar file change notifications
     RArray<TCalenNotification> notificationArray;
     notificationArray.Append(ECalenNotifyCalendarInfoCreated);
@@ -230,9 +235,6 @@ void CCalenMultipleDbUi::ConstructL()
     notificationArray.Close();
     
     iConflictOccured = EFalse;
-    
-    TCallBack callBackDeleteQuery(CCalenMultipleDbUi::DoAsyncDeleteTemL, this);
-    iAsyncDeletequery = new(ELeave) CAsyncCallBack(callBackDeleteQuery,CActive::EPriorityStandard);
     
     TRACE_EXIT_POINT;
     }
@@ -269,13 +271,9 @@ CCalenMultipleDbUi::~CCalenMultipleDbUi()
     iIconIndices.Reset();
     iIconIndices.Close();
     
-    iAsyncExit->Cancel();
-    delete iAsyncExit;
-    iAsyncExit = NULL;
-    
-    iAsyncDeletequery->Cancel();
-    delete iAsyncDeletequery;
-    iAsyncDeletequery = NULL;
+    iAsyncAction->Cancel();
+    delete iAsyncAction;
+    iAsyncAction = NULL;
         
     if(iCalendarInfoNew)
         {
@@ -554,29 +552,25 @@ void  CCalenMultipleDbUi::ProcessCommandL( TInt aCommandId )
       case ECalenCmdEdit:
           {
           TInt retValue = EditItemL();
-          
           if(retValue == EAknCmdExit || retValue == EAknSoftkeyExit )
               {
-              iAsyncExitCmd = retValue;
-              iAsyncExit->CallBack();
+              DoAsyncActionL(retValue);
               }
           }
           break;
       case ECalenCmdAdd:
           {
           TInt retValue = AddItemL();
-          
           if(retValue == EAknCmdExit || retValue == EAknSoftkeyExit )
              {
-             iAsyncExitCmd = retValue;
-             iAsyncExit->CallBack();
+             DoAsyncActionL(retValue);
              }
           }
           break;
       case ECalenCmdDelete:
           {
-          iAsyncDeletequery->CallBack();
-		  }
+          DoAsyncActionL(ECalenCmdDelete);
+          }
           break;
       case ECalenCmdItemSelect:
       case ECalenCmdShow:
@@ -593,13 +587,36 @@ void  CCalenMultipleDbUi::ProcessCommandL( TInt aCommandId )
       case EAknCmdExit:
       case EAknSoftkeyExit:
           {
-          iAsyncExitCmd = EAknSoftkeyExit;
-          iAsyncExit->CallBack();
+          DoAsyncActionL(EAknSoftkeyExit);
           }
+          break;
+      case EAknCmdHelp:      
+            if (FeatureManager::FeatureSupported(KFeatureIdHelp)) //ravi
+                {
+                HlpLauncher::LaunchHelpApplicationL(
+                        iCoeEnv->WsSession(),iAvkonAppUi->AppHelpContextL());                        
+                }
           break;
       default:
           break;
       }
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenMultipleDbUi::GetHelpContext
+// Gets help context
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenMultipleDbUi::GetHelpContext( TCoeHelpContext& aContext ) const
+    {
+    TRACE_ENTRY_POINT;
+
+    aContext.iMajor = KUidCalendar;
+    // This is specified in HRH file.
+    aContext.iContext = KCALE_HLP_DAY_VIEW; //KCALE_HLP_DAY_VIEW should be replaced with MultipleDbUi related help id
+
     TRACE_EXIT_POINT;
     }
 
@@ -712,8 +729,8 @@ void CCalenMultipleDbUi::UpdateOnAddOrEditL(TBool aItemAdded)
 void CCalenMultipleDbUi::ExitDialogL()
     {
     TRACE_ENTRY_POINT
-    iAsyncExitCmd = EAknSoftkeyExit;
-    iAsyncExit->CallBack();
+    iAsyncActionCmd = EAknSoftkeyExit;
+    iAsyncAction->CallBack();
     TRACE_EXIT_POINT
     }
 
@@ -775,7 +792,7 @@ TInt CCalenMultipleDbUi::DeleteItemL()
     {
     TRACE_ENTRY_POINT;
     
-    TInt currentIndex =  iListBox->CurrentItemIndex();
+    TInt currentIndex =  iCurrentIndex;
     
     RPointerArray<CCalCalendarInfo> calendarInfoList; 
     iController.GetAllCalendarInfoL(calendarInfoList);
@@ -887,7 +904,7 @@ TKeyResponse CCalenMultipleDbUi::OfferKeyEventL(const TKeyEvent& aKeyEvent,
         {
         if( aKeyEvent.iCode == EKeyEscape )
             {
-            TryExitL( EKeyEscape );
+            TryExitL( EKeyNo );
             return exitCode; // Chain this one up to the main app so it closes calendar app.
             }
          else if(aType == EEventKey && TChar(aKeyEvent.iCode).IsPrint() )
@@ -972,6 +989,12 @@ TBool CCalenMultipleDbUi::OkToExitL( TInt aButtonId )
            okExit = ETrue;
            }
            break;
+       case EKeyNo:
+           {
+           iController.BroadcastNotification(ECalenNotifyDeleteInstanceView);
+           okExit = CAknDialog::OkToExitL(aButtonId);
+           break;
+           }
        default:
            {
            okExit = CAknDialog::OkToExitL(aButtonId);
@@ -1157,30 +1180,60 @@ void CCalenMultipleDbUi::HandleResourceChange(TInt aType)
     }
 
 // ----------------------------------------------------------------------------
-// CCalenMultipleDbUi::CallBackForAddAndDeleteL
+// CCalenMultipleDbUi::AsyncCallBackL
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-TInt CCalenMultipleDbUi::DoAsyncExit(TAny* aPtr)
+TInt CCalenMultipleDbUi::AsyncCallBackL(TAny* aThisPtr)
     {
     TRACE_ENTRY_POINT
-    CCalenMultipleDbUi* self = static_cast<CCalenMultipleDbUi*>(aPtr);
-    self->TryExitL(self->iAsyncExitCmd);
+    CCalenMultipleDbUi* self = static_cast<CCalenMultipleDbUi*>(aThisPtr);
+    self->HandleAsyncCommandL(self->iAsyncActionCmd);
     TRACE_EXIT_POINT
     return 0;
     }
+
 // ----------------------------------------------------------------------------
-// CCalenMultipleDbUi::CallBackForDeleteItemL
+// CCalenMultipleDbUi::DoAsyncActionL
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-TInt CCalenMultipleDbUi::DoAsyncDeleteTemL(TAny* aPtr)
+void CCalenMultipleDbUi::DoAsyncActionL(const TInt aCommand)
     {
     TRACE_ENTRY_POINT
-    CCalenMultipleDbUi* self = static_cast<CCalenMultipleDbUi*>(aPtr);
-    self->DeleteItemL();
+    iCurrentIndex = iListBox->CurrentItemIndex();
+    iAsyncActionCmd = aCommand;
+    iAsyncAction->CallBack();
     TRACE_EXIT_POINT
-    return 0;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenMultipleDbUi::DoAsyncActionL
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenMultipleDbUi::HandleAsyncCommandL(const TInt aCommand)
+    {
+    TRACE_ENTRY_POINT
+    
+    switch(aCommand)
+        {
+        case EAknSoftkeyExit:
+        case EAknCmdExit:
+            {
+            TryExitL(aCommand);
+            }
+            break;
+        case ECalenCmdDelete:
+            {
+            DeleteItemL();
+            }
+            break;
+        default:
+            break;
+        }
+    
+    TRACE_EXIT_POINT
     }
 
 // ----------------------------------------------------------------------------

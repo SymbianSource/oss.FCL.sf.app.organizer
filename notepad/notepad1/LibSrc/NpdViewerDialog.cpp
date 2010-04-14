@@ -583,33 +583,23 @@ TKeyResponse CNotepadViewerDialog::OfferKeyEventL(
 // -----------------------------------------------------------------------------
 //
 void CNotepadViewerDialog::HandleDialogPointerEventL( const TPointerEvent& aPointerEvent )
-{
-	
-	 if(!AknLayoutUtils::PenEnabled())
-	 {
-	 	return;
-	 }
-	 
-    if(aPointerEvent.iType == TPointerEvent::EButton1Up ) 
     {
-   
-       TInt curPos = iEditor->CursorPos();	
-       TRect rect = iEditor->Rect();  
-       if ( !iAutoFinder->ItemWasTappedL( aPointerEvent.iPosition - rect.iTl ) )
-         {
-		 	return;
-		 } 
-		 
-       TInt curPos1 = iEditor->CursorPos();
-       if (curPos == curPos1) 
-       {
-   			iFlags |= ENotepadMenuByOkKey;
-   	    	DisplayMenuL();	       	
-       }
-   
-    
+    if(!AknLayoutUtils::PenEnabled())
+        {
+        return;
+        }
+	 
+    if( aPointerEvent.iType == TPointerEvent::EButton1Up ) 
+        {
+        TRect rect = iEditor->Rect();  
+        if ( !iAutoFinder->ItemWasTappedL( aPointerEvent.iPosition - rect.iTl ) )
+            {
+            return;
+            }
+        
+        DisplayMenuL();
+        }
     }
-}
 
 // -----------------------------------------------------------------------------
 // CNotepadViewerDialog::HandleNumberCallL

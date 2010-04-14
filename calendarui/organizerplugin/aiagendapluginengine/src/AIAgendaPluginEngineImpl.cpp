@@ -148,13 +148,12 @@ CAIAgendaPluginEngineImpl::~CAIAgendaPluginEngineImpl(void)
     {
         iEnvironmentChangeNotifier->Cancel();
         delete iEnvironmentChangeNotifier;
-    }
-
-    delete iCalendarEngine;  // Close() called in destructor
+    }    
 
     iInstanceArray.ResetAndDestroy();
     iInstanceArray.Close();
 
+		delete iCalendarEngine;  // Close() called in destructor
     
     TRACE_EXIT_POINT;
 }

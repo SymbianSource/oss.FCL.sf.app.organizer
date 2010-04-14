@@ -42,9 +42,9 @@ const TInt KTimerResolution = 1000000;  // 1 Second
 // C++ default constructor can NOT contain any code, that might leave.
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
-CCalenDbChangeNotifier::CCalenDbChangeNotifier( CCalenGlobalData& aGlobalData ) 
+CCalenDbChangeNotifier::CCalenDbChangeNotifier( CCalSession& aSession ) 
     : CActive( EPriorityNormal ),
-      iGlobalData( aGlobalData )
+      iSession( aSession )
     {
     TRACE_ENTRY_POINT;
 
@@ -58,11 +58,11 @@ CCalenDbChangeNotifier::CCalenDbChangeNotifier( CCalenGlobalData& aGlobalData )
 // Two-phased constructor.
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
-CCalenDbChangeNotifier* CCalenDbChangeNotifier::NewL( CCalenGlobalData& aGlobalData )
+CCalenDbChangeNotifier* CCalenDbChangeNotifier::NewL( CCalSession& aSession )
     {
     TRACE_ENTRY_POINT;
 
-    CCalenDbChangeNotifier* self = new( ELeave ) CCalenDbChangeNotifier( aGlobalData );
+    CCalenDbChangeNotifier* self = new( ELeave ) CCalenDbChangeNotifier( aSession );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -93,7 +93,7 @@ void CCalenDbChangeNotifier::ConstructL()
                                                         range );
 
     // Enable database change notifications on current global data session
-    iGlobalData.CalSessionL().StartChangeNotification( *this, *iCalChangeFilter );
+    iSession.StartChangeNotification( *this, *iCalChangeFilter );
 
     // Create a timer to limit the number of notifications broadcast
     iNotificationTimer.CreateLocal();
@@ -120,7 +120,7 @@ CCalenDbChangeNotifier::~CCalenDbChangeNotifier()
     iNotificationTimer.Close();
 
     // Disable database change notifications on current global data session   
-    PIM_TRAPD_HANDLE( iGlobalData.CalSessionL().StopChangeNotification() );
+    PIM_TRAPD_HANDLE( iSession.StopChangeNotification() );
 
     // Destroy the notification filter
     delete iCalChangeFilter;

@@ -22,6 +22,7 @@
 #include <calsession.h>
 
 class CCalEntryView;
+class CCalenDbChangeNotifier;
 
 
 /**
@@ -107,6 +108,18 @@ NONSHARABLE_CLASS( CCalenFileMapping ): public CBase
      */
     CCalSession *GetSessionPtr();    
     
+    /*
+     * Set the dbchangenotifier observer
+     * @param CCalSession pointer to a session 
+     */
+    void SetDBChangeNotifier(CCalenDbChangeNotifier* aDBChangeNotifier );
+    
+    /*
+     * Get the dbchangenotifier observer.
+     * @return CCalSession pointer to session.
+     */
+    CCalenDbChangeNotifier *GetDBChangeNotifier();
+    
     private:
 
     /**
@@ -125,7 +138,8 @@ NONSHARABLE_CLASS( CCalenFileMapping ): public CBase
     TInt iStatus;
     CCalSession* iSessionPtr;
     TCalCollectionId iColId;        
-    CCalEntryView* iEntryView;        
+    CCalEntryView* iEntryView;
+    CCalenDbChangeNotifier* iDBChangeNotifier;
     };
 
 
