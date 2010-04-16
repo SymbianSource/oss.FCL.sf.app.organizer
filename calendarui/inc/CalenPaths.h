@@ -11,11 +11,10 @@
 *
 * Contributors:
 *
-* Description:   Internal path definitions for all Calendar components.
+* Description:  Internal path definitions for all Calendar components.
                   !!! Remember to check .rss files when making path changes !!!
  *
 */
-
 
 #ifndef CALENPATHS_H
 #define CALENPATHS_H
@@ -28,7 +27,7 @@ _LIT( KDummyOffFile, "z:\\resource\\No_Sound.wav" );
 _LIT( KVCalAttachmentFilename, "c:\\private\\10005901\\Calendar.vcs" );
 
 // path and filename for Calendar database
-_LIT( KCalendarDatabaseFilePath, "c:calendar" );
+_LIT( KCalendarDatabaseFilePath, "c:Calendar" );
 
 
 #endif  // CALENPATHS_H

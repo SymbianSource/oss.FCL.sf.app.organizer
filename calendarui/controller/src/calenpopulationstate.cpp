@@ -11,10 +11,9 @@
 *
 * Contributors:
 *
-* Description:   Calendar state machine
+* Description:  Calendar state machine
 *
 */
-
 
 
 // includes
@@ -25,7 +24,7 @@
 #include "calennotifier.h"
 
 // ----------------------------------------------------------------------------
-// CCalenPopulationState::NewLC
+// CalenPopulationState::NewLC
 // First stage construction
 // ----------------------------------------------------------------------------
 CCalenPopulationState* CCalenPopulationState::NewLC( CCalenController& aController,

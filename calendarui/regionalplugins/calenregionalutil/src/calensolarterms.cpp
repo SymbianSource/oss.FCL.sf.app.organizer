@@ -21,9 +21,9 @@
 //debug
 #include "calendarui_debug.h"
 
-#include "calensolarterms.h"
+#include "CalenSolarTerms.h"
 
-#include "calenlunarpaths.h"
+#include "CalenLunarPaths.h"
 
 #include <f32file.h>
 #include <s32file.h>
@@ -33,9 +33,9 @@
 _LIT(KSolarTermsFile, "SolarItems");
 // search path for solar item file
 //Uncomment for emulator
-_LIT( KSolarTermsPath, "//private//10005901//" );  
+//_LIT( KSolarTermsPath, "\\private\\10005901\\" );  
 
-//_LIT( KSolarTermsPath, "//Data//calenlunarchinese//" );
+_LIT( KSolarTermsPath, "\\data\\" );
 const TInt KFirstSolarTermYear(1900);
 const TInt KLastSolarTermYear(2100);
 
@@ -183,6 +183,8 @@ void CCalenSolarTerms::ReadSolarTermsL(TDateTime aDate)
         RFs& fs = iFs;
         TFindFile ffile(fs);
         User::LeaveIfError(ffile.FindByDir(KSolarTermsFile, KSolarTermsPath));
+       // User::LeaveIfError(ffile.FindByPath(KSolarTermsFile, KSolarTermsPath));
+        
         User::LeaveIfError(file.Open(fs,
                                      ffile.File(), EFileRead));
         CleanupClosePushL(file);

@@ -567,10 +567,11 @@ EXPORT_C TUid CParserVCalEntity::RecognizeToken(const TDesC8& aToken) const
 			{
 			uid.iUid = KVCalPropertyExtendedAlarmUid;
 			}
-		else if (!aToken.CompareF(KVersitTokenXLOCALUID))
-		    {
+		else if (!aToken.CompareF(KVersitTokenXLOCALUID) ||
+				!aToken.CompareF(KVCalTokenXFavourite))
+			{
 			uid.iUid = KVersitPropertyIntUid;
-		    }
+			}
 		break;
 		}
 	if (uid == KNullUid)

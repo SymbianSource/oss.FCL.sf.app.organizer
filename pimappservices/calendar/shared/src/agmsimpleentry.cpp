@@ -273,17 +273,17 @@ EXPORT_C void CAgnSimpleEntry::SetStatus(CCalEntry::TStatus aStatus)
 */
 	{
 	__ASSERT_DEBUG( (aStatus == CCalEntry::ETentative)
-	    			|(aStatus == CCalEntry::EConfirmed)
-	    			|(aStatus == CCalEntry::ECancelled)
-	    			|(aStatus == CCalEntry::ETodoNeedsAction)
-	    			|(aStatus == CCalEntry::ETodoCompleted)
-	    			|(aStatus == CCalEntry::ETodoInProcess)
-	    			|(aStatus == CCalEntry::ENullStatus)
-	    			|(aStatus == CCalEntry::EVCalAccepted)
-	    			|(aStatus == CCalEntry::EVCalNeedsAction)
-	    			|(aStatus == CCalEntry::EVCalSent)
-	    			|(aStatus == CCalEntry::EVCalDeclined)
-	    			|(aStatus == CCalEntry::EVCalDelegated),
+					|(aStatus == CCalEntry::EConfirmed)
+					|(aStatus == CCalEntry::ECancelled)
+					|(aStatus == CCalEntry::ETodoNeedsAction)
+					|(aStatus == CCalEntry::ETodoCompleted)
+					|(aStatus == CCalEntry::ETodoInProcess)
+					|(aStatus == CCalEntry::ENullStatus)
+					|(aStatus == CCalEntry::EVCalAccepted)
+					|(aStatus == CCalEntry::EVCalNeedsAction)
+					|(aStatus == CCalEntry::EVCalSent)
+					|(aStatus == CCalEntry::EVCalDeclined)
+					|(aStatus == CCalEntry::EVCalDelegated),
 					Panic(EAgmErrInvalidStatus));
 	
 	iStatus = aStatus;
@@ -759,9 +759,9 @@ Sets the user integer for this entry.
 @internalComponent
 */
 EXPORT_C void CAgnSimpleEntry::SetUserInt( TUint32 aUserInt )
-    {
-    iUserInt = aUserInt;
-    }
+	{
+	iUserInt = aUserInt;
+	}
 
 /**
 Gets the user integer of this entry.
@@ -770,7 +770,7 @@ Gets the user integer of this entry.
 @internalComponent
 */
 EXPORT_C TUint32 CAgnSimpleEntry::UserInt() const
-    {
-    return iUserInt;
-    }
+	{
+	return iUserInt;
+	}
 

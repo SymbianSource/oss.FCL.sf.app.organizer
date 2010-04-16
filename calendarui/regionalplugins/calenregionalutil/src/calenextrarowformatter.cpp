@@ -17,9 +17,9 @@
 
 
 #include "calendarui_debug.h"
-#include "calenextrarowformatter.h"
+#include "CalenExtraRowFormatter.h"
 #include <calenregionalutil.rsg>
-#include <AknBidiTextUtils.h>
+#include <aknbiditextutils.h>
 #include <badesca.h> 
 #include <eikenv.h>
 #include <StringLoader.h>

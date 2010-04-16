@@ -18,7 +18,7 @@
 
 
 #include "calendarui_debug.h"
-#include "calenlunarinfo.h"
+#include "CalenLunarInfo.h"
 
 // -----------------------------------------------------------------------------
 // TCalenLunarInfo::HasFestival

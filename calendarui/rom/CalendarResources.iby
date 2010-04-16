@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,20 +11,20 @@
 *
 * Contributors:
 *
-* Description:   IBY file for localizable elements (resources of Calendar
-*                application
+* Description:   IBY file for localizable elements of Calendar.app
 *
 */
 
 
 
-#ifndef CALENDARRESOURCES_IBY
-#define CALENDARRESOURCES_IBY
+#ifndef CALENDARRESOURCE_IBY
+#define CALENDARRESOURCE_IBY
+#include <data_caging_paths_for_iby.hrh>
 
+// Application resource file.
+data=DATAZ_\resource\apps\CALENDAR.RSC		APP_RESOURCE_DIR\CALENDAR.RSC
+data=DATAZ_\QT_TRANSLATIONS_DIR\calendar.qm			QT_TRANSLATIONS_DIR\calendar.qm
 
-data=DATAZ_\APP_RESOURCE_DIR\CALENDAR.RSC    APP_RESOURCE_DIR\Calendar.rsc
-
-
-#endif // CALENDARRESOURCES_IBY
+#endif // CALENDARRESOURCE_IBY
 
 //  End of File

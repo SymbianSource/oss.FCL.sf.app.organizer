@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/images" >
+        <file>ftudatetimewizard_toc_icon.svg</file>
+        <file>ftudatetimewizard_menustrip_icon.svg</file>                
+    </qresource>
+</RCC>

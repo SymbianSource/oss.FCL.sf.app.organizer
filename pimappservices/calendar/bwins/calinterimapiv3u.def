@@ -338,4 +338,11 @@ EXPORTS
 	?PropertyKeysL@CCalCalendarInfo@@QBEPAVCDesC8Array@@XZ @ 337 NONAME ; class CDesC8Array * CCalCalendarInfo::PropertyKeysL(void) const
 	?RemovePropertyL@CCalCalendarInfo@@QAEXABVTDesC8@@@Z @ 338 NONAME ; void CCalCalendarInfo::RemovePropertyL(class TDesC8 const &)
 	?PropertyValueL@CCalCalendarInfo@@QBEABVTDesC8@@ABV2@@Z @ 339 NONAME ; class TDesC8 const & CCalCalendarInfo::PropertyValueL(class TDesC8 const &) const
+	?FavouriteL@CCalEntry@@QAEKXZ @ 340 NONAME ; unsigned long CCalEntry::FavouriteL(void)
+	??0TCalFavouriteFilter@CalCommon@@QAE@KK@Z @ 341 NONAME ; CalCommon::TCalFavouriteFilter::TCalFavouriteFilter(unsigned long, unsigned long)
+	?Mask@TCalFavouriteFilter@CalCommon@@QBEKXZ @ 342 NONAME ; unsigned long CalCommon::TCalFavouriteFilter::Mask(void) const
+	?SetFavouriteFilter@CCalFindInstanceSettings@@QAEXABVTCalFavouriteFilter@CalCommon@@@Z @ 343 NONAME ; void CCalFindInstanceSettings::SetFavouriteFilter(class CalCommon::TCalFavouriteFilter const &)
+	??0TCalFavouriteFilter@CalCommon@@QAE@XZ @ 344 NONAME ; CalCommon::TCalFavouriteFilter::TCalFavouriteFilter(void)
+	?Value@TCalFavouriteFilter@CalCommon@@QBEKXZ @ 345 NONAME ; unsigned long CalCommon::TCalFavouriteFilter::Value(void) const
+	?SetFavouriteL@CCalEntry@@QAEXK@Z @ 346 NONAME ; void CCalEntry::SetFavouriteL(unsigned long)
 

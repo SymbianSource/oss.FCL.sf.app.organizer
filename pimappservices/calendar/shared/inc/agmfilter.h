@@ -44,10 +44,7 @@ public:
 	inline TBool AreRemindersIncluded() const;
 	inline TBool AreEventsIncluded() const;
 	inline TBool AreAnnivsIncluded() const;
-
-    inline TBool AreNonTodosIncluded() const;
-
-
+	inline TBool AreNonTodosIncluded() const;
 	inline TBool RptNextInstanceOnly() const;
 	inline TBool AreCompletedTodosIncluded() const;
 	inline TBool AreIncompletedTodosIncluded() const;
@@ -76,6 +73,14 @@ public:
 	
 	IMPORT_C void InternalizeL(RReadStream& aStream);
 	IMPORT_C void ExternalizeL(RWriteStream& aStream) const;
+	
+	/**
+	 * @brief check for Notes included in the filter
+	 * 
+	 * @return ETrue if notes are included otherwise return EFalse 
+	 */
+	inline TBool AreNotesIncluded() const;
+	
 private:
 	CalCommon::TCalViewFilter iFilter;
 	CalCommon::TCalSearchBehaviour iSearchBehaviour;

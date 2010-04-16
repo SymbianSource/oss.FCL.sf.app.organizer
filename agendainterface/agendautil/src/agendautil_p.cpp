@@ -1,0 +1,3626 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Definition file for AgendaUtilPrivate class.
+*
+*/
+
+// System includes
+#include <calsession.h>
+#include <calinstance.h>
+#include <CalenImporter>
+#include <calentry.h>
+#include <calrrule.h>
+#include <e32math.h>
+#include <caluser.h>
+#include <caldataexchange.h>
+#include <caldataformat.h>
+#include <f32file.h>
+#include <s32file.h>
+#include <asshddefs.h>
+
+// User includes
+#include "agendautil_p.h"
+#include "agendaentry.h"
+#include "agendaentry_p.h"
+
+// Constants
+//recognition string for ical
+_LIT8(KVersionICal,		"VERSION:2.0");
+//recognition string for vcal
+_LIT8(KVersionVCal,		"VERSION:1.0");
+const TInt KReadDataAmount = 256;
+const TInt KGuidLength = 30;
+static const int startDateArray[2] = { 1900, 1};
+static const int endDateArray[2] = { 2100, 1};
+
+AgendaUtilPrivate::AgendaUtilPrivate(AgendaUtil* parent)
+:q(parent)
+{
+	mEntryViewCreated = false;
+	mInstanceViewCreated = false;
+	mIsDeleting = false;
+	prepareSession();
+}
+
+bool AgendaUtilPrivate::prepareSession()
+{
+	if (iCalSession && mEntryViewCreated && mInstanceViewCreated)
+		{
+		// Everything is ready, nothing to be done
+		return true;
+		}
+
+	// Create the cal session if not already there.
+	if (!iCalSession)
+		{
+		TRAP(iError, iCalSession = CCalSession::NewL(););
+		if (!iCalSession)
+			{
+			return false;
+			}
+
+		const TDesC& file = iCalSession->DefaultFileNameL();
+		TRAPD(iError, iCalSession->OpenL(file));
+		if (iError == KErrNotFound)
+			{
+			iCalSession->CreateCalFileL(file);
+			iCalSession->OpenL(file);
+			}
+		else if (iError != KErrNone)
+			{
+			return false;
+			}
+
+		// Subscribe for notification on changes in the opened session (file).
+		TCalTime startDate;
+		TCalTime endDate;
+		TDateTime startTime = TDateTime(
+				startDateArray[0], static_cast<TMonth>(startDateArray[1]),
+				0, 0, 0, 0, 0);
+		TDateTime endTime = TDateTime(
+				endDateArray[0], static_cast<TMonth>(endDateArray[1]),
+				0, 0, 0, 0, 0);
+
+		startDate.SetTimeLocalL(startTime);
+		endDate.SetTimeLocalL(endTime);
+		CalCommon::TCalTimeRange searchTimeRange(startDate, startDate);
+
+		CCalChangeNotificationFilter* filter = 0;
+		filter = CCalChangeNotificationFilter::NewL(
+				EChangeEntryAll, true, searchTimeRange);
+
+		iCalSession->StartChangeNotification(*this, *filter);
+
+		// Cleanup.
+		delete filter;
+		}
+
+	/*
+	// If view creation is in progress, then wait till it gets completed
+	if((iCalEntryView && !mEntryViewCreated)
+			|| (iCalInstanceView && !mInstanceViewCreated))
+	{
+		if(!iWait)
+		{
+			TRAP(iError, iWait = new (ELeave) CActiveSchedulerWait;);
+			if(!iWait->IsStarted())
+			{
+				iWait->Start();
+			}
+		}
+	}
+	*/
+
+	// First construct the CCalEntryView if not already available.
+	// The CCalInstanceView is constructed in ::CompletedL. We block the
+	// thread here until everything is setup.
+	if (!iCalEntryView)
+		{
+		TRAP(
+				iError,
+				iCalEntryView = CCalEntryView::NewL(*iCalSession, *this);
+		);
+		if (!iWait)
+			{
+			TRAP(
+					iError,
+					iWait = new (ELeave) CActiveSchedulerWait;
+			)
+			if (!iWait->IsStarted())
+				{
+				iWait->Start();
+				}
+			}
+		}
+
+	// Comes here only when timer is expired, hence one more
+	// check is needed here.
+	if (iCalSession && mEntryViewCreated && mInstanceViewCreated)
+		{
+		// Everything is ready.
+		return true;
+		}
+
+	else
+		{
+		return false;
+		}
+}
+
+AgendaUtilPrivate::~AgendaUtilPrivate()
+{
+	delete iCalEntryView;
+	delete iCalInstanceView;
+	if (iWait && iWait->IsStarted())
+	{
+		iWait->AsyncStop();
+	}
+
+	delete iWait;
+	if (iCalSession)
+	{
+		iCalSession->StopChangeNotification();
+	}
+	delete iCalSession;
+}
+
+void AgendaUtilPrivate::Completed(TInt aError)
+{
+	iError = aError;
+
+	if (mIsDeleting) {
+		// If deletion was in progress, then it is completed now
+		// emit the signal to the clients.
+		mIsDeleting = false;
+		emit q->entriesDeleted(iError);
+	}
+
+	if(KErrNone != iError)
+	{
+		// Something has gone wrong, return
+		delete iCalEntryView;
+		iCalEntryView = NULL;
+		delete iCalInstanceView;
+		iCalInstanceView = NULL;
+		return;
+	}
+
+	if(iCalEntryView && !mEntryViewCreated)
+	{
+		mEntryViewCreated = true;
+
+		// Start creating the instance view.
+		if(!iCalInstanceView)
+		{
+			TRAP(iError, iCalInstanceView = CCalInstanceView::NewL(
+					*iCalSession, *this);)
+		}
+	}
+	else if(iCalInstanceView && !mInstanceViewCreated)
+	{
+		mInstanceViewCreated = true;
+	}
+
+	// Stop the wait timer
+	if( iWait && iWait->IsStarted())
+	{
+		if(mEntryViewCreated &&  mInstanceViewCreated)
+		{
+			iWait->AsyncStop();
+		}
+	}
+}
+
+void AgendaUtilPrivate::CalChangeNotification(
+		RArray<TCalChangeEntry>& aChangeItems)
+{
+	QList<ulong> ids;
+	for (int i = 0; i < aChangeItems.Count(); i++) {
+		ids.append(aChangeItems[i].iEntryId);
+	}
+
+	emit q->entriesChanged(ids);
+}
+
+/*!
+	Adds a new entry with the calendar database.
+
+	\param entry Reference to a new AgendaEntry to be added.
+	\return ulong The local uid of the entry added in the db.
+ */
+ulong AgendaUtilPrivate::addEntry(const AgendaEntry& entry)
+{
+	// Will be filled with the lUID of the new entry created.
+	TCalLocalUid localUid = 0;
+	int success = 0;
+
+	// First check if the session to the calendar database is prepared or not.
+	if (!prepareSession()) {
+		// Something went wrong
+		return localUid;
+	}
+
+	if (AgendaEntry::TypeNote == entry.type()) {
+		TRAP(
+				iError,
+
+				RPointerArray<CCalEntry> entryArray;
+				CleanupClosePushL(entryArray);
+
+				// Get the global uid.
+				TTime homeTime;
+				homeTime.HomeTime();
+				TInt64 seed = homeTime.Int64();
+				TInt randumNumber = Math::Rand(seed);
+				HBufC8* globalUid = HBufC8::NewLC(KGuidLength);
+				globalUid->Des().Num(randumNumber);
+
+				// Construct a CCalEntry object and start filling the details.
+				CCalEntry* newEntry = 0;
+				newEntry = CCalEntry::NewL(
+						static_cast<CCalEntry::TType>(entry.type()),
+						globalUid,
+						static_cast<CCalEntry::TMethod>(entry.method()),
+						0);
+
+				CleanupStack::Pop(globalUid);
+				CleanupStack::PushL(newEntry);
+
+				// Add description.
+				TPtrC description(reinterpret_cast<const TUint16*>(
+						entry.description().utf16()));
+				newEntry->SetDescriptionL(description);
+
+				// Set the favourite property.
+				newEntry->SetFavouriteL(entry.favourite());
+
+				// Set the last modification time.
+				TCalTime calTime;
+				QDateTime dateTime = entry.lastModifiedDateTime();
+				TDateTime tempDateTime(
+						dateTime.date().year(),
+						static_cast<TMonth>(dateTime.date().month() - 1),
+						dateTime.date().day() - 1, dateTime.time().hour(),
+						dateTime.time().minute(), 0, 0);
+				TTime tempTime(tempDateTime);
+				calTime.SetTimeLocalL(tempTime);
+				newEntry->SetLastModifiedDateL(calTime);
+
+				// Finally set the entry to the database using the entry view.
+				entryArray.AppendL(newEntry);
+				iCalEntryView->StoreL(entryArray, success);
+				localUid = newEntry->LocalUidL();
+
+				// Cleanup.
+				CleanupStack::PopAndDestroy(newEntry);
+				CleanupStack::PopAndDestroy(&entryArray);
+		)
+	} else {
+		TRAP(
+				iError,
+
+				RPointerArray<CCalEntry> entryArray;
+				CleanupClosePushL(entryArray);
+
+				// Get the global uid.
+				TTime homeTime;
+				homeTime.HomeTime();
+				TInt64 seed = homeTime.Int64();
+				TInt randumNumber = Math::Rand(seed);
+				HBufC8* globalUid = HBufC8::NewLC(KGuidLength);
+				globalUid->Des().Num(randumNumber);
+
+				// Construct a CCalEntry object and start filling the details.
+				CCalEntry* newEntry = 0;
+				newEntry = CCalEntry::NewL(
+						static_cast<CCalEntry::TType>(entry.type()),
+						globalUid,
+						static_cast<CCalEntry::TMethod>(entry.method()),
+						0);
+
+				CleanupStack::Pop(globalUid);
+				CleanupStack::PushL(newEntry);
+
+				// Add the summary.
+				if (!entry.summary().isNull()) {
+					TPtrC summary(reinterpret_cast<const TUint16*>(
+							entry.summary().utf16()));
+					newEntry->SetSummaryL(summary);
+				}
+
+				// Set the entry Start/End Date and time.
+				QDate date = entry.startTime().date();
+				QTime time = entry.startTime().time();
+
+				TDateTime startDateTime(
+						date.year(), static_cast<TMonth>(date.month() - 1),
+						date.day() - 1, time.hour(), time.minute(), 0, 0);
+				TTime entryStartTime(startDateTime);
+				TCalTime calStartTime;
+				calStartTime.SetTimeLocalL(entryStartTime);
+
+				date = entry.endTime().date();
+				time = entry.endTime().time();
+
+				TDateTime endDateTime(
+						date.year(), static_cast<TMonth>(date.month() - 1),
+						date.day() - 1, time.hour(), time.minute(), 0, 0);
+				TTime entryEndTime(endDateTime);
+				TCalTime calEndTime;
+				calEndTime.SetTimeLocalL(entryEndTime);
+				newEntry->SetStartAndEndTimeL(calStartTime, calEndTime);
+
+				// Add attendees to the entry.
+				addAttendeesToEntry(entry.d->m_attendees, *newEntry);
+
+				// Add categories to the entry.
+				addCategoriesToEntry(entry.d->m_categories, *newEntry);
+
+				// Add description to the entry.
+				TPtrC description(reinterpret_cast<const TUint16*>(
+						entry.description().utf16()));
+				newEntry->SetDescriptionL(description);
+
+				// Set the favourite property.
+				newEntry->SetFavouriteL(entry.favourite());
+
+				// Add Alarm to the entry.
+				AgendaAlarm alarm = entry.alarm();
+				if (!alarm.isNull()) {
+					setAlarmToEntry(alarm, *newEntry);
+				}
+
+				// Set the priority.
+				int priority = entry.priority();
+				if (entry.priority() != -1) {
+					newEntry->SetPriorityL(priority);
+				}
+
+				// Set the location.
+				if (!entry.location().isNull()) {
+					TPtrC location(reinterpret_cast<const TUint16*>(
+							entry.location().utf16()));
+					newEntry->SetLocationL(location);
+				}
+
+				// Set the repeat type if applicable.
+				if (AgendaRepeatRule::InvalidRule
+						!= entry.repeatRule().type()) {
+					TCalRRule repeatRule(static_cast<TCalRRule::TType>(
+							entry.repeatRule().type()));
+					QDate ruleStartDate = entry.repeatRule().repeatRuleStart();
+					QTime ruleStartTime = entry.startTime().time();
+					TDateTime ruleStartCalendarDateTime(
+							ruleStartDate.year(),
+							static_cast<TMonth>(ruleStartDate.month() - 1),
+							ruleStartDate.day() - 1, ruleStartTime.hour(),
+							ruleStartTime.minute(), 0, 0);
+
+					TCalTime ruleStartCalTime;
+					ruleStartCalTime.SetTimeLocalL(
+							TTime(ruleStartCalendarDateTime));
+					repeatRule.SetDtStart(ruleStartCalTime);
+					repeatRule.SetInterval(entry.repeatRule().interval());
+					QDate repeatUntilDate = entry.repeatRule().until();
+					TDateTime repeatTill(
+							repeatUntilDate.year(),
+							static_cast<TMonth> (repeatUntilDate.month() - 1),
+							repeatUntilDate.day() - 1, ruleStartTime.hour(),
+							ruleStartTime.minute(), 0, 0);
+
+					TCalTime ruleRepeatTillTime;
+					ruleRepeatTillTime.SetTimeLocalL(TTime(repeatTill));
+					repeatRule.SetUntil(ruleRepeatTillTime);
+
+					QList<AgendaRepeatRule::Day> qDays =
+							entry.repeatRule().byDay();
+					RArray<TDay> days;
+					for (int i = 0; i < qDays.count(); i++) {
+						days.Append(TDay(qDays[i]));
+					}
+					if (days.Count() > 0) {
+						repeatRule.SetByDay(days);
+					}
+
+					QList<int> qmonthDay = entry.repeatRule().byMonthDay();
+					RArray<TInt> monthDay;
+					for (int i = 0; i < qmonthDay.count(); i++) {
+						monthDay.Append(qmonthDay[i] - 1);
+					}
+					if (monthDay.Count() > 0) {
+						repeatRule.SetByMonthDay(monthDay);
+					}
+
+					QList<AgendaRepeatRule::Month> qMonth =
+							entry.repeatRule().byMonth();
+					RArray<TMonth> month;
+					for (int i = 0; i < qMonth.count(); i++) {
+						month.Append(TMonth(qMonth[i]));
+					}
+					if (month.Count() > 0) {
+						repeatRule.SetByMonth(month);
+					}
+					newEntry->SetRRuleL(repeatRule);
+				}
+
+				// Save the status of the entry.
+				newEntry->SetStatusL((CCalEntry::TStatus) entry.status());
+				newEntry->SetLastModifiedDateL();
+				
+				// Finally set the entry to the database using the entry view.
+				entryArray.AppendL(newEntry);
+				iCalEntryView->StoreL(entryArray, success);
+				localUid = newEntry->LocalUidL();
+
+				// Cleanup.
+				CleanupStack::PopAndDestroy(newEntry);
+				CleanupStack::PopAndDestroy(&entryArray);
+		)
+	}
+	// Emit signal upon successful creation of entry.
+	if (0 < localUid && 1 == success) {
+		emit q->entryAdded(localUid);
+	}
+	return localUid;
+}
+
+/*!
+	Clones the `entry' passed in the argument and saves it as type `type'.
+
+	\param entry Entry which should be used for cloning.
+	\param type The new type of the entry.
+	\return ulong The local UID of the new entry.
+
+	\sa deleteEntry()
+ */
+ulong AgendaUtilPrivate::cloneEntry(
+		const AgendaEntry &entry, AgendaEntry::Type type)
+{
+	// First prepare the session with agenda server.
+	if (!prepareSession()) {
+		// Something went wrong.
+		return 0;
+	}
+
+	if (entry.isNull()
+			|| type == AgendaEntry::TypeUnknown) {
+		return 0;
+	}
+
+	// Will be filled with the lUID of the new entry created.
+	TCalLocalUid localUid = 0;
+	int success = 0;
+	CCalEntry *originalEntry = 0;
+	HBufC8* globalUid = 0;
+
+	// Get the stored entry first.
+	TRAP(
+			iError,
+
+			originalEntry = iCalEntryView->FetchL(entry.id());
+	)
+
+	if (!originalEntry) {
+		return 0;
+	}
+
+	// Now save the GUID of the saved entry.
+	TRAP(
+			iError,
+
+			globalUid = HBufC8::NewL(KGuidLength);
+			*globalUid = originalEntry->UidL();
+	)
+
+	delete originalEntry;
+
+	// Now start cloning and create a new entry.
+	if (AgendaEntry::TypeNote == type) {
+		TRAP(
+				iError,
+
+				RPointerArray<CCalEntry> entryArray;
+				CleanupClosePushL(entryArray);
+
+				// Construct a CCalEntry object and start filling the details.
+				CCalEntry* newEntry = 0;
+				newEntry = CCalEntry::NewL(
+						static_cast<CCalEntry::TType>(type),
+						globalUid,
+						static_cast<CCalEntry::TMethod>(entry.method()),
+						0);
+				CleanupStack::PushL(newEntry);
+
+				// Add description.
+				TPtrC description(reinterpret_cast<const TUint16*>(
+						entry.description().utf16()));
+				newEntry->SetDescriptionL(description);
+
+				// Set the favourite property.
+				newEntry->SetFavouriteL(entry.favourite());
+
+				// Finally set the entry to the database using the entry view.
+				entryArray.AppendL(newEntry);
+				iCalEntryView->StoreL(entryArray, success);
+				localUid = newEntry->LocalUidL();
+
+				// Cleanup.
+				CleanupStack::PopAndDestroy(newEntry);
+				CleanupStack::PopAndDestroy(&entryArray);
+		)
+	} else {
+		TRAP(
+				iError,
+
+				RPointerArray<CCalEntry> entryArray;
+				CleanupClosePushL(entryArray);
+
+				// Construct a CCalEntry object and start filling the details.
+				CCalEntry* newEntry = 0;
+				newEntry = CCalEntry::NewL(
+						static_cast<CCalEntry::TType>(type),
+						globalUid,
+						static_cast<CCalEntry::TMethod>(entry.method()),
+						0);
+				CleanupStack::PushL(newEntry);
+
+				// Add the summary.
+				if (!entry.summary().isNull()) {
+					TPtrC summary(reinterpret_cast<const TUint16*>(
+							entry.summary().utf16()));
+					newEntry->SetSummaryL(summary);
+				}
+
+				// Set the entry Start/End Date and time.
+				QDate date = entry.startTime().date();
+				QTime time = entry.startTime().time();
+
+				TDateTime startDateTime(
+						date.year(), static_cast<TMonth>(date.month() - 1),
+						date.day() - 1, time.hour(), time.minute(), 0, 0);
+				TTime entryStartTime(startDateTime);
+				TCalTime calStartTime;
+				calStartTime.SetTimeLocalL(entryStartTime);
+
+				date = entry.endTime().date();
+				time = entry.endTime().time();
+
+				TDateTime endDateTime(
+						date.year(), static_cast<TMonth>(date.month() - 1),
+						date.day() - 1, time.hour(), time.minute(), 0, 0);
+				TTime entryEndTime(endDateTime);
+				TCalTime calEndTime;
+				calEndTime.SetTimeLocalL(entryEndTime);
+				newEntry->SetStartAndEndTimeL(calStartTime, calEndTime);
+
+				// Add attendees to the entry.
+				addAttendeesToEntry(entry.d->m_attendees, *newEntry);
+
+				// Add categories to the entry.
+				addCategoriesToEntry(entry.d->m_categories, *newEntry);
+
+				// Add description to the entry.
+				TPtrC description(reinterpret_cast<const TUint16*>(
+						entry.description().utf16()));
+				newEntry->SetDescriptionL(description);
+
+				// Set the favourite property.
+				newEntry->SetFavouriteL(entry.favourite());
+
+				// Add Alarm to the entry.
+				AgendaAlarm alarm = entry.alarm();
+				if (!alarm.isNull()) {
+					setAlarmToEntry(alarm, *newEntry);
+				}
+
+				// Set the priority.
+				int priority = entry.priority();
+				if (entry.priority() != -1) {
+					newEntry->SetPriorityL(priority);
+				}
+
+				// Set the location.
+				if (!entry.location().isNull()) {
+					TPtrC location(reinterpret_cast<const TUint16*>(
+							entry.location().utf16()));
+					newEntry->SetLocationL(location);
+				}
+
+				// Set the repeat type if applicable.
+				if (AgendaRepeatRule::InvalidRule
+						!= entry.repeatRule().type()) {
+					TCalRRule repeatRule(static_cast<TCalRRule::TType>(
+							entry.repeatRule().type()));
+					QDate ruleStartDate = entry.repeatRule().repeatRuleStart();
+					QTime ruleStartTime = entry.startTime().time();
+					TDateTime ruleStartCalendarDateTime(
+							ruleStartDate.year(),
+							static_cast<TMonth>(ruleStartDate.month() - 1),
+							ruleStartDate.day() - 1, ruleStartTime.hour(),
+							ruleStartTime.minute(), 0, 0);
+
+					TCalTime ruleStartCalTime;
+					ruleStartCalTime.SetTimeLocalL(
+							TTime(ruleStartCalendarDateTime));
+					repeatRule.SetDtStart(ruleStartCalTime);
+					repeatRule.SetInterval(entry.repeatRule().interval());
+					QDate repeatUntilDate = entry.repeatRule().until();
+					TDateTime repeatTill(
+							repeatUntilDate.year(),
+							static_cast<TMonth> (repeatUntilDate.month() - 1),
+							repeatUntilDate.day() - 1, ruleStartTime.hour(),
+							ruleStartTime.minute(), 0, 0);
+
+					TCalTime ruleRepeatTillTime;
+					ruleRepeatTillTime.SetTimeLocalL(TTime(repeatTill));
+					repeatRule.SetUntil(ruleRepeatTillTime);
+
+					QList<AgendaRepeatRule::Day> qDays =
+							entry.repeatRule().byDay();
+					RArray<TDay> days;
+					for (int i = 0; i < qDays.count(); i++) {
+						days.Append(TDay(qDays[i]));
+					}
+					if (days.Count() > 0) {
+						repeatRule.SetByDay(days);
+					}
+
+					QList<int> qmonthDay = entry.repeatRule().byMonthDay();
+					RArray<TInt> monthDay;
+					for (int i = 0; i < qmonthDay.count(); i++) {
+						monthDay.Append(qmonthDay[i] - 1);
+					}
+					if (monthDay.Count() > 0) {
+						repeatRule.SetByMonthDay(monthDay);
+					}
+
+					QList<AgendaRepeatRule::Month> qMonth =
+							entry.repeatRule().byMonth();
+					RArray<TMonth> month;
+					for (int i = 0; i < qMonth.count(); i++) {
+						month.Append(TMonth(qMonth[i]));
+					}
+					if (month.Count() > 0) {
+						repeatRule.SetByMonth(month);
+					}
+					newEntry->SetRRuleL(repeatRule);
+				}
+
+				// Save the status of the entry.
+				newEntry->SetStatusL((CCalEntry::TStatus) entry.status());
+				newEntry->SetLastModifiedDateL();
+				// Finally set the entry to the database using the entry view.
+				entryArray.AppendL(newEntry);
+				iCalEntryView->StoreL(entryArray, success);
+				localUid = newEntry->LocalUidL();
+
+				// Cleanup.
+				CleanupStack::PopAndDestroy(newEntry);
+				CleanupStack::PopAndDestroy(&entryArray);
+		)
+	}
+	// Emit signal upon successful creation of entry.
+	if (0 < localUid && 1 == success) {
+		emit q->entryAdded(localUid);
+	}
+	return localUid;
+}
+
+/*!
+	Deletes a given entry with `id'.
+
+	\param id The id of the entry to be deleted.
+	\return bool true if deletion successful, false otherwise.
+ */
+bool AgendaUtilPrivate::deleteEntry(ulong id)
+{
+	// First prepare the session with agenda server.
+	if (!prepareSession()) {
+		// Something went wrong.
+		return false;
+	}
+	int success = 0;
+
+	// Now delete the entry with agenda server.
+	TRAP(
+			iError,
+			RArray<TCalLocalUid> localIds;
+			CleanupClosePushL(localIds);
+
+			localIds.AppendL(id);
+			iCalEntryView->DeleteL(localIds, success);
+			CleanupStack::PopAndDestroy(&localIds);
+	)
+
+	// Emit the signal to notify the deletion of entry.
+	if (0 < success) {
+		emit q->entryDeleted(id);
+	}
+	return (success != 0);
+}
+
+/*!
+	Deletes a repeated entry given the recurrance range.
+
+	\param entry
+	\param range
+	\return bool true if deletion successful, false otherwise.
+ */
+void AgendaUtilPrivate::deleteRepeatedEntry(
+		AgendaEntry& entry,
+		AgendaUtil::RecurrenceRange range)
+{
+	qDebug("AgendaUtilPrivate::deleteRepeatedEntry");
+
+	// First prepare the session with agenda server.
+	if (!prepareSession()) {
+		// Something went wrong.
+		return;
+	}
+
+	TRAP(iError,
+
+			if (range != AgendaUtil::ThisAndAll) {
+				// Find the correct instance to be deleted from entry.
+				CCalInstance* instance = findPossibleInstance(entry);
+				if (instance) {
+				    iCalInstanceView->DeleteL(instance,
+				                              (CalCommon::TRecurrenceRange)range);
+				}
+			} else {
+				// Unfortunately we can't pass the existing child instance
+				// through to the InstanceView DeleteL function because even if
+				// we pass in EThisAndAll, it only ever deletes the exception.
+				// We'll have to fetch the parent then delete it via
+				// the entry view.
+				CCalEntry* calEntry = iCalEntryView->FetchL(entry.id());
+				CleanupStack::PushL(calEntry);
+
+				// Fetch the entries based on the global uid of the entry, as
+				// the exceptional entries share the global uid with the parent
+				// entry.
+				RPointerArray<CCalEntry> entries;
+				CleanupClosePushL(entries);
+				iCalEntryView->FetchL(calEntry->UidL(), entries);
+				if (entries.Count()) {
+				    iCalEntryView->DeleteL(*entries[0]);
+				}
+
+				// Cleanup.
+				int count = entries.Count();
+				for (int i = count - 1; i >= 0; --i) {
+					CCalEntry *entry = entries[i];
+					delete entry;
+				}
+				CleanupStack::PopAndDestroy(&entries);
+				CleanupStack::PopAndDestroy();
+			}
+	)
+	
+	// Emit the signal to notify the deletion of entry.
+	emit q->entryDeleted(entry.id());
+}
+
+/*!
+	Updates a given entry in the calendar database.
+
+	\param entry The entry to be updated.
+	\return bool true if updation was successful, false otherwise.
+ */
+bool AgendaUtilPrivate::updateEntry(const AgendaEntry& entry, bool isChild)
+{
+	// First prepare the session with agenda server.
+	if (!prepareSession()) {
+		// Something went wrong.
+		return false;
+	}
+
+	if (entry.isNull()) {
+		// Invalid entry.
+		return false;
+	}
+
+	int success = 0;
+
+	if (AgendaEntry::TypeNote == entry.type()) {
+		TRAP(
+				iError,
+
+				// Get the entry corresponding to the id.
+				AgendaEntry storedEntry = fetchById(entry.id());
+				CCalEntry* calEntry = iCalEntryView->FetchL(entry.id());
+				CleanupStack::PushL(calEntry);
+
+				// Update the description.
+				if (storedEntry.description() != entry.description()
+						&& !entry.description().isNull()) {
+					calEntry->SetDescriptionL(
+							TPtrC(reinterpret_cast<const TUint16 *> (
+									entry.description().utf16())));
+				}
+
+				// Update the method.
+				if (storedEntry.method() != entry.method() &&
+						AgendaEntry::MethodUnknown != entry.method()) {
+					calEntry->SetMethodL(
+							static_cast<CCalEntry::TMethod> (entry.method()));
+				}
+
+				// Update the last modification time.
+				if (entry.lastModifiedDateTime().isValid()) {
+					if (entry.lastModifiedDateTime() !=
+							storedEntry.lastModifiedDateTime()) {
+						QDateTime dateTime = entry.lastModifiedDateTime();
+						QDate lastDate = dateTime.date();
+						QTime lastTime = dateTime.time();
+
+						TDateTime lastModDateTime(
+								lastDate.year(),
+								static_cast<TMonth> (lastDate.month() - 1),
+								lastDate.day() - 1, lastTime.hour(),
+								lastTime.minute(), 0, 0);
+
+						TTime lastModTime(lastModDateTime);
+						TCalTime lastModCalTime;
+						lastModCalTime.SetTimeLocalL(lastModTime);
+						calEntry->SetLastModifiedDateL(lastModCalTime);
+					}
+				}
+
+				// Check if the favourite property is changed and update the
+				// same.
+				if (entry.favourite() != storedEntry.favourite()) {
+					calEntry->SetFavouriteL(entry.favourite());
+				}
+
+				// Update the entry using the CCalEntryView.
+				RPointerArray<CCalEntry> entryArray;
+				CleanupClosePushL(entryArray);
+				entryArray.AppendL(calEntry);
+				iCalEntryView->UpdateL(entryArray, success);
+
+				// Cleanup.
+				CleanupStack::PopAndDestroy(2, calEntry);
+		)
+	} else {
+		TRAP(
+				iError,
+
+				// Get the entry corresponding to the id.
+				AgendaEntry storedEntry = fetchById(entry.id());
+				CCalEntry* calEntry = iCalEntryView->FetchL(entry.id());
+				CleanupStack::PushL(calEntry);
+
+				// Update the attendees.
+				if (!entry.isNull()
+						&& (entry.d->m_attendees != storedEntry.attendees())) {
+
+					RPointerArray<CCalAttendee> attendeesArray =
+							calEntry->AttendeesL();
+					CleanupClosePushL(attendeesArray);
+					int iterator = 0;
+					while (attendeesArray.Count() > iterator) {
+						calEntry->DeleteAttendeeL(iterator);
+						iterator++;
+					}
+					// Cleanup.
+					CleanupStack::PopAndDestroy(&attendeesArray);
+
+					addAttendeesToEntry(entry.d->m_attendees, *calEntry);
+				}
+
+				// Update the categories.
+				if (entry.d->m_categories != storedEntry.categories()) {
+
+					RPointerArray<CCalCategory> categories =
+							calEntry->CategoryListL();
+					CleanupClosePushL(categories);
+					int iterator = 0;
+					while (categories.Count() > iterator) {
+						calEntry->DeleteCategoryL(iterator);
+						iterator++;
+					}
+					// Cleanup.
+					CleanupStack::PopAndDestroy(&categories);
+
+					addCategoriesToEntry(entry.d->m_categories, *calEntry);
+				}
+
+				// Update the alarm.
+				if (entry.alarm() != storedEntry.alarm()) {
+					setAlarmToEntry(entry.alarm(), *calEntry);
+				}
+
+				// Update the description.
+				if ((storedEntry.description() != entry.description()
+						&& !entry.description().isNull()) || entry.description().isNull() ) {
+					calEntry->SetDescriptionL(
+							TPtrC(reinterpret_cast<const TUint16 *> (
+									entry.description().utf16())));
+				}
+
+				// Update the location.
+				if (storedEntry.location() != entry.location()
+						&& !entry.location().isNull()) {
+					calEntry->SetLocationL(
+							TPtrC(reinterpret_cast<const TUint16 *> (
+									entry.location().utf16())));
+				}
+
+				// Update the priority.
+				if (storedEntry.priority() != entry.priority()
+						&& -1 != entry.priority()) {
+					calEntry->SetPriorityL(entry.priority());
+				}
+
+				// Update the summary.
+				if (storedEntry.summary() != entry.summary()
+						&& !entry.summary().isNull()) {
+					calEntry->SetSummaryL(
+							TPtrC(reinterpret_cast<const TUint16 *> (
+									entry.summary().utf16())));
+				}
+
+				// Update the method.
+				if (storedEntry.method() != entry.method() &&
+						AgendaEntry::MethodUnknown != entry.method()) {
+					calEntry->SetMethodL(
+							static_cast<CCalEntry::TMethod> (entry.method()));
+				}
+
+				// Update the time.
+				if (storedEntry.startTime() != entry.startTime()
+						|| storedEntry.endTime() != entry.endTime()) {
+
+					QDateTime startDateTime = entry.startTime();
+					QDate startDate = startDateTime.date();
+					QTime startTime = startDateTime.time();
+
+					TDateTime startCalendarDateTime(
+							startDate.year(),
+							static_cast<TMonth> (startDate.month() - 1),
+							startDate.day() - 1,
+							startTime.hour(),
+							startTime.minute(),
+							0,
+							0);
+
+					TTime startCalTime(startCalendarDateTime);
+					TCalTime calTime;
+					calTime.SetTimeLocalL(startCalTime);
+					QDateTime endDateTime = entry.endTime();
+					QDate endDate = endDateTime.date();
+					QTime endTime = endDateTime.time();
+
+					TDateTime endCalendarDateTime(
+							endDate.year(),
+							static_cast<TMonth>(endDate.month() - 1),
+							endDate.day() - 1,
+							endTime.hour(),
+							endTime.minute(),
+							0,
+							0);
+
+					TTime endCalTime(endCalendarDateTime);
+					TCalTime calTime2;
+					calTime2.SetTimeLocalL(endCalTime);
+
+					calEntry->SetStartAndEndTimeL(calTime, calTime2);
+				}
+
+				// Update the repeat rule
+				if (storedEntry.repeatRule() != entry.repeatRule()) {
+
+					calEntry->ClearRepeatingPropertiesL();
+
+					if(TCalRRule::EInvalid != entry.repeatRule().type()) {
+						TCalRRule
+						repeatRule(static_cast<TCalRRule::TType> (
+								entry.repeatRule().type()));
+						QDate ruleStartDate =
+								entry.repeatRule().repeatRuleStart();
+						QTime ruleStartTime = entry.startTime().time();
+						TDateTime
+						ruleStartCalendarDateTime(
+								ruleStartDate.year(),
+								static_cast<TMonth> (ruleStartDate.month()
+										- 1),
+										ruleStartDate.day() - 1,
+										ruleStartTime.hour(),
+										ruleStartTime.minute(), 0, 0);
+
+						TCalTime ruleStartCalTime;
+						ruleStartCalTime.SetTimeLocalL(
+								TTime(ruleStartCalendarDateTime));
+						repeatRule.SetDtStart(ruleStartCalTime);
+						repeatRule.SetInterval(entry.repeatRule().interval());
+						QDate repeatUntilDate = entry.repeatRule().until();
+						TDateTime repeatTill(
+								repeatUntilDate.year(),
+								static_cast<TMonth>(repeatUntilDate.month() - 1),
+								repeatUntilDate.day() - 1, ruleStartTime.hour(),
+								ruleStartTime.minute(), 0, 0);
+						TCalTime ruleRepeatTillTime;
+						ruleRepeatTillTime.SetTimeLocalL(TTime(repeatTill));
+						repeatRule.SetUntil(ruleRepeatTillTime);
+
+						QList<AgendaRepeatRule::Day> qDays =
+								entry.repeatRule().byDay();
+						RArray<TDay> days;
+						for (int i = 0; i < qDays.count(); i++) {
+							days.Append(TDay(qDays[i]));
+						}
+						if (days.Count()> 0) {
+							repeatRule.SetByDay(days);
+						}
+
+						QList<int> qmonthDay = entry.repeatRule().byMonthDay();
+						RArray<TInt> monthDay;
+						for (int i = 0; i < qmonthDay.count(); i++) {
+							monthDay.Append(qmonthDay[i] - 1);
+						}
+						if (monthDay.Count()> 0) {
+							repeatRule.SetByMonthDay(monthDay);
+						}
+
+						QList<AgendaRepeatRule::Month> qMonth =
+								entry.repeatRule().byMonth();
+						RArray<TMonth> month;
+						for (int i = 0; i < qMonth.count(); i++) {
+							month.Append(TMonth(qMonth[i]));
+						}
+						if (month.Count()> 0) {
+							repeatRule.SetByMonth(month);
+						}
+						calEntry->SetRRuleL(repeatRule);
+					}
+				}
+				
+				// Check if the favourite property is changed and update the
+				// same.
+				if (entry.favourite() != storedEntry.favourite()) {
+					calEntry->SetFavouriteL(entry.favourite());
+				}
+				calEntry->SetLastModifiedDateL();
+				// Update the entry using the calen entry view.
+				RPointerArray<CCalEntry> entryArray;
+				CleanupClosePushL(entryArray);
+				entryArray.AppendL(calEntry);
+				if (!isChild) {
+					iCalEntryView->UpdateL(entryArray, success);
+				} else {
+					iCalEntryView->StoreL(entryArray, success);
+				}
+				// Cleanup.
+				CleanupStack::PopAndDestroy(2, calEntry);
+		)
+	}
+
+	// Emit the signal to notify the clients.
+	if (0 < success) {
+		emit q->entryUpdated(entry.id());
+	}
+	return (success != 0);
+}
+
+bool AgendaUtilPrivate::storeRepeatingEntry(const AgendaEntry& entry,
+                                            bool copyToChildren)
+{
+	// First prepare the session with agenda server.
+	if (!prepareSession()) {
+		// Something went wrong.
+		return false;
+	}
+
+	if (entry.isNull()) {
+		// Invalid entry.
+		return false;
+	}
+
+	int success = 0;
+	
+	// Get the entry corresponding to the id.
+	AgendaEntry storedEntry = fetchById(entry.id());
+	CCalEntry* instance = iCalEntryView->FetchL(entry.id());
+	CleanupStack::PushL(instance);
+	
+	CCalEntry* calEntry;
+	if (instance) {
+		// Get all the entries with same global Uid.
+		RPointerArray<CCalEntry> entries;
+		CleanupClosePushL(entries);
+		iCalEntryView->FetchL(instance->UidL(), entries);
+		calEntry = entries[0];
+		CleanupStack::PopAndDestroy(&entries);
+	} else {
+		CleanupStack::PopAndDestroy(instance);
+		return false;
+	}
+	CleanupStack::PopAndDestroy(instance);
+	CleanupStack::PushL(calEntry);
+	
+	// This entry is repeating. Does it have EXDATEs which could be due to children?
+	RArray<TCalTime> exceptionDates;
+	CleanupClosePushL( exceptionDates );
+	calEntry->GetExceptionDatesL( exceptionDates );
+	TInt exceptionCount = exceptionDates.Count();
+	CleanupStack::PopAndDestroy( &exceptionDates );
+
+	if (exceptionCount == 0) {
+		// No exception dates so do a StoreL().
+		// We have no exceptions, so there are no children to re-store
+		// Same logic as above applies, we call StoreL rather than check to 
+		// see if we could have called UpdateL
+		success = updateEntry(entry, true);
+		CleanupStack::PopAndDestroy( calEntry );
+		return success;
+	} 
+
+	//Is this a child entry?
+	if (calEntry->RecurrenceIdL().TimeUtcL() != Time::NullTTime()) {
+		success = updateEntry(entry, true);
+		CleanupStack::PopAndDestroy( calEntry );
+		return success;
+	}
+
+	// Entry is not a child, but does it have any children?
+	// Fetch array of entries associated with this UID.
+	RPointerArray<CCalEntry> oldEntries;
+	CleanupClosePushL(oldEntries);
+	iCalEntryView->FetchL(calEntry->UidL(), oldEntries);
+	bool hasChildren = oldEntries.Count() > 0;
+	
+	// Before we proceed further update calEntry with the latest modifications
+	// Update only those fields that are required to copy to the children
+	// refer to enum DifferenceFlag to know what fields need to be updated
+	
+	// set the summary
+	calEntry->SetSummaryL(TPtrC(reinterpret_cast<const TUint16 *> (
+										entry.summary().utf16())));
+	
+	// set the locaiton
+	calEntry->SetLocationL(TPtrC(reinterpret_cast<const TUint16 *> (
+										entry.location().utf16())));
+	
+	// set the description
+	calEntry->SetDescriptionL(TPtrC(reinterpret_cast<const TUint16 *> (
+										entry.description().utf16())));
+	
+	// set the instance start and end dates to this
+	TCalTime originalStartCalTime = calEntry->StartTimeL();
+	TDateTime origStartDateTime = originalStartCalTime.TimeLocalL().DateTime();
+	
+	QDate date = entry.startTime().date();
+	QTime time =entry.startTime().time();
+	origStartDateTime.Set(date.year(),
+					 static_cast<TMonth> (date.month() - 1),
+					 date.day() - 1,
+					 time.hour(),
+					 time.minute(),time.second(), 0);
+	TTime originalStartTime(origStartDateTime);
+	originalStartCalTime.SetTimeLocalL(originalStartTime);
+	
+	TCalTime originalEndCalTime = calEntry->EndTimeL();
+	TDateTime origEndDateTime = originalEndCalTime.TimeLocalL().DateTime();
+	date = entry.endTime().date();
+	time = entry.endTime().time();
+	origEndDateTime.Set(date.year(),
+					 static_cast<TMonth> (date.month() - 1),
+					 date.day() - 1,
+					 time.hour(),
+					 time.minute(),time.second(), 0);
+	TTime originalEndTime(origEndDateTime);
+	originalEndCalTime.SetTimeLocalL(originalEndTime);
+	
+	calEntry->SetStartAndEndTimeL(originalStartCalTime, originalEndCalTime);
+	
+	// Set the repeat rules
+	calEntry->ClearRepeatingPropertiesL();
+
+	if(TCalRRule::EInvalid != entry.repeatRule().type()) {
+		TCalRRule
+		repeatRule(static_cast<TCalRRule::TType> (
+				entry.repeatRule().type()));
+		QDate ruleStartDate =
+				entry.repeatRule().repeatRuleStart();
+		QTime ruleStartTime = entry.startTime().time();
+		TDateTime
+		ruleStartCalendarDateTime(
+				ruleStartDate.year(),
+				static_cast<TMonth> (ruleStartDate.month()
+						- 1),
+						ruleStartDate.day() - 1,
+						ruleStartTime.hour(),
+						ruleStartTime.minute(), 0, 0);
+
+		TCalTime ruleStartCalTime;
+		ruleStartCalTime.SetTimeLocalL(
+				TTime(ruleStartCalendarDateTime));
+		repeatRule.SetDtStart(ruleStartCalTime);
+		repeatRule.SetInterval(entry.repeatRule().interval());
+		QDate repeatUntilDate = entry.repeatRule().until();
+		TDateTime repeatTill(
+				repeatUntilDate.year(),
+				static_cast<TMonth>(repeatUntilDate.month() - 1),
+				repeatUntilDate.day() - 1, ruleStartTime.hour(),
+				ruleStartTime.minute(), 0, 0);
+		TCalTime ruleRepeatTillTime;
+		ruleRepeatTillTime.SetTimeLocalL(TTime(repeatTill));
+		repeatRule.SetUntil(ruleRepeatTillTime);
+
+		QList<AgendaRepeatRule::Day> qDays =
+				entry.repeatRule().byDay();
+		RArray<TDay> days;
+		for (int i = 0; i < qDays.count(); i++) {
+			days.Append(TDay(qDays[i]));
+		}
+		if (days.Count()> 0) {
+			repeatRule.SetByDay(days);
+		}
+
+		QList<int> qmonthDay = entry.repeatRule().byMonthDay();
+		RArray<TInt> monthDay;
+		for (int i = 0; i < qmonthDay.count(); i++) {
+			monthDay.Append(qmonthDay[i] - 1);
+		}
+		if (monthDay.Count()> 0) {
+			repeatRule.SetByMonthDay(monthDay);
+		}
+
+		QList<AgendaRepeatRule::Month> qMonth =
+				entry.repeatRule().byMonth();
+		RArray<TMonth> month;
+		for (int i = 0; i < qMonth.count(); i++) {
+			month.Append(TMonth(qMonth[i]));
+		}
+		if (month.Count()> 0) {
+			repeatRule.SetByMonth(month);
+		}
+		calEntry->SetRRuleL(repeatRule);
+	}
+	
+	bool hasTimeOrDateCanged = (oldEntries[0]->StartTimeL().TimeUtcL() != 
+			calEntry->StartTimeL().TimeUtcL() ||
+			oldEntries[0]->EndTimeL().TimeUtcL() != calEntry->EndTimeL().TimeUtcL());
+	if (oldEntries.Count() == 0) {
+		//This is a new repeating entry, with exceptions
+		//This must have come from an external application, as the 
+		//calendar UI does not allow creation of this type of entry
+		success = updateEntry(entry);
+	} // Have the RRule or time fields changed 
+	else if (copyToChildren || hasTimeOrDateCanged  
+		|| haveRepeatPropertiesChanged(*oldEntries[0], *calEntry)) {
+		if (hasChildren && copyToChildren)
+			{
+			copyChildrenExceptionData( *calEntry, oldEntries );
+			}
+		success = updateEntry(entry, false);
+		
+		if(hasChildren)
+			{
+			storeEachChildEntry( *calEntry, oldEntries, !copyToChildren );
+			}
+	}
+	else
+		{
+		success = this->updateEntry(entry);
+		}
+	CleanupStack::PopAndDestroy( &oldEntries );
+	CleanupStack::PopAndDestroy( calEntry );
+
+	return success;    
+}
+
+bool AgendaUtilPrivate::createException(const AgendaEntry& entry)
+{
+
+	// First prepare the session with agenda server.
+	if (!prepareSession()) {
+		// Something went wrong.
+		return false;
+	}
+
+	if (entry.isNull()) {
+		// Invalid entry.
+		return false;
+	}
+
+	int success = 0;
+	TCalLocalUid localUid = 0;
+	if (AgendaEntry::TypeNote == entry.type()) {
+		TRAP(
+				iError,
+
+				// Get the entry corresponding to the id.
+				CCalEntry* calEntry = iCalEntryView->FetchL(entry.id());
+				CleanupStack::PushL(calEntry);
+				// We are creating an exception, hence get the global Uid
+				HBufC8* guid = calEntry->UidL().AllocLC();
+				// create new (child) entry
+				// Use original instance time for recurrenceID as this entry hasn't got one.
+				TCalTime originalCalTime = calEntry->StartTimeL();
+				TDateTime origDateTime = originalCalTime.TimeLocalL().DateTime();
+				// set the instance date to this
+				QDate date = entry.startTime().date();
+				QTime time =entry.startTime().time();
+				origDateTime.Set(date.year(),
+								 static_cast<TMonth> (date.month() - 1),
+								 date.day() - 1,
+								 time.hour(),
+								 time.minute(),time.second(), 0);
+				TTime originalTime(origDateTime);
+				originalCalTime.SetTimeLocalL(originalTime);
+				// create the new child now
+				CCalEntry* newEntry = CCalEntry::NewL( calEntry->EntryTypeL(), 
+													   guid,
+													   calEntry->MethodL(),
+													   calEntry->SequenceNumberL(),
+													   originalCalTime,
+													   CalCommon::EThisOnly );
+				
+				CleanupStack::Pop(guid);
+				CleanupStack::PopAndDestroy(calEntry);
+				CleanupStack::PushL(newEntry);
+
+				// Update the description.
+				if (!entry.description().isNull()) {
+					newEntry->SetDescriptionL(
+							TPtrC(reinterpret_cast<const TUint16 *> (
+									entry.description().utf16())));
+				}
+
+				// Update the method.
+				if (AgendaEntry::MethodUnknown != entry.method()) {
+					newEntry->SetMethodL(
+							static_cast<CCalEntry::TMethod> (entry.method()));
+				}
+
+				// Update the last modification time.
+				if (entry.lastModifiedDateTime().isValid()) {
+					QDateTime dateTime = entry.lastModifiedDateTime();
+					QDate lastDate = dateTime.date();
+					QTime lastTime = dateTime.time();
+
+					TDateTime lastModDateTime(
+							lastDate.year(),
+							static_cast<TMonth> (lastDate.month() - 1),
+							lastDate.day() - 1, lastTime.hour(),
+							lastTime.minute(), 0, 0);
+
+					TTime lastModTime(lastModDateTime);
+					TCalTime lastModCalTime;
+					lastModCalTime.SetTimeLocalL(lastModTime);
+					newEntry->SetLastModifiedDateL(lastModCalTime);
+				}
+
+				newEntry->SetFavouriteL(entry.favourite());
+
+				// Update the entry using the CCalEntryView.
+				RPointerArray<CCalEntry> entryArray;
+				CleanupClosePushL(entryArray);
+				entryArray.AppendL(newEntry);
+				iCalEntryView->StoreL(entryArray, success);
+
+				localUid = newEntry->LocalUidL();
+				// Cleanup.
+				CleanupStack::PopAndDestroy(2, newEntry);
+		)
+	} else {
+		TRAP(
+				iError,	
+				
+				CCalEntry* calEntry = iCalEntryView->FetchL(entry.id());
+				CleanupStack::PushL(calEntry);
+				// We are creating an exception, hence get the global Uid
+				HBufC8* guid = calEntry->UidL().AllocLC();
+				// create new (child) entry
+				// Use original instance time for recurrenceID as this entry hasn't got one.
+				TCalTime originalCalTime = calEntry->StartTimeL();
+				TDateTime origDateTime = originalCalTime.TimeLocalL().DateTime();
+				// set only the instance date but not the time to this
+				QDate date = entry.startTime().date();
+				QTime time =entry.startTime().time();
+				origDateTime.Set(date.year(),
+				                 static_cast<TMonth> (date.month() - 1),
+								 date.day() - 1,
+                                 origDateTime.Hour(),
+                                 origDateTime.Minute(),
+                                 origDateTime.Second(), 
+                                 origDateTime.MicroSecond());
+				TTime originalTime(origDateTime);
+				originalCalTime.SetTimeLocalL(originalTime);
+				// create the new child now
+				CCalEntry* newEntry = CCalEntry::NewL( calEntry->EntryTypeL(), 
+													   guid,
+													   calEntry->MethodL(),
+													   calEntry->SequenceNumberL(),
+													   originalCalTime,
+													   CalCommon::EThisOnly );
+				
+				CleanupStack::Pop(guid);
+				CleanupStack::PopAndDestroy(calEntry);
+				CleanupStack::PushL(newEntry);
+				// Store the attendees.
+				if (!entry.isNull()) {
+					addAttendeesToEntry(entry.d->m_attendees, *newEntry);
+					addCategoriesToEntry(entry.d->m_categories, *newEntry);
+				}
+
+				// Store the alarm.
+				if (!entry.alarm().isNull()) {
+					setAlarmToEntry(entry.alarm(), *newEntry);
+				}
+
+				// Store the description.
+				if (!entry.description().isNull()) {
+					newEntry->SetDescriptionL(
+							TPtrC(reinterpret_cast<const TUint16 *> (
+									entry.description().utf16())));
+				}
+
+				// Store the location.
+				if (!entry.location().isNull()) {
+					newEntry->SetLocationL(
+							TPtrC(reinterpret_cast<const TUint16 *> (
+									entry.location().utf16())));
+				}
+
+				// Store the priority.
+				if ( -1 != entry.priority()) {
+					newEntry->SetPriorityL(entry.priority());
+				}
+
+				// Store the summary.
+				if (!entry.summary().isNull()) {
+					newEntry->SetSummaryL(
+							TPtrC(reinterpret_cast<const TUint16 *> (
+									entry.summary().utf16())));
+				}
+
+				// Update the method.
+				if (AgendaEntry::MethodUnknown != entry.method()) {
+					newEntry->SetMethodL(
+							static_cast<CCalEntry::TMethod> (entry.method()));
+				}
+
+				// Store the time.
+				QDateTime startDateTime = entry.startTime();
+				QDate startDate = startDateTime.date();
+				QTime startTime = startDateTime.time();
+
+				TDateTime startCalendarDateTime(
+						startDate.year(),
+						static_cast<TMonth> (startDate.month() - 1),
+						startDate.day() - 1,
+						startTime.hour(),
+						startTime.minute(),
+						0,
+						0);
+
+				TTime startCalTime(startCalendarDateTime);
+				TCalTime calTime;
+				calTime.SetTimeLocalL(startCalTime);
+				QDateTime endDateTime = entry.endTime();
+				QDate endDate = endDateTime.date();
+				QTime endTime = endDateTime.time();
+
+				TDateTime endCalendarDateTime(
+						endDate.year(),
+						static_cast<TMonth>(endDate.month() - 1),
+						endDate.day() - 1,
+						endTime.hour(),
+						endTime.minute(),
+						0,
+						0);
+
+				TTime endCalTime(endCalendarDateTime);
+				TCalTime calTime2;
+				calTime2.SetTimeLocalL(endCalTime);
+
+				newEntry->SetStartAndEndTimeL(calTime, calTime2);
+
+				// No need to update the repeat rule as it is an exception
+
+				// Store the favourite
+				newEntry->SetFavouriteL(entry.favourite());
+				
+				// reset local UID
+				newEntry->SetLocalUidL( TCalLocalUid( 0 ) );
+				
+				// clear repeat rule properties
+				newEntry->ClearRepeatingPropertiesL();
+				// Update the entry using the calen entry view.
+				RPointerArray<CCalEntry> entryArray;
+				CleanupClosePushL(entryArray);
+				entryArray.AppendL(newEntry);
+				iCalEntryView->StoreL(entryArray, success);
+				
+				localUid = newEntry->LocalUidL();
+				// Cleanup.
+				CleanupStack::PopAndDestroy(&entryArray);
+				CleanupStack::PopAndDestroy(newEntry);
+		)
+	}
+
+	// Emit the signal to notify the clients.
+	if (0 < success) {
+		emit q->entryUpdated(localUid);
+	}
+	return (success != 0);	
+}
+
+/*!
+	Fetches an AgendaEntry, given the id.
+
+	\param id The (ulong) local uid the entry to be fetched.
+	\return AgendaEntry The fetched entry.
+ */
+AgendaEntry AgendaUtilPrivate::fetchById(ulong id)
+{
+	AgendaEntry entry;
+
+	// First check if the session with the calendar exists.
+	if (!prepareSession()) {
+		// Return empty AgendaEntry.
+		return entry;
+	}
+
+	TRAP(
+			iError,
+
+			CCalEntry* calEntry = iCalEntryView->FetchL(id);
+
+			// We fetch only if we have got a valid calendar entry.
+			if (calEntry) {
+				CleanupStack::PushL(calEntry);
+
+				// We have a valid CCalEntry. We get the AgendaEntry
+				// corresponding to that.
+				entry = createAgendaEntryFromCalEntry(*calEntry);
+
+				// Cleanup.
+				CleanupStack::PopAndDestroy(calEntry);
+			}
+	)
+	return entry;
+}
+
+/*!
+	Returns a list of entry ids which match the given filter.
+
+	\param filter The filter to be applied to get the entry ids.
+	\return QList a list of entry ids.
+ */
+QList<ulong> AgendaUtilPrivate::entryIds(AgendaUtil::FilterFlags filter)
+{
+	QList<ulong> listOfIds;
+
+	// First check if the session with agenda server exists.
+	if (!prepareSession()) {
+		// Return empty list.
+		return listOfIds;
+	}
+
+	TRAP(
+			iError,
+
+			RPointerArray<CCalInstance> instanceList;
+			CleanupClosePushL(instanceList);
+			CalCommon::TCalViewFilter filters = filter;
+			TCalTime startDateForInstanceSearch;
+			TCalTime endDateForInstanceSearch;
+
+			TDateTime startTime = TDateTime(
+					startDateArray[0], static_cast<TMonth>(startDateArray[1]),
+					0, 0, 0, 0, 0);
+
+			TDateTime endTime = TDateTime(
+					endDateArray[0], static_cast<TMonth>(endDateArray[1]),
+					0, 0, 0, 0, 0);
+
+			startDateForInstanceSearch.SetTimeLocalL(startTime);
+			endDateForInstanceSearch.SetTimeLocalL(endTime);
+			CalCommon::TCalTimeRange searchTimeRange(
+					startDateForInstanceSearch, endDateForInstanceSearch);
+
+			iCalInstanceView->FindInstanceL(
+					instanceList, filters, searchTimeRange);
+
+			TDateTime date;
+
+			for (int iter = 0; iter < instanceList.Count(); iter++) {
+				listOfIds.append(instanceList[iter]->Entry().LocalUidL());
+			}
+
+			int count = instanceList.Count();
+			for (int iter = count - 1; iter >= 0; --iter) {
+				CCalInstance *instance = instanceList[iter];
+				delete instance;
+			}
+
+			// Cleanup.
+			CleanupStack::PopAndDestroy();
+	)
+
+	return listOfIds;
+}
+
+/*!
+	Retruns a list of entries matching a given filter.
+
+	\param Filter to be applied to get the matching entries.
+	\return QList a list of AgendaEntries matching the given filter.
+ */
+QList<AgendaEntry> AgendaUtilPrivate::fetchAllEntries(
+		AgendaUtil::FilterFlags filter)
+{
+	QList<AgendaEntry> entryList;
+
+	// First check if the session with agenda server exists.
+	if (!prepareSession()) {
+		// Return empty list.
+		return entryList;
+	}
+
+	TRAP(
+			iError,
+
+			RPointerArray<CCalInstance> instanceList;
+			CleanupClosePushL(instanceList);
+			CalCommon::TCalViewFilter filters = filter;
+			TCalTime startDateForInstanceSearch;
+			TCalTime endDateForInstanceSearch;
+
+			TDateTime startTime = TDateTime(
+					startDateArray[0], static_cast<TMonth>(startDateArray[1]),
+					0, 0, 0, 0, 0);
+
+			TDateTime endTime = TDateTime(
+					endDateArray[0], static_cast<TMonth>(endDateArray[1]),
+					0, 0, 0, 0, 0);
+
+			startDateForInstanceSearch.SetTimeLocalL(startTime);
+			endDateForInstanceSearch.SetTimeLocalL(endTime);
+			CalCommon::TCalTimeRange searchTimeRange(
+					startDateForInstanceSearch,
+					endDateForInstanceSearch);
+
+			iCalInstanceView->FindInstanceL(
+					instanceList, filters, searchTimeRange);
+
+			TDateTime date;
+
+			for (int iter = 0; iter < instanceList.Count(); iter++) {
+				entryList.append(
+						createAgendaEntryFromCalEntry(
+								instanceList[iter]->Entry(),
+								instanceList[iter]));
+			}
+
+			int count = instanceList.Count();
+			for (int iter = count - 1; iter >= 0; --iter) {
+				CCalInstance *instance = instanceList[iter];
+				delete instance;
+			}
+
+			// Cleanup.
+			CleanupStack::PopAndDestroy();
+	)
+
+	return entryList;
+}
+
+QList<AgendaEntry> AgendaUtilPrivate::fetchEntriesInRange(
+		QDateTime rangeStart, QDateTime rangeEnd,
+		AgendaUtil::FilterFlags filter)
+{
+    QList<AgendaEntry> entryList;
+    if(!prepareSession())
+        {
+            // return empty list
+            return entryList;
+        }
+
+    TRAP(iError,
+
+        RPointerArray<CCalInstance> instanceList;
+        CleanupClosePushL(instanceList);
+        CalCommon::TCalViewFilter filters = filter;
+        TCalTime startDateForInstanceSearch;
+        TCalTime endDateForInstanceSearch;
+
+        TDateTime startTime(rangeStart.date().year(),
+                TMonth(rangeStart.date().month() - 1),
+                rangeStart.date().day() - 1,
+                rangeStart.time().hour(),
+                rangeStart.time().minute(),
+                rangeStart.time().second(),
+                rangeStart.time().msec());
+
+        TDateTime endTime(rangeEnd.date().year(),
+                TMonth(rangeEnd.date().month() - 1),
+                rangeEnd.date().day() - 1,
+                rangeEnd.time().hour(),
+                rangeEnd.time().minute(),
+                rangeEnd.time().second(),
+                rangeEnd.time().msec());
+
+        startDateForInstanceSearch.SetTimeLocalL(startTime);
+        endDateForInstanceSearch.SetTimeLocalL(endTime);
+        CalCommon::TCalTimeRange searchTimeRange(
+                startDateForInstanceSearch,
+                endDateForInstanceSearch);
+
+        iCalInstanceView->FindInstanceL(instanceList, filters, searchTimeRange);
+
+        for(TInt i = 0; i<instanceList.Count(); i++)
+        {
+            entryList.append(createAgendaEntryFromCalEntry(instanceList[i]->Entry(), instanceList[i]));
+        }
+        int count = instanceList.Count();
+        for (int i = count - 1; i >= 0; --i) {
+            CCalInstance *instance = instanceList[i];
+            delete instance;
+        }
+        CleanupStack::PopAndDestroy();
+    )
+
+    return entryList;
+}
+
+QList<AgendaEntry> AgendaUtilPrivate::createEntryIdListForDay( QDateTime day,
+                            AgendaUtil::FilterFlags filter )
+{
+    QList<AgendaEntry> entryList;
+    if(!prepareSession()) {
+        // return empty list
+        return entryList;
+    }
+    TCalTime dummy;
+    CalCommon::TCalTimeRange dayRange( dummy, dummy );
+    TRAP(iError,
+        getDayRange(day, day, dayRange);
+        RPointerArray<CCalInstance> instanceList;
+        CleanupClosePushL(instanceList);
+        CalCommon::TCalViewFilter filters = filter;
+        iCalInstanceView->FindInstanceL(instanceList, filters, dayRange);
+
+        // Sort the list
+        sortInstanceList(instanceList);
+        for(TInt i = 0; i<instanceList.Count(); i++)
+            {
+                entryList.append(createAgendaEntryFromCalEntry(instanceList[i]->Entry(), instanceList[i]));
+            }
+        int count = instanceList.Count();
+        for (int i = count - 1; i >= 0; --i) {
+            CCalInstance *instance = instanceList[i];
+            delete instance;
+        }
+        CleanupStack::PopAndDestroy();
+        )
+
+    return entryList;
+}
+
+int AgendaUtilPrivate::importvCalendar(const QString& fileName, 
+										AgendaEntry& entry)
+{
+	int success = -1 ;
+
+	// First prepare the session with agenda server.
+	if (!prepareSession()) {
+		return success;
+	}
+
+	CCalenImporter* calImporter = CCalenImporter::NewL(*iCalSession);
+	CleanupStack::PushL(calImporter);
+	calImporter->SetImportMode(ECalenImportModeExtended);
+
+	RFs fs;
+	User::LeaveIfError(fs.Connect());
+	CleanupClosePushL(fs);
+	TPtrC path(reinterpret_cast<const TUint16*> (fileName.utf16()));
+	RFileReadStream stream;
+	User::LeaveIfError(stream.Open(fs, path, EFileRead));
+	CleanupClosePushL(stream);
+
+	TBuf8<KReadDataAmount> vcalData;
+	stream.ReadL(vcalData, KReadDataAmount);
+
+	//return the read stream back to the beginning for import
+	stream.Source()->SeekL(MStreamBuf::ERead, EStreamBeginning, 0);
+
+	TInt errImport(KErrNone);
+	RPointerArray<CCalEntry> calEntryArray;
+	CleanupClosePushL(calEntryArray);
+	if (vcalData.FindF(KVersionVCal) == KErrNotFound) {
+		//using the ICAl import API
+		TRAP( errImport, calImporter->ImportICalendarL( stream, calEntryArray ) );
+	} else if (vcalData.FindF(KVersionICal) == KErrNotFound) {
+		//using the VCAL import API
+		TRAP( errImport, calImporter->ImportVCalendarL( stream, calEntryArray ) );
+	}
+	success = errImport;
+	if (errImport != KErrNone || calEntryArray.Count() == 0) {
+		// the data was corrupt
+		User::Leave(errImport);
+	}
+
+	//sets the local UID to 0 in imported entry
+	calEntryArray[0]->SetLocalUidL(TCalLocalUid(0));
+	AgendaEntry agendaEntry = createAgendaEntryFromCalEntry(*calEntryArray[0]);
+	if (!agendaEntry.isNull()) {
+		entry = agendaEntry;
+	}
+
+	CleanupStack::PopAndDestroy(4, calImporter);
+	return success;
+}
+
+bool AgendaUtilPrivate::exportAsvCalendar(
+		const QString& fileName, ulong calendarEntryId)
+{
+	// First prepare session with agenda server.
+	if (!prepareSession()) {
+		return false;
+	}
+	TRAP(
+			iError,
+
+			TPtrC path(reinterpret_cast<const TUint16*>(fileName.utf16()));
+			RFs fs;
+			User::LeaveIfError(fs.Connect());
+			CleanupClosePushL(fs);
+			fs.MkDirAll(path);
+			RFileWriteStream rs;
+			User::LeaveIfError(rs.Replace(fs, path, EFileWrite));
+
+			CCalEntry* entry = iCalEntryView->FetchL(calendarEntryId);
+			CleanupStack::PushL(entry);
+
+			RPointerArray<CCalEntry> calEntryArray;
+			CleanupClosePushL(calEntryArray);
+			CCalDataExchange* calDataExchange =
+					CCalDataExchange::NewL(*iCalSession);
+			CleanupStack::PushL(calDataExchange);
+			calDataExchange->ExportL(KUidVCalendar, rs, calEntryArray);
+
+			CleanupStack::PopAndDestroy(4, &fs);
+	)
+
+	return (iError == KErrNone);
+}
+
+/*!
+	Returns error code.
+ */
+AgendaUtil::Error AgendaUtilPrivate::error() const
+{
+	switch (iError) {
+		case KErrNone:
+			return AgendaUtil::NoError;
+		case KErrNoMemory:
+			return AgendaUtil::OutOfMemoryError;
+		case KErrInUse:
+			return AgendaUtil::AlreadyInUse;
+		default:
+			return AgendaUtil::UnknownError;
+	}
+}
+
+void AgendaUtilPrivate::setCompleted(
+		AgendaEntry& entry, bool complete, QDateTime& dateTime)
+{
+	int success = 0;
+
+	TRAP(
+			iError,
+
+			// Convert the dateTime to TCalTime.
+			TCalTime calTime;
+			TDateTime time(
+					dateTime.date().year(), TMonth(dateTime.date().month() - 1),
+					dateTime.date().day() - 1, dateTime.time().hour(),
+					dateTime.time().minute(), dateTime.time().second(),
+					dateTime.time().msec());
+
+			calTime.SetTimeLocalL(time);
+
+			// Fetch the calentry
+			CCalEntry* calEntry = iCalEntryView->FetchL(entry.id());
+			CleanupStack::PushL(calEntry);
+			calEntry->SetCompletedL(complete, calTime);
+
+			// Update the entry in the Database
+			RPointerArray<CCalEntry> array;
+			CleanupClosePushL(array);
+			array.AppendL(calEntry);
+			iCalEntryView->UpdateL(array, success);
+
+			// Cleanup.
+			CleanupStack::PopAndDestroy(&array);
+			CleanupStack::PopAndDestroy(calEntry);
+	)
+
+	if (0 < success) {
+		emit q->entryUpdated(entry.id());
+	}
+}
+
+/*!
+	Deletes entries between a given range.
+
+	\param start The start datetime of the range.
+	\param end The end datetime of the range.
+	\param filter The filter to include types of entries.
+ */
+void AgendaUtilPrivate::deleteEntries(
+		QDateTime& start, QDateTime& end, AgendaUtil::FilterFlags filter)
+{
+	TRAP(
+			iError,
+
+			TDateTime startDateTime(
+					start.date().year(), TMonth(start.date().month() - 1),
+					start.date().day() - 1, start.time().hour(),
+					start.time().minute(), start.time().second(),
+					start.time().msec());
+
+			TDateTime endDateTime(
+					end.date().year(), TMonth(end.date().month() - 1),
+					end.date().day() - 1, end.time().hour(),
+					end.time().minute(), end.time().second(),
+					end.time().msec());
+
+			TCalTime startCalTime;
+			TCalTime endCalTime;
+			startCalTime.SetTimeLocalL(startDateTime);
+			endCalTime.SetTimeLocalL(endDateTime);
+
+			CalCommon::TCalTimeRange calTimeRange(startCalTime, endCalTime);
+
+			// Set the flag indicating that delete is in progress.
+			mIsDeleting = true;
+			iCalEntryView->DeleteL(
+					calTimeRange,
+					(CalCommon::TCalViewFilterFlags) filter, *this);
+	)
+}
+
+/*!
+	Returns the parent entry of the given entry.
+
+	\param entry The entry for which parent entry is required.
+	\return AgendaEntry The parent entry.
+ */
+AgendaEntry AgendaUtilPrivate::parentEntry(AgendaEntry& entry)
+{
+	AgendaEntry parentEntry;
+	// First check if the session with the calendar exists.
+	if (!prepareSession()) {
+		// Return empty AgendaEntry.
+		return entry;
+	}
+
+	TRAP(
+			iError,
+
+			// Get the CalEntry equivalent of the entry.
+			CCalEntry* calEntry = iCalEntryView->FetchL(entry.id());
+
+			if (calEntry) {
+				// Get all the entries with same global Uid.
+				RPointerArray<CCalEntry> entries;
+				CleanupClosePushL(entries);
+				iCalEntryView->FetchL(calEntry->UidL(), entries);
+				parentEntry = createAgendaEntryFromCalEntry(*entries[0]);
+				CleanupStack::PopAndDestroy(&entries);
+			}
+	)
+
+	// Return the parent entry.
+	return parentEntry;
+}
+
+/*!
+	Clears the repeating properties of the entry. This means
+	It will delete all the instances and stores a single entry
+	which is non repeating
+
+	\param entry The entry for which repeating properties to be cleared
+	\return None
+ */
+void AgendaUtilPrivate::clearRepeatingProperties(AgendaEntry& entry)
+{
+	// Fetch the parent entry 
+	// Get the CalEntry equivalent of the entry.
+	CCalEntry* calEntry = iCalEntryView->FetchL(entry.id());
+
+	if (calEntry) {
+		// Get all the entries with same global Uid.
+		RPointerArray<CCalEntry> entries;
+		CleanupClosePushL(entries);
+		iCalEntryView->FetchL(calEntry->UidL(), entries);
+		entries[0]->ClearRepeatingPropertiesL();
+		CleanupStack::PopAndDestroy(&entries);
+	}
+}
+
+/*!
+	Returns the start and end times of previous occurence of a particular
+	instance
+
+	\param entry The instance with which previous instance details are obtained
+	\return None
+ */
+void AgendaUtilPrivate::getPreviousInstanceTimes(AgendaEntry& entry, 
+												QDateTime& startTime, 
+												QDateTime& endTime)
+{
+	RPointerArray<CCalEntry> entries;
+	CleanupClosePushL(entries);
+	TCalTime previousStartTime;
+	TCalTime previousEndTime;
+	TTime zero(TInt64(0));
+	// Fetch the parent entry 
+	// Get the CalEntry equivalent of the entry.
+	CCalEntry* calEntry = iCalEntryView->FetchL(entry.id());
+	
+	// Update the start and end dates as per the instance
+	TCalTime instanceStartCalTime;
+	TCalTime instanceEndCalTime;
+	TDateTime instStartDateTime(entry.startTime().date().year(),
+		static_cast<TMonth>(entry.startTime().date().month() - 1),
+		entry.startTime().date().day() - 1, entry.startTime().time().hour(),
+		entry.startTime().time().minute(), entry.startTime().time().second(), 0);
+	
+	TDateTime instEndDateTime(entry.endTime().date().year(),
+		static_cast<TMonth>(entry.endTime().date().month() - 1),
+		entry.endTime().date().day() - 1, entry.endTime().time().hour(),
+		entry.endTime().time().minute(), entry.endTime().time().second(), 0);
+	
+	TTime instStartTime(instStartDateTime);
+	TTime instEndTime(instEndDateTime);
+	instanceStartCalTime.SetTimeLocalL(instStartTime);
+	instanceEndCalTime.SetTimeLocalL(instEndTime);
+	calEntry->SetStartAndEndTimeL(instanceStartCalTime,instanceEndCalTime);
+	
+	// Get the parent entry of this instance
+	if (calEntry) {
+		iCalEntryView->FetchL(calEntry->UidL(), entries);
+	}
+	
+	TCalTime currentInstanceDate = calEntry->RecurrenceIdL();
+	if (currentInstanceDate.TimeUtcL() == Time::NullTTime()) {
+		// We must be creating a new exception. Calculate the recurrence id.
+		TTime startTime =  entries[0]->StartTimeL().TimeLocalL();
+		TTimeIntervalMinutes timeOfDay = 0;
+		TTime beginningOfDay = zero + startTime.DaysFrom( zero );
+		startTime.MinutesFrom(beginningOfDay,timeOfDay);
+		beginningOfDay = zero + calEntry->StartTimeL().TimeLocalL().DaysFrom(zero);
+		currentInstanceDate.SetTimeLocalL( beginningOfDay + timeOfDay );
+	}
+	TDateTime check = currentInstanceDate.TimeLocalL().DateTime();
+	TCalRRule rrule;
+	if (entries[0]->GetRRuleL(rrule)) {
+		int repeatIndex = getRepeatIndex(*entries[0]);
+		TBool keepLooking = ETrue;
+		RArray<TCalTime> exdates;
+		CleanupClosePushL( exdates );
+		entries[0]->GetExceptionDatesL(exdates);
+		
+		// Needed for case ERepeatOther
+		TCalRRule::TType type( rrule.Type() );
+		TInt repeatInterval( rrule.Interval() );
+		TCalTime start, end;
+		TTime previousInstanceTime = Time::NullTTime(); 
+		
+		while (keepLooking) {
+			// Subtract the repeat interval of the parent.
+			switch (repeatIndex) {
+				case repeatDaily:
+					currentInstanceDate.SetTimeLocalL( currentInstanceDate.TimeLocalL()-TTimeIntervalDays(1) );
+					break;
+				case repeatWeekly:
+					currentInstanceDate.SetTimeLocalL( currentInstanceDate.TimeLocalL()-TTimeIntervalDays(7) );
+					break;
+				case repeatBiWeekly:
+					currentInstanceDate.SetTimeLocalL( currentInstanceDate.TimeLocalL()-TTimeIntervalDays(14) );
+					break;
+				case repeatMonthly:
+					currentInstanceDate.SetTimeLocalL( currentInstanceDate.TimeLocalL()-TTimeIntervalMonths(1) );
+					break;
+				case repeatYearly:
+					currentInstanceDate.SetTimeLocalL( currentInstanceDate.TimeLocalL()-TTimeIntervalYears(1) );
+					break;
+				case repeatOther:
+					/* This case includes repeating events like: 3 days every week, 3rd weekday of everymonth
+					   that does not fall in any cases above but still have repeating rule*/
+					   
+					// Check if the current entry being edited is child entry
+					// If yes, then put back the child entry time to currentInstanceDate  
+					if (calEntry->RecurrenceIdL().TimeUtcL() != Time::NullTTime()) {
+						 currentInstanceDate.SetTimeLocalL(calEntry->StartTimeL().TimeLocalL());
+					}
+			 
+					 switch (type) {
+						case TCalRRule::EDaily:
+							start.SetTimeLocalL( currentInstanceDate.TimeLocalL()-TTimeIntervalDays(1 * repeatInterval));
+							break;
+						case TCalRRule::EWeekly:
+							start.SetTimeLocalL( currentInstanceDate.TimeLocalL()-TTimeIntervalDays(7 * repeatInterval));
+							break;
+						case TCalRRule::EMonthly: 
+							// Add 7 days of buffer to cover the cases were gap b/w two instances of the event 
+							// can go beuong 30 days. Ex: Every third wednesday of every month 
+							start.SetTimeLocalL( currentInstanceDate.TimeLocalL()-TTimeIntervalMonths(repeatInterval)-TTimeIntervalDays(7 * repeatInterval));
+							break;
+						case TCalRRule::EYearly:  
+							// Add 7 days of buffer to cover the cases were gap b/w two instances of the event 
+							// can go beuong 365 days. Ex: Every third wednesday of September of every year
+							start.SetTimeLocalL( currentInstanceDate.TimeLocalL()-TTimeIntervalYears(repeatInterval)-TTimeIntervalDays(7 * repeatInterval));
+							break;
+					 }
+					 
+					 end.SetTimeLocalL(zero + currentInstanceDate.TimeLocalL().DaysFrom( zero ));
+					 previousInstanceTime = getPreviousInstanceForRepeatOther(*entries[0], CalCommon::TCalTimeRange( start, end));
+					 currentInstanceDate.SetTimeLocalL( previousInstanceTime);
+					 break;
+				default:
+				case notRepeated:
+					keepLooking = EFalse;
+					break;
+			}
+			// Is currentInstanceDate before parent dt start?
+			if (currentInstanceDate.TimeLocalL() < 
+					entries[0]->StartTimeL().TimeLocalL()) {
+				// There are no instances before the exception
+				keepLooking = EFalse;
+			} else {
+				// TODO: Put the rest of this function into a separate function, as it's identical
+				// to GetNextInstanceTimeL().
+
+				// Is there an exdate on currentInstanceDate?
+				TBool isExdateOnDay = EFalse;
+				for (TInt i=0; i<exdates.Count(); ++i) {
+					if( exdates[i].TimeLocalL() == currentInstanceDate.TimeLocalL() )
+						{
+						isExdateOnDay = ETrue;
+						// There is an exdate - is there a child associated with the exdate?
+						for(TInt j=1; j<entries.Count(); ++j)
+							{
+							if( entries[j]->RecurrenceIdL().TimeLocalL() == currentInstanceDate.TimeLocalL() )
+								{
+								// This child is the previous instance.
+								previousStartTime = entries[j]->StartTimeL();
+								previousEndTime = entries[j]->EndTimeL();
+								keepLooking = EFalse;
+								}
+							}
+						break;
+						}
+				}
+				if (!isExdateOnDay) {
+					// The instance exists and hasn't been deleted or made into an exception.
+					// Use information from the parent to set the start/end times.
+					previousStartTime = currentInstanceDate;
+
+					TTimeIntervalMinutes duration;
+					TTime start = entries[0]->StartTimeL().TimeLocalL();
+					TTime end = entries[0]->EndTimeL().TimeLocalL(); 
+					end.MinutesFrom( start, duration );
+					previousEndTime.SetTimeLocalL( currentInstanceDate.TimeLocalL() + duration );
+					keepLooking = EFalse;
+				}
+			}
+		}
+		CleanupStack::PopAndDestroy(&exdates);
+	}
+	// Convert TCalTimes to QDateTimes
+	TDateTime prevStart = previousStartTime.TimeLocalL().DateTime();
+	TDateTime prevEnd = previousEndTime.TimeLocalL().DateTime();
+	startTime.setDate(QDate(prevStart.Year(), prevStart.Month()+1,
+					prevStart.Day() + 1));
+	startTime.setTime(QTime(prevStart.Hour(), prevStart.Minute(), 0, 0));
+	endTime.setDate(QDate(prevEnd.Year(), prevEnd.Month()+1,
+	                      prevEnd.Day() + 1));
+	endTime.setTime(QTime(prevEnd.Hour(), prevEnd.Minute(), 0, 0));
+	
+	delete calEntry;
+	int count = entries.Count();
+	for (int i = count - 1; i >= 0; --i) {
+		CCalEntry *instance = entries[i];
+		delete instance;
+	}
+	CleanupStack::PopAndDestroy(&entries);
+}
+
+/*!
+	Returns the start and end times of next occurence of a particular
+	instance
+
+	\param entry The instance with which next instance details are obtained
+	\return None
+ */
+void AgendaUtilPrivate::getNextInstanceTimes(AgendaEntry& entry, 
+                                          QDateTime& startTime, 
+                                          QDateTime& endTime)
+{
+	RPointerArray<CCalEntry> entries;
+	CleanupClosePushL(entries);
+	TCalTime nextStartTime;
+	TCalTime nextEndTime;
+	TTime zero(TInt64(0));
+	// Fetch the parent entry 
+	// Get the CalEntry equivalent of the entry.
+	CCalEntry* calEntry = iCalEntryView->FetchL(entry.id());
+	
+	// Update the start and end dates as per the instance
+	TCalTime instanceStartCalTime;
+	TCalTime instanceEndCalTime;
+	TDateTime instStartDateTime(entry.startTime().date().year(),
+		static_cast<TMonth>(entry.startTime().date().month() - 1),
+		entry.startTime().date().day() - 1, entry.startTime().time().hour(),
+		entry.startTime().time().minute(), entry.startTime().time().second(), 0);
+	
+	TDateTime instEndDateTime(entry.endTime().date().year(),
+		static_cast<TMonth>(entry.endTime().date().month() - 1),
+		entry.endTime().date().day() - 1, entry.endTime().time().hour(),
+		entry.endTime().time().minute(), entry.endTime().time().second(), 0);
+	
+	TTime instStartTime(instStartDateTime);
+	TTime instEndTime(instEndDateTime);
+	instanceStartCalTime.SetTimeLocalL(instStartTime);
+	instanceEndCalTime.SetTimeLocalL(instEndTime);
+	calEntry->SetStartAndEndTimeL(instanceStartCalTime,instanceEndCalTime);
+	
+	// Get the parent entry of this instance
+	if (calEntry) {
+		iCalEntryView->FetchL(calEntry->UidL(), entries);
+	}
+	
+	TCalTime currentInstanceDate = calEntry->RecurrenceIdL();
+	if (currentInstanceDate.TimeUtcL() == Time::NullTTime()) {
+		// We must be creating a new exception. Calculate the recurrence id.
+		TTime startTime =  entries[0]->StartTimeL().TimeLocalL();
+		TTimeIntervalMinutes timeOfDay = 0;
+		TTime beginningOfDay = zero + startTime.DaysFrom( zero );
+		startTime.MinutesFrom(beginningOfDay,timeOfDay);
+		beginningOfDay = zero + calEntry->StartTimeL().TimeLocalL().DaysFrom(zero);
+		currentInstanceDate.SetTimeLocalL( beginningOfDay + timeOfDay );
+	}
+	
+	TCalRRule rrule;
+	if (entries[0]->GetRRuleL(rrule)) {
+		int repeatIndex = getRepeatIndex(*entries[0]);
+		TBool keepLooking = ETrue;
+		RArray<TCalTime> exdates;
+		CleanupClosePushL( exdates );
+		entries[0]->GetExceptionDatesL(exdates);
+		
+		// Needed for case ERepeatOther
+		TCalRRule::TType type( rrule.Type() );
+		TInt repeatInterval( rrule.Interval() );
+		TCalTime start, end;
+		TTime previousInstanceTime = Time::NullTTime(); 
+		
+		while (keepLooking) {
+			// Subtract the repeat interval of the parent.
+			switch (repeatIndex) {
+				case repeatDaily:
+					currentInstanceDate.SetTimeLocalL( currentInstanceDate.TimeLocalL()+TTimeIntervalDays(1) );
+					break;
+				case repeatWeekly:
+					currentInstanceDate.SetTimeLocalL( currentInstanceDate.TimeLocalL()+TTimeIntervalDays(7) );
+					break;
+				case repeatBiWeekly:
+					currentInstanceDate.SetTimeLocalL( currentInstanceDate.TimeLocalL()+TTimeIntervalDays(14) );
+					break;
+				case repeatMonthly:
+					currentInstanceDate.SetTimeLocalL( currentInstanceDate.TimeLocalL()+TTimeIntervalMonths(1) );
+					break;
+				case repeatYearly:
+					currentInstanceDate.SetTimeLocalL( currentInstanceDate.TimeLocalL()+TTimeIntervalYears(1) );
+					break;
+				case repeatOther:
+					/* This case includes repeating events like: 3 days every week, 3rd weekday of everymonth
+					   that does not fall in any cases above but still have repeating rule*/
+					   
+					// Check if the current entry being edited is child entry
+					// If yes, then put back the child entry time to currentInstanceDate  
+					if (calEntry->RecurrenceIdL().TimeUtcL() != Time::NullTTime()) {
+						 currentInstanceDate.SetTimeLocalL(calEntry->StartTimeL().TimeLocalL());
+					}
+			 
+					 switch (type) {
+						case TCalRRule::EDaily:
+							start.SetTimeLocalL( currentInstanceDate.TimeLocalL()+TTimeIntervalDays(1 * repeatInterval));
+							break;
+						case TCalRRule::EWeekly:
+							start.SetTimeLocalL( currentInstanceDate.TimeLocalL()+TTimeIntervalDays(7 * repeatInterval));
+							break;
+						case TCalRRule::EMonthly: 
+							// Add 7 days of buffer to cover the cases were gap b/w two instances of the event 
+							// can go beuong 30 days. Ex: Every third wednesday of every month 
+							start.SetTimeLocalL( currentInstanceDate.TimeLocalL()+TTimeIntervalMonths(repeatInterval)-TTimeIntervalDays(7 * repeatInterval));
+							break;
+						case TCalRRule::EYearly:  
+							// Add 7 days of buffer to cover the cases were gap b/w two instances of the event 
+							// can go beuong 365 days. Ex: Every third wednesday of September of every year
+							start.SetTimeLocalL( currentInstanceDate.TimeLocalL()+TTimeIntervalYears(repeatInterval)-TTimeIntervalDays(7 * repeatInterval));
+							break;
+					 }
+					 
+					 end.SetTimeLocalL(zero + currentInstanceDate.TimeLocalL().DaysFrom( zero ));
+					 previousInstanceTime = getNextInstanceForRepeatOther(*entries[0], CalCommon::TCalTimeRange( start, end));
+					 currentInstanceDate.SetTimeLocalL( previousInstanceTime);
+					 break;
+				default:
+				case notRepeated:
+					keepLooking = EFalse;
+					break;
+			}
+			// Is currentInstanceDate before parent dt start?
+			if (currentInstanceDate.TimeLocalL() < 
+					entries[0]->StartTimeL().TimeLocalL()) {
+				// There are no instances before the exception
+				keepLooking = EFalse;
+			} else {
+				// TODO: Put the rest of this function into a separate function, as it's identical
+				// to GetNextInstanceTimeL().
+
+				// Is there an exdate on currentInstanceDate?
+				TBool isExdateOnDay = EFalse;
+				for (TInt i=0; i<exdates.Count(); ++i) {
+					if( exdates[i].TimeLocalL() == currentInstanceDate.TimeLocalL() )
+						{
+						isExdateOnDay = ETrue;
+						// There is an exdate - is there a child associated with the exdate?
+						for(TInt j=1; j<entries.Count(); ++j)
+							{
+							if( entries[j]->RecurrenceIdL().TimeLocalL() == currentInstanceDate.TimeLocalL() )
+								{
+								// This child is the previous instance.
+								nextStartTime = entries[j]->StartTimeL();
+								nextEndTime = entries[j]->EndTimeL();
+								keepLooking = EFalse;
+								}
+							}
+						break;
+						}
+				}
+				if (!isExdateOnDay) {
+					// The instance exists and hasn't been deleted or made into an exception.
+					// Use information from the parent to set the start/end times.
+					nextStartTime = currentInstanceDate;
+
+					TTimeIntervalMinutes duration;
+					TTime start = entries[0]->StartTimeL().TimeLocalL();
+					TTime end = entries[0]->EndTimeL().TimeLocalL(); 
+					end.MinutesFrom( start, duration );
+					nextEndTime.SetTimeLocalL( currentInstanceDate.TimeLocalL() + duration );
+					keepLooking = EFalse;
+				}
+			}
+		CleanupStack::PopAndDestroy( &exdates );
+		}
+	}
+	// Convert TCalTimes to QDateTimes
+	TDateTime nextStart = nextStartTime.TimeLocalL().DateTime();
+	TDateTime nextEnd = nextEndTime.TimeLocalL().DateTime();
+	startTime.setDate(QDate(nextStart.Year(), nextStart.Month()+1,
+	                        nextStart.Day() + 1));
+	startTime.setTime(QTime(nextStart.Hour(), nextStart.Minute(), 0, 0));
+	endTime.setDate(QDate(nextEnd.Year(), nextEnd.Month()+1,
+	                      nextEnd.Day() + 1));
+	endTime.setTime(QTime(nextEnd.Hour(), nextEnd.Minute(), 0, 0));	
+	
+	delete calEntry;
+	int count = entries.Count();
+		for (int i = count - 1; i >= 0; --i) {
+			CCalEntry *instance = entries[i];
+			delete instance;
+		}
+	CleanupStack::PopAndDestroy(&entries);
+}
+
+/*!
+	Returns the minimum time supported.
+
+	\return QDateTime holding the minimum supported time.
+ */
+QDateTime AgendaUtilPrivate::minTime()
+{
+	TTime minTime = TCalTime::MinTime();
+
+	// Convert it to QT
+	QDate date(
+			minTime.DateTime().Year(), minTime.DateTime().Month() + 1,
+			minTime.DateTime().Day() + 1);
+	QTime time(
+			minTime.DateTime().Hour(), minTime.DateTime().Minute(),
+			minTime.DateTime().Second());
+
+	QDateTime minimumDateTime(date, time);
+
+	return minimumDateTime;
+}
+
+/*!
+	Returns the maximum time supported.
+
+	\return QDateTime holding the maximum supported time.
+ */
+QDateTime AgendaUtilPrivate::maxTime()
+{
+	TTime maxTime = TCalTime::MaxTime();
+
+	// Convert it to QT
+	QDate date(
+			maxTime.DateTime().Year(), maxTime.DateTime().Month() + 1,
+			maxTime.DateTime().Day() + 1);
+	QTime time(
+			maxTime.DateTime().Hour(), maxTime.DateTime().Minute(),
+			maxTime.DateTime().Second());
+
+	QDateTime maximumDateTime(date, time);
+
+	return maximumDateTime;
+}
+
+/*!
+	Creates an AgendaEntry object from a given CCalEntry and CCalInstance.
+
+	\param calEntry Reference to a CCalEntry.
+	\param instance A CCalInstance.
+
+	\return AgendaEntry.
+ */
+AgendaEntry AgendaUtilPrivate::createAgendaEntryFromCalEntry(
+		CCalEntry& calEntry, CCalInstance* instance)
+{
+	AgendaEntry entry;
+
+	// Type.
+	AgendaEntry::Type entryType =
+			static_cast<AgendaEntry::Type>(calEntry.EntryTypeL());
+	entry.setType(entryType);
+
+	// Method.
+	AgendaEntry::Method method =
+			static_cast<AgendaEntry::Method>(calEntry.MethodL());
+	entry.setMethod(method);
+
+	// Summary.
+	TPtrC calSummary = calEntry.SummaryL();
+	entry.setSummary(
+			QString::fromUtf16(calSummary.Ptr(), calSummary.Length()));
+
+	// Description.
+	TPtrC calDescription = calEntry.DescriptionL();
+	entry.setDescription(
+			QString::fromUtf16(calDescription.Ptr(), calDescription.Length()));
+
+	// Location.
+	TPtrC calLocation = calEntry.LocationL();
+	entry.setLocation(
+			QString::fromUtf16(calLocation.Ptr(), calLocation.Length()));
+
+	// Priority.
+	entry.setPriority(calEntry.PriorityL());
+
+	// Time.
+	TDateTime calStartDateTime;
+	TDateTime calEndDateTime;
+	if (instance) {
+		// Set start time and end time frm the instance instead from entry
+		// to copy the correct time.
+		calStartDateTime = instance->StartTimeL().TimeLocalL().DateTime();
+		calEndDateTime = instance->EndTimeL().TimeLocalL().DateTime();
+	} else {
+		calStartDateTime = calEntry.StartTimeL().TimeLocalL().DateTime();
+		calEndDateTime = calEntry.EndTimeL().TimeLocalL().DateTime();
+	}
+	QDateTime startDateTime(
+			QDate(
+					calStartDateTime.Year(), calStartDateTime.Month()+1,
+					calStartDateTime.Day() + 1),
+			QTime(
+					calStartDateTime.Hour(), calStartDateTime.Minute(), 0, 0));
+	QDateTime endDateTime(
+			QDate(
+					calEndDateTime.Year(), calEndDateTime.Month()+1,
+					calEndDateTime.Day() + 1),
+			QTime(
+					calEndDateTime.Hour(), calEndDateTime.Minute(), 0, 0));
+	entry.setStartAndEndTime(startDateTime, endDateTime);
+
+	// Attendees.
+	RPointerArray<CCalAttendee> calAttendees = calEntry.AttendeesL();
+	CleanupClosePushL(calAttendees);
+
+	for (int i = 0; i < calAttendees.Count(); i++) {
+		AgendaAttendee attendee;
+		// Address.
+		TPtrC calAddress = calAttendees[i]->Address();
+		attendee.setAddress(
+				QString::fromUtf16(calAddress.Ptr(), calAddress.Length()));
+
+		// Common name.
+		TPtrC calCommonName = calAttendees[i]->CommonName();
+		attendee.setCommonName(QString::fromUtf16(
+				calCommonName.Ptr(), calCommonName.Length()));
+
+		// Response requested.
+		attendee.setResponseRequested(calAttendees[i]->ResponseRequested());
+
+		// Participant role.
+		attendee.setRole(static_cast<AgendaAttendee::ParticipantRole>(
+				calAttendees[i]->RoleL()));
+
+		// Status.
+		attendee.setStatus(
+				static_cast<AgendaAttendee::StatusType>(
+						calAttendees[i]->StatusL()));
+		entry.addAttendee(attendee);
+	}
+	CleanupStack::PopAndDestroy(&calAttendees);
+
+	// Categories.
+	RPointerArray<CCalCategory> calCategories = calEntry.CategoryListL();
+	CleanupClosePushL(calCategories);
+
+	for (int i = 0; i < calCategories.Count(); i++) {
+		AgendaCategory category;
+		CCalCategory::TCalCategoryType categoryType =
+				calCategories[i]->Category();
+		if (categoryType == CCalCategory::ECalExtended) {
+			TPtrC categoryName = calCategories[i]->ExtendedCategoryName();
+			category.setExtendedCategoryName(
+					QString::fromUtf16(
+							categoryName.Ptr(), categoryName.Length()));
+		}
+		category.setCategory(
+				static_cast<AgendaCategory::CategoryType>(categoryType));
+		entry.addCategory(category);
+	}
+	CleanupStack::PopAndDestroy(&calCategories);
+
+	// Id.
+	entry.d->m_id = calEntry.LocalUidL();
+
+	// Alarm.
+	CCalAlarm* calAlarm = calEntry.AlarmL();
+	if (calAlarm) {
+		CleanupStack::PushL(calAlarm);
+		AgendaAlarm alarm;
+		alarm.setAlarmSoundName(QString::fromUtf16(
+				calAlarm->AlarmSoundNameL().Ptr(),
+				calAlarm->AlarmSoundNameL().Length()));
+		alarm.setTimeOffset(calAlarm->TimeOffset().Int());
+		entry.setAlarm(alarm);
+		CleanupStack::PopAndDestroy(calAlarm);
+	}
+
+	// Repear rule.
+	TCalRRule rRule;
+	calEntry.GetRRuleL(rRule);
+	if (rRule.Type() != TCalRRule::EInvalid) {
+		AgendaRepeatRule repeatRule;
+		RArray<TDay> days;
+		rRule.GetByDayL(days);
+		QList<AgendaRepeatRule::Day> qDays;
+		for (int i = 0; i < days.Count(); i++) {
+			qDays.append(AgendaRepeatRule::Day(days[i]));
+		}
+		repeatRule.setByDay(qDays);
+
+		RArray<TMonth> months;
+		rRule.GetByMonthL(months);
+		QList<AgendaRepeatRule::Month> qMonths;
+		for (int i = 0; i < months.Count(); i++) {
+			qMonths.append(AgendaRepeatRule::Month(months[i]));
+		}
+		repeatRule.setByMonth(qMonths);
+
+		RArray<TInt> monthDays;
+		rRule.GetByMonthDayL(monthDays);
+		QList<int> qMonthDays;
+		for (int i = 0; i < monthDays.Count(); i++) {
+			qMonthDays.append(monthDays[i]);
+		}
+		repeatRule.setByMonthDay(qMonthDays);
+
+		repeatRule.setType((AgendaRepeatRule::RuleType)(rRule.Type()));
+		repeatRule.setInterval(rRule.Interval());
+		TCalTime time = rRule.Until();
+		TTime untilTime = time.TimeUtcL();
+		QDate qUntilTime(
+				untilTime.DateTime().Year(),
+				untilTime.DateTime().Month() + 1,
+				untilTime.DateTime().Day() + 1);
+		repeatRule.setUntil(qUntilTime);
+
+		TCalTime dayStart = rRule.DtStart();
+		TTime ruleStart = dayStart.TimeUtcL();
+		QDate qRuleStart(
+				untilTime.DateTime().Year(),
+				untilTime.DateTime().Month() + 1,
+				untilTime.DateTime().Day() + 1);
+		repeatRule.setRepeatRuleStart(qRuleStart);
+
+		TDay wkDay = rRule.WkSt();
+		AgendaRepeatRule::Day qWkDay = (AgendaRepeatRule::Day)wkDay;
+		repeatRule.setWeekStart(qWkDay);
+
+		// Set the rule now.
+		entry.setRepeatRule(repeatRule);
+	}
+
+	// Get the RDates.
+	RArray<TCalTime> rDateList;
+	calEntry.GetRDatesL(rDateList);
+	QList<QDate> qRDates;
+	for (int i = 0; i < rDateList.Count(); i++) {
+		TTime rDate = rDateList[i].TimeUtcL();
+		QDate qRdate(
+				rDate.DateTime().Year(),
+				rDate.DateTime().Month() + 1,
+				rDate.DateTime().Day() + 1);
+		qRDates.append(qRdate);
+	}
+	// Set the RDates.
+	entry.setRDates(qRDates);
+
+	// Recurrence Id.
+	TCalTime recCalTime = calEntry.RecurrenceIdL();
+	
+	// Set the recurrence id only when it is not NULL
+	// so that we can identify the child properly
+	if (recCalTime.TimeUtcL() != Time::NullTTime()) {
+		TTime recTime = recCalTime.TimeUtcL();
+		QDateTime qRecTime(
+				QDate(
+						recTime.DateTime().Year(), recTime.DateTime().Month() + 1,
+						recTime.DateTime().Day() + 1),
+				QTime(
+						recTime.DateTime().Hour(), recTime.DateTime().Minute(),
+						recTime.DateTime().Second()));
+		entry.setRecurrenceId(qRecTime);
+	}
+	
+	// Set the last modification time for the entry.
+	TCalTime lastModCalTime = calEntry.LastModifiedDateL();
+	TTime localTime = lastModCalTime.TimeLocalL();
+	TDateTime localDateTime = localTime.DateTime();
+	QDateTime lastModifiedTime(
+			QDate(
+					localDateTime.Year(),
+					localDateTime.Month() + 1,
+					localDateTime.Day() + 1),
+			QTime(
+					localDateTime.Hour(), localDateTime.Minute(),
+					localDateTime.Second(), 0));
+	entry.setLastModifiedDateTime(lastModifiedTime);
+
+	// Set the status for the entry.
+	entry.setStatus((AgendaEntry::Status) calEntry.StatusL());
+
+	// Get the favourite property.
+	entry.setFavourite(calEntry.FavouriteL());
+
+	// Set the to-do completion date and time for the entry
+	TCalTime completionTime = calEntry.CompletedTimeL();
+	TTime completionTimeInlocal = completionTime.TimeLocalL();
+	QDateTime completionDateTime(
+				QDate(
+						completionTimeInlocal.DateTime().Year(),
+						completionTimeInlocal.DateTime().Month() + 1,
+						completionTimeInlocal.DateTime().Day() + 1),
+				QTime(
+						completionTimeInlocal.DateTime().Hour(),
+						completionTimeInlocal.DateTime().Minute(),
+						completionTimeInlocal.DateTime().Second(), 0));
+	entry.setCompletedDateTime(completionDateTime);
+
+	// Return the entry.
+	return entry;
+}
+
+bool AgendaUtilPrivate::addAttendeesToEntry(
+		const QList<AgendaAttendee>& attendees, CCalEntry& entry)
+{
+	// First prepare the session with the agenda server.
+	if (!prepareSession()) {
+		return false;
+	}
+
+	TRAP(
+			iError,
+
+			for (int i = 0; i < attendees.count(); i++) {
+				CCalAttendee* attendee = CCalAttendee::NewL(
+						TPtrC(reinterpret_cast<const TUint16*>(
+								attendees.at(i).address().utf16())));
+				CleanupStack::PushL(attendee);
+				attendee->SetCommonNameL(
+						TPtrC(reinterpret_cast<const TUint16*>(
+								attendees.at(i).commonName().utf16())));
+				attendee->SetResponseRequested(
+						attendees.at(i).responseRequested());
+				attendee->SetRoleL(static_cast<CCalAttendee::TCalRole>(
+						attendees.at(i).role()));
+				attendee->SetStatusL(static_cast<CCalAttendee::TCalStatus>(
+						attendees.at(i).status()));
+				entry.AddAttendeeL(attendee);
+				CleanupStack::PopAndDestroy(attendee);
+			}
+	)
+	return (iError == KErrNone);
+}
+
+bool AgendaUtilPrivate::addCategoriesToEntry(
+		const QList<AgendaCategory>& categories, CCalEntry& entry)
+{
+	// First prepare the session with the agenda server.
+	if (!prepareSession()) {
+		return false;
+	}
+	TRAP(
+			iError,
+
+			for (int i = 0; i < categories.count(); i++) {
+				AgendaCategory::CategoryType type = categories.at(i).category();
+				if (type != AgendaCategory::ExtendedCategory) {
+					CCalCategory* category = CCalCategory::NewL(
+							static_cast<CCalCategory::TCalCategoryType>(type));
+					entry.AddCategoryL(category);
+					delete category;
+				} else {
+					TPtrC categoryName = TPtrC(reinterpret_cast<const TUint16*>(
+							categories.at(i).extendedCategoryName().utf16()));
+					CCalCategory* category = CCalCategory::NewL(categoryName);
+					entry.AddCategoryL(category);
+					delete category;
+				}
+			}
+	)
+	return (iError == KErrNone);
+}
+
+bool AgendaUtilPrivate::setAlarmToEntry(
+		const AgendaAlarm& alarm, CCalEntry& entry)
+{
+	TRAP(
+			iError,
+
+			if (alarm.isNull()) {
+				entry.SetAlarmL(0);
+			} else {
+				CCalAlarm* calAlarm = CCalAlarm::NewL();
+				CleanupStack::PushL(calAlarm);
+				calAlarm->SetTimeOffset(alarm.timeOffset());
+				if (!alarm.alarmSoundName().isNull()) {
+					TPtrC alarmName(reinterpret_cast<const TUint16*>(
+							alarm.alarmSoundName().utf16()));
+					calAlarm->SetAlarmSoundNameL(alarmName);
+				}
+				entry.SetAlarmL(calAlarm);
+				CleanupStack::PopAndDestroy(calAlarm);
+			}
+	)
+	return (iError == KErrNone);
+}
+
+void AgendaUtilPrivate::sortInstanceList(RPointerArray<CCalInstance>& list)
+{
+	TLinearOrder<CCalInstance> instanceListOrder(
+			AgendaUtilPrivate::entryCompare );
+	list.Sort( instanceListOrder );
+}
+
+void AgendaUtilPrivate::getDayRange(
+		const QDateTime& aStartDay, const QDateTime& aEndDay,
+		CalCommon::TCalTimeRange& aRange )
+{
+	TDateTime start(
+			aStartDay.date().year(), TMonth(aStartDay.date().month() - 1),
+			aStartDay.date().day() - 1, aStartDay.time().hour(),
+			aStartDay.time().minute(), aStartDay.time().second(),
+			aStartDay.time().msec());
+	TDateTime end(
+			aEndDay.date().year(), TMonth(aEndDay.date().month() - 1),
+			aEndDay.date().day() - 1, aEndDay.time().hour(),
+			aEndDay.time().minute(), aEndDay.time().second(),
+			aEndDay.time().msec());
+
+	start.SetHour(0);
+	start.SetMinute(0);
+	start.SetSecond(0);
+	start.SetMicroSecond(0);
+
+	end.SetHour(23);
+	end.SetMinute(59);
+	end.SetSecond(59);
+	end.SetMicroSecond(0);
+
+	// Prevent overflow.
+	TCalTime endDate;
+	endDate.SetTimeLocalL(LimitToValidTime(TTime(end)));
+	TCalTime startDate;
+	startDate.SetTimeLocalL(LimitToValidTime(TTime(start)));
+
+	CalCommon::TCalTimeRange dayrange(startDate, endDate);
+	aRange = dayrange;
+}
+
+TTime AgendaUtilPrivate::LimitToValidTime( const TTime& aTime )
+{
+
+	TTime valid = aTime;
+	valid = valid > (
+			TCalTime::MaxTime() - TTimeIntervalMinutes( 1 ))
+			? (TCalTime::MaxTime() - TTimeIntervalMinutes( 1 ))
+			: valid;
+	valid = valid < (TCalTime::MinTime()) ? (TCalTime::MinTime()) : valid;
+
+	return valid;
+}
+
+CCalInstance* AgendaUtilPrivate::findPossibleInstance(AgendaEntry& entry)
+{
+    if(!prepareSession()) {
+        // return empty list
+        return NULL;
+    }
+	TCalTime dummy;
+	CalCommon::TCalTimeRange dayRange(dummy, dummy);
+	getDayRange(entry.startTime(), entry.startTime(), dayRange);
+	RPointerArray<CCalInstance> instances;
+	CleanupClosePushL(instances);
+	iCalInstanceView->FindInstanceL(instances, CalCommon::EIncludeAll, dayRange);
+	TTime entryStartTime(dayRange.StartTime().TimeLocalL());
+
+	CCalInstance* result = 0;
+
+	// For instances finishing the next day (now possible with unified
+	// DateTime editor), we have to do our best to match the instance time
+	// exactly - otherwise we could match the LocalUid to the incorrect
+	// instance in a series.
+	for(int i = 0; i < instances.Count() && !result; ++i)
+	{
+		if(instances[i]->Entry().LocalUidL() == entry.id())
+		{
+			// Check the instance time matches.
+			if(instances[i]->StartTimeL().TimeLocalL() == entryStartTime)
+			{
+				result = instances[i];
+				instances.Remove(i);
+			}
+		}
+	}
+
+	if(!result)
+	{
+		// Couldn't match the instance time exactly - just use the instance
+		// with the same LocalUid as the one we're looking for.
+		for(TInt i=0; i < instances.Count() && !result; ++i)
+		{
+			if(instances[i]->Entry().LocalUidL() == entry.id())
+			{
+				result = instances[i];
+				instances.Remove(i);
+			}
+		}
+	}
+
+	// Cleanup.
+	CleanupStack::PopAndDestroy(&instances);
+	return result;
+}
+
+int AgendaUtilPrivate::entryCompare(
+		const CCalInstance& aInstance1, const CCalInstance& aInstance2)
+{
+	int ret(Equal);
+
+	const CCalEntry& entry1 = aInstance1.Entry();
+	const CCalEntry& entry2 = aInstance2.Entry();
+	const CCalEntry::TType type1 = entry1.EntryTypeL();
+	const CCalEntry::TType type2 = entry2.EntryTypeL();
+
+	// types are equal (reminders are handled as meetings)
+	if(type1 == type2
+			|| ((type1 == CCalEntry::EAppt && type2 == CCalEntry::EReminder)
+			|| (type2 == CCalEntry::EAppt && type1 == CCalEntry::EReminder)))
+	{
+		switch(type1)
+		{
+			case CCalEntry::ETodo:
+				ret = compareToDos(entry1, entry2);
+				break;
+
+			case CCalEntry::EAnniv:
+			case CCalEntry::EEvent:
+				ret = compareNonTimedNotes(aInstance1, aInstance2);
+				break;
+
+			case CCalEntry::EReminder:
+			case CCalEntry::EAppt:
+				ret = compareTimedNotes(aInstance1, aInstance2);
+				break;
+
+			default:
+				ASSERT(EFalse);
+		}
+	}
+	else // Types are different.
+	{
+		switch(type1)
+		{
+			case CCalEntry::ETodo:
+				// To-dos come always first...
+				ret = LessThan;
+				break;
+
+			case CCalEntry::EEvent:
+			{
+				// ...then day notes...
+				if(type2 == CCalEntry::ETodo)
+				{
+					ret = GreaterThan;
+				}
+				else
+				{
+					ret = LessThan;
+				}
+			}
+			break;
+
+			case CCalEntry::EAnniv:
+			{
+				// ...and anniversaries...
+				if((type2 == CCalEntry::ETodo) || (type2 == CCalEntry::EEvent))
+				{
+					ret = GreaterThan;
+				}
+				else
+				{
+					ret = LessThan;
+				}
+			}
+			break;
+
+			case CCalEntry::EReminder:
+			case CCalEntry::EAppt:
+				// ...and finally timed notes.
+				ret = GreaterThan;
+				break;
+
+			default:
+				ASSERT(EFalse);
+		}
+	}
+
+	return ret;
+}
+
+int AgendaUtilPrivate::compareToDos(
+		const CCalEntry& aEntry1, const CCalEntry& aEntry2)
+{
+    int ret( Equal );
+    CCalEntry::TStatus status1 = aEntry1.StatusL();
+    CCalEntry::TStatus status2 = aEntry2.StatusL();
+
+    if( status1 == CCalEntry::ENullStatus )
+        {
+        status1 = CCalEntry::ETodoNeedsAction;
+        }
+
+    if( status2 == CCalEntry::ENullStatus )
+        {
+        status2 = CCalEntry::ETodoNeedsAction;
+        }
+
+    if( status1 == status2 )
+        {
+        TTime time1 = aEntry1.EndTimeL().TimeUtcL();
+        TTime time2 = aEntry2.EndTimeL().TimeUtcL();
+
+        if( time1 == time2 )
+            {
+            const TUint pri1( aEntry1.PriorityL() );
+            const TUint pri2( aEntry2.PriorityL() );
+
+            if( pri1 == pri2 )
+                {
+                time1 = aEntry1.LastModifiedDateL().TimeUtcL();
+                time2 = aEntry2.LastModifiedDateL().TimeUtcL();
+
+                if( time1 == time2 )
+                    {
+                    ret = Equal;
+                    }
+                else if( time1 > time2 )
+                    {
+                    ret = GreaterThan; // oldest first
+                    }
+                else
+                    {
+                    ret = LessThan;
+                    }
+                }
+            else
+                {
+                if( pri1 > pri2 )
+                    {
+                    ret = GreaterThan;
+                    }
+                else
+                    {
+                    ret = LessThan;
+                    }
+                }
+            }
+        else
+            {
+            if( time1 > time2 )
+                {
+                ret = GreaterThan;
+                }
+            else
+                {
+                ret = LessThan;
+                }
+            }
+        }
+    else
+        {
+        if( status1 == CCalEntry::ETodoCompleted )
+            {
+            ret = GreaterThan;
+            }
+        else
+            {
+            ret = LessThan;
+            }
+        }
+
+    return ret;
+}
+
+int AgendaUtilPrivate::compareNonTimedNotes( const CCalInstance& aInstance1,
+                                              const CCalInstance& aInstance2 )
+{
+    int ret( Equal );
+    TTime time1 = aInstance1.Time().TimeUtcL();
+    TTime time2 = aInstance2.Time().TimeUtcL();
+
+    if( time1 == time2 )
+        {
+        time1 = aInstance1.Entry().LastModifiedDateL().TimeUtcL();
+        time2 = aInstance2.Entry().LastModifiedDateL().TimeUtcL();
+
+        if( time1 == time2 )
+            {
+            ret = Equal;
+            }
+        else if( time1 > time2 )
+            {
+            ret = GreaterThan; // oldest first
+            }
+        else
+            {
+            ret = LessThan;
+            }
+        }
+    else
+        {
+        if( time1 < time2 )
+            {
+            ret = LessThan;
+            }
+        else
+            {
+            ret = GreaterThan;
+            }
+        }
+
+    return ret;
+}
+
+int AgendaUtilPrivate::compareTimedNotes( const CCalInstance& aInstance1,
+                                           const CCalInstance& aInstance2 )
+{
+    int ret( Equal );
+    TTime time1 = aInstance1.Time().TimeUtcL();
+    TTime time2 = aInstance2.Time().TimeUtcL();
+
+    if( time1 == time2 )
+        {
+        TTimeIntervalMinutes duration1;
+        TTimeIntervalMinutes duration2;
+        aInstance1.EndTimeL().TimeUtcL().MinutesFrom( aInstance1.StartTimeL().TimeUtcL(), duration1 );
+        aInstance2.EndTimeL().TimeUtcL().MinutesFrom( aInstance2.StartTimeL().TimeUtcL(), duration2 );
+
+        if( duration1 == duration2 )
+            {
+            time1 = aInstance1.Entry().LastModifiedDateL().TimeUtcL();
+            time2 = aInstance2.Entry().LastModifiedDateL().TimeUtcL();
+
+            if( time1 == time2 )
+                {
+                ret = Equal;
+                }
+            else if( time1 > time2 )
+                {
+                ret = GreaterThan; // oldest first
+                }
+            else
+                {
+                ret = LessThan;
+                }
+            }
+        else
+            {
+            if( duration1 < duration2 )
+                {
+                ret = LessThan;
+                }
+            else
+                {
+                ret = GreaterThan;
+                }
+            }
+        }
+    else
+        {
+        if( time1 < time2 )
+            {
+            ret = LessThan;
+            }
+        else
+            {
+            ret = GreaterThan;
+            }
+        }
+
+    return ret;
+}
+
+RepeatIndex AgendaUtilPrivate::getRepeatIndex(const CCalEntry& aEntry)
+{
+	RepeatIndex repeatIndex( notRepeated );
+
+    TCalRRule rrule;
+
+    if( aEntry.GetRRuleL( rrule) )
+        {
+        TCalRRule::TType type( rrule.Type() );
+        TInt repeatInterval( rrule.Interval() );
+
+        // If repeat type of current note is not supported in Calendar,
+        // default repeat value is "Other".
+        repeatIndex = repeatOther;
+
+        switch( type )
+            {
+            case TCalRRule::EDaily:
+                {
+                switch (repeatInterval)
+                    {
+                    case 1:   repeatIndex = repeatDaily;     break;
+                    case 7:   repeatIndex = repeatWeekly;    break;
+                    case 14:  repeatIndex = repeatBiWeekly;  break;
+                    default:                                  break;
+                    }
+                break;
+                }
+
+            case TCalRRule::EWeekly:
+                {
+                RArray<TDay> weekDays(7);
+                rrule.GetByDayL( weekDays );
+
+                if( weekDays.Count() == 1 ) // FIXME: AL - is this necessary?
+                    {
+                    switch( repeatInterval )
+                        {
+                        case 1:   repeatIndex = repeatWeekly;    break;
+                        case 2:   repeatIndex = repeatBiWeekly;  break;
+                        default:                                  break;
+                        }
+                    }
+
+                weekDays.Close();
+
+                break;
+                }
+
+            case TCalRRule::EMonthly:
+                {
+                RArray<TInt> monthDays(31);
+                rrule.GetByMonthDayL ( monthDays );
+
+                if( monthDays.Count() == 1) // FIXME: AL - is this necessary?
+                    {
+                    switch( repeatInterval )
+                        {
+                        case 1:  repeatIndex = repeatMonthly;  break;
+                        // If interval of repeat is 12 months, 
+                        // every year is shown in Note Editor, 
+                        // because it means yearly repeat.
+                        case 12:  repeatIndex = repeatYearly;   break;
+                        default:                                 break;
+                        }
+                    }
+
+                monthDays.Close();
+
+                break;
+                }
+            case TCalRRule::EYearly:
+                {
+                if( repeatInterval == 1 )
+                    {
+                    repeatIndex = repeatYearly;
+                    }
+                break;
+                }
+
+            default:
+                {
+                // If repeat type of current note is not supported in Calendar,
+                // default repeat value is "Other".
+                repeatIndex = repeatOther;
+                break;
+                }
+            }
+        }
+    return repeatIndex;
+}
+
+TTime AgendaUtilPrivate::getPreviousInstanceForRepeatOther(CCalEntry& entry, 
+									const CalCommon::TCalTimeRange& timeRange)
+{
+	RPointerArray<CCalInstance> allInstances;
+	CleanupClosePushL( allInstances );
+	
+	TInt filter;
+	// Get the entry type to be filtered
+	switch(entry.EntryTypeL())
+		{
+		case CCalEntry::EAppt:
+			filter = CalCommon::EIncludeAppts;
+			break;
+		case CCalEntry::ETodo:
+			filter = CalCommon::EIncludeCompletedTodos | CalCommon::EIncludeIncompletedTodos;
+			break;
+		case CCalEntry::EEvent:
+			filter = CalCommon::EIncludeEvents;
+			break;
+		case CCalEntry::EReminder:
+			filter = CalCommon::EIncludeReminder;
+			break;
+		case CCalEntry::EAnniv:
+			filter = CalCommon::EIncludeAnnivs;
+			break;
+		default:
+			filter = CalCommon::EIncludeAll;
+			break;
+		};
+
+	iCalInstanceView->FindInstanceL( allInstances, 
+									 (CalCommon::TCalViewFilterFlags)filter,
+									 timeRange);
+
+	TTime previousTime = Time::NullTTime();
+	
+	for( TInt i = allInstances.Count() - 1; i >= 0; i-- )
+		{
+		if( allInstances[i]->Entry().UidL() == entry.UidL() )
+			{
+			previousTime = allInstances[i]->Time().TimeLocalL();
+			break;
+			}
+		}
+
+	CleanupStack::PopAndDestroy( &allInstances );  
+	return previousTime;
+}
+
+TTime AgendaUtilPrivate::getNextInstanceForRepeatOther(CCalEntry& aEntry, 
+								   const CalCommon::TCalTimeRange& timeRange)
+{
+	RPointerArray<CCalInstance> allInstances;
+	CleanupClosePushL( allInstances );
+    
+    TInt filter;
+    // Get the entry type to be filtered
+    switch(aEntry.EntryTypeL())
+        {
+    	case CCalEntry::EAppt:
+    		filter = CalCommon::EIncludeAppts;
+    		break;
+    	case CCalEntry::ETodo:
+    		filter = CalCommon::EIncludeCompletedTodos | CalCommon::EIncludeIncompletedTodos;
+    		break;
+    	case CCalEntry::EEvent:
+    		filter = CalCommon::EIncludeEvents;
+    		break;
+    	case CCalEntry::EReminder:
+    		filter = CalCommon::EIncludeReminder;
+    		break;
+    	case CCalEntry::EAnniv:
+    		filter = CalCommon::EIncludeAnnivs;
+    		break;
+    	default:
+    		filter = CalCommon::EIncludeAll;
+    		break;
+        };
+    
+    iCalInstanceView->FindInstanceL( allInstances, 
+                                     (CalCommon::TCalViewFilterFlags)filter,
+                                     timeRange);
+                                     
+    TTime nextTime = Time::NullTTime();
+    
+	TInt i( 0 );
+    for( ; i < allInstances.Count(); i++ )
+        {
+        if( allInstances[i]->Entry().UidL() == aEntry.UidL() )
+            {
+            nextTime = allInstances[i]->Time().TimeLocalL();
+            break;
+            }
+        }
+  
+    CleanupStack::PopAndDestroy( &allInstances );  
+    return nextTime;
+}
+
+bool AgendaUtilPrivate::haveRepeatPropertiesChanged(const CCalEntry& newEntry, 
+	                                  const CCalEntry& oldEntry)
+{
+	//Have the RRules Changed?
+	TCalRRule newEntryRule;
+	newEntry.GetRRuleL(newEntryRule);
+
+	TCalRRule oldEntryRule;
+	oldEntry.GetRRuleL(oldEntryRule);
+
+	if ((newEntryRule.Type() != oldEntryRule.Type()) ||
+	(newEntryRule.DtStart().TimeUtcL() != oldEntryRule.DtStart().TimeUtcL()) ||
+	(newEntryRule.Until().TimeUtcL() != oldEntryRule.Until().TimeUtcL()) ||
+	(newEntryRule.Count() != oldEntryRule.Count()))
+		{
+		return ETrue;
+		}
+
+	// Did the RDates change?
+	TBool rDatesChanged = EFalse;
+	RArray<TCalTime> newRDates;
+	RArray<TCalTime> oldRDates;
+	CleanupClosePushL(newRDates);
+	CleanupClosePushL(oldRDates);
+	newEntry.GetRDatesL(newRDates);
+	oldEntry.GetRDatesL(oldRDates);
+
+	if (newRDates.Count() != oldRDates.Count())
+		{
+		rDatesChanged = ETrue;
+		}
+	else
+		{
+		for (TInt x = 0; x < newRDates.Count(); ++x)
+			{
+			if (newRDates[x].TimeUtcL() != oldRDates[x].TimeUtcL())
+				{
+				rDatesChanged = ETrue;
+				break;
+				}
+			}
+		}
+
+	CleanupStack::PopAndDestroy(&oldRDates);
+	CleanupStack::PopAndDestroy(&newRDates);
+
+	return rDatesChanged;
+}
+
+void AgendaUtilPrivate::copyChildrenExceptionData( CCalEntry& editedEntry,
+								RPointerArray<CCalEntry>& oldEntries )
+{
+	// For each oldChild..., 0th index will be parent
+	for (int i=1; i<oldEntries.Count(); ++i) {
+		// For each field...
+		for(DifferenceFlag j=(DifferenceFlag)1; j<EntryDifferenceCount; j=(DifferenceFlag)(j<<1))
+			{
+			// Where oldChild field == oldParent Field
+			// and newParent field != oldParent Field...
+			if( isFieldSame(*oldEntries[i], *oldEntries[0], j ) &&
+				!isFieldSame(editedEntry,  *oldEntries[0], j ) )
+				{
+				// ...copy newParent field to oldChild.
+				copyField(editedEntry, *oldEntries[i], j);
+				}
+			}
+	}	
+}
+
+bool AgendaUtilPrivate::isFieldSame(CCalEntry& entryOne,
+									CCalEntry& entryTwo,
+									DifferenceFlag flag)
+{
+	switch( flag ) {
+		case EntryDifferentStartTimeAndEndTime: {
+			TTime zero(TInt64(0));
+			TTime entryOneStartTime = entryOne.StartTimeL().TimeUtcL();
+			TTime beginningOfDay = zero + entryOneStartTime.DaysFrom(zero);
+			TTimeIntervalMinutes startTimeOne;
+			entryOneStartTime.MinutesFrom(beginningOfDay, startTimeOne);
+			TTime entryTwoStartTime = entryTwo.StartTimeL().TimeUtcL();
+			beginningOfDay = zero + entryTwoStartTime.DaysFrom(zero);
+			TTimeIntervalMinutes startTimeTwo;
+			entryTwoStartTime.MinutesFrom(beginningOfDay, startTimeTwo);
+			TTime entryOneEndTime = entryOne.EndTimeL().TimeUtcL();
+			beginningOfDay = zero + entryOneEndTime.DaysFrom(zero);
+			TTimeIntervalMinutes endTimeOne;
+			entryOneEndTime.MinutesFrom(beginningOfDay, endTimeOne);
+			TTime entryTwoEndTime = entryTwo.EndTimeL().TimeUtcL();
+			beginningOfDay = zero + entryTwoEndTime.DaysFrom(zero);
+			TTimeIntervalMinutes endTimeTwo;
+			entryTwoEndTime.MinutesFrom(beginningOfDay, endTimeTwo);
+			return      ( startTimeOne.Int()
+						== startTimeTwo.Int() )
+					&&  ( endTimeOne.Int() 
+						== endTimeTwo.Int() );
+		}
+		case EntryDifferentSummary:
+			return entryOne.SummaryL() == entryTwo.SummaryL();
+		case EntryDifferentDescription:
+			return entryOne.DescriptionL() == entryTwo.DescriptionL();
+		case EntryDifferentLocation:
+			return entryOne.LocationL() == entryTwo.LocationL();
+		default:
+			break;
+	}
+	return EFalse; // Never hit.
+}
+
+void AgendaUtilPrivate::copyField( const CCalEntry& src,
+                                    CCalEntry& dst,
+                                    DifferenceFlag field )
+{
+	switch( field ) {
+		case EntryDifferentStartTimeAndEndTime:
+			{
+			// START TIME
+			// Keep aDst's start date, but copy the start time (h/m/s) from aSrc to aDst.
+			TTime zero(TInt64(0));
+			TTime srcStartTime = src.StartTimeL().TimeUtcL();
+			TTime dtStartDay = zero + dst.StartTimeL().TimeUtcL().DaysFrom(zero);
+			TTimeIntervalMinutes dtStartTimeOfDay;
+			srcStartTime.MinutesFrom(dtStartDay, dtStartTimeOfDay);
+	
+			TCalTime startTime;
+			startTime.SetTimeUtcL( dtStartDay + (TTimeIntervalMinutes)dtStartTimeOfDay );
+	
+	
+			TTimeIntervalMinutes duration;
+			src.EndTimeL().TimeUtcL().MinutesFrom(src.StartTimeL().TimeUtcL(), duration);
+	
+			// END TIME
+			// Calculate the duration of aSrc, and make aDst endtime equal aDst startTime
+			// + duration.  This will allow for events spanning multiple days.
+			TCalTime endTime;
+			endTime.SetTimeUtcL(startTime.TimeUtcL() + duration);
+	
+			dst.SetStartAndEndTimeL(startTime, endTime);
+	
+			break;
+			}
+		case EntryDifferentSummary:
+			dst.SetSummaryL(src.SummaryL());
+			break;
+		case EntryDifferentDescription:
+			dst.SetDescriptionL(src.DescriptionL());
+			break;
+		case EntryDifferentLocation:
+			dst.SetLocationL(src.LocationL());
+			break;
+		default:
+			break;
+	}
+}
+
+void AgendaUtilPrivate::storeEachChildEntry(CCalEntry &entry,
+                                              RPointerArray<CCalEntry> &oldEntries,
+                                              bool resetLocalUid)
+    {
+    
+    // Start from 1 as we don't want to copy the old parent entry.
+    for(int i=1; i<oldEntries.Count(); ++i)
+        {
+        if (resetLocalUid)
+            {
+            // Reset the local UID of the exception.  When we store the exception, it will
+            // be added as a new entry rather than an update.
+            oldEntries[i]->SetLocalUidL( TCalLocalUid( 0 ) );
+            }
+
+        // The RecurrenceId of child (exception) entries should never be a null time by definition.
+        // The code below will attempt to generate a RecurrenceId from the start time of the
+        // exception if no RecurrenceId is found.  This should never actually happen, and
+        // will not work if the start time/start date is changed.  The if case below should remain
+        // until the Symbian defect fix for NULL RecurrenceIds is verified.
+
+        if(oldEntries[i]->RecurrenceIdL().TimeUtcL() == Time::NullTTime())
+            {
+            // This is being hit, but shouldn't be. Hence we create a new Recurrence ID.
+            // Without doing this, the SingleStoreL below fails with Agenda Model -35: No agenda server.
+            TCalTime recId = generateRecurrenceIdFromEntry( entry, oldEntries[i]->StartTimeL() );
+            CCalEntry *exception = CCalEntry::NewL( oldEntries[i]->EntryTypeL(),
+                                                entry.UidL().AllocL(),
+                                                oldEntries[i]->MethodL(),
+                                                oldEntries[i]->SequenceNumberL(),
+                                                recId,
+                                                oldEntries[i]->RecurrenceRangeL() );
+            CleanupStack::PushL(exception);
+            exception->CopyFromL(*oldEntries[i]);
+            exception->SetLastModifiedDateL();
+            TInt successCount=0;
+			RPointerArray<CCalEntry> entries;
+			CleanupClosePushL( entries );
+			entries.Append( exception );
+			iCalEntryView->StoreL( entries, successCount );
+			CleanupStack::PopAndDestroy( &entries );
+            CleanupStack::PopAndDestroy(exception);
+            }
+        else
+            {
+            // If the start time of the series has been changed, the call below will
+            // leave with -1, and the child entries will be lost.  To prevent this
+            // we need to regenerate a new recurrence id for each child, create a copy
+            // of the child with the new recurrence id, and store that instead.
+            // Fixing this may cause issues with sync though, as some servers delete the
+            // children when changing the start time of the series anyway.
+        	oldEntries[i]->SetLastModifiedDateL();
+			TInt successCount=0;
+			RPointerArray<CCalEntry> entries;
+			CleanupClosePushL( entries );
+			entries.Append( oldEntries[i] );
+			iCalEntryView->StoreL( entries, successCount );
+			CleanupStack::PopAndDestroy( &entries );
+            }
+        }
+    }
+
+TCalTime AgendaUtilPrivate::generateRecurrenceIdFromEntry( CCalEntry& entry, 
+														TCalTime instanceDate )
+{    
+    TDateTime theTime = entry.StartTimeL().TimeUtcL().DateTime();
+    TDateTime theDate = instanceDate.TimeUtcL().DateTime();
+
+    theTime.SetYear(theDate.Year());
+    theTime.SetMonth(theDate.Month());
+    theTime.SetDay(theDate.Day());
+
+    TCalTime toRet;
+    toRet.SetTimeUtcL(theTime);
+    
+    return toRet;
+}
+
+// End of file  --Don't remove this.

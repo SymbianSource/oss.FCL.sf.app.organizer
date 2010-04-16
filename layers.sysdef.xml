@@ -1,15 +1,14 @@
 <?xml version="1.0"?>
-<!DOCTYPE SystemDefinition SYSTEM "sysdef_1_4_0.dtd" [
+<!DOCTYPE SystemDefinition SYSTEM "sysdef_1_5_1.dtd" [
   <!ENTITY layer_real_source_path "sf/app/organizer" >
 ]>
-
-<SystemDefinition name="organizer" schema="1.4.0">
+<SystemDefinition name="organizer" schema="1.5.1">
   <systemModel>
     <layer name="app_layer">
-      <module name="organizer">
-        <unit unitID="orgdo.organizer" mrp="" bldFile="&layer_real_source_path;/group" name="organizer" />
+    	<module name="organizer">
+		<unit unitID="orgdo.organizer.bldinf" mrp="" bldFile="&layer_real_source_path;/group" name="organizer_bldinf"/>
+		<unit unitID="orgdo.organizer.pro" mrp="" bldFile="&layer_real_source_path;" name="organizer_pro" proFile="organizer.pro"/>
       </module>
     </layer>
   </systemModel>
 </SystemDefinition>
-

@@ -36,7 +36,6 @@ USERINCLUDE     ../AppServerStuff/Inc
 
 APP_LAYER_SYSTEMINCLUDE
 
-
 SOURCEPATH      ../AppServerStuff/Src
 SOURCE          AlarmWrapper.cpp
 

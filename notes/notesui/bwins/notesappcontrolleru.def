@@ -1,0 +1,5 @@
+EXPORTS
+	??1NotesAppController@@UAE@XZ @ 1 NONAME ; NotesAppController::~NotesAppController(void)
+	??_ENotesAppController@@UAE@I@Z @ 2 NONAME ; NotesAppController::~NotesAppController(unsigned int)
+	??0NotesAppController@@QAE@PAVQObject@@@Z @ 3 NONAME ; NotesAppController::NotesAppController(class QObject *)
+

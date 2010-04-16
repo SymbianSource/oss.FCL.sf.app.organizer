@@ -99,6 +99,7 @@ TBool CCalenViewingState::HandleCommandL( const TCalenCommand& aCommand,
 	    case ECalenEditSeries:
         case ECalenRestoreTodo:
         case ECalenCompleteTodo:
+        case ECalenEditEntryFromViewer:
       		{
     		// set the previous state as viewing state
     		CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
@@ -121,6 +122,7 @@ TBool CCalenViewingState::HandleCommandL( const TCalenCommand& aCommand,
         case ECalenDeleteCurrentEntry:
         case ECalenDeleteSeries:
         case ECalenDeleteCurrentOccurrence:
+        case ECalenDeleteEntryFromViewer:
     		{    
 			// set the previous state as viewing state
             CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
@@ -140,25 +142,8 @@ TBool CCalenViewingState::HandleCommandL( const TCalenCommand& aCommand,
 		case ECalenGetLocation:
     	case ECalenShowLocation:
         case ECalenGetLocationAndSave:
-    		{
-    		CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
-	        SetCurrentState( aStateMachine, CCalenStateMachine::ECalenMapState );
-	        SetCurrentPreviousState( aStateMachine, cachedState );
-	        ActivateCurrentStateL(aStateMachine);        
-	        
-	        cmdUsed = ETrue;
-	        break;	
+    		{    		
     		}
-        case ECalenViewAttachmentList:
-        case ECalenAddAttachmentFromViewer:    
-            {
-            CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
-            SetCurrentState( aStateMachine, CCalenStateMachine::ECalenAttachmentState );
-            SetCurrentPreviousState( aStateMachine, cachedState );
-            ActivateCurrentStateL(aStateMachine);        
-            cmdUsed = ETrue;
-            }
-            break;    		
         }
     RequestCallbackL( handler, aCommand );
 

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,143 +11,155 @@
 *
 * Contributors:
 *
-* Description:   For month view of calendar application.
- *
+* Description:  CalenMonthView class definition.
+*
 */
 
-
-
-#ifndef CALENMONTHVIEW_H
+#ifndef CALENMONTHVIEW_H  
 #define CALENMONTHVIEW_H
 
-//  INCLUDES
+// System includes
+#include <QGraphicsLinearLayout>
+#include <qdatetime.h>
+#include <hblabel.h>
+#include <hbextendedlocale.h>
+
+// User includes
 #include "calennativeview.h"
 
-// FORWARD DECLARATIONS
-class CCalenMonthContainer;
-class CAknNavigationDecorator;
+// Forward declarations
+class QStandardItemModel;
+class HbAction;
+class HbGridView;
+class HbExtendedLocale;
+class XQSettingsManager;
+class XQSettingsKey;
+class AgendaUtil;
+class AgendaEntry;
+class MCalenContext;
+class CalenMonthData;
+class MCalenServices;
+class CalenPreviewPane;
+class CalenDocLoader;
+class CalenThickLinesDrawer;
+class CalenMonthGrid;
 
-//  CLASS DEFINITIONS
-/**
- *  For Month View of calendar application
- */
-NONSHARABLE_CLASS( CCalenMonthView ) : public CCalenNativeView
-    {
-    public:
-        /**
-         * Two-phased constructor.
-         */
-        IMPORT_C static CCalenMonthView* NewL( MCalenServices& aServices );
+// Constants
+const int KCalenDaysInWeek = 7;
+const int KNumOfVisibleRows = 6;
 
-        /**
-         * Destructor.
-         */
-        virtual ~CCalenMonthView();
+#ifdef  CALENVIEWS_DLL
+#define CALENMONTHVIEW_EXPORT Q_DECL_EXPORT
+#else
+#define CALENMONTHVIEW_EXPORT Q_DECL_IMPORT
+#endif
 
-    public:    // New function
-        void SetStatusPaneFromActiveContextL();
-
-    private:    // New function
-        /**
-         * C++ constructor.
-         */
-        CCalenMonthView( MCalenServices& aServices );
-
-        /**
-         * By default Symbian OS constructor is private.
-         */
-        void ConstructL();
-
-    public:  // From CCalenView
-        virtual TNextPopulationStep ActiveStepL();
-        virtual void CancelPopulation();
-        virtual TCyclePosition CyclePosition() const;
-        virtual const TDesC& LocalisedViewNameL( CCalenView::TViewName aViewName );
-        virtual CGulIcon* CCalenMonthView::ViewIconL() const;
-
-    protected:   // From CCalenNativeView
-        /**
-         * Clears view specific data
-         */
-        virtual void ClearViewSpecificDataL();
-    
-        /**
-         *  Updates preview pane/preview popup
-         */
-        void UpdatePreviewPaneL();
-
-        /**
-         * Hides preview pane/preview popup
-         */
-        void HidePreviewPane();
-        
-    private:    // From CCalenView
-        /**
-         * From CCalenView CCalenView::DoActivateL() calls DoActivateImplL()
-         */
-        void DoActivateImplL(	const TVwsViewId& aPrevViewId,
-                                TUid aCustomMessageId,
-                                const TDesC8& aCustomMessage );
-
-        /**
-         * From CCalenView
-         * CCalenView::DoDeactivateL() calls DoDeactivateImplL()
-         */
-        void DoDeactivateImpl();
-
-        /**
-         * From CCalenView Creates CCalenContainer
-         */
-        CCalenContainer* CreateContainerImplL();
-
-        /**
-         * From CCalenView Called when cross over midinight or locale change.
-         */
-        void OnLocaleChangedL(TInt aReason);
-
-        /**
-         * From CCalenView Redraw status pane when Form is closed
-         */
-        void RedrawStatusPaneL();
-
-        /**
-         * From CCalenView. Normal command handling method.
-         * needed for MSK.
-         */
-        void HandleCommandL(TInt aCommand);
-
-    private:
-        // From CAknView
-        TUid Id() const;
-
-        /**
-         * Returns ETrue if the vsd is null.
-         */
-        TBool IsViewSpecificDataNullL();
-        
-    private:    // From MEikMenuObserver
-        /**
-         * From MEikMenuObserver Changes MenuPane dynamically
-         */
-        void DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMenuPane);
-
-    private:    // Data
-
-        enum TPopulationStep
-            {
-            ENothingDone,
-            ESizeChanged,
-            ERequestedInstanceView,
-            ESetIndicatorNext,
-            ESetFocusNext,
-            EPopulationDone
-            };
-        TPopulationStep iPopulationStep;
-    // view specific data
-        TTime iDate;
-    };
+class CALENMONTHVIEW_EXPORT CalenMonthView : public CalenNativeView
+{
+	Q_OBJECT
+	
+public:
+	CalenMonthView( MCalenServices &services );
+	virtual ~CalenMonthView();
+	
+public:  // From CCalenView
+	virtual void doPopulation();
+	void setupView(CalenDocLoader *docLoader);
+	void handleGridItemActivated();
+	void handleGridItemLongPressed(int index, QPointF &coords);
+	void setContextForActiveDay(int index);
+	QDateTime getCurrentDay();
+	QDateTime getActiveDay();
+	int rowsInPrevMonth();
+	int rowsInFutMonth();
+	int getCurrGridIndex();
+	void setCurrGridIndex(int index);
+	void populatePrevMonth();
+	void populateNextMonth();
+	void onLocaleChanged(int reason);
+	QList<CalenMonthData> monthDataList();
+	void updateModelWithPrevMonth();
+	void updateModelWithFutureMonth();
+	void populatePreviewPane(QDateTime &dateTime);
+	void handlePreviewPaneGesture(bool rightGesture);
+	
+private:
+	void createGrid();
+	void populateWithInstanceView();
+	void completePopulation();
+	void prepareForPopulation();
+	QDateTime dateFromContext( const MCalenContext &context );
+	void setActiveDay(QDateTime day);
+	void setDate();
+	void getInstanceList(QList<AgendaEntry> &list,
+						QDateTime rangeStart, QDateTime rangeEnd);
+	void handleChangeOrientation();
+	void setDateToLabel();
+	void updateWeekNumGridModel();
+	void addWeekNumbers();
+	void removeWeekNumbers();
+	void addBackgroundFrame();
+	
+	
+private slots:
+	void createEditor();
+	void goToToday();
+	void updateMonthDataArrayWithActiveDates();
+	void handleLeftEffectCompleted(const HbEffect::EffectStatus &status);
+	void handleRightEffectCompleted(const HbEffect::EffectStatus &status);
+	
+public slots:
+	void launchDayView();
+	void changeOrientation(Qt::Orientation orientation);
+	
+private:
+	bool mIsFirstTimeLoad;
+	CalenDocLoader *mDocLoader;
+	CalenThickLinesDrawer *mDayNameWidget;
+	CalenMonthGrid *mMonthGrid;
+	HbWidget* mPrevPaneParent;
+	HbWidget* mCurrPaneParent;
+	HbWidget* mNextPaneParent;
+	CalenPreviewPane* mCurrPreviewPane;
+	CalenPreviewPane* mPrevPreviewPane;
+	CalenPreviewPane* mNextPreviewPane;
+	CalenThickLinesDrawer *mWeekNumberWidget;
+	HbWidget *mMonthGridPlusWeekNumWidget;
+	HbExtendedLocale mLocale;
+	int mIndexToBeScrolled;
+	QDateTime mActiveMonth;
+	int mNumOfRowsInPrevMonth;
+	int mNumOfRowsInFutureMonth;
+	HbLabel *mFirstDayLabel;
+	HbLabel *mSecondDayLabel;
+	HbLabel *mThirdDayLabel;
+	HbLabel *mFourthDayLabel;
+	HbLabel *mFifthDayLabel;
+	HbLabel *mSixthDayLabel;
+	HbLabel *mSeventhDayLabel;
+	HbLabel *mFirstWeekLabel;
+	HbLabel *mSecondWeekLabel;
+	HbLabel *mThirdWeekLabel;
+	HbLabel *mFourthWeekLabel;
+	HbLabel *mFifthWeekLabel;
+	HbLabel *mSixthWeekLabel;
+	QList<CalenMonthData> mMonthDataArray;
+	QDateTime mDate;
+	QDateTime mCurrentDay;
+	QDateTime mFirstDayOfGrid;
+	QDateTime mLastDayOfGrid;
+	int mTotalNumOfGridItems;
+	QList<int> mWeekNumbers;
+	HbLabel *mTitleLabel;
+	Qt::Orientation mOrientation;
+	XQSettingsManager *mSettingsManager;
+	XQSettingsKey *mWeekNumberCenrepKey;
+	uint mIsWeekNumbersShown;
+	AgendaUtil *mAgendaUtil;
+	bool mIsPrevPaneGesture;
+	HbAction *mGoToTodayAction;
+};
 
 #endif //CALENMONTHVIEW_H
 
-
-// End of File
+// End of file  --Don't remove this.

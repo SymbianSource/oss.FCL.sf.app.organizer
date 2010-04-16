@@ -216,10 +216,13 @@ void CCalEntryImpl::PopulateAttendeeListL()
 
 void CCalEntryImpl::AddAttendeeL(CCalAttendee* aAttendee)
 	{
-    if (!aAttendee)
-        {
-        User::Leave( KErrArgument );
-        }
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+						User::Leave(KErrNotSupported));
+
+	if (!aAttendee)
+		{
+		User::Leave( KErrArgument );
+		}
 
 	CleanupStack::PushL(aAttendee);
 	__ASSERT_ALWAYS(aAttendee != NULL, User::Leave(KErrArgument));
@@ -262,6 +265,9 @@ void CCalEntryImpl::DeleteAttendeeL(TInt aIndex)
 
 void CCalEntryImpl::SetOrganizerL(CCalUser* aUser)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+							User::Leave(KErrNotSupported));
+
 	CleanupStack::PushL(aUser);
 	__ASSERT_ALWAYS(aUser != NULL, User::Leave(KErrArgument));
 	LoadFullEntryL();
@@ -276,6 +282,8 @@ void CCalEntryImpl::SetOrganizerL(CCalUser* aUser)
 
 void CCalEntryImpl::SetPhoneOwnerL(const CCalUser* aOwner)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+							User::Leave(KErrNotSupported));
 	__ASSERT_ALWAYS(aOwner != NULL, User::Leave(KErrArgument));
 	LoadFullEntryL();
 	CCalUserImpl* userImpl = aOwner->Impl();
@@ -349,6 +357,8 @@ CTzRules* CCalEntryImpl::GetTzRulesL()
 
 void CCalEntryImpl::SetTzRulesL(const CTzRules& aTzRules)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+								User::Leave(KErrNotSupported));
 	LoadFullEntryL();
 	
 	if (TimeMode() == MAgnCalendarTimeMode::EFloating)
@@ -368,6 +378,8 @@ void CCalEntryImpl::SetTzRulesL(const CTzRules& aTzRules)
 
 void CCalEntryImpl::SetTzRulesL()
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+							   User::Leave(KErrNotSupported));
 	LoadFullEntryL();
 	
 	if (TimeMode() == MAgnCalendarTimeMode::EFloating)
@@ -385,12 +397,16 @@ void CCalEntryImpl::SetTzRulesL()
 
 void CCalEntryImpl::SetRDatesL(const RArray<TCalTime>& aRDates)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+								User::Leave(KErrNotSupported));
 	LoadFullEntryL();
 	SetDatesL(ETrue, aRDates);
 	}
 
 void CCalEntryImpl::SetExceptionDatesL(const RArray<TCalTime>& aExDates)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+								User::Leave(KErrNotSupported));
 	LoadFullEntryL();
 	
 	if (iFullEntry->RptDef() == NULL)
@@ -560,6 +576,9 @@ const RPointerArray<CCalCategory>& CCalEntryImpl::CategoryListL()
 
 void CCalEntryImpl::AddCategoryL(CCalCategory* aCategory)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+						User::Leave(KErrNotSupported));
+
 	CleanupStack::PushL(aCategory);
 	__ASSERT_ALWAYS(aCategory != NULL, User::Leave(KErrArgument));
 	
@@ -586,6 +605,8 @@ void CCalEntryImpl::AddCategoryL(CCalCategory* aCategory)
 
 void CCalEntryImpl::DeleteCategoryL(TInt aIndex)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+						User::Leave(KErrNotSupported));
 	LoadFullEntryL();
 	
 	if (aIndex < 0 || aIndex >= iFullEntry->CategoryCount())
@@ -830,6 +851,9 @@ void CCalEntryImpl::CopyFromL(CCalEntryImpl& aOther, CCalEntry::TCopyType aCopyT
 
 void CCalEntryImpl::SetAlarmL(CCalAlarm* aAlarm)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+						User::Leave(KErrNotSupported));
+
 	LoadFullEntryL();
 	
 	if ( aAlarm == NULL ) 
@@ -938,6 +962,9 @@ void CCalEntryImpl::SetCommonRptDataL(const TCalRRule& aRpt, CAgnRptDef& aRptRul
 
 void CCalEntryImpl::SetRRuleL(const TCalRRule& aRpt)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+						User::Leave(KErrNotSupported));
+
 	if (aRpt.Until().TimeLocalL() != Time::NullTTime() && aRpt.DtStart().TimeLocalL() >= aRpt.Until().TimeLocalL())
 		{
 		// if Until time is set to earlier than the start time and is non-NULL, leave
@@ -1206,6 +1233,8 @@ TCalTime CCalEntryImpl::DTStampL()
 
 void CCalEntryImpl::SetLocationL(const TDesC& aLocation)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+						User::Leave(KErrNotSupported));
 	LoadFullEntryL();
 	iFullEntry->SetLocationL(aLocation);
 	}
@@ -1218,6 +1247,8 @@ const TDesC& CCalEntryImpl::LocationL()
 
 void CCalEntryImpl::SetPriorityL(TUint aPriority)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+						User::Leave(KErrNotSupported));
 	LoadFullEntryL();
 	iFullEntry->SetPriority(aPriority);
 	}
@@ -1244,6 +1275,8 @@ TCalTime CCalEntryImpl::EndTimeL()
 
 void CCalEntryImpl::SetStartAndEndTimeL(const TCalTime& aStartTime, const TCalTime& aEndTime)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+						User::Leave(KErrNotSupported));
 	LoadFullEntryL();
 	TCalTime::TTimeMode mode = aStartTime.TimeMode();
 	if (aEndTime.TimeUtcL() != Time::NullTTime())
@@ -1346,6 +1379,8 @@ void CCalEntryImpl::SetCompletedL(TBool aCompleted, const TCalTime& aDate)
 
 void CCalEntryImpl::SetSummaryL(const TDesC& aSummary)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+			User::Leave(KErrNotSupported));
 	LoadFullEntryL();
 	HBufC* summ = aSummary.AllocL();
 	iFullEntry->SetSummary(summ); // takes ownership of aSummary
@@ -1430,6 +1465,8 @@ void CCalEntryImpl::SetStatusL(CCalEntry::TStatus aStatus)
 
 void CCalEntryImpl::SetReplicationStatusL(CCalEntry::TReplicationStatus aReplicationStatus)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+				User::Leave(KErrNotSupported));
 	LoadFullEntryL();
 	iFullEntry->SetReplicationStatusL(aReplicationStatus);
 	}
@@ -1461,10 +1498,20 @@ void CCalEntryImpl::SetLastModifiedDateL(const TCalTime& aModifiedTime)
 	{
 	LoadFullEntryL();
 	iFullEntry->SetLastModifiedDateUtc(aModifiedTime.TimeUtcL());
+
+	// for entry type ENote,set the modified time as the start/end time
+	if(EntryTypeL() == CCalEntry::ENote)
+		{
+		TAgnCalendarTime agnModifiedTime =
+				CalUtils::TCalTimeToTAgnCalendarTimeL(aModifiedTime);
+		iFullEntry->SetStartAndEndTimeL(agnModifiedTime, agnModifiedTime);
+		}
 	}
-	
+
 void CCalEntryImpl::SetDTStampL(const TCalTime& aDTStampTime)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+					User::Leave(KErrNotSupported));
 	LoadFullEntryL();
 	iFullEntry->SetDTStampUtcL(aDTStampTime.TimeUtcL());
 	}
@@ -1501,7 +1548,7 @@ TUint8 CCalEntryImpl::ShortFileIdL()
 	else
 		{
 		return iFullEntry->CollectionId();
-		}	
+		}
 	}
 
 CCalEntry::TTransp CCalEntryImpl::BusyStatusL()
@@ -1512,6 +1559,8 @@ CCalEntry::TTransp CCalEntryImpl::BusyStatusL()
 
 void CCalEntryImpl::SetBusyStatusL(CCalEntry::TTransp aBusyStatus)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+					User::Leave(KErrNotSupported));
 	LoadFullEntryL();
 	iFullEntry->SetBusyStatusL(aBusyStatus);
 	}
@@ -1530,11 +1579,14 @@ CCalGeoValue* CCalEntryImpl::GeoValueL()
 		CleanupStack::Pop(geoValue);
 		return geoValue;
 		}
-	return NULL;		
+	return NULL;
 	}
 
 void CCalEntryImpl::SetGeoValueL(const CCalGeoValue& aGeoValue)
 	{
+	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
+					User::Leave(KErrNotSupported));
+
 	LoadFullEntryL();
 	TReal geoLatitude;
 	TReal geoLongitude;
@@ -1657,14 +1709,14 @@ const CAgnSimpleEntry* CCalEntryImpl::SimpleEntry() const
 	}
 
 void CCalEntryImpl::SetUserIntL( TUint32 aUserInt )
-    {
-    SimpleEntry()->SetUserInt(aUserInt);
-    }
+	{
+	SimpleEntry()->SetUserInt(aUserInt);
+	}
 
 TUint32 CCalEntryImpl::UserIntL()
-    {
-    return SimpleEntry()->UserInt();
-    }
+	{
+	return SimpleEntry()->UserInt();
+	}
 
 
 //  CCalEntryIdImpl //

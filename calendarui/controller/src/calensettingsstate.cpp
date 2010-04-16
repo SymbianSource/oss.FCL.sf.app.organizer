@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -17,8 +17,6 @@
 
 
 // includes
-#include <calentoolbar.h>
-
 #include "calensettingsstate.h"
 #include "calendarui_debug.h"           // Debug macros
 #include "calencontroller.h"
@@ -104,15 +102,16 @@ TBool CCalenSettingsState::HandleCommandL( const TCalenCommand& aCommand,
             cmdUsed = ETrue;
             }
             break;
-        case ECalenMissedEventViewFromIdle:
-            {
-            cmdUsed = ETrue;
-            break;
-            }
-        case ECalenEventViewFromAlarm:
-        case ECalenEventViewFromAlarmStopOnly:
+        case ECalenMonthView:
         case ECalenDayView:
+        case ECalenLandscapeDayView:
+        case ECalenStartActiveStep:
             {
+            // set previous state to idle
+            CCalenStateMachine::TCalenStateIndex cachedState = CCalenStateMachine::ECalenIdleState;
+            SetCurrentState( aStateMachine, CCalenStateMachine::ECalenPopulationState );
+            SetCurrentPreviousState( aStateMachine, cachedState );
+            ActivateCurrentStateL(aStateMachine);               
             cmdUsed = ETrue;
             }
             break;
@@ -140,9 +139,8 @@ void CCalenSettingsState::HandleNotificationL(const TCalenNotification& aNotific
     switch( aNotification )
         {
         case ECalenNotifyPluginEnabledDisabled:
-        case ECalenNotifyEComRegistryChanged:    
             {
-     		CCalenState::HandleNotificationL( aNotification, aStateMachine );
+			 CCalenState::HandleNotificationL( aNotification, aStateMachine );
             }
             break;
         case ECalenNotifySettingsClosed:

@@ -11,10 +11,9 @@
 *
 * Contributors:
 *
-* Description:   Calendar state machine
+* Description:  Calendar state machine
 *
 */
-
 
 
 #ifndef CALENPRINTINGSTATE_H

@@ -15,14 +15,18 @@
 *
 */
 
+
+
 #ifndef CALENDARINTERNALCRKEYS_H
 #define CALENDARINTERNALCRKEYS_H
 
+//#include <CalendarSDKCRKeys.h>
 
 /** Calendar UI Settings API */
 /** Provides access to the Calendar application's settings */
 
-const TUid KCRUidCalendar = {0x101F874B};
+const TUint32 KCRUidCalendar = {0x101F874B};
+
 
 /**
 * Default alarm time in minutes before event starting time.
@@ -93,56 +97,5 @@ const TReal KCalendarPersistentTime  = 0x00000009;
 * Default value: Empty
 */
 const TUint32 KCalendarPluginAvailability = 0x0000000A;
-
-/**
-* Text string containing the name of last used calendar in unified editor.
-*  Used for storing the last used calendar name
-*  Default value : "c: calendar"
-*/
-const TUint32 KCalendarLastUsedCalendar = 0x0000000B;
-
-/**
-* Used for storing latest number used for appending to c:Calendar string. 
-* Default value 0
-*/
-const TUint32 KCalendarFileNumber = 0x0000000C;
-
-/**
-* Boolean value to show missed alarm soft notification by calendar application.
-* 1 = Supress the missed alarm soft notification
-* 0= Show the missed alarm soft notification
-**/
-const TUint32 KCalendarSupressMissedAlarmSoftNotification = 0x0000000D;
-
-/**
-* Boolean value containing startup status 
-* Used for calendar files creation on first boot up
-* Value is either boolean 0 or 1
-* 0 = Off (default) calendar files not created
-* 1 = On   calendar files created
-**/
-const TUint32 KCalendarStartupStatus = 0x0000000E;
-
-/**
-* Text string containing default calendar names separated by commas
-* Used for creating default calendars at the startup of the device
-* Default value: "Personal,Family,Friends"
-*/
-const TUint32 KCalendarDefaultCalendars = 0x0000000F;
-
-/**
-* Text string containing default calendar colors separated by commas
-* Used for creating default calendars at the startup of the device
-* Default value: "16711680,65280,255"
-*/
-const TUint32 KCalendarDefaultColors = 0x00000010;
-
-/**
-* String value containing unique calendar value 
-* Used for identifying an entry by LUID + unique calendar value 
-* Default value:"0"
-*/
-const TUint32 KCalendarAvailableValue = 0x00000011;
-
 
 #endif  // CALENDARINTERNALCRKEYS_H

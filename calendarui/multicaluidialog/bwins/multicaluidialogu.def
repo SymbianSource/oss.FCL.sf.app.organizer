@@ -1,5 +1,0 @@
-EXPORTS
-	?NewL@CMultiCalUiDialog@@SAPAV1@ABV?$RPointerArray@VCCalEntry@@@@H@Z @ 1 NONAME ; class CMultiCalUiDialog * CMultiCalUiDialog::NewL(class RPointerArray<class CCalEntry> const &, int)
-	?LaunchL@CMultiCalUiDialog@@QAEHXZ @ 2 NONAME ; int CMultiCalUiDialog::LaunchL(void)
-	?NewLC@CMultiCalUiDialog@@SAPAV1@ABV?$RPointerArray@VCCalEntry@@@@H@Z @ 3 NONAME ; class CMultiCalUiDialog * CMultiCalUiDialog::NewLC(class RPointerArray<class CCalEntry> const &, int)
-

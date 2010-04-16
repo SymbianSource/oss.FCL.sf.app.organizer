@@ -21,8 +21,8 @@
 #define CPROPERTYOBSERVER_H
 
 // INCLUDES
-#include <e32base.h>
-#include <e32property.h>
+#include <E32Base.h>
+#include <E32Property.h>
 
 // CLASS DECLARATION
 

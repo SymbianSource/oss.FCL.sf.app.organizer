@@ -185,3 +185,53 @@ EXPORT_C TUint CalCommon::TCalPriorityRange::HighestPriority() const
 	{
 	return iHighestPriority;
 	}
+
+/** Creates a default favourite filter. This filter will accept any value of
+the favourite
+
+@publishedAll
+@released
+*/
+EXPORT_C CalCommon::TCalFavouriteFilter::TCalFavouriteFilter()
+	: iValue(0), iMask(0)
+	{
+	}
+
+/** Creates a user integer filter.
+
+@param aValue The bit values that the bits of the user integer must match.
+@param aMask A mask indicating which bits must be taken into account 
+when doing the user integer filtering.
+@publishedAll
+@released
+*/
+EXPORT_C CalCommon::TCalFavouriteFilter::TCalFavouriteFilter(TUint32 aValue,
+		TUint32 aMask)
+	: iValue(aValue), iMask(aMask)
+	{
+	}
+
+/** Returns the bit values that the bits of the user integer must match.
+
+@return The bit values that the bits of the user integer must match.
+@publishedAll
+@released
+*/
+EXPORT_C TUint32 CalCommon::TCalFavouriteFilter::Value() const
+	{
+	return iValue;
+	}
+
+/** Returns a mask indicating which bits must be taken into account when 
+doing the user integer filtering.
+
+@return A mask indicating which bits must be taken into account when doing 
+ the user integer filtering.
+@publishedAll
+@released
+*/
+EXPORT_C TUint32 CalCommon::TCalFavouriteFilter::Mask() const
+	{
+	return iMask;
+	}
+

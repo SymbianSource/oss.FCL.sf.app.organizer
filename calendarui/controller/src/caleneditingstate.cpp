@@ -28,12 +28,11 @@
 // First stage construction
 // ----------------------------------------------------------------------------
 CCalenEditingState* CCalenEditingState::NewLC( CCalenController& aController,
-                    RHashSet<TCalenNotification>& aOutstandingNotifications )
+                                                            RHashSet<TCalenNotification>& aOutstandingNotifications )
     {
     TRACE_ENTRY_POINT;
 
-    CCalenEditingState* self = new( ELeave ) CCalenEditingState( aController,
-                                                    aOutstandingNotifications );
+    CCalenEditingState* self = new( ELeave ) CCalenEditingState( aController, aOutstandingNotifications );
     CleanupStack::PushL( self );
     self->ConstructL();
 
@@ -58,7 +57,7 @@ void CCalenEditingState::ConstructL()
 // C++ Constructor
 // ----------------------------------------------------------------------------
 CCalenEditingState::CCalenEditingState( CCalenController& aController,
-            RHashSet<TCalenNotification>& aOutstandingNotifications )
+                                                        RHashSet<TCalenNotification>& aOutstandingNotifications )
     : CCalenState( aController, aOutstandingNotifications )
     {
     TRACE_ENTRY_POINT;
@@ -93,7 +92,7 @@ TBool CCalenEditingState::HandleCommandL( const TCalenCommand& aCommand,
      
     TBool cmdUsed = EFalse;
     switch( cmd )
-        {
+    {
     	case ECalenDeleteCurrentEntry:
     	case ECalenDeleteSeries:
     	case ECalenDeleteCurrentOccurrence:
@@ -106,6 +105,7 @@ TBool CCalenEditingState::HandleCommandL( const TCalenCommand& aCommand,
 	        cmdUsed = ETrue;
 	        break;
     		}
+    		
     	case ECalenSend: // For handling send in viewer
     		{
     		CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
@@ -116,6 +116,7 @@ TBool CCalenEditingState::HandleCommandL( const TCalenCommand& aCommand,
 	        cmdUsed = ETrue;
 	        break;	
     		}
+    		
     	case ECalenFasterAppExit:
     		{
 	        SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
@@ -123,48 +124,19 @@ TBool CCalenEditingState::HandleCommandL( const TCalenCommand& aCommand,
 	        cmdUsed = ETrue;
 	        break;
         	}
+        	
     	case ECalenGetLocation:
     	case ECalenShowLocation:
-    		{
-    		CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
-	        SetCurrentState( aStateMachine, CCalenStateMachine::ECalenMapState );
-	        SetCurrentPreviousState( aStateMachine, cachedState );
-	        ActivateCurrentStateL(aStateMachine);        
-	        cmdUsed = ETrue;
-	        break;	
-    		}
-    	case ECalenAddAttachment:
-    	case ECalenRemoveAttachment:
-    	case ECalenViewAttachmentList:
-    	case ECalenAddAttachmentFromViewer:
-            {
-            CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
-            SetCurrentState( aStateMachine, CCalenStateMachine::ECalenAttachmentState );
-            SetCurrentPreviousState( aStateMachine, cachedState );
-            ActivateCurrentStateL(aStateMachine);        
-            cmdUsed = ETrue;
-            }
-            break;
-    	case ECalenMissedEventViewFromIdle:
-    	    {
-    	    cmdUsed = ETrue;
-    	    break;
-    	    }
-    	case ECalenEventViewFromAlarm:
-    	case ECalenEventViewFromAlarmStopOnly:
-    	    {
-    	    cmdUsed = ETrue;
-    	    break;
-    	    }   
+    		{       	
+    		}	
+	
     	default:
     		break;
     		
-        }
+    }
     
 	if(cmdUsed)
-	    {
-	    RequestCallbackL( handler, aCommand );
-	    }
+		RequestCallbackL( handler, aCommand );
 	
     TRACE_EXIT_POINT;
     
@@ -187,24 +159,13 @@ void CCalenEditingState::HandleNotificationL(const TCalenNotification& aNotifica
         case ECalenNotifyInstanceSaved:
         case ECalenNotifyDialogClosed:
         case ECalenNotifyEntryDeleted:
-        case ECalenNotifyMarkedEntryCompleted:
+        case ECalenNotifyEditorClosedFromViewer:
             {
             SetCurrentState( aStateMachine, iPreviousState );
             // Let new state does the broadcast
             iOutstandingNotifications.InsertL(aNotification);
 			ActivateCurrentStateL(aStateMachine);
             }
-            break;
-        case ECalenNotifyCancelStatusUpdation:
-              {
-              SetCurrentState( aStateMachine, iPreviousState);
-              SetCurrentPreviousState( aStateMachine, GetCurrentState(aStateMachine) );
-
-              iOutstandingNotifications.InsertL(aNotification);
-              ActivateCurrentStateL(aStateMachine);
-              
-              CancelPreviousCmd(aStateMachine);
-              }
             break;
         default:
            CCalenState::HandleNotificationL( aNotification, aStateMachine );

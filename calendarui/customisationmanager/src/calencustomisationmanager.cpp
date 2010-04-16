@@ -16,22 +16,21 @@
 */
 
 
-#include <eikmenup.h>
-#include <ecom/ecom.h>
-#include <Calendar.rsg>
-#include <aknsettingitemlist.h>          // CAknSettingItem
-#include <calencommandhandler.h>
-#include <calencustomisation.h>
-#include <calenservices.h>
-#include <mcalenpreview.h>
 
-#include "calensend.h"
-#include "calenviewinfo.h"
+#include <vwsdef.h>                     // TVwsViewId
+#include <apadef.h>                     // TApaCommand
 #include "calendarui_debug.h"
+#include <hbwidget.h>
+#include <hblabel.h>
 #include "calencustomisationmanager.h"
-#include "calencontroller.h"
-#include "calensetting.h"
-#include "CalenUid.h"
+#include "calencommandhandler.h"
+#include "calenservices.h"
+#include "calencustomisation.h"
+#include <ecom/ecom.h>
+#include "calenservices.h"
+#include "calenservicesfactory.h"
+
+
 
 
 // ----------------------------------------------------------------------------
@@ -40,19 +39,16 @@
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C CCalenCustomisationManager* CCalenCustomisationManager::NewL( 
+ CCalenCustomisationManager* CCalenCustomisationManager::NewL( 
                                     MCalenServicesFactory& aFactory,
-                                    CCalenPluginStatusArray& aPluginSettingsStatus,
-                                    MCalenServices& aServices,
-                                    RPointerArray<CCalenViewInfo>& aViewArray )
+                                    MCalenServices& aServices
+                                    )
     {
     TRACE_ENTRY_POINT;
 
     CCalenCustomisationManager* self = new( ELeave ) CCalenCustomisationManager(
                                                                  aFactory,
-                                                                 aServices,
-                                                                 aViewArray,
-                                                                 aPluginSettingsStatus );
+                                                                 aServices );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -68,14 +64,9 @@ EXPORT_C CCalenCustomisationManager* CCalenCustomisationManager::NewL(
 // ----------------------------------------------------------------------------
 //
 CCalenCustomisationManager::CCalenCustomisationManager( MCalenServicesFactory& aFactory,
-                                                        MCalenServices& aServices,
-                                                        RPointerArray<CCalenViewInfo>& aViewArray,
-                                                        CCalenPluginStatusArray& aPluginSettingsStatus )
-    : iServicesFactory( aFactory ),
-      iViewInfoArray( aViewArray ),
-      iSortOrder( CCalenViewInfo::CyclePositionComparison ), 
-      iServices( aServices ),
-      iPluginSettingsStatus( aPluginSettingsStatus )
+                                                        MCalenServices& aServices )
+    : iServicesFactory( aFactory ),       
+      iServices( aServices )
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
@@ -90,15 +81,7 @@ CCalenCustomisationManager::CCalenCustomisationManager( MCalenServicesFactory& a
 void CCalenCustomisationManager::ConstructL()
     {
     TRACE_ENTRY_POINT;
-    iInfoBarProviderUid = TUid::Uid(0);
-    iPreviewPaneProviderUid = TUid::Uid(0);
-    
-    // Get a pointer to the global data and controller
-    iGlobalData = CCalenGlobalData::InstanceL();
-    
-    // Get the setting singleton. We update it when settings change.
-    iSetting = CCalenSetting::InstanceL();
-    
+
     CreateActivePluginListL();
 
     // Load any enabled plugins
@@ -113,7 +96,7 @@ void CCalenCustomisationManager::ConstructL()
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C CCalenCustomisationManager::~CCalenCustomisationManager()
+ CCalenCustomisationManager::~CCalenCustomisationManager()
     {
     TRACE_ENTRY_POINT;
 
@@ -126,96 +109,60 @@ EXPORT_C CCalenCustomisationManager::~CCalenCustomisationManager()
     iActivePlugins.Reset();
     iRomBasedPlugins.Reset();
 
-    // reset deferred unload plugins list
-    iDefferedUnloadPluginList.Reset();
-	
-	
     // Close the ECOM interface
     REComSession::FinalClose();
-
-    // Release the global data and controller
-    if ( iGlobalData )
-        {
-        iGlobalData->Release();
-        }
     
-    if(iSetting)
-        {
-        iSetting->Release();
-        }
-    iHiddenViews.Reset();
     iDefferedUnloadPluginList.Reset();
 
     TRACE_EXIT_POINT;
     }
+ // ----------------------------------------------------------------------------
+ // CCalenCustomisationManager::GetCommandHandlerL
+ // Get a command handler for a specific command.  Ownership remains with the
+ // plugin
+ // ----------------------------------------------------------------------------
+ MCalenCommandHandler* CCalenCustomisationManager::GetCommandHandlerL( TInt aCommand )
+     {
+     TRACE_ENTRY_POINT;
 
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::GetCommandHandlerL
-// Get a command handler for a specific command.  Ownership remains with the
-// plugin
-// ----------------------------------------------------------------------------
-EXPORT_C MCalenCommandHandler* CCalenCustomisationManager::GetCommandHandlerL( TInt aCommand )
-    {
-    TRACE_ENTRY_POINT;
+     MCalenCommandHandler* handler( NULL );
+     
+     // Loop though all the enabled plugins asking for a command handler
+     // to handle this command with.  Returns NULL if no plugin wants to 
+     // handle the command.
+     
+     TInt count = iPlugins.Count();
+     for ( TInt index = 0; index < count && !handler; ++index )
+         {
+         TRAPD( error,
+             // Loop though until a command handler is found
+             for (; index < count && !handler; ++index )
+                 {
+                 //if ( !iPlugins[index]->IsDisabled() )
+                     {
+                     handler = iPlugins[index]->Plugin().CommandHandlerL( aCommand );
+                     }
+                 }
+              );
 
-    MCalenCommandHandler* handler( NULL );
-    
-    // Loop though all the enabled plugins asking for a command handler
-    // to handle this command with.  Returns NULL if no plugin wants to 
-    // handle the command.
-    
-    TInt count = iPlugins.Count();
-    for ( TInt index = 0; index < count && !handler; ++index )
-        {
-        TRAPD( error,
-            // Loop though until a command handler is found
-            for (; index < count && !handler; ++index )
-                {
-                if ( !iPlugins[index]->IsDisabled() )
-                    {
-                    handler = iPlugins[index]->Plugin().CommandHandlerL( aCommand );
-                    }
-                }
-             );
+         if ( error )
+             {
+             // Report a problem with plugin.
+             }
+         }
+     
+     TRACE_EXIT_POINT;
+     return handler;
+     }
 
-        if ( error )
-            {
-            // Report a problem with plugin.
-            }
-        }
-    
-    TRACE_EXIT_POINT;
-    return handler;
-    }
 
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::GetPluginSettingsL
-// Gets custom settings from the specified plugin
-// ----------------------------------------------------------------------------
-//
-EXPORT_C void CCalenCustomisationManager::GetPluginSettingsL( TUid aPluginUid,
-                                                              RPointerArray<CAknSettingItem>& aSettingArray )
-    {
-    TRACE_ENTRY_POINT;
-
-    CCalenCustomisation* plugin = FindPluginL( aPluginUid );
-    User::LeaveIfNull( plugin );
-
-    TRAPD( error, plugin->GetCustomSettingsL( aSettingArray ));
-    if ( error )
-            {
-            // Report a problem with plugin.
-            }
-    
-    TRACE_EXIT_POINT;
-    }
 
 // ----------------------------------------------------------------------------
 // CCalenCustomisationManager::ActivePlugins
 // Returns a reference to an array of active plugins uids
 // ----------------------------------------------------------------------------
 //
-EXPORT_C const RArray<TUid>& CCalenCustomisationManager::ActivePlugins() const
+ const RArray<TUid>& CCalenCustomisationManager::ActivePlugins() const
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
@@ -235,31 +182,25 @@ void CCalenCustomisationManager::CreateActivePluginListL()
     iPluginInfo.ResetAndDestroy();
     iActivePlugins.Reset();
     iRomBasedPlugins.Reset();
-    
+
     //Added resolver for corolla release
     // Set resolver params
-    /*TLanguage lang = User::Language();
+    TLanguage lang = User::Language();
     TBuf8<40> langStr;
     langStr.Format( _L8("language(%d)"), lang );
 
     TEComResolverParams resolverParams;
     resolverParams.SetDataType( langStr );
-    resolverParams.SetGenericMatch( ETrue );*/
+    resolverParams.SetGenericMatch( ETrue );
     
-    REComSession::ListImplementationsL( KCalenCustomisationInterfaceUid,/* resolverParams,*/ iPluginInfo );
-    
-    LoadPluginsBasedOnVariantL();
-    
+   // REComSession::ListImplementationsL( KCalenCustomisationInterfaceUid, resolverParams, iPluginInfo );
+    REComSession::ListImplementationsL( KCalenCustomisationInterfaceUid, iPluginInfo );
     TInt pluginCount = iPluginInfo.Count();
     
     for ( TInt pluginIndex(0); pluginIndex < pluginCount; ++pluginIndex )
         {
         TUid pluginUid = iPluginInfo[pluginIndex]->ImplementationUid();
         
-        // Find the plugin in the list of known plugins 
-        TInt position = iPluginSettingsStatus.Find( pluginUid, PluginAvailabilityFinder );
-        if ( ( position == KErrNotFound ) || ( iPluginSettingsStatus[position].iEnabled ) )
-            {
             // If the plugin can not be found or if it is enabled
             // add it to the list of active plugins
             iActivePlugins.AppendL( pluginUid );
@@ -269,117 +210,8 @@ void CCalenCustomisationManager::CreateActivePluginListL()
                 {
                 iRomBasedPlugins.AppendL( pluginUid );
                 }
-            }
-        }
-
-    TRACE_EXIT_POINT;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::GetCustomViewsL
-// GetCustomViews returns custom views info in an array for a given
-// plugin. 
-// NOTE: The contents of the array are owned by the caller - caller
-// must guarantee to call ResetAndDestroy on the array in all cases.
-// ----------------------------------------------------------------------------
-//
-EXPORT_C void CCalenCustomisationManager::GetCustomViewsL( TUid aPluginUid, 
-                                                           RPointerArray<CCalenView>& aViews )
-    {
-    TRACE_ENTRY_POINT;
-
-    CCalenCustomisation* plugin = FindPluginL( aPluginUid );
-    User::LeaveIfNull( plugin );
-    
-    TRAPD( error, plugin->GetCustomViewsL( aViews ));
-    if ( error )
-        {
-        // Report a problem with plugin.
-        }
-
-    TInt numViews = aViews.Count();
-    for ( TInt index( 0 ); index < numViews; ++index )
-        {
-        CCalenView* customView = aViews[index];
-
-        // Add to view info array
-        const TUid viewId = customView->Id();
-        
-         // Check for duplicate view ids. 
-        TInt position = iViewInfoArray.Find( viewId , 
-                                     CCalenViewInfo::ViewInfoIdentifier );
-                                     
-        if ( position == KErrNotFound )
-            {
-            const TDesC& menuName = customView->LocalisedViewNameL( CCalenView::EMenuName );
-            const TDesC& settingsName = customView->LocalisedViewNameL( CCalenView::ESettingsName );
-            const CCalenView::TCyclePosition cyclePos = customView->CyclePosition();
-
-            CCalenViewInfo* viewInfo = CCalenViewInfo::NewL( viewId,
-                                                             aPluginUid, 
-                                                             menuName,
-                                                             settingsName,
-                                                             cyclePos );
-                                                             
-            // Check if the view has already been hidden.
-            TBool hidden = ( iHiddenViews.Find( viewId.iUid ) != KErrNotFound );
-            viewInfo->Hide( hidden );                     
-                                                             
-            ViewInfoArray().InsertInOrderAllowRepeatsL( viewInfo, iSortOrder );
-            }
-         else
-            {
-            // A plugin with the same id already exists. ( It could be a replacement
-            // view provided by a rom plugin, as currently preventing rom plugins from
-            // being disabled if required is not implemented, it needs to be handled)
-            delete customView;
-            aViews.Remove( index );
-            index--; 
-            numViews--;
             
-            // Report a problem with plugin.
-            }
-         }
-	RArray<TInt> hiddenViews;
-    CleanupClosePushL( hiddenViews );
-    plugin->RemoveViewsFromCycle( hiddenViews );
-    TInt hiddenViewCount = hiddenViews.Count();
-    if ( hiddenViewCount )
-       {
-       // Get the default view form the settings to check if it is going to be hidden
-       // by the installed plugin
-       TUid defaultView = iSetting->DefaultView();
-       for ( TInt index(0); index < hiddenViewCount; ++index )
-           {
-           TInt hiddenViewId = hiddenViews[index];
-          // iHiddenViews.InsertInOrderAllowRepeatsL( hiddenViewId );
-                       
-           // If this view is already on the view cycle list it needs
-           // to be hidden.
-           TUid hiddenViewUid = TUid::Uid( hiddenViewId );
-                       
-           // If the current default view is hidden, then set the newly
-           // installed plugin view as default view
-           if(defaultView == hiddenViewUid)
-               {
-               TInt position = iViewInfoArray.Find( aPluginUid, 
-                                                    CCalenViewInfo::ViewPluginIdentifier );
-               if(position != -1)
-                   {
-                   for(TInt i = position; i < iViewInfoArray.Count(); i++)
-                       {
-                       if((iViewInfoArray[i]->PluginUid() == aPluginUid) &&
-                               (iViewInfoArray[i]->CyclePosition() != CCalenView::ENoCyclePosition))
-                           {
-                           iSetting->SetDefaultView(iViewInfoArray[i]->ViewUid());
-                           break;
-                           }
-                       }
-                   }
-               }
-           }
-       }
-   CleanupStack::PopAndDestroy(); // removedViews
+        }
 
     TRACE_EXIT_POINT;
     }
@@ -389,7 +221,7 @@ EXPORT_C void CCalenCustomisationManager::GetCustomViewsL( TUid aPluginUid,
 // Enables or disables the given plugin.
 // ----------------------------------------------------------------------------
 //
-EXPORT_C void CCalenCustomisationManager::SetPluginAvailabilityL( TUid aPluginUid,
+ void CCalenCustomisationManager::SetPluginAvailabilityL( TUid aPluginUid,
                                                                   TBool aEnabled )
     {
     TRACE_ENTRY_POINT;
@@ -431,53 +263,14 @@ EXPORT_C void CCalenCustomisationManager::SetPluginAvailabilityL( TUid aPluginUi
             TInt position = iActivePlugins.Find( aPluginUid );
             ASSERT( position != KErrNotFound );
             
-            iActivePlugins.Remove( position );
-             
-            // Does this plugin hide any views
-            RArray<TInt> removedViews;
-            CleanupClosePushL( removedViews );
-            CCalenCustomisation& plugin = pluginInfo->Plugin();
-            plugin.RemoveViewsFromCycle( removedViews );
-            TInt hiddenViewsCount = removedViews.Count();
-            if ( hiddenViewsCount )
-                {
-                // Need to recalculate which views have been hidden, as 
-                // more than one plugin might have hidden the same view.
-                for ( TInt index( 0 ); index < hiddenViewsCount; ++index )
-                    {
-                    TUid viewUid = TUid::Uid( removedViews[index] );
-                    CheckHiddenViewL( viewUid, aPluginUid );
-                    }
-                }
+            iActivePlugins.Remove( position );         
 
-            // If the plugin does not offer any views, or the current
-            // info or preview bar it can be deleted immediately,
-            // otherwise the customisation needs to wait until it
-            // is told it is safe to do so.
-
-            // Does this plugin does not offer any views and the plugin
-            // doesn't offer the current infobar or preview pane
-            // bar it can be deleted immediately
-            TInt offerViews = iViewInfoArray.Find( aPluginUid, 
-                                       CCalenViewInfo::ViewPluginIdentifier );
-                                              
-            if ( offerViews == KErrNotFound &&
-                 iInfoBarProviderUid != aPluginUid
-                 && iPreviewPaneProviderUid != aPluginUid )
-                {
-                RArray<TUid> pluginArray;
-                CleanupClosePushL( pluginArray );
-                pluginArray.AppendL( aPluginUid );
-                UnloadPluginsL( pluginArray );
-                CleanupStack::PopAndDestroy(); // pluginArray
-                }
 
             // Issue notification of plugin been disabled
-            iPluginsEnabledDisabled = ETrue;
-            iServices.IssueNotificationL( ECalenNotifyPluginEnabledDisabled );
-            CleanupStack::PopAndDestroy(); // removedViews
+            iPluginsEnabledDisabled = ETrue;            
+            
             }
-        }
+            }
         
 
     TRACE_EXIT_POINT;
@@ -490,7 +283,7 @@ EXPORT_C void CCalenCustomisationManager::SetPluginAvailabilityL( TUid aPluginUi
 // is called when it is safe to unload the plugin.
 // ----------------------------------------------------------------------------
 //
-EXPORT_C void CCalenCustomisationManager::UnloadPluginsL( const RArray<TUid>& aPlugins )
+ void CCalenCustomisationManager::UnloadPluginsL( const RArray<TUid>& aPlugins )
     {
     TRACE_ENTRY_POINT;
     // Check plugin isn't already enabled
@@ -500,20 +293,17 @@ EXPORT_C void CCalenCustomisationManager::UnloadPluginsL( const RArray<TUid>& aP
         TInt position = iPlugins.Find( aPlugins[index], CPluginInfo::Identifier );
         if ( position != KErrNotFound ) 
 	        {
-        	if((iInfoBarProviderUid != iPlugins[position]->Uid())
-        		&& (iPreviewPaneProviderUid != iPlugins[ position]->Uid()))
-	            {
-	            CPluginInfo* removedPlugin = iPlugins[ position ];
-	            iPlugins.Remove( position );
-	            delete removedPlugin;
-	            }
-        	else 
-	        	{
-	        	iPlugins[position]->Disable(ETrue);
-				iDefferedUnloadPluginList.AppendL(iPlugins[position]->Uid());
-				iInfoBarProviderUid = KNullUid;
-				iPreviewPaneProviderUid = KNullUid;
-	        	}
+	        	if((iInfoBarProviderUid != iPlugins[position]->Uid()))
+		            {
+		            CPluginInfo* removedPlugin = iPlugins[ position ];
+		            iPlugins.Remove( position );
+		            delete removedPlugin;
+		            }
+	        	else 
+		        	{
+		        	iPlugins[position]->Disable(ETrue);
+					iDefferedUnloadPluginList.AppendL(iPlugins[position]->Uid());
+		        	}
 		   }
         }
     TRACE_EXIT_POINT;
@@ -551,83 +341,7 @@ void CCalenCustomisationManager::EnablePluginL( TUid aPluginUid )
     
     TRACE_EXIT_POINT;
     }
-	
-	
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::LoadPluginsBasedOnVariant
-// From MCalenNotificationHandler. Handles notifications.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CCalenCustomisationManager::LoadPluginsBasedOnVariantL()
-    {
-    TRACE_ENTRY_POINT
     
-    TLanguage lang = User::Language();
-    
-    // Based on the variant the plugins will be loaded
-    // Eg. for 01 Euro regional plugins are not needed so all regional plugins will be removed 
-    // other than non regional plugins.
-    // for Chinese variant Thai and vietnamese plugins will be removed 
-    // leaving chinese plugin and other non regional plugins.
-    RArray<TUid> needsToBeRemoved;  
-    
-    switch(lang)
-        {
-        case ELangThai:
-        case ELangEnglish_Thailand:
-            needsToBeRemoved.Append(KCalenChineseImplUid);
-            needsToBeRemoved.Append(KCalenVietnameseImplUid);
-            break;
-        case ELangTaiwanChinese:
-        case ELangHongKongChinese:
-        case ELangPrcChinese:
-            needsToBeRemoved.Append(KCalenThaiImplUid);
-            needsToBeRemoved.Append(KCalenVietnameseImplUid);
-            break;
-        case ELangVietnamese:
-            needsToBeRemoved.Append(KCalenThaiImplUid);
-            needsToBeRemoved.Append(KCalenChineseImplUid);
-            break;
-        default:
-            needsToBeRemoved.Append(KCalenThaiImplUid);
-            needsToBeRemoved.Append(KCalenChineseImplUid);
-            needsToBeRemoved.Append(KCalenVietnameseImplUid);
-            break;
-        }
-    
-    if(needsToBeRemoved.Count())
-        {
-        for(TInt i = 0 ; i < needsToBeRemoved.Count() ; i++)
-            {
-            TInt index = iPluginInfo.Find(needsToBeRemoved[i],CCalenCustomisationManager::PluginInfoFinder);
-            if( index != KErrNotFound )
-                {
-                CImplementationInformation* impl = iPluginInfo[index];
-                iPluginInfo.Remove(index);
-                delete impl;
-                }
-            }
-        }
-    
-    needsToBeRemoved.Close();
-    
-    TRACE_EXIT_POINT
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::PluginInfoFinder(
-// Matches an uid in pluginInfo.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-TBool CCalenCustomisationManager::PluginInfoFinder( const TUid* aUid  , const CImplementationInformation&  aArrayItem)
-    {
-    TRACE_ENTRY_POINT; 
-    TRACE_EXIT_POINT;
-    return (*aUid  == aArrayItem.ImplementationUid() );
-    }
-
 // ----------------------------------------------------------------------------
 // CCalenCustomisationManager::HandleNotificationL
 // From MCalenNotificationHandler. Handles notifications.
@@ -656,51 +370,10 @@ void CCalenCustomisationManager::HandleNotification(const TCalenNotification aNo
 void CCalenCustomisationManager::HandleNotificationL(TCalenNotification aNotification)
     {
     TRACE_ENTRY_POINT;
-    
-     switch( aNotification )
-        {
-        case ECalenNotifyCheckPluginUnloading:
-        	{
-        	if(iDefferedUnloadPluginList.Count() > 0)
-	        	{
-	        	UnloadPluginsL(iDefferedUnloadPluginList);
-	        	}
-        	}
-        	break;
-        case ECalenNotifySettingsChanged:
-	        {
-		    // Make sure that any plugins marked as enabled are enabled, and
-		    // any plugins marked as disabled are disabled.
-		    iPluginsEnabledDisabled = EFalse;
-		    TInt pluginCount = iPluginSettingsStatus.Count();
-		    for ( TInt pluginIndex(0); pluginIndex < pluginCount; ++pluginIndex )
-		        {
-		        TUid pluginUid = iPluginSettingsStatus[pluginIndex].iUid;
-		        TBool enabled = iPluginSettingsStatus[pluginIndex].iEnabled;
-		 
-		        SetPluginAvailabilityL( pluginUid, enabled );
-		        }
-		        
-		    if ( iPluginsEnabledDisabled )
-		        {
-		        iServices.IssueNotificationL( ECalenNotifySettingsChanged );
-		        }
-	        }
-	        break;
-        case ECalenNotifyEComRegistryChanged:
-            {
-            CreateActivePluginListL();
-            iSetting->UpdatePluginListL(*this);
-            DoImmediatePluginLoadingL();
-            iServices.IssueNotificationL(ECalenNotifyPluginEnabledDisabled);
-            iServices.IssueNotificationL(ECalenNotifySettingsChanged );
-            }
-	  default:
-            break; 
-        }
-
-	  TRACE_EXIT_POINT;
+	Q_UNUSED(aNotification);
+	TRACE_EXIT_POINT;
     }  
+
 
 // ----------------------------------------------------------------------------
 // CCalenCustomisationManager::PluginInfoArray
@@ -708,25 +381,14 @@ void CCalenCustomisationManager::HandleNotificationL(TCalenNotification aNotific
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C const RImplInfoPtrArray& CCalenCustomisationManager::PluginInfoArray() const
+ const RImplInfoPtrArray& CCalenCustomisationManager::PluginInfoArray() const
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
     return iPluginInfo;
     }
 
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::Views
-// Returns a const reference to the views array.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-EXPORT_C const RPointerArray<CCalenViewInfo>& CCalenCustomisationManager::Views() const
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return iViewInfoArray;
-    }
+
 
 // ----------------------------------------------------------------------------
 // CCalenCustomisationManager::DoImmediatePluginLoadingL
@@ -765,7 +427,7 @@ void CCalenCustomisationManager::DoImmediatePluginLoadingL()
                 }
             }
         }
-   
+
     TRACE_EXIT_POINT;
     }
 
@@ -781,7 +443,7 @@ void CCalenCustomisationManager::LoadPluginL( TUid aPluginUid )
 
     // Get a new services object from global data
     MCalenServices* services = iServicesFactory.NewServicesL();
-    
+
     // Creates the plugin and transfers ownership of the services
     // object to the plugin.
     CCalenCustomisation* plugin = 
@@ -793,501 +455,108 @@ void CCalenCustomisationManager::LoadPluginL( TUid aPluginUid )
     AddPluginL( plugin, aPluginUid  );
     CleanupStack::Pop( plugin );
 
-        
-    RArray<TInt> hiddenViews;
-    CleanupClosePushL( hiddenViews );
-    plugin->RemoveViewsFromCycle( hiddenViews );
-    TInt hiddenViewCount = hiddenViews.Count();
-    if ( hiddenViewCount )
-        {
-        // Get the default view form the settings to check if it is going to be hidden
-        // by the installed plugin
-        TUid defaultView = iSetting->DefaultView();
-        for ( TInt index(0); index < hiddenViewCount; ++index )
-            {
-            TInt hiddenViewId = hiddenViews[index];
-            iHiddenViews.InsertInOrderAllowRepeatsL( hiddenViewId );
-            
-            // If this view is already on the view cycle list it needs
-            // to be hidden.
-            TUid hiddenViewUid = TUid::Uid( hiddenViewId );
-            
-            // If the current default view is hidden, then set the newly
-            // installed plugin view as default view
-            if(defaultView == hiddenViewUid)
-            	iSetting->SetDefaultView(aPluginUid);
-            
-            TInt position = iViewInfoArray.Find( hiddenViewUid, 
-                                     CCalenViewInfo::ViewInfoIdentifier );
-                                     
-            if ( position != KErrNotFound )
-                {
-                CCalenViewInfo* viewInfo = iViewInfoArray[position];
-                viewInfo->Hide( ETrue );
-                
-                // By hiding the view, the cycleposition order may be changed
-                // so the view info array needs to be resorted.
-                iViewInfoArray.Sort( iSortOrder );
-                }
-            }
-        }
-    CleanupStack::PopAndDestroy(); // removedViews
 
     TRACE_EXIT_POINT;
     }
 
- // ----------------------------------------------------------------------------
-// CCalenCustomisationManager::OfferMenuPaneL
-// Offers a menupane for customisation by plugins
-// and the controller.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-EXPORT_C void CCalenCustomisationManager::OfferMenuPaneL( TInt aResourceId,
-                                                          CEikMenuPane* aMenuPane )
-    {
-    TRACE_ENTRY_POINT;
+ 
 
-    // Offer the menu to registered plugins
-    OfferMenuPaneToPluginsL( aResourceId, aMenuPane );
-
-    // If the menupane is a main menu, a check needs to be made that the
-    // exit and switch view commands exist
-
-    // Replace the send menu if it exists
-    TInt position( 0 );
-    if ( aMenuPane->MenuItemExists( ECalenSend, position) )
-        {
-        // Delete the existing send menu option
-        aMenuPane->DeleteMenuItem(ECalenSend);
-
-        // Insert the calensend menu item
-        iGlobalData->CalenSendL().DisplaySendMenuItemL( *aMenuPane, position );
-        } 
-
-    // If the menu has a view switch menu item, it is up to the 
-    // customisation manager to decide if the menu should be 
-    // cascading or a selection list box. 
-    if ( aMenuPane->MenuItemExists( ECalenSwitchView, position) )
-        {
-        CEikMenuPaneItem::SData& switchItem =  aMenuPane->ItemData( ECalenSwitchView );
-        if ( iActivePlugins.Count() == 0 )
-            {
-            // Create a cascading menu
-            switchItem.iCascadeId = R_CALENDAR_CHANGE_VIEW_MENUPANE;
-            }
-        else
-            {
-            switchItem.iCascadeId = 0;
-            }
-        }
-
-    TRACE_EXIT_POINT;
-    }
-    
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::CheckHiddenViewL(
-// A check needs to be made to see if any other plugins hide the same view.
-// ----------------------------------------------------------------------------
-//
-void CCalenCustomisationManager::CheckHiddenViewL( TUid aViewUid, TUid aPluginUid )
-    {
-    TRACE_ENTRY_POINT;
-    
-    // Find the viewId in the hidden view list, and remove it
-    TInt viewId = aViewUid.iUid;
-    TInt position = iHiddenViews.Find( viewId );
-    if ( position != KErrNotFound )
-        {
-        iHiddenViews.Remove( position );
-        
-        // Try to find the view again, in case it is hidden by another view
-        position = iHiddenViews.Find( viewId );
-        if ( position == KErrNotFound )
-            {
-            // If it can't be found in the hidden view list,
-            // it can be unhidden. 
-            TInt viewInfoPos = iViewInfoArray.Find( aViewUid , 
-                                     CCalenViewInfo::ViewInfoIdentifier );
-                                     
-            if ( viewInfoPos != KErrNotFound )
-                {
-                // Unhide the view
-                CCalenViewInfo* viewInfo = iViewInfoArray[viewInfoPos];
-                viewInfo->Hide( EFalse );
-                
-                // Set hidden view as default view if the currently disabled plugin
-                // is the default view
-                TInt position = iViewInfoArray.Find( aPluginUid, 
-                                                           CCalenViewInfo::ViewPluginIdentifier );
-                if(position != -1)
-                  {
-                  for(TInt i = position; i < iViewInfoArray.Count(); i++)
-                      {
-                      if((iViewInfoArray[i]->PluginUid() == aPluginUid) &&
-                              iViewInfoArray[i]->ViewUid() == iSetting->DefaultView())
-                          {
-                          iSetting->SetDefaultView(aViewUid);
-                          break;
-                          }
-                      }
-                  }
-                                
-                // By unhiding the view, the cycleposition order may be changed
-                // so the view info array needs to be resorted.
-                iViewInfoArray.Sort( iSortOrder );
-                }
-            }
-        }
-    TRACE_EXIT_POINT;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::GetReplacePluginViewIdL
-// Returns the view ID of the plugin that hides a particular view
-// ----------------------------------------------------------------------------
-//
-EXPORT_C TUid CCalenCustomisationManager::GetReplacePluginViewIdL( TUid aHiddenViewId )
-	{
-	TRACE_ENTRY_POINT;
-	
-	RArray<TInt> removedViews;
-	CCalenCustomisation* plugin = NULL;
-	TInt i = 0;
-	for( ;i < iActivePlugins.Count(); i++)
-	{
-        plugin = FindPluginL(iActivePlugins[i]);
-		plugin->RemoveViewsFromCycle(removedViews);
-		if(removedViews.Count())
-		{
-			TInt position = removedViews.Find(aHiddenViewId.iUid);
-			if(position != KErrNotFound)
-			    break;
-			else
-				continue;
-		    }
-		else
-		    {
-			continue;
-		    }	
-	    }
-	removedViews.Reset();
-	
-	// Get all the views provided by the plugin
-	//plugin->GetCustomViewsL()
-	TInt position = iViewInfoArray.Find( iActivePlugins[i], 
-	                                       CCalenViewInfo::ViewPluginIdentifier );
-	while((position < iViewInfoArray.Count()) && ((iViewInfoArray[position]->CyclePosition() == CCalenView::ENoCyclePosition) ||
-	        (iActivePlugins[i] != (iViewInfoArray[position]->PluginUid()))))
-	    {
-	    // go to the next view position
-	    position++;
-	    }
-    TRACE_EXIT_POINT;   
-
-    return (iViewInfoArray[position]->ViewUid());
-	}
-
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::GetReplacePluginViewIdL
-// Returns the hidden views list 
-// ----------------------------------------------------------------------------
-//
-EXPORT_C void CCalenCustomisationManager::GetHiddenViewIdL( TUid aPluginUid, RArray<TInt>& aHiddenViews )
-	{
-	TRACE_ENTRY_POINT;
-	
-	// Get the plugin instance
-	CCalenCustomisation* plugin = FindPluginL(aPluginUid);
-	
-	plugin->RemoveViewsFromCycle(aHiddenViews);
-	
-	TRACE_EXIT_POINT;	
-	}
-
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::CustomPreviewPaneL
-// Returns the preview pane
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-EXPORT_C MCalenPreview* CCalenCustomisationManager::CustomPreviewPaneL( TRect& aRect )
-	{
-	MCalenPreview* previewPane = NULL;
-   
-   
-    // Loop though all the command handlers, within two interlinked
-    // for loops. If PreviewPaneL leaves for one plugin, a plugin
-    // error message will be displayed and the loop will continue with
-    // the next command handler. If none of the plugins leave, there will
-    // be only one TRAP used.
-    TInt count = iPlugins.Count();
-    for ( TInt index = 0; index < count && !previewPane; ++index )
-        {
-        TRAPD( error,
-                {
-                 // Loop though until an infobar is found
-                for (; index < count && !previewPane; ++index )
-                    {
-                    if ( !iPlugins[index]->IsDisabled() )
-                        {
-                        previewPane = iPlugins[index]->Plugin().CustomPreviewPaneL( aRect );
-                        }
-                    }
-                }
-             );
-        if ( error )
-            {
-            // Report a problem with plugin.
-            }
-        }
-    
-    TRACE_EXIT_POINT;
-    return previewPane;
-	}
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::PreviewPane
-// Returns the preview pane
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-EXPORT_C CCoeControl* CCalenCustomisationManager::PreviewPane(   TRect& aRect  )
-    {
-    TRACE_ENTRY_POINT;
-	
-    iInfoBarProviderUid = TUid::Uid(0);;		
-    iPreviewPaneProviderUid = TUid::Uid(0);
-    
-    CCoeControl* previewPane = NULL;
-   
-    // Loop though all the command handlers, within two interlinked
-    // for loops. If PreviewPaneL leaves for one plugin, a plugin
-    // error message will be displayed and the loop will continue with
-    // the next command handler. If none of the plugins leave, there will
-    // be only one TRAP used.
-    TInt count = iPlugins.Count();
-    for ( TInt index = 0; index < count && !previewPane; ++index )
-        {
-        TRAPD( error,
-            // Loop though until an infobar is found
-            for (; index < count && !previewPane; ++index )
-                {
-                
-                if ( !iPlugins[index]->IsDisabled() )
-                    {
-                    previewPane = iPlugins[index]->Plugin().PreviewPaneL( aRect );
-                    if(previewPane)
-						{
-                    	iPreviewPaneProviderUid = iPlugins[index]->Uid();
-						}
-                    }
-                
-                }
-             );
-
-        if ( error )
-            {
-            // Report a problem with plugin.
-            }
-        }
-    
-    TRACE_EXIT_POINT;
-    return previewPane;
-    }
 
 // ----------------------------------------------------------------------------
 // CCalenCustomisationManager::Infobar
 // Returns the infobar.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
-EXPORT_C CCoeControl* CCalenCustomisationManager::Infobar(const  TRect& aRect )
+ HbWidget* CCalenCustomisationManager::Infobar( )
     {
     TRACE_ENTRY_POINT;
 
     iInfoBarProviderUid = TUid::Uid(0);
-    iPreviewPaneProviderUid = TUid::Uid(0);
-    
-    CCoeControl* infoBar = NULL;
+       
+    HbWidget* infoBar =NULL;
     // Loop though all the command handlers, within two interlinked
     // for loops. If GetInfoBarL leaves for one plugin, a plugin
     // error message will be displayed and the loop will continue with
     // the next command handler. If none of the plugins leave, there will
     // be only one TRAP used.
     TInt count = iPlugins.Count();
+    /*if(count > 0)
+        {
+        infoBar = iPlugins[0]->Plugin().InfobarL();
+        iInfoBarProviderUid = iPlugins[0]->Uid();
+        }*/
+    
     for ( TInt index = 0; index < count && !infoBar; ++index )
         {
         TRAPD( error,
             // Loop though until an infobar is found
             for (; index < count && !infoBar; ++index )
                 {
-                if ( !iPlugins[index]->IsDisabled() )
+                //if ( !iPlugins[index]->IsDisabled() )
                     {
-                    infoBar = iPlugins[index]->Plugin().InfobarL( aRect  );
+                    infoBar = iPlugins[index]->Plugin().InfobarL();
                     iInfoBarProviderUid = iPlugins[index]->Uid();
                     }
                 }
              );
-
-        if ( error )
-            {
-            // Report a problem with plugin.
-            }
+        if(error)
+        	{
+        		// Need to handle the error case
+        	}
         }
         
     TRACE_EXIT_POINT;   
     return infoBar;
     }
-    
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::Infobar
-// Returns the infobar.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-EXPORT_C const TDesC& CCalenCustomisationManager::Infobar()
-    {
-    TRACE_ENTRY_POINT;
 
-    iInfoBarProviderUid = TUid::Uid(0);
-    iPreviewPaneProviderUid = TUid::Uid(0);
-    
-    iInfoBarStr.Set(KNullDesC);
-    // Loop though all the command handlers, within two interlinked
-    // for loops. If GetInfoBarL leaves for one plugin, a plugin
-    // error message will be displayed and the loop will continue with
-    // the next command handler. If none of the plugins leave, there will
-    // be only one TRAP used.
-    TBool infoBarFound = EFalse;
-    TInt count = iPlugins.Count();
-    for ( TInt index = 0; index < count && !infoBarFound; ++index )
-        {
-        TRAPD( error,
-            // Loop though until an infobar is found
-            for (; index < count && !infoBarFound; ++index )
-                {
-                if ( !iPlugins[index]->IsDisabled() )
-                    {
-                    iInfoBarStr.Set( iPlugins[index]->Plugin().InfobarL() );
-                    if(iInfoBarStr.Length())
-                        {
-                        infoBarFound = ETrue;
-                        }
-                    iInfoBarProviderUid = iPlugins[index]->Uid();
-                    }
-                }
-             );
+ // ----------------------------------------------------------------------------
+ // CCalenCustomisationManager::InfobarTextL
+ // @returns info bar text
+ // (other items were commented in a header).
+ // ----------------------------------------------------------------------------
+ //
+ QString* CCalenCustomisationManager::InfobarTextL()
+     {
+     TRACE_ENTRY_POINT;
 
-        if ( error )
-            {
-            // Report a problem with plugin.
-            }
-        }
-        
-    TRACE_EXIT_POINT;   
-    return iInfoBarStr;
-    }
-    
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::HiddenView
-// Return ETrue if a view has been hidden by a plugin
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//         
-EXPORT_C TBool CCalenCustomisationManager::HiddenView( TUid aHiddenView) const
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return ( iHiddenViews.Find( aHiddenView.iUid ) != KErrNotFound );
-    }
-    
-    
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::RomBased(
-// Return ETrue if a view has been provided by a rom-based plugin
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//  
-EXPORT_C TBool CCalenCustomisationManager::IsViewRomBased( TUid aViewUid ) const
-    {
-    TRACE_ENTRY_POINT;
-    
-    TBool isRomBased = EFalse;
-    
-    TInt viewInfoPos = iViewInfoArray.Find( aViewUid , 
-                                     CCalenViewInfo::ViewInfoIdentifier );
-    if ( viewInfoPos != KErrNotFound )
-        {
-        TUid plugUid = iViewInfoArray[viewInfoPos]->PluginUid();
-        TInt position = iRomBasedPlugins.Find( plugUid );
-        if ( position != KErrNotFound )
-            {
-            isRomBased = ETrue;
-            }
-        }
-    
-    TRACE_EXIT_POINT;
-    return isRomBased;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::CanBeEnabledDisabled(
-// Return ETrue if plugins can be enabled/disabled from settings
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-EXPORT_C TBool CCalenCustomisationManager::CanBeEnabledDisabledL(TUid aPluginUid)
-    {
-    TRACE_ENTRY_POINT;
-    TBool enabledDisabled = EFalse;
-    
-    CCalenCustomisation* plugin = FindPluginL(aPluginUid);
-    if(plugin)
-		{
-        enabledDisabled = plugin->CanBeEnabledDisabled();
-		}
-    
-    TRACE_EXIT_POINT;
-    return enabledDisabled;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::OfferMenuPaneL
-// Offers a menupane to all interested plugins
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CCalenCustomisationManager::OfferMenuPaneToPluginsL( TInt aResourceId,
-                                                          CEikMenuPane* aMenuPane )
-    {
-    TRACE_ENTRY_POINT;
-
-    // Get the number of command handlers
- //   TInt count = iCommandHandlers.Count();
-    const TInt count = iPlugins.Count();
-
-    // Loop though all the command handlers, within two interlinked
-    // for loops. If customiseMenuPane leaves for one plugin, a plugin
-    // error message will be displayed and the loop will continue with
-    // the next command handler. If none of the plugins leave, there will
-    // be only one TRAP used.
-    for ( TInt index = 0; index < count; ++index )
-        {
-        TRAPD( error,
-            for (; index < count; ++index )
-                {
-                iPlugins[index]->Plugin().CustomiseMenuPaneL( aResourceId,
-                                                             aMenuPane );
-                                                             
-                // The commands added should be checked to see that
-                // they match the expected command range for the plugin
-                }
-             );
+         iInfoBarProviderUid = TUid::Uid(0);
+            
+         QString* infoBarText =NULL;
+         // Loop though all the command handlers, within two interlinked
+         // for loops. If GetInfoBarL leaves for one plugin, a plugin
+         // error message will be displayed and the loop will continue with
+         // the next command handler. If none of the plugins leave, there will
+         // be only one TRAP used.
+         TInt count = iPlugins.Count();
+         /*if(count > 0)
+             {
+             infoBar = iPlugins[0]->Plugin().InfobarL();
+             iInfoBarProviderUid = iPlugins[0]->Uid();
+             }*/
          
-        if ( error )
-            {
-            // Report a problem with plugin.
-            }
-        }
-
-    TRACE_EXIT_POINT;
-    }
+         for ( TInt index = 0; index < count && !infoBarText; ++index )
+             {
+             TRAPD( error,
+                 // Loop though until an infobar is found
+                 for (; index < count && !infoBarText; ++index )
+                     {
+                     //if ( !iPlugins[index]->IsDisabled() )
+                         {
+                         infoBarText = iPlugins[index]->Plugin().InfobarTextL();
+                         iInfoBarProviderUid = iPlugins[index]->Uid();
+                         }
+                     }
+                  );
+             if(error)
+		        	{
+		        		// Need to handle the error case
+		        	}
+             
+             }
+             
+         TRACE_EXIT_POINT;   
+         return infoBarText;
+     }
 
 // ----------------------------------------------------------------------------
 // CCalenCustomisationManager::FindPluginL
@@ -1400,6 +669,8 @@ TBool CCalenCustomisationManager::CPluginInfo::IsDisabled()
      
     TRACE_EXIT_POINT;
     }
+    
+  
 
 // ----------------------------------------------------------------------------
 // CCalenCustomisationManager::AddPluginL
@@ -1436,22 +707,10 @@ TBool CCalenCustomisationManager::CPluginInfo::Identifier( const TUid* aUid,
     return ( *aUid == aArray.Uid() ); 
     }
 
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::ViewInfoArray
-// returns a reference to the view info array.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------      
-//
-RPointerArray<CCalenViewInfo>& CCalenCustomisationManager::ViewInfoArray()
-    {
-    TRACE_ENTRY_POINT;
 
-    TRACE_EXIT_POINT;
-    return iViewInfoArray;
-    }    
     
 // ----------------------------------------------------------------------------
-// CCalenCustomisationManager::PluginAvailabilityFinder
+// CCalenCustomisationManager::Identifier(
 // Matches an uid and a plugin uid. Used by when finding the disabled plugins
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
@@ -1463,126 +722,47 @@ TBool CCalenCustomisationManager::PluginAvailabilityFinder( const TUid* aUid,
     TRACE_EXIT_POINT;
     
     return ( *aUid == aArrayItem.iUid); 
-    }    
+    }   
 
 // ----------------------------------------------------------------------------
-// CCalenCustomisationManager::DoPluginLoadingL
-// Load all plugins 
-// ----------------------------------------------------------------------------
-//
-EXPORT_C void CCalenCustomisationManager::DoPluginLoadingL()
-    {
-    TRACE_ENTRY_POINT;
-    // Reset and destroy the contents of the owned arrays
-    iPlugins.ResetAndDestroy();
-
-    iPluginInfo.ResetAndDestroy();
-
-    iActivePlugins.Reset();
-
-    iHiddenViews.Reset();
-    iDefferedUnloadPluginList.Reset();
-    // create active plugin list
-    CreateActivePluginListL();
-    
-    DoImmediatePluginLoadingL();
-    iSetting->LoadL();
-    iSetting->UpdatePluginListL(*this);
-    
-    TRACE_EXIT_POINT;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::DisableAllPluginsL
-// Disable all plugins 
+// CCalenCustomisationManager::OfferMenu
+// Offers a menupane for customisation by plugins
+// and the controller.
+// (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C void CCalenCustomisationManager::DisableAllPluginsL()
+void CCalenCustomisationManager::OfferMenu(HbMenu* aHbMenu )
     {
     TRACE_ENTRY_POINT;
-    
-    TInt pluginCount = iPluginInfo.Count();
-    for(TInt index = 0;index<pluginCount;index++)
+
+    // Get the number of command handlers
+    //   TInt count = iCommandHandlers.Count();
+    const TInt count = iPlugins.Count();
+
+    // Loop though all the command handlers, within two interlinked
+    // for loops. If customiseMenuPane leaves for one plugin, a plugin
+    // error message will be displayed and the loop will continue with
+    // the next command handler. If none of the plugins leave, there will
+    // be only one TRAP used.
+    for ( TInt index = 0; index < count; ++index )
         {
-        TUid pluginUid = iPluginInfo[index]->ImplementationUid();
-        if(iActivePlugins.Find(pluginUid)!=KErrNotFound)
-            {
-            DisablePluginOnFakeExitL(pluginUid);
-            }
-        }
-    
-    TRACE_EXIT_POINT;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenCustomisationManager::DisablePluginOnFakeExitL
-// Disable plugin on fake exit
-// ----------------------------------------------------------------------------
-//
-void CCalenCustomisationManager::DisablePluginOnFakeExitL(TUid aPluginUid)
-    {
-    TRACE_ENTRY_POINT;
-    
-    TInt index = iPlugins.Find( aPluginUid, CPluginInfo::Identifier );
-    if ( index != KErrNotFound )
-        {
-        CPluginInfo* pluginInfo = iPlugins[index];
-    
-        // Remove the plugin from the active plugin list
-        TInt position = iActivePlugins.Find( aPluginUid );
-        ASSERT( position != KErrNotFound );
-    
-        if(iActivePlugins.Count())
-            {
-            iActivePlugins.Remove( position );            
-            }
-
-        // Does this plugin hide any views
-        RArray<TInt> removedViews;
-        CleanupClosePushL( removedViews );
-        CCalenCustomisation& plugin = pluginInfo->Plugin();
-        plugin.RemoveViewsFromCycle( removedViews );
-        TInt hiddenViewsCount = removedViews.Count();
-        if ( hiddenViewsCount )
-            {
-            // Need to recalculate which views have been hidden, as 
-            // more than one plugin might have hidden the same view.
-            for ( TInt index( 0 ); index < hiddenViewsCount; ++index )
+        TRAPD( error,
+            for (; index < count; ++index )
                 {
-                TUid viewUid = TUid::Uid( removedViews[index] );
-                CheckHiddenViewL( viewUid, aPluginUid );
+                iPlugins[index]->Plugin().CustomiseMenu(aHbMenu );
+                                                             
+                // The commands added should be checked to see that
+                // they match the expected command range for the plugin
                 }
-            }
-    
-        // If the plugin does not offer any views, or the current
-        // info or preview bar it can be deleted immediately,
-        // otherwise the customisation needs to wait until it
-        // is told it is safe to do so.
-    
-        // Does this plugin does not offer any views and the plugin
-        // doesn't offer the current infobar or preview pane
-        // bar it can be deleted immediately
-        TInt offerViews = iViewInfoArray.Find( aPluginUid, 
-                                   CCalenViewInfo::ViewPluginIdentifier );
-                                      
-        if ( offerViews == KErrNotFound &&
-             iInfoBarProviderUid != aPluginUid
-             && iPreviewPaneProviderUid != aPluginUid )
+             );
+         
+        if ( error )
             {
-            RArray<TUid> pluginArray;
-            CleanupClosePushL( pluginArray );
-            pluginArray.AppendL( aPluginUid );
-            UnloadPluginsL( pluginArray );
-            CleanupStack::PopAndDestroy(); // pluginArray
+            // Report a problem with plugin.
             }
-    
-        // Issue notification of plugin been disabled
-        iPluginsEnabledDisabled = ETrue;
-        iServices.IssueNotificationL( ECalenNotifyPluginEnabledDisabled );
-        CleanupStack::PopAndDestroy(); // removedViews
         }
+
     TRACE_EXIT_POINT;
     }
 
 // End of File
-

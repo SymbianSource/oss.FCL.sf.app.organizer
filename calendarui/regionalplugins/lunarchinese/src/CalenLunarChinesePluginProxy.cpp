@@ -21,7 +21,7 @@
 
 #include "calencustomisation.h"
 #include "CalenLunarChinesePlugin.h"
-#include "calenregionalpluginuids.h"
+#include "CalenRegionalPluginUids.h"
 
 
 // ----------------------------------------------------------------------------

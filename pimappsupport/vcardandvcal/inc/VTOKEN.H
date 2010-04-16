@@ -360,4 +360,7 @@ _LIT8(KVersitTokenClass,					"X-CLASS");
 _LIT8(KVersitAttachLabel, 					"X-NAME");
 _LIT8(KVersitAttachMimeType, 				"X-FMTTYPE");
 
+// favourite property
+_LIT8(KVCalTokenXFavourite,					"X-FAVOURITE");
+
 #endif

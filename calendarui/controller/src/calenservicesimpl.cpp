@@ -15,30 +15,29 @@
 *
 */
 
-#include <gulicon.h>
-#include <calcalendarinfo.h>
-#include <mcalenpreview.h>
+// System includes
+#include <agendautil.h>
+#include <hbwidget.h>
 
-#include "calenglobaldata.h"
 #include "calendarui_debug.h"
 #include "calenservicesimpl.h"
 #include "calencontroller.h"
 #include "calenviewmanager.h"
-#include "calenicons.h"
-#include "calenattachmentmodel.h"
+
+
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::NewL
+// CalenServicesImpl::NewL
 // Two phased constructor.
 // Taking the command range start and end points
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CCalenServicesImpl* CCalenServicesImpl::NewL( TInt aCommandRangeStart,
+CalenServicesImpl* CalenServicesImpl::NewL( TInt aCommandRangeStart,
                                                                   TInt aCommandRangeEnd )
     {
     TRACE_ENTRY_POINT;
-    CCalenServicesImpl* self = new( ELeave ) CCalenServicesImpl(
+    CalenServicesImpl* self = new( ELeave ) CalenServicesImpl(
                                        aCommandRangeStart, aCommandRangeEnd );
 
     CleanupStack::PushL( self );
@@ -50,15 +49,15 @@ CCalenServicesImpl* CCalenServicesImpl::NewL( TInt aCommandRangeStart,
     }
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::NewL
+// CalenServicesImpl::NewL
 // 1st phase of construction.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CCalenServicesImpl* CCalenServicesImpl::NewL()
+CalenServicesImpl* CalenServicesImpl::NewL()
     {
     TRACE_ENTRY_POINT;
-    CCalenServicesImpl* self = new( ELeave ) CCalenServicesImpl( 0, 0 );
+    CalenServicesImpl* self = new( ELeave ) CalenServicesImpl( 0, 0 );
 
     CleanupStack::PushL( self );
     self->ConstructL();
@@ -69,12 +68,12 @@ CCalenServicesImpl* CCalenServicesImpl::NewL()
     }
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::CCalenServicesImpl
+// CalenServicesImpl::CalenServicesImpl
 // C++ constructor.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CCalenServicesImpl::CCalenServicesImpl( TInt aCommandRangeStart,
+CalenServicesImpl::CalenServicesImpl( TInt aCommandRangeStart,
                                                         TInt aCommandRangeEnd )
     : iCommandRangeStart( aCommandRangeStart ),
       iCommandRangeEnd( aCommandRangeEnd )
@@ -84,259 +83,207 @@ CCalenServicesImpl::CCalenServicesImpl( TInt aCommandRangeStart,
     }
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::ConstructL
+// CalenServicesImpl::ConstructL
 // 2nd phase of construction.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenServicesImpl::ConstructL()
+void CalenServicesImpl::ConstructL()
     {
     TRACE_ENTRY_POINT;
 
-    iGlobalData = CCalenGlobalData::InstanceL();
     iController = CCalenController::InstanceL();
 
     TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::Release
+// CalenServicesImpl::Release
 // Performs cleanup of this object.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenServicesImpl::Release()
+void CalenServicesImpl::Release()
     {
     TRACE_ENTRY_POINT;
-
-    if( iGlobalData )
-        {
-        iGlobalData->Release();
-        }
 
     if( iController )
         {
         iController->Release();
-        }
-
+        }  
+    
     delete this;
 
     TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::SessionL
+// CalenServicesImpl::SessionL
 // Retrieve the calendar session currently in use by Calendar
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CCalSession& CCalenServicesImpl::SessionL()
+HbMainWindow& CalenServicesImpl::MainWindow()
     {
-    TRACE_ENTRY_POINT;
-
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
-
-    TRACE_EXIT_POINT;
-    return iGlobalData->CalSessionL();
+	TRACE_ENTRY_POINT;
+    ASSERT( iController ); // Make sure ConstructL has been called.
+	TRACE_EXIT_POINT;
+    return iController->MainWindow();
     }
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::EntryViewL
-// Retrieve the calendar entry view currently in use by Calendar
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-CCalEntryView* CCalenServicesImpl::EntryViewL()
-    {
-    TRACE_ENTRY_POINT;
-
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
-
-    TRACE_EXIT_POINT;
-    return iGlobalData->EntryViewL();
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenServicesImpl::InstanceViewL
-// Retrieve the calendar instance view currently in use by Calendar
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-CCalInstanceView* CCalenServicesImpl::InstanceViewL()
-    {
-    TRACE_ENTRY_POINT;
-
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
-
-    TRACE_EXIT_POINT;
-    return iGlobalData->InstanceViewL();
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenServicesImpl::InterimUtilsL()
-// Retrieve interimutils from globaldata
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-CCalenInterimUtils2& CCalenServicesImpl::InterimUtilsL()
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return iGlobalData->InterimUtilsL();
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenServicesImpl::RegisterForNotificationsL
+// CalenServicesImpl::RegisterForNotificationsL
 // Register for notification of Calendar event
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenServicesImpl::RegisterForNotificationsL( MCalenNotificationHandler* aHandler,
+void CalenServicesImpl::RegisterForNotificationsL( MCalenNotificationHandler* aHandler,
                                                             TCalenNotification aNotification )
     {
     TRACE_ENTRY_POINT;
 
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
+    ASSERT( iController ); // Make sure ConstructL has been called.
     iController->RegisterForNotificationsL( aHandler, aNotification );
 
     TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::RegisterForNotificationsL
+// CalenServicesImpl::RegisterForNotificationsL
 // Register for array notifications of Calendar events
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenServicesImpl::RegisterForNotificationsL( MCalenNotificationHandler* aHandler,
+void CalenServicesImpl::RegisterForNotificationsL( MCalenNotificationHandler* aHandler,
                                                             RArray<TCalenNotification>& aNotifications )
     {
     TRACE_ENTRY_POINT;
 
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
+    ASSERT( iController ); // Make sure ConstructL has been called.
     iController->RegisterForNotificationsL( aHandler, aNotifications );
 
     TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::CancelNotifications
+// CalenServicesImpl::CancelNotifications
 // Cancel notifications of Calendar events
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenServicesImpl::CancelNotifications( MCalenNotificationHandler* aHandler )
+void CalenServicesImpl::CancelNotifications( MCalenNotificationHandler* aHandler )
     {
     TRACE_ENTRY_POINT;
 
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
+    ASSERT( iController ); // Make sure ConstructL has been called.
     iController->CancelNotifications( aHandler );
 
     TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::IssueCommandL
+// CalenServicesImpl::IssueCommandL
 // Issue a command to be handled by Calendar or a customization
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-TBool CCalenServicesImpl::IssueCommandL( TInt aCommand )
+TBool CalenServicesImpl::IssueCommandL( TInt aCommand )
     {
     TRACE_ENTRY_POINT;
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
+    ASSERT( iController ); // Make sure ConstructL has been called.
 
     TRACE_EXIT_POINT;
     return iController->IssueCommandL( aCommand );
     }
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::IssueNotificationL
+// CalenServicesImpl::IssueNotificationL
 // Issue a notification to Calendar, which will be broadcast synchronously
 // to all registered notification handlers
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenServicesImpl::IssueNotificationL( TCalenNotification aNotification )
+void CalenServicesImpl::IssueNotificationL( TCalenNotification aNotification )
     {
     TRACE_ENTRY_POINT;
 
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
+    ASSERT( iController ); // Make sure ConstructL has been called.
     iController->BroadcastNotification( aNotification );
 
     TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::Context
-// Returns the context.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-MCalenContext& CCalenServicesImpl::Context()
-    {
-    TRACE_ENTRY_POINT;
-
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
-
-    TRACE_EXIT_POINT;
-    return iGlobalData->Context();
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenServicesImpl::RequestActivationL
+// CalenServicesImpl::RequestActivationL
 // Request activation of a specific view
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenServicesImpl::RequestActivationL( const TVwsViewId& aViewId )
+void CalenServicesImpl::RequestActivationL( const TVwsViewId& /*aViewId*/ )
     {
-    TRACE_ENTRY_POINT;
-
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
-    iController->RequestActivationL( aViewId );
-
-    TRACE_EXIT_POINT;
+    //ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
+   // iController->RequestActivationL( aViewId );
     }
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::ActivationNotificationL
+// CalenServicesImpl::ActivationNotificationL
 // Notify Calendar that a specific view has been activated
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenServicesImpl::ActivationNotificationL( const TVwsViewId& /*aViewId*/ )
+void CalenServicesImpl::ActivationNotificationL( const TVwsViewId& /*aViewId*/ )
     {
-    TRACE_ENTRY_POINT;
-
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
-
-    TRACE_EXIT_POINT;
+    //ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
     }
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::OfferMenuPaneL
-// Offers the menu pane to plugins for customisation
+// CalenServicesImpl::Context
+// Returns the context.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenServicesImpl::OfferMenuPaneL( TInt aResourceId, CEikMenuPane* aMenuPane )
+MCalenContext& CalenServicesImpl::Context()
     {
-    TRACE_ENTRY_POINT;
-
-    iController->OfferMenuPaneL( aResourceId, aMenuPane );
-
+	TRACE_ENTRY_POINT;
+    ASSERT( iController ); // Make sure ConstructL has been called.
     TRACE_EXIT_POINT;
+    return iController->context();
     }
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::GetCommandRange
+// CCalenServicesImpl::Infobar
+// Descriptor passed to plugins to get customised info bar text
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+HbWidget* CalenServicesImpl::Infobar( )
+    {    
+    TRACE_ENTRY_POINT;
+
+    TRACE_EXIT_POINT;
+    return iController->Infobar();
+    }
+// ----------------------------------------------------------------------------
+// CCalenServicesImpl::InfobarTextL
+// @returns info bar text
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+QString* CalenServicesImpl::InfobarTextL()
+    {
+    TRACE_ENTRY_POINT;
+
+    TRACE_EXIT_POINT;
+    return iController->InfobarTextL();
+    }
+// ----------------------------------------------------------------------------
+// CalenServicesImpl::GetCommandRange
 // Returns the assigned command range
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenServicesImpl::GetCommandRange( TInt& aCommandRangeStart, 
-        TInt& aCommandRangeEnd ) const
+void CalenServicesImpl::GetCommandRange( TInt& aCommandRangeStart, 
+                                                              TInt& aCommandRangeEnd ) const
     {
     TRACE_ENTRY_POINT;
 
@@ -345,242 +292,48 @@ void CCalenServicesImpl::GetCommandRange( TInt& aCommandRangeStart,
 
     TRACE_EXIT_POINT;
     }
-
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::Infobar
-// Descriptor passed to plugins to get customised info bar text
+// CalenServicesImpl::OfferMenu
+// Offers the menu to plugins for customisation
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CCoeControl* CCalenServicesImpl::Infobar(const TRect& aRect )
+void CalenServicesImpl::OfferMenu(HbMenu* aHbMenu )
     {
     TRACE_ENTRY_POINT;
 
+    iController->OfferMenu(aHbMenu);
+
     TRACE_EXIT_POINT;
-    return iController->Infobar( aRect );
     }
 
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::Infobar
-// Returns the customized text from plugin
+// CalenServicesImpl::agendaInterface
+// returns the interface to the agenda database
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-const TDesC& CCalenServicesImpl::Infobar()
+AgendaUtil* CalenServicesImpl::agendaInterface()
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
-    return iController->Infobar();
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenServicesImpl::CustomPreviewPaneL
-// Returns the customized Preview pane
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-MCalenPreview* CCalenServicesImpl::CustomPreviewPaneL( TRect& aRect )
-	{
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return iController->CustomPreviewPaneL( aRect );	
-	}
-
-// ----------------------------------------------------------------------------
-// CCalenServicesImpl::PreviewPane
-// Descriptor passed to plugins to get customised info bar text
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-CCoeControl* CCalenServicesImpl::PreviewPane( TRect& aRect )
-    {
-    TRACE_ENTRY_POINT;
-
-    TRACE_EXIT_POINT;
-    return iController->PreviewPane( aRect );
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenServicesImpl::ToolbarOrNull
-// Provides access to the calendar toolbar if one is available
-// ----------------------------------------------------------------------------
-MCalenToolbar* CCalenServicesImpl::ToolbarOrNull()
-    {
-    TRACE_ENTRY_POINT;
-
-    TRACE_EXIT_POINT;
-    return iController->ViewManager().ToolbarOrNull();
-    }
     
+    return iController->agendaInterface();
+    
+    }
+
 // ----------------------------------------------------------------------------
-// CCalenServicesImpl::GetIconL
-// Get icon of specific type
+// CalenServicesImpl::getFirstView
+// returns the first view with which calendar has been launched
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CGulIcon* CCalenServicesImpl::GetIconL( MCalenServices::TCalenIcons aIndex )
-    {
-    TRACE_ENTRY_POINT;
-
-    TRACE_EXIT_POINT;
-    return iController->GetIconL( aIndex );
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenServicesImpl::QueueKeyEvent
-// Queue key events
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-TBool CCalenServicesImpl::QueueKeyEvent( const TKeyEvent& aEvent, 
-                                                           TEventCode aType )
-    {
-    TRACE_ENTRY_POINT;
-
-    TRACE_EXIT_POINT;
-    return iGlobalData->QueueKeyEvent( aEvent, aType );
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenServicesImpl::GetQueuedKeyEventL
-// Get queued key events
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//    
-TBool CCalenServicesImpl::GetQueuedKeyEvent( TKeyEvent& aEvent, 
-                                                                  TEventCode& aType )
-    {
-    TRACE_ENTRY_POINT;
-
-    TRACE_EXIT_POINT;
-    return iGlobalData->GetQueuedKeyEvent( aEvent, aType );
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenServicesImpl::ResetKeyEventQueue
-// reset key event queue
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//    
-void CCalenServicesImpl::ResetKeyEventQueue()
-    {
-    TRACE_ENTRY_POINT;
-
-    iGlobalData->ResetKeyEventQueue();
-
-    TRACE_EXIT_POINT;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenController::MissedAlarmStore
-// Returns a reference to the Missed Alarm Store
-// ----------------------------------------------------------------------------
-CMissedAlarmStore* CCalenServicesImpl::MissedAlarmStore()
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return iController->MissedAlarmStore();
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenServicesImpl::GetMissedAlarmsList
-// Get missed alarms list
-// ----------------------------------------------------------------------------
-void CCalenServicesImpl::GetMissedAlarmsList(RArray<TCalenInstanceId>& aMissedAlarmsList)
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return iController->GetMissedAlarmsList(aMissedAlarmsList);
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenServicesImpl::GetAttachmentData
-// returns ref of CCalenAttachmentModel
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-// 
-CCalenAttachmentModel* CCalenServicesImpl::GetAttachmentData()
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return &iController->AttachmentData();
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenServicesImpl::SessionL
-// Retrieve the calendar session currently in use by Calendar
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-CCalSession& CCalenServicesImpl::SessionL(const TDesC& aCalendar )
-    {
-    TRACE_ENTRY_POINT;
-
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
-
-    TRACE_EXIT_POINT;
-    return iGlobalData->CalSessionL(aCalendar);
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenServicesImpl::EntryViewL
-// Retrieve the calendar entry view currently in use by Calendar
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-CCalEntryView* CCalenServicesImpl::EntryViewL(const  TCalCollectionId aCollectionId )
-    {
-    TRACE_ENTRY_POINT;
-
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
-
-    TRACE_EXIT_POINT;
-    return iGlobalData->EntryViewL(aCollectionId);
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenServicesImpl::InstanceViewL
-// Retrieve the calendar instance view currently in use by Calendar
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-CCalInstanceView* CCalenServicesImpl::InstanceViewL(
-                                        const RArray<TInt>& aCollectionIds)
-    {
-    TRACE_ENTRY_POINT;
-
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
-
-    TRACE_EXIT_POINT;
-    return iGlobalData->InstanceViewL(aCollectionIds);
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenGlobalData::GetAllCalendarInfoL
-// Get all available calendar info
-// -----------------------------------------------------------------------------
-//
-void CCalenServicesImpl::GetAllCalendarInfoL(
-        RPointerArray<CCalCalendarInfo>& aCalendarInfoList )
-    {
-    TRACE_ENTRY_POINT;
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
-    iGlobalData->GetAllCalendarInfoL(aCalendarInfoList);
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenGlobalData::GetCalFileNameForCollectionId
-// Get calendar file name for the given collection id
-// -----------------------------------------------------------------------------
-//
-const TDesC& CCalenServicesImpl::GetCalFileNameForCollectionId(
-        const TCalCollectionId aCollectionId)
-    {
-    TRACE_ENTRY_POINT;
-    ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
-    TRACE_EXIT_POINT;
-    return iGlobalData->GetCalFileNameForCollectionId(aCollectionId);
-    }
+int CalenServicesImpl::getFirstView()
+{
+	TRACE_ENTRY_POINT;
+	TRACE_EXIT_POINT;
+	
+	return iController->getFirstView();
+}
 
 // End of file

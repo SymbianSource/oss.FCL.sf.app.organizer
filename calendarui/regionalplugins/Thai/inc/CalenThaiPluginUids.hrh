@@ -11,10 +11,9 @@
 *
 * Contributors:
 *
-* Description: Caledar Thai Plugin.
+* Description:
 *
 */
-
 
 
 #define SYMBIAN_ECOM_PLUGIN_UID              0x10009D8D

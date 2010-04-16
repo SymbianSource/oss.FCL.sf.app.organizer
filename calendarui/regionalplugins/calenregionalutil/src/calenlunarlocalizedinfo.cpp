@@ -17,7 +17,7 @@
 
 
 #include "calendarui_debug.h"
-#include "calenlunarlocalizedinfo.h"
+#include "CalenLunarLocalizedInfo.h"
 
 // -----------------------------------------------------------------------------
 // CCalenLunarLocalizedInfo::NewL
@@ -95,97 +95,6 @@ EXPORT_C const TDesC& CCalenLunarLocalizedInfo::GetField( TField aField )
             ASSERT( EFalse );
             return KNullDesC;
         }
-    
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenLunarLocalizedInfo::Festival
-// -----------------------------------------------------------------------------
-//
-EXPORT_C const TDesC& CCalenLunarLocalizedInfo::Festival()
-    {
-    TRACE_ENTRY_POINT;
-    
-    return iFestival;
-    
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenLunarLocalizedInfo::SolarTerm
-// -----------------------------------------------------------------------------
-//
-EXPORT_C const TDesC& CCalenLunarLocalizedInfo::SolarTerm()
-    {
-    TRACE_ENTRY_POINT;
-    
-    return iSolarTerm;
-    
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenLunarLocalizedInfo::FullLunarDate
-// -----------------------------------------------------------------------------
-//
-EXPORT_C const TDesC& CCalenLunarLocalizedInfo::FullLunarDate()
-    {
-    TRACE_ENTRY_POINT;
-    
-    return iFullLunarDate;
-    
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenLunarLocalizedInfo::LunarYear
-// -----------------------------------------------------------------------------
-//
-EXPORT_C const TDesC& CCalenLunarLocalizedInfo::LunarYear()
-    {
-    TRACE_ENTRY_POINT;
-    
-    return iLunarYear;
-    
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenLunarLocalizedInfo::LunarMonthAndDay
-// -----------------------------------------------------------------------------
-//
-EXPORT_C const TDesC& CCalenLunarLocalizedInfo::LunarMonthAndDay()
-    {
-    TRACE_ENTRY_POINT;
-    
-    return iLunarMonthAndDay;
-    
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenLunarLocalizedInfo::AnimalYear
-// -----------------------------------------------------------------------------
-//
-EXPORT_C const TDesC& CCalenLunarLocalizedInfo::AnimalYear()
-    {
-    TRACE_ENTRY_POINT;
-    
-    return iAnimalYear;
-    
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenLunarLocalizedInfo::GregorianDate
-// -----------------------------------------------------------------------------
-//
-EXPORT_C const TDesC& CCalenLunarLocalizedInfo::GregorianDate()
-    {
-    TRACE_ENTRY_POINT;
-    
-    return iGregorianDate;
     
     TRACE_EXIT_POINT;
     }

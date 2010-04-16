@@ -22,14 +22,15 @@
 // INCLUDES
 #include <e32base.h>
 #include <e32hashtab.h>
-#include <calencommandhandler.h>
-#include <calennotificationhandler.h>
+#include "calennotificationhandler.h"
+#include "calencommandhandler.h"
 #include "calenhashfunctions.inl"       // HashFunctions 
 
 class CCalenState;
 class CCalenController;
 
 // CLASS DEFINITIONS
+
 /**
  * 
  */
@@ -42,19 +43,16 @@ class CCalenStateMachine : public CBase,
             // If you change the array order or add/remove items,
             // update CCalenStateMachine::ConstructL too.
 	        ECalenIdleState,
-	        ECalenPopulationState,
+	        ECalenPopulationState,	        
 	        ECalenBackgroundState,
 	        ECalenViewingState,
-	        ECalenEditingState,
+	        ECalenEditingState,	
 	        ECalenDeletingState,
 	        ECalenPrintingState,
 	        ECalenSendingState,
 	        ECalenSettingsState,
 	        ECalenHelpState,
-	        ECalenExitingState,
-	        ECalenMapState,
-	        ECalenAttachmentState,
-			ECalenAlarmState,
+	        ECalenExitingState,	       
 	        KCalenLastState  // Must be last
 	        };
 
@@ -77,6 +75,11 @@ class CCalenStateMachine : public CBase,
 		 * Handles Notifications 
  		 */
         void HandleNotification(const TCalenNotification aNotification );
+        
+        /*
+         * Returns the current state in which calendar is.
+         */
+        TCalenStateIndex CurrentState();
 
     private:  // Construction and destruction
         

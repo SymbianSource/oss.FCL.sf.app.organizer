@@ -18,14 +18,14 @@
 
 #include "calendarui_debug.h"
 
-#include "calenlunarlocalizer.h"
+#include "CalenLunarLocalizer.h"
 
-#include "calenlunarinfo.h"
-#include "calenlunarlocalizedinfo.h"
-#include "calenextrarowformatter.h"
+#include "CalenLunarInfo.h"
+#include "CalenLunarLocalizedInfo.h"
+#include "CalenExtraRowFormatter.h"
 #include <calenregionalutil.rsg>
 
-#include <AknBidiTextUtils.h>
+#include <aknbiditextutils.h>
 #include <avkon.rsg>
 #include <badesca.h> 
 #include <eikenv.h>
@@ -83,7 +83,6 @@ EXPORT_C CCalenLunarLocalizer::~CCalenLunarLocalizer()
         {
         CCoeEnv::Static()->DeleteResourceFile( iResourceFileOffset );
         }
-    
     TRACE_EXIT_POINT;
     }
 
@@ -104,6 +103,7 @@ EXPORT_C CCalenLunarLocalizer::CCalenLunarLocalizer() : iEikEnv( CEikonEnv::Stat
 EXPORT_C void CCalenLunarLocalizer::ConstructL()
     {
     TRACE_ENTRY_POINT;
+    
     iRowFormatter = CCalenExtraRowFormatter::NewL();
     
     TFileName dllName;
@@ -117,7 +117,6 @@ EXPORT_C void CCalenLunarLocalizer::ConstructL()
     BaflUtils::NearestLanguageFile( CEikonEnv::Static()->FsSession(), resourceFilename );
     // Add the resource file.
     iResourceFileOffset = CEikonEnv::Static()->AddResourceFileL( resourceFilename );
-    
 
     iFestivalNames = iEikEnv->ReadDesCArrayResourceL(R_CALEN_CHI_FESTIVALS);
     iSolarTermNames = iEikEnv->ReadDesCArrayResourceL(R_CALEN_CHI_SOLAR_ITEMS);

@@ -57,6 +57,7 @@ _LIT(KVCalTokenTypeANNIV,"ANNIVERSARY");
 _LIT(KVCalTokenTypeEVENT,"EVENT");
 _LIT(KVCalTokenTypeTODO,"TODO");
 _LIT(KVCalTokenTypeREMINDER,"REMINDER");
+_LIT(KVCalTokenTypeNOTE,"NOTE");
 
 _LIT(KVCalTokenPUBLIC,"PUBLIC");
 _LIT(KVCalTokenPRIVATE,"PRIVATE");
@@ -339,6 +340,28 @@ private:
 	void ImportStatusPropertyL(CVersitParser& aParser, CCalEntry::TStatus& aStatus);
 	void ImportICalStatusPropertyL(CVersitParser& aParser, CCalEntry::TStatus& aStatus);
 	void ImportVCalStatusPropertyL(CVersitParser& aParser, CCalEntry::TStatus& aStatus);
+	
+	/**
+	 * @brief imports vcalendar for the types EAppt,
+	 * EReminder,EAnniv,ETodo,EEvent
+	 * 
+	 * @param aParser reference to versit parser
+	 * @param aRelativeTime reference to releative time
+	 * @param aEntryType type of calendar entry
+	 */
+	void ImportVCalendarL(CVersitParser& aParser,
+			TVersitDateTime::TRelativeTime& aRelativeTime,
+			CCalEntry::TType& aEntryType);
+	
+	/**
+	 * @brief import note entry from vcal
+	 * 
+	 * @param aParser reference to versit parser
+	 * @param aRelativeTime reference to releative time
+	 */
+	void ImportNoteL(CVersitParser& aParser,
+			TVersitDateTime::TRelativeTime& aRelativeTime);
+	
 private:
 	CCalEntry*	iEntry; //for convenience
 	RTz* iTzConverter; // It is used to convert time between UTC and Symstem local time. RTz* is owned by TAgnVCalConverter

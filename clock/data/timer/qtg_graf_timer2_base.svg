@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 13.0.2, SVG Export Plug-In . SVG Version: 6.00 Build 14948)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="305px" height="305px" viewBox="0 0 305 305" enable-background="new 0 0 305 305" xml:space="preserve">
+<g>
+	<g>
+		<g>
+			<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="145.4951" y1="-231.5366" x2="156.7914" y2="387.755">
+				<stop  offset="0" style="stop-color:#FFFFFF"/>
+				<stop  offset="1" style="stop-color:#000000"/>
+			</linearGradient>
+			<path fill="url(#SVGID_1_)" d="M304,152.5c0,83.678-67.824,151.5-151.5,151.5C68.826,304,1,236.178,1,152.5
+				C1,68.822,68.826,1,152.5,1C236.175,1,304,68.822,304,152.5z"/>
+			<radialGradient id="SVGID_2_" cx="138.186" cy="4.4321" r="299.1064" gradientUnits="userSpaceOnUse">
+				<stop  offset="0" style="stop-color:#FFFFFF"/>
+				<stop  offset="1" style="stop-color:#CCCCCC"/>
+			</radialGradient>
+			<path fill="url(#SVGID_2_)" d="M302.5,152.688c0,82.85-67.154,150-150,150c-82.844,0-150-67.15-150-150
+				c0-82.848,67.155-150,150-150C235.345,2.688,302.5,69.84,302.5,152.688z"/>
+		</g>
+		<rect fill="none" width="305" height="305"/>
+	</g>
+	<path fill="#333333" d="M98.717,150.686c0.005-30.09,24.396-54.494,54.499-54.502l0,0c30.105,0.008,54.492,24.412,54.502,54.502
+		l0,0c-0.01,30.09-24.396,54.495-54.502,54.502l0,0C123.113,205.18,98.723,180.776,98.717,150.686L98.717,150.686z M112.717,150.686
+		c0.002,11.2,4.522,21.284,11.864,28.633l0,0c7.351,7.344,17.432,11.865,28.636,11.867l0,0c11.207-0.002,21.287-4.523,28.639-11.867
+		l0,0c7.34-7.35,11.859-17.434,11.861-28.633l0,0c-0.002-11.199-4.521-21.279-11.861-28.633l0,0
+		c-7.352-7.342-17.432-11.863-28.639-11.867l0,0c-11.204,0.004-21.285,4.525-28.636,11.867l0,0
+		C117.239,129.406,112.719,139.486,112.717,150.686L112.717,150.686L112.717,150.686z"/>
+</g>
+</svg>

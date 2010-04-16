@@ -1,0 +1,86 @@
+/*
+ * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+ * All rights reserved.
+ * This component and the accompanying materials are made available
+ * under the terms of "Eclipse Public License v1.0"
+ * which accompanies this distribution, and is available
+ * at the URL "http://www.eclipse.org/legal/epl-v10.html".
+ *
+ * Initial Contributors:
+ * Nokia Corporation - initial contribution.
+ *
+ * Contributors: 
+ *
+ * Description: Header file for class CalenEditorCustomItem.
+ *
+ */
+
+#ifndef CALENEDITORCUSTOMITEM_H
+#define CALENEDITORCUSTOMITEM_H
+
+// System includes
+#include <QObject>
+#include <QDateTime>
+#include <hbdataformviewitem.h>
+#include <hbextendedlocale.h>
+
+class HbDateTimePicker;
+class HbPushButton;
+class HbDataFomViewer;
+class AgendaEntry;
+
+class CalenEditorCustomItem : public HbDataFormViewItem
+{
+	Q_OBJECT
+	
+public:
+	CalenEditorCustomItem(QGraphicsItem *parent = 0);
+	~CalenEditorCustomItem();
+	virtual HbAbstractViewItem* createItem();
+	void enableFromTimeFieldAndSetTime(bool, QDateTime);
+	void enableToTimeFieldAndSetTime(bool, QDateTime);	
+	void populateDateTime(QDateTime defaultDateTime, bool isFromItem);
+	void setDateRange(QDate start, QDate end);
+	void setTimeRange(QTime start, QTime end);
+	void enableDateButton(bool value);
+	bool canSetModelIndex(const QModelIndex &index) const;
+	void restore();
+	
+protected:
+	virtual HbWidget* createCustomWidget();
+	
+protected slots:
+	void handleDate();
+	void handleTime();
+	void saveTime();
+	void saveDate();
+	
+Q_SIGNALS:
+	void dateTimeUpdated(QDateTime& fromDateTime);
+		
+private:
+	AgendaEntry *mEditedEntry;
+	QDate mDate;
+	QDate mMaxDate;
+	QDate mMinDate;
+	QTime mTime;
+	QTime mMaxTime;
+	QTime mMinTime;
+	QDateTime mDateTime;
+
+	HbPushButton* mPushButtonTime;
+	HbPushButton* mPushButtonDate;
+	HbPushButton *mRepeatUntilWidget;
+
+	HbDateTimePicker *mDatePicker;
+	HbDateTimePicker *mTimePicker;
+
+	HbExtendedLocale mLocale;
+	
+	bool mIsFromItem;
+	
+};
+
+#endif // CALENEDITORCUSTOMITEM_H
+
+// End of file	--Don't remove this.

@@ -11,10 +11,9 @@
 *
 * Contributors:
 *
-* Description:   Calendar state machine
+* Description:  Calendar state machine
 *
 */
-
 
 
 // includes
@@ -92,18 +91,13 @@ TBool CCalenSendingState::HandleCommandL( const TCalenCommand& aCommand,
     
     TBool cmdUsed = EFalse;
     
-    if(ECalenFasterAppExit == cmd)
+    if( ECalenFasterAppExit == cmd )
         {
         SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
         ActivateCurrentStateL(aStateMachine);
         RequestCallbackL( handler, aCommand );
         cmdUsed = ETrue;
         }
-    else if(ECalenStartActiveStep == cmd)
-        {
-        RequestCallbackL( handler, aCommand );
-        cmdUsed = ETrue;
-        }    
 
     TRACE_EXIT_POINT;
     return cmdUsed;

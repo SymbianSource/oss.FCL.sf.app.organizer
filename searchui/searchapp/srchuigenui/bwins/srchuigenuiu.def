@@ -1,6 +1,0 @@
-EXPORTS
-	?NewL@CSrchUiGeneral@@SAPAV1@PAVCAknViewAppUi@@@Z @ 1 NONAME ; class CSrchUiGeneral * CSrchUiGeneral::NewL(class CAknViewAppUi *)
-	?NewL@CSrchUiGeneral@@SAPAV1@PAVCAknViewAppUi@@AAVRDesReadStream@@@Z @ 2 NONAME ; class CSrchUiGeneral * CSrchUiGeneral::NewL(class CAknViewAppUi *, class RDesReadStream &)
-	?SearchStringL@CSrchUiGeneral@@QAEAAVTDesC8@@XZ @ 3 NONAME ; class TDesC8 & CSrchUiGeneral::SearchStringL(void)
-	?SetSearchStringL@CSrchUiGeneral@@QAEXABVTDesC16@@@Z @ 4 NONAME ; void CSrchUiGeneral::SetSearchStringL(class TDesC16 const &)
-

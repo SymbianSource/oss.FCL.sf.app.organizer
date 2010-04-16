@@ -15,35 +15,42 @@
  *
 */
 
+#include <QtGui>
 
-#include "calendarui_debug.h"
 
 #include <eikenv.h>
-#include <AknUtils.h>
+#include <aknutils.h>
 #include <eiklabel.h>
 #include <avkon.hrh>
 #include <StringLoader.h>
-#include <aknmessagequerydialog.h>
 #include <data_caging_path_literals.hrh>
 #include <bautils.h>
-#include <AknBidiTextUtils.h>
+#include <aknbiditextutils.h>
 #include <CalenLunarChinesePluginData.rsg>
 #include <layoutmetadata.cdl.h>
-#include <mcalenpreview.h>
+
+#include <hblabel.h>
+#include <hbwidget.h>
+#include <qstring.h>
+#include <hbaction.h>
+#include <hbtextedit.h>
+#include <hbmainwindow.h>
+#include <hbview.h>
+#include <hbmenu.h>
 
 #include "calendarui_debug.h" 
 #include "CalenLunarChinesePlugin.h"
-#include "calenlunarpanic.h"
-#include "calenlunarlocalizedinfo.h"
-#include "calenlunarlocalizer.h"
-#include "calenlunarinfoprovider.h"
+#include "CalenLunarPanic.h"
+#include "CalenLunarLocalizedInfo.h"
+#include "CalenLunarLocalizer.h"
+#include "CalenLunarInfoProvider.h"
 #include "CalendarPrivateCRKeys.h"
-#include "calencommands.hrh"
+#include "hb_calencommands.hrh"
 
 //CONSTANTS
 _LIT( KFieldSeparator, "\n" );
 _LIT( KHeaderSeparator, "\n  ");
-  _LIT( KResourceChinesePluginFile, "calenlunarchineseplugindata.rsc" );
+_LIT( KResourceChinesePluginFile, "calenlunarchineseplugindata.rsc" );
 #define KResourcePath KDC_RESOURCE_FILES_DIR
 
 const TInt KFieldCount = 5;
@@ -60,11 +67,12 @@ CCalenLunarChinesePlugin::CCalenLunarChinesePlugin(MCalenServices* aServices)
 	 iLocInfo(NULL),
 	 iServices(aServices),
 	 iInfoBarText(NULL),
-	 iResourceFileOffset( NULL )
+	 iResourceFileOffset( NULL ),
+	 iLabelControl(NULL)
 	 
 	{
 	TRACE_ENTRY_POINT;
-	iLabelControl = NULL;
+	
 	TRACE_EXIT_POINT;
 	}
 
@@ -75,10 +83,11 @@ CCalenLunarChinesePlugin::CCalenLunarChinesePlugin(MCalenServices* aServices)
 CCalenLunarChinesePlugin* CCalenLunarChinesePlugin::NewL( MCalenServices* aServices )
 	{
 	TRACE_ENTRY_POINT;
-	CCalenLunarChinesePlugin* self = new( ELeave ) CCalenLunarChinesePlugin( aServices);
+	CCalenLunarChinesePlugin* self = new( ELeave ) 
+											CCalenLunarChinesePlugin( aServices);
 	CleanupStack::PushL( self );
 	self->ConstructL();
-	CleanupStack::Pop(self);
+    CleanupStack::Pop(self);
 	TRACE_EXIT_POINT;
 	return self;
 	}
@@ -144,96 +153,41 @@ void CCalenLunarChinesePlugin::ConstructL()
 	
 	iInfoProvider = CCalenLunarInfoProvider::NewL(CEikonEnv::Static()->FsSession());
 	
-	iLabelControl = CCalenPluginLabel::NewL(*this);
-    
+	iLabelControl = new CalenPluginLabel(*this);
     
     TRACE_EXIT_POINT;	
 	}
 	
-	
-// -----------------------------------------------------------------------------
-// CCalenLunarChinesePlugin::SetLabelContentExtraL
-// -----------------------------------------------------------------------------
-//
-void CCalenLunarChinesePlugin::SetLabelContentExtraL( CEikLabel& aLabel ,TRect& aRect) 
-    {
-    TRACE_ENTRY_POINT;
-    
-    TRect nullRect;
-    aLabel.SetRect(nullRect);
-    
-    FormatExtraRowStringL( aLabel, ETrue );
-
-    CArrayFixFlat<TPtrC>* textLines = new(ELeave)CArrayFixFlat<TPtrC>( 2 );
-    CleanupStack::PushL( textLines );
-    
-    CArrayFixFlat<TInt>* lineWidths = new( ELeave )CArrayFixFlat<TInt>( 1 );
-    CleanupStack::PushL( lineWidths );
-    
-    TInt maxWidth = aRect.Size().iWidth;
-    lineWidths->AppendL( maxWidth );
-    
-    const CFont* fontLabel = AknLayoutUtils::FontFromId(EAknLogicalFontPrimarySmallFont,NULL);
-    
-    HBufC* visualText = AknBidiTextUtils::ConvertToVisualAndWrapToArrayWholeTextL(
-        iExtraRowText,
-        *lineWidths,
-        *fontLabel,
-        *textLines);
-        
-    if(textLines->Count() < 3 && textLines->Count() > 0)
-    	{
-    	 TInt nH =	textLines->Count();
-    	 aRect.iBr.iY = aRect.iBr.iY * nH;
-    	}
-       
-    HBufC* newLinedText = HBufC::NewLC( iExtraRowText.Length() + 4);
-        
-    for(TInt i = 0 ; i < textLines->Count();i++)
-    	{
-    	newLinedText->Des().Append(textLines->At(i));
-    	newLinedText->Des().Append( KFieldSeparator );
-    	}
-   
-    aLabel.UseLogicalToVisualConversion(ETrue);
-    aLabel.SetLabelAlignment(ELayoutAlignCenter); 
-    aLabel.SetTextL( *newLinedText);
-    
-    CleanupStack::PopAndDestroy( newLinedText );
-    CleanupStack::PopAndDestroy( lineWidths );
-    CleanupStack::PopAndDestroy( textLines );
-    delete visualText;
-
-    TRACE_EXIT_POINT;
-    }
 
 // -----------------------------------------------------------------------------
 // CCalenLunarChinesePlugin::SetLabelContentL
 // -----------------------------------------------------------------------------
 //
-void CCalenLunarChinesePlugin::SetLabelContentL( CEikLabel& aLabel, const TRect& /*aRect*/ ) 
+void CCalenLunarChinesePlugin::SetLabelContentL( HbLabel& aLabel) 
     {
     TRACE_ENTRY_POINT;
-    TRect nullRect(0,0,0,0);
-    aLabel.SetRect(nullRect);
     
     FormatExtraRowStringL( aLabel, EFalse );
-    aLabel.UseLogicalToVisualConversion(ETrue);
-    aLabel.SetLabelAlignment(ELayoutAlignCenter);
-    aLabel.SetTextL(  iExtraRowText );
+    //aLabel.UseLogicalToVisualConversion(ETrue);
+    //aLabel.SetLabelAlignment(ELayoutAlignCenter);
+    //aLabel.setPlainText(  iExtraRowText );
+    
+    QString text = QString::fromUtf16(iExtraRowText.Ptr(),iExtraRowText.Length());
+    aLabel.setPlainText(text);
     
     TRACE_EXIT_POINT;
-    }
-    
+    }    
     
 // -----------------------------------------------------------------------------
 // CCalenLunarChinesePlugin::FormatExtraRowStringL
 // -----------------------------------------------------------------------------
 //	
-void CCalenLunarChinesePlugin::FormatExtraRowStringL( CEikLabel& aLabel,TBool aTwoLines)
+void CCalenLunarChinesePlugin::FormatExtraRowStringL( HbLabel& aLabel,TBool aTwoLines)
+
     {
     TRACE_ENTRY_POINT;
     
+    Q_UNUSED(aLabel);
     const CFont*  labelFont = NULL;
     
     if( aTwoLines ) 
@@ -245,7 +199,7 @@ void CCalenLunarChinesePlugin::FormatExtraRowStringL( CEikLabel& aLabel,TBool aT
     	labelFont = AknLayoutUtils::FontFromId(EAknLogicalFontSecondaryFont,NULL);	
     	}
     
-    aLabel.SetFont( labelFont );
+    //aLabel.SetFont( labelFont );
     TInt maxWidth = 0;
     if(iRect.IsEmpty())
     	{
@@ -276,24 +230,14 @@ void CCalenLunarChinesePlugin::FormatExtraRowStringL( CEikLabel& aLabel,TBool aT
 // CCalenLunarChinesePlugin::InfobarL
 // -----------------------------------------------------------------------------
 //	
-CCoeControl* CCalenLunarChinesePlugin::InfobarL( const TRect&  aRect )
+HbWidget* CCalenLunarChinesePlugin::InfobarL( )
 	{
 	TRACE_ENTRY_POINT;
 
 	UpdateLocalizerInfoL();
-	iRect = aRect;
-	
-	if(iLabelControl)
-	    {
-		delete iLabelControl;
-		iLabelControl = NULL;
-	    }
-	
-	iLabelControl = CCalenPluginLabel::NewL(*this);
     
-	SetLabelContentL(*iLabelControl,aRect);
-	iLabelControl->SetRect(aRect);
-	 
+	SetLabelContentL(*iLabelControl);
+		 
 	return iLabelControl;
 	
     TRACE_EXIT_POINT;	
@@ -304,7 +248,7 @@ CCoeControl* CCalenLunarChinesePlugin::InfobarL( const TRect&  aRect )
 // This function is called in case of Hitchcock views
 // ----------------------------------------------------------------------------
 //
-const TDesC& CCalenLunarChinesePlugin::InfobarL( )
+QString* CCalenLunarChinesePlugin::InfobarTextL( )
     {
     TRACE_ENTRY_POINT;
     TRect nullRect(0,0,0,0);
@@ -316,109 +260,31 @@ const TDesC& CCalenLunarChinesePlugin::InfobarL( )
         }
     //Update the local information based on current context
     //from framework.
-    UpdateLocalizerInfoL(); 
-    
-    //Dummy label for formatting the iExtraRowText
-    CEikLabel* dummyLabel = new(ELeave) CEikLabel;
-    CleanupStack::PushL(dummyLabel);
-    SetLabelContentL(*dummyLabel,TRect());
-    CleanupStack::PopAndDestroy();
-    
+    UpdateLocalizerInfoL();  
+    SetLabelContentL(*iLabelControl);    
     iInfoBarText = iExtraRowText.AllocLC();
     CleanupStack::Pop();
     
     TRACE_EXIT_POINT;
-    return *iInfoBarText;
+    return  (new QString((QChar*)iInfoBarText->Des().Ptr(),iInfoBarText->Length()));
     }
 
-// -----------------------------------------------------------------------------
-// CCalenLunarChinesePlugin::CustomPreviewPaneL
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CCalenThaiPlugin::InfobarL
+// This function is called to add menuitem 
+// ----------------------------------------------------------------------------
 //
-MCalenPreview* CCalenLunarChinesePlugin::CustomPreviewPaneL( TRect& /*aRect*/ )
-	{
-	TRACE_ENTRY_POINT
-	TRACE_EXIT_POINT
-	return NULL;
-	}
 
-// -----------------------------------------------------------------------------
-// CCalenLunarChinesePlugin::PreviewPaneL
-// -----------------------------------------------------------------------------
-//
-CCoeControl* CCalenLunarChinesePlugin::PreviewPaneL(  TRect&  aRect )
-	{
-	TRACE_ENTRY_POINT;
-    
-    UpdateLocalizerInfoL();
-	iRect = aRect;
-	if (iLabelControl)
-	    {
-		delete iLabelControl;
-		iLabelControl = NULL;
-	    }
-
-	iLabelControl = CCalenPluginLabel::NewL(*this);
-	
-	if(!Layout_Meta_Data::IsLandscapeOrientation()) //Portriat
-		{
-		SetLabelContentL(*iLabelControl, aRect);
-		}
-	else
-		{
-		SetLabelContentExtraL(*iLabelControl,aRect);	
-		}
-	
-	
-    return iLabelControl;
-	TRACE_EXIT_POINT;	
-	}
-
-// -----------------------------------------------------------------------------
-// CCalenLunarChinesePlugin::CustomiseMenuPaneL
-// -----------------------------------------------------------------------------
-//
-TBool CCalenLunarChinesePlugin::CustomiseMenuPaneL( TInt /*aResourceId*/, 
-												CEikMenuPane* aMenuPane )
-	{
-	TRACE_ENTRY_POINT;
-	HBufC* itemText = StringLoader::LoadLC(R_CALENDAR_SHOW_LUNAR_DATA);
-    
-    CEikMenuPaneItem::SData menuItem;
-    menuItem.iCommandId = iStart; 
-    menuItem.iCascadeId = 0;
-    menuItem.iFlags = 0;
-    menuItem.iText = *itemText;
-    menuItem.iExtraText = KNullDesC;
-    
-    aMenuPane->InsertMenuItemL( menuItem, 1 );
-    
-    CleanupStack::PopAndDestroy(itemText);
-	TRACE_EXIT_POINT;
-	return ETrue;
-	}
-
-// -----------------------------------------------------------------------------
-// CCalenLunarChinesePlugin::CanBeEnabledDisabled
-// -----------------------------------------------------------------------------
-//
-TBool CCalenLunarChinesePlugin::CanBeEnabledDisabled()
+void CCalenLunarChinesePlugin::CustomiseMenu(HbMenu* aHbMenu)
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return ETrue;
+    HbAction* lunarAction = new HbAction("Show Lunar Data");
+    QList<QAction*> actionList = aHbMenu->actions();     
+    TInt count = actionList.count() - 1;  
+    if(count >= 0)
+    aHbMenu->insertAction(actionList[count], lunarAction);
+    QObject::connect(lunarAction, SIGNAL(triggered()), iLabelControl, SLOT(showLunarData()));
     }
 
-// -----------------------------------------------------------------------------
-// CCalenLunarChinesePlugin::CalenCustomisationExtensionL
-// -----------------------------------------------------------------------------
-//
-TAny* CCalenLunarChinesePlugin::CalenCustomisationExtensionL( TUid /*aExtensionUid*/ )
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return NULL;
-    }
 // -----------------------------------------------------------------------------
 // CCalenLunarChinesePlugin::HandleCommandL
 // -----------------------------------------------------------------------------
@@ -465,38 +331,6 @@ MCalenCommandHandler* CCalenLunarChinesePlugin::CommandHandlerL( TInt aCommand )
    
     return commandHandler;
 	TRACE_EXIT_POINT;	
-	}
-
-// -----------------------------------------------------------------------------
-// CCalenLunarChinesePlugin::RemoveViewsFromCycle
-// -----------------------------------------------------------------------------
-//
-void CCalenLunarChinesePlugin::RemoveViewsFromCycle( RArray<TInt>& /*aViews*/ )
-	{
-	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;	
-	}
-
-// -----------------------------------------------------------------------------
-// CCalenLunarChinesePlugin::GetCustomSettingsL
-// -----------------------------------------------------------------------------
-//
-void CCalenLunarChinesePlugin::GetCustomSettingsL( RPointerArray<CAknSettingItem>&  
-														/*aCustomSettingArray*/)
-	{
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;		
-	}
-
-// -----------------------------------------------------------------------------
-// CCalenLunarChinesePlugin::GetCustomViewsL
-// -----------------------------------------------------------------------------
-//	
-void CCalenLunarChinesePlugin::GetCustomViewsL(  RPointerArray<CCalenView>& 
-															/*aCustomViewArray*/ )
-	{
-	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;		
 	}
  	
 // -----------------------------------------------------------------------------
@@ -597,87 +431,88 @@ void CCalenLunarChinesePlugin::ShowDetailsL( )
 //    
 void CCalenLunarChinesePlugin::ExecuteMessageDialogL(TDesC& aMsgText)
 	{
-	TRACE_ENTRY_POINT;
+	TRACE_ENTRY_POINT;	
+	QString text = QString::fromUtf16(aMsgText.Ptr(),aMsgText.Length());
 	
-	CAknMessageQueryDialog* dlg = CAknMessageQueryDialog::NewL(aMsgText);
-    CleanupStack::PushL(dlg);
-    dlg->PrepareLC(R_CALEN_LUNAR_DETAILS_DIALOG);
-    CleanupStack::Pop(dlg);
-    dlg->RunLD();
+    // Instantiate a popup
+    HbPopup popup;
+
+    // Set dismiss policy that determines what tap events will cause the popup
+    // to be dismissed
+    popup.setDismissPolicy(HbPopup::NoDismiss);
+    popup.setTimeout(HbPopup::NoTimeout);
     
+    // Set the label as heading widget    
+    popup.setHeadingWidget(new HbLabel("Lunar Calendar"));
+    HbTextEdit* contentWidget = new HbTextEdit (text);
+    contentWidget->setReadOnly(true);
+    //contentWidget->setCursorHidden(true);
+    QSizeF size = contentWidget->maximumSize();
+    contentWidget->setMinimumSize(200,250);    
+    popup.setContentWidget(contentWidget);
+    
+    // Sets the primary action
+    popup.setPrimaryAction(new HbAction("Ok",&popup));  
+
+    // Launch popup syncronously
+    popup.exec();
    	TRACE_EXIT_POINT;
 	}
 
-// -----------------------------------------------------------------------------
-// CCalenPluginLabel::NewL
-// -----------------------------------------------------------------------------
-//     
-CCalenPluginLabel* CCalenPluginLabel::NewL(CCalenLunarChinesePlugin& aPlugin)
-	{
+
+CalenPluginLabel::CalenPluginLabel(CCalenLunarChinesePlugin& aPlugin , QGraphicsItem* parent)
+    :HbLabel(parent),iPlugin(aPlugin)
+    {
 	TRACE_ENTRY_POINT;
-	CCalenPluginLabel* self = new(ELeave)CCalenPluginLabel(aPlugin);
-	CleanupStack::PushL(self);
-	self->ConstructL();
-	CleanupStack::Pop(self);
-	TRACE_EXIT_POINT;
-	return self;
-	}
 	
-// -----------------------------------------------------------------------------
-// CPluginLabel::CCalenLunarChinesePlugin
-// -----------------------------------------------------------------------------
-// 	
-CCalenPluginLabel::CCalenPluginLabel(CCalenLunarChinesePlugin& aPlugin) : iPlugin(aPlugin) 
-	{
+    setAlignment(Qt::AlignHCenter);
+    setTextColor(Qt::blue);    
+    QFont font("Times", 9, QFont::Bold);    
+    setFont(font);
+    setTextWrapping(Hb::TextWrapping);
+    setOpacity(12);
+    
+    TRACE_EXIT_POINT;    
+    }
+
+CalenPluginLabel::~CalenPluginLabel()
+    {
     TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;	
-	}
-	
-	
-// -----------------------------------------------------------------------------
-// CPluginLabel::ConstructL
-// -----------------------------------------------------------------------------
-// 
-void CCalenPluginLabel::ConstructL()
-	{
-	TRACE_ENTRY_POINT;
-    SetContainerWindowL(*this);
     TRACE_EXIT_POINT;
-	}
+    }
 
-// -----------------------------------------------------------------------------
-// CCalenPluginLabel::~CCalenPluginLabel
-// -----------------------------------------------------------------------------
-// 
-CCalenPluginLabel::~CCalenPluginLabel()
-	{
+void CalenPluginLabel::showLunarData()
+    {
+    TRACE_ENTRY_POINT;
+    iPlugin.ShowDetailsL(); 
+    TRACE_EXIT_POINT;
+    }
+void CalenPluginLabel::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
+    {
 	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;	
-	}
-
-// -----------------------------------------------------------------------------
-// CCalenPluginLabel::Draw
-// -----------------------------------------------------------------------------
-// 
-void CCalenPluginLabel::Draw( const TRect& aRect) const
-	{
+   
+    HbLabel::paint(painter,option,widget);
+    QPen pen;//
+    pen.setStyle(Qt::SolidLine);
+    pen.setWidth(1);
+    pen.setBrush(Qt::gray);
+    painter->setPen(pen);
+    QRectF rect = this->rect();
+    painter->eraseRect(rect);
+    painter->drawRect(rect);
+    painter->fillRect(rect,Qt::gray);
+    
+    TRACE_EXIT_POINT;    
+    }
+	
+void CalenPluginLabel::mousePressEvent(QGraphicsSceneMouseEvent* event)
+    {
 	TRACE_ENTRY_POINT;
-	CEikLabel::Draw(aRect);
-	TRACE_EXIT_POINT;
-	}	
-
-// -----------------------------------------------------------------------------
-// CCalenPluginLabel::HandlePointerEventL
-// -----------------------------------------------------------------------------
-//
-void CCalenPluginLabel::HandlePointerEventL(const TPointerEvent& 
-                                                                /*aPointerEvent*/)
-	{
-	TRACE_ENTRY_POINT;
+	Q_UNUSED(event);
 	iPlugin.ShowDetailsL();	
-	TRACE_EXIT_POINT;
-	}
-
+	TRACE_EXIT_POINT;    
+    }	
+	
 //EOF
 
 

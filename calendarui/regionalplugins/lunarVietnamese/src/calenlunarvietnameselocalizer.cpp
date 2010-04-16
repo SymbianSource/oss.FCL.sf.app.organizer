@@ -16,14 +16,14 @@
 */
 
 
-#include "calenlunarvietnameselocalizer.h"
+#include "CalenLunarVietnameseLocalizer.h"
 
-#include "calenlunarlocalizer.h"
-#include "calenlunarinfo.h"
-#include "calenlunarlocalizedinfo.h"
-#include "calenextrarowformatter.h"
+#include "CalenLunarLocalizer.h"
+#include "CalenLunarInfo.h"
+#include "CalenLunarLocalizedInfo.h"
+#include "CalenExtraRowFormatter.h"
 
-#include <CalenLunarVietnamesePluginData.rsg>
+#include <calenlunarvietnameseplugindata.rsg>
 #include <StringLoader.h>
 
 

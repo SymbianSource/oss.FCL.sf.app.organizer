@@ -32,9 +32,7 @@
 #include <etelmm.h>
 #include <e32math.h>
 #include <calrrule.h>
-#include <cmrmailboxutils.h>
 #include <featmgr.h>
-#include <MeetingRequestUids.hrh>
 #include <ecom/ecom.h>
 #include <utf.h>
 #include <openssl/md5.h>
@@ -90,9 +88,6 @@ CCalenInterimUtils2Impl::CCalenInterimUtils2Impl()
     {
     TRACE_ENTRY_POINT;
 
-    iMrEnabledCheck = ETrue;
-    iMrEnabled = EFalse;
-    
     TRACE_EXIT_POINT;
     }
 
@@ -566,19 +561,12 @@ void CCalenInterimUtils2Impl::GetImeiL( TDes& aImei )
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-TBool CCalenInterimUtils2Impl::MRViewersEnabledL(TBool aForceCheck)
+TBool CCalenInterimUtils2Impl::MRViewersEnabledL(TBool /*aForceCheck*/)
     {
     TRACE_ENTRY_POINT;
-    if( aForceCheck || iMrEnabledCheck )
-        {
-		iMrEnabled = EFalse;
-		iMrEnabledCheck = EFalse;
-
-        PIM_TRAPD_HANDLE( DoMRViewersEnabledL() );
-        }
-        
+    // Need to implement it once we have meeting request viewer in 10.1
     TRACE_EXIT_POINT;
-    return iMrEnabled;    
+    return false;    
     }
 // -----------------------------------------------------------------------------
 // CCalenInterimUtils2Impl::DoMRViewersEnabledL()
@@ -590,102 +578,8 @@ TBool CCalenInterimUtils2Impl::MRViewersEnabledL(TBool aForceCheck)
 void CCalenInterimUtils2Impl::DoMRViewersEnabledL()
     {
     TRACE_ENTRY_POINT;
-
-    // We ignore any leaves because iMrEnabled and iMrEnabledCheck are already set to
-    // EFalse, so if the function leaves it will return EFalse this time and any future
-    // calls will not force a check (unless aForceCheck is ETrue).
-    if (FeatureManager::FeatureSupported(KFeatureIdMeetingRequestSupport))
-        {
-        // Full meeting request solution
-        // As long as we have at least one mailbox we can return true
-        CMRMailboxUtils *mbUtils = CMRMailboxUtils::NewL();
-        CleanupStack::PushL( mbUtils );
-
-                RArray<CMRMailboxUtils::TMailboxInfo> mailboxes;
-                CleanupClosePushL(mailboxes);
-                mbUtils->ListMailBoxesL(mailboxes);
-                if(mailboxes.Count() > 0)
-                    {
-                    iMrEnabled = ETrue; // && 1 mailbox
-                    }
-
-        CleanupStack::PopAndDestroy(); // mailboxes
-        CleanupStack::PopAndDestroy(); // mbUtils
-        }
-     else
-        {
-        if (FeatureManager::FeatureSupported(KFeatureIdMeetingRequestEnabler))
-            {
-    		// Meeting request enablers solution
-    		//Check for:
-    		//	At least one mailbox exists on the terminal
-    		//	At least one MRViewer implementation, with an id matching a mailbox,
-    		    //	exists on the terminal
-    		    //	At least one MRUtils implementation exists on the terminal
-    		    CMRMailboxUtils *mbUtils = CMRMailboxUtils::NewL();
-    		    CleanupStack::PushL( mbUtils );
-
-                RArray<CMRMailboxUtils::TMailboxInfo> mailboxes;
-                CleanupClosePushL(mailboxes);
-
-                mbUtils->ListMailBoxesL(mailboxes);
-                if(mailboxes.Count() > 0)
-                    {
-                    RImplInfoPtrArrayOwn implArray;
-                     CleanupClosePushL( implArray );
-
-                     //Check for a MRViewers Implementation
-                     const TUid mrViewersIface = {KMRViewersInterfaceUID};
-                     REComSession::ListImplementationsL(mrViewersIface, implArray );
-                     if ( implArray.Count() > 0 )
-                         {
-                         // MRViewers implementations exist.  We need to see if any are
-                         // associated with an existing mailbox
-                         TBool mrImplMatchesMailbox = EFalse;
-                         for (TInt i=0; i<implArray.Count(); ++i)
-                             {
-                             for(TInt j=0; j<mailboxes.Count(); ++j)
-                                 {
-                                 TBuf16<KMaxUidName> mbName;
-                                 CnvUtfConverter::ConvertToUnicodeFromUtf8( mbName, implArray[i]->DataType() );
-                                 if(mailboxes[j].iMtmUid.Name().CompareF(mbName) == 0)
-                                     {
-                                    mrImplMatchesMailbox = ETrue;
-                                    //One match is enough for this decision to be true
-                                    break;
-                                    }
-                                 }
-                             if (mrImplMatchesMailbox)
-                                 {
-                                 break;
-                                 }
-                             }
-
-                         // Reset the viewer implementation array.  This will be reused
-                         // if we need to check for mr utils implementations
-                         implArray.ResetAndDestroy();
-
-                         if (mrImplMatchesMailbox)
-                             {
-                             // We have at least one MRViewer implementation with an associated
-                             // mailbox.  Check for a matching MR utils implementation
-                             const TUid mrUtilsIface = {KMRUtilsInterfaceUID};
-                             REComSession::ListImplementationsL(mrUtilsIface, implArray );
-                             if (implArray.Count() > 0)
-                                 {
-                                 // Meeting request functionality is available on this device
-                                 iMrEnabled = ETrue;
-                                 }
-                             }
-
-                         }
-                      CleanupStack::PopAndDestroy(); // implArray
-                      }
-
-                CleanupStack::PopAndDestroy(); // mailboxes
-                CleanupStack::PopAndDestroy(); // mbUtils
-                }            
-            }
+		// Need to implement it once we have meeting request viewer in 10.1
+    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
@@ -732,10 +626,7 @@ void CCalenInterimUtils2Impl::PrepareForStorageL( CCalEntry& aEntry )
         {
         if( IsMeetingRequestL(aEntry) && aEntry.PhoneOwnerL() == NULL )
             {
-            CMRMailboxUtils *mbUtils = CMRMailboxUtils::NewL();
-            CleanupStack::PushL( mbUtils );
-            mbUtils->SetPhoneOwnerL( aEntry );
-            CleanupStack::PopAndDestroy(); // mbUtils
+            // Need to implement it once we have meeting request viewer in 10.1
             }
         }
     FeatureManager::UnInitializeLib();

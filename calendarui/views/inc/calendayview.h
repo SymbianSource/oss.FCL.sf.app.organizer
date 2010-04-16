@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,163 +11,169 @@
 *
 * Contributors:
 *
-* Description:   Declares view class of View architecture for Day view.
- *
+* Description: Class declaration for the day/agenda view
+*
 */
-
-
 
 #ifndef CALENDAYVIEW_H
 #define CALENDAYVIEW_H
 
-//  INCLUDES
+// System includes
+#include <QDateTime>
+
+// User includes
 #include "calennativeview.h"
 
-// FORWARD DECLARATIONS
-class CAknNavigationDecorator;
+// Forward declarations
+class QGraphicsSceneMouseEvent;
+class CalenDayViewWidget;
+class CalenDocLoader;
 
-//  CLASS DEFINITIONS
+#ifdef  CALENVIEWS_DLL
+#define CALENDAYVIEW_EXPORT Q_DECL_EXPORT
+#else
+#define CALENDAYVIEW_EXPORT Q_DECL_IMPORT
+#endif
 
 /**
- *  Declares view for Day view
+ * @class CalenDayView
+ * @brief Class declaration for the day/agenda view
+ * which shows the list of events &/ to-do's (if any)
+ * for any given day in the calendar. User can do other
+ * basic operations like creating, viewing or deleting
+ * an event
  */
-NONSHARABLE_CLASS( CCalenDayView ) : public CCalenNativeView
+class CalenDayView : public CalenNativeView
     {
-public: // Constructors and destructor
-    /**
-     * Two-phased constructor.
-     */
-    IMPORT_C static CCalenDayView* NewL( MCalenServices& aServices );
+    Q_OBJECT
 
+public:
     /**
-     * Destructor.
+     * @brief Constructor
+     * @param services A reference to the MCalenServices object
      */
-    virtual ~CCalenDayView();
-
-public:  // New function
-    /**
-     * Set a date text to StatusPane
-     * @param aTime Set a time
-     */
-    void SetStatusPaneFromActiveContextL();
-
-    /**
-     * Update CBA buttons depending on if we have items or not in view
-     * Callend from Day Container as well as DoActivateViewImpl.
-     * 
-     */
-    void UpdateCbaL();
-
-public:  // From CCalenView
-    virtual TNextPopulationStep ActiveStepL();
-    virtual void CancelPopulation();
-    virtual TCyclePosition CyclePosition() const;
-    virtual const TDesC& LocalisedViewNameL( CCalenView::TViewName aViewName );
-    virtual CGulIcon* CCalenDayView::ViewIconL() const;
-
-protected:  // From CCalenNativeView
-    /**
-     * Clears view specific data
-     */
-    virtual void ClearViewSpecificDataL();
+    CALENDAYVIEW_EXPORT CalenDayView(MCalenServices &services);
     
     /**
-     * Update date form context when entry is saved
+     * @brief Default C++ constructor
      */
-    void UpdateDateFromContextL();
-
-private: // Constructors
+    CALENDAYVIEW_EXPORT virtual ~CalenDayView();
+    
     /**
-     * C++ constructor.
+     * @brief Initializes the view after its creation
+     * Must be called only after the view and its children are constructed
+     * @param docLoader Pointer to the document loader object which has
+     * loaded this view from the .docml file
      */
-    CCalenDayView( MCalenServices& aServices );
+    CALENDAYVIEW_EXPORT void setupView(CalenDocLoader *docLoader);
+    
+    /**
+     * @brief Activates the current view. Sets this view as the current
+     * view of the application's main window. Must be called only after
+     * the view has been constructed and initialized
+     */
+    CALENDAYVIEW_EXPORT virtual void doPopulation();
+    
+    /**
+     * @brief Callback function for any notifications that has been
+     * subscribed by this view
+     * @param notification The event for which notification is being sent
+     */
+    CALENDAYVIEW_EXPORT void HandleNotification(const TCalenNotification notification);
+    
+    /**
+     * @brief Getter function for the document loader. Called from the content
+     * widget in order get its children
+     */
+    CALENDAYVIEW_EXPORT CalenDocLoader* docLoader();
+
+    
+    /**
+     * @brief Called from the content widget to indicate if the day
+     * has any events or not
+     * @param yes true if day has events, false otherwise
+     */
+    void hasEvents(bool yes);
+    
+protected:
+    
+    // TODO: Remove these after gestures are available
+    void mousePressEvent(QGraphicsSceneMouseEvent *event);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+    bool eventFilter(QObject *source, QEvent *event);
 
 private:
-    /**
-     * By default Symbian OS constructor is private.
-     */
-    void ConstructL();
-
-    /**
-     * From CCalenView Second phase DoActivateL
-     */
-    void DoActivateImplL(	const TVwsViewId& aPrevViewId,
-                            TUid aCustomMessageId,
-                            const TDesC8& aCustomMessage );
-
-    /**
-     * From CCalenView Second phase DoDeactivate
-     */
-    void DoDeactivateImpl();
-
-    /**
-     * From CCalenView. Called when locale was changed and
-     *                 time was crossed over
-     */
-    void OnLocaleChangedL(TInt aReason);
-
-    /**
-     * From CCalenView Creates container control for DayView
-     */
-    CCalenContainer* CreateContainerImplL();
-
-    /**
-     * From CCalenView Redraw status pane when Form is closed
-     */
-    void RedrawStatusPaneL();
     
     /**
-     * From CCalenView. Normal command handling method.
-     * needed for MSK.
+     * @brief Connects to all the toolbar and menu actions associated
+     * with this view
      */
-    void HandleCommandL(TInt aCommand);
-    
-    TUid Id() const;
+	void setupActions();
 	
 	/**
-     * Enable the copy functionality for the entries 
-	  *.to single aur multiple calendars.    
-     */
-    
-    void CopyToCalendarsL();
-    
-private:  // From MEikMenuObserver
+	 * @brief Callback function for listening to locale changes like
+	 * time format, date format etc
+	 */
+	void onLocaleChanged(int reason);
+	
+private slots:
+	
     /**
-     * From MEikMenuObserver Changes MenuPane dynamically
-     */
-    void DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMenuPane);
+	 * @brief Slot which is called whenever the orientation of the device changes
+	 * @param orientation The current device orientation
+	 */
+	void orientationChanged(Qt::Orientation orientation);
+	
+	/**
+	 * @brief Slot which launches back the month view
+	 */
+	void launchMonthView();
 
-private: 
+private:
+	
+	/**
+	 * @var mDate
+	 * @brief The date for which this view is being shown
+	 */
+	QDateTime mDate;
+	
+	/**
+	 * @var mSoftKeyAction
+	 * TODO: This may not be required going ahead
+	 */
+	HbAction *mSoftKeyAction;
+	
+	/**
+	 * @var mDayViewWidget
+	 * @brief The pointer to the content widget of this view
+	 */
+	CalenDayViewWidget *mDayViewWidget;
+	
+	/**
+	 * @var mDocLoader
+	 * @brief Pointer to the document loader which has loaded
+	 * this view
+	 */
+	CalenDocLoader *mDocLoader;
+	
+	/**
+	 * @var mGoToTodayAction
+	 * Action which provides "Go to today" functionality
+	 */
+	HbAction *mGoToTodayAction;
+	
+	/**
+	 * @var mDeleteAction
+	 * Action which provides "Delete" functionality
+	 */
+	HbAction *mDeleteAction;
+	   
+    // TODO: Remove these after gestures are available
+    QPointF mTapPoint;
+    bool mActionTaken;
 
-    /**
-     * Returns ETrue if the vsd is null.
-     */
-    TBool IsViewSpecificDataNullL();
-    
-private:   // Data
+};
 
-    TBool iShowBackButtonOnCba; // BACK cba button test variable
-    TVwsViewId iPreviousViewId;   // view id that the day view is switched from
+#endif /* CALENDAYVIEW_H */
 
-private: 
-    enum TPopulationStep
-        {
-        ENothingDone,        
-        ERequestedInstanceView,
-        ECreateSlotTableNext,
-        ESizedChanged,
-        ECreateListBoxDataNext,
-        EPopulationDone
-        };
-    TPopulationStep iPopulationStep;
-
-    // View specific data, day container gets references to all of these.
-    TTime iDate;                    // Date of current focus.
-    TInt iHighlightedRowNumber;     // The row number highlighted.
-    TInt iFirstEntryOnScreenIndex;  // The offset of the topmost item on screen to the first entry.
-    TInt iEventViewCommandHandled;
-    };
-
-#endif  // CALENDAYVIEW_H
-
-// End of File
+// End of file	--Don't remove this.

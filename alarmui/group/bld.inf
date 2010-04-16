@@ -40,30 +40,30 @@ alarmuisnooze.rul           /epoc32/data/z/private/10282bc4/rules/alarmuisnooze.
 
 // alarm tones
 // wins
-../DataSrc/alarm.aac        /epoc32/release/wins/udeb/z/data/sounds/digital/alarm.aac
-../DataSrc/clock.aac        /epoc32/release/wins/udeb/z/data/sounds/digital/clock.aac
-../DataSrc/alarm.aac        /epoc32/release/wins/urel/z/data/sounds/digital/alarm.aac
-../DataSrc/clock.aac        /epoc32/release/wins/urel/z/data/sounds/digital/clock.aac
+../datasrc/alarm.aac        /epoc32/release/wins/udeb/z/data/sounds/digital/alarm.aac
+../datasrc/clock.aac        /epoc32/release/wins/udeb/z/data/sounds/digital/clock.aac
+../datasrc/alarm.aac        /epoc32/release/wins/urel/z/data/sounds/digital/alarm.aac
+../datasrc/clock.aac        /epoc32/release/wins/urel/z/data/sounds/digital/clock.aac
 // winscw
-../DataSrc/alarm.aac        /epoc32/release/winscw/udeb/z/data/sounds/digital/alarm.aac
-../DataSrc/clock.aac        /epoc32/release/winscw/udeb/z/data/sounds/digital/clock.aac
-../DataSrc/alarm.aac        /epoc32/release/winscw/urel/z/data/sounds/digital/alarm.aac
-../DataSrc/clock.aac        /epoc32/release/winscw/urel/z/data/sounds/digital/clock.aac
+../datasrc/alarm.aac        /epoc32/release/winscw/udeb/z/data/sounds/digital/alarm.aac
+../datasrc/clock.aac        /epoc32/release/winscw/udeb/z/data/sounds/digital/clock.aac
+../datasrc/alarm.aac        /epoc32/release/winscw/urel/z/data/sounds/digital/alarm.aac
+../datasrc/clock.aac        /epoc32/release/winscw/urel/z/data/sounds/digital/clock.aac
 // thumb
-../DataSrc/alarm.aac        /epoc32/release/thumb/udeb/z/data/sounds/digital/alarm.aac
-../DataSrc/clock.aac        /epoc32/release/thumb/udeb/z/data/sounds/digital/clock.aac
-../DataSrc/alarm.aac        /epoc32/release/thumb/urel/z/data/sounds/digital/alarm.aac
-../DataSrc/clock.aac        /epoc32/release/thumb/urel/z/data/sounds/digital/clock.aac
+../datasrc/alarm.aac        /epoc32/release/thumb/udeb/z/data/sounds/digital/alarm.aac
+../datasrc/clock.aac        /epoc32/release/thumb/udeb/z/data/sounds/digital/clock.aac
+../datasrc/alarm.aac        /epoc32/release/thumb/urel/z/data/sounds/digital/alarm.aac
+../datasrc/clock.aac        /epoc32/release/thumb/urel/z/data/sounds/digital/clock.aac
 // armv5
-../DataSrc/alarm.aac        /epoc32/data/z/data/sounds/digital/alarm.aac
-../DataSrc/clock.aac        /epoc32/data/z/data/sounds/digital/clock.aac
+../datasrc/alarm.aac        /epoc32/data/z/data/sounds/digital/alarm.aac
+../datasrc/clock.aac        /epoc32/data/z/data/sounds/digital/clock.aac
 
 //stubsis is added to provide IAD
 ../stubsis/alarmui_stub.sis   										/epoc32/data/z/system/install/alarmui_stub.sis
 
 PRJ_MMPFILES
-AlmAlert.mmp
-AknAlarmService.mmp
+almalert.mmp
+aknalarmservice.mmp
 
 PRJ_TESTMMPFILES
 // none

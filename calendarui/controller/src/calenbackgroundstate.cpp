@@ -11,10 +11,9 @@
 *
 * Contributors:
 *
-* Description:   Calendar state machine
+* Description:  Calendar state machine
 *
 */
-
 
 
 // includes
@@ -109,22 +108,8 @@ TBool CCalenBackgroundState::HandleCommandL( const TCalenCommand& aCommand,
             SetCurrentState(aStateMachine,CCalenStateMachine::ECalenViewingState);
             cmdUsed = ETrue;
             break;
-        case ECalenEventViewFromAlarm:
-        case ECalenEventViewFromAlarmStopOnly:
-            SetCurrentState(aStateMachine,CCalenStateMachine::ECalenAlarmState);
-            cmdUsed = ETrue;
-            break;
-        case ECalenFasterAppExit:
-        	if(iPreviousState == CCalenStateMachine::ECalenMapState)
-				{
-				// Issue map launch cancel notification
-				iController.BroadcastNotification(ECalenNotifyCancelMapLaunch);
-		        SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
-		        ActivateCurrentStateL(aStateMachine);
-		        cmdUsed = ETrue;
-		        break;
-		   		}
-        	else if(iPreviousState == CCalenStateMachine::ECalenDeletingState)
+        case ECalenFasterAppExit:        	
+			if(iPreviousState == CCalenStateMachine::ECalenDeletingState)
         	    {
                 // Issue ECalenNotifyDeleteFailed notification to cancel the delete
                 iController.BroadcastNotification(ECalenNotifyDeleteFailed);
@@ -132,20 +117,21 @@ TBool CCalenBackgroundState::HandleCommandL( const TCalenCommand& aCommand,
                 ActivateCurrentStateL(aStateMachine);
                 cmdUsed = ETrue;                 
         	    }
-        	else if( iPreviousState == CCalenStateMachine::ECalenSettingsState
+        	else
+				{
+				if( iPreviousState == CCalenStateMachine::ECalenSettingsState
         	       || iPreviousState == CCalenStateMachine::ECalenEditingState
-        	       || iPreviousState == CCalenStateMachine::ECalenSendingState 
-        	       || iPreviousState == CCalenStateMachine::ECalenIdleState 
-                   || iPreviousState == CCalenStateMachine::ECalenViewingState)
-        	    {
-                SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
-                ActivateCurrentStateL(aStateMachine);
-                cmdUsed = ETrue;                 
-        	    }
+        	       || iPreviousState == CCalenStateMachine::ECalenSendingState )
+	        	    {
+	                SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
+	                ActivateCurrentStateL(aStateMachine);
+	                cmdUsed = ETrue;                 
+	        	    }
+				}
         default:
             break;
         }
-    if(cmdUsed)
+    
     RequestCallbackL( handler, aCommand );
     
     TRACE_EXIT_POINT;

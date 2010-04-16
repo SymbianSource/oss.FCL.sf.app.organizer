@@ -1,0 +1,29 @@
+CalenGridItem {
+	layout: layout-griditem;	
+}
+
+CalenGridItem::eventIconItem {
+	fixed-height: 1un;
+	fixed-width: 1un;
+}
+
+CalenGridItem::focusIconItem {
+	top: -0.5un;
+	left: -0.5un;
+	right: 0.5un;
+	bottom: 0.5un;
+}
+
+CalenGridItem::monthDayInfoTextItem {
+	pref-height: var(hb-param-text-height-secondary);
+	font-variant: secondary;
+	text-align: center;
+}
+
+CalenGridItem::todayIndicatorItem {
+	top: -0.75un;
+	left: -0.75un;
+	right: 0.75un;
+	fixed-height: 0.75un;
+	background-color: red;
+}

@@ -17,9 +17,9 @@
 
 
 #include "calendarui_debug.h"
-#include "calenlunarinfoprovider.h"
-#include "calenlunarinfo.h"
-#include "calensolarterms.h"
+#include "CalenLunarInfoProvider.h"
+#include "CalenLunarInfo.h"
+#include "CalenSolarTerms.h"
 
 #include <calendarconverter.h>
 

@@ -1,8 +1,0 @@
-EXPORTS
-	?MtmUid@CMRMailBoxInfo@@QBE?AVTUid@@XZ @ 1 NONAME ; class TUid CMRMailBoxInfo::MtmUid(void) const
-	?NewL@CMRMailBoxInfo@@SAPAV1@ABVTDesC16@@0VTUid@@J@Z @ 2 NONAME ; class CMRMailBoxInfo * CMRMailBoxInfo::NewL(class TDesC16 const &, class TDesC16 const &, class TUid, long)
-	?Name@CMRMailBoxInfo@@QBE?AVTPtrC16@@XZ @ 3 NONAME ; class TPtrC16 CMRMailBoxInfo::Name(void) const
-	?EntryId@CMRMailBoxInfo@@QBEJXZ @ 4 NONAME ; long CMRMailBoxInfo::EntryId(void) const
-	??1CMRMailBoxInfo@@UAE@XZ @ 5 NONAME ; CMRMailBoxInfo::~CMRMailBoxInfo(void)
-	?Address@CMRMailBoxInfo@@QBE?AVTPtrC16@@XZ @ 6 NONAME ; class TPtrC16 CMRMailBoxInfo::Address(void) const
-

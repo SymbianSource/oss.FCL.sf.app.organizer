@@ -22,7 +22,7 @@
 #include <avkon.rh>
 #include <avkon.rsg>
 
-#include <calendar.loc>
+#include <Calendar.loc>
 
 NAME CLU2
 

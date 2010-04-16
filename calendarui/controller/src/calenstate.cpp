@@ -11,10 +11,9 @@
 *
 * Contributors:
 *
-* Description:   Calendar state machine
+* Description:  Calendar state machine
 *
 */
-
 
 
 // includes
@@ -49,7 +48,7 @@ void CCalenState::BaseConstructL()
     
     TCalenCommand command;
     MCalenCommandHandler* handler( NULL );
-    iCallBackPackage = new( ELeave ) CCalenCallbackPackage( this, command, handler );
+    iCallBackPackage = new( ELeave ) CalenCallbackPackage( this, command, handler );
     
     TRACE_EXIT_POINT;
     }
@@ -82,7 +81,7 @@ void CCalenState::RequestCallbackL( MCalenCommandHandler* aCommandHandler, const
     if( !iCmdCallback )
         {
         TCallBack callback( CommandCallback, iCallBackPackage );
-        iCmdCallback = CCalenAsyncCallBack::NewL( callback, CActive::EPriorityHigh , iController );
+        iCmdCallback = CalenAsyncCallBack::NewL( callback, CActive::EPriorityHigh , iController );
        }
 
     TCallBack callback( CommandCallback, iCallBackPackage );
@@ -105,7 +104,7 @@ TInt CCalenState::CommandCallback( TAny* aCommandStruct )
     TRACE_ENTRY_POINT;
     TBool continueCommand(EFalse);
     
-    CCalenCallbackPackage* package = static_cast<CCalenCallbackPackage*>( aCommandStruct );
+    CalenCallbackPackage* package = static_cast<CalenCallbackPackage*>( aCommandStruct );
     continueCommand = package->HandleCallBack();
     
     TRACE_EXIT_POINT;
@@ -128,14 +127,11 @@ void CCalenState::HandleNotificationL(const TCalenNotification& aNotification,
         case ECalenNotifyAppBackgrounded:
         	{
         	CCalenStateMachine::TCalenStateIndex cachedState = aStateMachine.GetCurrentState();
-        	if(cachedState != CCalenStateMachine::ECalenMapState) // Never send calendar to background state in MapState as maps will 
-        	                                                        // launched in cahin mode not in stand alone mode
-        	    {
-                aStateMachine.SetCurrentState(CCalenStateMachine::ECalenBackgroundState);
-                aStateMachine.SetCurrentPreviousState(cachedState);
-                iOutstandingNotifications.InsertL(aNotification);
-                aStateMachine.ActivateCurrentStateL();
-        	    }
+			aStateMachine.SetCurrentState(CCalenStateMachine::ECalenBackgroundState);
+			aStateMachine.SetCurrentPreviousState(cachedState);
+			iOutstandingNotifications.InsertL(aNotification);
+			aStateMachine.ActivateCurrentStateL();
+        	    
         	}
             break;
         default:
@@ -185,10 +181,10 @@ void CCalenState::CommandExecuting()
     }  
 
 // ----------------------------------------------------------------------------
-// CCalenState::CCalenCallbackPackage::CCalenCallbackPackage
+// CCalenState::CalenCallbackPackage::CalenCallbackPackage
 // C++ constructor
 // ----------------------------------------------------------------------------
-CCalenState::CCalenCallbackPackage::CCalenCallbackPackage( CCalenState* aSelf,
+CCalenState::CalenCallbackPackage::CalenCallbackPackage( CCalenState* aSelf,
                         TCalenCommand aCommand,  MCalenCommandHandler* aCommandHandler)
     : iSelf( aSelf ), iCommand( aCommand ), iCommandHandler( aCommandHandler )                   
     {
@@ -197,10 +193,10 @@ CCalenState::CCalenCallbackPackage::CCalenCallbackPackage( CCalenState* aSelf,
     }
 
 // ----------------------------------------------------------------------------
-// CCalenState::CCalenCallbackPackage::HandleCallBack
+// CCalenState::CalenCallbackPackage::HandleCallBack
 // Handles a callback
 // ----------------------------------------------------------------------------
-TBool CCalenState::CCalenCallbackPackage::HandleCallBack()
+TBool CCalenState::CalenCallbackPackage::HandleCallBack()
     {
     TRACE_ENTRY_POINT;
     TBool continueCommand(EFalse);
@@ -213,10 +209,10 @@ TBool CCalenState::CCalenCallbackPackage::HandleCallBack()
     }
 
 // ----------------------------------------------------------------------------
-// CCalenState::CCalenCallbackPackage::SetCommandHandler
+// CCalenState::CalenCallbackPackage::SetCommandHandler
 // Sets the command handler and command
 // ----------------------------------------------------------------------------
-void CCalenState::CCalenCallbackPackage::SetCommandHandler(CCalenState* aSelf,
+void CCalenState::CalenCallbackPackage::SetCommandHandler(CCalenState* aSelf,
                         TCalenCommand aCommand,  MCalenCommandHandler* aCommandHandler)
     {
     TRACE_ENTRY_POINT;

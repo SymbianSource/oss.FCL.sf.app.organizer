@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,83 +11,90 @@
 *
 * Contributors:
 *
-* Description:   Grid of month view.
- *
+* Description:  CalenMonthGrid class definition.
+*
 */
-
-
 
 #ifndef CALENMONTHGRID_H
 #define CALENMONTHGRID_H
 
-//  INCLUDES
-#include <AknGrid.h>
+// System includes
+#include <hbview.h>
+#include <QGraphicsWidget>
+#include <QAbstractItemModel>
+#include <QtGui>
+#include <hbgridviewitem.h>
+#include <hbgridview.h>
+#include <hbframebackground.h>
+#include <hbframedrawer.h>
 
-class CCalenMonthContainer;
+// Forward declarations
+class QStandardItemModel;
+class CalenGridItemPrototype;
+class CalenMonthData;
+class CalenMonthView;
 
-// CLASS DECLARATION
+#ifdef  CALENVIEWS_DLL
+#define CALENGRID_EXPORT Q_DECL_EXPORT
+#else
+#define CALENGRID_EXPORT Q_DECL_IMPORT
+#endif
 
-/**
- *  Grid of month view
- */
-NONSHARABLE_CLASS( CCalenMonthGrid ) : public CAknGrid 
-    {
-public:  // Constructors and destructor
+// enums
+enum scrollDirection{
+	up,
+	down,
+	invalid
+};
 
-    /**
-     * C++ constructor.
-     * @param aFirstDayOfGrid first day of grid
-     */
-    CCalenMonthGrid(TTime aFirstDayOfGrid, CCalenMonthContainer* aMonthCont);
-    /**
-     * Destructor.
-     */
-    virtual ~CCalenMonthGrid();
-public:  // new functions
-    /**
-     * Return first day of grid
-     * @return first day of grid
-     */
-    TTime FirstDayOfGrid();
-    /**
-     * Set argument aDay to first day of Grid
-     * @param aDay New first day of grid
-     */
-    void SetFirstDayOfGrid(TTime aDay);
+class CALENGRID_EXPORT CalenMonthGrid : public HbGridView
+{
+	Q_OBJECT
 
-protected: // From CAknGrid
-    /**
-     * From CAknGrid Creates CFormattedCellListBoxItemDrawer,
-     * actually CCalenMonthCellListBoxItemDrawer.
-     */
-    void CreateItemDrawerL();
+public:
+	CalenMonthGrid(QGraphicsItem *parent = NULL);
+	~CalenMonthGrid();
+	void setView(CalenMonthView *view);
+	void updateMonthGridModel(QList<CalenMonthData> &monthDataArray,
+                                int indexToBeScrolled);
+	void setCurrentIdex(int index);
+	int getCurrentIndex();
 
-    /**
-     * Override default scrollbar implementation to prevent scrollbar 
-     * to be drawn.
-     */
-    void UpdateScrollBarsL();
+protected:
+	void orientationChanged(Qt::Orientation newOrientation);
+		
+private:
+	void mousePressEvent(QGraphicsSceneMouseEvent* event);
+	void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
+	void setFocusToProperDay();
+	void setActiveDates(QDateTime activeDate);
+	
+public slots:
+	void scrollingFinished();
+	void prependRows();
+	void appendRows();
+	void itemActivated(const QModelIndex &index);
 
-private: // new data
-    
-    /**
-      * From CCoeControl drawing month view
-      */
-     void Draw(const TRect& /*aRect*/) const;
-     
-     /**
-       * Draw secondary grid lines.
-       */   
-     void DrawGridLines() const;
-     
-     TTime iFirstDayOfGrid;
-     
-     CCalenMonthContainer* iMonthContainer;
-     
+protected slots:
+	void downGesture(int value);
+	void upGesture(int value);
+	void panGesture(const QPointF &delta);
+	void timerExpired();
 
-    };
+private:
+	QStandardItemModel *mModel;
+	QList<CalenMonthData> mMonthDataArray;
+	scrollDirection mDirection;
+	bool mIsPanGesture;
+	bool mIsAtomicScroll;
+	CalenMonthView *mView;
+	int mCurrentRow;
+	bool mIsNonActiveDayFocused;
+	QDateTime mNonActiveFocusedDay;
+	bool mIgnoreItemActivated;
+	QPointF mPressedPos;
+};
 
 #endif // CALENMONTHGRID_H
 
-
-// End of File
+// End of file  --Don't remove this.

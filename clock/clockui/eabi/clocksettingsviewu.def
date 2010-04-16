@@ -1,0 +1,8 @@
+EXPORTS
+	_ZN17ClockSettingsView16loadSettingsViewEv @ 1 NONAME
+	_ZN17ClockSettingsViewC1EP7QObject @ 2 NONAME
+	_ZN17ClockSettingsViewC2EP7QObject @ 3 NONAME
+	_ZN17ClockSettingsViewD0Ev @ 4 NONAME
+	_ZN17ClockSettingsViewD1Ev @ 5 NONAME
+	_ZN17ClockSettingsViewD2Ev @ 6 NONAME
+

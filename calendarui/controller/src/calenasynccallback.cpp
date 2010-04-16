@@ -11,10 +11,9 @@
 *
 * Contributors:
 *
-* Description:   Calendar async callback implementation
+* Description:  Calendar async callback implementation
  *
 */
-
 
  
  // INCLUDE FILES
@@ -24,12 +23,12 @@
 
 
 // ---------------------------------------------------------------------------
-// CCalenAsyncCallBack::CCalenAsyncCallBack
+// CalenAsyncCallBack::CalenAsyncCallBack
 // C++ constructor
 // (other items were commented in a header).
 // ---------------------------------------------------------------------------
 //
-CCalenAsyncCallBack::CCalenAsyncCallBack(TCallBack& aCallBack, CActive::TPriority  aPriority,
+CalenAsyncCallBack::CalenAsyncCallBack(TCallBack& aCallBack, CActive::TPriority  aPriority,
                                          CCalenController& aController)
     :CAsyncCallBack(aCallBack, aPriority),
     iController(aController)
@@ -39,39 +38,39 @@ CCalenAsyncCallBack::CCalenAsyncCallBack(TCallBack& aCallBack, CActive::TPriorit
     }
 
 // ---------------------------------------------------------------------------
-// CCalenAsyncCallBack::NewL
+// CalenAsyncCallBack::NewL
 // First phase construction
 // (other items were commented in a header).
 // ---------------------------------------------------------------------------
 //  
-CCalenAsyncCallBack* CCalenAsyncCallBack::NewL(TCallBack& aCallBack, CActive::TPriority  aPriority,
+CalenAsyncCallBack* CalenAsyncCallBack::NewL(TCallBack& aCallBack, CActive::TPriority  aPriority,
                              CCalenController& aController)
     {
     TRACE_ENTRY_POINT;
   
-    CCalenAsyncCallBack* self = new( ELeave ) CCalenAsyncCallBack( aCallBack, aPriority , aController );
+    CalenAsyncCallBack* self = new( ELeave ) CalenAsyncCallBack( aCallBack, aPriority , aController );
 
     TRACE_EXIT_POINT;
     return self;
     }
 // ---------------------------------------------------------------------------
-// CCalenAsyncCallBack::~CCalenAsyncCallBack
+// CalenAsyncCallBack::~CalenAsyncCallBack
 // C++ Destructor
 // (other items were commented in a header).
 // ---------------------------------------------------------------------------
 //	
-CCalenAsyncCallBack::~CCalenAsyncCallBack()
+CalenAsyncCallBack::~CalenAsyncCallBack()
 	{
 	TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
 	}
 
 // ---------------------------------------------------------------------------
-// CCalenAsyncCallBack::BaseConstructL
+// CalenAsyncCallBack::BaseConstructL
 // (other items were commented in a header).
 // ---------------------------------------------------------------------------
 //
-void CCalenAsyncCallBack::BaseConstructL()
+void CalenAsyncCallBack::BaseConstructL()
 	{
 	TRACE_ENTRY_POINT;
 
@@ -79,12 +78,12 @@ void CCalenAsyncCallBack::BaseConstructL()
 	}
 	
 // ---------------------------------------------------------------------------
-// CCalenAsyncCallBack::RunL
+// CalenAsyncCallBack::RunL
 // Handle Completion
 // (other items were commented in a header).
 // ---------------------------------------------------------------------------
 //	
-void CCalenAsyncCallBack::RunL()
+void CalenAsyncCallBack::RunL()
 	{
 	TRACE_ENTRY_POINT;
 	

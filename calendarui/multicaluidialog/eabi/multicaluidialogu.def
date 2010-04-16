@@ -1,5 +1,0 @@
-EXPORTS
-	_ZN17CMultiCalUiDialog4NewLERK13RPointerArrayI9CCalEntryEi @ 1 NONAME
-	_ZN17CMultiCalUiDialog5NewLCERK13RPointerArrayI9CCalEntryEi @ 2 NONAME
-	_ZN17CMultiCalUiDialog7LaunchLEv @ 3 NONAME
-

@@ -1,5 +1,5 @@
 ;
-; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 ; All rights reserved.
 ; This component and the accompanying materials are made available
 ; under the terms of "Eclipse Public License v1.0"
@@ -11,13 +11,13 @@
 ;
 ; Contributors:
 ;
-; Description:  Package file for Calen importer. 
+; Description: 
 ;
 &EN
 ;
 ; UID is the app's UID
 ;
-#{"CalenImporter"},(0x01700007),1,0,0,TYPE=SA
+#{"calenexporter"},(0x01700010),1,0,0,TYPE=SA
 
 ; Localised Vendor name
 %{"Nokia-EN"}
@@ -33,8 +33,10 @@
 [0x101F7961], 0, 0, 0, {"Series60ProductID"}
 ;
 
-; CalenImporter data input files
-"\epoc32\release\armv5\urel\testcalenimporter.dll"-"$:\sys\bin\testcalenimporter.dll"
-"..\data\mmc\unittest\calenimptest\input\CalenImpTest.ini"-"E:\testing\data\unittest\calenimptest\input\CalenImpTest.ini"
-"..\data\mmc\unittest\calenimptest\input\super_test.ics"-"E:\testing\data\unittest\calenimptest\input\super_test.ics"
-"..\data\mmc\unittest\calenimptest\input\super_test.vcs"-"E:\testing\data\unittest\calenimptest\input\super_test.vcs"
+; calenexporter data input files
+"\epoc32\release\armv5\urel\calenimportertest.dll"-"$:\sys\bin\calenimportertest.dll"
+"..\data\super_test.ics"-"E:\testing\data\unittest\calenimptest\input\super_test.ics"
+"..\data\super_test.vcs"-"E:\testing\data\unittest\calenimptest\input\super_test.vcs"
+"/epoc32/winscw/C/testframework/calenimportertest.cfg"	-	"c:/testframework/calenimportertest.cfg"
+;"/epoc32/winscw/C/testframework/TestFramework.ini"	-	"c:/testframework/TestFramework.ini"
+

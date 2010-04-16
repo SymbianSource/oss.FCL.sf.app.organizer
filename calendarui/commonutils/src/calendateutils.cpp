@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2004 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,21 +11,20 @@
 *
 * Contributors:
 *
-* Description:   	Utility class providing utility functions to know  beginning of the day, maximum/minimum date allowed in calendar, 
-*			day range, on same day, on same month etc.
+* Description:  ?Description
 *
 */
 
 
-
 //debug
+#include <qdatetime.h>
 #include "calendarui_debug.h"
 
-#include <calendateutils.h>
-#include <caltime.h> // For Min/MaxValidDate
+#include "calendateutils.h"
+#include "agendautil.h"
 
 //  LOCAL CONSTANTS AND MACROS
-const TInt KDefaultStartTime(8);    // 8 am
+const int KDefaultStartTime(8);    // 8 am ( 0 to 23 hour scale)
 
 // ============================ MEMBER FUNCTIONS ==============================
 
@@ -36,17 +35,11 @@ const TInt KDefaultStartTime(8);    // 8 am
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TBool CalenDateUtils::OnSameDay( const TTime& aX, const TTime& aY )
+ bool CalenDateUtils::onSameDay( const QDateTime& x, const QDateTime& y )
     {
-    TRACE_ENTRY_POINT;
-    
-    TDateTime x = aX.DateTime();
-    TDateTime y = aY.DateTime();
-    
-    TRACE_EXIT_POINT;
-    return x.Year()  == y.Year() 
-        && x.Month() == y.Month()
-        && x.Day()   == y.Day();
+    return x.date().year()  == y.date().year() 
+        && x.date().month() == y.date().month()
+        && x.date().day()   == y.date().day();
     }
 
 // -----------------------------------------------------------------------------
@@ -55,15 +48,9 @@ EXPORT_C TBool CalenDateUtils::OnSameDay( const TTime& aX, const TTime& aY )
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TBool CalenDateUtils::OnSameMonth( const TTime& aX, const TTime& aY )
+ bool CalenDateUtils::onSameMonth( const QDateTime& x, const QDateTime& y )
     {
-    TRACE_ENTRY_POINT;
-    
-    TDateTime x = aX.DateTime();
-    TDateTime y = aY.DateTime();
-    
-    TRACE_EXIT_POINT;
-    return ( x.Year() == y.Year() && x.Month() == y.Month() );
+    return ( x.date().year() == y.date().year() && x.date().month() == y.date().month() );
     }
 
 // -----------------------------------------------------------------------------
@@ -72,14 +59,11 @@ EXPORT_C TBool CalenDateUtils::OnSameMonth( const TTime& aX, const TTime& aY )
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TTime CalenDateUtils::BeginningOfDay( const TTime& aStartTime )
-    {
-    TRACE_ENTRY_POINT;
-    
-    TTime zero(TInt64(0));
-    
-    TRACE_EXIT_POINT;
-    return zero + aStartTime.DaysFrom( zero );
+ QDateTime CalenDateUtils::beginningOfDay( const QDateTime& startTime )
+    {    
+    QTime zeroTime(0,0,0,0);
+    QDateTime ret(startTime.date(), zeroTime);
+    return ret;
     }
 
 // -----------------------------------------------------------------------------
@@ -88,20 +72,16 @@ EXPORT_C TTime CalenDateUtils::BeginningOfDay( const TTime& aStartTime )
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TTime CalenDateUtils::DisplayTimeOnDay( const TTime& aStartTime,
-                                                 const TTime& aDay )
+ QDateTime CalenDateUtils::displayTimeOnDay( const QDateTime& startTime,
+                                                 const QDateTime& day )
     {
-    TRACE_ENTRY_POINT;
-    
-    if( ! OnSameDay( aStartTime, aDay ) )
+    if( ! onSameDay( startTime, day ) )
         {
-        TRACE_EXIT_POINT;
-        return BeginningOfDay( aDay );
+        return beginningOfDay( day );
         }
     else 
         {
-        TRACE_EXIT_POINT;
-        return aStartTime;
+        return startTime;
         }
     }
 
@@ -111,18 +91,15 @@ EXPORT_C TTime CalenDateUtils::DisplayTimeOnDay( const TTime& aStartTime,
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TBool CalenDateUtils::TimeRangesIntersect( const TTime& aXStart,
-                                                    const TTime& aXEnd,
-                                                    const TTime& aYStart,
-                                                    const TTime& aYEnd )
+ bool CalenDateUtils::timeRangesIntersect( const QDateTime& xStart,
+                                                    const QDateTime& xEnd,
+                                                    const QDateTime& yStart,
+                                                    const QDateTime& yEnd )
     {
-    TRACE_ENTRY_POINT;
-    
-    TRACE_EXIT_POINT;
-    return (! ( aYEnd <= aXStart || aXEnd <= aYStart ))
-        || (aXStart == aXEnd && aYStart <= aXStart && aXStart < aYEnd)
-        || (aYStart == aYEnd && aXStart <= aYStart && aYStart < aXEnd)
-        || (aXStart == aXEnd && aYStart == aYEnd && aXStart == aYStart);
+    return (! ( yEnd <=  xStart || xEnd <= yStart )
+        || (xStart == xEnd && yStart <= xStart && xStart < yEnd)
+        || (yStart == yEnd && xStart <= yStart && yStart < xEnd)
+        || (xStart == xEnd && yStart == yEnd && xStart == yStart));
     }
 
 // -----------------------------------------------------------------------------
@@ -131,13 +108,10 @@ EXPORT_C TBool CalenDateUtils::TimeRangesIntersect( const TTime& aXStart,
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TBool CalenDateUtils::IsValidDay( const TTime& aTime )
+ bool CalenDateUtils::isValidDay( const QDateTime& time )
     {
-    TRACE_ENTRY_POINT;
-    
     // Interim API supports range from 1900-2100, 
-    TRACE_EXIT_POINT;
-    return ( MinTime() <= aTime && aTime <= MaxTime() );
+    return ( minTime() <= time && time <= maxTime() );
     }
 
 // -----------------------------------------------------------------------------
@@ -146,37 +120,9 @@ EXPORT_C TBool CalenDateUtils::IsValidDay( const TTime& aTime )
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C void CalenDateUtils::GetDayRangeL( const TTime& aStartDay,
-                                            const TTime& aEndDay,
-                                            CalCommon::TCalTimeRange& aRange )
+ bool CalenDateUtils::isNullTime( QDateTime& time )
     {
-    TRACE_ENTRY_POINT;
-
-    TDateTime start( aStartDay.DateTime() );
-    TDateTime end( aEndDay.DateTime() );
-
-    start.SetHour( 0 );
-    start.SetMinute( 0 );
-    start.SetSecond( 0 );
-    start.SetMicroSecond( 0 );
-
-    end.SetHour( 23 );
-    end.SetMinute( 59 );
-    end.SetSecond( 59 );
-    end.SetMicroSecond( 0 );
-
-    // prevent overflow
-    TCalTime endDate;
-    endDate.SetTimeLocalL( LimitToValidTime( TTime( end ) ) );
-
-    TCalTime startDate;
-    startDate.SetTimeLocalL( LimitToValidTime( TTime( start ) ) );
-
-    CalCommon::TCalTimeRange dayrange( startDate, endDate );
-
-    aRange = dayrange;
-    
-    TRACE_EXIT_POINT;
+    return( time.isNull() );
     }
 
 // -----------------------------------------------------------------------------
@@ -185,29 +131,12 @@ EXPORT_C void CalenDateUtils::GetDayRangeL( const TTime& aStartDay,
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TBool CalenDateUtils::IsNullTimeL( TCalTime& aTime )
-    {
-    TRACE_ENTRY_POINT;
-    
-    TRACE_EXIT_POINT;
-    return( aTime.TimeLocalL() == Time::NullTTime() );
-    }
+ QDateTime CalenDateUtils::limitToValidTime( const QDateTime& time )
+    {    
+    QDateTime valid = time;
+    valid = valid > maxTime() ? maxTime() : valid;
+    valid = valid < minTime() ? minTime() : valid;
 
-// -----------------------------------------------------------------------------
-// ?classname::?member_function
-// ?implementation_description
-// (other items were commented in a header).
-// -----------------------------------------------------------------------------
-//
-EXPORT_C TTime CalenDateUtils::LimitToValidTime( const TTime& aTime )
-    {
-    TRACE_ENTRY_POINT;
-    
-    TTime valid = aTime;
-    valid = valid > MaxTime() ? MaxTime() : valid;
-    valid = valid < MinTime() ? MinTime() : valid;
-    
-    TRACE_EXIT_POINT;
     return valid;
     }
 
@@ -218,14 +147,9 @@ EXPORT_C TTime CalenDateUtils::LimitToValidTime( const TTime& aTime )
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TTime CalenDateUtils::MaxTime()
-    {
-    TRACE_ENTRY_POINT;
-    
-    TTime time( TCalTime::MaxTime() - TTimeIntervalMinutes( 1 ) );
-    
-    TRACE_EXIT_POINT;
-    return time;
+ QDateTime CalenDateUtils::maxTime()
+    { 
+    return AgendaUtil::maxTime();
     }
 
 // -----------------------------------------------------------------------------
@@ -234,114 +158,169 @@ EXPORT_C TTime CalenDateUtils::MaxTime()
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TTime CalenDateUtils::MinTime()
+ QDateTime CalenDateUtils::minTime()
     {
-    TRACE_ENTRY_POINT;
+    return AgendaUtil::minTime();
+    }
+
+// -----------------------------------------------------------------------------
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+ int CalenDateUtils::timeOfDay( const QDateTime& dateTime )
+    {    
+    QDateTime midnight = CalenDateUtils::beginningOfDay( dateTime );
+    int resultInSec = midnight.secsTo(dateTime);
     
-    TRACE_EXIT_POINT;
-    return TCalTime::MinTime();
+    return (resultInSec/60);
     }
 
 // -----------------------------------------------------------------------------
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TTimeIntervalMinutes CalenDateUtils::TimeOfDay( const TTime& aDateTime )
+ QDateTime CalenDateUtils::roundToPreviousHour( const QDateTime& dateTime ) 
     {
-    TRACE_ENTRY_POINT;
-    
-    TTime midnight = CalenDateUtils::BeginningOfDay( aDateTime );
-    TTimeIntervalMinutes result;
-    aDateTime.MinutesFrom( midnight, result );
-    
-    TRACE_EXIT_POINT;
-    return result;
+    QTime time = dateTime.time();
+    time.setHMS(time.hour(),0,0,0);
+    return QDateTime( dateTime.date(), time );
     }
 
 // -----------------------------------------------------------------------------
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TTime CalenDateUtils::RoundToPreviousHour( const TTime& aTime ) 
+ int CalenDateUtils::roundToPreviousHour( const int& minutes )
     {
-    TRACE_ENTRY_POINT;
-
-    TDateTime dt = aTime.DateTime();
-    dt.SetMinute(0);
-    dt.SetSecond(0);
-    dt.SetMicroSecond(0);
-
-    TRACE_EXIT_POINT;
-    return TTime( dt );
+    return ( (minutes / 60) * 60 );
     }
 
 // -----------------------------------------------------------------------------
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TTimeIntervalMinutes CalenDateUtils::RoundToPreviousHour( const TTimeIntervalMinutes& aMinutes )
+ QDateTime CalenDateUtils::now()
     {
-    TRACE_ENTRY_POINT;
-
-    TRACE_EXIT_POINT;
-    return TTimeIntervalMinutes( (aMinutes.Int() / 60) * 60 );
+    TTime currentTime;
+    currentTime.HomeTime();
+    TDateTime curDateTime = currentTime.DateTime();
+    QDateTime ret;
+    ret.setDate(QDate(curDateTime.Year(), curDateTime.Month() + 1, curDateTime.Day() + 1));
+    ret.setTime(QTime(curDateTime.Hour(), curDateTime.Minute(), curDateTime.Second(), curDateTime.MicroSecond()));
+    // TODO: need to use QDateTime::currentDateTime() from QT4.6 onwards
+    //return QDateTime::currentDateTime();
+    return ret;
     }
 
 // -----------------------------------------------------------------------------
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TTime CalenDateUtils::Now()
+ QDateTime CalenDateUtils::today()
     {
-    TRACE_ENTRY_POINT;
-
-    TTime now;
-    now.HomeTime();
-
-    TRACE_EXIT_POINT;
-    return now;
+    return CalenDateUtils::beginningOfDay( now() );
     }
 
 // -----------------------------------------------------------------------------
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TTime CalenDateUtils::Today()
+ bool CalenDateUtils::isOnToday( const QDateTime& time )
     {
-    TRACE_ENTRY_POINT;
-
-    TRACE_EXIT_POINT;
-    return CalenDateUtils::BeginningOfDay( Now() );
+    return CalenDateUtils::onSameDay( time, today() );
     }
 
 // -----------------------------------------------------------------------------
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TBool CalenDateUtils::IsOnToday( const TTime& aTime )
+ QDateTime CalenDateUtils::defaultTime( const QDateTime& date )
     {
-    TRACE_ENTRY_POINT;
-
-    TRACE_EXIT_POINT;
-    return CalenDateUtils::OnSameDay( aTime, Today() );
-    }
-
-// -----------------------------------------------------------------------------
-// (other items were commented in a header).
-// -----------------------------------------------------------------------------
-//
-EXPORT_C TTime CalenDateUtils::DefaultTime( const TTime& aDate )
-    {
-    TRACE_ENTRY_POINT;
-
-    TTime dateTime( Time::NullTTime() );
+    QDateTime dateTime;
     // DD:MM:YY @ hh:mm:ss
-    dateTime = CalenDateUtils::BeginningOfDay( aDate ); 
+    dateTime = CalenDateUtils::beginningOfDay( date ); 
     // DD:MM:YY @ 00:00:00
-    dateTime += TTimeIntervalHours( KDefaultStartTime ); // DD:MM:YY @ 08:00 am
-        
-    TRACE_EXIT_POINT;
+    QTime time(KDefaultStartTime, 0, 0, 0);
+    dateTime.setTime(time); // DD:MM:YY @ 08:00 am
+  
     return dateTime;
     }      
 
+ // -----------------------------------------------------------------------------
+ // (other items were commented in a header).
+ // -----------------------------------------------------------------------------
+ //
+ QDateTime CalenDateUtils::pastOf(const QDateTime& dateTime, int numOfDays)
+     {
+     QDateTime result;
+     int dayNumber = dateTime.date().day();
+      int numOfDaysInMonth = dayNumber;
+      int month = dateTime.date().month();
+      int year = dateTime.date().year();
+      int buff = numOfDays;
+      QDate date(year, month, dayNumber);
+      while(buff > numOfDaysInMonth)
+          {
+          if(month == 1) {
+          // If January,
+          month = 12; // December
+          year--;
+          }
+          else {
+          month--;
+          }
+          // Create the qdate with these details
+          date.setDate(year, month, 1);
+          // check to see if it goes beyond the next month also
+          buff = buff - numOfDaysInMonth;
+          numOfDaysInMonth = date.daysInMonth();
+          }
+      
+      // Substract buff days from end of the month
+      int day = numOfDaysInMonth - buff;
+      date.setYMD(date.year(), date.month(), day);
+      result.setDate(date);
+      result.setTime(dateTime.time());
+      return result;
+     }
+ 
+ // -----------------------------------------------------------------------------
+ // (other items were commented in a header).
+ // -----------------------------------------------------------------------------
+ //
+ QDateTime CalenDateUtils::futureOf(const QDateTime& dateTime, int numOfDays)
+     {
+     QDateTime result;
+     int dayNumber = dateTime.date().day();
+     int numOfDaysInMonth = dateTime.date().daysInMonth();
+     int month = dateTime.date().month();
+     int year = dateTime.date().year();
+     int buff = numOfDays;
+     QDate date(year, month, dayNumber);
+     while(dayNumber + buff > numOfDaysInMonth)
+         {
+         if(month == 12) {
+         // If December,
+         month = 1; // January
+         year++;
+         }
+         else {
+         month++;
+         }
+         // Create the qdate with these details
+         date.setDate(year, month, 1);
+         // check to see if it goes beyond the next month also
+         buff = buff - (numOfDaysInMonth - dayNumber);
+         dayNumber = 0;
+         numOfDaysInMonth = date.daysInMonth();
+         }
+     
+     // Add the buff days to the day number to get the result
+     int day = dayNumber + buff;
+     
+     date.setYMD(date.year(), date.month(), day);
+     result.setDate(date);
+     result.setTime(dateTime.time());
+     return result;
+     }
 // End of File

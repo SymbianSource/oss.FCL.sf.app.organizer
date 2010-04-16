@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -24,6 +24,9 @@
 #include <StifTestModule.h>
 #include <TestclassAssert.h>
 #include <CalenInterimUtils2.h>
+#include <calprogresscallback.h>
+#include <calsession.h>
+#include <calentryview.h>
 
 
 // MACROS
@@ -47,7 +50,8 @@ _LIT( KCalenInterimUtils2TestLogFileWithTitle,
 *  @lib CalenInterimUtils2.lib
 *  @since ?Series60_version
 */
-NONSHARABLE_CLASS( CCalenInterimUtils2Test ) : public CScriptBase
+NONSHARABLE_CLASS( CCalenInterimUtils2Test ) : public CScriptBase, 
+												public MCalProgressCallBack
     {
     public:  // Constructors and destructor
 
@@ -74,9 +78,10 @@ NONSHARABLE_CLASS( CCalenInterimUtils2Test ) : public CScriptBase
         virtual TInt RunMethodL( CStifItemParser& aItem );
 
     protected:  // New functions
-
-    protected:  // Functions from base classes
-
+        void Progress(TInt /*aPercentageCompleted*/) {};
+		void Completed(TInt aError);
+		TBool NotifyProgress() { return EFalse; };
+    	
     private:
 
         /**
@@ -111,6 +116,10 @@ NONSHARABLE_CLASS( CCalenInterimUtils2Test ) : public CScriptBase
         */
         TInt TestGlobalUUIDL( CStifItemParser& aItem );
         
+        TInt TestPopulateChildEntryL( CStifItemParser& aItem );
+        
+        TInt TestStoreL( CStifItemParser& aItem );
+        
     private:    // New functions
         
         
@@ -123,7 +132,11 @@ NONSHARABLE_CLASS( CCalenInterimUtils2Test ) : public CScriptBase
         //?data_declaration;
 
     private:    // Data
-        
+        CCalenInterimUtils2* iCalenInterimUtils;
+        CCalSession* iCalSession;
+        CCalEntryView* iCalEntryView;
+        CActiveSchedulerWait* iWait;
+        TInt iError;
         // ?one_line_short_description_of_data
         //?data_declaration;
 

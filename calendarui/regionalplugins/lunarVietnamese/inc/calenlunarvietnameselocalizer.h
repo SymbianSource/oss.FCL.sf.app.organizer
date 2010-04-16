@@ -19,7 +19,7 @@
 #define __CALENLUNARVIETNAMESELOCALIZER_H__
 
 #include <e32base.h>
-#include "calenlunarlocalizer.h"
+#include "CalenLunarLocalizer.h"
 
 
 

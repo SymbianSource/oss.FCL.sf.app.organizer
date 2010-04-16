@@ -1,0 +1,9 @@
+EXPORTS
+	_ZN18NotesAppControllerC1EP7QObject @ 1 NONAME
+	_ZN18NotesAppControllerC2EP7QObject @ 2 NONAME
+	_ZN18NotesAppControllerD0Ev @ 3 NONAME
+	_ZN18NotesAppControllerD1Ev @ 4 NONAME
+	_ZN18NotesAppControllerD2Ev @ 5 NONAME
+	_ZTI18NotesAppController @ 6 NONAME
+	_ZTV18NotesAppController @ 7 NONAME
+

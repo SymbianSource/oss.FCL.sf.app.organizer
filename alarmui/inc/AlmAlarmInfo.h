@@ -62,11 +62,19 @@ NONSHARABLE_CLASS( CAlmAlarmInfo ) : public CBase
      * @since 2.0
      **/
     void GetWakeupLabelL(HBufC*& aLabel);
+    
+    /**
+     * @brief Gets the alarm information for the alarm that is
+     * about to expire
+     * @return The alarm information 
+     */
+    SAlarmInfo* GetAlarmInfo(TASShdAlarm aAlarm, CAlarmUtils::TAlarmType aAlarmType);
 
  private:
     /**
      * Functions to set the alarm notification string.
      **/
+    /*
     void SetupUnknownAlarmL(HBufC*& aText);
     void SetupClockAlarmL(HBufC*& aText);
     void SetupAppointmentAlarmL(HBufC*& aText);
@@ -75,6 +83,13 @@ NONSHARABLE_CLASS( CAlmAlarmInfo ) : public CBase
 
     void GetCoverUIParamsForCalendarL(const CCalEntry* aEntry);
     void GetCoverUIParamsForClockAndOtherL(const TASShdAlarm& aAlarm, const CAlarmUtils::TAlarmType aType);
+    */
+    
+    void SetupUnknownAlarmL(TASShdAlarm aAlarm);
+    void SetupClockAlarmL(TASShdAlarm aAlarm);
+    void SetupAppointmentAlarmL(TASShdAlarm aAlarm);
+    void SetupToDoAlarmL(TASShdAlarm aAlarm);
+    void SetupAnniversaryAlarmL(TASShdAlarm aAlarm);
 
     void AppendSubjectLocationText(TPtr& aDest, const TDesC& aSeparator);
 
@@ -91,6 +106,8 @@ NONSHARABLE_CLASS( CAlmAlarmInfo ) : public CBase
     HBufC* iTime;
     HBufC* iCoverTime;
     HBufC* iCoverDate;
+    
+    SAlarmInfo*     iAlarmInfo;
 
 };
 

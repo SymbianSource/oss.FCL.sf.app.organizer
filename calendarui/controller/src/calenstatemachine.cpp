@@ -15,31 +15,26 @@
 *
 */
 
-#include <avkon.hrh>
-#include <coemain.h>
-#include <aknappui.h>
 
 // includes
 #include "calendarui_debug.h"           // Debug macros
+
 #include "calenstatemachine.h"
 #include "calenstate.h"
 #include "calenidlestate.h"
-#include "calenbackgroundstate.h"
+#include "calenpopulationstate.h"
 #include "calendeletingstate.h"
+#include "calenbackgroundstate.h"
 #include "caleneditingstate.h"
 #include "calenexitingstate.h"
 #include "calenhelpstate.h"
-#include "calenpopulationstate.h"
 #include "calenprintingstate.h"
 #include "calensendingstate.h"
 #include "calensettingsstate.h"
 #include "calenviewingstate.h"
-#include "calenmapstate.h"
-#include "calenattachmentstate.h"
-#include "calenalarmstate.h"
+
 
 const TInt KHashLength = 64;
-
 // ----------------------------------------------------------------------------
 // CCalenStateMachine::NewL
 // Two phased constructor.
@@ -129,19 +124,6 @@ void CCalenStateMachine::ConstructL()
     state = CCalenExitingState::NewLC( iController, iOutstandingNotifications );
     iStates.InsertL( state, ECalenExitingState );
     CleanupStack::Pop( state );
-    
-    state = CCalenMapState::NewLC( iController, iOutstandingNotifications );
-    iStates.InsertL( state, ECalenMapState );
-    CleanupStack::Pop( state );
-    
-    state = CCalenAttachmentState::NewLC( iController, iOutstandingNotifications );
-    iStates.InsertL( state, ECalenAttachmentState );
-    CleanupStack::Pop( state );
-	
-	state = CCalenAlarmState::NewLC( iController, iOutstandingNotifications );
-    iStates.InsertL( state, ECalenAlarmState );
-    CleanupStack::Pop( state );
-
 
     ASSERT( iStates.Count() == KCalenLastState );
 
@@ -184,6 +166,17 @@ void CCalenStateMachine::HandleNotification(const TCalenNotification aNotificati
     }
 
 // ----------------------------------------------------------------------------
+// CCalenStateMachine::CurrentState
+// Returns the current state in which calendar is.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+CCalenStateMachine::TCalenStateIndex CCalenStateMachine::CurrentState()
+{
+	return iCurrentState;
+}
+
+// ----------------------------------------------------------------------------
 // CCalenStateMachine::HandleCommandL
 // Command handler interface.
 // (other items were commented in a header).
@@ -191,14 +184,7 @@ void CCalenStateMachine::HandleNotification(const TCalenNotification aNotificati
 //
 TBool CCalenStateMachine::HandleCommandL( const TCalenCommand& aCommand )
     {
-    TRACE_ENTRY_POINT;
-
-    if( aCommand.Command() == EAknSoftkeyExit 
-        || aCommand.Command() == EAknCmdExit 
-    	|| aCommand.Command() == EEikCmdExit )
-        {
-        iAvkonAppUi->Exit();
-        }
+    TRACE_ENTRY_POINT;  
     
     TBool cmdUsed = iStates[iCurrentState]->HandleCommandL( aCommand, *this);
     

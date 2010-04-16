@@ -47,12 +47,13 @@ inline TBool TAgnFilter::AreIncompletedTodosIncluded() const
 inline TBool TAgnFilter::AreNonTodosIncluded() const
 /** Tests whether the filter includes any entry type other than to-dos
 @return True=included, False=excluded. */
-   {
-   	  return ((iFilter & CalCommon::EIncludeAppts)   ||
-   	          (iFilter & CalCommon::EIncludeReminder) ||
-   	          (iFilter & CalCommon::EIncludeEvents)       ||
-   	          (iFilter & CalCommon::EIncludeAnnivs));
-   }
+	{
+	return ((iFilter & CalCommon::EIncludeAppts)   ||
+			(iFilter & CalCommon::EIncludeReminder) ||
+			(iFilter & CalCommon::EIncludeEvents)   ||
+			(iFilter & CalCommon::EIncludeAnnivs)   ||
+			(iFilter & CalCommon::EIncludeNotes ));
+	}
 
 inline TBool TAgnFilter::RptNextInstanceOnly() const
 /** Tests whether the filter only includes the next instance of a repeating entry.
@@ -131,4 +132,15 @@ inline TBool TAgnFilter::FloatingInstanceOnly() const
 
 inline void TAgnFilter::SetFloatingInstanceOnly(const TBool aFloatingInstanceOnly)
 	{ iFloatingInstanceOnly = aFloatingInstanceOnly; }
+
 #endif
+
+/**
+ * @brief check for Notes included in the filter
+ * 
+ * @return ETrue if notes are included otherwise return EFalse 
+ */
+inline TBool TAgnFilter::AreNotesIncluded() const
+	{ return (iFilter & CalCommon::EIncludeNotes); }
+
+

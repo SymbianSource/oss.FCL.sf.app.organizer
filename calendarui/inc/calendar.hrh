@@ -20,8 +20,8 @@
 #ifndef CALENDAR_HRH
 #define CALENDAR_HRH
 
-#include <avkon.hrh>
-#include "CalendarVariant.hrh"
+//#include <avkon.hrh>
+//#include "CalendarVariant.hrh"
 
 
 
@@ -44,9 +44,6 @@ enum TCalenMenuPaneCommands
     ECalenMarkAll,
     ECalenUnmarkAll,
 
-    ECalenCmdComplete,
-    ECalenMarkDone,
-    ECalenMarkUnDone,
 
     ECalenCmdChangeView,
 
@@ -54,15 +51,11 @@ enum TCalenMenuPaneCommands
     /* Settings view */
     //ECalenCmdSetting,
     ECalenCmdChange,
-		
-	/* Event view From alarm commands */
-    ECalenStopAlarm,
-    ECalenSnoozeAlarm,
 
     /* Misc commands */
-#ifdef RD_CALEN_ENHANCED_MSK 
-	ECalenCmdOpenMskDialog,
-#endif //RD_CALEN_ENHANCED_MSK
+//#ifdef RD_CALEN_ENHANCED_MSK 
+	//ECalenCmdOpenMskDialog,
+//#endif //RD_CALEN_ENHANCED_MSK
 
     /* Meeting request commands*/
     ECalenCmdSendResponse,
@@ -74,11 +67,6 @@ enum TCalenMenuPaneCommands
     /* End of common commands */ 
     ECalenCmdLast, 
     ECalenRegionalVariantCmdFirst = 100160 
-    };
-
-enum TCalenDayViewCommands
-    {
-    ECalenCopyToCalendars = 100161
     };
 
 // Do not use this directly but through ItemToArrayIndex,
@@ -96,7 +84,6 @@ enum TSettingListItemId
     ECalenDefaultMailboxId,
     ECalenToolbarItemId,
     ECalenPluginListItemId,
-    ECalenInfoBarPluginsItemId,
     ECalenRegionalVariantSettingListItemIdFirst = 6020
     };
 
@@ -161,62 +148,8 @@ enum // TTodoPriority
     ETodoPriorityNormal,
     ETodoPriorityLow
     };
-enum //
-    {
-    ECalenCmdEdit = 1,
-    ECalenCmdAdd,
-    ECalenCmdDelete,
-    ECalenCmdItemSelect,
-    ECalenCmdItemDeselect,
-    ECalenCmdShow,
-    ECalenCmdHide
-    };
+    
 
-enum
-    {
-    ECalenMultiDbName = 5000,
-    ECalenMultiDbColor,
-    ECalenMultiDbPublicPrivate,
-    ECalenMultiDbHiddenVisible,
-    ECalenMultiDbSyncStatus
-    };
-
- enum
-    {
-    ECalenMultiDbHelp = 1,
-    ECalenMultiDbExit
-    };
- 
- enum TCalenAttachmentCommands
-     {
-     ECalenAddImage,
-     ECalenAddNote,
-     ECalenAddAudio,
-     ECalenAddVideo,
-     ECalenAddOtherFiles,
-     ECalenViewAttachmentCmdOpen,
-     ECalenViewAttachmentCmdSave,
-     ECalenViewAttachmentCmdRemove,
-     ECalenViewAttachmentAdd,
-     ECalenViewAttachmentCmdFetch,
-     ECalenViewerCmdAttachmentCmdExit
-     };
- 
- // dialog control ids.
- enum TCalenAttachmentDlgCtrlIds
-     {
-     ECalenAttachmentListBoxId = 1,
-     ECalenCannotOpenNoteId,
-     ECalenSavedNoteId,
-     ECalenWaitNoteId
-     };
- 
- // custom control types.
- enum TCalenAttachmentDlgCustomControls
-     {
-     ECalenAttachmentListBox = 0x2001
-     };
- 
 #define CALEN_VIEW_CYCLING_NEXT '#'
 #define CALEN_VIEW_CYCLING_PREV '*'
 
@@ -232,11 +165,6 @@ enum
 #define cell_cale_tentative_mr      114 // light blue, RGB (102, 204, 255)
 #define cell_cale_cancelled_mr       35 // red, RGB (255, 0, 0)
 
- enum
-     {
-     /// Enable Ok button for calender selection dialog
-     ECalenSelectCmdOk = 3000
-     };
 
 #endif // end of CALENDAR_HRH
 

@@ -25,10 +25,10 @@
 #include <e32std.h>
 #include <vcal.h>
 #include <tz.h>
-#include "calversit.h"
 #include <caldataexchange.h>
 
 #include "agmvcal.h"
+#include "calversit.h"
 
 class TTzRule;
 class CAgnVCalConverter;

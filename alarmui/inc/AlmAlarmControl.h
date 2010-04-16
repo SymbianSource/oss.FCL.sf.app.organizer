@@ -30,15 +30,17 @@
 #include "pim_trace.h"
 #include "PropertyObserver.h"
 #include "AlmAlertVariant.hrh"
+#include "alarmalertobserver.h"
 
 #include <akndialogcontroller.h>
 #include <AlarmObserver.h>
 
-#include <missedalarmstore.h>
+// #include <missedalarmstore.h>
 
 // FORWARD DECLARATIONS
 class CAknAlarmService;
 class CAlarmUtils;
+class AlarmAlertWidget;
 
 // CLASS DECLARATION
 
@@ -52,7 +54,8 @@ class CAlarmUtils;
 NONSHARABLE_CLASS( CAlmAlarmControl ) : public CCoeControl,
                                         public MEikServAlarm,
                                         public MPropertyChangeHandler,
-                                        public MNotifierDialogObserver
+                                        public MNotifierDialogObserver,
+                                        public AlarmAlertObserver
 {
  public: // Constructors and destructor
     /**
@@ -153,14 +156,6 @@ NONSHARABLE_CLASS( CAlmAlarmControl ) : public CCoeControl,
      */
     void StoreMissedAlarmDataL();
 
-    /**
-     * Checks for calendar type alarm needed to be stored as missed alarm 
-     *  Stops the alarm and enters to missed alarm table. If the calendar type
-     * is clock, then snoozes the alarm.
-     */
-
-    void StopOrSnoozeAlarm();
-
 public:  // from MEikServAlarm
     /**
      * From MEikServAlarm.
@@ -247,6 +242,12 @@ public:  // from MEikServAlarm
      * @param None
      */
     TBool IsStopFromContext();
+    
+public: // From AlarmAlertObserver
+    
+    void alertCompleted(AlarmCommand command);
+    void alertDisplayed(AlarmCommand command);
+    void alertCancelled(AlarmCommand command);
 
  private:  // From MPropertyChangeHandler
     /**

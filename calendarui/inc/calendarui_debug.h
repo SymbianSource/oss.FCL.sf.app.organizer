@@ -11,10 +11,9 @@
 *
 * Contributors:
 *
-* Description: Calendar debug file.
+* Description:
 *
 */
-
 /**
 *
 **/
@@ -33,7 +32,7 @@
     #include <flogger.h>
     #include <e32svr.h>
     #include <f32file.h>
-    #include <AknGlobalConfirmationQuery.h>
+    //#include <AknGlobalConfirmationQuery.h>
     const TInt KMaxLogLineLength = 512;
 #endif
 
@@ -44,7 +43,7 @@
     _LIT( KWarningFormat, " error %d trapped %S line %d");
     inline void DisplayWarningNote( TInt aError, const TDesC8& aFile, TInt aWarningNote )
         {
-        if ( aError )
+        /*if ( aError )
             {
             TRAP_IGNORE(
             CAknGlobalConfirmationQuery* cq = CAknGlobalConfirmationQuery::NewL();
@@ -61,12 +60,12 @@
             
             CleanupStack::PopAndDestroy( cq );
             );
-            }       
+            }  */     
         }
 
     inline void DisplayWarningNote( const TDesC& aNote )
         {
-        TRAP_IGNORE(
+        /*TRAP_IGNORE(
             CAknGlobalConfirmationQuery* cq = CAknGlobalConfirmationQuery::NewL();
             CleanupStack::PushL( cq );
            
@@ -76,7 +75,7 @@
             User::WaitForRequest( stat );
             
             CleanupStack::PopAndDestroy( cq );
-            );
+            );*/
         }
         
     #undef TRAP_INSTRUMENTATION_LEAVE
@@ -106,18 +105,11 @@
         ASSERT( !_err ); \
     }
     #define WARNING_NOTE( _s )
-    #define PIM_ASSERT( _s ) \
-    { \
-        const TInt _err = _s; \
-        if( _err ) RDebug::Print( _L("### PIM_ASSERT: %d"), _err ); \
-        ASSERT( !_err ); \
-    }
 #else 
 // urel
     #define PIM_TRAP_HANDLE( _err, _s )   TRAP_IGNORE( _s; );
     #define PIM_TRAPD_HANDLE( _s )  TRAP_IGNORE( _s; );
     #define WARNING_NOTE( _s )
-    #define PIM_ASSERT( _s )  _s;
 #endif // _DEBUG
 
 #if defined (_DEBUG) || defined (_PIM_FILE_LOG) 
@@ -183,10 +175,10 @@
         TRefByValue<const TDesC> tmpFmt( _L("%S") );
  #if defined (_PIM_FILE_LOG)  
         _LIT( KLogDir, "CalenUi");
-        _LIT( KLogDir2, "c://CalenUi");
+        _LIT( KLogDir2, "c:\\CalenUi");
         _LIT( KLogFile, "log.txt");
-        _LIT( KDir, "c://logs//CalenUi" );
-        _LIT( KDir2, "c://logs//CalenUi" );
+        _LIT( KDir, "c:\\logs\\CalenUi" );
+        _LIT( KDir2, "c:\\logs\\CalenUi" );
         
         RFs fs;
         fs.Connect();

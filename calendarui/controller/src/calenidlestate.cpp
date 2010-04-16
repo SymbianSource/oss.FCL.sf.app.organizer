@@ -24,7 +24,7 @@
 #include "calennotifier.h"
 
 // ----------------------------------------------------------------------------
-// CCalenIdleState::NewLC
+// CalenIdleState::NewLC
 // First stage construction
 // ----------------------------------------------------------------------------
 CCalenIdleState* CCalenIdleState::NewLC( CCalenController& aController, 
@@ -98,7 +98,18 @@ TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
         case ECalenMonthView:
         case ECalenWeekView:
         case ECalenDayView:
-        case ECalenTodoView:
+        case ECalenStartActiveStep:
+            {
+            // set previous state to idle
+            CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
+            SetCurrentState( aStateMachine, CCalenStateMachine::ECalenPopulationState );
+            SetCurrentPreviousState( aStateMachine, cachedState );
+            ActivateCurrentStateL(aStateMachine);               
+            cmdUsed = ETrue;
+            }
+            break;
+        case ECalenTodoEditor:
+        case ECalenTodoEditorDone:
         case ECalenForwardsToDayView:
         case ECalenNextView:
         case ECalenPrevView:
@@ -119,16 +130,7 @@ TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
         	 cmdUsed = ETrue;
              break;
         
-        case ECalenStartActiveStep:
-        	{
-        	// set previous state to idle
-            CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
-            SetCurrentState( aStateMachine, CCalenStateMachine::ECalenPopulationState );
-           	SetCurrentPreviousState( aStateMachine, cachedState );
-            ActivateCurrentStateL(aStateMachine);           	
-           	cmdUsed = ETrue;
-           	}
-           	break;
+        
         case ECalenEventView: 
         case ECalenMissedEventView: 
             {
@@ -141,11 +143,11 @@ TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
         	}
         	break;
         case ECalenNewMeeting:
-        case ECalenNewTodo:
         case ECalenNewAnniv:
         case ECalenNewDayNote:
         case ECalenNewReminder:
         case ECalenNewMeetingRequest:
+        case ECalenNewEntry:
         case ECalenEditCurrentEntry:
         case ECalenEditSeries:
         case ECalenEditOccurrence:
@@ -206,35 +208,8 @@ TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
         case ECalenGetLocation:
     	case ECalenShowLocation:
     	case ECalenGetLocationAndSave:
-    		{
-    		CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
-	        SetCurrentState( aStateMachine, CCalenStateMachine::ECalenMapState );
-	        SetCurrentPreviousState( aStateMachine, cachedState );
-	        ActivateCurrentStateL(aStateMachine);        
-	        cmdUsed = ETrue;
-    		}
-			break;
-		case ECalenEventViewFromAlarm:
-        case ECalenEventViewFromAlarmStopOnly:	
-			{
-			CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
-            SetCurrentState( aStateMachine, CCalenStateMachine::ECalenAlarmState);
-            SetCurrentPreviousState( aStateMachine, cachedState );
-            ActivateCurrentStateL(aStateMachine);            
-            cmdUsed = ETrue;
-			}
-			break;
-    	case ECalenAddAttachment:
-    	case ECalenRemoveAttachment:
-    	case ECalenViewAttachmentList:    
-    	    {
-    	    CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
-    	    SetCurrentState( aStateMachine, CCalenStateMachine::ECalenAttachmentState );
-            SetCurrentPreviousState( aStateMachine, cachedState );
-            ActivateCurrentStateL(aStateMachine);        
-            cmdUsed = ETrue;
-    	    }
-    	    break;
+    		{    		
+    		}       
         default:
             // This a valid custom command as there is a command handler
             // do not modify the new start and remain in idle.

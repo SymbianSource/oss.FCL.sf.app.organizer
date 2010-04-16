@@ -11,10 +11,9 @@
 *
 * Contributors:
 *
-* Description:   Calendar state machine
+* Description:  Calendar state machine
 *
 */
-
 
 
 // includes
@@ -80,7 +79,7 @@ CCalenDeletingState::~CCalenDeletingState()
 
 // ----------------------------------------------------------------------------
 // CCalenDeletingState::HandleCommandL
-// From CCalenState
+// From CCCalenState
 // ----------------------------------------------------------------------------    
 TBool CCalenDeletingState::HandleCommandL( const TCalenCommand& aCommand,
                                          CCalenStateMachine& aStateMachine )
@@ -94,34 +93,18 @@ TBool CCalenDeletingState::HandleCommandL( const TCalenCommand& aCommand,
     
     TBool cmdUsed = EFalse;
     
-    if(ECalenDeleteEntryWithoutQuery == cmd)
+    if( cmd == ECalenDeleteEntryWithoutQuery )
         {
         RequestCallbackL( handler, aCommand );
         cmdUsed = ETrue;
         }
-    else if(ECalenFasterAppExit == cmd)
+    else if( ECalenFasterAppExit == cmd )
     	{
         SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
         ActivateCurrentStateL(aStateMachine);
         RequestCallbackL( handler, aCommand );
         cmdUsed = ETrue;
     	}
-    else if(ECalenStartActiveStep == cmd)
-        {
-        RequestCallbackL( handler, aCommand );
-        cmdUsed = ETrue;
-        }
-    
-    else if(ECalenMissedEventViewFromIdle == cmd)
-        {
-        RequestCallbackL( handler, aCommand );
-        cmdUsed = ETrue;
-        }
-    else if(ECalenMissedAlarmsViewFromIdle == cmd)
-        {
-        RequestCallbackL( handler, aCommand );
-        cmdUsed = ETrue;
-        }
 
     TRACE_EXIT_POINT;
     return cmdUsed;
@@ -129,7 +112,7 @@ TBool CCalenDeletingState::HandleCommandL( const TCalenCommand& aCommand,
 
 // ----------------------------------------------------------------------------
 // CCalenDeletingState::HandleNotificationL
-// From CCalenState
+// From CCCalenState
 // ----------------------------------------------------------------------------        
 void CCalenDeletingState::HandleNotificationL(const TCalenNotification& aNotification,
                                               CCalenStateMachine& aStateMachine )

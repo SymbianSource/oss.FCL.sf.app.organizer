@@ -23,7 +23,7 @@
 #include <caltime.h>
 
 //User includes
-#include <agnimportobserver.h>	// for MAgnImportObserver::TImpResponse
+#include <AgnImportObserver.h>	// for MAgnImportObserver::TImpResponse
 
 #include "ICalRuleSegment.h"	// For CICalRuleSegment
 

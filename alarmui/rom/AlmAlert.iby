@@ -25,6 +25,10 @@
 file=ABI_DIR\BUILD_DIR\AlmAlert.dll           SHARED_LIB_DIR\AlmAlert.dll
 file=ABI_DIR\BUILD_DIR\AknAlarmService.dll    SHARED_LIB_DIR\AknAlarmService.dll
 
+data=/epoc32/data/z/resource/plugins/devicedialogs/alarmalertplugin.qtplugin		resource/plugins/devicedialogs/alarmalertplugin.qtplugin
+file=ABI_DIR/BUILD_DIR/alarmalertplugin.dll		SHARED_LIB_DIR/alarmalertplugin.dll
+file=ABI_DIR/BUILD_DIR/alarmalertwidget.dll		SHARED_LIB_DIR/alarmalertwidget.dll
+
 // Stub sis
 data=DATAZ_\system\install\alarmui_stub.sis             \System\Install\alarmui_stub.sis
 

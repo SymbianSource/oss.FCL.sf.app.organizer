@@ -20,368 +20,148 @@
 #define CALENVIEWMANAGER_H
 
 // INCLUDES
+
 #include <vwsdef.h>
-#include <coeview.h>                    // MCoeViewActivationObserver
-#include <calencommandhandler.h>
-#include <calennotificationhandler.h>   // MCalenNotificationHandler
 
-// FORWARD DECLARATIONS
-class CAknViewAppUi;
-class CCalenGlobalData;
-class CCalenViewPopulator;
+#include "calennotificationhandler.h"   // MCalenNotificationHandler
+#include "hb_calencommands.hrh"
+#include "calencommandhandler.h"
+
+
 class CCalenController;
-class CCalenView;
-class CEikMenuPane;
-class CCalenToolbarImpl;
-class MCalenToolbar;
-class CCalenSetting;
-class CCalenViewInfo;
-class CCalenCustomisationManager;
-class MCalenServices;
-class CCalenIcons; 
-class CCalenToolbarImpl;
-
-typedef CCalenView* (*NativeView)(MCalenServices&);
+class CalenMonthView;
+class CalenDayView;
+class AgendaEventViewer;
+class CalenLandscapeDayView;
+class CalenSettingsView;
+class CalenDocLoader;
 
 /**
  * The action ui handles events passed from the controller and delegates
  * them to the appropriate place (i.e. the specific action ui classes).
  */
-class CCalenViewManager : public CBase,
-                          public MCoeViewActivationObserver,
-                          public MCalenNotificationHandler,
-                          public MCalenCommandHandler
-    {
+class  CalenViewManager :	public QObject,
+							public MCalenNotificationHandler,
+							public MCalenCommandHandler
+    {   
+    
+	Q_OBJECT
+	
     public:  // Construction and destruction
-        /**
-         * Symbian 1st phase constructor
-         * @param aAppUi Reference to the CAknViewAppUi
-         * @param aController Reference to the CCalenController
-         * @return Pointer to CCalenViewManager
-         */
-        static CCalenViewManager* NewL( CAknViewAppUi& aAppUi,  
-                                        CCalenController& aController );
+		/**
+		 * Constructor
+		 */
+		CalenViewManager ( CCalenController& aController, 
+		                   bool isFromServiceFrmwrk);
+		
         /**
          * Destructor
          */                             
-        virtual ~CCalenViewManager();
-
-    public:  // New functions
-        /**
-         * Constructs the custom views
-         * @param aCustomisationmManager Reference to CCalenCustomisationManager
-         */
-        void ConstructCustomViewsL(
-                           CCalenCustomisationManager& aCustomisationManager );
-
-        /**
-         * Get info array
-         * @return Reference to RPointerArray<CCalenViewInfo>
-         */
-        RPointerArray<CCalenViewInfo>& ViewInfoArray();
-
-        /**
-         * From MCalenCommandHandler.
-         * Handles key presses.
-         * 
-         * @param aCommand The command Id of the key.
+        virtual ~CalenViewManager();
+	    
+	public: 
+       /**
+         * Handles view manager commands.
+         * @return ETrue if command is handled, EFalse otherwise
          */
         TBool HandleCommandL( const TCalenCommand& aCommand );
-
-        /**
-         * From MCalenCommandHandler.
-         * Allows extending this API without breaking BC.
-         * 
-         * @param aExtensionUid specifies
-         * @return extension of the requested type
-         */
-        TAny* CalenCommandHandlerExtensionL( TUid aExtensionUid );
-
-        /**
-         * Returns the current view.
-         * @return TUid of current view
-         */
-        TUid CurrentView() const;
-
-        /**
-         * Removes the current view from the switch menu
-         * @param aMenuPane Where the currenct view should be removed from
-         */
-        void RemoveCurrentViewFromMenu( CEikMenuPane* aMenuPane );
-
-        /**
-         * Request activation of a specific view
-         * @param aViewId Reference to TVwsViewId of the view to be activated
-         */
-        void RequestActivationL( const TVwsViewId& aViewId );
         
         /**
-         * Get a pointer to the Calendar toolbar, or NULL if none is available.
-         * Ownership is not transferred.
-         * @return Calendar toolbar if available
+         * Refresh current view.
          */
-        MCalenToolbar* ToolbarOrNull();
+        void refreshCurrentViewL();
         
         /**
-         * Activates the default view, as retrieved from settings.
+         * Returns the settings view
          */
-        void ActivateDefaultViewL( TUid aDefaultView );
-        
-        /**
-         * Returns if the first view activation on start-up has taken place
-         */
-        TBool ViewsActivated() const;
-        
-        /** 
-         * Interupts the population of the current view.
-         */
-        void InterruptPopulationL();
-        
-        /**
-         * Try to activate a view
-         * @param aViewUid View id to be activated
-         * @param aMessageId Message id
-         * @param aMessage Message send along activation query
-         */
-        void RequestActivationL( const TUid& aViewUid,
-                                 const TUid& aMessageId = KNullUid,
-                                 const TDesC8& aMessage = KNullDesC8 );
-        
-        /**
-         * Started population of the current view
-         */
-        void StartActiveStepL();
-        
-        /**
-         * Returns a reference to the calendar icon array
-         * @return reference to a CCalenIcons array
-         */
-        CCalenIcons& IconsL();  
-         
-        /**
-         * Gets next view icon
-         */
-        CGulIcon* GetNextViewIconL();
-        
-        /**
-         * Repopulate the view.
-         */
-        void SetRepopulation(TBool aRePopulate);
-
-        /**
-         * Returns calendar toolbar
-         */
-        CCalenToolbarImpl* CalenToolbar();
-        
-        /**
-         * Unload all plugins on fake exit
-         */
-        void UnLoadAllPluginsL();
-        
-        /**
-         * Reload all plugins when application comes to
-         * foreground after fake exit
-         */
-        void ReloadAllPluginsL();
-        
+        CalenSettingsView* settingsView();
+		/*
+		* @brief Returns CCalenController
+		*/
+		CCalenController&  calenController();
 		/**
-         * Gets the view Id of previous view.
-         * @return TUid, Uid of previous view.
-         */
-        TUid GetPreviousViewUid();
+		 * Constructs and activates the requested view
+		 */
+		void constructAndActivateView(int view);
+		/**
+		 * Constructs the other views apart frm firstview and adds 
+		 * them to main window
+		 */
+		void constructOtherViews();
+		/**
+		 * Returns the first view
+		 */
+		int getFirstView();
 		
-        /**
-         * Check for native view.
-         * @param aViewUid Uid of the View  
-         * @returns ETrue if aViewUid is any of the native views
-         */
-        TBool IsNativeView(TUid aViewUid);
-        
-        /**
-         * Activate view depending upon the current default view
-		 * If plugin views is default view, then dummy view will be activated
-		 * else the native view
-		 * @param	aDefView	current default view frm calendar settings
-         */
-        void ActivateViewOnFakeExitL(TUid aDefView);
-        
-    private:  // New functions
-
-        /**
-         * From MCoeViewActivationObserver
-         * Called just before a view in this application is activated by the view server
-         * @param aNewlyActivatedViewId View id to be activated
-         * @param aViewIdToBeDeactivated View id to be deactivated
-         */
-        void HandleViewActivation( const TVwsViewId& aNewlyActivatedViewId,
-                                   const TVwsViewId& aViewIdToBeDeactivated );
-                                                                                          
-        /**
-         * Requests activation for the next view in the view cycle
-         */
-        void CycleNextViewL();
-        
-        /**
-         * Requests activation for the previous view in the view cycle
-         */
-        void CyclePrevViewL();
-        
-        /**
-         * Constructs the s60 native views and registers them with the view server
-         */
-        void ConstructNativeViewsL();
-        
-        /**
-         * Constructs any custom views from plugins and registers them with the view server
-         */
-        void ConstructCustomViewsL();
-        
-         /**
-         * Constructs any custom views from a plugin and registers them with the view server
-         */
-        void ConstructCustomViewL( TUid aPluginUid );
-          
-        /**
-         * Prompts the user to choose a view to switch to. If cancelled returns 
-         * KErrCancel, otherwise one of the ECalenView*
-         */
-        void ShowSwitchViewQueryL();
-        
-        /**
-         * Adds a view to the array
-         * @param aView Pointer to the view that is going to be added
-         */
-        void AddNativeViewL( CCalenView* aView );
-        
-        /** 
-         * Removes a native view from the view manager
-         * @param aViewUid  view uid of view that is going to be removed
-         */
-        void RemoveNativeViewL( TUid aViewUid );
-        
-        /**
-         * Creates native view 
-         */
-        TBool CreateNativeViewL( TUid aViewUid );
-
-        /**
-         * Return reference to the customisation manager
-         * @return Reference to CCalenCustomisationManager
-         */
-        CCalenCustomisationManager& CustomisationManager();
-
-        /**
-         * Compares the list of active plugins and plugins the view manager
-         * knows about, to discover which plugins have been enabled or
-         * disabled
-         */
-        void UpdatePluginListL();
-        
-        /**
-         * Removes the custom views supplied by the plugin list from the view 
-         * server.
-         * @param   uids 
-         */
-        void RemoveDisabledPluginsViewsL( RArray<TUid>& aDisabledPlugins );
-                                 
-        /**
-         * Asyncronous callback function to remove the current view after 
-         * it has been disabled.
-         */
-        static TInt RemoveDeActivatedView( TAny* aObject );
-        
-        /**
-         * Asyncronous callback function to remove the current view after 
-         * it has been disabled. Leaving version
-         */
-        void RemoveDeActivatedViewL();
-        
-        /**
-         * Handles notifications (Leaving)
-         */
-        void HandleNotificationL( TCalenNotification aNotification );
-        
-        /**
-         * Updates the nextview icon on the toolbar when default view is not month view
-         */
-        void UpdateToolbarNextViewIconL(TUid defViewUid);
-        
-        /**
-         * Handles Faster app exit
-         */
-        void HandleFasterAppExitCommandL();
-        
-        /**
-         * Handles ECalenNotifySettingsChanged notification 
-         */
-        void HandleSettingsChangeNotificationL();
-        
-        /**
-         * Handles ECalenNotifyEntryDeleted and ECalenNotifyInstanceDeleted
-         * notifications 
-         */
-        void HandleEntryDeleteNotificationL();
-        
-        /**
-         * Handles ECalenNotifyEntryClosed notification
-         */
-        void HandleEntryClosedNotificationL();
-        
-        /**
-         * Handles ECalenNotifySystemTimeChanged notification
-         */ 
-        void HandleSystemTimeChangeNotificationL();
-        
-    private: // from MCalenNotificationHandler
+		void showNextDay();
+		
+		void showPrevDay();
+		
+		void removeDayViews();
+		
+	public: // from MCalenNotificationHandler
    
         /**
          * Handles notifications
          */
         void HandleNotification( const TCalenNotification aNotification );
         
-    private:  // Construction and destruction
+	private:
         /**
-         * C++ constructor
-         * @param aAppUi Reference to CAknViewAppUi
-         * @param aController Reference to CCalenController
+         * Loads month view frm the docml
          */
-        CCalenViewManager( CAknViewAppUi& aAppUi,
-                                     CCalenController& aController  );
-
+        void loadMonthView();
         /**
-         * Symbian 2nd phase constructor
-         */
-        void ConstructL();
-
-    private:  // Data
-        TVwsViewId              iCurrentViewId;
-        CCalenGlobalData*       iGlobalData;
-        CAknViewAppUi&          iAppUi;
-        TInt                    iViewCycleIndex;
-        CCalenViewPopulator*    iPopulator;
-        CCalenSetting*          iSetting;
-        CCalenToolbarImpl*      iToolbar;
-        CCalenCustomisationManager* iCustomisationManager;
-        RPointerArray<CCalenViewInfo> iViewInfoArray;
-        CCalenController&           iController;
-
-        // Stores the uids of the plugins, the view manager is
-        // aware of.
-        RArray<TUid> iKnownPlugins;
-        // Pointer to CCalenViewInfo for an active view which has
-        // been disabled. 
-        CCalenViewInfo* iRemovedActiveView;
-        // Remove the current view asynchronously
-        CAsyncCallBack*  iViewRemovalCallback;   
-        CCalenIcons* iIcons;
+		 * Loads day view frm the docml
+		 */
+        void loadDayView();
+	    /**
+	     * Activates the default view, as retrieved from settings.
+	     */
+	    void ActivateDefaultViewL( int defaultView );
+	    
+	    /**
+          * Activate current view.
+          */
+		void activateCurrentView();
+		
+		/**
+		 * Launch event view.
+		 */
+		void launchEventView();
+		
+		/**
+		 * @brief Constructs the auxilliary view used
+		 * to provide illusion of swiping to next or prev
+		 * day
+		 */
+		void loadAlternateDayView();
         
-        // The first view on start-up has been activated.
-        TBool iViewsActivated; 
-        TVwsViewId  iPreviousViewId;
-        TVwsViewId  iPreviousToDayView;
-        TBool iAvoidRepopulation;
-        TBool iStartupComplete;
-    };
+    private slots:
+    
+		void handleViewingCompleted(bool status);
+		void handleEditingStarted();
+		void handleEditingCompleted();
+		void handleDeletingStarted();
+		void handleDeletingCompleted();
+		
+    private:  // Data        
+
+		CCalenController		&mController;
+		CalenMonthView			*mCalenMonthView;
+		CalenDayView			*mCalenDayView;
+		AgendaEventViewer		*mCalenEventViewer;
+		CalenLandscapeDayView	*mCalenLandscapeDayView;
+		CalenSettingsView		*mSettingsView;
+		CalenDocLoader			*mDayViewDocLoader;
+		CalenDocLoader			*mMonthViewDocLoader;
+		CalenDayView            *mCalenDayViewAlt;
+		CalenDocLoader          *mDayViewAltDocLoader;
+        
+		int  mCurrentViewId;
+		int  mPreviousViewId;
+		int  mFirstView;
+        };
 
 #endif // CALENVIEWMANAGER_H
 

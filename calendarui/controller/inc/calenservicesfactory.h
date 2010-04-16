@@ -11,10 +11,9 @@
 *
 * Contributors:
 *
-* Description:   Interface for creating calendar services
+* Description:  Interface for creating calendar services
 *
 */
-
 
 #ifndef CALENSERVICESFACTORY_H
 #define CALENSERVICESFACTORY_H
