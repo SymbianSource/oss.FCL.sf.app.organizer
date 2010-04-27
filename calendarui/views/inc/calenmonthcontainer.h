@@ -369,7 +369,8 @@ private:  // New variables
     // View specific data, references to views data
     TTime& iDate;
     TTime iOldFirstDayOfGrid;
-	TBool iChangeMonth;	
+	TBool iChangeMonth;
+	TBool iChangeDay;
     };
 
 #endif //CALENMONTHCONT_H

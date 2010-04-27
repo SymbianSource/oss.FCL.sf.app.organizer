@@ -982,7 +982,7 @@ CCalenSetting& CCalenController::Settings()
 // Get icon of specific type
 // ----------------------------------------------------------------------------
 //
-CGulIcon* CCalenController::GetIconL( MCalenServices::TCalenIcons aIndex )
+CGulIcon* CCalenController::GetIconL( MCalenServices::TCalenIcons aIndex, const TInt aViewId ) 
     {
     TRACE_ENTRY_POINT;
     
@@ -993,7 +993,7 @@ CGulIcon* CCalenController::GetIconL( MCalenServices::TCalenIcons aIndex )
         }
     
     TRACE_EXIT_POINT;
-    return iViewManager->IconsL().GetIconL(aIndex);
+    return iViewManager->IconsL().GetIconL(aIndex,aViewId);
     }
 
 // ----------------------------------------------------------------------------

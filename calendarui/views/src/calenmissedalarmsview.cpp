@@ -120,16 +120,20 @@ CCalenView::TNextPopulationStep CCalenMissedAlarmsView::ActiveStepL()
         	break;
         case EPopulationDone:
 	       	{
-	       	// update missed alarm list
-	       	Container()->UpdateMissedAlarmsArrayL();
+	       	if(Container())
+	       	    {
+                // update missed alarm list
+                Container()->UpdateMissedAlarmsArrayL();
 
-	       	// populate with missed alarms
-	       	Container()->PopulateWithMissedAlarmsL();
+                // populate with missed alarms
+                Container()->PopulateWithMissedAlarmsL();
        	    
-       	    // complete population
-       	    Container()->CompletePopulationL();
-       	    RedrawStatusPaneL();
-       	    UpdateCbaL();
+                // complete population
+                Container()->CompletePopulationL();
+                
+                RedrawStatusPaneL();
+                UpdateCbaL();
+	       	    }
        	    
        	 
 

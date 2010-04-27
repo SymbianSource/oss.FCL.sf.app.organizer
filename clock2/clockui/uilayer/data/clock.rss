@@ -476,7 +476,8 @@ RESOURCE MENU_PANE r_clock_world_view_menupane
             { 
             command = EClockWorldMyRegion;
             txt = qtn_clk_opt_region_my_region; 
-            flags = EEikMenuItemAction; 
+//            flags = EEikMenuItemAction; 
+            flags = EEikMenuItemSpecific;
             },
         MENU_ITEM 
             { 

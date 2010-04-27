@@ -20,6 +20,7 @@
 #include "calenicons.h"
 #include "calendar.hrh"
 
+#include <CalenUid.h> 
 #include <aknconsts.h>
 #include <data_caging_path_literals.hrh>
 #include <AknIconArray.h>
@@ -309,7 +310,7 @@ EXPORT_C MCalenServices::TCalenIcons CCalenIcons::IconIndexFromEntryL(CCalEntry&
 // (other items were commented in a header).
 // ---------------------------------------------------------
 //
-EXPORT_C CGulIcon* CCalenIcons::GetIconL( MCalenServices::TCalenIcons aIndex ) const
+EXPORT_C CGulIcon* CCalenIcons::GetIconL( MCalenServices::TCalenIcons aIndex, const TInt aViewId ) const 
     {
     TRACE_ENTRY_POINT;
     CGulIcon* icon;
@@ -318,6 +319,7 @@ EXPORT_C CGulIcon* CCalenIcons::GetIconL( MCalenServices::TCalenIcons aIndex ) c
     // When Avkon suplies some method to do that, change these 
     TAknsItemID colorGroup = KAknsIIDQsnIconColors;
     TInt colorIndex = EAknsCIQsnIconColorsCG19;
+    TInt colorIndexToDo = EAknsCIQsnIconColorsCG13;
     TRgb nonSkinColor = AKN_LAF_COLOR(215);
     CFbsBitmap* bitmap = NULL;
     CFbsBitmap* mask = NULL;
@@ -370,79 +372,188 @@ EXPORT_C CGulIcon* CCalenIcons::GetIconL( MCalenServices::TCalenIcons aIndex ) c
             break;
         case MCalenServices::ECalenAlarmIcon:
             {
-            AknsUtils::CreateColorIconLC( AknsUtils::SkinInstance(), 
-                                                     KAknsIIDQgnIndiAlarmAdd,
-                                                     colorGroup,
-                                                     colorIndex,
-                                                     bitmap, mask,
-                                                     AknIconUtils::AvkonIconFileName(),
-                                                     EMbmAvkonQgn_indi_alarm_add,
-                                                     EMbmAvkonQgn_indi_alarm_add_mask,
-                                                     nonSkinColor);
-            icon = CGulIcon::NewL( bitmap, mask );
-            CleanupStack::Pop( 2 ); // bitmap, mask
+            if(aViewId == KCalenTodoViewUidValue || 
+               aViewId == KCalenEventViewUidValue || 
+               aViewId == KCalenMissedAlarmsViewUidValue ||
+               aViewId == KCalenMissedEventViewUidValue )
+                {
+                AknsUtils::CreateColorIconLC( AknsUtils::SkinInstance(), 
+                                                         KAknsIIDQgnIndiAlarmAdd,
+                                                         colorGroup,
+                                                         colorIndexToDo,
+                                                         bitmap, mask,
+                                                         AknIconUtils::AvkonIconFileName(),
+                                                         EMbmAvkonQgn_indi_alarm_add,
+                                                         EMbmAvkonQgn_indi_alarm_add_mask,
+                                                         nonSkinColor);
+                icon = CGulIcon::NewL( bitmap, mask );
+                CleanupStack::Pop( 2 ); // bitmap, mask
+                break;
+                }
+            else 
+                {
+                AknsUtils::CreateColorIconLC( AknsUtils::SkinInstance(), 
+                                                       KAknsIIDQgnIndiAlarmAdd,
+                                                       colorGroup,
+                                                       colorIndex,
+                                                       bitmap, mask,
+                                                       AknIconUtils::AvkonIconFileName(),
+                                                       EMbmAvkonQgn_indi_alarm_add,
+                                                       EMbmAvkonQgn_indi_alarm_add_mask,
+                                                       nonSkinColor);
+                icon = CGulIcon::NewL( bitmap, mask );
+                CleanupStack::Pop( 2 ); // bitmap, mask
+                break;
+                }                
             }
-            break;
+            
         case MCalenServices::ECalenRepeatIcon:
             {
-            AknsUtils::CreateColorIconLC( AknsUtils::SkinInstance(), 
-                                                     KAknsIIDQgnIndiRepeatAdd,
-                                                     colorGroup,
-                                                     colorIndex,
-                                                     bitmap, mask,
-                                                     iIconFile,
-                                                     EMbmCalendarQgn_indi_repeat_add,
-                                                     EMbmCalendarQgn_indi_repeat_add_mask,
-                                                     nonSkinColor);
-            icon = CGulIcon::NewL(bitmap, mask);
-            CleanupStack::Pop( 2 );
+            if(aViewId == KCalenTodoViewUidValue || 
+               aViewId == KCalenEventViewUidValue || 
+               aViewId == KCalenMissedAlarmsViewUidValue ||
+               aViewId == KCalenMissedEventViewUidValue )
+                {
+                AknsUtils::CreateColorIconLC( AknsUtils::SkinInstance(), 
+                                                         KAknsIIDQgnIndiRepeatAdd,
+                                                         colorGroup,
+                                                         colorIndexToDo,
+                                                         bitmap, mask,
+                                                         iIconFile,
+                                                         EMbmCalendarQgn_indi_repeat_add,
+                                                         EMbmCalendarQgn_indi_repeat_add_mask,
+                                                         nonSkinColor);
+                icon = CGulIcon::NewL(bitmap, mask);
+                CleanupStack::Pop( 2 );
+                break;
+                }
+            else
+                {
+                AknsUtils::CreateColorIconLC( AknsUtils::SkinInstance(), 
+                                                         KAknsIIDQgnIndiRepeatAdd,
+                                                         colorGroup,
+                                                         colorIndex,
+                                                         bitmap, mask,
+                                                         iIconFile,
+                                                         EMbmCalendarQgn_indi_repeat_add,
+                                                         EMbmCalendarQgn_indi_repeat_add_mask,
+                                                         nonSkinColor);
+                icon = CGulIcon::NewL(bitmap, mask);
+                CleanupStack::Pop( 2 );
+                break;
+                }
             }
-            break;
+           
         case MCalenServices::ECalenRepeatExceptionIcon:
             {
-            AknsUtils::CreateColorIconLC(AknsUtils::SkinInstance(), 
-                                         KAknsIIDQgnIndiRepeatExceptionAdd,
-                                         colorGroup,
-                                         colorIndex,
-                                         bitmap, mask,
-                                         iIconFile,
-                                         EMbmCalendarQgn_indi_repeat_exception_add,
-                                         EMbmCalendarQgn_indi_repeat_exception_add_mask,
-                                         nonSkinColor);
-            icon = CGulIcon::NewL(bitmap, mask);
-            CleanupStack::Pop(2); // bitmap, mask;
+            if(aViewId == KCalenTodoViewUidValue || 
+               aViewId == KCalenEventViewUidValue || 
+               aViewId == KCalenMissedAlarmsViewUidValue ||
+               aViewId == KCalenMissedEventViewUidValue )
+                {
+                AknsUtils::CreateColorIconLC(AknsUtils::SkinInstance(), 
+                                             KAknsIIDQgnIndiRepeatExceptionAdd,
+                                             colorGroup,
+                                             colorIndexToDo,
+                                             bitmap, mask,
+                                             iIconFile,
+                                             EMbmCalendarQgn_indi_repeat_exception_add,
+                                             EMbmCalendarQgn_indi_repeat_exception_add_mask,
+                                             nonSkinColor);
+                icon = CGulIcon::NewL(bitmap, mask);
+                CleanupStack::Pop(2); // bitmap, mask;
+                break;
+                }
+            else
+                {
+                AknsUtils::CreateColorIconLC(AknsUtils::SkinInstance(), 
+                                             KAknsIIDQgnIndiRepeatExceptionAdd,
+                                             colorGroup,
+                                             colorIndex,
+                                             bitmap, mask,
+                                             iIconFile,
+                                             EMbmCalendarQgn_indi_repeat_exception_add,
+                                             EMbmCalendarQgn_indi_repeat_exception_add_mask,
+                                             nonSkinColor);
+                icon = CGulIcon::NewL(bitmap, mask);
+                CleanupStack::Pop(2); // bitmap, mask;
+                break;
+                }
+                
             }
-            break;
         case MCalenServices::ECalenNotePriorityLow:
             {
-            AknsUtils::CreateColorIconLC(AknsUtils::SkinInstance(), 
-                                         KAknsIIDQgnIndiTodoLowAdd,
-                                         colorGroup,
-                                         colorIndex,
-                                         bitmap, mask,
-                                         iIconFile,
-                                         EMbmCalendarQgn_indi_todo_low_add,
-                                         EMbmCalendarQgn_indi_todo_low_add_mask,
-                                         nonSkinColor);
-            icon = CGulIcon::NewL(bitmap, mask);
-            CleanupStack::Pop(2); // bitmap, mask;
+            if(aViewId == KCalenTodoViewUidValue || 
+               aViewId == KCalenEventViewUidValue || 
+               aViewId == KCalenMissedAlarmsViewUidValue ||
+               aViewId == KCalenMissedEventViewUidValue )
+                {
+                AknsUtils::CreateColorIconLC(AknsUtils::SkinInstance(), 
+                                             KAknsIIDQgnIndiTodoLowAdd,
+                                             colorGroup,
+                                             colorIndexToDo,
+                                             bitmap, mask,
+                                             iIconFile,
+                                             EMbmCalendarQgn_indi_todo_low_add,
+                                             EMbmCalendarQgn_indi_todo_low_add_mask,
+                                             nonSkinColor);
+                icon = CGulIcon::NewL(bitmap, mask);
+                CleanupStack::Pop(2); // bitmap, mask;
+                break;
+                }
+            else 
+                {
+                AknsUtils::CreateColorIconLC(AknsUtils::SkinInstance(), 
+                                                         KAknsIIDQgnIndiTodoLowAdd,
+                                                         colorGroup,
+                                                         colorIndex,
+                                                         bitmap, mask,
+                                                         iIconFile,
+                                                         EMbmCalendarQgn_indi_todo_low_add,
+                                                         EMbmCalendarQgn_indi_todo_low_add_mask,
+                                                         nonSkinColor);
+                icon = CGulIcon::NewL(bitmap, mask);
+                CleanupStack::Pop(2); // bitmap, mask;
+                break;
+                }                           
             }
-            break;
+            
         case MCalenServices::ECalenNotePriorityHigh:
             {
-            AknsUtils::CreateColorIconLC(AknsUtils::SkinInstance(), 
-                                         KAknsIIDQgnIndiTodoHighAdd,
-                                         colorGroup,
-                                         colorIndex,
-                                         bitmap, mask,
-                                         iIconFile,
-                                         EMbmCalendarQgn_indi_todo_high_add,
-                                         EMbmCalendarQgn_indi_todo_high_add_mask,
-                                         nonSkinColor );
-            icon = CGulIcon::NewL(bitmap, mask);
-            CleanupStack::Pop(2); // bitmap, mask;
+            if(aViewId == KCalenTodoViewUidValue || 
+               aViewId == KCalenEventViewUidValue || 
+               aViewId == KCalenMissedAlarmsViewUidValue ||
+               aViewId == KCalenMissedEventViewUidValue )
+                {
+                AknsUtils::CreateColorIconLC(AknsUtils::SkinInstance(), 
+                                             KAknsIIDQgnIndiTodoHighAdd,
+                                             colorGroup,
+                                             colorIndexToDo,
+                                             bitmap, mask,
+                                             iIconFile,
+                                             EMbmCalendarQgn_indi_todo_high_add,
+                                             EMbmCalendarQgn_indi_todo_high_add_mask,
+                                             nonSkinColor );
+                icon = CGulIcon::NewL(bitmap, mask);
+                CleanupStack::Pop(2); // bitmap, mask;
+                break;
+                }
+            else 
+                {
+                AknsUtils::CreateColorIconLC(AknsUtils::SkinInstance(), 
+                                                         KAknsIIDQgnIndiTodoHighAdd,
+                                                         colorGroup,
+                                                         colorIndex,
+                                                         bitmap, mask,
+                                                         iIconFile,
+                                                         EMbmCalendarQgn_indi_todo_high_add,
+                                                         EMbmCalendarQgn_indi_todo_high_add_mask,
+                                                         nonSkinColor );
+                icon = CGulIcon::NewL(bitmap, mask);
+                CleanupStack::Pop(2); // bitmap, mask;
+                break;
+                }
             }
-            break;
         case MCalenServices::ECalenTodoIconUndone:
             {
             icon = CreateBitmapSkinnedIconL( KAknsIIDQgnPropTodoUndone,

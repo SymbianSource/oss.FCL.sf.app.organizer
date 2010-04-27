@@ -136,15 +136,35 @@ void CCalenDayListBoxItemDrawer::DrawItemText
         }
     
 
-    TAknWindowComponentLayout tempLayout =
-                    AknLayoutScalable_Apps::list_cale_time_pane_g6(
-                            aItemIndex - static_cast<CCalenDayListBox*> (iListBox)->TopItemIndex());
+    
+    TInt variantIndex = static_cast<CCalenDayListBox*>(iListBox)->iDayContainer->LayoutVariantIndex(CCalenDayContainer::EListScrollCaleDayPane);
+    // get the listbox rect.
+    TRect listBoxRect = iListBox->View()->ViewRect();
+    TAknWindowComponentLayout tempLayout = AknLayoutScalable_Apps::list_cale_time_pane_g6(variantIndex);
 
     TAknLayoutRect colourstrips;
     colourstrips.LayoutRect( aItemTextRect, tempLayout.LayoutLine() );
     TRect finalRect(colourstrips.Rect());
-    finalRect.SetHeight(aItemTextRect.Height());
-    iGc->DrawRect( colourstrips.Rect() );
+    
+    // check the height of the colored strip , if it is greater than listboxrect or not
+    // for bottom part.
+    if( aItemTextRect.iBr.iY > listBoxRect.iBr.iY )
+        {
+        finalRect.SetRect(aItemTextRect.iTl.iX, aItemTextRect.iTl.iY,colourstrips.Rect().iBr.iX,listBoxRect.iBr.iY);
+        }
+    
+    // for top part.
+    else if(aItemTextRect.iTl.iY < listBoxRect.iTl.iY)
+        {
+        finalRect.SetRect(aItemTextRect.iTl.iX, listBoxRect.iTl.iY,colourstrips.Rect().iBr.iX,aItemTextRect.iBr.iY);
+        }
+    
+    else
+        {
+        finalRect.SetHeight(aItemTextRect.Height());
+        }
+    
+    //iGc->DrawRect( colourstrips.Rect() );
     iGc->SetBrushStyle( CGraphicsContext::ESolidBrush );
     iGc->SetBrushColor( TRgb(iColor) );
     iGc->DrawRect( finalRect );

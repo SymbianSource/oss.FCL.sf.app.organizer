@@ -154,7 +154,7 @@ NONSHARABLE_CLASS( MCalenServices )
 		 * @param aIndex One of the TCalenIcons
 		 * @return CGulIcon* The icon corresponding to aIndex
 		 */
-		virtual CGulIcon* GetIconL( TCalenIcons aIndex ) = 0;
+		virtual CGulIcon* GetIconL( TCalenIcons aIndex, const TInt aViewId = 0 ) = 0;
 
 		/**
 		 * @brief Register for notifications of Calendar events

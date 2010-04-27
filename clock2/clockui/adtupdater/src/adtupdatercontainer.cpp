@@ -648,8 +648,11 @@ void CAdtUpdaterContainer::ShowCountryAndCityListsL()
 	if( currentMcc )
 	    {	
 		CTzLocalizedCity* localizedCity( GetLocalizedCityL( currentMcc ) );
+        if( localizedCity ) // added
+            {
 		TInt cityGroupId = localizedCity->GroupId();
 		citySelected = ShowCityListL( cityGroupId );
+		    }
 		delete localizedCity;			
 		}
 		

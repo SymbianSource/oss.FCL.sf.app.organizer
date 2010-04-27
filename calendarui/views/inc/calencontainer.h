@@ -166,7 +166,7 @@ public:     // New function
     /**
     * Creates icon array according to icon index array passed in
     */
-    CAknIconArray* CreateIconsL( const RArray<MCalenServices::TCalenIcons>& aIndexArray );
+    CAknIconArray* CreateIconsL( const RArray<MCalenServices::TCalenIcons>& aIndexArray, const TInt aViewId = 0 ); 
     
     /**
      * Creates icon index array

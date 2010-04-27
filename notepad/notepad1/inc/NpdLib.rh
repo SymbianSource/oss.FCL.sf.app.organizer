@@ -61,6 +61,7 @@ STRUCT NOTEPAD_MODEL
     //WORD  list_width_in_chars = NOTEPAD_LIST_WIDTH_IN_CHARS; 
     LLINK date_format = 0;
     LLINK time_format = 0;
+    LLINK first_note = 0;
     }
 
 // -----------------------------------------------------------------------------

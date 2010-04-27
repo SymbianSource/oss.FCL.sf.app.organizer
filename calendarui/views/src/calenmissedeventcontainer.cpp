@@ -532,14 +532,18 @@ void CCalenMissedEventContainer::HandleResourceChange(TInt aType)
         ( aType == KUidValueCoeZoomChangeEvent ) ||
         ( aType == KUidValueCoeFontChangeEvent ))
         {
-        CEikAppUi* appUi = static_cast<CEikAppUi*>( ControlEnv()->AppUi() );
-        SetRect( appUi->ClientRect() );
+//        CEikAppUi* appUi = static_cast<CEikAppUi*>( ControlEnv()->AppUi() );
+//        SetRect( appUi->ClientRect() );
+        TRect mainPane;
+        AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, mainPane );
+        SetRect( mainPane );
         }
     
     if(aType == KAknsMessageSkinChange || aType == KEikDynamicLayoutVariantSwitch)
         {
         SizeChanged();
 
+        SetupFontL();
         // refresh
         TRAPD(err,iView->BeginRepopulationL());
         if(err!=KErrNone)

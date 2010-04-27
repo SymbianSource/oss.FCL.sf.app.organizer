@@ -348,6 +348,8 @@ class CNotepadModel : public CNotepadCoreModel,
         TInt iListingStyle;
         HBufC* iDateFormat;
         HBufC* iTimeFormat;
+        //used for Notepad's first note. Template does not use.
+        HBufC* iFixedFirstNote;
         TInt iStepCount;
         RFs iFileSession;
         TInt iRetval;

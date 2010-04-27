@@ -48,13 +48,19 @@
 #include <CalendarInternalCRKeys.h>
 #include <calenmulticalutil.h>
 
+#include <BAUTILS.H>
+#include <calensvrmissedalarmmanagerresource.rsg>
 // Default Calendar database path
 _LIT( KCalendarDatabaseFilePath, "c:calendar" );
 _LIT( KPhoneCalendar,"Personal" );
 _LIT( KExtCalendar,"Ext calendar" );
 const TInt KBuffLength = 24;
 
-_LIT(KPhoneCalendarName,"PhoneCalendar");
+
+_LIT(KPersonal,"Personal");
+_LIT(KFamily,"Family");
+_LIT(KFriends,"Friends");
+_LIT( KMissedAlarmResourceFile, "z:\\resource\\CalenSvrMissedAlarmManagerResource.rsc"); // changes done
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -1493,20 +1499,52 @@ EXPORT_C void CCalenGlobalData::GetAllCalendarInfoL(
                     RPointerArray<CCalCalendarInfo>& aCalendarInfoList )
 	{
 	TRACE_ENTRY_POINT;
+    RFs fsSession;
+    CleanupClosePushL( fsSession );
+    RResourceFile resourceFile;
+    CleanupClosePushL( resourceFile );
+    User::LeaveIfError( fsSession.Connect() );
+    TFileName resourceFileName( KMissedAlarmResourceFile );
 		
+    BaflUtils::NearestLanguageFile( fsSession, resourceFileName );
+    resourceFile.OpenL(fsSession, resourceFileName );
+    resourceFile.ConfirmSignatureL( 0 );   
 	for(TInt index=0;index < iCalendarInfoList.Count();index++)
 	    {
-        TPtrC fileNamePtr = iCalendarInfoList[index]->FileNameL();
+        
 	    TPtrC calendarNamePtr = iCalendarInfoList[index]->NameL();
+        if(calendarNamePtr.Compare(KPersonal) == 0)
+            {  
+            HBufC8* personalBuffer = resourceFile.AllocReadLC( R_CALE_DB_PERSONAL );    
+            const TPtrC16 ptrPBuffer(( TText16*) personalBuffer->Ptr(),
+                                             ( personalBuffer->Length()+1 )>>1 );    
+            HBufC *personalCalendar = ptrPBuffer.AllocL();    
+            iCalendarInfoList[index]->SetNameL(*personalCalendar);
+            CleanupStack::PopAndDestroy( personalBuffer );
+            }
+        else if(calendarNamePtr.Compare(KFamily) == 0)
+            {
+            HBufC8* familyBuffer=resourceFile.AllocReadLC( R_CALE_DB_FAMILY );
+            const TPtrC16 ptrFBuffer(( TText16*) familyBuffer->Ptr(),
+                    ( familyBuffer->Length()+1 )>>1 );
+            HBufC *familyCalendar = ptrFBuffer.AllocL();
+            iCalendarInfoList[index]->SetNameL(*familyCalendar);
+            CleanupStack::PopAndDestroy( familyBuffer );
+            }
+        else if(calendarNamePtr.Compare(KFriends) == 0)
+            {
+            HBufC8* friendsBuffer = resourceFile.AllocReadLC( R_CALE_DB_FRIENDS );
+            const TPtrC16 ptrFrBuffer(( TText16*) friendsBuffer->Ptr(),
+                    ( friendsBuffer->Length()+1 )>>1 );
+            HBufC *friendsCalendar = ptrFrBuffer.AllocL();
+            iCalendarInfoList[index]->SetNameL(*friendsCalendar);
+            CleanupStack::PopAndDestroy( friendsBuffer );
+            }
+	   
+            aCalendarInfoList.AppendL(iCalendarInfoList[index]);
 	        
-	    //We dont want default calendar PhoneCalendar tobe shown in calendarui.
-	    if(fileNamePtr.CompareF(KCalendarDatabaseFilePath) 
-	                && calendarNamePtr.CompareF(KPhoneCalendarName))
-	            {
-                aCalendarInfoList.AppendL(iCalendarInfoList[index]);
-	            }
 	    }
-	
+	 CleanupStack::PopAndDestroy(2);
 	TRACE_EXIT_POINT;
 	}
 

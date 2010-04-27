@@ -35,6 +35,7 @@ NAME    NPDL // 4 letter ID
 #include <data_caging_paths_strings.hrh>
 #include <AiwCommon.rh>
 #include <AknFep.rsg>
+#include <avkon.hrh>
 
 //  CONSTANTS  
 #define NOTEPAD_DATABASE "c:Notepad.dat"
@@ -84,6 +85,18 @@ RESOURCE TBUF r_notepad_template_datafile_name
     }
 
 // -----------------------------------------------------------------------------
+//
+// r_notepad_the_first_listbox_item
+// the first notepad item, New note.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_the_first_listbox_item
+	{
+	buf = qtn_nmake_om_add_new;
+	}
+	
+// -----------------------------------------------------------------------------
 //   
 // r_notepad_model
 // Model of Notepad application.
@@ -96,6 +109,7 @@ RESOURCE NOTEPAD_MODEL r_notepad_model
     listing_style = ENotepadListingStyleNP;
     date_format = R_QTN_DATE_SHORT_WITH_ZERO;
     time_format = R_QTN_TIME_USUAL_WITH_ZERO;
+    first_note = r_notepad_the_first_listbox_item;
     }
 
 // -----------------------------------------------------------------------------
@@ -347,6 +361,40 @@ RESOURCE DIALOG r_notepad_editor_dialog_org
 
 // -----------------------------------------------------------------------------
 //
+// r_menupane_markable_list_edit_list_implementation
+// mark parent menu
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_menupane_markable_list_edit_list_implementation
+    {
+    items =
+        {
+        MENU_ITEM { cascade=r_menupane_markable_list_implementation; command=EAknCmdEditListMenu; txt=qtn_options_list; }
+        };
+
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_menupane_markable_list_implementation
+// mark child menu
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_menupane_markable_list_implementation
+    {
+    items =
+        {
+        MENU_ITEM{ command=EAknCmdMark; txt=qtn_options_list_mark_one; flags=EEikMenuItemSpecific; },
+        MENU_ITEM{ command=EAknCmdUnmark; txt=qtn_options_list_unmark_one; flags=EEikMenuItemSpecific; },
+        MENU_ITEM{ command=EAknMarkAll; txt=qtn_options_list_mark_all;},
+        MENU_ITEM{ command=EAknUnmarkAll; txt=qtn_options_list_unmark_all;}
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
 // r_notepad_list_menubar
 // Menu bar of Notepad list mode.
 //
@@ -363,7 +411,7 @@ RESOURCE MENU_BAR r_notepad_list_menubar
             },
         MENU_TITLE
             {
-            menu_pane=R_AVKON_MENUPANE_MARKABLE_LIST_EDIT_LIST_IMPLEMENTATION;
+            menu_pane = r_menupane_markable_list_edit_list_implementation;
             txt = "";
             },
         MENU_TITLE

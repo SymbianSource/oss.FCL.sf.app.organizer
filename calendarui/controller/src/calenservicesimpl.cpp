@@ -418,12 +418,12 @@ MCalenToolbar* CCalenServicesImpl::ToolbarOrNull()
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CGulIcon* CCalenServicesImpl::GetIconL( MCalenServices::TCalenIcons aIndex )
+CGulIcon* CCalenServicesImpl::GetIconL( MCalenServices::TCalenIcons aIndex, const TInt aViewId ) 
     {
     TRACE_ENTRY_POINT;
 
     TRACE_EXIT_POINT;
-    return iController->GetIconL( aIndex );
+    return iController->GetIconL( aIndex, aViewId );
     }
 
 // ----------------------------------------------------------------------------

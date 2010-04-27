@@ -455,6 +455,10 @@ void CCalenMissedEventView::UpdateCbaL()
         {
         cba->SetCommandL( KSK2CBAPosition, R_CALEN_CLOSE_CBA_BUTTON );
         }
+    else
+        {
+        cba->SetCommandL( KSK2CBAPosition, R_CALEN_BACK_CBA_BUTTON);
+        }
     
     cba->DrawNow();
        

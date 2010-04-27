@@ -115,11 +115,10 @@ void CCalenMultipleDbListboxItemDrawer::DrawItem(TInt aItemIndex,
      
      iGc->Reset();
              
-     TAknWindowComponentLayout tempLayout = 
-                AknLayoutScalable_Apps::list_cale_time_pane_g6( aItemIndex - iListBox->TopItemIndex()) ;     
+     TAknWindowComponentLayout tempLayout = AknLayoutScalable_Apps::list_cale_time_pane_g6(0);     
 
-        TAknLayoutRect colourstrips;
-        colourstrips.LayoutRect( actualItemRect, tempLayout.LayoutLine() );
+     TAknLayoutRect colourstrips;
+     colourstrips.LayoutRect( actualItemRect, tempLayout.LayoutLine() );
       
      iGc->SetPenColor( CGraphicsContext::ENullPen );
      iGc->DrawRect( colourstrips.Rect() );
@@ -521,7 +520,7 @@ void CCalenMultipleDbUi::DynInitMenuPaneL( TInt aResourceId,CEikMenuPane* aMenuP
               HBufC* calendarFileName = 
                   calendarInfoList[currentIndex]->FileNameL().AllocLC();
               if (!(calendarFileName->CompareF(
-                      _L("c:Calendar1"))))
+                        iController.Services().SessionL().DefaultFileNameL())))
                   {
                   aMenuPane->DeleteMenuItem(ECalenCmdDelete);
                   }
@@ -591,7 +590,7 @@ void  CCalenMultipleDbUi::ProcessCommandL( TInt aCommandId )
           }
           break;
       case EAknCmdHelp:      
-            if (FeatureManager::FeatureSupported(KFeatureIdHelp)) //ravi
+            if (FeatureManager::FeatureSupported(KFeatureIdHelp))
                 {
                 HlpLauncher::LaunchHelpApplicationL(
                         iCoeEnv->WsSession(),iAvkonAppUi->AppHelpContextL());                        

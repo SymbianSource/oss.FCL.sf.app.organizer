@@ -639,7 +639,10 @@ void CCalenNotifier::Completed( TInt aStatus )
         );
 
         // Exit application
-        iAvkonAppUi->Exit();
+        if (iAvkonAppUi)
+            {
+            iAvkonAppUi->Exit();
+            }
         }
 
     TRACE_EXIT_POINT;

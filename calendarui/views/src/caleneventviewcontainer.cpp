@@ -639,15 +639,18 @@ void CCalenEventViewContainer::HandleResourceChange(TInt aType)
             ( aType == KUidValueCoeZoomChangeEvent ) ||
             ( aType == KUidValueCoeFontChangeEvent ) )
         {
-        CEikAppUi* appUi = static_cast<CEikAppUi*>( ControlEnv()->AppUi() );
-        SetRect( appUi->ClientRect() );
+//        CEikAppUi* appUi = static_cast<CEikAppUi*>( ControlEnv()->AppUi() );
+//        SetRect( appUi->ClientRect() );
+        TRect mainPane;
+        AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, mainPane );
+        SetRect( mainPane );
         }
 
     if( KAknsMessageSkinChange == aType || 
             KEikDynamicLayoutVariantSwitch == aType )
         {
 	    SizeChanged();
-	    
+	    SetupFontL();
 	    if(iTextEditor->ScrollBarFrame())
 	        {
 	        // make the scrollbars invisible
@@ -2788,6 +2791,7 @@ void CCalenEventViewContainer::HandleServerAppExit( TInt aReason)
     TRACE_ENTRY_POINT;
     
     iEmbeddedFileOpened = EFalse;
+    iServices.GetAttachmentData()->AttachmentOpen(iEmbeddedFileOpened);  
     if (aReason == EAknCmdExit)
         {
         //issue this notification, which will be handled by attachmentui.
@@ -2979,6 +2983,7 @@ void CCalenEventViewContainer::OpenAttachmentViewerL(RFile& aFile, MAknServerApp
             iEmbeddedFileOpened = ETrue;
             }
         }
+    iServices.GetAttachmentData()->AttachmentOpen(iEmbeddedFileOpened);
     
     switch(ret)
         {

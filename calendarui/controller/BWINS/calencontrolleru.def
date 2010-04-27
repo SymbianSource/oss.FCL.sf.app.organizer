@@ -17,7 +17,7 @@ EXPORTS
 	?RegisterForNotificationsL@CCalenController@@QAEXPAVMCalenNotificationHandler@@W4TCalenNotification@@@Z @ 16 NONAME ; void CCalenController::RegisterForNotificationsL(class MCalenNotificationHandler *, enum TCalenNotification)
 	?CreateOutOfRangeIconsL@CCalenIcons@@QBEPAVCAknIconArray@@XZ @ 17 NONAME ; class CAknIconArray * CCalenIcons::CreateOutOfRangeIconsL(void) const
 	?CreateMonthViewIconsL@CCalenIcons@@QBEPAVCAknIconArray@@XZ @ 18 NONAME ; class CAknIconArray * CCalenIcons::CreateMonthViewIconsL(void) const
-	?GetIconL@CCalenIcons@@QBEPAVCGulIcon@@W4TCalenIcons@MCalenServices@@@Z @ 19 NONAME ; class CGulIcon * CCalenIcons::GetIconL(enum MCalenServices::TCalenIcons) const
+	?GetIconL@CCalenIcons@@QBEPAVCGulIcon@@W4TCalenIcons@MCalenServices@@H@Z @ 19 NONAME ; class CGulIcon * CCalenIcons::GetIconL(enum MCalenServices::TCalenIcons, int) const
 	?CreateItemNotShownIconL@CCalenIcons@@QBEPAVCGulIcon@@XZ @ 20 NONAME ; class CGulIcon * CCalenIcons::CreateItemNotShownIconL(void) const
 	?RegisterForNotificationsL@CCalenController@@QAEXPAVMCalenNotificationHandler@@AAV?$RArray@W4TCalenNotification@@@@@Z @ 21 NONAME ; void CCalenController::RegisterForNotificationsL(class MCalenNotificationHandler *, class RArray<enum TCalenNotification> &)
 	?NewServicesL@CCalenController@@UAEPAVMCalenServices@@XZ @ 22 NONAME ; class MCalenServices * CCalenController::NewServicesL(void)

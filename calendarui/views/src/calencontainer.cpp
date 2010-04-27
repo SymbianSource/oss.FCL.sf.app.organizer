@@ -517,7 +517,7 @@ void CCalenContainer::NotifyLongTapDetectorL(const TPointerEvent& aPointerEvent)
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CAknIconArray* CCalenContainer::CreateIconsL( const RArray<MCalenServices::TCalenIcons>& aIndexArray )
+CAknIconArray* CCalenContainer::CreateIconsL( const RArray<MCalenServices::TCalenIcons>& aIndexArray, const TInt aViewId ) 
     {
     TRACE_ENTRY_POINT;
     const TInt iconCount( aIndexArray.Count() );
@@ -527,8 +527,8 @@ CAknIconArray* CCalenContainer::CreateIconsL( const RArray<MCalenServices::TCale
 
     for( TInt i=0; i<iconCount; ++i )
         {
-        icons->AppendL( iServices.GetIconL( static_cast<MCalenServices::TCalenIcons>(aIndexArray[i] ) ));
-        }
+        icons->AppendL( iServices.GetIconL( static_cast<MCalenServices::TCalenIcons>(aIndexArray[i] ), aViewId ));
+        } 
     CleanupStack::Pop( icons );
     TRACE_EXIT_POINT;
     return icons;

@@ -2633,5 +2633,11 @@
 //l:popup_note_window
 //
 #define qtn_calen_db_change_del_exeptions "Exceptions will be deleted, Want to continue?"
+
+//d:Confirmation note shown, when tasks are updated
+//l:popup_note_window
+//w:
+//r:9.2
+#define qtn_todo_all_task_updated  "All to-do notes updated"
         
 // End of File

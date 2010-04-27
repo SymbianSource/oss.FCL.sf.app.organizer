@@ -152,7 +152,14 @@ TBool CCalenEditUi::HandleCommandL( const TCalenCommand& aCommand )
             TUid currentView = iController.ViewManager().CurrentView();
             if( KUidCalenTodoView == currentView )
                 {
-                // Open NewEntry as "To-Do", if editor is launched from To-Do view. 
+                // Open NewEntry as "To-Do", if editor is launched from To-Do view.
+                MCalenContext& context = iController.Services().Context();
+                // Set the date on the context to today.
+                TTime homeTime;
+                homeTime.HomeTime();
+                TCalTime today;
+                today.SetTimeLocalL( homeTime );
+                context.SetFocusDateL( today, TVwsViewId( KUidCalendar, KUidCalenTodoView ) );
                 EditNewEntryL( CCalEntry::ETodo );
                 }
             else

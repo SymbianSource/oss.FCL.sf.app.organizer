@@ -92,7 +92,7 @@ public:     // From CCoeControl
      */
     TBool IsValidPointer(TPoint aPos);
     void HandlePointerEventL(const TPointerEvent& aPointerEvent);
-private:
+
     /**
      * Calculates new column from pointer event
      */

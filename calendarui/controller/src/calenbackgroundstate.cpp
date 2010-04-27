@@ -136,7 +136,8 @@ TBool CCalenBackgroundState::HandleCommandL( const TCalenCommand& aCommand,
         	       || iPreviousState == CCalenStateMachine::ECalenEditingState
         	       || iPreviousState == CCalenStateMachine::ECalenSendingState 
         	       || iPreviousState == CCalenStateMachine::ECalenIdleState 
-                   || iPreviousState == CCalenStateMachine::ECalenViewingState)
+                   || iPreviousState == CCalenStateMachine::ECalenViewingState
+                   || iPreviousState == CCalenStateMachine::ECalenAttachmentState)
         	    {
                 SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
                 ActivateCurrentStateL(aStateMachine);

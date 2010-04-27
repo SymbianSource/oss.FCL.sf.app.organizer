@@ -185,6 +185,22 @@ class CCalenAttachmentModel : public CBase
          */
         IMPORT_C void CheckForExistingAttachmentsL(CCalEntry* entry);
         
+        /**
+         * Set the flag to ETrue if the attachment(Photo, audio and vedio files) is open.
+         * 
+         * @param   aEmbeddedFileOpened, set to ETrue when attachment(Photo, audio and vedio files) is Open
+         * @return  None
+         */
+        IMPORT_C void AttachmentOpen(TBool& aEmbeddedFileOpened);
+        
+        /**
+         * return ETrue if the atacchment is opened.
+         * 
+         * @param   None
+         * @return  None
+         */
+        IMPORT_C TBool IsAttachmentOpen();
+        
     private:
 
         /**
@@ -230,6 +246,7 @@ class CCalenAttachmentModel : public CBase
         RApaLsSession iAppList;
         TSize iIconSize;
         TBool isAttachmentModelCleared; // Flag to tell if attachment model is reset. If yes, then only it will be populated again
+        TBool iEmbeddedFileOpened;
     };
 
 #endif // CALENATTACHMENTMODEL_H

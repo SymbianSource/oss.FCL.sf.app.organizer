@@ -424,6 +424,8 @@ void CCalenTodoView::HandleCommandL( TInt aCommand ) // command ID
             iServices.IssueCommandL( aCommand );
             }
             break;
+        case ECalenShowCalendars:            
+               ClearMarkedToDoItems();              
         default:
             SaveCurrentItemIndexL();
             CCalenNativeView::HandleCommandL( aCommand );
@@ -681,7 +683,7 @@ void CCalenTodoView::DynInitMenuPaneL(TInt aResourceId,          // Resource Id
             // setup edit/mark menu
             case R_CALENDAR_DONE_UNDONE:
                 {
-                if( Container()->MarkedCount() == 1)
+                if( Container()->MarkedCount() )
                     {
                     TBool crossout( EFalse );
                     crossout = CheckMarkedItemCompletedL();

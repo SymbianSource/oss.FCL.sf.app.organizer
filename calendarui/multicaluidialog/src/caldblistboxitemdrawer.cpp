@@ -103,9 +103,8 @@ void CCalenDbListboxItemDrawer::DrawItem(TInt aItemIndex,
      
      iGc->Reset();
      
-	 // Ggetting the layout for clolourstrips for list dialog
-	 TAknWindowComponentLayout tempLayout = 
-             AknLayoutScalable_Apps::list_cale_time_pane_g6( aItemIndex - iListBox->TopItemIndex() ) ;     
+	 // Ggetting the layout for clolourstrips for list dialog     
+     TAknWindowComponentLayout tempLayout = AknLayoutScalable_Apps::list_cale_time_pane_g6(0);     
 
      TAknLayoutRect colourstrips;
      colourstrips.LayoutRect( actualItemRect, tempLayout.LayoutLine() );

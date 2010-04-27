@@ -167,6 +167,11 @@ void COpenCommand::RunL()
     {
     TRACE_ENTRY_POINT;
     
+    if (iStatus.Int())
+        {
+        return;
+        }
+    
     switch( iState )
         {
         case ECreateSession:
@@ -367,6 +372,11 @@ void CGetEntriesCommand::RunL(void)
     {
     TRACE_ENTRY_POINT;
 
+    if (iStatus.Int())
+        {
+        return;
+        }
+    
     switch( iState )
         {
         case EFetch:
@@ -554,6 +564,11 @@ void CGetNextEventCommand::RunL(void)
     {
     TRACE_ENTRY_POINT;
     
+    if (iStatus.Int())
+        {
+        return;
+        }
+    
     switch( iState )
         {
         case EFetch:
@@ -731,6 +746,11 @@ void CGetTodosCommand::RunL(void)
     {
     TRACE_ENTRY_POINT;
 
+    if (iStatus.Int())
+        {
+        return;
+        }
+    
     switch( iState )
         {
         case EFetchInstances:
@@ -889,6 +909,11 @@ CGetEntriesForDaysCommand::~CGetEntriesForDaysCommand()
 void CGetEntriesForDaysCommand::RunL(void)
     {
     TRACE_ENTRY_POINT;
+    
+    if (iStatus.Int())
+        {
+        return;
+        }
     
     switch( iState )
         {

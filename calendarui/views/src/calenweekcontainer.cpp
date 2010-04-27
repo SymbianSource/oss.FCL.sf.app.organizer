@@ -2226,26 +2226,21 @@ void CCalenWeekContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent
                 // for themable support - clear Pressed Down State when dragging
                 oldRow = iListBox->View()->CurrentItemIndex();
                 oldColumn = iColumn;
-                iListBox->HandlePointerEventL(aPointerEvent);
-                newRow = iListBox->View()->CurrentItemIndex();
-                newColumn = iColumn;
+                newColumn = iListBox->PointerEventColumn(aPointerEvent.iPosition);
+                newRow = pointerIndex;
                 if (newRow != oldRow || newColumn != oldColumn)
                     {
-                    CalcDayFromColumn();
-                    SetActiveContextFromHighlightL();
-                    if (newColumn != oldColumn)
-                        {
-                        WeekView().SetStatusPaneFromActiveContextL();
-                        }                    
+                    iHourChange = ETrue;
                     }
                 break;
                 }
             case TPointerEvent::EButton1Up:
                 if(isItem &&
-                   iView->MenuBar()->IsDisplayed() == EFalse)
+                   iView->MenuBar()->IsDisplayed() == EFalse && !iHourChange)
                     {
                     iServices.IssueCommandL( ECalenForwardsToDayView );
                     }
+                iHourChange = EFalse;
                 break;
             default:
                 break;

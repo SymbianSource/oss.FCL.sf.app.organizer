@@ -1265,10 +1265,10 @@ void CDbColorPicture::Draw(CGraphicsContext& aGc,
     
 	TSize pixelsize;
     pixelsize.iWidth = 225;
-    pixelsize.iHeight = 25;
+    pixelsize.iHeight = 16;
     TPoint aPoint;
     TRect area = TRect(aTopLeft, pixelsize);
-    area.Move(0,-20);
+    area.Move(0,-11);
     // Draw a datbase color rectangle
     aGc.SetBrushColor(iColors);
     aGc.SetBrushStyle(CGraphicsContext::ESolidBrush);

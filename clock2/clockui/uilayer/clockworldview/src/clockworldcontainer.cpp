@@ -250,7 +250,7 @@ void CClockWorldContainer::HandleListBoxEventL( CEikListBox* aListBox, TListBoxE
     {
     __PRINTS( "CClockWorldContainer::HandleListBoxEventL - Entry" );
 
-    if( aListBox == iListBox &&
+/*    if( aListBox == iListBox &&
 		//Single click integration
         aEventType == EEventItemSingleClicked )
 
@@ -266,7 +266,7 @@ void CClockWorldContainer::HandleListBoxEventL( CEikListBox* aListBox, TListBoxE
             {
             iView->HandleCommandL( EClockWorldMyRegion ); 
             }
-        }
+        }*/
 
         
     __PRINTS( "CClockWorldContainer::HandleListBoxEventL - Entry" );

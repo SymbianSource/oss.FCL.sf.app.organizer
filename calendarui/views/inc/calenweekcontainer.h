@@ -438,7 +438,8 @@ private:  // New variables
     
     TBool iTopRowDefault;
     TBool iRow;
-    TBool iValidDay;   
+    TBool iValidDay;
+    TBool iHourChange;
     };
 
 #endif //CALENWEEKCONT_H

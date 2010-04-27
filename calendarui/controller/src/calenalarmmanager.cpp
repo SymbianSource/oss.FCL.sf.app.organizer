@@ -46,6 +46,7 @@
 #include "calensetting.h"
 #include "calencontextfwlistener.h"
 #include "CleanupResetAndDestroy.h"
+#include "CalenAttachmentModel.h"
 
 static const TUint32 KMaxMissedAlarms = 10;
 
@@ -190,9 +191,13 @@ TBool CCalenAlarmManager::HandleCommandL( const TCalenCommand& aCommand )
             break;
         case ECalenEventViewFromAlarm:
             {
-            LaunchEventViewerL();
-            iViewManager.SetRepopulation(EFalse);
-            iController.ViewManager().RequestActivationL( KUidCalenEventView, KUidCalenShowAlarmCba );
+            TBool attachmentOpened = iController.Services().GetAttachmentData()->IsAttachmentOpen();
+            if(!attachmentOpened)
+                {
+                LaunchEventViewerL();
+                iViewManager.SetRepopulation(EFalse);
+                iController.ViewManager().RequestActivationL( KUidCalenEventView, KUidCalenShowAlarmCba );
+                }
             }
             break;
         case ECalenEventViewFromAlarmStopOnly:

@@ -151,11 +151,9 @@ void CCalenTodoListBoxItemDrawer::DrawItem(TInt aItemIndex,
                                              aViewIsDimmed);
     
     
-    
 
-    TAknWindowComponentLayout tempLayout = 
-            AknLayoutScalable_Apps::list_cale_time_pane_g6( aItemIndex - static_cast<CCalenTodoListBox*>(iListBox)->TopItemIndex()) ;     
     
+    TAknWindowComponentLayout tempLayout = AknLayoutScalable_Apps::list_cale_time_pane_g6(0);    
     TAknLayoutRect colourstrips;
     colourstrips.LayoutRect( actualItemRect, tempLayout.LayoutLine() );
       
@@ -387,7 +385,7 @@ void CCalenTodoContainer::ConstructImplL()
     model->SetItemTextArray(iDesArray);
     model->SetOwnershipType(ELbmDoesNotOwnItemArray);
 
-    CAknIconArray* iconList = CreateIconsL( iIconIndices );
+    CAknIconArray* iconList = CreateIconsL( iIconIndices, KCalenTodoViewUidValue ); 
 
     // Transfer iconlist ownership to the listbox
     iListBox->ItemDrawer()->ColumnData()->SetIconArray( iconList );
@@ -894,7 +892,10 @@ void CCalenTodoContainer::HandleResourceChange(TInt aType)
     if ( aType == KAknsMessageSkinChange || aType == KEikDynamicLayoutVariantSwitch )
         {
         SizeChanged();
+        CAknIconArray* iconList = CreateIconsL( iIconIndices, KCalenTodoViewUidValue ); 
 
+            // Transfer iconlist ownership to the listbox
+            iListBox->ItemDrawer()->ColumnData()->SetIconArray( iconList );
         // refresh
         TRAPD(error,iView->BeginRepopulationL());
 	    if(error!=KErrNone)

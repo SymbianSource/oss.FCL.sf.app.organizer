@@ -94,7 +94,7 @@ public: // New functions
      * @param aIndex An index to the enum TCalenIcons
      * @return a pointer to CGulIcon
      */
-    IMPORT_C CGulIcon* GetIconL( MCalenServices::TCalenIcons aIndex) const;
+    IMPORT_C CGulIcon* GetIconL( MCalenServices::TCalenIcons aIndex, const TInt aViewId = 0 ) const;
 
 private:
     /**

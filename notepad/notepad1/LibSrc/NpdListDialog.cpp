@@ -176,22 +176,19 @@ void CNotepadListDialog::HandleEditorExitL(
         {
         iFlags &= ~ENotepadItemAdded;
         }
-    if ( aEagerSync )
+    if ( aEagerSync && iClockValueChange )
         {
-        if(iClockValueChange)
-        	{
-        	iModel->SetItemArrayFlags();
-        	iClockValueChange = EFalse;
-        	}
-        iModel->SyncL(EFalse);
-        RestoreCurrentAndSelectionsL();
-        DrawNow();
+        iModel->SetItemArrayFlags();
+        iClockValueChange = EFalse;        
         }
     if (aStatOfSave == CNotepadModel::ENotepadModelRowDeleted)
     	{
     	iListBox->HandleItemRemovalL();
     	DrawNow();
     	}
+    iModel->SyncL(EFalse);
+    RestoreCurrentAndSelectionsL();
+    DrawNow();
         // MSK 
         MiddleSoftKeyL();
     }
@@ -875,10 +872,10 @@ void CNotepadListDialog::DynInitMenuPaneL(
 		}
     iModel->SyncL(EFalse);
     CNotepadDialogBase::DynInitMenuPaneL( aResourceId, aMenuPane );
-    const TInt memoCount( iModel->MdcaCount() );
-   	const TInt markCount( iListBox->SelectionIndexes()->Count() );
-    TInt index;
-    switch ( aResourceId )
+    const TInt memoCount( iModel->MdcaCount() - 1 );
+   	const TInt markCount(iListBox->SelectionIndexes()->Count());
+	TInt index;
+	switch (aResourceId )
         {
         case R_SENDUI_MENU:
             index = 2;
@@ -965,13 +962,27 @@ void CNotepadListDialog::DynInitMenuPaneL(
                 // this must after InsertSendMenuItemAfterL
                 aMenuPane->DeleteMenuItem(ENotepadCmdOpen);
                 }
-            }
+            if ( iListBox->CurrentItemIndex() == 0 && IsNotepad() && memoCount > 0)
+				{                    
+				aMenuPane->SetItemDimmed( ENotepadCmdDelete, ETrue );				 
+				aMenuPane->SetItemDimmed( ENotepadCmdSend, ETrue );				 
+				}
+			}
             break;
         default:
-            AknSelectionService::HandleMarkableListDynInitMenuPane(
-                aResourceId, aMenuPane, iListBox);
-            break;
-        }
+			{
+			if ( IsTemplates() )
+				{
+				AknSelectionService::HandleMarkableListDynInitMenuPane(
+						aResourceId, aMenuPane, iListBox );				
+				}
+			else
+				{			
+			    HandleMarkListDynInitMenuPane( aResourceId, aMenuPane, iListBox );
+				}	
+			break;
+			}
+		}
     }
     
 // -----------------------------------------------------------------------------
@@ -1025,6 +1036,28 @@ void CNotepadListDialog::ProcessCommandL(TInt aCommandId)
         case ENotepadCmdSend:
         	OnCmdSendL(aCommandId);
         	break;
+		case EAknMarkAll:
+			{
+			if ( IsNotepad() )
+				{
+				iListBox->ClearSelection();
+				TInt num = iListBox->Model()->NumberOfItems();
+				if ( num < 2 )
+					return;
+				TInt ii = 0;
+				CArrayFixFlat<TInt>* array = new (ELeave) CArrayFixFlat<TInt> (
+						20 );
+				CleanupStack::PushL(array);
+				array->SetReserveL(num);
+				for ( ii = 1; ii < num; ii++ )
+					{
+					array->AppendL( ii );
+					}
+				iListBox->SetSelectionIndexesL( array );
+				CleanupStack::PopAndDestroy(); //array
+				break;
+				}
+			}
         default:
             {
             const TInt aiwServiceCmd( iServiceHandler ? iServiceHandler->ServiceCmdByMenuCmd( aCommandId ) : 0 );                
@@ -1299,15 +1332,22 @@ void CNotepadListDialog::HandleListBoxEventL(
             OnCmdOpenL(aListBox->CurrentItemIndex());
             break;
         case EEventItemSingleClicked:
-            if ( aListBox->Model()->NumberOfItems() != 0 
-                && aListBox->SelectionIndexes()->Count() == 0 )
-                {
-                HandleListBoxPointerEventL( CNotepadListDialog::EOpenListBoxItem );
-                }
-            else
-                {
-                HandleListBoxPointerEventL( CNotepadListDialog::EOpenListBoxContextMenu );
-                }
+        	if ( IsNotepad() )
+				{     
+				if ( aListBox->Model()->NumberOfItems() != 0
+						&& aListBox->SelectionIndexes()->Count() == 0 )
+					{
+				
+					HandleListBoxPointerEventL(
+							CNotepadListDialog::EOpenListBoxItem);
+					}
+				else
+					{
+					HandleListBoxPointerEventL(
+							CNotepadListDialog::EOpenListBoxContextMenu );
+					}
+				}
+            
             if(  IsTemplates() && AknLayoutUtils::PenEnabled() ) 
                 {
                   if( !aListBox->SelectionIndexes()->Count()  )
@@ -1572,7 +1612,11 @@ void CNotepadListDialog::HandleListBoxPointerEventL(TNotepadListBoxEvent aEvent)
 	{
 	if(aEvent == EOpenListBoxContextMenu && !MenuShowing())
 		{
-		if(iEditorFlag==EFalse)
+		if (iListBox->CurrentItemIndex() == 0)
+			{		
+		    OnCmdAddL();
+			}
+		else if (iEditorFlag == EFalse)
 		{
 		iFlags |= ENotepadMenuByOkKey;
 		iMskFlag=ETrue;
@@ -1581,7 +1625,11 @@ void CNotepadListDialog::HandleListBoxPointerEventL(TNotepadListBoxEvent aEvent)
 		}
 	else if(aEvent == EOpenListBoxItem)
 		{
-        if ( !iEditorDialog&& !IsTemplates() )
+		if ( iListBox->CurrentItemIndex() == 0 )
+			{		
+			OnCmdAddL();
+			}
+		else if (!iEditorDialog && !IsTemplates())
             {
             OnCmdOpenL( iListBox->CurrentItemIndex() );
             }
@@ -1599,7 +1647,7 @@ void CNotepadListDialog::MiddleSoftKeyL()
     
     if( !IsTemplates() ) // Notepad ListView
         {
-            if( (iModel->MdcaCount() == 0))
+            if( (iModel->MdcaCount() == 1))
             {
               ButtonGroupContainer().SetCommandSetL( R_NOTEPAD_SOFTKEYS_OPTIONS_EXIT_NEW );
             }
@@ -1672,6 +1720,35 @@ TInt CNotepadListDialog::HandleNotifyL( TInt /* aCmdId */,
     return KErrNone;
     }
     
+// -----------------------------------------------------------------------------
+// CNotepadListDialog::HandleMarkListDynInitMenuPane
+// -----------------------------------------------------------------------------
+//
+void CNotepadListDialog::HandleMarkListDynInitMenuPane( TInt aResourceId, CEikMenuPane *aMenu, CEikListBox *aListBox )
+	{
+	if ( aResourceId == R_MENUPANE_MARKABLE_LIST_IMPLEMENTATION )
+		{
+		TInt currentItemIndex = aListBox->View()->CurrentItemIndex();
+		TBool markHidden = aListBox->View()->ItemIsSelected( currentItemIndex ) || currentItemIndex == 0;
+		TBool unmarkHidden =
+				!aListBox->View()->ItemIsSelected(currentItemIndex) || currentItemIndex == 0;
+		TBool markAllHidden = aListBox->Model()->NumberOfItems() == 0
+				|| aListBox->SelectionIndexes()->Count()
+						== aListBox->Model()->NumberOfItems() - 1;
+		TBool unmarkAllHidden = aListBox->Model()->NumberOfItems() == 0
+				|| aListBox->SelectionIndexes()->Count() == 0;
+		aMenu->SetItemDimmed(EAknCmdMark, markHidden);
+		aMenu->SetItemDimmed(EAknCmdUnmark, unmarkHidden);
+		aMenu->SetItemDimmed(EAknMarkAll, markAllHidden);
+		aMenu->SetItemDimmed(EAknUnmarkAll, unmarkAllHidden);		
+		}
+	if ( aResourceId == R_MENUPANE_MARKABLE_LIST_EDIT_LIST_IMPLEMENTATION )
+		{
+		TBool editListHidden = aListBox->Model()->NumberOfItems() == 0;
+
+		aMenu->SetItemDimmed(EAknCmdEditListMenu, editListHidden);
+		}
+	}
 // End of File  
 
 

@@ -41,6 +41,7 @@
 #include <calcalendarinfo.h>
 #include <calentoolbar.h>
 #include <akntoolbar.h>
+#include <CalenAttachmentModel.h>
 
 #include "calendarui_debug.h"           // Debug
 #include "calendeleteui.h"
@@ -586,13 +587,13 @@ void CCalenDeleteUi::DeleteEntriesBeforeDateL()
 //
 void CCalenDeleteUi::HandleDeleteMultipleEventsL( const TTime& aFirstDay,
                                                                      const TTime& aLastDay,
-                                                                     TInt aConfNoteId )
+                                                                     TInt /*aConfNoteId */)
     {
     TRACE_ENTRY_POINT;
 
     ASSERT( !iWaitDialog );
     ASSERT( !iIsDeleting );
-    iConfirmationNoteId = aConfNoteId;
+    //iConfirmationNoteId = aConfNoteId;
 
     iWaitDialog = new( ELeave ) CAknWaitDialog( REINTERPRET_CAST( CEikDialog**, 
                                                                   &iWaitDialog ) );
@@ -690,10 +691,10 @@ void CCalenDeleteUi::DoCompletedL( TInt aFirstPassError )
 		if( aFirstPassError == KErrNone )
 			{
 			// Show confirmation note
-			HBufC* buf = StringLoader::LoadLC( iConfirmationNoteId, iEikEnv );
-			CAknConfirmationNote* dialog = new( ELeave ) CAknConfirmationNote();
-			dialog->ExecuteLD(*buf);
-			CleanupStack::PopAndDestroy( buf );
+//			HBufC* buf = StringLoader::LoadLC( iConfirmationNoteId, iEikEnv );
+//			CAknConfirmationNote* dialog = new( ELeave ) CAknConfirmationNote();
+//			dialog->ExecuteLD(*buf);
+//			CleanupStack::PopAndDestroy( buf );
 			}
 		else
 			{
@@ -891,6 +892,12 @@ TBool CCalenDeleteUi::DoDeleteSingleInstanceL( CCalInstance* aInstance,
         
     if( doDelete )
         {
+        //Before deleteing the entry reset the attachment model
+        if(iController.Services().GetAttachmentData()->NumberOfItems())
+            {
+            iController.Services().GetAttachmentData()->Reset();
+            }
+        
         if( !TryDeleteWithMrUtilsL( aInstance, aRepeatType ) )
             {
             if( !child || aRepeatType == CalCommon::EThisOnly )

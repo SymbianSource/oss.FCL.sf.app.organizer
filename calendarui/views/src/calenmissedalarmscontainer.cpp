@@ -144,7 +144,7 @@ void CCalenMissedAlarmsContainer::ConstructImplL()
     iListBox->Model()->SetItemTextArray(iListBoxItemArray);
 
     // set icon array
-    CAknIconArray* iconArray = CreateIconsL( iIconIndices );
+    CAknIconArray* iconArray = CreateIconsL( iIconIndices, KCalenMissedAlarmsViewUidValue ); 
     CleanupStack::PushL(iconArray);
     iListBox->ItemDrawer()->FormattedCellData()->SetIconArray(iconArray);
     CleanupStack::Pop();
@@ -401,7 +401,17 @@ void CCalenMissedAlarmsContainer::HandleResourceChange(TInt aType)
 
     if ( aType == KAknsMessageSkinChange || aType == KEikDynamicLayoutVariantSwitch )
         {
-        SizeChanged();
+//        SizeChanged();
+    TRect main_pane;
+    AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, main_pane );
+    SetRect( main_pane );
+    if(iListBox)
+        {
+        TRect mainPane;
+        AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, mainPane );
+        TRect bgContextRect( TPoint(0, 0), mainPane.Size() );
+        iListBox->SetRect( bgContextRect );
+        }
 
         // refresh
         TRAPD(error,iView->BeginRepopulationL());

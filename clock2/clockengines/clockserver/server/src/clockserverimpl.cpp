@@ -806,7 +806,7 @@ void CClkSrvImpl::NotifyMccChangeL()
 			// NITZ data again attributes would get filled with actual value.
 			// Has been kept outside because this statement is valid for
 			// first boot also.
-			if( iTimeAttributes )
+			if( iTimeAttributes && staleBoot )
 			{
 				iTimeAttributes->iDstOffset = TTimeIntervalMinutes( 0 );
 				iTimeAttributes->iTimeZoneOffset =  TTimeIntervalMinutes( 0 );
