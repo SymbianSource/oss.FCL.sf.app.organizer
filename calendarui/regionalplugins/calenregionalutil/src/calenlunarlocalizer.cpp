@@ -16,16 +16,9 @@
 */
 
 
-#include "calendarui_debug.h"
 
-#include "CalenLunarLocalizer.h"
 
-#include "CalenLunarInfo.h"
-#include "CalenLunarLocalizedInfo.h"
-#include "CalenExtraRowFormatter.h"
-#include <calenregionalutil.rsg>
 
-#include <aknbiditextutils.h>
 #include <avkon.rsg>
 #include <badesca.h> 
 #include <eikenv.h>
@@ -33,6 +26,14 @@
 #include <bautils.h>
 #include <data_caging_path_literals.hrh>
 
+#include <calenregionalutil.rsg>
+
+#include "calendarui_debug.h"
+
+#include "CalenLunarLocalizer.h"
+#include "CalenLunarInfo.h"
+#include "CalenLunarLocalizedInfo.h"
+#include "CalenExtraRowFormatter.h"
 //CONSTANTS
 const TInt KCharMonth = 0x6708;
 const TInt KCharFirstMonth = 0x6b63;
@@ -126,22 +127,6 @@ EXPORT_C void CCalenLunarLocalizer::ConstructL()
 
     iGregorianDateFormat = StringLoader::LoadL(R_QTN_DATE_USUAL_WITH_ZERO);
 
-
-#ifdef _DEBUG
-    // Validate assumptions
-    TInt maxStem = -1;
-    for (TInt i = 0; i < iHeavenlyStemNames->Count(); i++)
-        {
-        maxStem = Max( maxStem, iHeavenlyStemNames->MdcaPoint(i).Length() );
-        }
-    
-    TInt maxBranch = -1;
-    for (TInt i = 0; i < iTerrestialBranchNames->MdcaPoint(i).Length() ; i++)
-        {
-        maxBranch = Max( maxBranch, iTerrestialBranchNames->MdcaPoint(i).Length() );        
-        }
-    ASSERT( maxStem + maxBranch <= 100);
-#endif
     
     TRACE_EXIT_POINT;
     }
@@ -178,13 +163,13 @@ EXPORT_C CCalenLunarLocalizedInfo* CCalenLunarLocalizer::LocalizeL( TCalenLunarI
     yearSubs->AppendL( iHeavenlyStemNames->MdcaPoint( aInfo.iHeavenlyStem ) );
     yearSubs->AppendL( iTerrestialBranchNames->MdcaPoint( aInfo.iTerrestialBranch ) );
 
-    HBufC* tmp = StringLoader::LoadLC( R_CALE_LUNAR_YEAR, *yearSubs, iEikEnv );
+    HBufC* tmp = StringLoader::LoadLC( R_CALE_LUNAR_YEAR, *yearSubs);
     RDebug::Print( *tmp );
     localized->iLunarYear = *tmp;
     CleanupStack::PopAndDestroy( tmp );
     CleanupStack::PopAndDestroy( yearSubs );
 
-    RDebug::Print(     localized->iLunarYear  );
+    RDebug::Print( localized->iLunarYear );
 
     LocalizeMonthAndDayL(localized, aInfo);
     
@@ -215,8 +200,8 @@ EXPORT_C CCalenLunarLocalizedInfo* CCalenLunarLocalizer::LocalizeL( TCalenLunarI
 // CCalenLunarLocalizer::GetExtraRowTextL
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TPtrC CCalenLunarLocalizer::GetExtraRowTextL( CCalenLunarLocalizedInfo& aLocInfo, TInt aMaxWidth, 
-                                              const CFont& aFont, TBool aTwoLines )
+EXPORT_C TPtrC CCalenLunarLocalizer::GetExtraRowTextL( 
+											CCalenLunarLocalizedInfo& aLocInfo )
     {
     TRACE_ENTRY_POINT;
     
@@ -228,11 +213,7 @@ EXPORT_C TPtrC CCalenLunarLocalizer::GetExtraRowTextL( CCalenLunarLocalizedInfo&
     fields.AppendL( CCalenLunarLocalizedInfo::EAnimalYear );
     fields.AppendL( CCalenLunarLocalizedInfo::ELunarYear );
     
-    TPtrC text = iRowFormatter->FormatExtraRowInformationL( aLocInfo, fields, aMaxWidth, aFont
-
-                                                            , aTwoLines 
-
-                                                            );
+    TPtrC text = iRowFormatter->FormatExtraRowInformationL( aLocInfo, fields );
     CleanupStack::PopAndDestroy( &fields );
     
     

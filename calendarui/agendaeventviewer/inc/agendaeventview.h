@@ -32,6 +32,7 @@ class QGraphicsLinearLayout;
 class QTranslator;
 class HbView;
 class HbAction;
+class HbLabel;
 class HbMainWindow;
 class AgendaEventViewerItem;
 class AgendaEventViewerPrivate;
@@ -57,6 +58,7 @@ private:
 	void addSubjectAndPriorityData();
 	void addDateTimeData();
 	void addLocationData();
+	void addMapTileImage();
 	void addReminderData();
 	void addCompletedTodoData();
 	void addRepeatData();
@@ -89,6 +91,7 @@ private:
 	QPointer<AgendaEventViewerItem> mSubjectWidget;
 	QPointer<AgendaEventViewerItem> mDateTimeWidget;
 	QPointer<AgendaEventViewerItem> mLocationWidget;
+	HbLabel                        *mMaptileLabel ;
 	QPointer<AgendaEventViewerItem> mReminderWidget;
 	QPointer<AgendaEventViewerItem> mRepeatWidget;
 	QPointer<AgendaEventViewerItem> mDescriptionWidget;
@@ -107,6 +110,8 @@ private:
 	bool mReminderWidgetAdded;
 	HbAction *mBackAction;
 	HbMainWindow* mMainWindow;
+	bool mLocationFeatureEnabled;
+    QString mMaptilePath;
 
 private:
 	friend class AgendaEventViewerPrivate;

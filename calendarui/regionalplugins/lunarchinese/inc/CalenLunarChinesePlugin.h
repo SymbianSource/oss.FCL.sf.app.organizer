@@ -21,20 +21,12 @@
 #define __CALENLUNARCHINESEPLUGIN_H__
 
 //SYSTEM INCLUDES
-#include <e32base.h>
 #include <ecom.h>
-#include <ConeResLoader.h> 
-
-#include <QtGui>
-
-#include <hblabel.h>
 
 //CALENDAR INCLUDES
 #include <calencommandhandler.h>
 #include <calennotificationhandler.h>
 #include <calenservices.h>
-#include <eiklabel.h>
-#include <COECNTRL.H>
 #include <calencustomisation.h>
 
 #include "CalendarVariant.hrh"
@@ -46,7 +38,6 @@ class QString;
 class HbWidget;
 class HbMenu;
 
-class CEikonEnv;
 class CCalenLunarInfoProvider;
 class CCalenLunarLocalizer;
 class CCalenLunarLocalizedInfo;
@@ -85,8 +76,7 @@ class CCalenLunarChinesePlugin :public CCalenCustomisation,
         void HandleNotification( const TCalenNotification aNotification );
         
     private:
-        void SetLabelContentL( HbLabel& aLabel );        
-        void FormatExtraRowStringL( HbLabel& aLabel,TBool aTwoLines);
+        void FormatExtraRowStringL();
         void UpdateLocalizerInfoL();
         void ExecuteMessageDialogL( TDesC& aMsgText );
        
@@ -120,38 +110,9 @@ class CCalenLunarChinesePlugin :public CCalenCustomisation,
 		* infobar in Month/Day/Week.
 		*/
 		HBufC* iInfoBarText;
-		
-		/**
-		* This control is used in  view.
-		*/
-	    HbLabel* iLabelControl;
 	    TInt iStart;
 	    TInt iEnd;
-	    TRect iRect;
 	    TInt  iResourceFileOffset;
-	    
 	};
 	
-class CalenPluginLabel : public HbLabel
-    {
-    Q_OBJECT
-    
-	public:
-		CalenPluginLabel( CCalenLunarChinesePlugin& aPlugin,QGraphicsItem *parent=0);
-		~CalenPluginLabel();
-		
-	public slots:	
-	void showLunarData();
-
-	private:
-		void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 ); 
-		void mousePressEvent(QGraphicsSceneMouseEvent *event);
-	private:
-		CCalenLunarChinesePlugin& iPlugin;	
-    };	
-
 #endif //__CALENLUNARCHINESEPLUGIN_H__
-
-
-
- 									

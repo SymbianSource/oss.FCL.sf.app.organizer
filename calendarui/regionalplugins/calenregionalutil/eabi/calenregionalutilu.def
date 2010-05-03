@@ -1,0 +1,35 @@
+EXPORTS
+	_ZN15TCalenLunarInfo10AnimalYearEv @ 1 NONAME
+	_ZN20CCalenLunarLocalizer10ConstructLEv @ 2 NONAME
+	_ZN20CCalenLunarLocalizer16GetExtraRowTextLER24CCalenLunarLocalizedInfo @ 3 NONAME
+	_ZN20CCalenLunarLocalizer4NewLEv @ 4 NONAME
+	_ZN20CCalenLunarLocalizer9LocalizeLER15TCalenLunarInfo @ 5 NONAME
+	_ZN20CCalenLunarLocalizerC1Ev @ 6 NONAME
+	_ZN20CCalenLunarLocalizerC2Ev @ 7 NONAME
+	_ZN20CCalenLunarLocalizerD0Ev @ 8 NONAME
+	_ZN20CCalenLunarLocalizerD1Ev @ 9 NONAME
+	_ZN20CCalenLunarLocalizerD2Ev @ 10 NONAME
+	_ZN23CCalenExtraRowFormatter26FormatExtraRowInformationLER24CCalenLunarLocalizedInfoR6RArrayINS0_6TFieldEE @ 11 NONAME
+	_ZN23CCalenExtraRowFormatter4NewLEv @ 12 NONAME
+	_ZN23CCalenExtraRowFormatterD0Ev @ 13 NONAME
+	_ZN23CCalenExtraRowFormatterD1Ev @ 14 NONAME
+	_ZN23CCalenExtraRowFormatterD2Ev @ 15 NONAME
+	_ZN23CCalenLunarInfoProvider13GetLunarInfoLERK5TTime @ 16 NONAME
+	_ZN23CCalenLunarInfoProvider4NewLER3RFs @ 17 NONAME
+	_ZN23CCalenLunarInfoProviderD0Ev @ 18 NONAME
+	_ZN23CCalenLunarInfoProviderD1Ev @ 19 NONAME
+	_ZN23CCalenLunarInfoProviderD2Ev @ 20 NONAME
+	_ZN24CCalenLunarLocalizedInfo4NewLEv @ 21 NONAME
+	_ZN24CCalenLunarLocalizedInfo8GetFieldENS_6TFieldE @ 22 NONAME
+	_ZN24CCalenLunarLocalizedInfoD0Ev @ 23 NONAME
+	_ZN24CCalenLunarLocalizedInfoD1Ev @ 24 NONAME
+	_ZN24CCalenLunarLocalizedInfoD2Ev @ 25 NONAME
+	_ZTI20CCalenLunarLocalizer @ 26 NONAME
+	_ZTI23CCalenExtraRowFormatter @ 27 NONAME
+	_ZTI23CCalenLunarInfoProvider @ 28 NONAME
+	_ZTI24CCalenLunarLocalizedInfo @ 29 NONAME
+	_ZTV20CCalenLunarLocalizer @ 30 NONAME
+	_ZTV23CCalenExtraRowFormatter @ 31 NONAME
+	_ZTV23CCalenLunarInfoProvider @ 32 NONAME
+	_ZTV24CCalenLunarLocalizedInfo @ 33 NONAME
+

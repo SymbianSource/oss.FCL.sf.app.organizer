@@ -15,7 +15,6 @@ CONFIG += hb \
 symbian: {
     TARGET.EPOCALLOWDLLDATA = 1
     TARGET.CAPABILITY = CAP_GENERAL_DLL
-    TARGET.UID3 = 0x2002EA1C
 
     pluginstub.sources = alarmalertplugin.dll
     pluginstub.path = /resource/plugins/devicedialogs
@@ -24,9 +23,11 @@ symbian: {
 
 # Input
 HEADERS +=  alarmalertplugin.h \
-			alarmalertwidget_p.h
+			alarmalertwidget_p.h \
+			alarmalertdocloader.h
 			
 SOURCES +=  alarmalertplugin.cpp \
-			alarmalertwidget_p.cpp
+			alarmalertwidget_p.cpp \
+			alarmalertdocloader.cpp
 
 RESOURCES += alarmalert.qrc

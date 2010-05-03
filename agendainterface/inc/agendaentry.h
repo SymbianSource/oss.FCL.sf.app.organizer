@@ -210,11 +210,11 @@ public:
 	void setInterval(int interval);
 	int interval() const;
 
-	void setUntil(const QDate& date);
-	QDate until() const;
+	void setUntil(const QDateTime& date);
+	QDateTime until() const;
 
-	void setRepeatRuleStart(const QDate& date);
-	QDate repeatRuleStart() const;
+	void setRepeatRuleStart(const QDateTime& date);
+	QDateTime repeatRuleStart() const;
 
 	void setWeekStart(Day day);
 	Day weekStart() const;
@@ -349,7 +349,10 @@ public:
 
 	void setCompletedDateTime(const QDateTime& dateTime);
 	QDateTime completedDateTime() const;
-	
+
+	void setDTStamp(const QDateTime& dateTime);
+	QDateTime dtStamp() const;
+
 	int durationInSecs() const;
 	AgendaEntry& operator=(const AgendaEntry& other);
 	bool operator==(const AgendaEntry& other) const;

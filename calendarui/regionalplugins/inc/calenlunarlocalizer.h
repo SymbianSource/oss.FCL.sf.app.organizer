@@ -41,11 +41,7 @@ public: // public API
     
     IMPORT_C virtual CCalenLunarLocalizedInfo* LocalizeL( TCalenLunarInfo& aInfo );
     
-    IMPORT_C virtual TPtrC GetExtraRowTextL( CCalenLunarLocalizedInfo& aLocInfo, 
-                                    TInt aMaxWidth, 
-                                    const CFont& aFont,
-									TBool aTwoLines
-                                  );
+    IMPORT_C virtual TPtrC GetExtraRowTextL( CCalenLunarLocalizedInfo& aLocInfo );
     
 
 protected:

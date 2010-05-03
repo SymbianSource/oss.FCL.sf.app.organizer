@@ -93,7 +93,8 @@ enum TCalenCommandId
     ECalenCmdGotoCalendar,
     ECalenMissedAlarmsViewFromIdle,
     ECalenMissedEventViewFromIdle,
-    ECalenLastCommand
+    ECalenLastCommand,
+    ECalenRegionalPluginTapEvent
     };
 
 #endif // HB_CALENCOMMANDS_HRH

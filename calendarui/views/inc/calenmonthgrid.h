@@ -67,7 +67,8 @@ private:
 	void mousePressEvent(QGraphicsSceneMouseEvent* event);
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 	void setFocusToProperDay();
-	void setActiveDates(QDateTime activeDate);
+	void setActiveDates(QDate activeDate);
+	void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
 	
 public slots:
 	void scrollingFinished();
@@ -93,6 +94,9 @@ private:
 	QDateTime mNonActiveFocusedDay;
 	bool mIgnoreItemActivated;
 	QPointF mPressedPos;
+	QColor mGridLineColor;
+	QColor mGridBorderColor;
+	QGraphicsWidget* mContentWidget;
 };
 
 #endif // CALENMONTHGRID_H

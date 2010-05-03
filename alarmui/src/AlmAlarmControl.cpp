@@ -133,7 +133,7 @@ void CAlmAlarmControl::HandleStateChange(TInt aOldState)
         && iState != EStateWaitingInput )
     {
         // stop the context/sensor observer.
-        // PIM_TRAPD_ASSERT( iAlarmUtils->StopCFObserverL(); )
+        PIM_TRAPD_ASSERT( iAlarmUtils->StopCFObserverL(); )
 
         // stop waiting for "end call" command from accessories
         iAlarmUtils->StopAccessoryObserver();
@@ -192,7 +192,7 @@ void CAlmAlarmControl::HandleStateChange(TInt aOldState)
             iAlarmUtils->StartAccessoryObserver();
 
             // publish new alarm context value and wait for any actions
-            // PIM_TRAPD_ASSERT( iAlarmUtils->StartCFObserverL(); )
+            PIM_TRAPD_ASSERT( iAlarmUtils->StartCFObserverL(); )
             break;
         }
 
@@ -258,7 +258,12 @@ void CAlmAlarmControl::DoAutoSnooze()
 void CAlmAlarmControl::DoCancelDialog()
 {
     TRACE_ENTRY_POINT;
-
+    /*if( iGlobalNoteId != KErrNotFound )
+    {
+        // iAlarmUtils->NotifierDialogController()->SetNoteObserver( this );
+        // iAlarmUtils->NotifierDialogController()->CancelNote( iGlobalNoteId );
+        iAlarmUtils->NotifierDialogController()->dismissAlarmAlert();
+    }*/
     iAlarmUtils->NotifierDialogController()->dismissAlarmAlert();
     iAlarmUtils->StopAlarmSound();
     iAlarmUtils->CancelAutoSnooze();
@@ -1322,8 +1327,7 @@ void CAlmAlarmControl::HandleAlmInfoCRChangeL(TUint32 /*aCount*/)
  
  void CAlmAlarmControl::alertCompleted(AlarmCommand command)
  {
-     // cancel timers
-     iAlarmUtils->CancelAutoSnooze();
+     //iAlarmUtils->CancelShutdown();
      iAlarmUtils->StopAlarmSound();
 
      switch( iState )
@@ -1342,13 +1346,17 @@ void CAlmAlarmControl::HandleAlmInfoCRChangeL(TUint32 /*aCount*/)
                  case AlarmStop:
                      {
                      SetState( EStateAfterInput );
+					 // cancel timers
+					 iAlarmUtils->CancelAutoSnooze();
                      iAskWakeup = ETrue; // ask wakeup after all the alarms are handled
                      iAlarmUtils->DoStopAlarm();  // stop
                      break;
                      }
                  case AlarmSnooze:
                      {
-                     SetState( EStateAfterInput );
+                     // cancel timers
+					 iAlarmUtils->CancelAutoSnooze();
+					 SetState( EStateAfterInput );
 
                      SetState( EStateShowingSnoozeInfo );
                      iAlarmUtils->TryToSnoozeActiveAlarm();

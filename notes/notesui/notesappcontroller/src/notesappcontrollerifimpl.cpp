@@ -16,9 +16,6 @@
 *
 */
 
-// System includes
-#include <QDebug>
-
 // User includes
 #include "notesappcontrollerifimpl.h"
 #include "notesmodelhandler.h"
@@ -44,11 +41,7 @@ NotesAppControllerIfImpl::NotesAppControllerIfImpl(
 :QObject(parent),
  mAppController(controller)
 {
-	qDebug() << "notes: NotesAppControllerIfImpl::NotesAppControllerIfImpl -->";
-
 	// Nothing yet.
-
-	qDebug() << "notes: NotesAppControllerIfImpl::NotesAppControllerIfImpl <--";
 }
 
 /*!
@@ -56,11 +49,7 @@ NotesAppControllerIfImpl::NotesAppControllerIfImpl(
  */
 NotesAppControllerIfImpl::~NotesAppControllerIfImpl()
 {
-	qDebug() << "notes: NotesAppControllerIfImpl::~NotesAppControllerIfImpl -->";
-
 	// Nothing yet.
-
-	qDebug() << "notes: NotesAppControllerIfImpl::~NotesAppControllerIfImpl <--";
 }
 
 /*!
@@ -72,10 +61,6 @@ NotesAppControllerIfImpl::~NotesAppControllerIfImpl()
  */
 AgendaUtil *NotesAppControllerIfImpl::agendaUtil()
 {
-	qDebug() << "notes: NotesAppControllerIfImpl::agendaUtil -->";
-
-	qDebug() << "notes: NotesAppControllerIfImpl::agendaUtil <--";
-
 	return mAppController->mNotesModelHandler->agendaInterface();
 }
 
@@ -88,10 +73,6 @@ AgendaUtil *NotesAppControllerIfImpl::agendaUtil()
  */
 NotesModel *NotesAppControllerIfImpl::notesModel()
 {
-	qDebug() << "notes: NotesAppControllerIfImpl::notesModel -->";
-
-	qDebug() << "notes: NotesAppControllerIfImpl::notesModel <--";
-
 	return mAppController->mNotesModelHandler->notesModel();
 }
 
@@ -104,11 +85,7 @@ NotesModel *NotesAppControllerIfImpl::notesModel()
  */
 void NotesAppControllerIfImpl::switchToView(NotesNamespace::NotesViewIds viewId)
 {
-	qDebug() << "notes: NotesAppControllerIfImpl::switchToView -->";
-
 	mAppController->mViewManager->switchToView(viewId);
-
-	qDebug() << "notes: NotesAppControllerIfImpl::switchToView <--";
 }
 
 // End of file	--Don't remove this.

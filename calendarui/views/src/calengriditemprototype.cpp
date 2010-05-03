@@ -22,11 +22,15 @@
 #include <QGraphicsWidget>
 #include <QGraphicsLinearLayout>
 #include <hblabel.h>
+#include <hbtextitem.h>
+#include <hbframeitem.h>
+#include <hbframedrawer.h>
+#include <hbiconitem.h>
+#include <hbframebackground.h>
 #include <hbcolorscheme.h>
 
 // User includes
 #include "calengriditemprototype.h"
-#include "calengriditem.h"
 #include "calencommon.h"
 
 #define GRIDLINE_WIDTH 0.075 //units
@@ -40,13 +44,17 @@
  Constructor.
  */
 CalenGridItemPrototype::CalenGridItemPrototype(QGraphicsWidget *parent) :
-	HbAbstractViewItem(parent),
+	HbGridViewItem(parent),
 	mLayout(0),
 	mCurrentDateColor(Qt::black),
 	mGridBorderColor(Qt::gray),
-	mIsSeventhColumn(false)
+	mEventIndicatorItem(0),
+	mMonthDayInfoItem(0),
+	mFocusIndicatorItem(0),
+	mTodayIndicatorItem(0),
+	mTodayUnderLineColor(Qt::gray)
 	{
-	// Nothing yet.
+	mTodayUnderLineColor = HbColorScheme::color("qtc_cal_month_current_day");
 	}
 
 /*!
@@ -57,9 +65,7 @@ CalenGridItemPrototype::CalenGridItemPrototype(QGraphicsWidget *parent) :
  */
 HbAbstractViewItem *CalenGridItemPrototype::createItem()
 {
-	CalenGridItemPrototype *item = new CalenGridItemPrototype();
-	item->createItemLayout();
-	return item;
+	return new CalenGridItemPrototype(*this);
 }
 
 /*!
@@ -69,106 +75,122 @@ HbAbstractViewItem *CalenGridItemPrototype::createItem()
  */
 void CalenGridItemPrototype::updateChildItems()
 {
+	
+	// base class implementation
+	HbGridViewItem::updateChildItems();
+		
 	// Here update content of each item.
-	
-	QVariant monthDayRole =
-	        modelIndex().data(CalendarNamespace::CalendarMonthDayRole);
-	if (monthDayRole.isValid()) {
-		if (monthDayRole.canConvert<QString>()) {
-			mWidget->updateMonthDayInfo(monthDayRole.toString());
+	QVariant monthDayRole;
+	QVariant monthFocusRole;
+	bool underlineEnabled = false;
+	QVariant monthEventRole;
+	QVariant monthTextColorRole;
+	QVariant itemData = modelIndex().data(Qt::UserRole + 1);
+	if (itemData.isValid()) {
+		if (itemData.canConvert<QVariantList>()) {
+			// Get the item list
+			QVariantList itemList = itemData.toList();
+			// Get the day text
+			monthDayRole = itemList.at(CalendarNamespace::CalendarMonthDayRole);
+			if (monthDayRole.canConvert<QString>()) {
+				QString monthDayText = monthDayRole.toString();
+
+				if (!mMonthDayInfoItem) {
+					mMonthDayInfoItem = new HbTextItem(this);
+					HbStyle::setItemName(mMonthDayInfoItem,
+							 QLatin1String("monthDayInfoTextItem"));
+
+				}
+
+				mMonthDayInfoItem->setText(monthDayText);
+				mMonthDayInfoItem->setElideMode(Qt::ElideNone);
+			}
+			
+			// Get the focus data
+			monthFocusRole = itemList.at(CalendarNamespace::CalendarMonthFocusRole);
+			if (monthFocusRole.canConvert<QString>()) {
+				QString focusIconPath = monthFocusRole.toString();
+				if (!mFocusIndicatorItem) {
+					mFocusIndicatorItem = new HbFrameItem(this);
+					mFocusIndicatorItem->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
+					mFocusIndicatorItem->setZValue(-1);
+					HbStyle::setItemName(mFocusIndicatorItem, QLatin1String("focusIconItem"));
+				}
+				mFocusIndicatorItem->frameDrawer().setFrameGraphicsName(focusIconPath);
+			}
+			
+			// Get the today indicator role
+			underlineEnabled = itemList.at(CalendarNamespace::CalendarMonthUnderlineRole).value<bool>();
+			drawUnderline(underlineEnabled);
+			
+			// Get the event indicator data
+			monthEventRole = itemList.at(CalendarNamespace::CalendarMonthEventRole);
+			if (monthEventRole.canConvert<QString>()) {
+				QString eventIconPath = monthEventRole.toString();
+				if (!mEventIndicatorItem) {
+					mEventIndicatorItem = new HbIconItem(this);
+					HbStyle::setItemName(mEventIndicatorItem, QLatin1String("eventIconItem"));
+				}
+				mEventIndicatorItem->setIconName(eventIconPath);
+			}
+			
+			// Get the text color
+			monthTextColorRole = itemList.at(CalendarNamespace::CalendarMonthTextColorRole);
+			if (monthTextColorRole.canConvert<QColor>()) {
+				QColor monthTextColor = monthTextColorRole.value<QColor>();
+				mMonthDayInfoItem->setTextColor(monthTextColor);
+			}
 		}
 	}
-	 
-	QVariant monthEventRole =
-	        modelIndex().data(CalendarNamespace::CalendarMonthEventRole);
-	if (monthEventRole.isValid()) {
-		if (monthEventRole.canConvert<QString>()) {
-			mWidget->updateEventIndicator(monthEventRole.toString());
-		}
-	}
-	
-	QVariant monthFocusRole =
-	        modelIndex().data(CalendarNamespace::CalendarMonthFocusRole);
-	if (monthFocusRole.isValid()) {
-		if (monthFocusRole.canConvert<QString>()) {
-			mWidget->updateFocusIndicator(monthFocusRole.toString());
-		}
-	}
-	
-	QVariant monthTextColorRole =
-	        modelIndex().data(CalendarNamespace::CalendarMonthTextColorRole);
-	if (monthTextColorRole.isValid()) {
-		if (monthTextColorRole.canConvert<QColor>()) {
-			mWidget->updateMonthDayInfoColor(monthTextColorRole.value<QColor>());
-		}
-	}
-	
-	QVariant seventhColumnRole = 
-            modelIndex().data(CalendarNamespace::CalendarMonthSeventhColumn);
-    if (seventhColumnRole.isValid()) {
-        if (seventhColumnRole.canConvert<bool>()) {
-            mIsSeventhColumn = seventhColumnRole.value<bool>();
-        }
-	}
-	bool underlineEnabled = modelIndex().data(
-				  CalendarNamespace::CalendarMonthUnderlineRole).value<bool>();
-	mWidget->drawUnderline(underlineEnabled);
 	
 }
 
 /*!
- Creates the item layout.
+ Function to create the underline icon item
  */
-void CalenGridItemPrototype::createItemLayout()
+void CalenGridItemPrototype::drawUnderline(bool underlineEnabled)
 {
-	mLayout = new QGraphicsLinearLayout(Qt::Vertical, this);
+	if (underlineEnabled) {
+		if (!mTodayIndicatorItem) {
+			mTodayIndicatorItem = new HbIconItem(this);
+			HbStyle::setItemName(mTodayIndicatorItem,
+								 QLatin1String("todayIndicatorItem"));
+			if (mTodayUnderLineColor.isValid()) {
+				mTodayIndicatorItem->setColor(mTodayUnderLineColor);
+			}
+		}
+	} else {
+		if (mTodayIndicatorItem) {
+			delete mTodayIndicatorItem;
+			mTodayIndicatorItem = NULL;
+		}
+	}
+}
 
-	mWidget = new CalenGridItem(this);
-	mLayout->addItem(mWidget);
 
-	mLayout->setSpacing(0);
-	mLayout->setContentsMargins(0, 0, 0, 0);
-
-	setLayout(mLayout);
+/*!
+ Function overwritten to avoid default behavior
+ */
+void CalenGridItemPrototype::pressStateChanged(bool pressed,bool animate)
+{
+	Q_UNUSED(pressed)
+	Q_UNUSED(animate)		
+	// Just overrode it as we dont want to have any default behavior
 }
 
 /*!
- To paint grid item border
+ Function overwritten to avoid default behavior
  */
-void CalenGridItemPrototype::paint(QPainter* painter,
-                          const QStyleOptionGraphicsItem* option,
-                          QWidget* widget)
+void CalenGridItemPrototype::pressStateChanged(bool animate)
 {
-	Q_UNUSED(option);
-	Q_UNUSED(widget);
-	
-	QPen pen;//
-    pen.setStyle(Qt::SolidLine);
-    pen.setWidth(GRIDLINE_WIDTH);
-    QColor gridLineColor = HbColorScheme::color("qtc_cal_grid_line");
-    if (gridLineColor.isValid()) {
-        pen.setBrush(gridLineColor);
-    } else {
-        pen.setBrush(mGridBorderColor);
-    }
-    painter->setPen(pen);
-    QRectF controlRect = boundingRect();
-    // Check if this is seventh column item
-    if ( !mIsSeventhColumn ) {
-        // Then draw right and bottom borders
-        QPointF startPoint = controlRect.bottomLeft();
-        QPointF endPoint = controlRect.bottomRight();
-        // Draw the bottom border
-        painter->drawLine(startPoint, endPoint);
-        startPoint = controlRect.topRight();
-        // Draw right border
-        painter->drawLine(startPoint, endPoint);
-    } else {
-        // Then draw only bottom border
-        QPointF startPoint = controlRect.bottomLeft();
-        QPointF endPoint = controlRect.bottomRight();
-        // Draw the bottom border
-        painter->drawLine(startPoint, endPoint);
-    }
+	Q_UNUSED(animate)
+	// Just overrode it as we dont want to have any default behavior
 }
+
+bool CalenGridItemPrototype::canSetModelIndex(const QModelIndex& index)
+{
+	Q_UNUSED(index)
+	return true;
+}
+
 // End of file  --Don't remove this.

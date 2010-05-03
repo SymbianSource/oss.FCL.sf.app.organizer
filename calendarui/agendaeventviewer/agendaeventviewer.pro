@@ -48,7 +48,8 @@ BLD_INF_RULES.prj_exports += \
 	LIBS += -lagendainterface \
 			-lnoteseditor \
 			-lcaleneditor \
-			-lcalencommonutils
+			-lcalencommonutils \
+			-lmaptileservice
 
 INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 }

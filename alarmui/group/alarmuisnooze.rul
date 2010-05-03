@@ -61,54 +61,6 @@
             <Vibra Mode='Start' Delay='0' Repeats='2' RepeatInterval='200' Duration='50' Intensity='50'/>
         </actions>
     </elseIf>
-    <!-- Check if we just have an active alarm -->
-    <!-- active sensor channels when alarm expires -->
-    <elseIf>
-    		<and>
-            <!-- ...alarm is active... -->
-            <contextUpdated>
-                <contextRef source='AlarmUI' type='State'/>
-            </contextUpdated>
-            <notEqual>
-                <contextRef source='AlarmUI' type='State'/>
-                <string>Inactive</string>
-            </notEqual>
-        </and>
-        <actions>
-            <!-- Activate double tap events from sensor -->
-            <publishContext>
-                <contextRef source='Sensor' type='Event' value='DoubleTap.Activate'/>
-            </publishContext>
-            <!-- Activate orientation events from sensor -->
-            <publishContext>
-                <contextRef source='Sensor' type='Event' value='Orientation.Activate'/>
-            </publishContext>
-        </actions>
-    </elseIf>
-    <!-- deactivate sensor channels when alarm is dismissed -->
-    <elseIf>
-        <and>
-            <!-- ...an alarm that was just deactivated -->
-            <contextUpdated>
-                <contextRef source='AlarmUI' type='State'/>
-            </contextUpdated>
-            <equals>
-                <contextRef source='AlarmUI' type='State'/>
-                <string>Inactive</string>
-            </equals>
-        </and>
-        <actions>
-            <!-- deactivate doubletap channel -->
-            <publishContext>
-                <contextRef source='Sensor' type='Event' value='DoubleTap.Deactivate'/>
-            </publishContext>
-
-            <!-- deactivate orientation channel -->
-            <publishContext>
-                <contextRef source='Sensor' type='Event' value='Orientation.Deactivate'/>
-            </publishContext>
-        </actions>
-    </elseIf>
     <!-- stop an active alarm on a 'Stop' command -->
     <elseIf>
         <and>

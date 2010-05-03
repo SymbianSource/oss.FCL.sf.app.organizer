@@ -25,10 +25,12 @@
 // Forward declarations
 class QGraphicsWidget;
 class QGraphicsLinearLayout;
+class HbIconItem;
+class HbTextItem;
+class HbFrameItem;
 class CalenGridItem;
 
-class CalenGridItemPrototype : public HbAbstractViewItem //HbGridViewItem
-//TODO :with current release it's crashing .. public HbGridViewItem
+class CalenGridItemPrototype : public HbGridViewItem
 {
 	Q_OBJECT
 
@@ -39,18 +41,24 @@ public:
 	}
 
 public:
-	virtual HbAbstractViewItem *createItem();
-	virtual void updateChildItems();
+	HbAbstractViewItem *createItem();
+	void updateChildItems();
+	void pressStateChanged(bool pressed,bool animate);
+	void pressStateChanged(bool  animate);
+	bool canSetModelIndex(const QModelIndex& index);
 
 private:
-	void createItemLayout();
-	void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
+	void drawUnderline(bool underlineEnabled);
 private:
 	QGraphicsLinearLayout *mLayout;
 	CalenGridItem *mWidget;
 	QColor mCurrentDateColor;
 	QColor mGridBorderColor;
-	bool mIsSeventhColumn;
+	HbIconItem *mEventIndicatorItem;
+	HbTextItem *mMonthDayInfoItem;
+	HbFrameItem *mFocusIndicatorItem;
+	HbIconItem *mTodayIndicatorItem;
+	QColor mTodayUnderLineColor;
 };
 
 #endif // CALENGRIDITEMPROTOTYPE_H

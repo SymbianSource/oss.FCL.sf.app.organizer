@@ -21,6 +21,7 @@
 // System includes
 #include <QObject>
 #include <QtPlugin>
+#include <QDate>
 #include <qglobal.h>
 
 // Forward declarations
@@ -29,10 +30,8 @@ class QString;
 class AgendaUtil;
 class AgendaEntry;
 
-#define CALENDAR_EVENTVIEWER_PLUGIN_PATH QString(
-											"z:/resource/qt/plugins/calendar")
-#define CALENDAR_EVENTVIEWER_PLUGIN_NAME QString(
-											"agendaeventviewerplugin.qtplugin")
+#define CALENDAR_EVENTVIEWER_PLUGIN_PATH QString("z:/resource/qt/plugins/calendar")
+#define CALENDAR_EVENTVIEWER_PLUGIN_NAME QString("agendaeventviewerplugin.qtplugin")
 
 class EventViewerPluginInterface : public QObject
 {
@@ -40,6 +39,7 @@ class EventViewerPluginInterface : public QObject
 	
 public:
 	enum Actions {
+		ActionNothing,
 		ActionEdit = 0x01,
 		ActionDelete = 0x02,
 		ActionEditDelete = ActionEdit | ActionDelete,
@@ -51,17 +51,17 @@ public:
 		
 public:
 	virtual void viewEvent(const ulong id, 
-	                       Actions action,
-	                       AgendaUtil *agendaUtil) = 0;
+	                       Actions action = ActionNothing,
+	                       AgendaUtil *agendaUtil = 0) = 0;
 	virtual void viewEvent(const QFile &fileHandle, 
-	                       Actions action,
-	                       AgendaUtil *agendaUtil) = 0;
+	                       Actions action = ActionNothing,
+	                       AgendaUtil *agendaUtil = 0) = 0;
 	virtual void viewEvent(AgendaEntry entry,
-	                       Actions action,
-	                       AgendaUtil *agendaUtil) = 0;
+	                       Actions action = ActionNothing,
+	                       AgendaUtil *agendaUtil = 0) = 0;
 
 signals:
-	void viewingCompleted();
+	void viewingCompleted(const QDate date = QDate());
 	void editingStarted();
 	void editingCompleted();
 	void deletingStarted();

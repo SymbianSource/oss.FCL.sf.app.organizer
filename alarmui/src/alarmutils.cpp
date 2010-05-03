@@ -277,7 +277,7 @@ void CAlarmUtils::PlayAlarmSound()
     TRACE_ENTRY_POINT;
     StopAlarmSound();
     PIM_TRAPD_ASSERT( iAlarmPlayer = CAlmAlarmPlayer::NewL( this ); )
-    SetBackLight( ETrue );
+    //SetBackLight( ETrue );
     TRACE_EXIT_POINT;
     }
 
@@ -293,12 +293,12 @@ void CAlarmUtils::StopAlarmSound()
     // only set the context if the player was really active
     if( iAlarmPlayer && iCFSupport )
         {
-        // PIM_TRAPD_ASSERT( iCFSupport->PublishAlarmResultL( EResultAlarmSilenced ); )
+        PIM_TRAPD_ASSERT( iCFSupport->PublishAlarmResultL( EResultAlarmSilenced ); )
         }
     #endif // RD_ALMALERT__SENSOR_SUPPORT
     delete iAlarmPlayer;
     iAlarmPlayer = NULL;
-    SetBackLight( EFalse );
+    //SetBackLight( EFalse );
     TRACE_EXIT_POINT;
     }
 
@@ -540,6 +540,12 @@ void CAlarmUtils::GetProfileSettings()
     	iAlarmData.iVolume = ringingVolume;
     	
     	iAlarmData.iVolumeRampTime = 0;
+    } else {
+    	TInt volumeOn = iAlarmData.iAlarm.ClientData2();
+    	if (!volumeOn) {
+    		iAlarmData.iRingType = EProfileRingingTypeSilent;
+    		iAlarmData.iVolume = 0;
+    	}
     }
     TRACE_EXIT_POINT;
     }
@@ -853,13 +859,13 @@ void CAlarmUtils::DoStopAlarm()
         {
 	     if(!iAlarmControl->IsStopFromContext() && IsCalendarAlarm())
 	     	{
-	     	// PIM_TRAPD_ASSERT( iCFSupport->PublishAlarmResultL( EResultAlarmStoppedAndExit );)
-            // iAlarmControl->SetStopFromContext(EFalse);
+	     	PIM_TRAPD_ASSERT( iCFSupport->PublishAlarmResultL( EResultAlarmStoppedAndExit );)
+            iAlarmControl->SetStopFromContext(EFalse);
 	     	}
 	     else
 	     	{
-	     	// PIM_TRAPD_ASSERT( iCFSupport->PublishAlarmResultL( EResultAlarmStopped );)
-	     	// iAlarmControl->SetStopFromContext(EFalse);
+	     	PIM_TRAPD_ASSERT( iCFSupport->PublishAlarmResultL( EResultAlarmStopped );)
+	     	iAlarmControl->SetStopFromContext(EFalse);
 	     	}
         }
     #endif // RD_ALMALERT__SENSOR_SUPPORT

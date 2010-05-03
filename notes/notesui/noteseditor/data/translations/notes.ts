@@ -2,6 +2,26 @@
 <!DOCTYPE TS>
 <TS version="3.0" sourcelanguage="en_GB">
 <context>
+<message numerus="no" id="txt_notes_list_due_date">
+    <comment>Due date for To-do note</comment>        
+    <source>%1</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_list_pri_graphic</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P11</extra-loc-viewid>
+    <extra-loc-positionid>list</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_notes_button_new_todo">
+    <comment>Toolbar button to create new To-do note</comment>        
+    <source>New To-do </source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_toolbar_tiny_4</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_L7</extra-loc-viewid>
+    <extra-loc-positionid>button</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
 <message numerus="no" id="txt_notes_formlabel_val_description">
     <comment>Default texxt value for Description field in a dataform</comment>        
     <source>Description</source>
@@ -22,16 +42,6 @@
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_notes_button_new_todo">
-    <comment>Toolbar button to create nbew to-do event in to-do collections view</comment>        
-    <source>New To-do</source>
-    <translation variants="no" type="unfinished"></translation>
-    <extra-loc-layout_id>qtl_toolbar_tiny_4</extra-loc-layout_id>    
-    <extra-loc-viewid>Notes_P10</extra-loc-viewid>
-    <extra-loc-positionid>button</extra-loc-positionid>
-    <extra-loc-feature>No</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
 <message numerus="no" id="txt_notes_menu_make_it_as_todo_note">
     <comment>Item specific menu item . This action launchs the To-Do editor to add due date and remainder for the selected note</comment>        
     <source>Make it as To-do note</source>
@@ -39,16 +49,6 @@
     <extra-loc-layout_id>qtl_menu_sec</extra-loc-layout_id>    
     <extra-loc-viewid>Notes_P1</extra-loc-viewid>
     <extra-loc-positionid>menu</extra-loc-positionid>
-    <extra-loc-feature>No</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_notes_list_recent_notes">
-    <comment>Collections name in the list widget (Left Side)</comment>        
-    <source>Recent notes</source>
-    <translation variants="no" type="unfinished"></translation>
-    <extra-loc-layout_id>qtl_list_pri</extra-loc-layout_id>    
-    <extra-loc-viewid>Notes_P2</extra-loc-viewid>
-    <extra-loc-positionid>list</extra-loc-positionid>
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -82,6 +82,16 @@
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
+<message numerus="no" id="txt_notes_dblist_note_modified_at_time">
+    <comment>Secondary text item to mention modification time for a note</comment>        
+    <source>Modified at %1</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_list_sec_graphic</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P1</extra-loc-viewid>
+    <extra-loc-positionid>dblist_14_val</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
 <message numerus="no" id="txt_notes_setlabel_priority_val_low">
     <comment>Priority value in Combo Box used in a dataform</comment>        
     <source>Low</source>
@@ -109,16 +119,6 @@
     <extra-loc-layout_id>qtl_dialog_pri_heading</extra-loc-layout_id>    
     <extra-loc-viewid>Notes_P9</extra-loc-viewid>
     <extra-loc-positionid>title</extra-loc-positionid>
-    <extra-loc-feature>No</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_notes_button_2">
-    <comment>Layout ID Parent. Date  Push Button in Dataform to set alarm date for a To-do note. This action opens the date picker component</comment>        
-    <source>0.02</source>
-    <translation variants="no" type="unfinished"></translation>
-    <extra-loc-layout_id>txt_notes_button_2</extra-loc-layout_id>    
-    <extra-loc-viewid>Notes_P8</extra-loc-viewid>
-    <extra-loc-positionid>button</extra-loc-positionid>
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -182,13 +182,13 @@
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_notes_list_1">
-    <comment>Due date for To-do note</comment>        
-    <source>0.01</source>
+<message numerus="no" id="txt_notes_dblist_note_created_at_time">
+    <comment>Secondary text item to mention creation time for a note</comment>        
+    <source>Created at %1</source>
     <translation variants="no" type="unfinished"></translation>
-    <extra-loc-layout_id>qtl_list_pri_graphic</extra-loc-layout_id>    
-    <extra-loc-viewid>Notes_P11</extra-loc-viewid>
-    <extra-loc-positionid>list</extra-loc-positionid>
+    <extra-loc-layout_id>qtl_list_sec_graphic</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P1</extra-loc-viewid>
+    <extra-loc-positionid>dblist_12_val</extra-loc-positionid>
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -216,7 +216,7 @@
     <comment>Primary text label in To-do viewer</comment>        
     <source>Subject:</source>
     <translation variants="no" type="unfinished"></translation>
-    <extra-loc-layout_id>qtl_list_pri_add</extra-loc-layout_id>    
+    <extra-loc-layout_id>qtl_list_pri_graphic_add</extra-loc-layout_id>    
     <extra-loc-viewid>Notes_P11</extra-loc-viewid>
     <extra-loc-positionid>dblist_5</extra-loc-positionid>
     <extra-loc-feature>No</extra-loc-feature>
@@ -232,6 +232,26 @@
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
+<message numerus="no" id="txt_notes_list_note_count">
+    <comment>List item to show the number&lt;Count&gt;  of items (To-Dos, Recent notes, Favourites) - Right side of the list item</comment>        
+    <source>[ %1 ]</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_list_pri</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P2</extra-loc-viewid>
+    <extra-loc-positionid>list</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_notes_button_due_date">
+    <comment>Date push button in Data Form to set due date for a To-do note. This action opens the date picker component</comment>        
+    <source>%1</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_dataform_button_sec</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P8</extra-loc-viewid>
+    <extra-loc-positionid>button</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
 <message numerus="no" id="txt_notes_setlabel_priority_val_high">
     <comment>Priority value in Combo Box used in a dataform</comment>        
     <source>High</source>
@@ -244,7 +264,7 @@
 </message>
 <message numerus="no" id="txt_notes_dblist_completed_date_val_1">
     <comment>Completed date value (Secondary text ) in To-do viewer</comment>        
-    <source>0.01</source>
+    <source>%1</source>
     <translation variants="no" type="unfinished"></translation>
     <extra-loc-layout_id>qtl_list_sec</extra-loc-layout_id>    
     <extra-loc-viewid>Notes_P11</extra-loc-viewid>
@@ -269,6 +289,16 @@
     <extra-loc-layout_id>qtl_grid_applications_sec</extra-loc-layout_id>    
     <extra-loc-viewid>Notes</extra-loc-viewid>
     <extra-loc-positionid>list</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_notes_button_dialog_delete">
+    <comment>Delete - Confirmation dialog softkey button </comment>        
+    <source>Delete</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_dialog_softkey_2</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P19</extra-loc-viewid>
+    <extra-loc-positionid>button</extra-loc-positionid>
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -302,6 +332,16 @@
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
+<message numerus="no" id="txt_notes_subhead_plain_notes">
+    <comment>Sub title in Recent notes list view</comment>        
+    <source>Plain notes</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_groupbox_simple_sec</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P6</extra-loc-viewid>
+    <extra-loc-positionid>subhead</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
 <message numerus="no" id="txt_notes_button_delete">
     <comment>Toolbar button item to delete the note</comment>        
     <source>Delete</source>
@@ -322,13 +362,43 @@
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_notes_list_1_2">
-    <comment>Alarm time and date for To-do note</comment>        
+<message numerus="no" id="txt_notes_info_delete_note">
+    <comment>Confirmation dialog text for deleting a note</comment>        
+    <source>Delete note?</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_dialog_pri5_large_graphic</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P19</extra-loc-viewid>
+    <extra-loc-positionid>info</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_notes_subhead_edit_time">
+    <comment>Creation &amp; Modification time and date will be shown in the groupBox. Custom groupBox label . Text shown on the right side of the widget</comment>        
     <source>%1 %2</source>
     <translation variants="no" type="unfinished"></translation>
-    <extra-loc-layout_id>qtl_list_pri_graphic</extra-loc-layout_id>    
-    <extra-loc-viewid>Notes_P11</extra-loc-viewid>
-    <extra-loc-positionid>list</extra-loc-positionid>
+    <extra-loc-layout_id>txt_notes_subhead_1_2</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P5</extra-loc-viewid>
+    <extra-loc-positionid>subhead</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_notes_button_all_notes">
+    <comment>One of the toolbar button text in landscape mode . If user taps on this button, All notes view is displayed</comment>        
+    <source>All notes</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_toolbar_tiny_4</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_L1</extra-loc-viewid>
+    <extra-loc-positionid>button</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_notes_info_delete_todo_note">
+    <comment>Confirmation dialog text for deleting a To-do note</comment>        
+    <source>Delete To-do note?</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_dialog_pri5_large_graphic</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P19</extra-loc-viewid>
+    <extra-loc-positionid>info</extra-loc-positionid>
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -362,6 +432,16 @@
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
+<message numerus="no" id="txt_notes_list_no_notes_available">
+    <comment>Custom layout ID. No parent . If the view is empty, this text should be displayed in the All notes empy list view. Same text is used in landscape as well</comment>        
+    <source>No notes available</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>txt_notes_list_no_notes_available</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P1</extra-loc-viewid>
+    <extra-loc-positionid>list</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
 <message numerus="no" id="txt_notes_button_send">
     <comment>Tool bar button used to send the note to other user</comment>        
     <source>Send</source>
@@ -369,6 +449,36 @@
     <extra-loc-layout_id>qtl_toolbar_tiny_3</extra-loc-layout_id>    
     <extra-loc-viewid>Notes_L4</extra-loc-viewid>
     <extra-loc-positionid>button</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_notes_list_plain_notes">
+    <comment>Collections name in the list widget (Left Side)</comment>        
+    <source>Plain notes</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_list_pri</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P2</extra-loc-viewid>
+    <extra-loc-positionid>list</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_notes_list_alarm_date">
+    <comment>Alarm time and date for To-do note</comment>        
+    <source>%1 %2</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_list_pri_graphic</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P11</extra-loc-viewid>
+    <extra-loc-positionid>list</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_notes_dblist_note_created_on_date">
+    <comment>Secondary text item to mention creation date for a note</comment>        
+    <source>Created on %1</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_list_sec_graphic</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P1</extra-loc-viewid>
+    <extra-loc-positionid>dblist_11_val</extra-loc-positionid>
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -402,6 +512,16 @@
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
+<message numerus="no" id="txt_notes_info_delete_todo_notes">
+    <comment>Confirmation dialog text for deleting multiple to-do notes</comment>        
+    <source>Delete To-do notes?</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_dialog_pri5_large_graphic</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P19</extra-loc-viewid>
+    <extra-loc-positionid>info</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
 <message numerus="no" id="txt_notes_dpopinfo_new_note_saved">
     <comment>Soft notification dialog info text. This dialog is displayed once the new note is saved</comment>        
     <source>New note saved</source>
@@ -409,6 +529,16 @@
     <extra-loc-layout_id>qtl_notifdialog_pri2</extra-loc-layout_id>    
     <extra-loc-viewid>Notes</extra-loc-viewid>
     <extra-loc-positionid>dpopinfo</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_notes_button_alarm_date">
+    <comment>Layout ID Parent. Date  Push Button in Dataform to set alarm date for a To-do note. This action opens the date picker component</comment>        
+    <source>%1</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>txt_notes_button_2</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P8</extra-loc-viewid>
+    <extra-loc-positionid>button</extra-loc-positionid>
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -432,32 +562,12 @@
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_notes_button_all">
-    <comment>One of the toolbar button text in landscape mode . If user taps on this button, All notes view is displayed</comment>        
-    <source>All</source>
-    <translation variants="no" type="unfinished"></translation>
-    <extra-loc-layout_id>qtl_toolbar_tiny_4</extra-loc-layout_id>    
-    <extra-loc-viewid>Notes_L1</extra-loc-viewid>
-    <extra-loc-positionid>button</extra-loc-positionid>
-    <extra-loc-feature>No</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
 <message numerus="no" id="txt_notes_subhead_new_note">
     <comment>Layout ID Parent. Custom GroupBox. Sub title in Notes editor (Creating new note) - Left side text</comment>        
     <source>New note</source>
     <translation variants="no" type="unfinished"></translation>
     <extra-loc-layout_id>txt_notes_subhead_new_note</extra-loc-layout_id>    
     <extra-loc-viewid>Notes_P4</extra-loc-viewid>
-    <extra-loc-positionid>subhead</extra-loc-positionid>
-    <extra-loc-feature>No</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_notes_subhead_1_2">
-    <comment>Creation &amp; Modification time and date will be shown in the groupBox. Custom groupBox label . Text shown on the right side of the widget</comment>        
-    <source>%1 %2</source>
-    <translation variants="no" type="unfinished"></translation>
-    <extra-loc-layout_id>txt_notes_subhead_1_2</extra-loc-layout_id>    
-    <extra-loc-viewid>Notes_P5</extra-loc-viewid>
     <extra-loc-positionid>subhead</extra-loc-positionid>
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
@@ -502,16 +612,6 @@
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_notes_subhead_recent_notes">
-    <comment>Sub title in Recent notes list view</comment>        
-    <source>Recent notes</source>
-    <translation variants="no" type="unfinished"></translation>
-    <extra-loc-layout_id>qtl_groupbox_simple_sec</extra-loc-layout_id>    
-    <extra-loc-viewid>Notes_P6</extra-loc-viewid>
-    <extra-loc-positionid>subhead</extra-loc-positionid>
-    <extra-loc-feature>No</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
 <message numerus="no" id="txt_notes_formlabel_alarm_date_and_time">
     <comment>Label item in Data form</comment>        
     <source>Alarm date and time</source>
@@ -552,12 +652,32 @@
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
+<message numerus="no" id="txt_notes_button_alarm_time">
+    <comment>Layout ID Parent. Custom Widget . Time Push Button in Dataform to set alarm time for a To-do note. This action opens the time picker component</comment>        
+    <source>%1</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>txt_notes_button_1</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P8</extra-loc-viewid>
+    <extra-loc-positionid>button</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_notes_info_delete_notes">
+    <comment>Confirmation dialog text for deleting multiple notes</comment>        
+    <source>Delete notes?</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_dialog_pri5_large_graphic</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P19</extra-loc-viewid>
+    <extra-loc-positionid>info</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
 <message numerus="no" id="txt_notes_subhead_favorites">
     <comment>Sub title in Favorite notes list view</comment>        
     <source>Favorites</source>
     <translation variants="no" type="unfinished"></translation>
     <extra-loc-layout_id>qtl_groupbox_simple_sec</extra-loc-layout_id>    
-    <extra-loc-viewid>Notes_P6</extra-loc-viewid>
+    <extra-loc-viewid>Notes_P3</extra-loc-viewid>
     <extra-loc-positionid>subhead</extra-loc-positionid>
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
@@ -582,6 +702,16 @@
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
+<message numerus="no" id="txt_notes_dblist_val_unnamed">
+    <comment>Secondary text in the list item. If subject is not mentioned for a note, this text is displayed as secondary text in the All notes list view</comment>        
+    <source>Unnamed</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_list_sec_graphic</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P11</extra-loc-viewid>
+    <extra-loc-positionid>dblist_5_val</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
 <message numerus="no" id="txt_notes_dblist_val_completed_on_1">
     <comment>Secondary text item in the list to show completed date for To-do note</comment>        
     <source>Completed on %1</source>
@@ -602,13 +732,13 @@
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
-<message numerus="no" id="txt_notes_button_1">
-    <comment>Layout ID Parent. Custom Widget . Time Push Button in Dataform to set alarm time for a To-do note. This action opens the time picker component</comment>        
-    <source>0.01</source>
+<message numerus="no" id="txt_notes_dpopinfo_new_todo_note_saved">
+    <comment>Soft notification dialog info text. This dialog is displayed once the new to-do note is saved</comment>        
+    <source>New To-do note saved</source>
     <translation variants="no" type="unfinished"></translation>
-    <extra-loc-layout_id>txt_notes_button_1</extra-loc-layout_id>    
-    <extra-loc-viewid>Notes_P8</extra-loc-viewid>
-    <extra-loc-positionid>button</extra-loc-positionid>
+    <extra-loc-layout_id>qtl_notifdialog_pri2</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P10</extra-loc-viewid>
+    <extra-loc-positionid>dpopinfo</extra-loc-positionid>
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -619,16 +749,6 @@
     <extra-loc-layout_id>qtl_dataform_pri</extra-loc-layout_id>    
     <extra-loc-viewid>Notes_P8</extra-loc-viewid>
     <extra-loc-positionid>setlabel_4</extra-loc-positionid>
-    <extra-loc-feature>No</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="no" id="txt_notes_dpopinfo_new_todo_note_saved">
-    <comment>Soft notification dialog info text. This dialog is displayed once the new to-do note is saved</comment>        
-    <source>New To-do note saved</source>
-    <translation variants="no" type="unfinished"></translation>
-    <extra-loc-layout_id>qtl_notifdialog_pri2</extra-loc-layout_id>    
-    <extra-loc-viewid>Notes_P10</extra-loc-viewid>
-    <extra-loc-positionid>dpopinfo</extra-loc-positionid>
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -660,6 +780,26 @@
     <extra-loc-viewid>Task Switcher</extra-loc-viewid>
     <extra-loc-positionid>caption</extra-loc-positionid>
     <extra-loc-feature>Ta</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_notes_dblist_note_modified_on_date">
+    <comment>Secondary text item to mention modification date for a note</comment>        
+    <source>Modified on %1</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_list_sec_graphic</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P1</extra-loc-viewid>
+    <extra-loc-positionid>dblist_13_val</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_notes_dblist_unnamed">
+    <comment>Primary text in all notes list view if the subject is not mentioned for a To-do note</comment>        
+    <source>Unnamed</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_list_pri_graphic_add</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes_P1</extra-loc-viewid>
+    <extra-loc-positionid>dblist_11</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
 <message numerus="no" id="txt_notes_menu_add_to_calendar">

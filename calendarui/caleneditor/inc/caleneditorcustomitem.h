@@ -23,6 +23,7 @@
 #include <QDateTime>
 #include <hbdataformviewitem.h>
 #include <hbextendedlocale.h>
+#include <hblineedit.h>
 
 class HbDateTimePicker;
 class HbPushButton;
@@ -40,6 +41,7 @@ public:
 	void enableFromTimeFieldAndSetTime(bool, QDateTime);
 	void enableToTimeFieldAndSetTime(bool, QDateTime);	
 	void populateDateTime(QDateTime defaultDateTime, bool isFromItem);
+	void populateLocation( QString location);
 	void setDateRange(QDate start, QDate end);
 	void setTimeRange(QTime start, QTime end);
 	void enableDateButton(bool value);
@@ -49,14 +51,20 @@ public:
 protected:
 	virtual HbWidget* createCustomWidget();
 	
+private:
+	void setSelectedLocation( QVariant &aValue );
+	
 protected slots:
 	void handleDate();
 	void handleTime();
 	void saveTime();
 	void saveDate();
+	void handleLocationTextChange(QString location);
+    void launchLocationPicker();
 	
 Q_SIGNALS:
 	void dateTimeUpdated(QDateTime& fromDateTime);
+	void locationTextChanged(QString location);
 		
 private:
 	AgendaEntry *mEditedEntry;
@@ -66,7 +74,6 @@ private:
 	QTime mTime;
 	QTime mMaxTime;
 	QTime mMinTime;
-	QDateTime mDateTime;
 
 	HbPushButton* mPushButtonTime;
 	HbPushButton* mPushButtonDate;
@@ -77,6 +84,8 @@ private:
 
 	HbExtendedLocale mLocale;
 	
+	HbLineEdit *mLocationLineEdit; 
+	HbPushButton* mLocationPushButton;
 	bool mIsFromItem;
 	
 };

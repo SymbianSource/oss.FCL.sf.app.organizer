@@ -18,7 +18,6 @@
 
 // System includes
 #include <QDateTime>
-#include <QDebug>
 #include <HbApplication>
 #include <HbLineEdit>
 #include <HbMainWindow>
@@ -39,6 +38,7 @@
 #include <HbCheckbox>
 #include <HbDialog>
 #include <HbGroupBox>
+#include <HbMessageBox>
 
 // User includes
 #include "notestodoeditor.h"
@@ -70,8 +70,6 @@ NotesTodoEditor::NotesTodoEditor(
  mDescriptionItemIndex(5),
  mDiscardChangesActive(false)
 {
-	qDebug() <<"notes: NotesTodoEditor::NotesTodoEditor -->";
-
 	mDocLoader = new NotesEditorDocLoader;
 	Q_ASSERT(mDocLoader);
 
@@ -104,8 +102,6 @@ NotesTodoEditor::NotesTodoEditor(
 	QList <HbAbstractViewItem*> prototypes = mDataForm->itemPrototypes();
 	prototypes.append(customItem);
 	mDataForm->setItemPrototypes(prototypes);
-
-	qDebug() <<"notes: NotesTodoEditor::NotesTodoEditor <--";
 }
 
 /*!
@@ -113,16 +109,12 @@ NotesTodoEditor::NotesTodoEditor(
  */
 NotesTodoEditor::~NotesTodoEditor()
 {
-	qDebug() <<"notes: NotesTodoEditor::~NotesTodoEditor -->";
-
 	if (mFormModel) {
 		delete mFormModel;
 	}
 
 	mDocLoader->reset();
 	delete mDocLoader;
-
-	qDebug() <<"notes: NotesTodoEditor::~NotesTodoEditor <--";
 }
 
 /*!
@@ -130,12 +122,8 @@ NotesTodoEditor::~NotesTodoEditor()
  */
 void NotesTodoEditor::updateSummaryText(const QString &text)
 {
-	qDebug() <<"notes: NotesTodoEditor::updateSummaryText -->";
-
 	mOwner->mModifiedNote.setSummary(text);
 	addDiscardChangesAction();
-
-	qDebug() <<"notes: NotesTodoEditor::updateSummaryText <--";
 }
 
 /*!
@@ -145,12 +133,8 @@ void NotesTodoEditor::updateSummaryText(const QString &text)
  */
 void NotesTodoEditor::updatePriority(int index)
 {
-	qDebug() <<"notes: NotesTodoEditor::updatePriority -->";
-
 	mOwner->mModifiedNote.setPriority(index + 1);
 	addDiscardChangesAction();
-
-	qDebug() <<"notes: NotesTodoEditor::updatePriority <--";
 }
 
 /*!
@@ -160,8 +144,6 @@ void NotesTodoEditor::updatePriority(int index)
  */
 void NotesTodoEditor::updateDescription(const QString &text)
 {
-	qDebug() <<"notes: NotesTodoEditor::updateDescription -->";
-
 	mOwner->mModifiedNote.setDescription(text);
 	addDiscardChangesAction();
 }
@@ -174,8 +156,6 @@ void NotesTodoEditor::updateDescription(const QString &text)
  */
 bool NotesTodoEditor::validAlarmSet()
 {
-	qDebug() << "notes: NotesTodoEditor::updateAlarm -->";
-
 	bool alarmSet(true);
 
 	// Sanity Check.
@@ -252,8 +232,6 @@ bool NotesTodoEditor::validAlarmSet()
 		mOwner->mModifiedNote.setAlarm(dummyAlarm);
 		return alarmSet;
 	}
-
-	qDebug() << "notes: NotesTodoEditor::updateAlarm <--";
 	return alarmSet;
 }
 
@@ -282,8 +260,6 @@ void NotesTodoEditor::addDiscardChangesAction()
  */
 void NotesTodoEditor::execute(AgendaEntry entry)
 {
-	qDebug() <<"notes: NotesTodoEditor::execute -->";
-
 	Q_UNUSED(entry)
 
 	HbMenu *viewMenu = mEditor->menu();
@@ -327,8 +303,6 @@ void NotesTodoEditor::execute(AgendaEntry entry)
 			this, SLOT(saveTodo()));
 	window->addView(mEditor);
 	window->setCurrentView(mEditor);
-
-	qDebug() <<"notes: NotesTodoEditor::execute <--";
 }
 
 /*!
@@ -338,20 +312,14 @@ void NotesTodoEditor::execute(AgendaEntry entry)
  */
 void NotesTodoEditor::create(AgendaEntry entry)
 {
-	qDebug() <<"notes: NotesTodoEditor::execute -->";
-
 	Q_UNUSED(entry)
 
-
-	qDebug() <<"notes: NotesTodoEditor::execute <--";
 }
 /*!
 	Initializes the data form model.
  */
 void NotesTodoEditor::initFormModel()
 {
-	qDebug() <<"notes: NotesTodoEditor::initFormModel -->";
-
 	// Delete the model if already there.
 	if (mFormModel) {
 		delete mFormModel;
@@ -373,8 +341,6 @@ void NotesTodoEditor::initFormModel()
 
 	// Set the model to the form.
 	mDataForm->setModel(mFormModel);
-
-	qDebug() <<"notes: NotesTodoEditor::initFormModel <--";
 }
 
 /*!
@@ -382,8 +348,6 @@ void NotesTodoEditor::initFormModel()
  */
 void NotesTodoEditor::insertSubjectItem()
 {
-	qDebug() <<"notes: NotesTodoEditor::insertSubjectItem -->";
-
 	mSubjectItem = mFormModel->appendDataFormItem(
 			HbDataFormModelItem::TextItem,
 			QString(""), mFormModel->invisibleRootItem());
@@ -394,8 +358,6 @@ void NotesTodoEditor::insertSubjectItem()
 	mDataForm->addConnection(
 			mSubjectItem , SIGNAL(textChanged(const QString &)),
 			this, SLOT(updateSummaryText(const QString &)));
-
-	qDebug() <<"notes: NotesTodoEditor::insertSubjectItem <--";
 }
 
 /*!
@@ -403,8 +365,6 @@ void NotesTodoEditor::insertSubjectItem()
  */
 void NotesTodoEditor::insertDueDateItem()
 {
-	qDebug() <<"notes: NotesTodoEditor::insertDueDateItem -->";
-
 	HbDataFormModelItem::DataItemType itemType =
 			static_cast<HbDataFormModelItem::DataItemType>
 			(HbDataFormModelItem::CustomItemBase + DueDateItemOffset);
@@ -426,16 +386,12 @@ void NotesTodoEditor::insertDueDateItem()
 					mOwner->dateFormatString());
 	}
 	mDueDateItem->setContentWidgetData("text",dueDateText);
-
-	qDebug() <<"notes: NotesTodoEditor::insertDueDateItem <--";
 }
 /*!
 	 Inserts the reminder enabler item into the model.
  */
 void NotesTodoEditor::insertReminderToggle()
 {
-	qDebug() << "notes: NotesTodoEditor::insertReminderToggle -->";
-
 	mReminderEnabler = mFormModel->appendDataFormItem(
 			HbDataFormModelItem::CheckBoxItem,
 			tr(""), mFormModel->invisibleRootItem());
@@ -452,8 +408,6 @@ void NotesTodoEditor::insertReminderToggle()
 	mDataForm->addConnection(
 			mReminderEnabler, SIGNAL(stateChanged(int)),
 			this, SLOT(handleReminderItem(int)));
-
-	qDebug() << "notes: NotesTodoEditor::insertReminderToggle <--";
 }
 
 /*!
@@ -537,8 +491,6 @@ void NotesTodoEditor::handleReminderItem(int checked)
  */
 void NotesTodoEditor::insertPriorityItem()
 {
-	qDebug() <<"notes: NotesTodoEditor::insertPriorityItem -->";
-
 	mPriorityItem = mFormModel->appendDataFormItem(
 			HbDataFormModelItem::ComboBoxItem,
 			hbTrId("txt_notes_setlabel_priority"),
@@ -561,8 +513,6 @@ void NotesTodoEditor::insertPriorityItem()
 	mDataForm->addConnection(
 			mPriorityItem, SIGNAL(currentIndexChanged(int)),
 			this, SLOT(updatePriority(int)));
-
-	qDebug() <<"notes: NotesTodoEditor::insertPriorityItem <--";
 }
 
 /*!
@@ -570,8 +520,6 @@ void NotesTodoEditor::insertPriorityItem()
  */
 void NotesTodoEditor::insertDescriptionItem()
 {
-	qDebug() <<"notes: NotesTodoEditor::insertDescriptionItem -->";
-
 	mDescriptionItem = mFormModel->appendDataFormItem(
 			HbDataFormModelItem::TextItem,
 			hbTrId("txt_notes_formlabel_val_description"),
@@ -586,8 +534,6 @@ void NotesTodoEditor::insertDescriptionItem()
 	mDataForm->addConnection(
 			mDescriptionItem, SIGNAL(textChanged(const QString)),
 			this, SLOT(updateDescription(const QString)));
-
-	qDebug() <<"notes: NotesTodoEditor::insertDescriptionItem <--";
 }
 
 /*!
@@ -595,14 +541,10 @@ void NotesTodoEditor::insertDescriptionItem()
  */
 void NotesTodoEditor::addMenu()
 {
-	qDebug() <<"notes: NotesTodoEditor::addMenu -->";
-
 	mDeleteAction = mEditor->menu()->addAction(hbTrId("txt_common_opt_delete"));
 	connect(
 			mDeleteAction, SIGNAL(triggered()),
 			this, SLOT(handleDeleteAction()));
-
-	qDebug() <<"notes: NotesTodoEditor::addMenu <--";
 }
 
 /*!
@@ -610,8 +552,6 @@ void NotesTodoEditor::addMenu()
  */
 void NotesTodoEditor::saveTodo()
 {
-	qDebug() <<"notes: NotesTodoEditor::saveTodo -->";
-
 	// Here we check if the user has set the appropriate alarm time.
 	// And save only if its fine to do so. Else we note a discrete notification
 	// asking the user to check for the alarm time.
@@ -639,13 +579,10 @@ void NotesTodoEditor::saveTodo()
  */
 void NotesTodoEditor::close()
 {
-	qDebug() <<"notes: NotesTodoEditor::close -->";
-
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 	// Now close the editor.
 	window->removeView(mEditor);
 
-	qDebug() <<"notes: NotesTodoEditor::close <--";
 }
 
 /*!
@@ -654,8 +591,6 @@ void NotesTodoEditor::close()
  */
 void NotesTodoEditor::handleAddDescriptionAction()
 {
-	qDebug() <<"notes: NotesTodoEditor::handleAddDescriptionAction -->";
-
 	// Now we add the description item here.
 	insertDescriptionItem();
 
@@ -669,8 +604,6 @@ void NotesTodoEditor::handleAddDescriptionAction()
 	connect(
 			mDescriptionAction, SIGNAL(triggered()),
 			this, SLOT(handleRemoveDescriptionAction()));
-
-	qDebug() <<"notes: NotesTodoEditor::handleAddDescriptionAction <--";
 }
 
 /*!
@@ -679,8 +612,6 @@ void NotesTodoEditor::handleAddDescriptionAction()
  */
 void NotesTodoEditor::handleRemoveDescriptionAction()
 {
-	qDebug() <<"notes: NotesTodoEditor::handleRemoveDescriptionAction -->";
-
 	// Here we firstset the description text in the entry to empty.
 	mOwner->mModifiedNote.setDescription("");
 
@@ -698,7 +629,6 @@ void NotesTodoEditor::handleRemoveDescriptionAction()
 			mDescriptionAction, SIGNAL(triggered()),
 			this, SLOT(handleAddDescriptionAction()));
 
-	qDebug() <<"notes: NotesTodoEditor::handleRemoveDescriptionAction <--";
 }
 
 /*!
@@ -706,15 +636,14 @@ void NotesTodoEditor::handleRemoveDescriptionAction()
  */
 void NotesTodoEditor::handleDeleteAction()
 {
-	qDebug() <<"notes: NotesTodoEditor::handleDeleteAction -->";
-
+	if (showDeleteConfirmationQuery()) {
 	// Delete the to-do entry.
 	mOwner->deleteNote();
 
 	// Close the to-do editor.
 	close();
+	}
 
-	qDebug() <<"notes: NotesTodoEditor::handleDeleteAction <--";
 }
 
 /*!
@@ -722,12 +651,37 @@ void NotesTodoEditor::handleDeleteAction()
  */
 void NotesTodoEditor::handleDiscardChangesAction()
 {
-	qDebug() <<"notes: NotesTodoEditor::handleDiscardChangesAction -->";
-
 	// Close the to-do editor
 	close();
 
-	qDebug() <<"notes: NotesTodoEditor::handleDiscardChangesAction <--";
 }
 
+/* !
+	Show the delete confirmation query.
+ */
+bool NotesTodoEditor::showDeleteConfirmationQuery()
+{
+	bool retValue(false);
+
+	HbMessageBox confirmationQuery(HbMessageBox::MessageTypeQuestion);
+	confirmationQuery.setDismissPolicy(HbDialog::NoDismiss);
+	confirmationQuery.setTimeout(HbDialog::NoTimeout);
+	confirmationQuery.setIconVisible(true);
+
+	QString displayText;
+	displayText = displayText.append(hbTrId("txt_notes_info_delete_todo_note"));
+
+	confirmationQuery.setText(displayText);
+
+	confirmationQuery.setPrimaryAction(new HbAction(
+	    hbTrId("txt_notes_button_dialog_delete"), &confirmationQuery));
+	confirmationQuery.setSecondaryAction(new HbAction(
+	    hbTrId("txt_common_button_cancel"), &confirmationQuery));
+	HbAction *selected = confirmationQuery.exec();
+	if (selected == confirmationQuery.primaryAction()) {
+		retValue = true;
+	}
+
+	return retValue;
+}
 // End of file	--Don't remove this.

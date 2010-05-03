@@ -69,6 +69,7 @@ private slots:
 private:
 	bool isNoteEdited();
 	bool isTodoEdited();
+	void showNotification(QString text);
 
 private:
 	NotesEditor *q_ptr;

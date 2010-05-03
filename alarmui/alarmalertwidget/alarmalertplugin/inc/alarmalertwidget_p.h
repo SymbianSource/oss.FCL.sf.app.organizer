@@ -22,6 +22,9 @@
 #include <hbdevicedialoginterface.h>
 #include <hbeffect.h>
 
+// User includes
+#include "alarmalert.h"
+
 // Forward declarations
 class QGraphicsWidget;
 class QEvent;
@@ -29,10 +32,12 @@ class QTranslator;
 class HbMainWindow;
 class HbDocumentLoader;
 class HbLabel;
-class HbPushButton;
+class HbAction;
+class AlarmAlertDocLoader;
 
-const QString alarmSwipeUIDocml(":/xml/alarmalert.docml");
-const QString alarmNormalUIDocml(":/xml/alarmalert_unlocked.docml");
+const QString alarmNormalUICalendarDocml(":/xml/alarmalert_calendar_unlocked.docml");
+const QString alarmNormalUIClockDocml(":/xml/alarmalert_clock_unlocked.docml");
+const QString alarmNormalUITodoDocml(":/xml/alarmalert_todo_unlocked.docml");
 
 // Class declaration
 /**
@@ -81,6 +86,12 @@ public:
      */
     HbDialog *deviceDialogWidget() const;
     
+    /**
+     * @brief Sets up the normal ui for alarms.
+     * This UI is shown when the screen is unlocked
+     */
+    void setupNormalUI(AlarmAlertDocLoader *alertDocLoader);
+    
 protected:
     
     /**
@@ -93,26 +104,8 @@ protected:
      * @brief From QGraphicsWidget
      * @see QGraphicsWidget
      */
-    bool sceneEvent(QEvent *event);
-    
-    /**
-     * @brief From QGraphicsWidget
-     * @see QGraphicsWidget
-     */
     void closeEvent(QCloseEvent *event);
     
-    /**
-     * @brief From QGraphicsWidget
-     * @see QGraphicsWidget
-     */
-    void mousePressEvent(QGraphicsSceneMouseEvent *event);
-    
-    /**
-     * @brief From QGraphicsWidget
-     * @see QGraphicsWidget
-     */
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-
 signals:
 
     /**
@@ -127,13 +120,6 @@ signals:
 
 private slots:
 
-    /**
-     * @brief Callback function that gets called when the
-     * slider animation ends
-     * @param status The status of the animation
-     */
-    void animationComplete(const HbEffect::EffectStatus &status);
-    
     /**
      * @brief Callback function for handling orientation changes
      */
@@ -162,24 +148,6 @@ private:
     void parseAndFetchParams(const QVariantMap &parameters);
     
     /**
-     * @brief Sets up the swipe ui for alarms.
-     * This UI is shown only when the screen is locked
-     */
-    void setupSwipeUI();
-    
-    /**
-     * @brief Sets up the normal ui for alarms.
-     * This UI is shown when the screen is unlocked
-     */
-    void setupNormalUI();
-    
-    /**
-     * @brief Checks if the screen is locked
-     * @return true if screen is locked, false otherwise
-     */
-    bool isScreenLocked();
-    
-    /**
      * @brief handles the calendar alarms
      */
     void handleCalendarAlarms();
@@ -188,6 +156,11 @@ private:
      * @brief handles the clock alarms
      */
     void handleClockAlarms();
+    
+    /**
+     * @brief handles to-do alarms
+     */
+    void handleToDoAlarms();
 
 private:
     Q_DISABLE_COPY(AlarmAlertDialogPrivate)
@@ -253,16 +226,16 @@ private:
     HbMainWindow *mMainWindow;
     
     /**
-     * @var mDocLoader
+     * @var mAlertDocLoader
      * @brief The document loader for loading docml's
      */
-    HbDocumentLoader *mDocLoader;
+    AlarmAlertDocLoader* mAlertDocLoader;
     
 	/**
-     * @var mSnoozeButton
-     * @brief snooze button for alarm
+     * @var mSnoozeAction
+     * @brief snooze softkey for alarm
      */
-    HbPushButton *mSnoozeButton;
+    HbAction *mSnoozeAction;
 	   
     /**
      * @var mUserResponse
@@ -271,11 +244,11 @@ private:
     int mUserResponse;
     
     /**
-     * @var mIsClockAlarm
-     * @brief Tells if the current alert being displayed
-     * is a clock (true) or calendar alert (false)
+     * @var mAlarmAlertType
+     * @brief Tells if the type of alert being displayed
+     * is a clock /calendar/to-do alert
      */
-    bool mIsClockAlarm;
+    AlarmType mAlarmAlertType;
     
     /**
      * @var mCanSnooze
@@ -292,14 +265,20 @@ private:
     bool mIsSilent;
     
     /**
+     * @var mIsTimedAlarm
+     * @brief Indicates if the alarm is has time info or not
+     */
+    bool mIsTimedAlarm;
+    
+    /**
      * @var mClosedByClient
      * @brief Indicates if the alarm dialog is closed by the client
      */
     bool mClosedByClient;
     
     /**
-     * @var mIsSilenceButton
-     * @brief Indicates if the silence button is shown for alarm
+     * @var mIsSilenceKey
+     * @brief Indicates if the silence softkey is shown for alarm
      */
-    bool mIsSilenceButton;
+    bool mIsSilenceKey;
 };

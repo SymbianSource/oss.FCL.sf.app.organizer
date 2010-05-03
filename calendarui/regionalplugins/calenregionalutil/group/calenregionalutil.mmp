@@ -1,0 +1,73 @@
+/*
+* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Project description file for calendar regional utilities
+*
+*/
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+
+// Target
+TARGET			calenregionalutil.dll 
+TARGETTYPE		DLL
+
+UID				0x1000008d 0x20022EDB
+CAPABILITY		CAP_GENERAL_DLL
+VENDORID        VID_DEFAULT
+
+// Includes
+USERINCLUDE     ../inc
+USERINCLUDE     ../../inc
+USERINCLUDE     ../../../inc
+USERINCLUDE     ../../loc
+APP_LAYER_SYSTEMINCLUDE
+
+// Resource
+SOURCEPATH      ../data
+START RESOURCE  calenregionalutil.rss
+HEADER
+TARGETPATH      RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END  // RESOURCE
+
+// Source
+SOURCEPATH		../src
+SOURCE			calenextrarowformatter.cpp
+SOURCE			calenlunarinfo.cpp
+SOURCE			calenlunarinfoprovider.cpp
+SOURCE			calenlunarlocalizedinfo.cpp
+SOURCE			calenlunarlocalizer.cpp
+SOURCE			calensolarterms.cpp
+
+// Libraries
+LIBRARY			avkon.lib
+LIBRARY			calinterimapi.lib
+LIBRARY			cone.lib
+LIBRARY			ecom.lib
+LIBRARY			eikcdlg.lib
+LIBRARY			eikctl.lib
+LIBRARY			eikcoctl.lib
+LIBRARY			eikcore.lib
+LIBRARY			euser.lib
+LIBRARY			gdi.lib
+LIBRARY			bafl.lib
+LIBRARY			platformenv.lib
+LIBRARY			efsrv.lib
+LIBRARY			commonengine.lib
+LIBRARY			ccon.lib 
+LIBRARY			estor.lib
+LIBRARY			centralrepository.lib
+LIBRARY			cdlengine.lib
+
+// End of file

@@ -58,8 +58,7 @@ class HbMenu;
  * The controller handles events from the rest of Calendar and delegates
  * them to the appropriate place (i.e. the action ui classes).
  */
-class CALENCONTROLLER_EXPORT CCalenController : public CBase ,
-							public MCalenServicesFactory
+class CALENCONTROLLER_EXPORT CCalenController : public MCalenServicesFactory
     {
   
     public:  // Construction and destruction

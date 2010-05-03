@@ -43,6 +43,9 @@ const QString alarmRingingType("ringingType");
 // The string identifier for alarm snoozability
 const QString alarmCanSnooze("canSnooze");
 
+// The string identifier for checking the nontimed alarms
+const QString alarmIsTimed("isTimed");
+
 
 /**
  * @enum Commands
@@ -56,5 +59,17 @@ enum Commands {
 	Shown,
 	Other
 };
+
+/**
+ * @enum AlarmType
+ * @brief Alarm types to be sent 
+ * to the alarm dialog
+ */
+enum AlarmType {
+    ClockAlarm = 0,
+	CalendarAlarm,
+    TodoAlarm,
+    OtherAlarm
+    };
 
 #endif		// __ALARM_ALERT_H__

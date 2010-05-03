@@ -1,6 +1,0 @@
-<RCC>
-  <qresource>
-		<file alias="calengriditem.css">resources/calengriditem.css</file>
-		<file alias="calengriditem.widgetml">resources/calengriditem.widgetml</file>
-  </qresource>
-</RCC>

@@ -51,27 +51,27 @@ HEADERS += calenmonthview.h \
 		   calenmonthdata.h \
 		   calenmonthgrid.h \
 		   calengriditemprototype.h \
-		   calengriditem.h \
 		   calennativeview.h \
 		   calendayview.h \
 		   caleneventlistviewitem.h \
 		   calendayviewwidget.h \
 		   calenpreviewpane.h \
 		   calensettingsview.h \
-		   calenthicklinesdrawer.h
+		   calenthicklinesdrawer.h \
+		   calenpluginlabel.h
 	
 SOURCES += calenmonthview.cpp \
            calenmonthdata.cpp \
            calenmonthgrid.cpp \
            calengriditemprototype.cpp \
-           calengriditem.cpp \
            calennativeview.cpp \
            calendayview.cpp \
            caleneventlistviewitem.cpp \
            calendayviewwidget.cpp \
            calenpreviewpane.cpp \
            calensettingsview.cpp \
-           calenthicklinesdrawer.cpp
+           calenthicklinesdrawer.cpp \
+		   calenpluginlabel.cpp
 
 RESOURCES += calenresources.qrc
 

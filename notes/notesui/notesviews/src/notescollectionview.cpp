@@ -17,9 +17,9 @@
 */
 
 // System includes
-#include <QDebug>
 #include <HbListWidget>
-#include <HbListWidgetItem>
+#include <QStandardItemModel>
+#include <HbListView>
 #include <HbAction>
 #include <HbTextEdit>
 #include <HbInstance>
@@ -29,6 +29,7 @@
 #include <HbLabel>
 #include <HbAbstractViewItem>
 #include <HbGroupBox>
+#include <HbStyleLoader>
 
 // User includes
 #include "notescollectionview.h"
@@ -55,11 +56,7 @@
 NotesCollectionView::NotesCollectionView(QGraphicsWidget *parent)
 :HbView(parent)
 {
-	qDebug() << "notes: NotesCollectionView::NotesCollectionView -->";
-
 	// Nothing yet.
-
-	qDebug() << "notes: NotesCollectionView::NotesCollectionView <--";
 }
 
 /*!
@@ -67,14 +64,10 @@ NotesCollectionView::NotesCollectionView(QGraphicsWidget *parent)
  */
 NotesCollectionView::~NotesCollectionView()
 {
-	qDebug() << "notes: NotesCollectionView::~NotesCollectionView -->";
-
 	if (mDocLoader) {
 		delete mDocLoader;
 		mDocLoader = 0;
 	}
-
-	qDebug() << "notes: NotesCollectionView::~NotesCollectionView <--";
 }
 
 /*!
@@ -87,8 +80,6 @@ NotesCollectionView::~NotesCollectionView()
 void NotesCollectionView::setupView(
 		NotesAppControllerIf &controllerIf, NotesDocLoader *docLoader)
 {
-	qDebug() << "notes: NotesCollectionView::setupView -->";
-
 	mDocLoader = docLoader;
 	mAppControllerIf = &controllerIf;
 	mNotesModel = mAppControllerIf->notesModel();
@@ -110,7 +101,8 @@ void NotesCollectionView::setupView(
 	mFavouriteModel->setDynamicSortFilter(true);
 	mFavouriteModel->setFilterRole(NotesNamespace::FavouriteRole);
 	mFavouriteModel->setFilterRegExp(QRegExp("favourites"));
-	mFavouriteModel->setSourceModel(mAppControllerIf->notesModel()->sourceModel());
+	mFavouriteModel->setSourceModel(
+			mAppControllerIf->notesModel()->sourceModel());
 	connect(
 			mFavouriteModel, SIGNAL(rowsInserted(QModelIndex, int, int)),
 			this, SLOT(updateFavouritesCount(QModelIndex, int, int)));
@@ -118,12 +110,12 @@ void NotesCollectionView::setupView(
 			mFavouriteModel, SIGNAL(rowsRemoved(QModelIndex, int, int)),
 			this, SLOT(updateFavouritesCount(QModelIndex, int, int)));
 
-	// Get the list object from the document and update the model.
-	mListWidget = static_cast<HbListWidget *> (
-			mDocLoader->findWidget("listWidget"));
+	// Get the list view from the document and update the model.
+	mListView = static_cast<HbListView *> (
+			mDocLoader->findWidget("listView"));
 	connect(
-			mListWidget, SIGNAL(activated(HbListWidgetItem *)),
-			this, SLOT(handleActivated(HbListWidgetItem *)));
+			mListView, SIGNAL(activated(const QModelIndex &)),
+			this, SLOT(handleActivated(const QModelIndex &)));
 
 	// Populate the content of the view.
 	populateListView();
@@ -163,16 +155,6 @@ void NotesCollectionView::setupView(
 	connect(
 			mAddNoteAction, SIGNAL(triggered()),
 			this, SLOT(createNewNote()));
-
-	// Check orientation and update the toolbar action's text
-	// icons in potriat mode and icons + text in landscape mode.
-	HbMainWindow *window = hbInstance->allMainWindows().first();
-	updateToolbarTexts(window->orientation());
-	connect(
-			window, SIGNAL(orientationChanged(Qt::Orientation)),
-			this, SLOT(updateToolbarTexts(Qt::Orientation)));
-
-	qDebug() << "notes: NotesCollectionView::setupView <--";
 }
 
 /*!
@@ -180,12 +162,8 @@ void NotesCollectionView::setupView(
  */
 void NotesCollectionView::displayAllNotesView()
 {
-	qDebug() << "notes: NotesMainView::displayAllNotesView -->";
-
 	// Switch to collections view.
 	mAppControllerIf->switchToView(NotesNamespace::NotesMainViewId);
-
-	qDebug() << "notes: NotesMainView::displayAllNotesView <--";
 }
 
 /*!
@@ -193,26 +171,22 @@ void NotesCollectionView::displayAllNotesView()
  */
 void NotesCollectionView::resetCollectionView()
 {
-	qDebug() << "notes: NotesCollectionView::resetCollectionView -->";
+	QString countString(hbTrId("txt_notes_list_note_count"));
 
-	QString countString("(%1)");
-
-	// Get the count of to-dos.
-	QList<ulong> entries = mAgendaUtil->entryIds(
-				(AgendaUtil::FilterFlags)
-				(AgendaUtil::IncludeCompletedTodos
-				| AgendaUtil::IncludeIncompletedTodos));
 	// Update the count of to-do's.
-	HbListWidgetItem *item = mListWidget->item(0);
-	item->setSecondaryText(countString.arg(QString::number(entries.count())));
+	QModelIndex mdlIndex = mListView->model()->index(0, 0);
+	QStringList todoStringList;
+	todoStringList.append(hbTrId("txt_notes_list_todos"));
+	todoStringList.append(countString.arg(QString::number(todosCount())));
+	mListView->model()->setData(mdlIndex, todoStringList, Qt::DisplayRole);
 
-	// Get the count of notes.
-	entries = mAgendaUtil->entryIds(AgendaUtil::IncludeNotes);
 	// Update the count of notes in the view.
-	item = mListWidget->item(2);
-	item->setSecondaryText(countString.arg(QString::number(entries.count())));
-
-	qDebug() << "notes: NotesCollectionView::resetCollectionView <--";
+	mdlIndex = mListView->model()->index(2, 0);
+	QStringList notesStringList;
+	notesStringList.append(hbTrId("txt_notes_list_plain_notes"));
+	notesStringList.append(
+			countString.arg(QString::number(recentNotesCount())));
+	mListView->model()->setData(mdlIndex, notesStringList, Qt::DisplayRole);
 }
 
 /*!
@@ -220,8 +194,6 @@ void NotesCollectionView::resetCollectionView()
  */
 void NotesCollectionView::createNewNote()
 {
-	qDebug() << "notes: NotesMainView::createNewNote -->";
-
 	// Here we Display an editor to the use to enter text.
 	mNotesEditor = new NotesEditor(mAgendaUtil, this);
 	connect(
@@ -229,8 +201,6 @@ void NotesCollectionView::createNewNote()
 			this, SLOT(handleEditingCompleted(bool)));
 
 	mNotesEditor->create(NotesEditor::CreateNote);
-
-	qDebug() << "notes: NotesMainView::createNewNote <--";
 }
 
 /*!
@@ -238,8 +208,6 @@ void NotesCollectionView::createNewNote()
  */
 void NotesCollectionView::handleEditingCompleted(bool status)
 {
-	qDebug() << "notes: NotesMainView::handleEditingCompleted -->";
-
 	Q_UNUSED(status)
 
 	// Refresh the content of the view.
@@ -247,8 +215,6 @@ void NotesCollectionView::handleEditingCompleted(bool status)
 
 	// Cleanup.
 	mNotesEditor->deleteLater();
-
-	qDebug() << "notes: NotesMainView::handleEditingCompleted <--";
 }
 
 /*!
@@ -257,14 +223,10 @@ void NotesCollectionView::handleEditingCompleted(bool status)
  */
 void NotesCollectionView::updateData(ulong id)
 {
-	qDebug() << "notes: NotesMainView::updateData -->";
-
 	Q_UNUSED(id)
 
 	// Refresh the content of the view.
 	resetCollectionView();
-
-	qDebug() << "notes: NotesMainView::updateData <--";
 }
 
 /*!
@@ -273,44 +235,50 @@ void NotesCollectionView::updateData(ulong id)
  */
 void NotesCollectionView::updateData(QList<ulong> ids)
 {
-	qDebug() << "notes: NotesMainView::updateData -->";
-
 	Q_UNUSED(ids)
 
 	// Refresh the content of the view.
 	resetCollectionView();
-
-	qDebug() << "notes: NotesMainView::updateData <--";
 }
 
 /*!
 	Handles the case when a list item is activated and the corresponding
 	collections view (viz., notes, to-dos, favourites) is opened.
 
-	\param item The item that was activated.
+	\param index The index of the item that was activated.
  */
-void NotesCollectionView::handleActivated(HbListWidgetItem *item)
+void NotesCollectionView::handleActivated(const QModelIndex &index)
 {
-	QString secondary = item->secondaryText();
-	QString primary = item->text();
 
-	switch (mListWidget->row(item)) {
-		case 0:
-			// To-do item selected. Switch to to-do view.
-			mAppControllerIf->switchToView(NotesNamespace::NotesTodoViewId);
-			break;
+	switch (index.row()) {
+		case 0: {
+			if (todosCount()) {
+				// To-do item selected.
+				// Switch to to-do view if to-do entries exist.
+				mAppControllerIf->switchToView(NotesNamespace::NotesTodoViewId);
+			}
+		}
+		break;
 
-		case 1:
-			// Favorites item selected. Switch to favorites view.
-			mAppControllerIf->switchToView(
-					NotesNamespace::NotesFavoritesViewId);
-			break;
+		case 1: {
+			if (mFavouriteModel->rowCount()) {
+				// Favorites item selected.
+				// Switch to favorites view if favorites exist.
+				mAppControllerIf->switchToView(
+						NotesNamespace::NotesFavoritesViewId);
+			}
+		}
+		break;
 
-		case 2:
-			// Recent notes item selected.
-			mAppControllerIf->switchToView(
-					NotesNamespace::NotesNoteViewId);
-			break;
+		case 2: {
+			if (recentNotesCount()) {
+				// Recent notes item selected.
+				// Switch to recent notes view if notes exist.
+				mAppControllerIf->switchToView(
+						NotesNamespace::NotesNoteViewId);
+			}
+		}
+		break;
 
 		default:
 			// Nothing yet.
@@ -331,45 +299,12 @@ void NotesCollectionView::updateFavouritesCount(
 	Q_UNUSED(end)
 
 	// Update the count of notes in the view.
-	QString countString("(%1)");
-	HbListWidgetItem *item = mListWidget->item(1);
-	item->setSecondaryText(countString.arg(mFavouriteModel->rowCount()));
-}
-
-/*!
-	Populate the content of the view.
- */
-void NotesCollectionView::populateListView()
-{
-	qDebug() << "notes: NotesCollectionView::populateListView -->";
-
-	QString countString(hbTrId("[%1]"));
-	// Add To-do's item.
-	HbListWidgetItem *item = new HbListWidgetItem;
-	item->setText(hbTrId("txt_notes_list_todos"));
-	// Get the number of to-do entries.
-	QList<ulong> entries = mAgendaUtil->entryIds(
-			(AgendaUtil::FilterFlags)
-			(AgendaUtil::IncludeCompletedTodos
-			| AgendaUtil::IncludeIncompletedTodos));
-	item->setSecondaryText(countString.arg(QString::number(entries.count())));
-	mListWidget->addItem(item);
-
-	// Add Favorites item.
-	item = new HbListWidgetItem;
-	item->setText(hbTrId("txt_notes_list_favorites"));
-	item->setSecondaryText(countString.arg(mFavouriteModel->rowCount()));
-	mListWidget->addItem(item);
-
-	// Get the number of notes.
-	entries = mAgendaUtil->entryIds(AgendaUtil::IncludeNotes);
-	// Add Recent notes item.
-	item = new HbListWidgetItem;
-	item->setText(hbTrId("txt_notes_list_recent_notes"));
-	item->setSecondaryText(countString.arg(QString::number(entries.count())));
-	mListWidget->addItem(item);
-
-	qDebug() << "notes: NotesCollectionView::populateListView <--";
+	QString countString(hbTrId("txt_notes_list_note_count"));
+	QModelIndex mdlIndex = mListView->model()->index(1, 0);
+	QStringList favStringList;
+	favStringList.append(hbTrId("txt_notes_list_favorites"));
+	favStringList.append(countString.arg(mFavouriteModel->rowCount()));
+	mListView->model()->setData(mdlIndex, favStringList, Qt::DisplayRole);
 }
 
 /*!
@@ -377,29 +312,73 @@ void NotesCollectionView::populateListView()
  */
 void NotesCollectionView::handleActionStateChanged()
 {
-	qDebug() << "notes: NotesCollectionView::handleActionStateChanged -->";
-
 	mViewCollectionAction->setChecked(true);
-
-	qDebug() << "notes: NotesCollectionView::handleActionStateChanged <--";
 }
 
 /*!
-	Update the toolbar actions texts on orientation change.
+	Populate the content of the view.
  */
-void NotesCollectionView::updateToolbarTexts(Qt::Orientation orientation)
+void NotesCollectionView::populateListView()
 {
-	if (Qt::Horizontal == orientation) {
-		// Set the text in landscape mode
-		mAllNotesAction->setText(hbTrId("txt_notes_button_all"));
-		mViewCollectionAction->setText(hbTrId("txt_notes_button_collections"));
-		mAddNoteAction->setText(hbTrId("txt_notes_button_new_note"));
-	} else if( Qt::Vertical == orientation) {
-		// Set empty text in portriat mode so that only icons are visible.
-		mAllNotesAction->setText("");
-		mViewCollectionAction->setText("");
-		mAddNoteAction->setText("");
-	}
+	QStandardItemModel *model = new QStandardItemModel(this);
+	model->setColumnCount(1);
+
+	QString countString(hbTrId("txt_notes_list_note_count"));
+
+	// Add To-do's item.
+	QStandardItem *item = new QStandardItem();
+	QStringList todoStringList;
+	todoStringList.append(hbTrId("txt_notes_list_todos"));
+	todoStringList.append(countString.arg(QString::number(todosCount())));
+	item->setData(todoStringList, Qt::DisplayRole);
+	model->appendRow(item);
+
+	// Add Favorites item.
+	item = new QStandardItem();
+	QStringList favStringList;
+	favStringList.append(hbTrId("txt_notes_list_favorites"));
+	favStringList.append(countString.arg(mFavouriteModel->rowCount()));
+	item->setData(favStringList, Qt::DisplayRole);
+	model->appendRow(item);
+
+	// Add Recent notes item.
+	item = new QStandardItem();
+	QStringList notesStringList;
+	notesStringList.append(hbTrId("txt_notes_list_plain_notes"));
+	notesStringList.append(
+			countString.arg(QString::number(recentNotesCount())));
+	item->setData(notesStringList, Qt::DisplayRole);
+	model->appendRow(item);
+
+	HbStyleLoader::registerFilePath(":/style");
+	mListView->setLayoutName("custom");
+	mListView->setModel(model);
+}
+
+
+/*!
+	Returns the todos count
+
+	\return int todos count.
+ */
+int NotesCollectionView::todosCount()
+{
+	QList<ulong> entries = mAgendaUtil->entryIds(
+			(AgendaUtil::FilterFlags)
+			(AgendaUtil::IncludeCompletedTodos
+			| AgendaUtil::IncludeIncompletedTodos));
+	return entries.count();
+}
+
+/*!
+	Returns recent notes count.
+
+	\return int recent notes count.
+ */
+int NotesCollectionView::recentNotesCount()
+{
+	QList<ulong> entries = mAgendaUtil->entryIds(AgendaUtil::IncludeNotes);
+	return entries.count();
 }
 
 // End of file	--Don't remove this.

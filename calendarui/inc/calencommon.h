@@ -24,21 +24,25 @@
 #define CALEN_DAYVIEW_WIDGET "dayViewWidget"
 #define CALEN_DAYVIEW_LISTWIDGET "eventsList"
 #define CALEN_DAYVIEW_HEADING "headingWidget"
+#define CALEN_DAYVIEW_HEADING_REGIONALPLUGIN_WIDGET "headingRegionalPluginWidget"
 #define CALEN_DAYVIEW_MENU_NEW_EVENT "newEventAction"
 #define CALEN_DAYVIEW_MENU_GO_TO_TODAY "todayAction"
 #define CALEN_DAYVIEW_MENU_GO_TO_DATE "goToDateAction"
-#define CALEN_DAYVIEW_MENU_DELETE "deleteAction"
 #define CALEN_DAYVIEW_MENU_SETTINGS "settingsAction"
 #define CALEN_PORTRAIT "portrait"
 #define CALEN_LANDSCAPE "landscape"
 #define CALEN_MONTHVIEW_XML_FILE ":/xml/calenmonthview.docml"
 #define CALEN_MONTHVIEW "monthView"
+#define CALEN_MONTHVIEW_EXCEPT_PANE "monthViewExceptPreviewPane"
 #define CALEN_MONTH_TITLE "monthTitle"
 #define CALEN_DAYNAMES_WIDGET "dayNamesWidget"
 #define CALEN_MONTHGRID "monthGrid"
+#define CALEN_PREVPANELAYOUT "prevPaneLayout"
 #define CALEN_PREVPREVIEWPARENT "prevPaneWidget"
 #define CALEN_CURRPREVIEWPARENT "currPaneWidget"
 #define CALEN_NEXTPREVIEWPARENT "nextPaneWidget"
+#define CALEN_NEXTPANELAYOUT "nextPaneLayout"
+#define CALEN_CURRPANELAYOUT "currPaneLayout"
 #define CALEN_PREVPREVIEWPANE "prevPreviewPane"
 #define CALEN_CURRPREVIEWPANE "currPreviewPane"
 #define CALEN_NEXTPREVIEWPANE "nextPreviewPane"
@@ -84,12 +88,11 @@ public:
 		\enum DataRole
 	 */
 	enum DataRole {
-		CalendarMonthDayRole = Qt::UserRole + 100,
-		CalendarMonthEventRole,
+		CalendarMonthDayRole ,
 		CalendarMonthFocusRole,
 		CalendarMonthUnderlineRole,
-		CalendarMonthTextColorRole,
-		CalendarMonthSeventhColumn
+		CalendarMonthEventRole,
+		CalendarMonthTextColorRole		
 	};
 	
 	/*!

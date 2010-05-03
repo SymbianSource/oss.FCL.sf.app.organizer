@@ -112,9 +112,6 @@ CCalenController::CCalenController(bool isFromServiceFrmwrk)
     RegisterForNotificationsL( iViewManager, notificationArray );
     notificationArray.Reset();  
     notificationArray.Close();
-    if (!isFromServiceFrmwrk) {
-    	iViewManager->constructOtherViews();
-    }
     TRACE_EXIT_POINT;
 }
 

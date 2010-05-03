@@ -16,7 +16,6 @@
 */
 
 // System includes
-#include <qdebug.h>
 #include <QScopedPointer>
 #include <QTranslator>
 #include <hbapplication.h>
@@ -33,8 +32,6 @@
  */
 int main(int argc, char *argv[])
 {
-	qDebug() << "notes: main -->";
-
 	// Create and initialize an HbApplication instance
 	HbApplication app(argc, argv);
 
@@ -55,9 +52,6 @@ int main(int argc, char *argv[])
 
 	// Show the main window.
 	window.show();
-
-	qDebug() << "notes: main <--";
-
 	// Start the event loop for the application
 	return app.exec();
 }

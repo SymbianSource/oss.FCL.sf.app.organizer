@@ -52,6 +52,7 @@ public:
 	void startAutoScroll();
 	void mousePressEvent(QGraphicsSceneMouseEvent* event);
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
+	void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
 	void setView(CalenMonthView* view);
 	void stopScrolling();
 	
@@ -80,6 +81,7 @@ private:
 	int mNumOfScrolls;
 	HbLabel* mNoEntriesLabel;
 	bool mIsNoEntriesAdded;
+	bool mIsGestureHandled;
 };
 
 #endif /* CALENPREVIEWPANE_H_ */

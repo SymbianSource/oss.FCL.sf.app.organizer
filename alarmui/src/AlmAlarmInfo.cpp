@@ -222,7 +222,7 @@ SAlarmInfo* CAlmAlarmInfo::GetAlarmInfo(TASShdAlarm aAlarm, CAlarmUtils::TAlarmT
             {
             SetupClockAlarmL( aAlarm );
             // Set the alarm type
-            iAlarmInfo->iIsClockAlarm = ETrue;
+			iAlarmInfo->iAlarmAlertType = CAlarmUtils::EAlarmTypeClock;
             }
         break;
 
@@ -230,7 +230,7 @@ SAlarmInfo* CAlmAlarmInfo::GetAlarmInfo(TASShdAlarm aAlarm, CAlarmUtils::TAlarmT
             {
             // TODO: Handle this case 
             SetupUnknownAlarmL( aAlarm );
-            iAlarmInfo->iIsClockAlarm = ETrue;
+            iAlarmInfo->iAlarmAlertType = CAlarmUtils::EAlarmTypeOther;
             }
         break;
 
@@ -242,7 +242,7 @@ SAlarmInfo* CAlmAlarmInfo::GetAlarmInfo(TASShdAlarm aAlarm, CAlarmUtils::TAlarmT
                 User::Leave( KErrCancel );
                 }
             // Set the alarm type
-            iAlarmInfo->iIsClockAlarm = EFalse;
+            iAlarmInfo->iAlarmAlertType = CAlarmUtils::EAlarmTypeCalendar;
             
             // Fetch the calendar entry and instance time
             CCalEntry* entry = NULL;
@@ -278,17 +278,30 @@ SAlarmInfo* CAlmAlarmInfo::GetAlarmInfo(TASShdAlarm aAlarm, CAlarmUtils::TAlarmT
                     // TODO : Format text based on type of entry
                     // SetupAppointmentAlarmL( aAlarm );
                     iAlarmInfo->iTime = instanceTime;
+                    iAlarmInfo->iIsTimed = ETrue;
                     }
                 break;
 
                 case CCalEntry::ETodo:
                     {
                     // TODO : Format text based on type of entry
-                    // SetupToDoAlarmL( aAlarm );
+                    //SetupToDoAlarmL( aAlarm );
+                    iAlarmInfo->iAlarmAlertType = CAlarmUtils::EAlarmTypeTodo;
                     iAlarmInfo->iTime = TTime( 0 );
+                    iAlarmInfo->iIsTimed = EFalse;
+                    // No Location is there for todo alarms
+                    iAlarmInfo->iLocation = HBufC::NewL( 0 );
                     }
                 break;
-
+                
+                case CCalEntry::EEvent:
+                    {
+                    // No time information for an all day event	
+                    iAlarmInfo->iTime = TTime( 0 );
+                    iAlarmInfo->iIsTimed = EFalse;
+                    }
+                break;
+                
                 default:
                     {
                     // TODO : Format text based on type of entry

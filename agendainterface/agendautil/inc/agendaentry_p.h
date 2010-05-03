@@ -71,6 +71,20 @@ private:
 	int m_timeOffset;
 };
 
+class AgendaGeoValuePrivate
+{
+public:
+	AgendaGeoValuePrivate();
+
+public:
+	QAtomicInt ref;
+
+private:
+	friend class AgendaGeoValue;
+	double mLatitude;
+	double mLongitude;
+};
+
 class AgendaRepeatRulePrivate
 {
 public:
@@ -86,8 +100,8 @@ private:
 	QList<AgendaRepeatRule::Month> m_months;
 	QList<int> m_monthDays;
 	AgendaRepeatRule::Day m_weekStartDay;
-	QDate m_startDate;
-	QDate m_untilDate;
+	QDateTime m_startDate;
+	QDateTime m_untilDate;
 	int m_interval;
 };
 
@@ -127,12 +141,14 @@ private:
 	AgendaEntry::Status m_entryStatus;
 
 	AgendaAlarm m_alarm;
+	AgendaGeoValue m_geoValue;
 	AgendaRepeatRule m_repeatRule;
 
 	QList<QDate> m_rDates;
 	QDateTime m_recurrenceId;
 	QDateTime m_lastModTime;
 	QDateTime m_completedDateTime;
+	QDateTime m_dtStamp;
 };
 
 #endif // AGENDAENTRY_P_H

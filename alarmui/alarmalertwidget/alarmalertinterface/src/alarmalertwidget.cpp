@@ -81,8 +81,9 @@ bool AlarmAlertWidget::showAlarmDialog(SAlarmInfo *alarmInfo)
 	
 	mCanSnooze = alarmInfo->iCanSnooze;
 	mIsSilent = alarmInfo->iIsSilent;
-	mIsClockAlarm = alarmInfo->iIsClockAlarm;
-    
+	mAlarmAlertType = alarmInfo->iAlarmAlertType;
+	mIsTimedAlarm = alarmInfo->iIsTimed;
+	
     // Package the different parameters to send
 	QVariantMap params;
 	params.insert(alarmSubject, mSubject);
@@ -90,8 +91,9 @@ bool AlarmAlertWidget::showAlarmDialog(SAlarmInfo *alarmInfo)
 	params.insert(alarmDateTime, mAlarmTime);
 	params.insert(alarmRingingType, mIsSilent);
 	params.insert(alarmCanSnooze, mCanSnooze);
-	params.insert(alarmType, mIsClockAlarm);
-	
+	params.insert(alarmType, mAlarmAlertType);
+	params.insert(alarmIsTimed, mIsTimedAlarm);
+
 	return mDeviceDialog->show(ALARM_ALERT_PLUGIN, params);
 }
 
@@ -154,3 +156,4 @@ void AlarmAlertWidget::triggerAction(QVariantMap params)
         	
     }
 }
+// End of file  --Don't remove this.

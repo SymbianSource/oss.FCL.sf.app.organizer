@@ -154,11 +154,11 @@ void AgendaEventViewerPrivate::view(AgendaEntry entry,
 
 	\param status true if viewing completed otherwise false.
  */
-void AgendaEventViewerPrivate::viewingCompleted(bool status)
+void AgendaEventViewerPrivate::viewingCompleted(const QDate date)
 {
 	qDebug() <<"AgendaEventViewerPrivate::viewingCompleted -->";
 
-	emit q_ptr->viewingCompleted(status);
+	emit q_ptr->viewingCompleted(date);
 
 	// Cleanup viewer.
 	if (mAgendaEventView) {

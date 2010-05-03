@@ -37,6 +37,7 @@ symbian: {
 	
 	LIBS += -lagendainterface \
 			-lcalencommonutils \
+                        -lxqservice \
 			-lcalenlauncher
 			
 	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
@@ -45,13 +46,19 @@ symbian: {
 SOURCES += caleneditor.cpp \
 					 caleneditorcustomitem.cpp \
 					  caleneditor_p.cpp \
-					caleneditordocloader.cpp
+					caleneditordocloader.cpp \
+					caleneditorreminderfield.cpp \
+					caleneditorrepeatfield.cpp \
+					caleneditordatahandler.cpp
 		   
 HEADERS += caleneditor.h \
 		   caleneditorcustomitem.h \
  caleneditorcommon.h \
 		   caleneditordocloader.h \
-		    caleneditor_p.h
+		    caleneditor_p.h \
+		caleneditorreminderfield.h \
+		caleneditorrepeatfield.h \
+		caleneditordatahandler.h
 		   
 RESOURCES += caleneditor.qrc		   
 		   

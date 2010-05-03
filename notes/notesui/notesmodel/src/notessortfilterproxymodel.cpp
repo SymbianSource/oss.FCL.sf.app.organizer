@@ -17,7 +17,6 @@
 */
 
 // System includes
-#include <qdebug.h>
 #include <QAbstractItemModel>
 
 // User includes
@@ -44,11 +43,7 @@ NotesSortFilterProxyModel::NotesSortFilterProxyModel(
 :QSortFilterProxyModel(parent),
  mAgendaUtil(agendaUtil)
 {
-	qDebug() << "notes: NotesSortFilterProxyModel::NotesSortFilterProxyModel -->";
-
 	// Nothing yet.
-
-	qDebug() << "notes: NotesSortFilterProxyModel::NotesSortFilterProxyModel <--";
 }
 
 /*!
@@ -56,11 +51,7 @@ NotesSortFilterProxyModel::NotesSortFilterProxyModel(
  */
 NotesSortFilterProxyModel::~NotesSortFilterProxyModel()
 {
-	qDebug() << "notes: NotesSortFilterProxyModel::~NotesSortFilterProxyModel -->";
-
 	// Nothing yet.
-
-	qDebug() << "notes: NotesSortFilterProxyModel::~NotesSortFilterProxyModel <--";
 }
 
 /*!
@@ -71,10 +62,6 @@ NotesSortFilterProxyModel::~NotesSortFilterProxyModel()
 bool NotesSortFilterProxyModel::lessThan(
 		const QModelIndex &left, const QModelIndex &right) const
 {
-	qDebug() << "notes: NotesSortFilterProxyModel::lessThan -->";
-
-	qDebug() << "notes: NotesSortFilterProxyModel::lessThan <--";
-
 	return QSortFilterProxyModel::lessThan(left, right);
 }
 
@@ -87,8 +74,6 @@ bool NotesSortFilterProxyModel::filterAcceptsRow(
 		int sourceRow,
 		const QModelIndex &sourceParent) const
 {
-	qDebug() << "notes: NotesSortFilterProxyModel::filterAcceptsRow -->";
-
 	// Get the model index of the source model.
 	QModelIndex modelIndex = sourceModel()->index(
 			sourceRow, filterKeyColumn(), sourceParent);
@@ -105,17 +90,11 @@ bool NotesSortFilterProxyModel::filterAcceptsRow(
 							modelIndex, filterRole()).value<int>());
 			if (AgendaEntry::TypeNote == type
 					&& QString("note").contains(filterRegExp())) {
-				qDebug() << "notes: NotesSortFilterProxyModel::filterAcceptsRow <--";
-
 				return true;
 			} else if (AgendaEntry::TypeTodo == type
 					&& QString("todo").contains(filterRegExp())) {
-				qDebug() << "notes: NotesSortFilterProxyModel::filterAcceptsRow <--";
-
 				return true;
 			}
-			qDebug() << "notes: NotesSortFilterProxyModel::filterAcceptsRow <--";
-
 			return false;
 		}
 
@@ -126,12 +105,8 @@ bool NotesSortFilterProxyModel::filterAcceptsRow(
 
 			if (1 == favouriteStatus
 					&& QString("favourites").contains(filterRegExp())) {
-				qDebug() << "notes: NotesSortFilterProxyModel::filterAcceptsRow <--";
-
 				return true;
 			}
-			qDebug() << "notes: NotesSortFilterProxyModel::filterAcceptsRow <--";
-
 			return false;
 		}
 
@@ -147,19 +122,14 @@ bool NotesSortFilterProxyModel::filterAcceptsRow(
 					QString string = dataList.value(i).toString();
 
 					if (string.contains(filterRegExp())) {
-						qDebug() << "notes: NotesSortFilterProxyModel::filterAcceptsRow <--";
-
 						return true;
 					}
 				}
-				qDebug() << "notes: NotesSortFilterProxyModel::filterAcceptsRow <--";
 
 				return false;
 			}
 		}
 	}
-	qDebug() << "notes: NotesSortFilterProxyModel::filterAcceptsRow <--";
-
 	// Allow the base class to check if row accepts filter.
 	return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent);
 }

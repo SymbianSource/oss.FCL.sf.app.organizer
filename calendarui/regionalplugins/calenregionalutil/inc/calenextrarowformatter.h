@@ -34,22 +34,10 @@ public: // public API
 
     IMPORT_C virtual ~CCalenExtraRowFormatter();
 
-    IMPORT_C TPtrC FormatExtraRowInformationL( CCalenLunarLocalizedInfo& aLocInfo, 
-                                      RArray<CCalenLunarLocalizedInfo::TField>& aPrioritizedFields,
-                                      TInt aMaxWidth,
-                                      const CFont& aFont
-
-                                      , TBool aTwoLines
-
-                                      );   
-    
-private:
-    TBool TryToFitL( const TDesC& aStr, TInt aMaxWidth, const CFont& aFont
-
-                     , TBool aTwoLines
-
-                     );
-
+    IMPORT_C TPtrC FormatExtraRowInformationL( 
+					CCalenLunarLocalizedInfo& aLocInfo, 
+					RArray<CCalenLunarLocalizedInfo::TField>& aPrioritizedFields 
+					);
 
 private: // own methods
     CCalenExtraRowFormatter();

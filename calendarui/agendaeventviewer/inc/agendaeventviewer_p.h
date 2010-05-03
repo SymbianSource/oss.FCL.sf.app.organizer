@@ -45,7 +45,7 @@ private:
 	void view(AgendaEntry entry, AgendaEventViewer::Actions action);
 
 private slots:
-	void viewingCompleted(bool status = true);
+	void viewingCompleted(const QDate date);
 	void editingStarted();
 	void editingCompleted();
 	void deletingStarted();

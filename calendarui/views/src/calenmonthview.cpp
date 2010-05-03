@@ -47,7 +47,7 @@
 #include "calenthicklinesdrawer.h"
 #include "calencommon.h"
 #include "CalendarInternalCRKeys.h"
-
+#include "calenpluginlabel.h"
 /*!
  \class CalenMonthView
 
@@ -59,7 +59,10 @@
  */
 CalenMonthView::CalenMonthView(MCalenServices &services) :
 	CalenNativeView(services), mAgendaUtil(services.agendaInterface()), 
-	mGoToTodayAction(0)
+	mGoToTodayAction(0),
+	mPrevRegionalInfo(0),
+	mCurrRegionalInfo(0),
+	mNextRegionalInfo(0)
 {
 	mIsWeekNumbersShown = 0;
 	mOrientation = mServices.MainWindow().orientation();
@@ -95,6 +98,12 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 	mTitleLabel
 	        = qobject_cast<HbLabel *> (
 								   mDocLoader->findWidget(CALEN_MONTH_TITLE));
+	// Set the title text color
+	QColor monthTitleColor = HbColorScheme::color("qtc_cal_monthgrid_title");
+	if (monthTitleColor.isValid()) {
+		mTitleLabel->setTextColor(monthTitleColor);
+	}
+		
 	mDayNameWidget
 	        = qobject_cast<CalenThickLinesDrawer *> (
 													mDocLoader->findWidget(
@@ -159,6 +168,9 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 	mCurrPreviewPane->setView(this);
 	mCurrPreviewPane->setNoEntriesLabel(currPaneNoEntriesLabel);
 	
+	mCurrPaneLayoutWidget = qobject_cast<HbWidget*>(docLoader->findWidget(CALEN_CURRPANELAYOUT));
+	mCurrPaneLayout = static_cast<QGraphicsLinearLayout*>(mCurrPaneLayoutWidget->layout());
+	
 	mPrevPaneParent = qobject_cast<HbWidget *> (
 			mDocLoader->findWidget(CALEN_PREVPREVIEWPARENT));
 	// Get previous day preview pane widget
@@ -173,6 +185,8 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 	mPrevPreviewPane->setNoEntriesLabel(prevPaneNoEntriesLabel);
 	mPrevPaneParent->setVisible(false);
 	
+	mPrevPaneLayoutWidget = qobject_cast<HbWidget*>(docLoader->findWidget(CALEN_PREVPANELAYOUT));
+	mPrevPaneLayout = static_cast<QGraphicsLinearLayout*>(mPrevPaneLayoutWidget->layout());
 	mNextPaneParent = qobject_cast<HbWidget *> (
 			mDocLoader->findWidget(CALEN_NEXTPREVIEWPARENT));
 	// Get next day preview pane widget
@@ -186,6 +200,8 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 	mNextPreviewPane->setView(this);
 	mNextPreviewPane->setNoEntriesLabel(nextPaneNoEntriesLabel);
 	mNextPaneParent->setVisible(false);
+	mNextPaneLayoutWidget = qobject_cast<HbWidget*>(docLoader->findWidget(CALEN_NEXTPANELAYOUT));
+	mNextPaneLayout = static_cast<QGraphicsLinearLayout*>(mNextPaneLayoutWidget->layout());
 	
 	mMonthGridPlusWeekNumWidget
 	        = qobject_cast<HbWidget *> (
@@ -215,11 +231,10 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 
 	// TODO: Need to move this to docml
 	// Set the title to the submenu
-	HbMenu
-	        *deleteSubMenu =
+	mDeleteSubMenu =
 	                qobject_cast<HbMenu *> (
 						mDocLoader->findObject(CALEN_MONTVIEW_DELETE_SUBMENU));
-	deleteSubMenu->setTitle(hbTrId("txt_calendar_opt_delete_entries"));
+	mDeleteSubMenu->setTitle(hbTrId("txt_calendar_opt_delete_entries"));
 
 	HbAction
 	        *beforeDateAction =
@@ -250,6 +265,12 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 	connect(&(mServices.MainWindow()),
 	        SIGNAL(orientationChanged(Qt::Orientation)), this,
 	        SLOT(changeOrientation(Qt::Orientation)));
+	
+	// Connect to the signal when options menu is shown
+	// This is required to add/remove dynamically some options
+	connect(menu(), SIGNAL(aboutToShow ()), this,
+	        SLOT(addRemoveActionsInMenu()));
+	
 	mIsFirstTimeLoad = true;
 	
 	// Add background items to all the widgets
@@ -371,13 +392,15 @@ void CalenMonthView::addBackgroundFrame()
 {
     // Set the background items for all the widgets
     HbFrameItem* frame = NULL;
-    if (mMonthGrid) {
+    HbWidget* monthViewExceptPreviewPane = qobject_cast<HbWidget *> (
+						 mDocLoader->findWidget(CALEN_MONTHVIEW_EXCEPT_PANE));
+    if (monthViewExceptPreviewPane) {
         // The grid background
         frame = new HbFrameItem(this);
         frame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
 
         frame->frameDrawer().setFrameGraphicsName("qtg_fr_cal_monthgrid_bg");
-        mMonthGrid->setBackgroundItem(frame->graphicsItem(), -2);
+        monthViewExceptPreviewPane->setBackgroundItem(frame->graphicsItem(), -2);
     }
     if (mTitleLabel) {
         // The month title
@@ -387,7 +410,104 @@ void CalenMonthView::addBackgroundFrame()
         frame->frameDrawer().setFrameGraphicsName("qtg_fr_cal_monthgrid_title_bg");
         mTitleLabel->setBackgroundItem(frame->graphicsItem(), -2);
     }
-  
+    
+    // Set the frame to the preview pane
+    frame = new HbFrameItem(this);
+    frame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
+
+    frame->frameDrawer().setFrameGraphicsName("qtg_fr_cal_preview_bg");
+    mPrevPaneLayoutWidget->setBackgroundItem(frame->graphicsItem(), -5);
+    
+    // Set the frame to the preview pane
+    frame = new HbFrameItem(this);
+    frame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
+
+    frame->frameDrawer().setFrameGraphicsName("qtg_fr_cal_preview_bg");
+    mCurrPaneLayoutWidget->setBackgroundItem(frame->graphicsItem(), -5);
+    
+    // Set the frame to the preview pane
+    frame = new HbFrameItem(this);
+    frame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
+
+    frame->frameDrawer().setFrameGraphicsName("qtg_fr_cal_preview_bg");
+    mNextPaneLayoutWidget->setBackgroundItem(frame->graphicsItem(), -5);
+}
+
+void CalenMonthView::showHideRegionalInformation()
+{
+    XQSettingsKey regionalInfo(XQSettingsKey::TargetCentralRepository,
+                               KCRUidCalendar.iUid, KShowRegionalInformation);
+    
+    int showRegionalInfo = mSettingsManager->readItemValue(regionalInfo).toUInt();
+    if (showRegionalInfo) {
+		
+        // Add the regional information to the preview panes
+        if (!mPrevRegionalInfo) {
+            mPrevRegionalInfo = new CalenPluginLabel(mServices, this);
+            mPrevPaneLayout->insertItem(0, mPrevRegionalInfo);
+
+            HbFrameItem *frameCurr = new HbFrameItem(this);
+            frameCurr->frameDrawer().setFrameType(HbFrameDrawer::ThreePiecesHorizontal);
+            frameCurr->frameDrawer().setFrameGraphicsName("qtg_fr_cal_preview_title_bg");
+            mPrevRegionalInfo->setBackgroundItem(frameCurr->graphicsItem(), -2);
+        }
+        if (!mCurrRegionalInfo) {
+            mCurrRegionalInfo = new CalenPluginLabel(mServices, this);
+            mCurrPaneLayout->insertItem(0, mCurrRegionalInfo);
+            
+            HbFrameItem *frameCurr = new HbFrameItem(this);
+            frameCurr->frameDrawer().setFrameType(HbFrameDrawer::ThreePiecesHorizontal);
+            frameCurr->frameDrawer().setFrameGraphicsName("qtg_fr_cal_preview_title_bg");
+            mCurrRegionalInfo->setBackgroundItem(frameCurr->graphicsItem(), -2);
+        }
+        if (!mNextRegionalInfo) {
+            mNextRegionalInfo = new CalenPluginLabel(mServices, this);
+            mNextPaneLayout->insertItem(0, mNextRegionalInfo);
+
+            HbFrameItem *frameCurr = new HbFrameItem(this);
+            frameCurr->frameDrawer().setFrameType(HbFrameDrawer::ThreePiecesHorizontal);
+            frameCurr->frameDrawer().setFrameGraphicsName("qtg_fr_cal_preview_title_bg");
+            mNextRegionalInfo->setBackgroundItem(frameCurr->graphicsItem(), -2);
+        }
+        
+        if (pluginEnabled()) {
+			QString *pluginString = pluginText();
+			mPrevRegionalInfo->setPlainText(*pluginString);
+			mCurrRegionalInfo->setPlainText(*pluginString);
+			mNextRegionalInfo->setPlainText(*pluginString);
+		}
+    } else {
+        if (mPrevRegionalInfo) {
+            mPrevPaneLayout->removeItem(mPrevRegionalInfo);
+            delete mPrevRegionalInfo;
+            mPrevRegionalInfo = NULL;
+        }
+        if (mCurrRegionalInfo) {
+            mPrevPaneLayout->removeItem(mCurrRegionalInfo);
+            delete mCurrRegionalInfo;
+            mCurrRegionalInfo = NULL;
+        }
+        if (mNextRegionalInfo) {
+            mPrevPaneLayout->removeItem(mNextRegionalInfo);
+            delete mNextRegionalInfo;
+            mNextRegionalInfo = NULL;
+        }
+    }
+}
+
+/*!
+ Handles the context changed notification
+ */
+void CalenMonthView::onContextChanged()
+{
+	//Update plugin label after setting context
+	if (mCurrRegionalInfo && mPrevRegionalInfo && mNextPaneLayout
+	        && pluginEnabled()) {
+		QString *pluginString = pluginText();
+		mPrevRegionalInfo->setPlainText(*pluginString);
+		mCurrRegionalInfo->setPlainText(*pluginString);
+		mNextRegionalInfo->setPlainText(*pluginString);
+	}
 }
 
 /*!
@@ -440,9 +560,16 @@ void CalenMonthView::updateWeekNumGridModel()
 void CalenMonthView::goToToday()
 {
 	QDateTime today = CalenDateUtils::today();
-	// First check if we are not already
+	// First check if we are not alread
 	// showing today's month view
 	if (mDate == today) {
+		return;
+	} else if (mActiveMonth.date().year() == today.date().year() && 
+				mActiveMonth.date().month() == today.date().month()) {
+		// User is in current month only, so just set the focus to current
+		// date grid item and refresh the preview pane
+		int currIndex = mFirstDayOfGrid.daysTo(today);
+		setCurrGridIndex(currIndex);
 		return;
 	}
 	
@@ -450,7 +577,32 @@ void CalenMonthView::goToToday()
 	MCalenContext &context = mServices.Context();
 	context.setFocusDateAndTimeL(today, KCalenMonthViewUidValue);
 	
-	mServices.IssueCommandL(ECalenStartActiveStep);
+	refreshViewOnGoToDate();
+}
+
+/*
+ Slot to handle adding / removing actions frm the menu when menu is about to
+ shown to the user
+ */
+void CalenMonthView::addRemoveActionsInMenu()
+{
+	HbAction* menuAction = mDeleteSubMenu->menuAction();
+	// Check if there are no entries in the database
+	if (mAgendaUtil->areNoEntriesInCalendar() && menuAction) {
+		// hide the delete entries option
+		menuAction->setVisible(false);
+	} else if (menuAction) {
+		// Show the option to delete
+		menuAction->setVisible(true);
+	}
+	
+	// Check if we are population for current day, if yes then disable the
+	// gototoday action
+	if ((CalenDateUtils::today().date() == mDate.date()) && mGoToTodayAction) {
+		mGoToTodayAction->setVisible(false);
+	} else if (mGoToTodayAction){
+		mGoToTodayAction->setVisible(true);
+	}
 }
 
 /*!
@@ -477,6 +629,10 @@ void CalenMonthView::doPopulation()
 
 	// Create the grid items with proper dates
 	createGrid();
+	
+	// Check if regional information needs to be shown
+	// and add it or remove it
+	showHideRegionalInformation();
 
 	// Complete the population
 	completePopulation();
@@ -495,6 +651,25 @@ void CalenMonthView::prepareForPopulation()
 {
 	setActiveDay(dateFromContext(mServices.Context()));
 	setDate();
+}
+
+/*!
+ Slot to handle gotodate action
+ */
+void CalenMonthView::refreshViewOnGoToDate()
+{
+	setActiveDay(dateFromContext(mServices.Context()));
+	setDate();
+	setDateToLabel();
+	// fetch list of required calendar instances
+	populateWithInstanceView();
+
+	populatePreviewPane(mDate);
+	
+	mMonthGrid->updateMonthGridModel(mMonthDataArray, mIndexToBeScrolled);
+	
+	// Start the auto scroll on current preview pane
+	mCurrPreviewPane->startAutoScroll();
 }
 
 /*!
@@ -522,13 +697,6 @@ QDateTime CalenMonthView::dateFromContext(const MCalenContext &context)
 void CalenMonthView::setActiveDay(QDateTime day)
 {
 	mDate = day;
-	// Check if we are population for current day, if yes then disable the
-	// gototoday action
-	if ((CalenDateUtils::today().date() == mDate.date()) && mGoToTodayAction) {
-	    mGoToTodayAction->setVisible(false);
-	} else if (mGoToTodayAction){
-	    mGoToTodayAction->setVisible(true);
-	}
     
 	mActiveMonth = mDate;
 	// Get the first day of the previous month
@@ -582,7 +750,7 @@ void CalenMonthView::setActiveDay(QDateTime day)
 
 	// Calculate the last visible day
 	int index = (mNumOfRowsInPrevMonth + KNumOfVisibleRows) * KCalenDaysInWeek;
-	QDateTime lastVisibleDate = mFirstDayOfGrid.addDays(index);
+	QDateTime lastVisibleDate = mFirstDayOfGrid.addDays(index - 1);
 	QDateTime dateTimeToCalc = mLastDayOfGrid;
 	mNumOfRowsInFutureMonth = 0;
 	while (dateTimeToCalc > lastVisibleDate) {
@@ -604,8 +772,6 @@ void CalenMonthView::setDate()
 		CalenMonthData element(currentDay);
 		mMonthDataArray.append(element);
 	}
-	// Update the dates with active flag
-	updateMonthDataArrayWithActiveDates();
 }
 
 /*!
@@ -726,9 +892,6 @@ void CalenMonthView::updateModelWithPrevMonth()
 	if (mIsWeekNumbersShown) {
 		updateWeekNumGridModel();
 	}
-
-	// Update the dates with active flag
-	updateMonthDataArrayWithActiveDates();
 }
 /*!
  Called when up gesture is performed
@@ -772,8 +935,7 @@ void CalenMonthView::updateModelWithFutureMonth()
 		mMonthDataArray.append(element);
 	}
 
-	// Update the mMonthDataArray with instances if any
-	populateNextMonth();
+	
 
 	// Update the necessary globals
 	mTotalNumOfGridItems += countToBeAdded;
@@ -795,9 +957,10 @@ void CalenMonthView::updateModelWithFutureMonth()
 	if (mIsWeekNumbersShown) {
 		updateWeekNumGridModel();
 	}
-
-	// Update the dates with active flag
-	updateMonthDataArrayWithActiveDates();
+	
+	// Update the mMonthDataArray with instances if any
+	populateNextMonth();
+		
 }
 
 /*!
@@ -879,77 +1042,24 @@ void CalenMonthView::populateWithInstanceView()
 	QDateTime gridEnd(mLastDayOfGrid.date(), QTime(23, 59, 59, 0));
 	QList<AgendaEntry> list;
 
-	getInstanceList(list, gridStart, gridEnd);
-
-	//Parse fetched items
-	if (list.count()) {
-		for (int i(0); i < list.count(); i++) {
-			AgendaEntry entry = list[i];
-
-			// Parse  Day Notes, Appointments and Remainders
-			// Start and end time of Event/Appointment/Remainders has to be 
-			// indentified before marking the tags
-			// EEvents/Appointments can span multiple days, 
-			// while Anniversaries cannot.
-			if ((entry.type() == AgendaEntry::TypeEvent) || (entry.type()
-			        == AgendaEntry::TypeAppoinment) || (entry.type()
-			        == AgendaEntry::TypeReminder)) {
-				// The start time of the instance
-				QDateTime startTime = entry.startTime();
-				// The instance's start index from the grid start           
-				int startIndex(gridStart.daysTo(startTime));
-				// The end time of the instance
-				QDateTime endTime = entry.endTime();
-
-				if (CalenAgendaUtils::endsAtStartOfDayL(entry, endTime)) {
-					// prevent problems with items ending tomorrow at 00:00
-					QTime time = endTime.time();
-					time.setHMS(time.hour(), time.minute() - 1, time.second(),
-					            time.msec());
-					endTime.setTime(time);
-
-					if (endTime <= gridStart) {
-						// ends at the start of the grid -> not visible
-						continue; // skip
-					}
-				}
-				// The instance's end index from the grid start             
-				int endIndex(gridStart.daysTo(endTime));
-
-				// Mark the days from start index to end index
-				for (; startIndex <= endIndex; startIndex++) {
-					if (startIndex >= 0 && 
-							startIndex < mMonthDataArray.count()) {
-						mMonthDataArray[startIndex].SetHasEvents(true);
-					}
-				} // Parse Anniversaries
-			} else if (entry.type() == AgendaEntry::TypeAnniversary) {
-				QDateTime startTime = entry.startTime();
-				// The instance's start index from the grid start           
-				int index(gridStart.daysTo(startTime));
-				// Mark the particular day
-				if (index >= 0 && index < mMonthDataArray.count()) {
-					mMonthDataArray[index].SetHasEvents(true);
-				} // Parse To DOs
-			} else if (entry.type() == AgendaEntry::TypeTodo) {
-				QDateTime startTime = entry.startTime();
-				;
-				int index;
-				// Mark the particular day if the instance's start 
-				// time is not in the past
-				if (startTime >= today) {
-					index = gridStart.daysTo(startTime);
-				} else {// Mark for today if the instance's 
-					// start time is in the past
-					index = todayIndex;
-				}
-				if (index >= 0 && index < mMonthDataArray.count()) {
-					mMonthDataArray[index].SetHasEvents(true);
-				}
-			}
-		}
+	AgendaUtil::FilterFlags filter =
+		        AgendaUtil::FilterFlags(AgendaUtil::IncludeAnniversaries
+		                | AgendaUtil::IncludeAppointments
+		                | AgendaUtil::IncludeEvents
+		                | AgendaUtil::IncludeReminders
+		                | AgendaUtil::IncludeIncompletedTodos);
+	
+	// Get the list of dates which have events
+	QList<QDate> datesWithEvents;
+	mAgendaUtil->markDatesWithEvents(gridStart,gridEnd,filter,datesWithEvents);
+	
+	// Parse thru the list of dates and set the required flags
+	for(int i(0); i < datesWithEvents.count(); i++) {
+		int offset = mFirstDayOfGrid.date().daysTo(datesWithEvents.at(i));
+		mMonthDataArray[offset].SetHasEvents(true);
 	}
-	list.clear();
+
+	datesWithEvents.clear();
 }
 
 /*!
@@ -966,77 +1076,25 @@ void CalenMonthView::populatePrevMonth()
 	QDateTime end = gridStart.addDays(mNumOfRowsInPrevMonth * KCalenDaysInWeek);
 	QDateTime gridEnd(end.date(), QTime(23, 59, 59, 0));
 
-	getInstanceList(list, gridStart, gridEnd);
 
-	//Parse fetched items
-	if (list.count()) {
-		for (int i(0); i < list.count(); i++) {
-			AgendaEntry entry = list[i];
-
-			// Parse  Day Notes, Appointments and Remainders
-			// Start and end time of Event/Appointment/Remainders 
-			// has to be indentified before marking the tags
-			// EEvents/Appointments can span multiple days, 
-			// while Anniversaries cannot.
-			if ((entry.type() == AgendaEntry::TypeEvent) || (entry.type()
-			        == AgendaEntry::TypeAppoinment) || (entry.type()
-			        == AgendaEntry::TypeReminder)) {
-				// The start time of the instance
-				QDateTime startTime = entry.startTime();
-				// The instance's start index from the grid start           
-				int startIndex(gridStart.daysTo(startTime));
-				// The end time of the instance
-				QDateTime endTime = entry.endTime();
-
-				if (CalenAgendaUtils::endsAtStartOfDayL(entry, endTime)) {
-					// prevent problems with items ending tomorrow at 00:00
-					QTime time = endTime.time();
-					time.setHMS(time.hour(), time.minute() - 1, time.second(),
-					            time.msec());
-					endTime.setTime(time);
-
-					if (endTime <= gridStart) {
-						// ends at the start of the grid -> not visible
-						continue; // skip
-					}
-				}
-				// The instance's end index from the grid start             
-				int endIndex(gridStart.daysTo(endTime));
-
-				// Mark the days from start index to end index
-				for (; startIndex <= endIndex; startIndex++) {
-					if (startIndex >= 0 && 
-							startIndex < mMonthDataArray.count()) {
-						mMonthDataArray[startIndex].SetHasEvents(true);
-					}
-				} // Parse Anniversaries
-			} else if (entry.type() == AgendaEntry::TypeAnniversary) {
-				QDateTime startTime = entry.startTime();
-				// The instance's start index from the grid start           
-				int index(gridStart.daysTo(startTime));
-				// Mark the particular day
-				if (index >= 0 && index < mMonthDataArray.count()) {
-					mMonthDataArray[index].SetHasEvents(true);
-				} // Parse To DOs
-			} else if (entry.type() == AgendaEntry::TypeTodo) {
-				QDateTime startTime = entry.startTime();
-				;
-				int index;
-				// Mark the particular day if the instance's 
-				// start time is not in the past
-				if (startTime >= today) {
-					index = gridStart.daysTo(startTime);
-				} else {// Mark for today if the instance's 
-					//start time is in the past
-					index = todayIndex;
-				}
-				if (index >= 0 && index < mMonthDataArray.count()) {
-					mMonthDataArray[index].SetHasEvents(true);
-				}
-			}
-		}
+	AgendaUtil::FilterFlags filter =
+		        AgendaUtil::FilterFlags(AgendaUtil::IncludeAnniversaries
+		                | AgendaUtil::IncludeAppointments
+		                | AgendaUtil::IncludeEvents
+		                | AgendaUtil::IncludeReminders
+		                | AgendaUtil::IncludeIncompletedTodos);
+						
+	// Get the list of dates which have events
+	QList<QDate> datesWithEvents;
+	mAgendaUtil->markDatesWithEvents(gridStart,gridEnd,filter,datesWithEvents);
+	
+	// Parse thru the list of dates and set the required flags
+	for(int i(0); i < datesWithEvents.count(); i++) {
+		int offset = mFirstDayOfGrid.date().daysTo(datesWithEvents.at(i));
+		mMonthDataArray[offset].SetHasEvents(true);
 	}
-	list.clear();
+	
+	datesWithEvents.clear();
 }
 
 /*!
@@ -1054,77 +1112,27 @@ void CalenMonthView::populateNextMonth()
 	const int todayIndex(gridStart.daysTo(today)); // grid index for "today"
 	QDateTime gridEnd(mLastDayOfGrid.date(), QTime(23, 59, 59, 0));
 
-	getInstanceList(list, gridStart, gridEnd);
 
-	//Parse fetched items
-	if (list.count()) {
-		for (int i(0); i < list.count(); i++) {
-			AgendaEntry entry = list[i];
-
-			// Parse  Day Notes, Appointments and Remainders
-			// Start and end time of Event/Appointment/Remainders 
-			// has to be indentified before marking the tags
-			// EEvents/Appointments can span multiple days, 
-			// while Anniversaries cannot.
-			if ((entry.type() == AgendaEntry::TypeEvent) || (entry.type()
-			        == AgendaEntry::TypeAppoinment) || (entry.type()
-			        == AgendaEntry::TypeReminder)) {
-				// The start time of the instance
-				QDateTime startTime = entry.startTime();
-				// The instance's start index from the grid start           
-				int startIndex(gridStart.daysTo(startTime));
-				// The end time of the instance
-				QDateTime endTime = entry.endTime();
-
-				if (CalenAgendaUtils::endsAtStartOfDayL(entry, endTime)) {
-					// prevent problems with items ending tomorrow at 00:00
-					QTime time = endTime.time();
-					time.setHMS(time.hour(), time.minute() - 1, time.second(),
-					            time.msec());
-					endTime.setTime(time);
-
-					if (endTime <= gridStart) {
-						// ends at the start of the grid -> not visible
-						continue; // skip
-					}
-				}
-				// The instance's end index from the grid start             
-				int endIndex(gridStart.daysTo(endTime));
-
-				// Mark the days from start index to end index
-				for (; startIndex <= endIndex; startIndex++) {
-					if (startIndex >= 0 && 
-							startIndex < mMonthDataArray.count()) {
-						mMonthDataArray[actualIndex + startIndex].SetHasEvents(true);
-					}
-				} // Parse Anniversaries
-			} else if (entry.type() == AgendaEntry::TypeAnniversary) {
-				QDateTime startTime = entry.startTime();
-				// The instance's start index from the grid start           
-				int index(gridStart.daysTo(startTime));
-				// Mark the particular day
-				if (actualIndex +index >= 0 && (actualIndex + index) < mMonthDataArray.count()) {
-					mMonthDataArray[actualIndex + index].SetHasEvents(true);
-				} // Parse To DOs
-			} else if (entry.type() == AgendaEntry::TypeTodo) {
-				QDateTime startTime = entry.startTime();
-				;
-				int index;
-				// Mark the particular day if the instance's 
-				// start time is not in the past
-				if (startTime >= today) {
-					index = gridStart.daysTo(startTime);
-				} else {// Mark for today if the instance's 
-					// start time is in the past
-					index = todayIndex;
-				}
-				if (actualIndex + index >= 0 && (actualIndex + index) < mMonthDataArray.count()) {
-					mMonthDataArray[actualIndex + index].SetHasEvents(true);
-				}
-			}
-		}
+	AgendaUtil::FilterFlags filter =
+		        AgendaUtil::FilterFlags(AgendaUtil::IncludeAnniversaries
+		                | AgendaUtil::IncludeAppointments
+		                | AgendaUtil::IncludeEvents
+		                | AgendaUtil::IncludeReminders
+		                | AgendaUtil::IncludeIncompletedTodos);
+						
+	// Get the list of dates which have events
+	QList<QDate> datesWithEvents;
+	mAgendaUtil->markDatesWithEvents(gridStart,gridEnd,filter,datesWithEvents);
+	
+	// Parse thru the list of dates and set the required flags
+	for(int i(0); i < datesWithEvents.count(); i++) {
+		int offset = mFirstDayOfGrid.date().daysTo(datesWithEvents.at(i));
+		mMonthDataArray[offset].SetHasEvents(true);
 	}
-	list.clear();
+
+
+	
+	datesWithEvents.clear();
 }
 
 /*!
@@ -1144,9 +1152,6 @@ void CalenMonthView::populatePreviewPane(QDateTime &dateTime)
 void CalenMonthView::completePopulation()
 {
 	setDateToLabel();
-
-	//Set this view as current view
-	mServices.MainWindow().setCurrentView(this);
 }
 
 /*!
@@ -1200,13 +1205,6 @@ void CalenMonthView::setContextForActiveDay(int index)
 		mIsPrevPaneGesture = false;
 	}
 	
-	// Check if we are population for current day, if yes then disable the
-    // gototoday action
-    if ((CalenDateUtils::today() == mDate) && mGoToTodayAction) {
-        mGoToTodayAction->setVisible(false);
-    } else if (mGoToTodayAction){
-        mGoToTodayAction->setVisible(true);
-    }
 }
 
 /*!
@@ -1287,10 +1285,6 @@ void CalenMonthView::setDateToLabel()
 	mLocale.setNumberOptions(QLocale::OmitGroupSeparator);
 	QString yearString = mLocale.toString(mDate.date().year());
 	mTitleLabel->setPlainText(hbTrId("txt_calendar_month_label_title_12").arg(monthString).arg(yearString));
-	QColor monthTitleColor = HbColorScheme::color("qtc_cal_monthgrid_title");
-	if (monthTitleColor.isValid()) {
-	    mTitleLabel->setTextColor(monthTitleColor);
-	}
 }
 
 /*!
@@ -1305,23 +1299,23 @@ void CalenMonthView::handlePreviewPaneGesture(bool rightGesture)
 		// Create the effect on mCurrPreviewPane to slide to right side
 		mPrevPaneParent->setVisible(true);
 		if (mOrientation == Qt::Vertical) {
-			HbEffect::add(mCurrPreviewPane,
+			HbEffect::add(mCurrPaneLayoutWidget,
 						  ":/fxml/portrait_preview_pane_hide_on_right_gesture",
 						  "hide");
-			HbEffect::add(mPrevPreviewPane,
+			HbEffect::add(mPrevPaneLayoutWidget,
 						  ":/fxml/portrait_preview_pane_show_on_right_gesture",
 						  "show");
 		} else {
-			HbEffect::add(mCurrPreviewPane,
+			HbEffect::add(mCurrPaneLayoutWidget,
 						  ":/fxml/landscape_preview_pane_hide_on_right_gesture",
 						  "hide");
-			HbEffect::add(mPrevPreviewPane,
+			HbEffect::add(mPrevPaneLayoutWidget,
 						  ":/fxml/landscape_preview_pane_show_on_right_gesture",
 						  "show");
 		}
 		// Start the effects
-		HbEffect::start(mCurrPreviewPane, "hide");
-		HbEffect::start(mPrevPreviewPane, "show", 
+		HbEffect::start(mCurrPaneLayoutWidget, "hide");
+		HbEffect::start(mPrevPaneLayoutWidget, "show", 
 										this, "handleRightEffectCompleted");
 		
 		//Remove the mCurrPreviewPane from the layout and add mPrevPreviewPane
@@ -1333,24 +1327,24 @@ void CalenMonthView::handlePreviewPaneGesture(bool rightGesture)
 		// Create the effect on mCurrPreviewPane to slide to left side
 		mNextPaneParent->setVisible(true);
 		if (mOrientation == Qt::Vertical) {
-			HbEffect::add(mCurrPreviewPane,
+			HbEffect::add(mCurrPaneLayoutWidget,
 						  ":/fxml/portrait_preview_pane_hide_on_left_gesture",
 						  "hide");
-			HbEffect::add(mNextPreviewPane,
+			HbEffect::add(mNextPaneLayoutWidget,
 						  ":/fxml/portrait_preview_pane_show_on_left_gesture",
 						  "show");
 		} else {
-			HbEffect::add(mCurrPreviewPane,
+			HbEffect::add(mCurrPaneLayoutWidget,
 						  ":/fxml/landscape_preview_pane_hide_on_left_gesture",
 						  "hide");
-			HbEffect::add(mNextPreviewPane,
+			HbEffect::add(mNextPaneLayoutWidget,
 						  ":/fxml/landscape_preview_pane_show_on_left_gesture",
 						  "show");
 		}
 		
 		// Start the effects
-		HbEffect::start(mCurrPreviewPane, "hide");
-		HbEffect::start(mNextPreviewPane, "show", 
+		HbEffect::start(mCurrPaneLayoutWidget, "hide");
+		HbEffect::start(mNextPaneLayoutWidget, "show", 
 										this, "handleLeftEffectCompleted");
 		
 		//Remove the mCurrPreviewPane from the layout and add mNextPreviewPane
@@ -1358,6 +1352,14 @@ void CalenMonthView::handlePreviewPaneGesture(bool rightGesture)
 		viewLayout->removeAt(1);
 		viewLayout->addItem(mNextPaneParent);
 	}
+}
+
+/*!
+ Returns the first date in the month grid
+ */
+QDateTime CalenMonthView::firstDayOfGrid()
+{
+	return mFirstDayOfGrid;
 }
 
 /*!
@@ -1385,12 +1387,16 @@ void CalenMonthView::handleLeftEffectCompleted(
 	// Swap the preview panes properly
 	CalenPreviewPane* pane = mCurrPreviewPane;
 	HbWidget* paneParent = mCurrPaneParent;
+	HbWidget* paneLayoutWidget = mCurrPaneLayoutWidget;
 	mCurrPreviewPane = mNextPreviewPane;
 	mCurrPaneParent = mNextPaneParent;
+	mCurrPaneLayoutWidget = mNextPaneLayoutWidget;
 	mNextPreviewPane = mPrevPreviewPane;
 	mNextPaneParent = mPrevPaneParent;
+	mNextPaneLayoutWidget = mPrevPaneLayoutWidget;
 	mPrevPreviewPane = pane;
 	mPrevPaneParent = paneParent;
+	mPrevPaneLayoutWidget = paneLayoutWidget;
 	
 	// Set the focus to proper date
 	setCurrGridIndex(index);
@@ -1416,12 +1422,16 @@ void CalenMonthView::handleRightEffectCompleted(
 	// Swap the preview panes properly
 	CalenPreviewPane* pane = mCurrPreviewPane;
 	HbWidget* paneParent = mCurrPaneParent;
+	HbWidget* paneLayoutWidget = mCurrPaneLayoutWidget;
 	mCurrPreviewPane = mPrevPreviewPane;
 	mCurrPaneParent = mPrevPaneParent;
+	mCurrPaneLayoutWidget = mPrevPaneLayoutWidget;
 	mPrevPreviewPane = mNextPreviewPane;
 	mPrevPaneParent = mNextPaneParent;
+	mPrevPaneLayoutWidget = mNextPaneLayoutWidget;
 	mNextPreviewPane = pane;
 	mNextPaneParent = paneParent;
+	mNextPaneLayoutWidget = paneLayoutWidget;
 	
 	// Set the focus to proper date
 	setCurrGridIndex(index);

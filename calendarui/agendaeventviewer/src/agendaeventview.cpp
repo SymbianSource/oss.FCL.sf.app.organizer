@@ -37,7 +37,11 @@
 #include <HbMessageBox>
 #include <HbDialog>
 #include <HbLabel>
-
+#include <QFile>
+#include <QString>
+#include <QIcon>
+#include <QPainter>
+#include <QPixmap>
 // User includes
 #include <agendautil.h>
 #include <noteseditor.h>
@@ -49,10 +53,17 @@
 #include "agendaeventvieweritem.h"
 #include "calendateutils.h"
 
+//maptile service 
+#include <maptileservice.h>
 // Constants
 #define CHARACTER_HYPHEN    "-"
 #define CHARACTER_SPACE     " "
 #define CHARACTER_NEW_LINE  "\n"
+
+// This is used to set the maptile image height and width ,
+//because HbLabel by default not displaying the actual size of image 
+const int height = 128;
+const int width =  330;
 /*!
 	\class AgendaEventView.
 
@@ -72,7 +83,8 @@ AgendaEventView::AgendaEventView(
 		QObject(parent),
 		mOwner(owner),
 		mReminderWidgetAdded(true),
-		mMainWindow(NULL)
+		mMainWindow(NULL),
+		mMaptilePath(NULL)
 {
 	qDebug() << "AgendaEventViewer: AgendaEventView::AgendaEventView -->";
 
@@ -107,6 +119,11 @@ AgendaEventView::AgendaEventView(
 	mLocationWidget = qobject_cast<AgendaEventViewerItem *> (
 			mDocLoader->findWidget(AGENDA_EVENT_VIEWER_LOCATION_WIDGET));
 	
+	
+	mMaptileLabel = qobject_cast<HbLabel *> (
+	                mDocLoader->findWidget(AGENDA_EVENT_VIEWER_MAPTILE_WIDGET));
+	
+	
 	mReminderWidget = qobject_cast<AgendaEventViewerItem *> (
 			mDocLoader->findWidget(AGENDA_EVENT_VIEWER_REMINDER_WIDGET));
 	
@@ -121,8 +138,13 @@ AgendaEventView::AgendaEventView(
 
     mLinearLayout = 
     		static_cast<QGraphicsLinearLayout *> (scrollAreaWidget->layout());
-
-	qDebug() << "AgendaEventViewer: AgendaEventView::AgendaEventView <--";
+	
+    MapTileService::AppType appType;
+    appType = MapTileService::AppTypeCalendar;
+    mLocationFeatureEnabled = MapTileService::isLocationFeatureEnabled(appType);
+    
+        
+    qDebug() << "AgendaEventViewer: AgendaEventView::AgendaEventView <--";
 	
 }
 
@@ -232,6 +254,7 @@ void AgendaEventView::addViewerData()
 		case AgendaEntry::TypeAppoinment:
 		case AgendaEntry::TypeEvent:
 			addLocationData();
+			addMapTileImage();	
 			addReminderData();
 			addRepeatData();
 			break;
@@ -294,24 +317,24 @@ void AgendaEventView::addToolBarItem(AgendaEventViewer::Actions action)
 	
 	if ((action == AgendaEventViewer::ActionEditDelete) || (action
 	        == AgendaEventViewer::ActionEdit)) {
-		HbAction *editAction = new HbAction(HbIcon("qtg_mono_edit"), 
-		                                  hbTrId("txt_calendar_button_edit"));
+		HbAction *editAction = new HbAction();
+		editAction->setIcon(HbIcon("qtg_mono_edit"));
 		connect(editAction, SIGNAL(triggered()), this, SLOT(edit()));
 		toolBar->addAction(editAction);
 	}
 
 	if ((action == AgendaEventViewer::ActionEditDelete) || (action
 	        == AgendaEventViewer::ActionDelete)) {
-		HbAction *deleteAction = new HbAction(HbIcon("qtg_mono_delete"), 
-		                                  hbTrId("txt_calendar_button_delete"));
+		HbAction *deleteAction = new HbAction();
+		deleteAction->setIcon(HbIcon("qtg_mono_delete"));
 		connect(deleteAction, SIGNAL(triggered()), this,
 		        SLOT(deleteAgendaEntry()));
 		toolBar->addAction(deleteAction);
 	}
 
 	if (action == AgendaEventViewer::ActionSave) {
-		HbAction *saveAction = new HbAction(
-							hbTrId("txt_calendar_button_save_to_calendar"));
+		HbAction *saveAction = new HbAction();
+		saveAction->setIcon(HbIcon("qtg_mono_add_to_calendar"));
 		connect(saveAction, SIGNAL(triggered()), this, SLOT(saveAgendaEntry()));
 		toolBar->addAction(saveAction);
 	}
@@ -479,6 +502,46 @@ void AgendaEventView::addLocationData()
 }
 
 /*!
+    Add maptile image to Event viewer
+ */
+void AgendaEventView::addMapTileImage()
+{
+
+    qDebug() << "AgendaEventViewer: AgendaEventView::addMapTileImage -->";
+    
+    if (!mAgendaEntry.location().isEmpty() && mLocationFeatureEnabled){
+        MapTileService::AddressType addressType;
+        addressType = MapTileService::AddressPlain;
+        int eventId = mAgendaEntry.id();
+        mMaptilePath = MapTileService::getMapTileImage(eventId, addressType);
+        if (!mMaptilePath.isNull())
+        {                        
+            QIcon mapTileIcon(mMaptilePath);
+            QPainter painter;
+            QPixmap baloon(HbIcon("qtg_small_location.svg").pixmap());
+            QPixmap map (mapTileIcon.pixmap(width,height));
+            //Display pin image in the center of maptile image
+            painter.begin( &map );
+            painter.drawPixmap( (width/2)-(baloon.width()/2), 
+                          (height/2)-baloon.height(), baloon );
+            painter.end();
+            mapTileIcon.addPixmap( map );          
+            
+            HbIcon maptile(mapTileIcon);
+            mMaptileLabel->setIcon(maptile);        
+
+            mMaptileLabel->setPreferredSize(QSizeF(width, height));
+            mMaptileLabel->setMinimumSize(QSizeF(width, height));
+            mMaptileLabel->setMaximumSize(QSizeF(width, height));
+            mMaptileLabel->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,
+                    QSizePolicy::Fixed));            
+
+        }
+    }
+
+    qDebug() << "AgendaEventViewer: AgendaEventView::addMapTileImage <--";
+}
+/*!
 	Add reminder data to Event viewer
  */
 void AgendaEventView::addReminderData()
@@ -578,19 +641,25 @@ QString AgendaEventView::repeatRule() const
 	qDebug() << "AgendaEventViewer: AgendaEventView::repeatRule -->";
 	
 	QString repeatRule;
-	if (mAgendaEntry.repeatRule().type() != AgendaRepeatRule::InvalidRule)
+	AgendaRepeatRule agendaRepeatRule = mAgendaEntry.repeatRule();
+	if (agendaRepeatRule.type() != AgendaRepeatRule::InvalidRule)
 	{
-		switch (mAgendaEntry.repeatRule().type()) {
+		switch (agendaRepeatRule.type()) {
 			case AgendaRepeatRule::DailyRule:
 				repeatRule.append(hbTrId("txt_calendar_dblist_repeats_daily"));
 			break;
 			case AgendaRepeatRule::WeeklyRule:
-				if (mAgendaEntry.repeatRule().interval() == 2) {
-					repeatRule.append(
-							hbTrId("txt_calendar_dblist_repeats_fortnightly"));
+				if (AgendaUtil::isWorkdaysRepeatingEntry(agendaRepeatRule)) {
+					//TODO: Add text id for workdays
+					repeatRule.append(hbTrId("Workdays"));
 				} else {
-					repeatRule.append(
+					if (agendaRepeatRule.interval() == 2) {
+						repeatRule.append(
+							hbTrId("txt_calendar_dblist_repeats_fortnightly"));
+					} else {
+						repeatRule.append(
 							hbTrId("txt_calendar_dblist_repeats_weekly"));
+					}
 				}
 			break;
 			case AgendaRepeatRule::MonthlyRule:
@@ -607,7 +676,8 @@ QString AgendaEventView::repeatRule() const
 		repeatRule.append(CHARACTER_NEW_LINE);
 		HbExtendedLocale systemLocale = HbExtendedLocale::system();
 		QString untilDateString = systemLocale.format(
-				mAgendaEntry.repeatRule().until(), r_qtn_date_usual_with_zero);
+				mAgendaEntry.repeatRule().until().date(), 
+				r_qtn_date_usual_with_zero);
 		repeatRule.append(
 			hbTrId("txt_calendar_dblist_repeats_daily_val_until_1").
 			arg(untilDateString));
@@ -665,6 +735,14 @@ void AgendaEventView::removeWidget()
 		mLinearLayout->removeItem(mLocationWidget);
 	}
 	
+	QFile file(mMaptilePath);
+    if ( !mLocationFeatureEnabled || !file.exists()
+            || mAgendaEntry.location().isEmpty()){        
+        //code added to hide and remove maptile image   
+        mMaptileLabel->hide();
+        mLinearLayout->removeItem(mMaptileLabel);
+    }
+        
 	if (mAgendaEntry.alarm().isNull()) { 
 		if (mAgendaEntry.type() == AgendaEntry::TypeTodo ) {
 				if (AgendaEntry::TodoNeedsAction == mAgendaEntry.status()) { 
@@ -760,6 +838,8 @@ void AgendaEventView::addAllWidgets()
 	
 	mLinearLayout->addItem(mLocationWidget);
 	mLocationWidget->show();
+	mLinearLayout->addItem(mMaptileLabel);
+	mMaptileLabel->show();		
 	mLinearLayout->addItem(mReminderWidget);
 	mReminderWidget->show();
 	mLinearLayout->addItem(mRepeatWidget);
@@ -932,9 +1012,10 @@ void AgendaEventView::edit()
 	} else {
 		// Launch the calendar entry editor using calendar editor api
 		mCalenEditor = new CalenEditor(mOwner->mAgendaUtil, this);
-		mCalenEditor->edit(mAgendaEntry, false);
 		connect(mCalenEditor, SIGNAL(dialogClosed()),
-						this, SLOT(handleCalendarEditorClosed()));
+		                        this, SLOT(handleCalendarEditorClosed()));
+		mCalenEditor->edit(mAgendaEntry, false);
+	
 		
 	}
 	qDebug() << "AgendaEventViewer: AgendaEventView::edit <--";
@@ -1001,7 +1082,7 @@ void AgendaEventView::close()
 			this, SLOT(close()));
 
 	window->removeView(mViewer);
-	mOwner->viewingCompleted();
+	mOwner->viewingCompleted(mAgendaEntry.startTime().date());
 
 	qDebug() << "AgendaEventViewer: AgendaEventView::close <--";
 }
@@ -1026,8 +1107,8 @@ void AgendaEventView::handleEntryUpdation(ulong id)
 			// entry and until date of updated entry then only update time.
 			if (mOriginalAgendaEntry.startTime().date()
 			        >= updatedEntry.startTime().date()
-			        || mOriginalAgendaEntry.startTime().date()
-			                <= updatedEntry.repeatRule().until()) {
+			        && mOriginalAgendaEntry.startTime().date()
+			                <= updatedEntry.repeatRule().until().date()) {
 				QDateTime
 				        startDateTime(mOriginalAgendaEntry.startTime().date(),
 				                      updatedEntry.startTime().time());

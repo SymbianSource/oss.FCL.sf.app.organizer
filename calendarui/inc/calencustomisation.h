@@ -24,7 +24,7 @@
 #include <ecom/ecom.h>
 
 // CONSTANTS
-const TUid KCalenCustomisationInterfaceUid = { 0x2018336F };
+const TUid KCalenCustomisationInterfaceUid = { 0x2002EA3B };
 
 // FORWARD DECLARATIONS
 class CalenView;

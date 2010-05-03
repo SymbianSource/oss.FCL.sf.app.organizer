@@ -33,9 +33,9 @@
 _LIT(KSolarTermsFile, "SolarItems");
 // search path for solar item file
 //Uncomment for emulator
-//_LIT( KSolarTermsPath, "\\private\\10005901\\" );  
+_LIT( KSolarTermsPath, "\\private\\10005901\\" );
 
-_LIT( KSolarTermsPath, "\\data\\" );
+//_LIT( KSolarTermsPath, "\\data\\" );
 const TInt KFirstSolarTermYear(1900);
 const TInt KLastSolarTermYear(2100);
 

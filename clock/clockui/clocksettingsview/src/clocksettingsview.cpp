@@ -72,16 +72,13 @@ ClockSettingsView::ClockSettingsView(QObject *parent)
 	mTimezoneClient = new TimezoneClient();
 	connect(
 			mTimezoneClient, SIGNAL(timechanged()),
-			this, SLOT(updatePlaceLabel()));
+			this, SLOT(updatePlaceInfo()));
 	connect(
 			mTimezoneClient, SIGNAL(timechanged()),
 			this, SLOT(updateDateLabel()));
 	connect(
 			mTimezoneClient, SIGNAL(timechanged()),
 			this, SLOT(updateClockWidget()));
-	connect(
-			mTimezoneClient, SIGNAL(timechanged()),
-			this, SLOT(updatePlaceItem()));
 	connect(
 			mTimezoneClient, SIGNAL(timechanged()),
 			this, SLOT(updateDateItem()));
@@ -205,7 +202,7 @@ void ClockSettingsView::updateDateLabel()
 /*!
 	Updates the zone info in the place label.
  */
-void ClockSettingsView::updatePlaceLabel()
+void ClockSettingsView::updatePlaceInfo()
 {
 	qDebug() << "clock: ClockSettingsView::updateClockZoneInfo -->";
 
@@ -259,10 +256,13 @@ void ClockSettingsView::updatePlaceLabel()
 	if (mTimezoneClient->timeUpdateOn()) {
 		mPlaceLabel->setPlainText(
 				currentZoneInfo.countryName + tr(" ") + gmtOffset);
+		mPlaceDataFormItem->setContentWidgetData(
+				"text", currentZoneInfo.countryName);
 	} else {
-		mPlaceLabel->setPlainText(
-				currentZoneInfo.cityName + tr(", ")
-				+ currentZoneInfo.countryName + tr(" ") + gmtOffset);
+		QString placeInfo = currentZoneInfo.cityName
+				+ tr(", ") + currentZoneInfo.countryName;
+		mPlaceLabel->setPlainText(placeInfo + tr(" ") + gmtOffset);
+		mPlaceDataFormItem->setContentWidgetData("text", placeInfo);
 	}
 
 	qDebug() << "clock: ClockSettingsView::updateDayDateInfo <--";
@@ -278,133 +278,6 @@ void ClockSettingsView::updateClockWidget()
 	mClockWidget->updateDisplay(true);
 
 	qDebug() << "clock: ClockSettingsView::updateClockWidget <--";
-}
-
-/*!
-	Slot which connects to the itemShown signal of the data form.
- */
-void ClockSettingsView::formItemDisplayed(const QModelIndex &index)
-{
-	qDebug() << "clock: ClockSettingsView::settingItemDisplayed -->";
-
-	// In this function implement only display updation.
-	// DO NOT connect slots here.
-
-	bool timeUpdateValue = mTimezoneClient->timeUpdateOn();
-
-	// Get the form item.
-	HbDataFormViewItem *item =
-			static_cast<HbDataFormViewItem*>(mSettingsForm->itemByIndex(index));
-	HbWidget *contentWidget = item->dataItemContentWidget();
-
-	switch (index.row()) {
-		case NetworkTimeItem:
-		{
-		mNetworkTimeWidget = static_cast<HbCheckBox *>(contentWidget);
-		/*if (timeUpdateValue) {
-			mNetworkTimeWidget->setCheckState(Qt::Checked);
-		} else {
-			mNetworkTimeWidget->setCheckState(Qt::Unchecked);
-		}*/
-		}
-		break;
-		case TimeItem:
-		{
-
-		}
-		break;
-
-		case DateItem:
-		{
-		// Update the item display.
-
-		}
-		break;
-
-		case PlaceItem:
-		{
-		// Update the item display.
-//		mPlaceWidget = static_cast<HbPushButton *>(contentWidget);
-		// Get the current zone info.		
-		updatePlaceLabel();
-
-
-		}
-		break;
-
-		default:
-		break;
-	}
-
-	qDebug() << "clock: ClockSettingsView::settingItemDisplayed <--";
-}
-
-/*!
-	Slot which connects to the dataChanged signal of the data form.
- */
-void ClockSettingsView::formItemValueChanged(
-		const QModelIndex& topLeft, const QModelIndex& bottomRight)
-{
-	qDebug("clock: ClockSettingsView::formItemValueChanged() -->");
-
-	Q_UNUSED(bottomRight)
-	// Get the form item.
-	HbDataFormViewItem *item =
-			static_cast<HbDataFormViewItem*>(
-			mSettingsForm->itemByIndex(topLeft));
-	HbWidget *contentWidget = item->dataItemContentWidget();
-
-
-	switch (topLeft.row()) {
-		case NetworkTimeItem:
-		{
-		Qt::CheckState state = mNetworkTimeWidget->checkState();
-		bool cenrepValue = mTimezoneClient->timeUpdateOn();
-
-		if ((Qt::Checked == state && !cenrepValue)
-				|| (Qt::Unchecked == state && cenrepValue)) {
-			if (Qt::Checked == state) {
-				// Disable the time, date and place item.
-				if (mTimeDataFormItem) {
-					mTimeDataFormItem->setEnabled(false);
-				}
-				if (mDateDataFormItem) {
-					mDateDataFormItem->setEnabled(false);
-				}
-				if (mPlaceDataFormItem) {
-					mPlaceDataFormItem->setEnabled(false);
-				}
-				// Update the cenrep value.
-				mTimezoneClient->setTimeUpdateOn(true);
-
-			} else if (Qt::Unchecked == state) {
-				// Enable the time, date and place item.
-				if (mTimeDataFormItem) {
-					mTimeDataFormItem->setEnabled(true);
-				}
-				if (mDateDataFormItem) {
-					mDateDataFormItem->setEnabled(true);
-				}
-				if (mPlaceDataFormItem) {
-					mPlaceDataFormItem->setEnabled(true);
-				}
-
-				// Update the cenrep value.
-				mTimezoneClient->setTimeUpdateOn(false);
-			}
-			
-			updatePlaceItem();
-			updatePlaceLabel();
-		}
-		}
-		break;
-
-		default:
-		break;
-	}
-
-
-	qDebug("clock: ClockSettingsView::formItemValueChanged() <--");
 }
 
 /*!
@@ -427,20 +300,6 @@ void ClockSettingsView::updateTimeItem()
 
 	// Start the timer again.
 	mTickTimer->start(60000 - 1000 * QTime::currentTime().second());
-}
-
-/*!
-	Slot to update the display of the place settings item field.
- */
-void ClockSettingsView::updatePlaceItem()
-{
-	// Get the current zone info.
-	LocationInfo currentZoneInfo = mTimezoneClient->getCurrentZoneInfoL();
-	QString placeItemText(currentZoneInfo.cityName);
-	placeItemText+= tr(",");
-	placeItemText.append(currentZoneInfo.countryName);
-	mPlaceDataFormItem->setContentWidgetData("text", placeItemText);
-//	mPlaceWidget->setText(placeItemText);
 }
 
 /*!
@@ -468,6 +327,45 @@ void ClockSettingsView::handleOrientationChanged(Qt::Orientation orientation)
 
 }
 
+void ClockSettingsView::handleNetworkTimeStateChange(int state)
+{
+	bool cenrepValue = mTimezoneClient->timeUpdateOn();
+	if ((Qt::Checked == state && !cenrepValue)
+			|| (Qt::Unchecked == state && cenrepValue)) {
+		if (Qt::Checked == state) {
+			// Disable the time, date and place item.
+			if (mTimeDataFormItem) {
+				mTimeDataFormItem->setEnabled(false);
+			}
+			if (mDateDataFormItem) {
+				mDateDataFormItem->setEnabled(false);
+			}
+			if (mPlaceDataFormItem) {
+				mPlaceDataFormItem->setEnabled(false);
+			}
+			// Update the cenrep value.
+			mTimezoneClient->setTimeUpdateOn(true);
+
+		} else if (Qt::Unchecked == state) {
+			// Enable the time, date and place item.
+			if (mTimeDataFormItem) {
+				mTimeDataFormItem->setEnabled(true);
+			}
+			if (mDateDataFormItem) {
+				mDateDataFormItem->setEnabled(true);
+			}
+			if (mPlaceDataFormItem) {
+				mPlaceDataFormItem->setEnabled(true);
+			}
+
+			// Update the cenrep value.
+			mTimezoneClient->setTimeUpdateOn(false);
+		}
+
+		updatePlaceInfo();
+	}
+}
+
 /*!
 	Called after loading the view from the docml.
 	The initializaion/setup of the view is done here.
@@ -493,10 +391,6 @@ void ClockSettingsView::setupView()
 	mSettingsForm = static_cast<HbDataForm *> (
 			mDocLoader->findWidget(CLOCK_SETTINGS_DATA_FORM));
 
-	connect(
-			mSettingsForm, SIGNAL(itemShown(const QModelIndex)),
-			this, SLOT(formItemDisplayed(const QModelIndex)));
-
 	// Get the day-date label.
 	mDayDateLabel = static_cast<HbLabel *> (
 			mDocLoader->findWidget(CLOCK_SETTINGS_DATE_LABEL));
@@ -520,7 +414,7 @@ void ClockSettingsView::setupView()
 	// Update the relevant info.
 	updateDateLabel();
 	updateClockWidget();
-	updatePlaceLabel();
+	updatePlaceInfo();
 
 	mTickTimer->start(60000 - 1000 * QTime::currentTime().second());
 
@@ -543,12 +437,6 @@ void ClockSettingsView::createModel()
 	// Add the items to the view.
 	populateModel();
 	mSettingsForm->setModel(mSettingsModel);
-
-	connect(
-			mSettingsModel,
-			SIGNAL(dataChanged(const QModelIndex, const QModelIndex)),
-			this,
-			SLOT(formItemValueChanged(const QModelIndex, const QModelIndex)));
 }
 
 /*!
@@ -561,18 +449,20 @@ void ClockSettingsView::populateModel()
 	}
 
 	// Add the network time update item.
-	HbDataFormModelItem *networkTimeItem = mSettingsModel->appendDataFormItem(
-			HbDataFormModelItem::CheckBoxItem,
-			"");
+	mNetworkTimeItem = mSettingsModel->appendDataFormItem(
+			HbDataFormModelItem::CheckBoxItem, "");
 	bool networkTime = mTimezoneClient->timeUpdateOn();
 	Qt::CheckState state = Qt::Unchecked;
 	if (networkTime) {
 		state = Qt::Checked;
 	}
-	networkTimeItem->setContentWidgetData(
+	mNetworkTimeItem->setContentWidgetData(
 			"checkState", state);
-	networkTimeItem->setContentWidgetData(
+	mNetworkTimeItem->setContentWidgetData(
 			"text", QString(hbTrId("txt_clk_setlabel_use_network_date_time")));
+	mSettingsForm->addConnection(
+			mNetworkTimeItem, SIGNAL(stateChanged(int)),
+			this, SLOT(handleNetworkTimeStateChange(int)));
 
 	// Add the time item.
 	// Custom data type for adding a time button to the data form.
@@ -606,7 +496,6 @@ void ClockSettingsView::populateModel()
 		placeItemText+= tr(", ");
 	}
 	placeItemText.append(currentZoneInfo.countryName);
-//		mPlaceWidget->setText(placeItemText);
 	mPlaceDataFormItem->setContentWidgetData("text", placeItemText);
 	
 	if (networkTime) {
@@ -622,7 +511,7 @@ void ClockSettingsView::populateModel()
 	// Add the regional settings item.
 	HbDataFormModelItem::DataItemType regionalSettingsItem =
 			static_cast<HbDataFormModelItem::DataItemType>
-	(HbDataFormModelItem::CustomItemBase + RegionalSettingsItem);
+			(HbDataFormModelItem::CustomItemBase + RegionalSettingsItem);
 	mSettingsModel->appendDataFormItem(regionalSettingsItem);
 
 }

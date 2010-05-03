@@ -1,6 +1,8 @@
 <RCC>
     <qresource prefix="/" >
-        <file>caleneventlistviewitem.widgetml</file>
+		<file>calengriditemprototype.widgetml</file>
+		<file>calengriditemprototype.css</file>
+        	<file>caleneventlistviewitem.widgetml</file>
 		<file>caleneventlistviewitem.css</file>
 		<file>qgn_indi_cdr_meeting_layer0.svg</file>
 		<file>qtg_mono_exception.png</file>

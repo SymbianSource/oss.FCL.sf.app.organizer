@@ -16,13 +16,14 @@
 */
 
 // System includes
-#include <qdebug.h>
 #include <qglobal.h>
 #include <QtGui>
 #include <HbMainWindow>
 #include <HbView>
 #include <HbInstance>
 #include <HbListView>
+#include <HbMessageBox>
+#include <HbAction>
 
 // User includes
 #include "notesviewmanager.h"
@@ -54,12 +55,17 @@ NotesViewManager::NotesViewManager(
 :QObject(parent),
  mAppControllerIf(controllerIf)
 {
-	qDebug() << "notes: NotesViewManager::NotesViewManager -->";
+	HbMainWindow *window = hbInstance->allMainWindows().first();
 
-	// The document loader and views.
-	loadViews();
+	mAgendaUtil = mAppControllerIf.agendaUtil();
 
-	qDebug() << "notes: NotesViewManager::NotesViewManager <--";
+	// Load the main view at the start up.
+	loadNotesMainView();
+
+	// Delay loading of other views till main view is loaded.
+	connect(
+			window, SIGNAL(viewReady()),
+			this, SLOT(loadOtherViews()));
 }
 
 /*!
@@ -116,36 +122,10 @@ void NotesViewManager::switchToView(NotesNamespace::NotesViewIds viewId)
 }
 
 /*!
-	Loads the views from the docml file.
- */
-void NotesViewManager::loadViews()
-{
-	qDebug() << "notes: NotesViewManager::loadViews -->";
-
-	// Load the main view.
-	loadNotesMainView();
-	// Load the collection view.
-	loadNotesCollectionView();
-	// Load the to-do view.
-	loadTodoView();
-	// Load the favorites view.
-	loadFavoritesView();
-	// Load the recent notes view.
-	loadNoteView();
-
-	// Set the main view to the window
-	hbInstance->allMainWindows().first()->addView(mMainView);
-
-	qDebug() << "notes: NotesViewManager::loadViews <--";
-}
-
-/*!
 	Loads the notes main view.
  */
 void NotesViewManager::loadNotesMainView()
 {
-	qDebug() << "notes: NotesViewManager::loadNotesMainView -->";
-
 	bool loadSuccess;
 
 	// Construct the document loader instance
@@ -165,8 +145,13 @@ void NotesViewManager::loadNotesMainView()
 			mMainView, "notesviewmanager.cpp", "Unable to find the main view.");
 	// Setup the view.
 	mMainView->setupView(mAppControllerIf, docLoader);
+	// Connect to main view signal for entry deletion.
+	connect (
+			mMainView, SIGNAL(deleteEntry(ulong)),
+			this, SLOT(deleteEntryFromView(ulong)));
 
-	qDebug() << "notes: NotesViewManager::loadNotesMainView <--";
+	// Set the main view to the window
+	hbInstance->allMainWindows().first()->addView(mMainView);
 }
 
 /*!
@@ -174,8 +159,6 @@ void NotesViewManager::loadNotesMainView()
  */
 void NotesViewManager::loadNotesCollectionView()
 {
-	qDebug("notes: NotesViewManager::loadNotesCollectionView -- Entry");
-
 	bool loadSuccess;
 
 	// Construct the document loader instance
@@ -189,8 +172,6 @@ void NotesViewManager::loadNotesCollectionView()
 			docLoader->findWidget(NOTES_COLLECTION_VIEW));
 	// Setup the view.
 	mCollectionView->setupView(mAppControllerIf, docLoader);
-
-	qDebug() << "notes: NotesViewManager::loadNotesCollectionView <--";
 }
 
 /*!
@@ -198,7 +179,6 @@ void NotesViewManager::loadNotesCollectionView()
  */
 void NotesViewManager::loadTodoView()
 {
-	qDebug("notes: NotesViewManager::loadTodoView -->");
 
 	bool loadSuccess;
 
@@ -213,8 +193,10 @@ void NotesViewManager::loadTodoView()
 			docLoader->findWidget(NOTES_TODO_VIEW));
 	// Setup the view.
 	mTodoView->setupView(mAppControllerIf, docLoader);
-
-	qDebug() << "notes: NotesViewManager::loadTodoView <--";
+	// Connect to to-do view signal for entry deletion.
+	connect (
+			mTodoView, SIGNAL(deleteEntry(ulong)),
+			this, SLOT(deleteEntryFromView(ulong)));
 }
 
 /*!
@@ -222,8 +204,6 @@ void NotesViewManager::loadTodoView()
  */
 void NotesViewManager::loadFavoritesView()
 {
-	qDebug("notes: NotesViewManager::loadFavoritesView -->");
-
 	bool loadSuccess;
 
 	// Construct the document loader instance
@@ -238,7 +218,10 @@ void NotesViewManager::loadFavoritesView()
 	// Setup the view.
 	mFavoriteView->setupView(mAppControllerIf, docLoader);
 
-	qDebug() << "notes: NotesViewManager::loadFavoritesView <--";
+	// Connect to favourite view signal for entry deletion.
+	connect (
+			mFavoriteView, SIGNAL(deleteEntry(ulong)),
+			this, SLOT(deleteEntryFromView(ulong)));
 }
 
 /*!
@@ -246,8 +229,6 @@ void NotesViewManager::loadFavoritesView()
  */
 void NotesViewManager::loadNoteView()
 {
-	qDebug("notes: NotesViewManager::loadNoteView -->");
-
 	bool loadSuccess;
 
 	// Construct the document loader instance
@@ -262,7 +243,75 @@ void NotesViewManager::loadNoteView()
 	// Setup the view.
 	mNoteView->setupView(mAppControllerIf, docLoader);
 
-	qDebug() << "notes: NotesViewManager::loadNoteView <--";
+	connect(
+			mNoteView, SIGNAL(deleteEntry(ulong)),
+			this, SLOT(deleteEntryFromView(ulong)));
 }
 
+/*!
+	 Delete the entry.
+ */
+void NotesViewManager::deleteEntryFromView(ulong entryId)
+{
+	if (showDeleteConfirmationQuery(entryId)) {
+		// Delete the given note.
+		mAgendaUtil->deleteEntry(entryId);
+	}
+}
+
+/*!
+	Loads other views from the docml file.
+ */
+void NotesViewManager::loadOtherViews()
+{
+	// Load the collection view.
+	loadNotesCollectionView();
+	// Load the to-do view.
+	loadTodoView();
+	// Load the favorites view.
+	loadFavoritesView();
+	// Load the recent notes view.
+	loadNoteView();
+
+	// Disconnect the signal viewReady as all the views are loaded.
+	HbMainWindow *window = hbInstance->allMainWindows().first();
+	disconnect(
+			window, SIGNAL(viewReady()),
+			this, SLOT(loadOtherViews()));
+}
+
+/* !
+	Show the delete confirmation query.
+ */
+bool NotesViewManager::showDeleteConfirmationQuery(ulong noteId)
+{
+	bool retValue(false);
+
+	HbMessageBox confirmationQuery(HbMessageBox::MessageTypeQuestion);
+	confirmationQuery.setDismissPolicy(HbDialog::NoDismiss);
+	confirmationQuery.setTimeout(HbDialog::NoTimeout);
+	confirmationQuery.setIconVisible(true);
+
+	QString displayText;
+	QString x;
+	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
+	if (AgendaEntry::TypeTodo == entry.type()) {
+		displayText += hbTrId("txt_notes_info_delete_todo_note");
+	} else {
+		displayText += hbTrId("txt_notes_info_delete_note");
+	}
+
+	confirmationQuery.setText(displayText);
+
+	confirmationQuery.setPrimaryAction(new HbAction(
+	    hbTrId("txt_notes_button_dialog_delete"), &confirmationQuery));
+	confirmationQuery.setSecondaryAction(new HbAction(
+	    hbTrId("txt_common_button_cancel"), &confirmationQuery));
+	HbAction *selected = confirmationQuery.exec();
+	if (selected == confirmationQuery.primaryAction()) {
+		retValue = true;
+	}
+
+	return retValue;
+}
 // End of file	--Don't remove this.

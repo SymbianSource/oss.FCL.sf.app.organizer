@@ -26,6 +26,7 @@
 #include "alarmalertplugin.h"
 #include "alarmalertwidget_p.h"
 #include "alarmalert.h"
+#include "alarmalertdocloader.h"
 
 // Plugin export
 Q_EXPORT_PLUGIN2(alarmalertplugin, AlarmAlertPlugin);
@@ -131,7 +132,31 @@ HbDeviceDialogInterface *AlarmAlertPlugin::createDeviceDialog(const QString &dev
     
 	// Create and return the alarm alert dialog
     HbDeviceDialogInterface *ret(0);
-    AlarmAlertDialogPrivate *alarmDialog = new AlarmAlertDialogPrivate(parameters);
-    ret = alarmDialog;
+    AlarmAlertDocLoader *alertDocLoader = new AlarmAlertDocLoader(parameters);
+    // Get the type of alarm to load the proper docml
+    QVariantMap::const_iterator iter = parameters.constBegin();
+    int count = parameters.size();
+    AlarmType alertType = OtherAlarm;
+	while (iter != parameters.constEnd()) {
+		QString key(iter.key());
+		if (alarmType == key) {
+			alertType = static_cast <AlarmType> (iter.value().toInt());
+		}
+		iter++;
+	}
+    bool loadSuccess = false;
+    if (alertType == ClockAlarm) {
+    	alertDocLoader->load(alarmNormalUIClockDocml, &loadSuccess);
+    }else if (alertType == TodoAlarm) {
+    	alertDocLoader->load(alarmNormalUITodoDocml, &loadSuccess);
+    }else if(alertType == CalendarAlarm) {
+    	alertDocLoader->load(alarmNormalUICalendarDocml, &loadSuccess);
+    }
+    if(!loadSuccess) {
+    	qFatal("Unable to load the docml");
+    }
+    AlarmAlertDialogPrivate *alertDialog = qobject_cast<AlarmAlertDialogPrivate*> (alertDocLoader->findWidget("dialog"));
+    alertDialog->setupNormalUI(alertDocLoader);
+    ret = alertDialog;
     return ret;
 }

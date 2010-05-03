@@ -30,7 +30,8 @@
 CalenSettings::CalenSettings(HbDataForm *form, QObject *parent)
 :QObject(parent),
  mSettingsForm(form),
- mSettingsModel(0)
+ mSettingsModel(0),
+ mShowRegionalInfoItem(NULL)
 {   
     mSettingsManager = new XQSettingsManager(this);
 	mAlarmSnoozeCenrepKey = new XQSettingsKey(
@@ -39,6 +40,8 @@ CalenSettings::CalenSettings(HbDataForm *form, QObject *parent)
 	mWeekNumberCenrepKey = new XQSettingsKey(
 										XQSettingsKey::TargetCentralRepository, 
 										KCRUidCalendar, KCalendarWeekViewTitle);
+	mShowRegionalInfoKey = new XQSettingsKey(XQSettingsKey::TargetCentralRepository,
+	                                         KCRUidCalendar, KShowRegionalInformation);
 	
 	// Read the initial values from the cenrep
 	QVariant value = mSettingsManager->readItemValue(*mAlarmSnoozeCenrepKey);
@@ -46,6 +49,9 @@ CalenSettings::CalenSettings(HbDataForm *form, QObject *parent)
 	
 	value = mSettingsManager->readItemValue(*mWeekNumberCenrepKey);
 	mShowWeekNumber = value.toUInt();
+	
+	value = mSettingsManager->readItemValue(*mShowRegionalInfoKey);
+	mShowRegionalInfo = value.toUInt();
 }
 
 CalenSettings::~CalenSettings()
@@ -102,9 +108,26 @@ void CalenSettings::createModel()
 										QString(hbTrId("txt_calendar_button_no")));
 	mShowWeekNumberItem->setContentWidgetData(QString("additionalText"), 
 										QString(hbTrId("txt_calendar_button_yes")));
+	
 	mSettingsForm->addConnection(mShowWeekNumberItem, SIGNAL(clicked()), 
-										this, SLOT(handleWeekNumberChange()));
+	                             this, SLOT(handleWeekNumberChange()));
 	mSettingsModel->appendDataFormItem(mShowWeekNumberItem);
+	
+	// TODO: Append the regional information setting only if any regional plugins have been
+	// loaded by the customisation manager
+	mShowRegionalInfoItem = new HbDataFormModelItem();
+	mShowRegionalInfoItem->setType(HbDataFormModelItem::ToggleValueItem);
+	mShowRegionalInfoItem->setData(HbDataFormModelItem::LabelRole, 
+	                               QString("Show regional info"));     
+
+	// For HbPushButton type properties -- to be used for toggle value item
+	mShowRegionalInfoItem->setContentWidgetData(QString("text"), 
+	                                            QString(hbTrId("txt_calendar_button_no")));
+	mShowRegionalInfoItem->setContentWidgetData(QString("additionalText"), 
+	                                            QString(hbTrId("txt_calendar_button_yes")));
+	mSettingsForm->addConnection(mShowRegionalInfoItem, SIGNAL(clicked()),
+	                             this, SLOT(handleRegionalInfoChange()));
+	mSettingsModel->appendDataFormItem(mShowRegionalInfoItem);
 }
 
 void CalenSettings::handleAlarmSnoozeTimeChange(int index)
@@ -156,6 +179,21 @@ void CalenSettings::handleWeekNumberChange()
 	}
 }
 
+void CalenSettings::handleRegionalInfoChange()
+{
+    QVariant data = mShowRegionalInfoItem->contentWidgetData(QString("text"));
+    QString value = data.toString();
+    if(!value.compare(hbTrId("txt_calendar_button_no"))) {    
+        // User has made it OFF
+        mShowRegionalInfo = 0;
+        mSettingsManager->writeItemValue(*mShowRegionalInfoKey, 0);
+    } else if(!value.compare(hbTrId("txt_calendar_button_yes"))) {
+        // User has made it ON.
+        mShowRegionalInfo = 1;
+        mSettingsManager->writeItemValue(*mShowRegionalInfoKey, 1);
+    }
+}
+
 void CalenSettings::populateSettingList()
 {   
     // Read the values from cenrep
@@ -201,7 +239,23 @@ void CalenSettings::populateSettingList()
 												QString(hbTrId("txt_calendar_button_no")));
         mShowWeekNumberItem->setContentWidgetData(QString("additionalText"), 
 												QString(hbTrId("txt_calendar_button_yes")));
-        }    
+        }
+    
+    value = mSettingsManager->readItemValue(*mShowRegionalInfoKey);
+    mShowRegionalInfo = value.toUInt();
+    
+    if (mShowRegionalInfo) {
+        mShowRegionalInfoItem->setContentWidgetData(QString("text"), 
+                                                    QString(hbTrId("txt_calendar_button_yes")));
+        mShowRegionalInfoItem->setContentWidgetData(QString("additionalText"), 
+                                                  QString(hbTrId("txt_calendar_button_no")));
+    } else {
+        mShowRegionalInfoItem->setContentWidgetData(QString("text"), 
+                                                    QString(hbTrId("txt_calendar_button_no")));
+        mShowRegionalInfoItem->setContentWidgetData(QString("additionalText"), 
+                                                    QString(hbTrId("txt_calendar_button_yes")));
+    }
+    
     mSettingsForm->setModel(mSettingsModel);
 }
 // End of file

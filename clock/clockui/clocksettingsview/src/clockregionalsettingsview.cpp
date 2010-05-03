@@ -277,18 +277,6 @@ void ClockRegionalSettingsView::handleDataChanged(
 
 
 	switch (topLeft.row()) {
-/*		case 4:
-		{
-		// Weekdays item.
-		HbDataFormModelItem *workdayItem = mFormModel->itemFromIndex(topLeft);
-		QList<QVariant> items = workdayItem
-				->contentWidgetData("selectedItems").toList();
-		int temp = items.count();
-		for (int var = 0; var < temp; ++var) {
-	        int temp1 = items.at(var).toInt();
-        }
-		}
-		break;*/
 		case 5:
 		{
 		// The Start of week item.

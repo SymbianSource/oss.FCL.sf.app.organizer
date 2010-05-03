@@ -57,16 +57,11 @@ CalenPreviewPane::CalenPreviewPane(MCalenServices& services,
 	mTwoSecTimer = new QTimer(this);
 	mScrollDirection = invalid;
 	mIsNoEntriesAdded = true;
+	mIsGestureHandled = false;
 	mNoEntriesLabel = 0;
 	setAcceptDrops(true);
 	setScrollDirections(Qt::Vertical);
 	setVerticalScrollBarPolicy(HbScrollArea::ScrollBarAlwaysOff);
-	// Set the frame to the preview pane
-	HbFrameItem* frame = new HbFrameItem(this);
-	frame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
-
-	frame->frameDrawer().setFrameGraphicsName("qtg_fr_cal_preview_bg");
-	setBackgroundItem(frame->graphicsItem(), -5);
 	
 	// Connect the scrollig finished signal
 	connect(this, SIGNAL(scrollingEnded()), this,
@@ -110,19 +105,14 @@ void CalenPreviewPane::populateLabel(QDateTime date)
 	// Adjust the layout
 	QGraphicsLinearLayout* layout = static_cast<QGraphicsLinearLayout *>
 															(content->layout());
-	
-	layout->setPreferredWidth(preferredWidth());
-	layout->setMinimumWidth(minimumWidth());
-	layout->setMaximumWidth(maximumWidth());
-	
 	int instanceCount = mInstanceArray.count();
 	HbFontSpec font(HbFontSpec::Secondary);
 	if (mIsNoEntriesAdded) {
 		if (!instanceCount) {
-			return;
+		    mNoEntriesLabel->setVisible(true);
+		    return;
 		} else {
 			// Remove the no entries label
-			layout->removeAt(0);
 			mNoEntriesLabel->setVisible(false);
 		}
 	}
@@ -207,8 +197,6 @@ void CalenPreviewPane::populateLabel(QDateTime date)
 		
 		// Add the no entries text to the preview pane
 		mNoEntriesLabel->setVisible(true);
-		layout->addItem(mNoEntriesLabel);
-		layout->setStretchFactor(mNoEntriesLabel,1);
 		mIsNoEntriesAdded = true;
 	}
 	layout->activate();
@@ -306,7 +294,9 @@ void CalenPreviewPane::scrollingFinished()
  */
 void CalenPreviewPane::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
+	mIsGestureHandled = false;
 	mPressedPos = event->pos();
+	event->accept();
 }
 
 /*!
@@ -315,16 +305,29 @@ void CalenPreviewPane::mousePressEvent(QGraphicsSceneMouseEvent* event)
 void CalenPreviewPane::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
 	qreal posDiff = mPressedPos.x()-event->pos().x();
-	if (abs(posDiff) < 50) {
+	if (abs(posDiff) < 50 && !mIsGestureHandled) {
 		// Preview pane tapped
 		mServices.IssueCommandL(ECalenDayView);
-	} else if (posDiff < -50) {
+	}
+	event->accept();
+}
+
+/*!
+ Function to listen mouse move events
+ */
+void CalenPreviewPane::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+{
+	qreal posDiff = mPressedPos.x()-event->pos().x();
+	if (posDiff < -50) {
+		mIsGestureHandled = true;
 		// right gesture
 		mView->handlePreviewPaneGesture(true);
 	} else if (posDiff > 50) {
+		mIsGestureHandled = true;
 		// left gesture
 		mView->handlePreviewPaneGesture(false);
 	}
+	event->accept();
 }
 
 /*!

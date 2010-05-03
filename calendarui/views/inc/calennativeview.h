@@ -43,17 +43,17 @@ class  CalenNativeView : public CalenView,
          * Destructor.
          */
 	    virtual ~CalenNativeView();
-	    HbWidget* ControlOrNull();
-	    bool isPlugin();
 	    virtual void populationComplete();
 		TBool pluginEnabled();
+		virtual void refreshViewOnGoToDate();
+		QString *pluginText();
 		
 	protected:  // New functions
 	    CalenNativeView( MCalenServices& services );
 	    
-	    void checkInfobarL();
 	    void HandleNotification( const TCalenNotification notification );
 	    virtual void onLocaleChanged(int reason)=0;
+	    virtual void onContextChanged() {};
 
 	protected slots:
 	
@@ -66,12 +66,10 @@ class  CalenNativeView : public CalenView,
 	    
     protected:
     
-        MCalenServices&      mServices; // not owned.
-        TBool mPluginEnabled;
+        MCalenServices	&mServices; // not owned.
 	
     private:
-        HbWidget* mInfobar;//plugin label
-        HbDateTimePicker* mDatePicker;
+        HbDateTimePicker	*mDatePicker;
 	};
 
 #endif  // CALENNATIVEVIEW_H

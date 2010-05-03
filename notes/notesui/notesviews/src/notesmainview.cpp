@@ -17,7 +17,6 @@
 */
 
 // System includes
-#include <QDebug>
 #include <QDateTime>
 #include <HbListView>
 #include <HbListWidget>
@@ -60,11 +59,7 @@ NotesMainView::NotesMainView(QGraphicsWidget *parent)
  mSelectedItem(0),
  mDeleteAction(0)
 {
-	qDebug() << "notes: NotesMainView::NotesMainView -->";
-
 	// Nothing yet.
-
-	qDebug() << "notes: NotesMainView::NotesMainView <--";
 }
 
 /*!
@@ -72,14 +67,11 @@ NotesMainView::NotesMainView(QGraphicsWidget *parent)
  */
 NotesMainView::~NotesMainView()
 {
-	qDebug() << "notes: NotesMainView::~NotesMainView -->";
-
 	if (mDocLoader) {
 		delete mDocLoader;
 		mDocLoader = 0;
 	}
 
-	qDebug() << "notes: NotesMainView::~NotesMainView <--";
 }
 
 /*!
@@ -92,7 +84,6 @@ NotesMainView::~NotesMainView()
 void NotesMainView::setupView(
 		NotesAppControllerIf &controllerIf, NotesDocLoader *docLoader)
 {
-	qDebug() << "notes: NotesMainView::setupView -->";
 
 	mDocLoader = docLoader;
 	mAppControllerIf = &controllerIf;
@@ -190,7 +181,10 @@ void NotesMainView::setupView(
 	connect(
 			mAgendaUtil, SIGNAL(entryUpdated(ulong)),
 			this, SLOT(updateSubTitle(ulong)));
-	qDebug() << "notes: NotesMainView::setupView <--";
+
+	// Set the graphics size for the icons.
+	HbListViewItem *prototype = mListView->listItemPrototype();
+	prototype->setGraphicsSize(HbListViewItem::SmallIcon);
 }
 
 /*!
@@ -199,7 +193,6 @@ void NotesMainView::setupView(
  */
 void NotesMainView::createNewNote()
 {
-	qDebug() << "notes: NotesMainView::createNewNote -->";
 
 	// Here we Display an editor to the use to enter text.
 	mNotesEditor = new NotesEditor(mAgendaUtil, this);
@@ -207,8 +200,6 @@ void NotesMainView::createNewNote()
 			mNotesEditor, SIGNAL(editingCompleted(bool)),
 			this, SLOT(handleEditingCompleted(bool)));
 	mNotesEditor->create(NotesEditor::CreateNote);
-
-	qDebug() << "notes: NotesMainView::createNewNote <--";
 }
 
 /*!
@@ -221,12 +212,8 @@ void NotesMainView::createNewNote()
  */
 void NotesMainView::handleItemReleased(const QModelIndex &index)
 {
-	qDebug() << "notes: NotesMainView::handleItemReleased -->";
-
 	// Sanity check.
 	if (!index.isValid()) {
-		qDebug() << "notes: NotesMainView::handleItemReleased <--";
-
 		return;
 	}
 
@@ -235,8 +222,6 @@ void NotesMainView::handleItemReleased(const QModelIndex &index)
 	ulong noteId = index.data(NotesNamespace::IdRole).value<qulonglong>();
 
 	if (0 >= noteId) {
-		qDebug() << "notes: NotesMainView::handleItemReleased <--";
-
 		// Something wrong.
 		return;
 	}
@@ -244,8 +229,6 @@ void NotesMainView::handleItemReleased(const QModelIndex &index)
 	// Get the entry details.
 	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
 	if (entry.isNull()) {
-		qDebug() << "notes: NotesMainView::handleItemReleased <--";
-
 		// Entry invalid.
 		return;
 	}
@@ -255,8 +238,8 @@ void NotesMainView::handleItemReleased(const QModelIndex &index)
 		mAgendaEventViewer = new AgendaEventViewer(mAgendaUtil, this);
 
 		connect(
-				mAgendaEventViewer, SIGNAL(viewingCompleted(bool)),
-				this, SLOT(handleViewingCompleted(bool)));
+				mAgendaEventViewer, SIGNAL(viewingCompleted(const QDate)),
+				this, SLOT(handleViewingCompleted()));
 		// Launch agenda event viewer
 		mAgendaEventViewer->view(
 				entry, AgendaEventViewer::ActionEditDelete);
@@ -270,8 +253,6 @@ void NotesMainView::handleItemReleased(const QModelIndex &index)
 		// Launch the notes editor with the obtained info.
 		mNotesEditor->edit(entry);
 	}
-
-	qDebug() << "notes: NotesMainView::handleItemReleased <--";
 }
 
 /*!
@@ -285,8 +266,6 @@ void NotesMainView::handleItemReleased(const QModelIndex &index)
 void NotesMainView::handleItemLongPressed(
 		HbAbstractViewItem *item, const QPointF &coords)
 {
-	qDebug() << "notes: NotesMainView::handleItemLongPressed -->";
-
 	mSelectedItem = item;
 
 	ulong noteId = item->modelIndex().data(
@@ -295,6 +274,11 @@ void NotesMainView::handleItemLongPressed(
 
 	// Display a context specific menu.
 	HbMenu *contextMenu = new HbMenu();
+	mOpenAction =
+			contextMenu->addAction(hbTrId("txt_common_menu_open"));
+	connect(
+			mOpenAction, SIGNAL(triggered()),
+			this, SLOT(openNote()));
 
 	// Add actions to the context menu.
 	if (AgendaEntry::TypeTodo == entry.type()) {
@@ -329,6 +313,13 @@ void NotesMainView::handleItemLongPressed(
 					this, SLOT(markNoteAsFavourite()));
 		}
 
+		mMarkTodoAction =
+				contextMenu->addAction(
+						hbTrId("txt_notes_menu_make_it_as_todo_note"));
+		connect(
+				mMarkTodoAction, SIGNAL(triggered()),
+				this, SLOT(markNoteAsTodo()));
+
 	} else if (AgendaEntry::TypeTodo == entry.type()) {
 		if (AgendaEntry::TodoNeedsAction == entry.status()) {
 			mTodoStatusAction = contextMenu->addAction(
@@ -351,7 +342,6 @@ void NotesMainView::handleItemLongPressed(
 	// Show the menu.
 	contextMenu->exec(coords);
 
-	qDebug() << "notes: NotesMainView::handleItemLongPressed <--";
 }
 
 /*!
@@ -359,30 +349,23 @@ void NotesMainView::handleItemLongPressed(
  */
 void NotesMainView::deleteNote()
 {
-	qDebug() << "notes: NotesMainView::deleteNote -->";
-
 	Q_ASSERT(mSelectedItem);
 
 	QModelIndex index = mSelectedItem->modelIndex();
 	if (!index.isValid()) {
-		qDebug() << "notes: NotesMainView::deleteNote <--";
-
 		return;
 	}
 	ulong noteId =
 			index.data(NotesNamespace::IdRole).value<qulonglong>();
 	if (!noteId) {
-		qDebug() << "notes: NotesMainView::deleteNote <--";
 
 		return;
 	}
 
-	// Delete the given note.
-	mAgendaUtil->deleteEntry(noteId);
+	// Emit the signal.Deletion would happen in view manager.
+	emit deleteEntry(noteId);
 
 	mSelectedItem = 0;
-
-	qDebug() << "notes: NotesMainView::deleteNote <--";
 }
 
 /*!
@@ -394,8 +377,6 @@ void NotesMainView::deleteNote()
  */
 void NotesMainView::markTodoStatus()
 {
-	qDebug() << "notes: NotesMainView::markTodoStatus -->";
-
 	ulong noteId = mSelectedItem->modelIndex().data(
 			NotesNamespace::IdRole).value<qulonglong>();
 	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
@@ -408,7 +389,6 @@ void NotesMainView::markTodoStatus()
 		mAgendaUtil->setCompleted(entry, false, currentDateTime);
 	}
 
-	qDebug() << "notes: NotesMainView::markTodoStatus <-- ";
 }
 
 /*!
@@ -416,8 +396,6 @@ void NotesMainView::markTodoStatus()
  */
 void NotesMainView::markNoteAsFavourite()
 {
-	qDebug() << "notes : NotesMainView::markNoteAsFavourite -->";
-
 	ulong noteId = mSelectedItem->modelIndex().data(
 				NotesNamespace::IdRole).value<qulonglong>();
 	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
@@ -429,7 +407,6 @@ void NotesMainView::markNoteAsFavourite()
 	}
 	mAgendaUtil->updateEntry(entry);
 
-	qDebug() << "notes : NotesMainView::markNoteAsFavourite <--";
 }
 
 /*!
@@ -441,14 +418,11 @@ void NotesMainView::markNoteAsFavourite()
  */
 void NotesMainView::handleEditingCompleted(bool status)
 {
-	qDebug() << "notes: NotesMainView::handleEditingCompleted -->";
-
 	Q_UNUSED(status)
 
 	// Cleanup.
 	mNotesEditor->deleteLater();
 
-	qDebug() << "notes: NotesMainView::handleEditingCompleted <--";
 }
 
 /*!
@@ -456,12 +430,10 @@ void NotesMainView::handleEditingCompleted(bool status)
  */
 void NotesMainView::displayCollectionView()
 {
-	qDebug() << "notes: NotesMainView::displayCollectionView -->";
 
 	// Switch to collections view.
 	mAppControllerIf->switchToView(NotesNamespace::NotesCollectionViewId);
 
-	qDebug() << "notes: NotesMainView::displayCollectionView <--";
 }
 
 /*!
@@ -471,11 +443,7 @@ void NotesMainView::displayCollectionView()
  */
 void NotesMainView::scrollTo(QModelIndex index)
 {
-	qDebug() << "notes: NotesMainView::scrollTo -->";
-
 	mListView->scrollTo(index, HbAbstractItemView::EnsureVisible);
-
-	qDebug() << "notes: NotesMainView::scrollTo <--";
 }
 
 /*!
@@ -483,15 +451,12 @@ void NotesMainView::scrollTo(QModelIndex index)
 
 	\param status Indicates the status of viewing
  */
-void NotesMainView::handleViewingCompleted(bool status)
+void NotesMainView::handleViewingCompleted()
 {
-	qDebug() << "notes: NotesMainView::handleViewingCompleted -->";
 
-	Q_UNUSED(status)
 
 	mAgendaEventViewer->deleteLater();
 
-	qDebug() << "notes: NotesMainView::handleViewingCompleted <--";
 }
 
 /*!
@@ -499,11 +464,7 @@ void NotesMainView::handleViewingCompleted(bool status)
  */
 void NotesMainView::handleActionStateChanged()
 {
-	qDebug() << "notes: NotesMainView::handleActionStateChanged -->";
-
 	mAllNotesAction->setChecked(true);
-
-	qDebug() << "notes: NotesMainView::handleActionStateChanged <--";
 }
 
 /*!
@@ -512,18 +473,15 @@ void NotesMainView::handleActionStateChanged()
 
 void NotesMainView::editTodo()
 {
-	qDebug() << "notes: NotesMainView::editTodo -->";
 
 	// Get the selected list item index
 	QModelIndex index = mSelectedItem->modelIndex();
 	if (!index.isValid()) {
-		qDebug() << "notes: NotesMainView::editTodo <--";
 		return;
 	}
 	ulong todoId =
 			index.data(NotesNamespace::IdRole).value<qulonglong>();
 	if (!todoId) {
-		qDebug() << "notes: NotesMainView::editTodo <--";
 
 		return;
 	}
@@ -537,7 +495,6 @@ void NotesMainView::editTodo()
 	// Launch the to-do editor with the obtained info.
 	mNotesEditor->edit(todoId);
 
-	qDebug() << "notes: NotesMainView::editTodo <--";
 }
 
 /*!
@@ -552,18 +509,8 @@ void NotesMainView::handleOrientationChanged(Qt::Orientation orientation)
 
 	if (Qt::Horizontal == orientation) {
 		prototype->setStretchingStyle(HbListViewItem::StretchLandscape);
-
-		// Set the text in landscape mode
-		mAllNotesAction->setText(hbTrId("txt_notes_button_all"));
-		mViewCollectionAction->setText(hbTrId("txt_notes_button_collections"));
-		mAddNoteAction->setText(hbTrId("txt_notes_button_new_note"));
 	} else {
 		prototype->setStretchingStyle(HbListViewItem::NoStretching);
-
-		// Set empty text in portriat mode so that only icons are visible.
-		mAllNotesAction->setText("");
-		mViewCollectionAction->setText("");
-		mAddNoteAction->setText("");
 	}
 }
 
@@ -583,5 +530,93 @@ void NotesMainView::updateSubTitle(ulong id)
 	int c= entries.count();
 	mSubTitle->setHeading(
 			hbTrId("txt_notes_subhead_ln_notes",entries.count()));
+}
+
+/*!
+	Slot to make a note as to-do.
+ */
+void NotesMainView::markNoteAsTodo()
+{
+	Q_ASSERT(mSelectedItem);
+
+	QModelIndex index = mSelectedItem->modelIndex();
+	if (!index.isValid()) {
+		return;
+	}
+	ulong noteId = index.data(NotesNamespace::IdRole).value<qulonglong> ();
+	if (!noteId) {
+		return;
+	}
+	// Get the entry details.
+	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
+
+	if (entry.isNull()) {
+		// Entry invalid.
+		return;
+	}
+
+	// Here change the type of modified note and destroy the noteeditor and
+	// construct the to-do editor.
+	entry.setType(AgendaEntry::TypeTodo);
+
+	QDateTime dueDateTime;
+	QDate currentDate(QDate::currentDate());
+	dueDateTime.setDate(
+			QDate(currentDate.year(),currentDate.month(),currentDate.day()+1));
+	dueDateTime.setTime(QTime::fromString("12:00 am", "hh:mm ap"));
+
+	entry.setStartAndEndTime(dueDateTime, dueDateTime);
+
+	entry.setSummary(entry.description().left(80));
+
+	if (80 > entry.description().length()) {
+		entry.setDescription("");
+	}
+
+	// Remove favourite if marked so.
+	entry.setFavourite(0);
+
+	// Set the status of the to-do.
+	entry.setStatus(AgendaEntry::TodoNeedsAction);
+
+	// First clone the todoEntry for the new type.
+	mAgendaUtil->cloneEntry(entry, AgendaEntry::TypeTodo);
+
+	// Delete the old entry.
+	mAgendaUtil->deleteEntry(entry.id());
+}
+
+
+/*
+	Opens the notes editor if selected item is note otherwise opens
+	to-do viewer if selected item is to-do event
+ */
+void NotesMainView::openNote()
+{
+	ulong noteId = mSelectedItem->modelIndex().data(
+			NotesNamespace::IdRole).value<qulonglong>();
+	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
+
+	if (AgendaEntry::TypeNote == entry.type()) {
+		// Construct notes editor.
+		mNotesEditor = new NotesEditor(mAgendaUtil, this);
+		connect(
+				mNotesEditor, SIGNAL(editingCompleted(bool)),
+				this, SLOT(handleEditingCompleted(bool)));
+
+		// Launch the notes editor with the obtained info.
+		mNotesEditor->edit(entry);
+	} else if (AgendaEntry::TypeTodo == entry.type()) {
+
+		// Construct agenda event viewer.
+		mAgendaEventViewer = new AgendaEventViewer(mAgendaUtil, this);
+
+		connect(
+				mAgendaEventViewer, SIGNAL(viewingCompleted(bool)),
+				this, SLOT(handleViewingCompleted(bool)));
+		// Launch agenda event viewer
+		mAgendaEventViewer->view(
+				entry, AgendaEventViewer::ActionEditDelete);
+	}
 }
 // End of file	--Don't remove this.

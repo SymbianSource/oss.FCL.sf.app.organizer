@@ -41,8 +41,8 @@
 /*!
  Default constructor.
  */
-CalenNativeView::CalenNativeView(MCalenServices& services) :
-	mServices(services), mPluginEnabled(false)//,mGoToDateForm(NULL)
+CalenNativeView::CalenNativeView(MCalenServices &services) :
+	mServices(services)
 {
 	setTitle(hbTrId("txt_calendar_title_calendar"));
 
@@ -51,6 +51,7 @@ CalenNativeView::CalenNativeView(MCalenServices& services) :
 
 	notificationArray.Append(ECalenNotifySystemTimeChanged);
 	notificationArray.Append(ECalenNotifySystemLocaleChanged);
+	notificationArray.Append(ECalenNotifyContextChanged);
 
 	mServices.RegisterForNotificationsL(this, notificationArray);
 
@@ -65,60 +66,12 @@ CalenNativeView::~CalenNativeView()
 }
 
 /*!
- Checks to see if an info bar is available from a customisation plugin
- */
-void CalenNativeView::checkInfobarL()
-{
-	HbWidget* pluginInfobar = mServices.Infobar();
-
-	if (mInfobar && mInfobar != pluginInfobar) {
-		mServices.IssueNotificationL(ECalenNotifyCheckPluginUnloading);
-		mInfobar = NULL;
-	}
-
-	if (pluginInfobar) {
-		mInfobar = pluginInfobar;
-	}
-
-}
-
-/*!
- Returns true if infobar is there
- */
-bool CalenNativeView::isPlugin()
-{
-	HbWidget* pluginInfobar = mServices.Infobar();
-	if (pluginInfobar) {
-		return true;
-	} else {
-		return false;
-	}
-
-}
-
-/*!
  Issues populcaiton complete to the framework
  */
 void CalenNativeView::populationComplete()
 {
 	// Population is complete, issue the notification
 	mServices.IssueNotificationL(ECalenNotifyViewPopulationComplete);
-}
-
-/*!
- Returns a pointer to the available secondary control, or NULL if none is
- available. The secondary control may be either an info bar or a preview pane
- */
-HbWidget* CalenNativeView::ControlOrNull()
-{
-	HbWidget* pluginInfobar = NULL;
-	if (mInfobar) {
-		pluginInfobar = mInfobar;
-
-	} else {
-		pluginInfobar = mServices.Infobar();
-	}
-	return pluginInfobar;
 }
 
 /*!
@@ -182,8 +135,17 @@ void CalenNativeView::goToSelectedDate()
 		//Set the selected date to contextDate.
 		contextDate.setDate(selectedDate);
 		context.setFocusDateAndTimeL(contextDate, KCalenMonthViewUidValue);
-		mServices.IssueCommandL(ECalenStartActiveStep);
 	}
+	refreshViewOnGoToDate();
+}
+
+/*!
+ Virtual function to refresh the current view upon selecting a date
+ from GoToDate popup
+ */
+void CalenNativeView::refreshViewOnGoToDate()
+{
+	mServices.IssueCommandL(ECalenStartActiveStep);
 }
 
 /*!
@@ -213,17 +175,31 @@ void CalenNativeView::HandleNotification(const TCalenNotification notification)
 			onLocaleChanged(EChangesLocale);
 		}
 			break;
+		case ECalenNotifyContextChanged: {
+			onContextChanged();
+		}
+		break;
 		default:
 			break;
 	}
 }
 
 /*!
- Returns true if plugin is enabled
+ Returns true if plugin is loaded
  */
 TBool CalenNativeView::pluginEnabled()
 {
-	return mPluginEnabled;
+	QString *pluginInfo = mServices.InfobarTextL();
+	if (!pluginInfo) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+QString *CalenNativeView::pluginText()
+{
+	return mServices.InfobarTextL();
 }
 
 //End Of File

@@ -16,6 +16,7 @@
 */
 
 // System includes
+#include <hbextendedlocale.h>
 #include <calsession.h>
 #include <calinstance.h>
 #include <CalenImporter>
@@ -41,6 +42,7 @@ _LIT8(KVersionICal,		"VERSION:2.0");
 _LIT8(KVersionVCal,		"VERSION:1.0");
 const TInt KReadDataAmount = 256;
 const TInt KGuidLength = 30;
+const TInt KNoOfDaysInWeek = 7;
 static const int startDateArray[2] = { 1900, 1};
 static const int endDateArray[2] = { 2100, 1};
 
@@ -297,6 +299,18 @@ ulong AgendaUtilPrivate::addEntry(const AgendaEntry& entry)
 				calTime.SetTimeLocalL(tempTime);
 				newEntry->SetLastModifiedDateL(calTime);
 
+				// Set the dtstamp time.It is used to set the cretaion time.
+				TCalTime creationCalTime;
+				QDateTime dtStamp = entry.dtStamp();
+				TDateTime creationDateTime(
+						dtStamp.date().year(),
+						static_cast<TMonth>(dtStamp.date().month() - 1),
+						dtStamp.date().day() - 1, dtStamp.time().hour(),
+						dtStamp.time().minute(), 0, 0);
+				TTime creationTTime(creationDateTime);
+				creationCalTime.SetTimeLocalL(creationTTime);
+				//newEntry->SetDTStampL(creationCalTime);
+
 				// Finally set the entry to the database using the entry view.
 				entryArray.AppendL(newEntry);
 				iCalEntryView->StoreL(entryArray, success);
@@ -397,66 +411,31 @@ ulong AgendaUtilPrivate::addEntry(const AgendaEntry& entry)
 				// Set the repeat type if applicable.
 				if (AgendaRepeatRule::InvalidRule
 						!= entry.repeatRule().type()) {
-					TCalRRule repeatRule(static_cast<TCalRRule::TType>(
-							entry.repeatRule().type()));
-					QDate ruleStartDate = entry.repeatRule().repeatRuleStart();
-					QTime ruleStartTime = entry.startTime().time();
-					TDateTime ruleStartCalendarDateTime(
-							ruleStartDate.year(),
-							static_cast<TMonth>(ruleStartDate.month() - 1),
-							ruleStartDate.day() - 1, ruleStartTime.hour(),
-							ruleStartTime.minute(), 0, 0);
-
-					TCalTime ruleStartCalTime;
-					ruleStartCalTime.SetTimeLocalL(
-							TTime(ruleStartCalendarDateTime));
-					repeatRule.SetDtStart(ruleStartCalTime);
-					repeatRule.SetInterval(entry.repeatRule().interval());
-					QDate repeatUntilDate = entry.repeatRule().until();
-					TDateTime repeatTill(
-							repeatUntilDate.year(),
-							static_cast<TMonth> (repeatUntilDate.month() - 1),
-							repeatUntilDate.day() - 1, ruleStartTime.hour(),
-							ruleStartTime.minute(), 0, 0);
-
-					TCalTime ruleRepeatTillTime;
-					ruleRepeatTillTime.SetTimeLocalL(TTime(repeatTill));
-					repeatRule.SetUntil(ruleRepeatTillTime);
-
-					QList<AgendaRepeatRule::Day> qDays =
-							entry.repeatRule().byDay();
-					RArray<TDay> days;
-					for (int i = 0; i < qDays.count(); i++) {
-						days.Append(TDay(qDays[i]));
-					}
-					if (days.Count() > 0) {
-						repeatRule.SetByDay(days);
-					}
-
-					QList<int> qmonthDay = entry.repeatRule().byMonthDay();
-					RArray<TInt> monthDay;
-					for (int i = 0; i < qmonthDay.count(); i++) {
-						monthDay.Append(qmonthDay[i] - 1);
-					}
-					if (monthDay.Count() > 0) {
-						repeatRule.SetByMonthDay(monthDay);
-					}
-
-					QList<AgendaRepeatRule::Month> qMonth =
-							entry.repeatRule().byMonth();
-					RArray<TMonth> month;
-					for (int i = 0; i < qMonth.count(); i++) {
-						month.Append(TMonth(qMonth[i]));
-					}
-					if (month.Count() > 0) {
-						repeatRule.SetByMonth(month);
-					}
+					AgendaRepeatRule agendaRepeatRule = entry.repeatRule();
+					TCalRRule repeatRule = 
+							createTCalRRuleFromAgendaRRule(agendaRepeatRule);
 					newEntry->SetRRuleL(repeatRule);
 				}
 
 				// Save the status of the entry.
 				newEntry->SetStatusL((CCalEntry::TStatus) entry.status());
 				newEntry->SetLastModifiedDateL();
+				
+				// Save the geo value if any
+				AgendaGeoValue entryGeoValue = entry.geoValue();
+				if (!entryGeoValue.isNull()) {
+					CCalGeoValue* geoValue = CCalGeoValue::NewL();
+					double latitude;
+					double longitude;
+					entryGeoValue.getLatLong(latitude, longitude);
+					
+					// set the values to symbian geo value
+					geoValue->SetLatLongL(latitude, longitude);
+					
+					// set it to CCalentry
+					newEntry->SetGeoValueL(*geoValue);
+					delete geoValue;
+				}
 				
 				// Finally set the entry to the database using the entry view.
 				entryArray.AppendL(newEntry);
@@ -640,66 +619,32 @@ ulong AgendaUtilPrivate::cloneEntry(
 				// Set the repeat type if applicable.
 				if (AgendaRepeatRule::InvalidRule
 						!= entry.repeatRule().type()) {
-					TCalRRule repeatRule(static_cast<TCalRRule::TType>(
-							entry.repeatRule().type()));
-					QDate ruleStartDate = entry.repeatRule().repeatRuleStart();
-					QTime ruleStartTime = entry.startTime().time();
-					TDateTime ruleStartCalendarDateTime(
-							ruleStartDate.year(),
-							static_cast<TMonth>(ruleStartDate.month() - 1),
-							ruleStartDate.day() - 1, ruleStartTime.hour(),
-							ruleStartTime.minute(), 0, 0);
-
-					TCalTime ruleStartCalTime;
-					ruleStartCalTime.SetTimeLocalL(
-							TTime(ruleStartCalendarDateTime));
-					repeatRule.SetDtStart(ruleStartCalTime);
-					repeatRule.SetInterval(entry.repeatRule().interval());
-					QDate repeatUntilDate = entry.repeatRule().until();
-					TDateTime repeatTill(
-							repeatUntilDate.year(),
-							static_cast<TMonth> (repeatUntilDate.month() - 1),
-							repeatUntilDate.day() - 1, ruleStartTime.hour(),
-							ruleStartTime.minute(), 0, 0);
-
-					TCalTime ruleRepeatTillTime;
-					ruleRepeatTillTime.SetTimeLocalL(TTime(repeatTill));
-					repeatRule.SetUntil(ruleRepeatTillTime);
-
-					QList<AgendaRepeatRule::Day> qDays =
-							entry.repeatRule().byDay();
-					RArray<TDay> days;
-					for (int i = 0; i < qDays.count(); i++) {
-						days.Append(TDay(qDays[i]));
-					}
-					if (days.Count() > 0) {
-						repeatRule.SetByDay(days);
-					}
-
-					QList<int> qmonthDay = entry.repeatRule().byMonthDay();
-					RArray<TInt> monthDay;
-					for (int i = 0; i < qmonthDay.count(); i++) {
-						monthDay.Append(qmonthDay[i] - 1);
-					}
-					if (monthDay.Count() > 0) {
-						repeatRule.SetByMonthDay(monthDay);
-					}
-
-					QList<AgendaRepeatRule::Month> qMonth =
-							entry.repeatRule().byMonth();
-					RArray<TMonth> month;
-					for (int i = 0; i < qMonth.count(); i++) {
-						month.Append(TMonth(qMonth[i]));
-					}
-					if (month.Count() > 0) {
-						repeatRule.SetByMonth(month);
-					}
+					AgendaRepeatRule agendaRepeatRule = entry.repeatRule();
+					TCalRRule repeatRule = 
+							createTCalRRuleFromAgendaRRule(agendaRepeatRule);
 					newEntry->SetRRuleL(repeatRule);
 				}
 
 				// Save the status of the entry.
 				newEntry->SetStatusL((CCalEntry::TStatus) entry.status());
 				newEntry->SetLastModifiedDateL();
+				
+				// Save the geo value if any
+				AgendaGeoValue entryGeoValue = entry.geoValue();
+				if (!entryGeoValue.isNull()) {
+					CCalGeoValue* geoValue = CCalGeoValue::NewL();
+					double latitude;
+					double longitude;
+					entryGeoValue.getLatLong(latitude, longitude);
+					
+					// set the values to symbian geo value
+					geoValue->SetLatLongL(latitude, longitude);
+					
+					// set it to CCalentry
+					newEntry->SetGeoValueL(*geoValue);
+					delete geoValue;
+				}
+								
 				// Finally set the entry to the database using the entry view.
 				entryArray.AppendL(newEntry);
 				iCalEntryView->StoreL(entryArray, success);
@@ -878,6 +823,14 @@ bool AgendaUtilPrivate::updateEntry(const AgendaEntry& entry, bool isChild)
 					}
 				}
 
+				// Update the DTStamp time as the entry is modified.
+				if (entry.dtStamp().isValid()) {
+					TCalTime resetCreationTime;
+					TTime nullTime = Time::NullTTime();
+					resetCreationTime.SetTimeLocalL(nullTime);
+					calEntry->SetDTStampL(resetCreationTime);
+				}
+
 				// Check if the favourite property is changed and update the
 				// same.
 				if (entry.favourite() != storedEntry.favourite()) {
@@ -1025,64 +978,9 @@ bool AgendaUtilPrivate::updateEntry(const AgendaEntry& entry, bool isChild)
 					calEntry->ClearRepeatingPropertiesL();
 
 					if(TCalRRule::EInvalid != entry.repeatRule().type()) {
-						TCalRRule
-						repeatRule(static_cast<TCalRRule::TType> (
-								entry.repeatRule().type()));
-						QDate ruleStartDate =
-								entry.repeatRule().repeatRuleStart();
-						QTime ruleStartTime = entry.startTime().time();
-						TDateTime
-						ruleStartCalendarDateTime(
-								ruleStartDate.year(),
-								static_cast<TMonth> (ruleStartDate.month()
-										- 1),
-										ruleStartDate.day() - 1,
-										ruleStartTime.hour(),
-										ruleStartTime.minute(), 0, 0);
-
-						TCalTime ruleStartCalTime;
-						ruleStartCalTime.SetTimeLocalL(
-								TTime(ruleStartCalendarDateTime));
-						repeatRule.SetDtStart(ruleStartCalTime);
-						repeatRule.SetInterval(entry.repeatRule().interval());
-						QDate repeatUntilDate = entry.repeatRule().until();
-						TDateTime repeatTill(
-								repeatUntilDate.year(),
-								static_cast<TMonth>(repeatUntilDate.month() - 1),
-								repeatUntilDate.day() - 1, ruleStartTime.hour(),
-								ruleStartTime.minute(), 0, 0);
-						TCalTime ruleRepeatTillTime;
-						ruleRepeatTillTime.SetTimeLocalL(TTime(repeatTill));
-						repeatRule.SetUntil(ruleRepeatTillTime);
-
-						QList<AgendaRepeatRule::Day> qDays =
-								entry.repeatRule().byDay();
-						RArray<TDay> days;
-						for (int i = 0; i < qDays.count(); i++) {
-							days.Append(TDay(qDays[i]));
-						}
-						if (days.Count()> 0) {
-							repeatRule.SetByDay(days);
-						}
-
-						QList<int> qmonthDay = entry.repeatRule().byMonthDay();
-						RArray<TInt> monthDay;
-						for (int i = 0; i < qmonthDay.count(); i++) {
-							monthDay.Append(qmonthDay[i] - 1);
-						}
-						if (monthDay.Count()> 0) {
-							repeatRule.SetByMonthDay(monthDay);
-						}
-
-						QList<AgendaRepeatRule::Month> qMonth =
-								entry.repeatRule().byMonth();
-						RArray<TMonth> month;
-						for (int i = 0; i < qMonth.count(); i++) {
-							month.Append(TMonth(qMonth[i]));
-						}
-						if (month.Count()> 0) {
-							repeatRule.SetByMonth(month);
-						}
+						AgendaRepeatRule agendaRepeatRule = entry.repeatRule();
+						TCalRRule repeatRule = 
+							createTCalRRuleFromAgendaRRule(agendaRepeatRule);
 						calEntry->SetRRuleL(repeatRule);
 					}
 				}
@@ -1093,6 +991,23 @@ bool AgendaUtilPrivate::updateEntry(const AgendaEntry& entry, bool isChild)
 					calEntry->SetFavouriteL(entry.favourite());
 				}
 				calEntry->SetLastModifiedDateL();
+				
+				// Save the geo value if any
+				AgendaGeoValue entryGeoValue = entry.geoValue();
+				if (!entryGeoValue.isNull()) {
+					CCalGeoValue* geoValue = CCalGeoValue::NewL();
+					double latitude;
+					double longitude;
+					entryGeoValue.getLatLong(latitude, longitude);
+					
+					// set the values to symbian geo value
+					geoValue->SetLatLongL(latitude, longitude);
+					
+					// set it to CCalentry
+					calEntry->SetGeoValueL(*geoValue);
+					delete geoValue;
+				}
+								
 				// Update the entry using the calen entry view.
 				RPointerArray<CCalEntry> entryArray;
 				CleanupClosePushL(entryArray);
@@ -1193,6 +1108,22 @@ bool AgendaUtilPrivate::storeRepeatingEntry(const AgendaEntry& entry,
 	calEntry->SetLocationL(TPtrC(reinterpret_cast<const TUint16 *> (
 										entry.location().utf16())));
 	
+	// Save the geo value if any
+	AgendaGeoValue entryGeoValue = entry.geoValue();
+	if (!entryGeoValue.isNull()) {
+		CCalGeoValue* geoValue = CCalGeoValue::NewL();
+		double latitude;
+		double longitude;
+		entryGeoValue.getLatLong(latitude, longitude);
+		
+		// set the values to symbian geo value
+		geoValue->SetLatLongL(latitude, longitude);
+		
+		// set it to CCalentry
+		calEntry->SetGeoValueL(*geoValue);
+		delete geoValue;
+	}
+	
 	// set the description
 	calEntry->SetDescriptionL(TPtrC(reinterpret_cast<const TUint16 *> (
 										entry.description().utf16())));
@@ -1228,66 +1159,12 @@ bool AgendaUtilPrivate::storeRepeatingEntry(const AgendaEntry& entry,
 	// Set the repeat rules
 	calEntry->ClearRepeatingPropertiesL();
 
-	if(TCalRRule::EInvalid != entry.repeatRule().type()) {
-		TCalRRule
-		repeatRule(static_cast<TCalRRule::TType> (
-				entry.repeatRule().type()));
-		QDate ruleStartDate =
-				entry.repeatRule().repeatRuleStart();
-		QTime ruleStartTime = entry.startTime().time();
-		TDateTime
-		ruleStartCalendarDateTime(
-				ruleStartDate.year(),
-				static_cast<TMonth> (ruleStartDate.month()
-						- 1),
-						ruleStartDate.day() - 1,
-						ruleStartTime.hour(),
-						ruleStartTime.minute(), 0, 0);
-
-		TCalTime ruleStartCalTime;
-		ruleStartCalTime.SetTimeLocalL(
-				TTime(ruleStartCalendarDateTime));
-		repeatRule.SetDtStart(ruleStartCalTime);
-		repeatRule.SetInterval(entry.repeatRule().interval());
-		QDate repeatUntilDate = entry.repeatRule().until();
-		TDateTime repeatTill(
-				repeatUntilDate.year(),
-				static_cast<TMonth>(repeatUntilDate.month() - 1),
-				repeatUntilDate.day() - 1, ruleStartTime.hour(),
-				ruleStartTime.minute(), 0, 0);
-		TCalTime ruleRepeatTillTime;
-		ruleRepeatTillTime.SetTimeLocalL(TTime(repeatTill));
-		repeatRule.SetUntil(ruleRepeatTillTime);
-
-		QList<AgendaRepeatRule::Day> qDays =
-				entry.repeatRule().byDay();
-		RArray<TDay> days;
-		for (int i = 0; i < qDays.count(); i++) {
-			days.Append(TDay(qDays[i]));
-		}
-		if (days.Count()> 0) {
-			repeatRule.SetByDay(days);
-		}
-
-		QList<int> qmonthDay = entry.repeatRule().byMonthDay();
-		RArray<TInt> monthDay;
-		for (int i = 0; i < qmonthDay.count(); i++) {
-			monthDay.Append(qmonthDay[i] - 1);
-		}
-		if (monthDay.Count()> 0) {
-			repeatRule.SetByMonthDay(monthDay);
-		}
-
-		QList<AgendaRepeatRule::Month> qMonth =
-				entry.repeatRule().byMonth();
-		RArray<TMonth> month;
-		for (int i = 0; i < qMonth.count(); i++) {
-			month.Append(TMonth(qMonth[i]));
-		}
-		if (month.Count()> 0) {
-			repeatRule.SetByMonth(month);
-		}
+	if (TCalRRule::EInvalid != entry.repeatRule().type()) {
+		AgendaRepeatRule agendaRepeatRule = entry.repeatRule();
+		TCalRRule repeatRule = 
+				createTCalRRuleFromAgendaRRule(agendaRepeatRule);
 		calEntry->SetRRuleL(repeatRule);
+
 	}
 	
 	bool hasTimeOrDateCanged = (oldEntries[0]->StartTimeL().TimeUtcL() != 
@@ -1529,7 +1406,23 @@ bool AgendaUtilPrivate::createException(const AgendaEntry& entry)
 				calTime2.SetTimeLocalL(endCalTime);
 
 				newEntry->SetStartAndEndTimeL(calTime, calTime2);
-
+				
+				// Save the geo value if any
+				AgendaGeoValue entryGeoValue = entry.geoValue();
+				if (!entryGeoValue.isNull()) {
+					CCalGeoValue* geoValue = CCalGeoValue::NewL();
+					double latitude;
+					double longitude;
+					entryGeoValue.getLatLong(latitude, longitude);
+					
+					// set the values to symbian geo value
+					geoValue->SetLatLongL(latitude, longitude);
+					
+					// set it to CCalentry
+					newEntry->SetGeoValueL(*geoValue);
+					delete geoValue;
+				}
+				
 				// No need to update the repeat rule as it is an exception
 
 				// Store the favourite
@@ -1779,6 +1672,87 @@ QList<AgendaEntry> AgendaUtilPrivate::fetchEntriesInRange(
     return entryList;
 }
 
+void AgendaUtilPrivate::markDatesWithEvents(QDateTime rangeStart, 
+	QDateTime rangeEnd,AgendaUtil::FilterFlags filter, QList<QDate>& dates)
+{
+	RPointerArray<CCalInstance> instanceList;
+	CleanupClosePushL(instanceList);
+	CalCommon::TCalViewFilter filters = filter;
+	TCalTime startDateForInstanceSearch;
+	TCalTime endDateForInstanceSearch;
+
+	TDateTime startTime(rangeStart.date().year(),
+			TMonth(rangeStart.date().month() - 1),
+			rangeStart.date().day() - 1,
+			rangeStart.time().hour(),
+			rangeStart.time().minute(),
+			rangeStart.time().second(),
+			rangeStart.time().msec());
+
+	TDateTime endTime(rangeEnd.date().year(),
+			TMonth(rangeEnd.date().month() - 1),
+			rangeEnd.date().day() - 1,
+			rangeEnd.time().hour(),
+			rangeEnd.time().minute(),
+			rangeEnd.time().second(),
+			rangeEnd.time().msec());
+
+	startDateForInstanceSearch.SetTimeLocalL(startTime);
+	endDateForInstanceSearch.SetTimeLocalL(endTime);
+	CalCommon::TCalTimeRange searchTimeRange(
+			startDateForInstanceSearch,
+			endDateForInstanceSearch);
+
+	iCalInstanceView->FindInstanceL(instanceList, filters, searchTimeRange);
+	
+	// Parse thru the list and mark the dates which have events
+	for (int i = 0; i < instanceList.Count(); i++) {
+		CCalEntry::TType type = instanceList[i]->Entry().EntryTypeL();
+		// Get the start time and end time of the events
+		TCalTime startCalTime = instanceList[i]->StartTimeL();
+		TCalTime endCalTime = instanceList[i]->EndTimeL();
+		TDateTime startDateTime = startCalTime.TimeLocalL().DateTime();
+		QDate startDate(startDateTime.Year(), startDateTime.Month()+1,
+						startDateTime.Day() + 1);
+		if (type == CCalEntry::EEvent || type == CCalEntry::EAppt ||
+				type == CCalEntry::EReminder) {
+			if(endsAtStartOfDay(instanceList[i], endCalTime.TimeLocalL())) {
+				// instance ends at start of endtime day, month view doesnt 
+				// want to show event on this day
+				TDateTime endDateTime = endCalTime.TimeLocalL().DateTime();
+				endDateTime.SetMinute(endDateTime.Minute() - 1);
+				TTime time(endDateTime);
+				if (time <= startDateForInstanceSearch.TimeLocalL()) {
+					continue;
+				}
+			}
+			
+			// Mark the required dates frm start date to end date
+			TTimeIntervalDays days = endCalTime.TimeLocalL().DaysFrom(startCalTime.TimeLocalL());
+			for (int j = -1; j < days.Int(); j++) {
+				QDate date = startDate.addDays(j+1);
+				if (date <= rangeEnd.date()) {
+					dates.append(date);
+				} else {
+					break;
+				}
+			}
+		} else if (type == CCalEntry::EAnniv) {
+			if (startDate <= rangeEnd.date()) {
+				dates.append(startDate);
+			}
+		} else if (type == CCalEntry::ETodo) {
+			// if start time is less that today, then mark it for today
+			if (startDate < QDate::currentDate()) {
+				dates.append(QDate::currentDate());
+			} else {
+				dates.append(startDate);
+			}
+		}
+	}
+	CleanupStack::PopAndDestroy();
+}
+
 QList<AgendaEntry> AgendaUtilPrivate::createEntryIdListForDay( QDateTime day,
                             AgendaUtil::FilterFlags filter )
 {
@@ -1794,13 +1768,53 @@ QList<AgendaEntry> AgendaUtilPrivate::createEntryIdListForDay( QDateTime day,
         RPointerArray<CCalInstance> instanceList;
         CleanupClosePushL(instanceList);
         CalCommon::TCalViewFilter filters = filter;
-        iCalInstanceView->FindInstanceL(instanceList, filters, dayRange);
-
+        // Check if the filter has todos also to be included
+        if(filter & CalCommon::EIncludeIncompletedTodos)
+            {
+            // Show the incompleted todos till date only for the current date 
+            if(QDate::currentDate() == day.date())
+                {
+                // Remove the todos from the filter and fetch it separately
+                CalCommon::TCalViewFilter changedfilter = 
+                                   filter ^ CalCommon::EIncludeIncompletedTodos;
+                iCalInstanceView->FindInstanceL(
+                                         instanceList, changedfilter, dayRange);
+                // Get the range from minimum datetime till the today
+                getDayRange(minTime(), day, dayRange);
+                iCalInstanceView->FindInstanceL(
+                        instanceList ,CalCommon::EIncludeIncompletedTodos | 
+                        // only fetch the first instance for repeating to-dos!
+                        CalCommon::EIncludeRptsNextInstanceOnly, 
+                        dayRange);
+                }
+            else if(QDate::currentDate() < day.date())
+                {
+            	// Fetch all the instances including todos
+            	// only if the day range is in future dates
+                iCalInstanceView->FindInstanceL(
+                                               instanceList, filters, dayRange);
+                }
+            else if(QDate::currentDate() > day.date())
+				{
+				// Remove todos from the filter
+				CalCommon::TCalViewFilter changedfilter = 
+								   filter ^ CalCommon::EIncludeIncompletedTodos;
+            	// Fetch all the instances excluding todos
+            	// only if the day range is in past dates
+				iCalInstanceView->FindInstanceL(
+										 instanceList, changedfilter, dayRange);
+				}
+            }
+        else
+            {
+            iCalInstanceView->FindInstanceL(instanceList, filters, dayRange);
+            }
         // Sort the list
         sortInstanceList(instanceList);
         for(TInt i = 0; i<instanceList.Count(); i++)
             {
-                entryList.append(createAgendaEntryFromCalEntry(instanceList[i]->Entry(), instanceList[i]));
+                entryList.append(createAgendaEntryFromCalEntry(
+                                    instanceList[i]->Entry(), instanceList[i]));
             }
         int count = instanceList.Count();
         for (int i = count - 1; i >= 0; --i) {
@@ -2133,6 +2147,7 @@ void AgendaUtilPrivate::getPreviousInstanceTimes(AgendaEntry& entry,
 					currentInstanceDate.SetTimeLocalL( currentInstanceDate.TimeLocalL()-TTimeIntervalDays(1) );
 					break;
 				case repeatWeekly:
+				case repeatWorkdays:
 					currentInstanceDate.SetTimeLocalL( currentInstanceDate.TimeLocalL()-TTimeIntervalDays(7) );
 					break;
 				case repeatBiWeekly:
@@ -2322,6 +2337,7 @@ void AgendaUtilPrivate::getNextInstanceTimes(AgendaEntry& entry,
 					currentInstanceDate.SetTimeLocalL( currentInstanceDate.TimeLocalL()+TTimeIntervalDays(1) );
 					break;
 				case repeatWeekly:
+				case repeatWorkdays:
 					currentInstanceDate.SetTimeLocalL( currentInstanceDate.TimeLocalL()+TTimeIntervalDays(7) );
 					break;
 				case repeatBiWeekly:
@@ -2436,6 +2452,57 @@ void AgendaUtilPrivate::getNextInstanceTimes(AgendaEntry& entry,
 }
 
 /*!
+	 Returns true if there are no entries in the database else returns false
+	 
+	 \return bool 
+ */
+bool AgendaUtilPrivate::areNoEntriesInCalendar()
+{
+	bool isEmpty;
+	// Query for the entries for entire range
+	RPointerArray<CCalInstance> instanceList;
+	CleanupClosePushL(instanceList);
+	
+	// Create the filter
+	CalCommon::TCalViewFilter filters = AgendaUtil::IncludeAnniversaries
+										| AgendaUtil::IncludeAppointments
+										| AgendaUtil::IncludeEvents
+										| AgendaUtil::IncludeReminders
+										| AgendaUtil::IncludeIncompletedTodos;
+	
+	// Set up the range
+	TCalTime startDateForInstanceSearch;
+	TCalTime endDateForInstanceSearch;
+
+	TDateTime startTime = TDateTime(
+			startDateArray[0], static_cast<TMonth>(startDateArray[1]),
+			0, 0, 0, 0, 0);
+
+	TDateTime endTime = TDateTime(
+			endDateArray[0], static_cast<TMonth>(endDateArray[1]),
+			0, 0, 0, 0, 0);
+
+	startDateForInstanceSearch.SetTimeLocalL(startTime);
+	endDateForInstanceSearch.SetTimeLocalL(endTime);
+	CalCommon::TCalTimeRange searchTimeRange(
+			startDateForInstanceSearch,
+			endDateForInstanceSearch);
+	
+	// Fire a query
+	iCalInstanceView->FindInstanceL(
+			instanceList, filters, searchTimeRange);
+	
+	// Check the list count
+	if (instanceList.Count()) {
+		isEmpty = false;
+	} else {
+		isEmpty = true;
+	}
+	CleanupStack::PopAndDestroy();
+	return isEmpty;
+}
+
+/*!
 	Returns the minimum time supported.
 
 	\return QDateTime holding the minimum supported time.
@@ -2479,6 +2546,54 @@ QDateTime AgendaUtilPrivate::maxTime()
 	return maximumDateTime;
 }
 
+/*!
+    Returns true if entry repeats on workdays else false
+
+    \return true if entry repeats on workdays else false
+ */
+bool AgendaUtilPrivate::isWorkdaysRepeatingEntry(
+											const AgendaRepeatRule& repeatRule)
+{
+	bool status = true;
+	int fixedNum = 1;
+	int ruleday = 0;
+	HbExtendedLocale locale = HbExtendedLocale::system();
+
+	QString workDaysString = locale.workDays();
+	bool ok;
+	uint workDays = workDaysString.toUInt(&ok, 2);
+	if (!ok) {
+		return false;
+	}
+	QList<AgendaRepeatRule::Day> weekDaysFromRule = repeatRule.byDay();
+
+	QList<AgendaRepeatRule::Day> weekDaysFromLocale;
+
+	// "workDays" is a bit mask of seven bits indicating (by being set) which days are workdays. 
+	// The least significant bit corresponds to Monday, the next bit to Tuesday and so on. 
+	// "workDays" is converted into weekDaysFromLocale for comparing with "weekDaysFromRule".
+	for (TInt i = 0; i < KNoOfDaysInWeek; i++) {
+		ruleday = fixedNum << i;
+		if (workDays & ruleday) {
+			weekDaysFromLocale.append((AgendaRepeatRule::Day) i);
+		}
+	}
+
+	// Checks whether the device "workdays" are same as the event's repeat days.
+	if (weekDaysFromRule.count() == weekDaysFromLocale.count()) {
+		for (int i = 0; i < weekDaysFromLocale.count(); i++) {
+			if ((int) weekDaysFromLocale[i] != (int) weekDaysFromRule[i]) {
+				status = false;
+				break;
+			}
+		}
+	} else {
+		status = false;
+	}
+
+	return status;
+
+}
 /*!
 	Creates an AgendaEntry object from a given CCalEntry and CCalInstance.
 
@@ -2575,7 +2690,7 @@ AgendaEntry AgendaUtilPrivate::createAgendaEntryFromCalEntry(
 						calAttendees[i]->StatusL()));
 		entry.addAttendee(attendee);
 	}
-	CleanupStack::PopAndDestroy(&calAttendees);
+	CleanupStack::Pop(&calAttendees);
 
 	// Categories.
 	RPointerArray<CCalCategory> calCategories = calEntry.CategoryListL();
@@ -2614,58 +2729,13 @@ AgendaEntry AgendaUtilPrivate::createAgendaEntryFromCalEntry(
 	}
 
 	// Repear rule.
-	TCalRRule rRule;
-	calEntry.GetRRuleL(rRule);
-	if (rRule.Type() != TCalRRule::EInvalid) {
-		AgendaRepeatRule repeatRule;
-		RArray<TDay> days;
-		rRule.GetByDayL(days);
-		QList<AgendaRepeatRule::Day> qDays;
-		for (int i = 0; i < days.Count(); i++) {
-			qDays.append(AgendaRepeatRule::Day(days[i]));
-		}
-		repeatRule.setByDay(qDays);
-
-		RArray<TMonth> months;
-		rRule.GetByMonthL(months);
-		QList<AgendaRepeatRule::Month> qMonths;
-		for (int i = 0; i < months.Count(); i++) {
-			qMonths.append(AgendaRepeatRule::Month(months[i]));
-		}
-		repeatRule.setByMonth(qMonths);
-
-		RArray<TInt> monthDays;
-		rRule.GetByMonthDayL(monthDays);
-		QList<int> qMonthDays;
-		for (int i = 0; i < monthDays.Count(); i++) {
-			qMonthDays.append(monthDays[i]);
-		}
-		repeatRule.setByMonthDay(qMonthDays);
-
-		repeatRule.setType((AgendaRepeatRule::RuleType)(rRule.Type()));
-		repeatRule.setInterval(rRule.Interval());
-		TCalTime time = rRule.Until();
-		TTime untilTime = time.TimeUtcL();
-		QDate qUntilTime(
-				untilTime.DateTime().Year(),
-				untilTime.DateTime().Month() + 1,
-				untilTime.DateTime().Day() + 1);
-		repeatRule.setUntil(qUntilTime);
-
-		TCalTime dayStart = rRule.DtStart();
-		TTime ruleStart = dayStart.TimeUtcL();
-		QDate qRuleStart(
-				untilTime.DateTime().Year(),
-				untilTime.DateTime().Month() + 1,
-				untilTime.DateTime().Day() + 1);
-		repeatRule.setRepeatRuleStart(qRuleStart);
-
-		TDay wkDay = rRule.WkSt();
-		AgendaRepeatRule::Day qWkDay = (AgendaRepeatRule::Day)wkDay;
-		repeatRule.setWeekStart(qWkDay);
-
+	TCalRRule calRRule;
+	calEntry.GetRRuleL(calRRule);
+	if (calRRule.Type() != TCalRRule::EInvalid) {
+		AgendaRepeatRule agendaRepeatRule =
+		        createAgendaRRuleFromTCalRRule(calRRule);
 		// Set the rule now.
-		entry.setRepeatRule(repeatRule);
+		entry.setRepeatRule(agendaRepeatRule);
 	}
 
 	// Get the RDates.
@@ -2734,6 +2804,40 @@ AgendaEntry AgendaUtilPrivate::createAgendaEntryFromCalEntry(
 						completionTimeInlocal.DateTime().Second(), 0));
 	entry.setCompletedDateTime(completionDateTime);
 
+	// Set the dtStamp time for agenda entry. Currently dtstamp is used as
+	// creation time for the entry type ENote.
+	TCalTime dtStampTime = calEntry.DTStampL();
+	TTime dtStampTimeInLocal = dtStampTime.TimeLocalL();
+	QDateTime dtStampDateTime;
+	if (dtStampTimeInLocal != Time::NullTTime()) {
+		dtStampDateTime.setDate(
+				QDate(
+					dtStampTimeInLocal.DateTime().Year(),
+					dtStampTimeInLocal.DateTime().Month() + 1,
+					dtStampTimeInLocal.DateTime().Day() + 1));
+
+		dtStampDateTime.setTime(
+				QTime(
+					dtStampTimeInLocal.DateTime().Hour(),
+					dtStampTimeInLocal.DateTime().Minute(),
+					dtStampTimeInLocal.DateTime().Second()));
+	}
+	entry.setDTStamp(dtStampDateTime);
+	
+	// Copy the geo value if it has any
+	CCalGeoValue* geoValue = calEntry.GeoValueL();
+	if (geoValue) {
+		AgendaGeoValue entryGeoValue;
+		double latitude;
+		double longitude;
+		geoValue->GetLatLong(latitude, longitude);
+		entryGeoValue.setLatLong(latitude, longitude);
+		
+		// Set it to entry
+		entry.setGeoValue(entryGeoValue);
+		delete geoValue;
+	}
+	
 	// Return the entry.
 	return entry;
 }
@@ -3201,94 +3305,107 @@ int AgendaUtilPrivate::compareTimedNotes( const CCalInstance& aInstance1,
 
 RepeatIndex AgendaUtilPrivate::getRepeatIndex(const CCalEntry& aEntry)
 {
-	RepeatIndex repeatIndex( notRepeated );
+	RepeatIndex repeatIndex(notRepeated);
 
-    TCalRRule rrule;
+	TCalRRule rrule;
 
-    if( aEntry.GetRRuleL( rrule) )
-        {
-        TCalRRule::TType type( rrule.Type() );
-        TInt repeatInterval( rrule.Interval() );
+	if (aEntry.GetRRuleL(rrule)) {
+		TCalRRule::TType type(rrule.Type());
+		TInt repeatInterval(rrule.Interval());
 
-        // If repeat type of current note is not supported in Calendar,
-        // default repeat value is "Other".
-        repeatIndex = repeatOther;
+		// If repeat type of current note is not supported in Calendar,
+		// default repeat value is "Other".
+		repeatIndex = repeatOther;
 
-        switch( type )
-            {
-            case TCalRRule::EDaily:
-                {
-                switch (repeatInterval)
-                    {
-                    case 1:   repeatIndex = repeatDaily;     break;
-                    case 7:   repeatIndex = repeatWeekly;    break;
-                    case 14:  repeatIndex = repeatBiWeekly;  break;
-                    default:                                  break;
-                    }
-                break;
-                }
+		switch (type) {
+			case TCalRRule::EDaily: {
+				switch (repeatInterval) {
+					case 1:
+						repeatIndex = repeatDaily;
+						break;
+					case 7:
+						repeatIndex = repeatWeekly;
+						break;
+					case 14:
+						repeatIndex = repeatBiWeekly;
+						break;
+					default:
+						break;
+				}
+				break;
+			}
 
-            case TCalRRule::EWeekly:
-                {
-                RArray<TDay> weekDays(7);
-                rrule.GetByDayL( weekDays );
+			case TCalRRule::EWeekly: {
+				AgendaRepeatRule agendaRepeatRule =
+				        createAgendaRRuleFromTCalRRule(rrule);
+				bool isWorkdaysRepeating =
+				        isWorkdaysRepeatingEntry(agendaRepeatRule);
 
-                if( weekDays.Count() == 1 ) // FIXME: AL - is this necessary?
-                    {
-                    switch( repeatInterval )
-                        {
-                        case 1:   repeatIndex = repeatWeekly;    break;
-                        case 2:   repeatIndex = repeatBiWeekly;  break;
-                        default:                                  break;
-                        }
-                    }
+				if (isWorkdaysRepeating) {
+					repeatIndex = repeatWorkdays;
+				} else {
+					RArray<TDay> weekDays(7);
+					rrule.GetByDayL(weekDays);
+					if (weekDays.Count() == 1) // FIXME: AL - is this necessary?
+					{
+						switch (repeatInterval) {
+							case 1:
+								repeatIndex = repeatWeekly;
+								break;
+							case 2:
+								repeatIndex = repeatBiWeekly;
+								break;
+							default:
+								break;
+						}
+					}
 
-                weekDays.Close();
+					weekDays.Close();
+				}
+				break;
+			}
 
-                break;
-                }
+			case TCalRRule::EMonthly: {
+				RArray<TInt> monthDays(31);
+				rrule.GetByMonthDayL(monthDays);
 
-            case TCalRRule::EMonthly:
-                {
-                RArray<TInt> monthDays(31);
-                rrule.GetByMonthDayL ( monthDays );
+				if (monthDays.Count() == 1) // FIXME: AL - is this necessary?
+				{
+					switch (repeatInterval) {
+						case 1:
+							repeatIndex = repeatMonthly;
+							break;
+							// If interval of repeat is 12 months, 
+							// every year is shown in Note Editor, 
+							// because it means yearly repeat.
+						case 12:
+							repeatIndex = repeatYearly;
+							break;
+						default:
+							break;
+					}
+				}
 
-                if( monthDays.Count() == 1) // FIXME: AL - is this necessary?
-                    {
-                    switch( repeatInterval )
-                        {
-                        case 1:  repeatIndex = repeatMonthly;  break;
-                        // If interval of repeat is 12 months, 
-                        // every year is shown in Note Editor, 
-                        // because it means yearly repeat.
-                        case 12:  repeatIndex = repeatYearly;   break;
-                        default:                                 break;
-                        }
-                    }
+				monthDays.Close();
 
-                monthDays.Close();
+				break;
+			}
+			case TCalRRule::EYearly: {
+				if (repeatInterval == 1) {
+					repeatIndex = repeatYearly;
+				}
+				break;
+			}
 
-                break;
-                }
-            case TCalRRule::EYearly:
-                {
-                if( repeatInterval == 1 )
-                    {
-                    repeatIndex = repeatYearly;
-                    }
-                break;
-                }
-
-            default:
-                {
-                // If repeat type of current note is not supported in Calendar,
-                // default repeat value is "Other".
-                repeatIndex = repeatOther;
-                break;
-                }
-            }
-        }
-    return repeatIndex;
+			default: {
+				// If repeat type of current note is not supported in Calendar,
+				// default repeat value is "Other".
+				repeatIndex = repeatOther;
+				break;
+			}
+		}
+	}
+	return repeatIndex;
 }
 
 TTime AgendaUtilPrivate::getPreviousInstanceForRepeatOther(CCalEntry& entry, 
@@ -3510,12 +3627,13 @@ void AgendaUtilPrivate::copyField( const CCalEntry& src,
 			// Keep aDst's start date, but copy the start time (h/m/s) from aSrc to aDst.
 			TTime zero(TInt64(0));
 			TTime srcStartTime = src.StartTimeL().TimeUtcL();
-			TTime dtStartDay = zero + dst.StartTimeL().TimeUtcL().DaysFrom(zero);
-			TTimeIntervalMinutes dtStartTimeOfDay;
-			srcStartTime.MinutesFrom(dtStartDay, dtStartTimeOfDay);
+			TTime srcStartDay = zero + src.StartTimeL().TimeUtcL().DaysFrom(zero);
+			TTime dstStartDay = zero + dst.StartTimeL().TimeUtcL().DaysFrom(zero);
+			TTimeIntervalMinutes dstStartTimeOfDay;
+			srcStartTime.MinutesFrom(srcStartDay, dstStartTimeOfDay);
 	
 			TCalTime startTime;
-			startTime.SetTimeUtcL( dtStartDay + (TTimeIntervalMinutes)dtStartTimeOfDay );
+			startTime.SetTimeUtcL( dstStartDay + (TTimeIntervalMinutes)dstStartTimeOfDay );
 	
 	
 			TTimeIntervalMinutes duration;
@@ -3538,8 +3656,15 @@ void AgendaUtilPrivate::copyField( const CCalEntry& src,
 			dst.SetDescriptionL(src.DescriptionL());
 			break;
 		case EntryDifferentLocation:
+		{
 			dst.SetLocationL(src.LocationL());
+			CCalGeoValue* geoValue = src.GeoValueL();
+			if (geoValue) {
+				dst.SetGeoValueL(*geoValue);
+				delete geoValue;
+			}
 			break;
+		}
 		default:
 			break;
 	}
@@ -3621,6 +3746,134 @@ TCalTime AgendaUtilPrivate::generateRecurrenceIdFromEntry( CCalEntry& entry,
     toRet.SetTimeUtcL(theTime);
     
     return toRet;
+}
+
+bool AgendaUtilPrivate::endsAtStartOfDay( CCalInstance* instance,
+                                          const TTime& day )
+{
+	TTime zero(TInt64(0));
+	TTime dayStart = zero + day.DaysFrom( zero );
+    const TTime startTime( instance->StartTimeL().TimeLocalL());
+    const TTime endTime( instance->EndTimeL().TimeLocalL());
+
+    const bool result( endTime > startTime && endTime == dayStart );
+
+    return result;
+}
+	
+AgendaRepeatRule AgendaUtilPrivate::createAgendaRRuleFromTCalRRule(
+															TCalRRule &calRRule)
+{
+	AgendaRepeatRule agendaRepeatRule;
+	RArray<TDay> days;
+	calRRule.GetByDayL(days);
+	QList<AgendaRepeatRule::Day> qDays;
+	for (int i = 0; i < days.Count(); i++) {
+		qDays.append(AgendaRepeatRule::Day(days[i]));
+	}
+	agendaRepeatRule.setByDay(qDays);
+
+	RArray<TMonth> months;
+	calRRule.GetByMonthL(months);
+	QList<AgendaRepeatRule::Month> qMonths;
+	for (int i = 0; i < months.Count(); i++) {
+		qMonths.append(AgendaRepeatRule::Month(months[i]));
+	}
+	agendaRepeatRule.setByMonth(qMonths);
+
+	RArray<TInt> monthDays;
+	calRRule.GetByMonthDayL(monthDays);
+	QList<int> qMonthDays;
+	for (int i = 0; i < monthDays.Count(); i++) {
+		qMonthDays.append(monthDays[i]);
+	}
+	agendaRepeatRule.setByMonthDay(qMonthDays);
+
+	agendaRepeatRule.setType((AgendaRepeatRule::RuleType) (calRRule.Type()));
+	agendaRepeatRule.setInterval(calRRule.Interval());
+	TCalTime time = calRRule.Until();
+	TTime untilTime = time.TimeUtcL();
+	QDateTime repeatUntil(QDate(untilTime.DateTime().Year(), 
+	                     untilTime.DateTime().Month() + 1, 
+	                     untilTime.DateTime().Day() + 1),
+	                     QTime(untilTime.DateTime().Hour(),
+	                     untilTime.DateTime().Minute()));
+	agendaRepeatRule.setUntil(repeatUntil);
+
+	TCalTime dayStart = calRRule.DtStart();
+	TDateTime ruleStart = dayStart.TimeUtcL().DateTime();
+	QDateTime qRuleStart(QDate(ruleStart.Year(), ruleStart.Month() + 1, 
+	          ruleStart.Day() + 1),QTime(ruleStart.Hour(), ruleStart.Minute()));
+	agendaRepeatRule.setRepeatRuleStart(qRuleStart);
+
+	TDay wkDay = calRRule.WkSt();
+	AgendaRepeatRule::Day qWkDay = (AgendaRepeatRule::Day) wkDay;
+	agendaRepeatRule.setWeekStart(qWkDay);
+	
+	return agendaRepeatRule;
+
+}
+
+TCalRRule AgendaUtilPrivate::createTCalRRuleFromAgendaRRule(
+												AgendaRepeatRule &agendaRRule)
+{
+	TCalRRule
+	        repeatRule(
+	                   static_cast<TCalRRule::TType> (agendaRRule.type()));
+	QDateTime ruleStartDateTime = agendaRRule.repeatRuleStart();
+	TDateTime ruleStartCalendarDateTime(ruleStartDateTime.date().year(), 
+	                 static_cast<TMonth> (ruleStartDateTime.date().month() - 1), 
+	                 ruleStartDateTime.date().day() - 1,
+	                 ruleStartDateTime.time().hour(),
+	                 ruleStartDateTime.time().minute(),
+	                 0, 
+	                 0);
+	
+	TCalTime ruleStartCalTime;
+	ruleStartCalTime.SetTimeLocalL(TTime(ruleStartCalendarDateTime));
+	repeatRule.SetDtStart(ruleStartCalTime);
+	repeatRule.SetInterval(agendaRRule.interval());
+	QDateTime repeatUntilDate = agendaRRule.until();
+	TDateTime repeatTill(repeatUntilDate.date().year(), 
+	                   static_cast<TMonth> (repeatUntilDate.date().month() - 1),
+	                   repeatUntilDate.date().day() - 1, 
+	                   repeatUntilDate.time().hour(), 
+	                   repeatUntilDate.time().minute(), 
+	                   0, 
+	                   0);
+
+	TCalTime ruleRepeatTillTime;
+	ruleRepeatTillTime.SetTimeLocalL(TTime(repeatTill));
+	repeatRule.SetUntil(ruleRepeatTillTime);
+
+	QList<AgendaRepeatRule::Day> qDays = agendaRRule.byDay();
+	RArray<TDay> days;
+	for (int i = 0; i < qDays.count(); i++) {
+		days.Append(TDay(qDays[i]));
+	}
+	if (days.Count() > 0) {
+		repeatRule.SetByDay(days);
+	}
+
+	QList<int> qmonthDay = agendaRRule.byMonthDay();
+	RArray<TInt> monthDay;
+	for (int i = 0; i < qmonthDay.count(); i++) {
+		monthDay.Append(qmonthDay[i] - 1);
+	}
+	if (monthDay.Count() > 0) {
+		repeatRule.SetByMonthDay(monthDay);
+	}
+
+	QList<AgendaRepeatRule::Month> qMonth = agendaRRule.byMonth();
+	RArray<TMonth> month;
+	for (int i = 0; i < qMonth.count(); i++) {
+		month.Append(TMonth(qMonth[i]));
+	}
+	if (month.Count() > 0) {
+		repeatRule.SetByMonth(month);
+	}
+	
+	return repeatRule;
 }
 
 // End of file  --Don't remove this.

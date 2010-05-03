@@ -39,6 +39,7 @@ enum RepeatIndex {
 		repeatDaily = 0,
 		repeatWeekly,
 		repeatBiWeekly,
+		repeatWorkdays,
 		repeatMonthly,
 		repeatYearly,
 		repeatOther,
@@ -83,6 +84,8 @@ public:
 			AgendaUtil::FilterFlags filter);
 
 	QList<ulong> entryIds(AgendaUtil::FilterFlags filter);
+	void markDatesWithEvents(QDateTime rangeStart, QDateTime rangeEnd,
+						 AgendaUtil::FilterFlags filter, QList<QDate>& dates);
 	QList<AgendaEntry> createEntryIdListForDay(
 			QDateTime day, AgendaUtil::FilterFlags filter);
 
@@ -94,9 +97,11 @@ public:
 		                              QDateTime& endTime);
 	void getNextInstanceTimes(AgendaEntry& entry, QDateTime& startTime, 
 							  QDateTime& endTime);
-
+	bool areNoEntriesInCalendar();
 	static QDateTime minTime();
 	static QDateTime maxTime();
+	
+	static bool isWorkdaysRepeatingEntry(const AgendaRepeatRule& repeatRule);
 
 protected:
 	void Progress(TInt /*aPercentageCompleted*/) {};
@@ -150,6 +155,14 @@ private:
 							  bool resetLocalUid);
 	TCalTime generateRecurrenceIdFromEntry( CCalEntry& entry, 
 											TCalTime instanceDate );
+	
+	bool endsAtStartOfDay( CCalInstance* instance,
+						  const TTime& day );
+						  
+	AgendaRepeatRule createAgendaRRuleFromTCalRRule(TCalRRule &calRRule);
+	
+	TCalRRule createTCalRRuleFromAgendaRRule(AgendaRepeatRule &agendaRRule);
+
 
 private:
 	AgendaUtil *q;

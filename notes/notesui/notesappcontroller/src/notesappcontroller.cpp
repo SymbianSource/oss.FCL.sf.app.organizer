@@ -15,9 +15,6 @@
 *
 */
 
-// System includes
-#include <QDebug>
-
 // User includes
 #include "notesappcontroller.h"
 #include "notesappcontrollerifimpl.h"
@@ -40,8 +37,6 @@ NotesAppController::NotesAppController(QObject *parent)
  mNotesModelHandler(0),
  mIfImpl(0)
 {
-	qDebug() << "notes: NotesAppController::NoteAppController -->";
-
 	// Construct the interface implementation.
 	mIfImpl = new NotesAppControllerIfImpl(this, this);
 
@@ -56,8 +51,6 @@ NotesAppController::NotesAppController(QObject *parent)
 	Q_ASSERT_X(
 			mViewManager, "notesappcontroller.cpp",
 			"NotesViewManager is 0");
-
-	qDebug() << "notes: NotesAppController::NoteAppController <--";
 }
 
 /*!
@@ -65,8 +58,6 @@ NotesAppController::NotesAppController(QObject *parent)
  */
 NotesAppController::~NotesAppController()
 {
-	qDebug() << "notes: NotesAppController::~NoteAppController -->";
-
 	if (mViewManager) {
 		delete mViewManager;
 		mViewManager = 0;
@@ -79,8 +70,6 @@ NotesAppController::~NotesAppController()
 		delete mIfImpl;
 		mIfImpl = 0;
 	}
-
-	qDebug() << "notes: NotesAppController::~NoteAppController <--";
 }
 
 // End of file	--Don't remove this.

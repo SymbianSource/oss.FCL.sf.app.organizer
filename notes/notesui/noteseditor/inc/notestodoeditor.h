@@ -71,6 +71,7 @@ private:
 	void addMenu();
 	bool validAlarmSet();
 	void addDiscardChangesAction();
+	bool showDeleteConfirmationQuery();
 
 private slots:
 	void saveTodo();

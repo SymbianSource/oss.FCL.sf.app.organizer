@@ -27,6 +27,7 @@
 #include <hbstyleloader.h>
 #include <hbdatetimepicker.h>
 #include <hbdialog.h>
+#include <xqsettingsmanager.h>
 #include <agendautil.h>
 #include <noteseditor.h>
 
@@ -40,6 +41,8 @@
 #include "calendateutils.h"
 #include "CalenUid.h"
 #include "caleneventlistviewitem.h"
+#include "calenpluginlabel.h"
+#include "CalendarInternalCRKeys.h"
 
 // Constants
 static const QString singleSpace(" ");
@@ -60,10 +63,11 @@ static const int singleColumn(1);
 // Rest of the details are commented in the header
 // ----------------------------------------------------------------------------
 //
-CalenDayViewWidget::CalenDayViewWidget(MCalenServices &services,
+EXPORT_C CalenDayViewWidget::CalenDayViewWidget(MCalenServices &services,
                                        CalenDocLoader *docLoader) :
 mServices(services),
-mDocLoader(docLoader)
+mDocLoader(docLoader),
+mRegionalInfoGroupBox(NULL)
 {
     // Construct the list view prototype
     mListViewPrototype = new CalenEventListViewItem(this);
@@ -73,6 +77,9 @@ mDocLoader(docLoader)
     
     // Register the custom docml and css to provide our own style to the list items
     HbStyleLoader::registerFilePath(":/");
+    
+    //Create the setting manager
+    mSettingsManager = new XQSettingsManager(this);
 }
 
 // ----------------------------------------------------------------------------
@@ -80,7 +87,7 @@ mDocLoader(docLoader)
 // Rest of the details are commented in the header
 // ----------------------------------------------------------------------------
 //    
-CalenDayViewWidget::~CalenDayViewWidget()
+EXPORT_C CalenDayViewWidget::~CalenDayViewWidget()
 {
     if (mListViewPrototype) {
         delete mListViewPrototype;
@@ -126,6 +133,10 @@ void CalenDayViewWidget::showWidget()
 
     // Get the instance list
     getInstanceList();
+    
+    // Check if regional information needs to be shown
+    // and add it or remove it
+    showHideRegionalInformation();
 
     // Load the appropriate section based on the number of events for the day
     if (0 == mInstanceArray.count()) {
@@ -295,6 +306,11 @@ void CalenDayViewWidget::initChildWidgets()
     if (!mEmptyListLabel) {
         qFatal("calendayviewwidget.cpp : Unable to find empty list label");
     }
+    HbWidget *headingPluginWidget = 
+    		qobject_cast<HbWidget*> (mDocLoader->findWidget(CALEN_DAYVIEW_HEADING_REGIONALPLUGIN_WIDGET));
+    
+    mRegionalPluginLayout = static_cast<QGraphicsLinearLayout*>(headingPluginWidget->layout());
+    
 }
 
 // ----------------------------------------------------------------------------
@@ -372,11 +388,7 @@ void CalenDayViewWidget::getInstanceList()
         mEventsList->hide();
         // Show the empty list text
         mEmptyListLabel->show();
-        // Inform the view about the change
-        mView->hasEvents(false);
         return;
-    } else {
-        mView->hasEvents(true);
     }
 }
 
@@ -476,12 +488,30 @@ void CalenDayViewWidget::addTimedEventToList(int index, AgendaEntry entry)
     }
 
     HbExtendedLocale locale = HbExtendedLocale::system();
-    // Get the start time and format as per the locale
-    QTime eventStartTime = entry.startTime().time();
+	// Get the start time and format as per the locale
+	QDateTime startTime = entry.startTime();
+	QTime eventStartTime;
+
+	if (CalenDateUtils::beginningOfDay(startTime)
+	        < CalenDateUtils::beginningOfDay(mDate)) {
+		// event is started previous day, show StarTime as 12:00 am in Agendaview, 
+		eventStartTime.setHMS(00, 00, 00);
+	} else {
+		eventStartTime = entry.startTime().time();
+	}
     QString eventTime = locale.format(eventStartTime, r_qtn_time_usual_with_zero);
 
-    // Get the event end time
-    QTime eventEndTime = entry.endTime().time();
+	// Get the event end time
+	QDateTime endTime = entry.endTime();
+	QTime eventEndTime;
+
+	if (CalenDateUtils::beginningOfDay(endTime)
+	        > CalenDateUtils::beginningOfDay(mDate)) {
+		// event has MidNight crossover, show EndTime as 11:59pm in Agendaview, 
+		eventEndTime.setHMS(23, 59, 59);
+	} else {
+		eventEndTime = entry.endTime().time();
+	}
 
     if (eventStartTime < eventEndTime) {
         // Raise the flag to indicate that the list item
@@ -774,6 +804,42 @@ int CalenDayViewWidget::getIndexToScrollTo()
 }
 
 // ----------------------------------------------------------------------------
+// CalenDayViewWidget::showHideRegionalInformation
+// To Show and hide regional plugin label depends upon settings
+// ----------------------------------------------------------------------------
+//
+void CalenDayViewWidget::showHideRegionalInformation()
+{
+    XQSettingsKey regionalInfo(XQSettingsKey::TargetCentralRepository,
+                               KCRUidCalendar.iUid, KShowRegionalInformation);
+    
+    int showRegionalInfo = mSettingsManager->readItemValue(regionalInfo).toUInt();
+    if (showRegionalInfo) {
+		
+        if (!mRegionalInfoGroupBox) {
+        	mRegionalInfoGroupBox = new HbGroupBox();
+        	CalenPluginLabel *regionalInfo = new CalenPluginLabel(
+															mServices, this);
+            mRegionalInfoGroupBox->setContentWidget(regionalInfo);
+            mRegionalPluginLayout->insertItem(1, mRegionalInfoGroupBox);
+        }
+        
+        if (mView->pluginEnabled()) {
+			QString *pluginString = mView->pluginText();
+			HbLabel *pluginInfoLabel = qobject_cast <HbLabel *> 
+									(mRegionalInfoGroupBox->contentWidget());
+			pluginInfoLabel->setPlainText(*pluginString);
+		}
+    } else {
+        if (mRegionalInfoGroupBox) {
+        	mRegionalPluginLayout->removeItem(mRegionalInfoGroupBox);
+            delete mRegionalInfoGroupBox;
+            mRegionalInfoGroupBox = NULL;
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
 // CalenDayViewWidget::createNewEvent
 // Rest of the details are commented in the header
 // ----------------------------------------------------------------------------
@@ -982,18 +1048,7 @@ void CalenDayViewWidget::goToToday()
     // Set the context for the current day
     mServices.Context().setFocusDateL(CalenDateUtils::today(), KCalenDayViewUidValue);
     
-    // Issue a command to re-populate the entire view
-    mServices.IssueCommandL(ECalenStartActiveStep);
-}
-
-// ----------------------------------------------------------------------------
-// CalenDayViewWidget::deleteEntries
-// Rest of the details are commented in the header
-// ----------------------------------------------------------------------------
-// 
-void CalenDayViewWidget::deleteEntries()
-{
-    // TODO: Show a checklist to allow multiple delete
+    mView->refreshViewOnGoToDate();
 }
 
 // End of file	--Don't remove this.

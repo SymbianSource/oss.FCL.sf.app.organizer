@@ -32,6 +32,7 @@ class AgendaAttendeePrivate;
 class AgendaCategoryPrivate;
 class AgendaEntryPrivate;
 class AgendaRepeatRulePrivate;
+class AgendaGeoValuePrivate;
 
 class XQCALENDAR_EXPORT AgendaAttendee
 {
@@ -158,6 +159,30 @@ private:
 	AgendaAlarmPrivate* d;
 };
 
+class XQCALENDAR_EXPORT AgendaGeoValue
+{
+public:
+
+	AgendaGeoValue();
+	AgendaGeoValue(const AgendaGeoValue& other);
+	~AgendaGeoValue();
+
+	void setLatLong(double latitude, double longitude);
+	void getLatLong(double& latitude, double& longitude) const;
+
+	bool isNull() const;
+
+	AgendaGeoValue& operator=(const AgendaGeoValue& other);
+	bool operator==(const AgendaGeoValue& other) const;
+	bool operator!=(const AgendaGeoValue& other) const;
+
+private:
+	void detach();
+
+private:
+	AgendaGeoValuePrivate* d;
+};
+
 class XQCALENDAR_EXPORT AgendaRepeatRule
 {
 public:
@@ -210,11 +235,11 @@ public:
 	void setInterval(int interval);
 	int interval() const;
 
-	void setUntil(const QDate& date);
-	QDate until() const;
+	void setUntil(const QDateTime& date);
+	QDateTime until() const;
 
-	void setRepeatRuleStart(const QDate& date);
-	QDate repeatRuleStart() const;
+	void setRepeatRuleStart(const QDateTime& dateTime);
+	QDateTime repeatRuleStart() const;
 
 	void setWeekStart(Day day);
 	Day weekStart() const;
@@ -349,6 +374,12 @@ public:
 
 	void setCompletedDateTime(const QDateTime& dateTime);
 	QDateTime completedDateTime() const;
+
+	void setDTStamp(const QDateTime& dateTime);
+	QDateTime dtStamp() const;
+	
+	void setGeoValue(const AgendaGeoValue& geoValue);
+	AgendaGeoValue geoValue() const;
 	
 	int durationInSecs() const;
 	AgendaEntry& operator=(const AgendaEntry& other);

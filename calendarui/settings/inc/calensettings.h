@@ -52,19 +52,22 @@ public:
 public slots:
     void handleAlarmSnoozeTimeChange(int index);
     void handleWeekNumberChange();
+    void handleRegionalInfoChange();
 
 private:
 	HbDataForm *mSettingsForm;
 	HbDataFormModel *mSettingsModel;
 	HbDataFormModelItem *mAlarmSnoozeTimeItem;
 	HbDataFormModelItem* mShowWeekNumberItem;
+	HbDataFormModelItem* mShowRegionalInfoItem;
 		
 	XQSettingsManager *mSettingsManager;
 	XQSettingsKey *mAlarmSnoozeCenrepKey;
 	XQSettingsKey *mWeekNumberCenrepKey;
+	XQSettingsKey *mShowRegionalInfoKey;
 	uint mAlarmSnoozeTime;
 	uint mShowWeekNumber;
-	
+	uint mShowRegionalInfo;
 };
 
 #endif // CALENSETTINGS_H

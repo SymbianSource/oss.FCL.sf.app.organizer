@@ -732,6 +732,144 @@ AgendaAlarmPrivate::AgendaAlarmPrivate()
 
 /****************************************************
  *
+ * AgendaGeoValue
+ *
+ ****************************************************/
+
+/*!
+    \class AgendaGeoValue
+
+    \brief Class representing the geo values.
+           This can be assigned to a calendar entry.
+*/
+
+/*!
+    Creates a geo value.
+*/
+AgendaGeoValue::AgendaGeoValue() : d(NULL)
+{
+}
+
+/*!
+    Creates a copy of a given alarm.
+
+   \param other alarm to be copied.
+*/
+AgendaGeoValue::AgendaGeoValue(const AgendaGeoValue& other) : d(other.d)
+{
+    if (d) {
+        d->ref.ref();
+    }
+}
+
+/*!
+    Destroys the alarm.
+*/
+AgendaGeoValue::~AgendaGeoValue()
+{
+    if (d && !d->ref.deref())
+    {
+        delete d;
+    }
+}
+
+/*!
+	Sets the latitude abd longitude values for a location
+ */
+void AgendaGeoValue::setLatLong(double latitude, double longitude)
+{
+	detach();
+	d->mLatitude = latitude;
+	d->mLongitude = longitude;
+}
+
+/*!
+	Returns the latitude and longitude of the geo value
+ */
+void AgendaGeoValue::getLatLong(double& latitude, double& longitude) const
+{
+	if (d) {
+		latitude = d->mLatitude;
+		longitude = d->mLongitude;
+	}
+}
+
+/*!
+	Returns true if the alarlm is empty; otherwise returns false.
+
+	\return true if the alarm is empty; otherwise returns false.
+ */
+bool AgendaGeoValue::isNull() const
+	{
+	return !d;
+	}
+
+/*!
+	Assigns \a other to this geovalue and returns a reference
+	to this alarm.
+
+	\param other the other geovalue
+	\return a reference to this geovalue
+ */
+AgendaGeoValue& AgendaGeoValue::operator=(const AgendaGeoValue& other)
+{
+	if (d == other.d) {
+		return *this;
+	}
+	if (other.d) {
+		other.d->ref.ref();
+	}
+	if (d && !d->ref.deref()) {
+		delete d;
+	}
+	d = other.d;
+	return *this;
+}
+
+/*!
+	Returns true if this AgendaGeoValue is equal to the \a other
+	info, otherwise returns false.
+ */
+bool AgendaGeoValue::operator==(const AgendaGeoValue& other) const
+{
+	if (d == other.d) {
+		return true;
+	}
+
+	if (!d || !other.d) {
+		return false;
+	}
+
+	return (d->mLatitude == other.d->mLatitude
+			&& d->mLongitude == other.d->mLongitude);
+}
+
+/*!
+	Returns true if this AgendaGeoValue is not equal to the \a other
+	info, otherwise returns false.
+ */
+bool AgendaGeoValue::operator!=(const AgendaGeoValue& other) const
+{
+	return !(*this == other);
+}
+
+void AgendaGeoValue::detach()
+{
+	if (!d) {
+		d = new AgendaGeoValuePrivate;
+	} else {
+		qAtomicDetach(d);
+	}
+}
+
+AgendaGeoValuePrivate::AgendaGeoValuePrivate()
+:ref(1)
+{
+	// Nothing to do.
+}
+
+/****************************************************
+ *
  * AgendaRepeatRule
  *
  ****************************************************/
@@ -923,7 +1061,7 @@ int AgendaRepeatRule::interval() const
     \param date The start date
     \sa repeatRuleStart()
 */
-void AgendaRepeatRule::setRepeatRuleStart(const QDate& date)
+void AgendaRepeatRule::setRepeatRuleStart(const QDateTime& date)
 {
     detach();
     d->m_startDate = date;
@@ -933,13 +1071,13 @@ void AgendaRepeatRule::setRepeatRuleStart(const QDate& date)
     Gets the repeat's start date.
 
     \return The start date on success;
-            otherwise returns a null QDate.
+            otherwise returns a null QDateTime.
 
     \sa setRepeatRuleStart()
 */
-QDate AgendaRepeatRule::repeatRuleStart() const
+QDateTime AgendaRepeatRule::repeatRuleStart() const
 {
-    return d ? d->m_startDate : QDate();
+    return d ? d->m_startDate : QDateTime();
 }
 
 /*!
@@ -948,7 +1086,7 @@ QDate AgendaRepeatRule::repeatRuleStart() const
     \parm date The end date
     \sa setUntil()
 */
-void AgendaRepeatRule::setUntil(const QDate& date)
+void AgendaRepeatRule::setUntil(const QDateTime& date)
 {
     detach();
     d->m_untilDate = date;
@@ -961,9 +1099,9 @@ void AgendaRepeatRule::setUntil(const QDate& date)
             otherwise returns a null QDate.
     \sa setUntil()
 */
-QDate AgendaRepeatRule::until() const
+QDateTime AgendaRepeatRule::until() const
 {
-    return d ? d->m_untilDate : QDate();
+    return d ? d->m_untilDate : QDateTime();
 }
 
 /*!
@@ -1813,7 +1951,42 @@ QDateTime AgendaEntry::completedDateTime() const
 }
 
 /*!
-	Returns 
+	Sets the dtStamp time for agenda entry. Currently it is used to store the
+	creation time of the agenda entry for the type ENote.
+ */
+void AgendaEntry::setDTStamp(const QDateTime& dateTime)
+{
+	d->m_dtStamp = dateTime;
+}
+
+/*!
+	Returns the DT Stamp for the agenda entry.
+
+	\param QDateTime object containing the dt stamp.
+ */
+QDateTime AgendaEntry::dtStamp() const
+{
+	return d->m_dtStamp;
+}
+
+/*!
+	 Sets the geo values for an entry
+ */
+void AgendaEntry::setGeoValue(const AgendaGeoValue& geoValue)
+{
+	d->m_geoValue = geoValue;
+}
+
+/*!
+	 Returns the geo value if it has any
+ */
+AgendaGeoValue AgendaEntry::geoValue() const
+{
+	return d->m_geoValue;
+}
+	
+/*!
+	Returns
 	duration of the meeting in seconds
 	\return int duration in seconds
  */
@@ -1888,7 +2061,8 @@ bool AgendaEntry::operator==(const AgendaEntry& other) const
 			&& d->m_lastModTime == other.d->m_lastModTime
 			&& d->m_entryStatus == other.d->m_entryStatus
 			&& d->m_favourite == other.d->m_favourite
-			&& d->m_completedDateTime == other.d->m_completedDateTime);
+			&& d->m_completedDateTime == other.d->m_completedDateTime
+			&& d->m_geoValue == other.d->m_geoValue);
 }
 
 /*!
@@ -1909,6 +2083,7 @@ AgendaEntryPrivate::AgendaEntryPrivate() : ref(1)
 	m_priority = -1;
 	m_favourite = 0;
 	m_alarm = AgendaAlarm();
+	m_geoValue = AgendaGeoValue();
 }
 
 bool AgendaEntryPrivate::deleteCategory(const AgendaCategory& category)

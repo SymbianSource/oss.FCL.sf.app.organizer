@@ -22,7 +22,7 @@
 #include <avkon.rh>
 #include <avkon.rsg>
 
-#include <Calendar.loc>
+#include "calendarregionalplugin.loc"
 
 NAME CLU2
 

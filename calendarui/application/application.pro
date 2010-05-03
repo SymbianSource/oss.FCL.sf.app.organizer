@@ -29,14 +29,13 @@ CONFIG += hb
 symbian: { 
 
 	BLD_INF_RULES.prj_exports += \
-	"../rom/calendar.iby   CORE_APP_LAYER_IBY_EXPORT_PATH(calendar.iby)" \
-	"../rom/calendarresources.iby		LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(calendarresources.iby)" \
+	"../rom/calendar.iby					CORE_APP_LAYER_IBY_EXPORT_PATH(calendar.iby)" \
+	"../rom/calendarresources.iby			LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(calendarresources.iby)" \
+	"../rom/calenregionalutil.iby			LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(calenregionalutil.iby)" \
+	"../rom/calenlunarchinese_variant.iby	CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(calenlunarchinese_variant.iby)" \
 	# Generic configuration interface for component cenrep settings  
-	"../conf/calendarUI.confml               APP_LAYER_CONFML(calendarUI.confml)" \
-	"../conf/calendarUI_101F874B.crml	    APP_LAYER_CRML(calendarUI_101F874B.crml)" \
-	"../cenrep/101f874b.txt					\epoc32\release\winscw\udeb\z\private\10202be9\101f874b.txt" \
-	"../cenrep/101f874b.txt					\epoc32\release\armv5\urel\z\private\10202be9\101f874b.txt" \
-	"qmakepluginstubs/calengriditemstyleplugin.qtplugin   /epoc32/data/z/pluginstub/calengriditemstyleplugin.qtplugin"
+	"../conf/calendarUI.confml				APP_LAYER_CONFML(calendarUI.confml)" \
+	"../conf/calendarUI_101F874B.crml		APP_LAYER_CRML(calendarUI_101F874B.crml)" 	
 
 	LIBS += -lcalencontroller \
 		-lxqservice \ 
@@ -59,8 +58,6 @@ symbian: {
 
     TRANSLATIONS += calendar.ts
 
-    styleplugin.sources += calengriditemstyleplugin.dll
-    DEPLOYMENT += styleplugin
 }
 
 # Input

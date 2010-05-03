@@ -386,10 +386,8 @@ void CalenDeleteUi::DeleteEntriesBeforeDateL()
             // Two pass delete:
             // 1. pass
             // To prevent destroying entries starting and ending midnight
-            // subtract one microsecond and do delete on that range.
-            QTime time = mDateTime.time();
-            time.setHMS(time.hour(), time.minute(), time.second(), time.msec() - 1);
-            mDateTime.setTime(time);
+            // subtract one second and do delete on that range.
+            mDateTime = mDateTime.addSecs(-1);
             mDateTime = ( mDateTime > AgendaUtil::minTime()? mDateTime :  AgendaUtil::minTime());
 
             HandleDeleteMultipleEventsL( AgendaUtil::minTime(),
@@ -550,8 +548,14 @@ void CalenDeleteUi::DeleteDayRangeL( const QDateTime& aStart,
     // Connect to the signal that gets generated when deletion is completed
     connect(iController.agendaInterface(), SIGNAL(entriesDeleted(int)), this,
             SLOT(doCompleted(int)));
+    AgendaUtil::FilterFlags filter =
+    	        AgendaUtil::FilterFlags(AgendaUtil::IncludeAnniversaries
+    	                | AgendaUtil::IncludeAppointments
+    	                | AgendaUtil::IncludeEvents
+    	                | AgendaUtil::IncludeReminders
+    	                | AgendaUtil::IncludeIncompletedTodos);
     // 1: First pass, delete all entries.
-    iController.agendaInterface()->deleteEntries(iStartTime, iEndTime);
+    iController.agendaInterface()->deleteEntries(iStartTime, iEndTime, filter);
 
     TRACE_EXIT_POINT;
     }

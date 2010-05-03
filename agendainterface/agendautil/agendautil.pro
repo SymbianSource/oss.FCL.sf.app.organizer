@@ -16,6 +16,7 @@
 
 TARGET = agendainterface
 TEMPLATE = lib
+CONFIG += hb
 DEPENDPATH += . \
 			  ./src \
 			  ./inc

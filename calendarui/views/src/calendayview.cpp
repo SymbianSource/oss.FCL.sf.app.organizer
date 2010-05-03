@@ -124,6 +124,29 @@ void CalenDayView::doPopulation()
     populationComplete();
     }
 
+/*!
+ Funtion to refresh the current view upon selecting a date
+ from GoToDate popup
+ */
+void CalenDayView::refreshViewOnGoToDate()
+{
+	// Get the day for which this view is being shown from the context
+	mDate = mServices.Context().focusDateAndTimeL();
+	
+	// Check if the current day being shown is "Today"
+	if (mGoToTodayAction) {
+		if (mDate.date() == CalenDateUtils::today().date()) {
+			// Hide the "Go to today" option
+			mGoToTodayAction->setVisible(false);
+		} else {
+			mGoToTodayAction->setVisible(true);
+		}
+	}
+	
+	// Initialize the content widget
+	mDayViewWidget->showWidget();
+}
+
 // ----------------------------------------------------------------------------
 // CCalenDayView::HandleNotification
 // Rest of the details are commented in the header
@@ -143,18 +166,6 @@ void CalenDayView::HandleNotification(const TCalenNotification notification)
 CalenDocLoader* CalenDayView::docLoader()
 {
     return mDocLoader;
-}
-
-// ----------------------------------------------------------------------------
-// CCalenDayView::hasEvents
-// Rest of the details are commented in the header
-// ----------------------------------------------------------------------------
-// 
-void CalenDayView::hasEvents(bool yes)
-{
-    if (mDeleteAction) {
-        mDeleteAction->setVisible(yes);
-    }
 }
 
 // ----------------------------------------------------------------------------
@@ -250,14 +261,6 @@ void CalenDayView::setupActions()
 	}
 	// Connect to the signal triggered by new event action
 	connect(goToDateAction, SIGNAL(triggered()), this, SLOT(goToDate()));
-	
-	mDeleteAction = qobject_cast<HbAction *>
-                                (mDocLoader->findObject(CALEN_DAYVIEW_MENU_DELETE));
-	if (!mDeleteAction) {
-	    qFatal("calendayview.cpp : Unable to find delete action");
-	}
-	// Connect to the signal triggered by new event action
-	connect(mDeleteAction, SIGNAL(triggered()), mDayViewWidget, SLOT(deleteEntries()));
 	
 	HbAction *settingsAction = qobject_cast<HbAction *>
                                 (mDocLoader->findObject(CALEN_DAYVIEW_MENU_SETTINGS));

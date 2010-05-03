@@ -15,8 +15,6 @@
 *
 */
 
-// System includes
-#include <qdebug.h>
 
 // User includes
 #include "notesdocloader.h"
@@ -43,8 +41,6 @@
  */
 QObject* NotesDocLoader::createObject(const QString &type, const QString &name)
 {
-	qDebug() << "notes: NotesDocLoader::createObject -->";
-
 	if (NOTES_MAIN_VIEW == name) {
 		QObject *object = new NotesMainView();
 		object->setObjectName(name);
@@ -66,8 +62,6 @@ QObject* NotesDocLoader::createObject(const QString &type, const QString &name)
 		object->setObjectName(name);
 		return object;
     }
-
-	qDebug() << "notes: NotesDocLoader::createObject <--";
 
 	return HbDocumentLoader::createObject(type, name);
 }

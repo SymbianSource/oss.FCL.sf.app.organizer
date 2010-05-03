@@ -19,7 +19,6 @@
 // System inlcudes.
 #include <QTime>
 #include <QGraphicsLinearLayout>
-#include <QDebug>
 #include <HbExtendedLocale>
 #include <HbLabel>
 #include <HbDateTimePicker>
@@ -71,8 +70,6 @@ NotesTodoEditorCustomItem::~NotesTodoEditorCustomItem()
  */
 HbAbstractViewItem* NotesTodoEditorCustomItem::createItem()
 {
-	qDebug() << "notes: NotesTodoEditorCustomItem::createItem <-->";
-
 	return new NotesTodoEditorCustomItem(*this);
 }
 
@@ -83,8 +80,6 @@ HbAbstractViewItem* NotesTodoEditorCustomItem::createItem()
  */
 HbWidget* NotesTodoEditorCustomItem::createCustomWidget()
 {
-	qDebug() << "notes: NotesTodoEditorCustomItem::createCustomWidget -->";
-
 	HbDataFormModelItem::DataItemType itemType =
 		static_cast<HbDataFormModelItem::DataItemType>(modelIndex()
 		.data(HbDataFormModelItem::ItemTypeRole).toInt());
@@ -116,15 +111,10 @@ HbWidget* NotesTodoEditorCustomItem::createCustomWidget()
 			connect(
 					mDateWidget, SIGNAL(clicked()),
 					this, SLOT(launchDatePicker()));
-
-			qDebug() <<
-					"notes: NotesTodoEditorCustomItem::createCustomWidget <--";
 			return widget;
 		}
 		case HbDataFormModelItem::CustomItemBase + ItemOffsetUnKnown:
 		default:
-			qDebug() <<
-				"notes: NotesTodoEditorCustomItem::createCustomWidget <--";
 		return 0;
 	}
 }
@@ -183,8 +173,6 @@ void NotesTodoEditorCustomItem::restore()
  */
 void NotesTodoEditorCustomItem::launchTimePicker()
 {
-	qDebug() << "notes: NotesTodoEditorCustomItem::launchTimePicker -->";
-
 	if (mTimePickerDialog) {
 		delete mTimePickerDialog;
 	}
@@ -199,11 +187,13 @@ void NotesTodoEditorCustomItem::launchTimePicker()
 	mTimePickerDialog->setHeadingWidget(timeLabel);
 	// Create the tumbler.
 	HbDateTimePicker *timePicker = new HbDateTimePicker(mTimePickerDialog);
-
+	
+	// Set the format for time picker.
+	timePicker->setDisplayFormat(mNotesTodoeditorPvt->timeFormatString());
+	// Set the time needs to be displayed in time picker.
 	timePicker->setTime(QTime::fromString(mTimeWidget->text(),
 		mNotesTodoeditorPvt->timeFormatString()));
 
-	timePicker->setDisplayFormat(mNotesTodoeditorPvt->timeFormatString());
 	// Set the tumbler as the content widget.
 	mTimePickerDialog->setContentWidget(timePicker);
 
@@ -222,8 +212,6 @@ void NotesTodoEditorCustomItem::launchTimePicker()
 			this, SLOT(handleCancelAction()));
 
 	mTimePickerDialog->exec();
-
-	qDebug() << "notes: NotesTodoEditorCustomItem::launchTimePicker <--";
 }
 
 /*!
@@ -231,8 +219,6 @@ void NotesTodoEditorCustomItem::launchTimePicker()
  */
 void NotesTodoEditorCustomItem::launchDatePicker()
 {
-	qDebug() << "notes: NotesTodoEditorCustomItem::launcDatePicker -->";
-
 	if (mDatePickerDialog) {
 		delete mDatePickerDialog;
 	}
@@ -252,11 +238,14 @@ void NotesTodoEditorCustomItem::launchDatePicker()
 	datePicker->setDateRange(QDate::fromString("01/01/1900",
 		mNotesTodoeditorPvt->dateFormatString()), QDate::fromString("31/12/2100",
 			mNotesTodoeditorPvt->dateFormatString()));
-
+	
+	// Set the date format in date picker.
+	datePicker->setDisplayFormat(mNotesTodoeditorPvt->dateFormatString());
+	// Set the date needs to be in focus in date picker.
 	datePicker->setDate(QDate::fromString(mDateWidget->text(),
 		mNotesTodoeditorPvt->dateFormatString()));
 
-	datePicker->setDisplayFormat(mNotesTodoeditorPvt->dateFormatString());
+	
 	// Set the tumbler as the content widget.
 	mDatePickerDialog->setContentWidget(datePicker);
 
@@ -274,16 +263,12 @@ void NotesTodoEditorCustomItem::launchDatePicker()
 			this, SLOT(handleCancelAction()));
 
 	mDatePickerDialog->exec();
-
-	qDebug() << "notes: NotesTodoEditorCustomItem::launchDatePicker <--";
 }
 /*!
 	 Handles the ok action of date/time picker dialog.
  */
 void NotesTodoEditorCustomItem::handleOkAction()
 {
-	qDebug() << "notes: NotesTodoEditorCustomItem::handleOkAction -->";
-
 	HbExtendedLocale locale =  HbExtendedLocale::system();
 
 	HbDataFormModelItem *modelItem =
@@ -356,16 +341,12 @@ void NotesTodoEditorCustomItem::handleOkAction()
 	}
 
 	handleCancelAction();
-
-	qDebug() << "notes: NotesTodoEditorCustomItem::handleOkAction <--";
 }
 /*!
 	 Handles the ok action of date/time picker dialog.
  */
 void NotesTodoEditorCustomItem::handleCancelAction()
 {
-	qDebug() << "notes: NotesTodoEditorCustomItem::handleCancelAction -->";
-
 	// Close the dialog.
 	if (mDatePickerDialog) {
 		mDatePickerDialog->close();
@@ -374,8 +355,6 @@ void NotesTodoEditorCustomItem::handleCancelAction()
 		mTimePickerDialog->close();
 		mTimePickerDialog->deleteLater();
 	}
-
-	qDebug() << "notes: NotesTodoEditorCustomItem::handleCancelAction <--";
 }
 
 /*
@@ -383,8 +362,6 @@ void NotesTodoEditorCustomItem::handleCancelAction()
  */
 void NotesTodoEditorCustomItem::selectDueDate()
 {
-	qDebug() <<"notes: NotesTodoEditorCustomItem::selectDueDate -->";
-
 	if( mDueDateItem->isDown()) {
 		mDueDateItem->setDown(false);
 		return;
@@ -407,11 +384,12 @@ void NotesTodoEditorCustomItem::selectDueDate()
 	datePicker->setDateRange(QDate::fromString("01/01/1900",
 		mNotesTodoeditorPvt->dateFormatString()), QDate::fromString("31/12/2100",
 			mNotesTodoeditorPvt->dateFormatString()));
-
+	
+	// Set the format of date picker.
+	datePicker->setDisplayFormat(mNotesTodoeditorPvt->dateFormatString());
+	// Set the date needs to be displayed in datepicker.
 	datePicker->setDate(QDate::fromString(mDueDateItem->text(),
 		mNotesTodoeditorPvt->dateFormatString()));
-
-	datePicker->setDisplayFormat(mNotesTodoeditorPvt->dateFormatString());
 
 	// Set the heading text
 	HbLabel *label = new HbLabel(hbTrId("txt_notes_formlabel_due_date"));
@@ -432,8 +410,6 @@ void NotesTodoEditorCustomItem::selectDueDate()
 
 	mDatePickerDialog->setContentWidget(datePicker);
 	mDatePickerDialog->exec();
-
-	qDebug() <<"notes: NotesTodoEditorCustomItem::selectDueDate <--";
 }
 
 // End of file	--Don't delete.

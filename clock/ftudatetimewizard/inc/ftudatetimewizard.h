@@ -37,7 +37,7 @@ public:
 	~FtuDateTimeWizard();
 
 protected:
-	void initializeWizard();
+	void initializeWizard(qint32 cenrepOwnerId, int wizardIdx);
 	void activateWizard();
 	void deactivateWizard();
 	bool shutdownWizard(ShutdownReason reason);

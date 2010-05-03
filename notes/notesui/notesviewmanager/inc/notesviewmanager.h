@@ -49,15 +49,20 @@ public:
 			NotesNamespace::NotesViewIds viewId);
 
 private:
-	void loadViews();
 	void loadNotesMainView();
 	void loadNotesCollectionView();
 	void loadTodoView();
 	void loadFavoritesView();
 	void loadNoteView();
+	bool showDeleteConfirmationQuery(ulong entryId);
+
+private slots:
+	void loadOtherViews();
+	void deleteEntryFromView(ulong entryId);
 
 private:
 	NotesAppControllerIf &mAppControllerIf;
+	AgendaUtil *mAgendaUtil;
 
 	NotesMainView *mMainView;
 	NotesCollectionView *mCollectionView;

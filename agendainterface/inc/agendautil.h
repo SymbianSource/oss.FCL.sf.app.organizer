@@ -109,6 +109,8 @@ public:
 	
 	static QDateTime minTime();
 	static QDateTime maxTime();
+	
+	static bool isWorkdaysRepeatingEntry(const AgendaRepeatRule& repeatRule);
 
 Q_SIGNALS:
 	void entriesChanged(QList<ulong> ids);

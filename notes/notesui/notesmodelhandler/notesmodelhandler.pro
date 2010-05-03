@@ -16,6 +16,7 @@
 #
 
 TEMPLATE = lib
+CONFIG += hb
 TARGET = notesmodelhandler
 DEFINES += NOTESMODELHANDLER_LIB
 

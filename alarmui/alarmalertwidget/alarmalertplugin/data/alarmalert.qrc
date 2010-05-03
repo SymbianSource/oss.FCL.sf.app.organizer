@@ -1,16 +1,11 @@
 <!DOCTYPE RCC><RCC version="1.0">
 	<qresource prefix="/image">
 		<file alias="clockAlarm.svg">icons/pri_small_bell.svg</file>
-		<file alias="calendarAlarm.svg">icons/pri_small_calendar.svg</file>
-		<file alias="slider.svg">icons/drawing.svg</file>
 	</qresource>
 	<qresource prefix="/xml">
-		<file alias="alarmalert.docml">xml/alarmalert.docml</file>
-		<file alias="alarmalert_unlocked.docml">xml/alarmalert_unlocked.docml</file>
-	</qresource>
-	<qresource prefix="/effect">
-		<file alias="animate_portrait.fxml">effects/animate_portrait.fxml</file>
-		<file alias="animate_landscape.fxml">effects/animate_landscape.fxml</file>
+		<file alias="alarmalert_calendar_unlocked.docml">xml/alarmalert_calendar_unlocked.docml</file>
+		<file alias="alarmalert_clock_unlocked.docml">xml/alarmalert_clock_unlocked.docml</file>
+		<file alias="alarmalert_todo_unlocked.docml">xml/alarmalert_todo_unlocked.docml</file>
 	</qresource>
 	<qresource prefix="/translations">
 		<file alias="alarmui_en_GB">alarmui_en_GB.qm</file>

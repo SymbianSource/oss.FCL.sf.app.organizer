@@ -115,9 +115,6 @@ void SettingsCustomItem::restore()
 		case (PlaceItemOffset + HbDataFormModelItem::CustomItemBase):
 		mPlaceWidget->setProperty("text", modlItem->contentWidgetData("text"));
 		break;
-/*		case (RegionalItemOffset + HbDataFormModelItem::CustomItemBase):
-
-		break;*/
 		case (50 + HbDataFormModelItem::CustomItemBase):
 
 		break;

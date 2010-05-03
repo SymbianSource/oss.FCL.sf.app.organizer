@@ -31,6 +31,7 @@
 class QAbstractItemModel;
 class QStandardItemModel;
 class AgendaUtil;
+class AgendaEntry;
 
 NOTES_TEST_CLASS(TestNotesModel)
 
@@ -57,12 +58,14 @@ private slots:
 
 private:
 	void modifyEntryInModel(ulong id, int row);
-	void appendNotesToModel(QList<ulong> &ids);
-	void appendInCompTodosToModel(QList<ulong> &ids);
-	void appendCompTodosToModel(QList<ulong> &ids);
+	void appendNotesToModel(QList<AgendaEntry> &agendaEntryList);
+	void appendInCompTodosToModel(QList<AgendaEntry> &agendaEntryList);
+	void appendCompTodosToModel(QList<AgendaEntry> &agendaEntryList);
 	bool insertNoteToModel(QModelIndex &index, ulong id);
 	bool insertInCompTodoToModel(QModelIndex &index, ulong id);
 	bool insertCompTodoToModel(QModelIndex &index, ulong id);
+	QString dateFormatString();
+	QString timeFormatString();
 
 private:
 	QStandardItemModel *mSourceModel;

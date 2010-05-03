@@ -28,8 +28,7 @@
 
 // Forward declarations
 class QGraphicsWidget;
-class HbListWidget;
-class HbListWidgetItem;
+class HbListView;
 class HbLabel;
 class AgendaUtil;
 class NotesModel;
@@ -56,16 +55,17 @@ private slots:
 	void handleEditingCompleted(bool status);
 	void updateData(ulong id);
 	void updateData(QList<ulong> ids);
-	void handleActivated(HbListWidgetItem *item);
+	void handleActivated(const QModelIndex &index);
 	void updateFavouritesCount(const QModelIndex &index, int start, int end);
 	void handleActionStateChanged();
-	void updateToolbarTexts(Qt::Orientation orientation);
 
 private:
 	void populateListView();
+	int todosCount();
+	int recentNotesCount();
 
 private:
-	HbListWidget *mListWidget;
+	HbListView *mListView;
 	HbAction *mAllNotesAction;
 	HbAction *mViewCollectionAction;
 	HbAction *mAddNoteAction;

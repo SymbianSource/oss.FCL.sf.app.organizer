@@ -50,6 +50,9 @@ public:
 public:
 	NOTESVIEWS_EXPORT void setupView(
 			NotesAppControllerIf &controllerIf, NotesDocLoader *docLoader);
+	
+signals:
+	void deleteEntry(ulong entryId);
 
 private slots:
 	void createNewTodo();
@@ -63,10 +66,11 @@ private slots:
 	void displayCollectionView();
 	void displayAllNotesView();
 	void handleEditingCompleted();
-	void handleViewingCompleted(bool status);
+	void handleViewingCompleted();
 	void handleActionStateChanged();
 	void handleOrientationChanged(Qt::Orientation);
 	void updateSubTitle(ulong id=0);
+	void openTodo();
 
 private:
 	HbListView *mListView;
@@ -75,10 +79,11 @@ private:
 	HbAction *mAllNotesAction;
 	HbAction *mViewCollectionAction;
 	HbAction *mAddTodoAction;
-
 	HbAction *mEditAction;
 	HbAction *mDeleteAction;
 	HbAction *mTodoStatusAction;
+	HbAction *mOpenAction;
+
 	HbGroupBox *mSubTitle;
 
 	AgendaUtil *mAgendaUtil;

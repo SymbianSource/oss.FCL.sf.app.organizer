@@ -24,10 +24,8 @@ EXPORTS
 	_ZN16CCalenController9OfferMenuEP6HbMenu @ 23 NONAME
 	_ZN16CCalenControllerC1Eb @ 24 NONAME
 	_ZN16CCalenControllerC2Eb @ 25 NONAME
-	_ZN16CCalenControllerD0Ev @ 26 NONAME
-	_ZN16CCalenControllerD1Ev @ 27 NONAME
-	_ZN16CCalenControllerD2Ev @ 28 NONAME
-	_ZTI16CCalenController @ 29 NONAME
-	_ZTV16CCalenController @ 30 NONAME
-	_ZThn4_N16CCalenController12NewServicesLEv @ 31 NONAME
+	_ZN16CCalenControllerD1Ev @ 26 NONAME
+	_ZN16CCalenControllerD2Ev @ 27 NONAME
+	_ZTI16CCalenController @ 28 NONAME
+	_ZTV16CCalenController @ 29 NONAME
 

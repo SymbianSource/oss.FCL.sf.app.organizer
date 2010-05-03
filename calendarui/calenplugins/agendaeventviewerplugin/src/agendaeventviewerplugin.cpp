@@ -27,9 +27,10 @@
  */
 
 /*!
-	\fn void AgendaEventViewerPlugin::viewingCompleted(bool status = true)
+	\fn void AgendaEventViewerPlugin::viewingCompleted(const QDate date = QDate())
 
 	Signal is emitted when viewing of the agenda entry is complete
+	Returns QDate for calendar application so it has proper context to set.
 	After receiving this signal use deleteLater() to detele this class object.
 
  */
@@ -150,8 +151,8 @@ void AgendaEventViewerPlugin::CreateAgendaEventViewer(
 	}
 
 	if (mEventViewer) {
-		connect(mEventViewer, SIGNAL(viewingCompleted(bool)), this,
-		        SLOT(handleViewingCompleted(bool)));
+		connect(mEventViewer, SIGNAL(viewingCompleted(const QDate)), this,
+		        SLOT(handleViewingCompleted(const QDate)));
 		connect(mEventViewer, SIGNAL(editingStarted()), this,
 		        SLOT(handleEditingStarted()));
 		connect(mEventViewer, SIGNAL(editingCompleted()), this,
@@ -182,7 +183,7 @@ AgendaEventViewer::Actions AgendaEventViewerPlugin::
 			return AgendaEventViewer::ActionSave;
 	}
 	
-	return AgendaEventViewer::ActionEditDelete;
+	return AgendaEventViewer::ActionNothing;
 }
 
 /*!
@@ -190,10 +191,9 @@ AgendaEventViewer::Actions AgendaEventViewerPlugin::
 
     \param status true if viewing completed otherwise false.
  */
-void AgendaEventViewerPlugin::handleViewingCompleted(bool status)
+void AgendaEventViewerPlugin::handleViewingCompleted(const QDate date)
 {
-	Q_UNUSED(status)
-	emit viewingCompleted();
+	emit viewingCompleted(date);
 
 	// Cleanup viewer.
 	if (mEventViewer) {

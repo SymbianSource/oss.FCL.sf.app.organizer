@@ -71,6 +71,7 @@ public: // data types
         {
         EAlarmTypeClock = 0,
         EAlarmTypeCalendar,
+        EAlarmTypeTodo,
         EAlarmTypeOther
         };
 

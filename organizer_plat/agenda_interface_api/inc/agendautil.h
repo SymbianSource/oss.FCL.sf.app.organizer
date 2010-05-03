@@ -106,10 +106,14 @@ public:
 	                              QDateTime& endTime);
 	void getNextInstanceTimes(AgendaEntry& entry, QDateTime& startTime, 
 	                          QDateTime& endTime);
-	
+	void markDatesWithEvents(QDateTime rangeStart, QDateTime rangeEnd,
+						 AgendaUtil::FilterFlags filter, QList<QDate>& dates);
+	bool areNoEntriesInCalendar();
 	static QDateTime minTime();
 	static QDateTime maxTime();
 
+	static bool isWorkdaysRepeatingEntry(const AgendaRepeatRule& repeatRule);
+	
 Q_SIGNALS:
 	void entriesChanged(QList<ulong> ids);
 	void entryAdded(ulong id);

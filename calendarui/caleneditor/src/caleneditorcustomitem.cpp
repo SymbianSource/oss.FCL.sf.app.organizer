@@ -34,10 +34,16 @@
 #include <QDate>
 #include <QTime>
 
+//LI related headers
+#include "qlocationpickeritem.h"
+#include <xqaiwrequest.h>
+#include <xqappmgr.h>
+
 // User includes
 #include "caleneditorcustomitem.h"
 #include "calendateutils.h"
 #include "caleneditorcommon.h"
+#include "caleneditordocloader.h"
 
 /*!
 	\class CalenEditorCustomItem
@@ -56,6 +62,8 @@ CalenEditorCustomItem::CalenEditorCustomItem(QGraphicsItem *parent)
 	mMinTime.setHMS(0,0,0,0);
 	mMaxTime.setHMS(23,59,59,999);
 	mLocale = HbExtendedLocale::system();
+	mLocationLineEdit = NULL;
+	mLocationPushButton = NULL;
 }
 /*!
 	Destructor.
@@ -119,6 +127,28 @@ HbWidget* CalenEditorCustomItem::createCustomWidget()
 		layoutBottom->addItem(mPushButtonDate);
 		return widgetBottom;
 		}
+				
+		case CustomWidgetLocation:
+		{
+			CalenEditorDocLoader editorLocationDocLoader;
+			bool loadSuccess = false;
+
+			editorLocationDocLoader.load(CALEN_EDITOR_LOCATION_XML_FILE, &loadSuccess);
+			Q_ASSERT_X(loadSuccess, "caleneditor.cpp", 
+		                                    "Unable to load caleneditor location view XML");
+			HbWidget* widgetLocation = qobject_cast<HbWidget *> (editorLocationDocLoader.findWidget(CALEN_EDITOR_LOCATION));
+		    
+			mLocationLineEdit = qobject_cast<HbLineEdit *>( editorLocationDocLoader.findWidget(CALEN_EDITOR_LOCATION_LINEEDIT));
+			mLocationLineEdit->setMinRows(1);
+			mLocationLineEdit->setMaxRows(4);
+			mLocationPushButton = qobject_cast<HbPushButton*>(editorLocationDocLoader.findWidget(CALEN_EDITOR_LOCATION_PUSHBUTTON));
+			mLocationPushButton->setIcon( HbIcon("qtg_mono_location"));
+			
+			connect(mLocationPushButton, SIGNAL(clicked()), this, SLOT(launchLocationPicker()));
+			connect(mLocationLineEdit, SIGNAL(textChanged(const QString)),
+		                this, SLOT(handleLocationTextChange(const QString)));
+			return widgetLocation;
+		}
 		
 		case RepeatUntilOffset:
 		{
@@ -131,7 +161,49 @@ HbWidget* CalenEditorCustomItem::createCustomWidget()
 			return 0;
 	}
 }
+/*!
+	launch the location picker application using QT highway with the required service
+*/
 
+void CalenEditorCustomItem::launchLocationPicker()
+{
+	XQApplicationManager *appManager = new XQApplicationManager();
+
+    XQAiwRequest *request = appManager->create("com.nokia.symbian", "ILocationPick", "pick()", true);
+    if( request )
+    {
+		QVariant retValue;
+		if( request->send( retValue ) )
+		{
+			setSelectedLocation(retValue);
+		}
+	}
+}
+/*!
+	set the selected location from the picker to the line edit widget 
+	and notify the other observers.
+*/
+void CalenEditorCustomItem::setSelectedLocation( QVariant &aValue )
+{
+	QLocationPickerItem selectedLocation = aValue.value<QLocationPickerItem>();
+	if( selectedLocation.mIsValid )
+    {
+		QString locationString;
+		if( selectedLocation.mStreet.size() )
+		{
+			locationString.append(selectedLocation.mStreet);
+			locationString.append(',');
+		}
+		if( selectedLocation.mCity.size() )
+		{
+			locationString.append(selectedLocation.mCity);
+			locationString.append(',');
+		}
+		locationString.append(selectedLocation.mCountry);
+		emit locationTextChanged(locationString);
+		mLocationLineEdit->setText(locationString );
+    }
+}
 void CalenEditorCustomItem::populateDateTime(QDateTime defaultDateTime, bool isFromItem)
 {
 	// Store the date and time to be shown
@@ -144,6 +216,12 @@ void CalenEditorCustomItem::populateDateTime(QDateTime defaultDateTime, bool isF
 	                                           r_qtn_date_usual_with_zero));
 	mPushButtonTime->setText(mLocale.format(defaultDateTime.time(), 
 	                                           r_qtn_time_usual_with_zero));
+}
+
+void CalenEditorCustomItem::populateLocation(QString location )
+{
+	mLocationLineEdit->setText( location );
+   
 }
 
 void CalenEditorCustomItem::setDateRange(QDate start, QDate end)
@@ -167,6 +245,12 @@ void CalenEditorCustomItem::setTimeRange(QTime start, QTime end)
 void CalenEditorCustomItem::enableDateButton(bool value)
 {
 	mPushButtonDate->setEnabled(value);
+}
+
+
+void CalenEditorCustomItem::handleLocationTextChange(QString location)
+{
+	emit locationTextChanged(location);
 }
 
 
@@ -237,11 +321,10 @@ void CalenEditorCustomItem::saveDate()
 {
 	mDate = mDatePicker->date(); 
 	if (mDate.isValid()) {
-		mDateTime.setDate(mDate);
-		mDateTime.setTime(mTime);
 		mPushButtonDate->setText(mLocale.format(mDate, 
 		                                           r_qtn_date_usual_with_zero));
-		emit dateTimeUpdated(mDateTime);
+		QDateTime dateTime(mDate,mTime);
+		emit dateTimeUpdated(dateTime);
 		}
 }
 
@@ -252,12 +335,11 @@ void CalenEditorCustomItem::saveTime()
 {
 	mTime = mTimePicker->time();
 	if (mTime.isValid()) {
-		mDateTime.setTime(mTime);
 		mPushButtonTime->setText(mLocale.format(mTime, 
 									r_qtn_time_usual_with_zero));
 
-		mDateTime.setDate(mDate);
-		emit dateTimeUpdated(mDateTime);
+		QDateTime dateTime(mDate,mTime);
+		emit dateTimeUpdated(dateTime);
 	}
 }
 
@@ -294,7 +376,8 @@ bool CalenEditorCustomItem::canSetModelIndex(const QModelIndex &index) const
         static_cast<HbDataFormModelItem::DataItemType>(
         index.data(HbDataFormModelItem::ItemTypeRole).toInt());
 
-    if(itemType == CustomWidgetFrom || itemType == CustomWidgetTo || itemType == RepeatUntilOffset) {
+    if(itemType == CustomWidgetFrom || itemType == CustomWidgetTo || itemType == RepeatUntilOffset 
+			|| itemType == CustomWidgetLocation ) {
         return true;
     } else {
         return false;
@@ -320,5 +403,6 @@ void CalenEditorCustomItem::restore()
     }
 }
 
+Q_IMPLEMENT_USER_METATYPE(QLocationPickerItem)
 
 // End of file	--Don't remove this.

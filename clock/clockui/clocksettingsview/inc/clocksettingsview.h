@@ -33,8 +33,7 @@ class HbAction;
 class HbDataFormModel;
 class HbDataFormModelItem;
 class HbLabel;
-class HbPushButton;
-class HbCheckBox;
+
 class TimezoneClient;
 class SettingsUtility;
 class SkinnableClock;
@@ -57,15 +56,12 @@ public:
 private slots:
 	void handleBackAction();
 	void updateDateLabel();
-	void updatePlaceLabel();
+	void updatePlaceInfo();
 	void updateClockWidget();
-	void formItemDisplayed(const QModelIndex &index);
-	void formItemValueChanged(
-			const QModelIndex& topLeft, const QModelIndex& bottomRight);
 	void updateDateItem();
 	void updateTimeItem();
-	void updatePlaceItem();
 	void handleOrientationChanged(Qt::Orientation orientation);
+	void handleNetworkTimeStateChange(int state);
 
 private:
 	void setupView();
@@ -86,10 +82,10 @@ private:
 	HbLabel *mDayDateLabel;
 	HbLabel *mPlaceLabel;
 
+	HbDataFormModelItem *mNetworkTimeItem;
 	HbDataFormModelItem *mTimeDataFormItem;
 	HbDataFormModelItem *mDateDataFormItem;
 	HbDataFormModelItem *mPlaceDataFormItem;
-	QPointer<HbCheckBox> mNetworkTimeWidget;
 
 	ClockSettingsDocLoader *mDocLoader;
 	SettingsUtility *mSettingsUtility;

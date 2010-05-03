@@ -20,7 +20,7 @@
 
 // System includes
 #include <QObject>
-#include <EventViewerPluginInterface>
+#include <eventviewerplugininterface.h>
 #include "agendaeventviewer.h"
 
 
@@ -42,12 +42,12 @@ public:
 	
 public:
 	
-	void viewEvent(const ulong id, Actions action, AgendaUtil *agendaUtil = 0);
+	void viewEvent(const ulong id, Actions action = ActionNothing, AgendaUtil *agendaUtil = 0);
 	void viewEvent(const QFile &fileHandle, 
-	               Actions action, AgendaUtil 
+	               Actions action = ActionNothing, AgendaUtil 
 	               *agendaUtil = 0);
 	void viewEvent(AgendaEntry entry, 
-	               Actions action, 
+	               Actions action = ActionNothing, 
 	               AgendaUtil *agendaUtil = 0);
 	
 private:
@@ -57,7 +57,7 @@ private:
 	
 private slots:
 
-	void handleViewingCompleted(bool status);
+	void handleViewingCompleted(const QDate date);
 	void handleEditingStarted();
 	void handleEditingCompleted();
 	void handleDeletingStarted();

@@ -18,7 +18,7 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 SUBDIRS += agendaeventviewer globaldata settings calenplugins customisationmanager \
-		 views styleplugins\calengriditemstyleplugin controller application
+		 views controller application regionalplugins
 
 # End of file	--Don't remove this.
 

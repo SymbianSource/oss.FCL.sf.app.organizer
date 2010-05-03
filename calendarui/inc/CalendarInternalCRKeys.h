@@ -97,4 +97,11 @@ const TReal KCalendarPersistentTime  = 0x00000009;
 */
 const TUint32 KCalendarPluginAvailability = 0x0000000A;
 
+/**
+* Defines whether regional information must be shown in the Calendar or not
+* Default value: 1
+*/
+const TUint32 KShowRegionalInformation = 0x0000000B;
+
+
 #endif  // CALENDARINTERNALCRKEYS_H

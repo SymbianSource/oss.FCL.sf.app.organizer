@@ -21,7 +21,7 @@
 // System includes
 #include <QObject>
 #include <qglobal.h>
-
+#include <QDate>
 
 // Forward declarations
 class QFile;
@@ -44,6 +44,7 @@ class AgendaEventViewer: public QObject
 
 public:
 	enum Actions {
+		ActionNothing,
 		ActionEdit = 0x01,
 		ActionDelete = 0x02,
 		ActionEditDelete = ActionEdit | ActionDelete,
@@ -55,12 +56,15 @@ public:
 	AGENDAEVENTVIEWER_EXPORT virtual ~AgendaEventViewer();
 
 public:
-	AGENDAEVENTVIEWER_EXPORT void view(const ulong id, Actions action);
-	AGENDAEVENTVIEWER_EXPORT void view(const QFile &fileHandle, Actions action);
-	AGENDAEVENTVIEWER_EXPORT void view(AgendaEntry entry, Actions action);
+	AGENDAEVENTVIEWER_EXPORT void view(const ulong id, 
+	                                   Actions action = ActionNothing);
+	AGENDAEVENTVIEWER_EXPORT void view(const QFile &fileHandle, 
+	                                   Actions action = ActionNothing);
+	AGENDAEVENTVIEWER_EXPORT void view(AgendaEntry entry, 
+	                                   Actions action = ActionNothing);
 
 signals:
-	void viewingCompleted(bool status = true);
+	void viewingCompleted(const QDate date = QDate());
 	void editingStarted();
 	void editingCompleted();
 	void deletingStarted();

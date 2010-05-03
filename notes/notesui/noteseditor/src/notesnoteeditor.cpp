@@ -18,7 +18,6 @@
 
 // System includes
 #include <QObject>
-#include <QDebug>
 #include <QDateTime>
 #include <HbTextEdit>
 #include <HbView>
@@ -30,7 +29,7 @@
 #include <HbExtendedLocale>
 #include <HbMenu>
 #include <CalenEditor>
-#include <HbStyleLoader>
+#include <HbMessageBox>
 
 // User includes
 #include "notesnoteeditor.h"
@@ -73,9 +72,6 @@ NotesNoteEditor::NotesNoteEditor(NotesEditorPrivate *owner, QObject *parent)
 	mDocLoader->load(NOTES_EDITOR_VIEW_DOCML, &success);
 	Q_ASSERT(success);
 
-	// Load the css file for displaying background lines.
-	HbStyleLoader::registerFilePath(NOTES_EDITOR_STYLE_PATH);
-
 	// Now load the view and the contents.
 	mEditor = static_cast<HbView *> (
 			mDocLoader->findWidget(NOTES_EDITOR_VIEW_OBJECT));
@@ -98,9 +94,6 @@ NotesNoteEditor::NotesNoteEditor(NotesEditorPrivate *owner, QObject *parent)
 			mTextEditor, SIGNAL(contentsChanged()),
 			this, SLOT(updateNoteText()));
 
-	// Set the object name
-	mTextEditor->setObjectName(NOTES_EDITOR_TEXTEDIT_OBJECT);
-
 	// Take the menu actions.
 	mDiscardChangesAction = static_cast<HbAction *> (
 			mDocLoader->findObject(NOTES_EDITOR_DISCARD_CHANGES_ACTION));
@@ -110,6 +103,15 @@ NotesNoteEditor::NotesNoteEditor(NotesEditorPrivate *owner, QObject *parent)
 	connect(
 			mDiscardChangesAction, SIGNAL(triggered()),
 			this, SLOT(handleDiscardChangesAction()));
+
+	mNewNoteAction = static_cast<HbAction *> (
+			mDocLoader->findObject(NOTES_EDITOR_NEWNOTE_ACTION));
+	if (!mNewNoteAction) {
+		qFatal("Unable to get object from document");
+	}
+	connect(
+			mNewNoteAction, SIGNAL(triggered()),
+			this, SLOT(handleNewNoteAction()));
 
 	mMarkToDoAction = static_cast<HbAction *> (
 			mDocLoader->findObject(NOTES_EDITOR_MARKTODO_ACTION));
@@ -154,14 +156,7 @@ NotesNoteEditor::NotesNoteEditor(NotesEditorPrivate *owner, QObject *parent)
 		qFatal("Unable to get widget from document");
 	}
 
-	// Get the modification date text.
-	mModificationDateLabel = static_cast<HbLabel *> (
-			mDocLoader->findWidget(NOTES_EDITOR_MODIFICATION_LABEL));
-	if (!mModificationDateLabel) {
-		qFatal("Unable to get widget from document");
-	}
-
-	// Get the modification date text.
+	// Get favorite icon
 	mFavouriteIcon = static_cast<HbLabel *> (
 			mDocLoader->findWidget(NOTES_EDITOR_FAVOURITE_ICON));
 	if (!mFavouriteIcon) {
@@ -193,16 +188,6 @@ void NotesNoteEditor::execute(AgendaEntry entry)
 	if (!mOwner->mNewEntry) {
 		mTextEditor->setPlainText(mOwner->mModifiedNote.description());
 
-		QString modificationDate = mOwner->
-			mModifiedNote.lastModifiedDateTime().date().toString("dd/MM/yyyy");
-
-		modificationDate.append(
-				" "+
-				mOwner->mModifiedNote.
-				lastModifiedDateTime().time().toString("hh:mm ap"));
-
-		mModificationDateLabel->setPlainText(modificationDate);
-
 		QString iconName;
 		if (mOwner->mModifiedNote.favourite()) {
 			iconName = "qtg_small_favorite";
@@ -218,17 +203,13 @@ void NotesNoteEditor::execute(AgendaEntry entry)
 
 		mFavouriteIcon->setIcon(HbIcon(iconName));
 
+		// Insert new note action.
+		HbMenu *viewMenu = mEditor->menu();
+		viewMenu->insertAction(mMarkToDoAction, mNewNoteAction);
+
 		// Set the sub heading
 		mViewHeading->setPlainText(hbTrId("txt_notes_subhead_note"));
 	} else {
-		QString creationDateTime =
-			(QDate::currentDate()).toString("dd/MM/yyyy");
-
-		creationDateTime.append(
-				" "+ (QTime::currentTime()).toString("hh:mm ap"));
-
-		mModificationDateLabel->setPlainText(creationDateTime);
-
 		mFavouriteIcon->setIcon(HbIcon(""));
 
 		// For handling the edit of note when text is given as input
@@ -236,7 +217,6 @@ void NotesNoteEditor::execute(AgendaEntry entry)
 
 		// Set the sub heading
 		mViewHeading->setPlainText(hbTrId("txt_notes_subhead_new_note"));
-		mModificationDateLabel->setPlainText(tr(" "));
 
 		// Dim the toolbar icons till text insertion.
 		mDeleteAction->setEnabled(false);
@@ -315,15 +295,19 @@ void NotesNoteEditor::saveNote()
  */
 void NotesNoteEditor::deleteNote()
 {
-	mOwner->deleteNote();
+	if (showDeleteConfirmationQuery()) {
+		mOwner->deleteNote();
 
-	HbMainWindow *window = hbInstance->allMainWindows().first();
-	bool status = false;
+		HbMainWindow *window = hbInstance->allMainWindows().first();
+		bool status = false;
 
-	// Now close the editor.
-	window->removeView(mEditor);
+		// Now close the editor.
+		window->removeView(mEditor);
 
-	mOwner->editingCompleted(status);
+		mOwner->editingCompleted(status);
+
+	}
+
 }
 
 /*!
@@ -358,7 +342,12 @@ void NotesNoteEditor::updateNoteText()
 		// existing entry
 		if (!mOwner->mNewEntry && !mDiscardChangesActionActive) {
 		HbMenu *viewMenu = mEditor->menu();
-		viewMenu->insertAction(mMarkToDoAction, mDiscardChangesAction);
+		if (mNewNoteAction) {
+			viewMenu->insertAction(mNewNoteAction, mDiscardChangesAction);
+		} else {
+			viewMenu->insertAction(mMarkToDoAction, mDiscardChangesAction);
+		}
+
 		mDiscardChangesActionActive = true;
 		}
 	}
@@ -423,12 +412,8 @@ void NotesNoteEditor::markNoteAsFavourite()
  */
 void NotesNoteEditor::handleDiscardChangesAction()
 {
-	qDebug() <<"notes: NotesNoteEditor::handleDiscardChangesAction -->";
-
 	// Close the note editor
 	close();
-
-	qDebug() <<"notes: NotesNoteEditor::handleDiscardChangesAction <--";
 }
 
 /*!
@@ -457,7 +442,8 @@ void NotesNoteEditor::handleAddToCalendarAction()
 
 	QString currentDateStr = currentDate.toString("dd/mm/yyyy");
 
-	mCalenEditor->create(calendarEntry,1);
+	mCalenEditor->create(
+			calendarEntry, 1, CalenEditor::TypeAppointment);
 
 }
 
@@ -501,6 +487,71 @@ void NotesNoteEditor::handleCalendarEditorClosed()
 
 	// Delete the calendar editor.
 	mCalenEditor->deleteLater();
+}
+
+/*!
+	Handles creation of new note signal
+ */
+void NotesNoteEditor::handleNewNoteAction()
+{
+	if (mOwner->isNoteEdited()) {
+		mOwner->mAgendaUtil->updateEntry(mOwner->mModifiedNote);
+	}
+
+	AgendaEntry entry;
+	entry.setType(AgendaEntry::TypeNote);
+
+	mOwner->mModifiedNote = mOwner->mOriginalNote = entry;
+	mOwner->mNewEntry = true;
+
+	mFavouriteIcon->setIcon(HbIcon(""));
+
+	// For handling the edit of note when text is given as input
+	mTextEditor->setPlainText(mOwner->mModifiedNote.description());
+
+	// Set the sub heading
+	mViewHeading->setPlainText(hbTrId("txt_notes_subhead_new_note"));
+
+	// Dim the toolbar icons till text insertion.
+	mDeleteAction->setEnabled(false);
+	mAddToCalendarAction->setEnabled(false);
+
+	mIgnoreFirstContentChange = false;
+
+	if (mDiscardChangesActionActive) {
+		mEditor->menu()->removeAction(mDiscardChangesAction);
+		mDiscardChangesActionActive = false;
+	}
+	mEditor->menu()->removeAction(mNewNoteAction);
+}
+
+/* !
+	Show the delete confirmation query.
+ */
+bool NotesNoteEditor::showDeleteConfirmationQuery()
+{
+	bool retValue(false);
+
+	HbMessageBox confirmationQuery(HbMessageBox::MessageTypeQuestion);
+	confirmationQuery.setDismissPolicy(HbDialog::NoDismiss);
+	confirmationQuery.setTimeout(HbDialog::NoTimeout);
+	confirmationQuery.setIconVisible(true);
+
+	QString displayText;
+	displayText = displayText.append(hbTrId("txt_notes_info_delete_note"));
+
+	confirmationQuery.setText(displayText);
+
+	confirmationQuery.setPrimaryAction(new HbAction(
+	    hbTrId("txt_notes_button_dialog_delete"), &confirmationQuery));
+	confirmationQuery.setSecondaryAction(new HbAction(
+	    hbTrId("txt_common_button_cancel"), &confirmationQuery));
+	HbAction *selected = confirmationQuery.exec();
+	if (selected == confirmationQuery.primaryAction()) {
+		retValue = true;
+	}
+
+	return retValue;
 }
 
 // End of file	--Don't remove this.

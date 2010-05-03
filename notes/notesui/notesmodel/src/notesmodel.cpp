@@ -17,12 +17,12 @@
 */
 
 // System includes
-#include <QDebug>
 #include <QAbstractItemModel>
 #include <QStandardItemModel>
 #include <QTimer>
 #include <QDateTime>
 #include <HbIcon>
+#include <HbExtendedLocale>
 
 // User includes
 #include "notesmodel.h"
@@ -48,8 +48,6 @@ NotesModel::NotesModel(AgendaUtil *agendaUtil, QObject *parent)
 :QObject(parent),
  mAgendaUtil(agendaUtil)
 {
-	qDebug() << "notes: NotesModel::NotesModel -->";
-
 	// Construct the source model.
 	mSourceModel = new QStandardItemModel(0, 1, this);
 
@@ -72,8 +70,6 @@ NotesModel::NotesModel(AgendaUtil *agendaUtil, QObject *parent)
 
 	// Populate the model in a different thread.
 	QTimer::singleShot(1, this, SLOT(populateSourceModel()));
-
-	qDebug() << "notes: NotesModel::NotesModel <--";
 }
 
 /*!
@@ -81,11 +77,7 @@ NotesModel::NotesModel(AgendaUtil *agendaUtil, QObject *parent)
  */
 NotesModel::~NotesModel()
 {
-	qDebug() << "notes: NotesModel::~NotesModel -->";
-
 	// Nothing yet.
-
-	qDebug() << "notes: NotesModel::~NotesModel <--";
 }
 
 /*!
@@ -96,12 +88,7 @@ NotesModel::~NotesModel()
  */
 QAbstractItemModel *NotesModel::sourceModel()
 {
-	qDebug() << "notes: NotesModel::sourceModel -->";
-
 	Q_ASSERT(mSourceModel);
-
-	qDebug() << "notes: NotesModel::sourceModel <--";
-
 	return mSourceModel;
 }
 
@@ -110,8 +97,6 @@ QAbstractItemModel *NotesModel::sourceModel()
  */
 void NotesModel::populateSourceModel()
 {
-	qDebug() << "notes: NotesModel::populateSourceModel -->";
-
 	// Clear the model if it has any data already
 	mSourceModel->clear();
 	mSourceModel->setColumnCount(1);
@@ -120,29 +105,27 @@ void NotesModel::populateSourceModel()
 	// The order of appending the items to the model is:
 	// 1. Notes, 2. Incompleted to-dos, 3. Completed to-dos.
 	// First get only the notes and populate the model.
-	QList<ulong> entryIds = mAgendaUtil->entryIds(
+	QList<AgendaEntry> agendaEntyList = mAgendaUtil->fetchAllEntries(
 			(AgendaUtil::FilterFlags) (AgendaUtil::IncludeNotes));
 
 	// Add the notes to the model.
-	appendNotesToModel(entryIds);
+	appendNotesToModel(agendaEntyList);
 
 	// Get the incompleted to-dos.
-	entryIds.clear();
-	entryIds = mAgendaUtil->entryIds(
+	agendaEntyList.clear();
+	agendaEntyList = mAgendaUtil->fetchAllEntries(
 			(AgendaUtil::FilterFlags) (AgendaUtil::IncludeIncompletedTodos));
 
 	// Add the incompleted to-dos to the model.
-	appendInCompTodosToModel(entryIds);
+	appendInCompTodosToModel(agendaEntyList);
 
 	// Get the completed to-dos.
-	entryIds.clear();
-	entryIds = mAgendaUtil->entryIds(
+	agendaEntyList.clear();
+	agendaEntyList = mAgendaUtil->fetchAllEntries(
 			(AgendaUtil::FilterFlags) (AgendaUtil::IncludeCompletedTodos));
 
 	// Add the completed to-dos to the model.
-	appendCompTodosToModel(entryIds);
-
-	qDebug() << "notes: NotesModel::populateSourceModel <--";
+	appendCompTodosToModel(agendaEntyList);
 }
 
 /*!
@@ -154,8 +137,6 @@ void NotesModel::populateSourceModel()
  */
 void NotesModel::updateSourceModel(ulong id)
 {
-	qDebug() << "notes: NotesModel::updateSourceModel -->";
-
 	AgendaEntry entry = mAgendaUtil->fetchById(id);
 	if (entry.isNull()) {
 		return;
@@ -251,7 +232,6 @@ void NotesModel::updateSourceModel(ulong id)
 			}
 		}
 	}
-	qDebug() << "notes: NotesModel::updateSourceModel <--";
 }
 
 /*!
@@ -262,13 +242,9 @@ void NotesModel::updateSourceModel(ulong id)
  */
 void NotesModel::populateSourceModel(QList<ulong> ids)
 {
-	qDebug() << "notes: NotesModel::populateSourceModel(ids) -->";
-
 	Q_UNUSED(ids)
 
 	QTimer::singleShot(1, this, SLOT(populateSourceModel()));
-
-	qDebug() << "notes: NotesModel::populateSourceModel(ids) <--";
 }
 
 /*!
@@ -279,8 +255,6 @@ void NotesModel::populateSourceModel(QList<ulong> ids)
  */
 void NotesModel::addEntryToModel(ulong id)
 {
-	qDebug() << "notes: NotesModel::addEntryToModel -->";
-
 	// We have different logic for adding a note or an incompleted to-do or a
 	// completed to-do.
 	AgendaEntry entry = mAgendaUtil->fetchById(id);
@@ -309,8 +283,6 @@ void NotesModel::addEntryToModel(ulong id)
 	if (notify) {
 		emit rowAdded(indexToNotify);
 	}
-
-	qDebug() << "notes: NotesModel::addEntryToModel <--";
 }
 
 /*!
@@ -361,8 +333,6 @@ void NotesModel::removeEntryFromModel(ulong id)
  */
 void NotesModel::modifyEntryInModel(ulong id, int row)
 {
-	qDebug() << "notes: NotesModel::modifyEntryInModel -->";
-
 	// Get the model index.
 	QModelIndex modelIndex = mSourceModel->index(row, 0);
 	Q_ASSERT(modelIndex.isValid());
@@ -380,14 +350,28 @@ void NotesModel::modifyEntryInModel(ulong id, int row)
 
 	// Set the display data to the index.
 	if (AgendaEntry::TypeNote == entry.type()) {
-		// Read modification time from agenda entry
 		QString displayText;
-		QString timeText(qtTrId("txt_notes_dblist_val_modified_on_1_2"));
-		QString modifiedDateText =
-				entry.startTime().date().toString("dd/MM/yyyy");
-		QString modifiedTimeText =
-						entry.startTime().time().toString("hh:mm ap");
-		displayText = timeText.arg(modifiedDateText,modifiedTimeText);
+		QString dateTimeText;
+		QString modifiedText;
+
+		// Read modification time from agenda entry
+		QDateTime entryStartDateTime = entry.startTime();
+
+		// If modified on today,show only modified time otherwise show the
+		// modified date.
+		if ((QDate::currentDate()) == entryStartDateTime.date() ) {
+			dateTimeText =
+					hbTrId("txt_notes_dblist_note_modified_at_time");
+			modifiedText =
+					entryStartDateTime.time().toString(timeFormatString());
+		} else {
+			dateTimeText =
+					hbTrId("txt_notes_dblist_note_modified_on_date");
+			modifiedText =
+					entryStartDateTime.date().toString(dateFormatString());
+		}
+
+		displayText = dateTimeText.arg(modifiedText);
 
 		QStringList stringList;
 		stringList << entry.description().left(15) << displayText;
@@ -397,24 +381,29 @@ void NotesModel::modifyEntryInModel(ulong id, int row)
 		// Set the favourite icon.
 		if (entry.favourite()) {
 			QList<QVariant> iconList;
-			iconList.append(QVariant(QVariant::Invalid));
+			iconList.append(HbIcon("qtg_small_note"));
 			iconList.append(HbIcon("qtg_mono_favourites"));
 			mSourceModel->setData(modelIndex, iconList, Qt::DecorationRole);
 		} else {
 			QList<QVariant> iconList;
-			iconList.append(QVariant(QVariant::Invalid));
+			iconList.append(HbIcon("qtg_small_note"));
 			iconList.append(QVariant(QVariant::Invalid));
 			mSourceModel->setData(modelIndex, iconList, Qt::DecorationRole);
 		}
 	} else if (AgendaEntry::TypeTodo == entry.type()) {
 		QStringList stringList;
-		stringList << entry.summary();
+		if (entry.summary().isEmpty()) {
+			// If empty set unnamed text
+			stringList<<hbTrId("txt_notes_dblist_unnamed");
+		} else {
+			stringList << entry.summary();
+		}
 		if (AgendaEntry::TodoNeedsAction == entry.status()) {
 			// Read due date from agenda entry
 			QString displayText;
 			QString timeText(hbTrId("txt_notes_dblist_val_due_on_1"));
 			QString dueDateText =
-					entry.startTime().toString("dd/MM/yyyy");
+					entry.startTime().toString(dateFormatString());
 			displayText = timeText.arg(dueDateText);
 			stringList << displayText;
 		}
@@ -430,17 +419,19 @@ void NotesModel::modifyEntryInModel(ulong id, int row)
 			iconList.append(HbIcon("qtg_small_todo"));
 		}
 
-		// Set the alarm icon if reminder is set.
-		if (!entry.alarm().isNull()) {
+		if (1 == entry.priority()) {
+			// Set the High Priority icon if priority is high.
+			iconList.append(HbIcon("qtg_small_priority_high"));
+		} else if (!entry.alarm().isNull()) {
+			// Set the alarm if set.
 			iconList.append(HbIcon("qtg_mono_alarm"));
 		} else {
 			iconList.append(QVariant(QVariant::Invalid));
 		}
+
 		// Set the icons.
 		mSourceModel->setData(modelIndex, iconList, Qt::DecorationRole);
 	}
-
-	qDebug() << "notes: NotesModel::modifyEntryInModel <--";
 }
 
 /*!
@@ -448,18 +439,17 @@ void NotesModel::modifyEntryInModel(ulong id, int row)
 
 	\param ids QList of uids containing the notes.
  */
-void NotesModel::appendNotesToModel(QList<ulong> &ids)
+void NotesModel::appendNotesToModel(QList<AgendaEntry> &agendaEntryList)
 {
-	qDebug() << "notes: NotesModel::appendNotesToModel -->";
-
+	int entriesCount = agendaEntryList.count();
 	// Iterate and add notes to the model.
-	mSourceModel->insertRows(mSourceModel->rowCount(), ids.count());
+	mSourceModel->insertRows(mSourceModel->rowCount(), entriesCount);
 	int rowCount = mSourceModel->rowCount();
-	for (int idIter = 0, modelIter = rowCount - ids.count();
-			idIter < ids.count(); idIter++, modelIter++) {
-		// Fetch the note details.
-		ulong id = ids[rowCount - 1 - idIter];
-		AgendaEntry entry = mAgendaUtil->fetchById(id);
+	for (int idIter = 0, modelIter = rowCount - entriesCount;
+			idIter < entriesCount; idIter++, modelIter++) {
+
+		// Read the note details.
+		AgendaEntry entry = agendaEntryList[rowCount - 1 - idIter];
 
 		if (AgendaEntry::TypeNote != entry.type()) {
 			continue;
@@ -470,7 +460,7 @@ void NotesModel::appendNotesToModel(QList<ulong> &ids)
 
 		// Set the note id.
 		mSourceModel->setData(
-				mdlIndex, (qulonglong) id, NotesNamespace::IdRole);
+				mdlIndex, (qulonglong) entry.id(), NotesNamespace::IdRole);
 		// Set the type of the note.
 		mSourceModel->setData(
 				mdlIndex, entry.type(), NotesNamespace::TypeRole);
@@ -481,12 +471,45 @@ void NotesModel::appendNotesToModel(QList<ulong> &ids)
 		// Set the display data now.
 		// Read modification time from agenda entry
 		QString displayText;
-		QString timeText(hbTrId("txt_notes_dblist_val_modified_on_1_2"));
-		QString modifiedDateText =
-				entry.lastModifiedDateTime().date().toString("dd/MM/yyyy");
-		QString modifiedTimeText =
-						entry.lastModifiedDateTime().time().toString("hh:mm ap");
-		displayText = timeText.arg(modifiedDateText,modifiedTimeText);
+		QString dateTimeText;
+		QString modifiedText;
+
+		// Show the creation time if entry is not modified.
+		if (entry.dtStamp().isValid()) {
+			QDateTime creationDateTime = entry.dtStamp();
+
+			// If created on today,show only creation time otherwise show the
+			// creation date.
+			if ((QDate::currentDate()) == creationDateTime.date()) {
+				dateTimeText =
+						hbTrId("txt_notes_dblist_note_created_at_time");
+				modifiedText =
+						creationDateTime.time().toString(timeFormatString());
+			} else {
+				dateTimeText =
+						hbTrId("txt_notes_dblist_note_created_on_date");
+				modifiedText =
+						creationDateTime.date().toString(dateFormatString());
+			}
+		} else {
+			QDateTime modifiedDateTime = entry.lastModifiedDateTime();
+
+			// If modified on today,show only modified time otherwise show the
+			// modified date.
+			if ((QDate::currentDate()) == modifiedDateTime.date() ) {
+				dateTimeText =
+						hbTrId("txt_notes_dblist_note_modified_at_time");
+				modifiedText =
+						modifiedDateTime.time().toString(timeFormatString());
+			} else {
+				dateTimeText =
+						hbTrId("txt_notes_dblist_note_modified_on_date");
+				modifiedText =
+						modifiedDateTime.date().toString(dateFormatString());
+			}
+		}
+
+		displayText = dateTimeText.arg(modifiedText);
 
 		QStringList stringList;
 		stringList << entry.description().left(100) << displayText;
@@ -497,12 +520,12 @@ void NotesModel::appendNotesToModel(QList<ulong> &ids)
 		if (entry.favourite()) {
 			// Set the favourite icon.
 			QList<QVariant> iconList;
-			iconList.append(QVariant(QVariant::Invalid));
+			iconList.append(HbIcon("qtg_small_note"));
 			iconList.append(HbIcon("qtg_mono_favourites"));
 			mSourceModel->setData(mdlIndex, iconList, Qt::DecorationRole);
 		} else {
 			QList<QVariant> iconList;
-			iconList.append(QVariant(QVariant::Invalid));
+			iconList.append(HbIcon("qtg_small_note"));
 			iconList.append(QVariant(QVariant::Invalid));
 			mSourceModel->setData(mdlIndex, iconList, Qt::DecorationRole);
 		}
@@ -510,8 +533,6 @@ void NotesModel::appendNotesToModel(QList<ulong> &ids)
 		// Update the notes count.
 		mNotesCount++;
 	}
-
-	qDebug() << "notes: NotesModel::appendNotesToModel <--";
 }
 
 /*!
@@ -519,18 +540,17 @@ void NotesModel::appendNotesToModel(QList<ulong> &ids)
 
 	\param ids QList of uids containing the incompleted to-dos.
  */
-void NotesModel::appendInCompTodosToModel(QList<ulong> &ids)
+void NotesModel::appendInCompTodosToModel(QList<AgendaEntry> &agendaEntryList)
 {
-	qDebug() << "notes: NotesModel::appendInCompTodosToModel -->";
-
+	int entriesCount = agendaEntryList.count();
 	// Iterate and add incomplete to-do to the model.
-	mSourceModel->insertRows(mSourceModel->rowCount(), ids.count());
+	mSourceModel->insertRows(mSourceModel->rowCount(), entriesCount);
 	int rowCount = mSourceModel->rowCount();
-	for (int idIter = 0, modelIter = rowCount - ids.count();
-			idIter < ids.count(); idIter++, modelIter++) {
-		// Fetch the to-do details.
-		ulong id = ids[idIter];
-		AgendaEntry entry = mAgendaUtil->fetchById(id);
+	for (int idIter = 0, modelIter = rowCount - entriesCount;
+			idIter < entriesCount; idIter++, modelIter++) {
+
+		// Read the to-do details.
+		AgendaEntry entry = agendaEntryList[idIter];
 
 		if (AgendaEntry::TypeTodo != entry.type()) {
 			continue;
@@ -545,7 +565,7 @@ void NotesModel::appendInCompTodosToModel(QList<ulong> &ids)
 
 		// Set the to-do id.
 		mSourceModel->setData(
-				mdlIndex, (qulonglong) id, NotesNamespace::IdRole);
+				mdlIndex, (qulonglong) entry.id(), NotesNamespace::IdRole);
 		// Set the type of the to-do.
 		mSourceModel->setData(
 				mdlIndex, entry.type(), NotesNamespace::TypeRole);
@@ -555,13 +575,19 @@ void NotesModel::appendInCompTodosToModel(QList<ulong> &ids)
 
 		// Set the display data now.
 		QStringList stringList;
-		stringList << entry.summary();
+		if (entry.summary().isEmpty()) {
+			// If empty set unnamed text
+			stringList<<hbTrId("txt_notes_dblist_unnamed");
+		} else {
+			stringList << entry.summary();
+		}
+
 		if (AgendaEntry::TodoNeedsAction == entry.status()) {
 			// Read due date from agenda entry
 			QString displayText;
 			QString timeText(hbTrId("txt_notes_dblist_val_due_on_1"));
 			QString dueDateText =
-					entry.startTime().toString("dd/MM/yyyy");
+					entry.startTime().toString(dateFormatString());
 			displayText = timeText.arg(dueDateText);
 			stringList << displayText;
 		}
@@ -571,8 +597,11 @@ void NotesModel::appendInCompTodosToModel(QList<ulong> &ids)
 		QList<QVariant> iconList;
 		iconList.append(HbIcon("qtg_small_todo"));
 
-		// Set the alarm icon if reminder is set.
-		if (!entry.alarm().isNull()) {
+		if (1 == entry.priority()) {
+			// Set the High Priority icon if priority is high.
+			iconList.append(HbIcon("qtg_small_priority_high"));
+		} else if (!entry.alarm().isNull()) {
+			// Set the alarm if set.
 			iconList.append(HbIcon("qtg_mono_alarm"));
 		} else {
 			iconList.append(QVariant(QVariant::Invalid));
@@ -584,8 +613,6 @@ void NotesModel::appendInCompTodosToModel(QList<ulong> &ids)
 		// Update the incompleted to-do count.
 		mInCompTodoCount++;
 	}
-
-	qDebug() << "notes: NotesModel::appendInCompTodosToModel <--";
 }
 
 /*!
@@ -593,18 +620,17 @@ void NotesModel::appendInCompTodosToModel(QList<ulong> &ids)
 
 	\param ids QList of uids containing the completed to-dos.
  */
-void NotesModel::appendCompTodosToModel(QList<ulong> &ids)
+void NotesModel::appendCompTodosToModel(QList<AgendaEntry> &agendaEntryList)
 {
-	qDebug() << "notes: NotesModel::appendCompTodosToModel -->";
-
+	int entriesCount = agendaEntryList.count();
 	// Iterate and add complete to-do to the model.
-	mSourceModel->insertRows(mSourceModel->rowCount(), ids.count());
+	mSourceModel->insertRows(mSourceModel->rowCount(), entriesCount);
 	int rowCount = mSourceModel->rowCount();
-	for (int idIter = 0, modelIter = rowCount - ids.count();
-			idIter < ids.count(); idIter++, modelIter++) {
-		// Fetch the to-do details.
-		ulong id = ids[idIter];
-		AgendaEntry entry = mAgendaUtil->fetchById(id);
+	for (int idIter = 0, modelIter = rowCount - entriesCount;
+			idIter < entriesCount; idIter++, modelIter++) {
+
+		// Read the completed to-do details.
+		AgendaEntry entry = agendaEntryList[idIter];
 
 		if (AgendaEntry::TypeTodo != entry.type()) {
 			continue;
@@ -619,7 +645,7 @@ void NotesModel::appendCompTodosToModel(QList<ulong> &ids)
 
 		// Set the to-do id.
 		mSourceModel->setData(
-				mdlIndex, (qulonglong) id, NotesNamespace::IdRole);
+				mdlIndex, (qulonglong) entry.id(), NotesNamespace::IdRole);
 		// Set the type of the to-do.
 		mSourceModel->setData(
 				mdlIndex, entry.type(), NotesNamespace::TypeRole);
@@ -629,13 +655,18 @@ void NotesModel::appendCompTodosToModel(QList<ulong> &ids)
 
 		// Set the display data now.
 		QStringList stringList;
-		stringList << entry.summary();
+		if (entry.summary().isEmpty()) {
+			// If empty set unnamed text
+			stringList<<hbTrId("txt_notes_dblist_unnamed");
+		} else {
+			stringList << entry.summary();
+		}
 		if (AgendaEntry::TodoCompleted == entry.status()) {
 			// Read completed date from agenda entry
 			QString displayText;
 			QString timeText(hbTrId("txt_notes_dblist_val_completed_on_1"));
 			QString completedTimeText =
-					entry.completedDateTime().toString("dd/MM/yyyy");
+					entry.completedDateTime().toString(dateFormatString());
 			displayText = timeText.arg(completedTimeText);
 			stringList << displayText;
 		}
@@ -654,8 +685,6 @@ void NotesModel::appendCompTodosToModel(QList<ulong> &ids)
 		// Update the completed to-do count.
 		mCompTodoCount++;
 	}
-
-	qDebug() << "notes: NotesModel::appendCompTodosToModel <--";
 }
 
 /*!
@@ -667,8 +696,6 @@ void NotesModel::appendCompTodosToModel(QList<ulong> &ids)
  */
 bool NotesModel::insertNoteToModel(QModelIndex &index, ulong id)
 {
-	qDebug() << "notes: NotesModel::insertNoteToModel -->";
-
 	AgendaEntry entry = mAgendaUtil->fetchById(id);
 	if (entry.isNull()) {
 		return false;
@@ -691,12 +718,44 @@ bool NotesModel::insertNoteToModel(QModelIndex &index, ulong id)
 	// Set the display data now.
 	// Read modification time from agenda entry
 	QString displayText;
-	QString timeText(hbTrId("txt_notes_dblist_val_modified_on_1_2"));
-	QString modifiedDateText =
-			entry.lastModifiedDateTime().date().toString("dd/MM/yyyy");
-	QString modifiedTimeText =
-					entry.lastModifiedDateTime().time().toString("hh:mm ap");
-	displayText = timeText.arg(modifiedDateText,modifiedTimeText);
+	QString dateTimeText;
+	QString modifiedText;
+
+	// Show the creation time if entry is not modified.
+	if (entry.dtStamp().isValid()) {
+		QDateTime creationDateTime = entry.dtStamp();
+
+		// If created on today,show only creation time otherwise show the
+		// creation date.
+		if ((QDate::currentDate()) == creationDateTime.date()) {
+			dateTimeText =
+					hbTrId("txt_notes_dblist_note_created_at_time");
+			modifiedText =
+					creationDateTime.time().toString(timeFormatString());
+		} else {
+			dateTimeText =
+					hbTrId("txt_notes_dblist_note_created_on_date");
+			modifiedText =
+					creationDateTime.date().toString(dateFormatString());
+		}
+	} else {
+		QDateTime modifiedDateTime = entry.lastModifiedDateTime();
+
+		// If modified on today,show only modified time otherwise show the
+		// modified date.
+		if ((QDate::currentDate()) == modifiedDateTime.date() ) {
+			dateTimeText =
+					hbTrId("txt_notes_dblist_note_modified_at_time");
+			modifiedText =
+					modifiedDateTime.time().toString(timeFormatString());
+		} else {
+			dateTimeText =
+					hbTrId("txt_notes_dblist_note_modified_on_date");
+			modifiedText =
+					modifiedDateTime.date().toString(dateFormatString());
+		}
+	}
+	displayText = dateTimeText.arg(modifiedText);
 
 	QStringList stringList;
 	stringList << entry.description().left(100) << displayText;
@@ -707,12 +766,12 @@ bool NotesModel::insertNoteToModel(QModelIndex &index, ulong id)
 	// Set the favourite icon.
 	if (entry.favourite()) {
 		QList<QVariant> iconList;
-		iconList.append(QVariant(QVariant::Invalid));
+		iconList.append(HbIcon("qtg_small_note"));
 		iconList.append(HbIcon("qtg_mono_favourites"));
 		mSourceModel->setData(mdlIndex, iconList, Qt::DecorationRole);
 	} else {
 		QList<QVariant> iconList;
-		iconList.append(QVariant(QVariant::Invalid));
+		iconList.append(HbIcon("qtg_small_note"));
 		iconList.append(QVariant(QVariant::Invalid));
 		mSourceModel->setData(mdlIndex, iconList, Qt::DecorationRole);
 	}
@@ -720,8 +779,6 @@ bool NotesModel::insertNoteToModel(QModelIndex &index, ulong id)
 	mNotesCount++;
 
 	index = mdlIndex;
-
-	qDebug() << "notes: NotesModel::insertNoteToModel <--";
 
 	return true;
 }
@@ -736,7 +793,6 @@ bool NotesModel::insertNoteToModel(QModelIndex &index, ulong id)
  */
 bool NotesModel::insertInCompTodoToModel(QModelIndex &index, ulong id)
 {
-	qDebug() << "notes: NotesModel::insertInCompTodoToModel -->";
 
 	bool success = false;
 
@@ -745,7 +801,6 @@ bool NotesModel::insertInCompTodoToModel(QModelIndex &index, ulong id)
 	if (entry.isNull()) {
 		return success;
 	}
-
 
 	// First fetch the list of incompleted to-dos.
 	QList<ulong> entryIds = mAgendaUtil->entryIds(
@@ -786,13 +841,18 @@ bool NotesModel::insertInCompTodoToModel(QModelIndex &index, ulong id)
 
 			// Set the display data now.
 			QStringList stringList;
-			stringList << entry.summary();
+			if (entry.summary().isEmpty()) {
+				// If empty set unnamed text
+				stringList<<hbTrId("txt_notes_dblist_unnamed");
+			} else {
+				stringList << entry.summary();
+			}
 			if (AgendaEntry::TodoNeedsAction == entry.status()) {
 				// Read due date from agenda entry
 				QString displayText;
 				QString timeText(hbTrId("txt_notes_dblist_val_due_on_1"));
 				QString dueDateText =
-						entry.startTime().toString("dd/MM/yyyy");
+						entry.startTime().toString(dateFormatString());
 				displayText = timeText.arg(dueDateText);
 				stringList << displayText;
 			}
@@ -803,12 +863,16 @@ bool NotesModel::insertInCompTodoToModel(QModelIndex &index, ulong id)
 			QList<QVariant> iconList;
 			iconList.append(HbIcon("qtg_small_todo"));
 
-			// Set the alarm icon if reminder is set.
-			if (!entry.alarm().isNull()) {
+			if (1 == entry.priority()) {
+				// Set the High Priority icon if priority is high.
+				iconList.append(HbIcon("qtg_small_priority_high"));
+			} else if (!entry.alarm().isNull()) {
+				// Set the alarm if set.
 				iconList.append(HbIcon("qtg_mono_alarm"));
 			} else {
 				iconList.append(QVariant(QVariant::Invalid));
 			}
+
 			// Set the icons.
 			mSourceModel->setData(
 					newModelIndex, iconList, Qt::DecorationRole);
@@ -820,8 +884,6 @@ bool NotesModel::insertInCompTodoToModel(QModelIndex &index, ulong id)
 			index = newModelIndex;
 		}
 	}
-
-	qDebug() << "notes: NotesModel::insertInCompTodoToModel <--";
 
 	return success;
 }
@@ -836,8 +898,6 @@ bool NotesModel::insertInCompTodoToModel(QModelIndex &index, ulong id)
  */
 bool NotesModel::insertCompTodoToModel(QModelIndex &index, ulong id)
 {
-	qDebug() << "notes: NotesModel::insertCompTodoToModel -->";
-
 	bool success = false;
 
 	// Fetch the entry first.
@@ -888,13 +948,18 @@ bool NotesModel::insertCompTodoToModel(QModelIndex &index, ulong id)
 
 			// Set the display data now.
 			QStringList stringList;
-			stringList << entry.summary();
+			if (entry.summary().isEmpty()) {
+				// If empty set unnamed text
+				stringList<<hbTrId("txt_notes_dblist_unnamed");
+			} else {
+				stringList << entry.summary();
+			}
 			if (AgendaEntry::TodoCompleted == entry.status()) {
 				// Read completed date from agenda entry
 				QString displayText;
 				QString timeText(hbTrId("txt_notes_dblist_val_completed_on_1"));
 				QString completedTimeText =
-						entry.completedDateTime().toString("dd/MM/yyyy");
+						entry.completedDateTime().toString(dateFormatString());
 				displayText = timeText.arg(completedTimeText);
 				stringList << displayText;
 			}
@@ -920,9 +985,72 @@ bool NotesModel::insertCompTodoToModel(QModelIndex &index, ulong id)
 		}
 	}
 
-	qDebug() << "notes: NotesModel::insertCompTodoToModel <--";
-
 	return success;
 }
+
+/*!
+	Retruns the dateformat based current locale settings.
+	Common method can be used by any class.
+	Can be removed once format strings are defined in hb.
+ */
+QString NotesModel::dateFormatString()
+{
+	HbExtendedLocale locale = HbExtendedLocale::system();
+
+	QString dateFormat;
+	switch (locale.dateStyle()) {
+		case HbExtendedLocale::American:
+			dateFormat.append("MM");
+			dateFormat.append(locale.dateSeparator(1));
+			dateFormat.append("dd");
+			dateFormat.append(locale.dateSeparator(1));
+			dateFormat.append("yyyy");
+			break;
+
+		case HbExtendedLocale::European:
+			dateFormat.append("dd");
+			dateFormat.append(locale.dateSeparator(1));
+			dateFormat.append("MM");
+			dateFormat.append(locale.dateSeparator(1));
+			dateFormat.append("yyyy");
+			break;
+
+		case HbExtendedLocale::Japanese:
+			dateFormat.append("yyyy");
+			dateFormat.append(locale.dateSeparator(1));
+			dateFormat.append("MM");
+			dateFormat.append(locale.dateSeparator(1));
+			dateFormat.append("dd");
+			break;
+	}
+
+	return dateFormat;
+}
+
+/*!
+	Retruns the timeformat string based on current locale settings
+	Common method can be used by any class.
+	Can be removed once format strings are defined in hb.
+ */
+QString NotesModel::timeFormatString()
+{
+	QString timeFormat;
+
+	HbExtendedLocale locale = HbExtendedLocale::system();
+
+	if (locale.timeStyle() == HbExtendedLocale::Time12) {
+		timeFormat.append("h");
+		timeFormat.append(locale.timeSeparator(1));
+		timeFormat.append("mm");
+		timeFormat.append(" ap");
+	} else {
+		timeFormat.append("hh");
+		timeFormat.append(locale.timeSeparator(1));
+		timeFormat.append("mm");
+	}
+
+	return timeFormat;
+}
+
 
 // End of file	--Don't remove this.

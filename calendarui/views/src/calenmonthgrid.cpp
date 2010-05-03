@@ -22,6 +22,7 @@
 #include <hbmainwindow.h>
 #include <hbgridview.h>
 #include <hbabstractviewitem.h>
+#include <hbstyleloader.h>
 #include <hbcolorscheme.h>
 
 // User includes
@@ -34,6 +35,7 @@
 
 // Constants
 #define SCROLL_SPEEED 1000 
+#define GRIDLINE_WIDTH 0.075 //units
 
 /*!
  \class CalenMonthGrid
@@ -53,7 +55,8 @@ CalenMonthGrid::CalenMonthGrid(QGraphicsItem *parent):
 	mView(NULL),
 	mCurrentRow(0),
 	mIsNonActiveDayFocused(false),
-	mIgnoreItemActivated(false)
+	mIgnoreItemActivated(false),
+	mGridBorderColor(Qt::gray)
 {
 	setScrollDirections(Qt::Vertical);
 	setRowCount(KNumOfVisibleRows);
@@ -64,10 +67,26 @@ CalenMonthGrid::CalenMonthGrid(QGraphicsItem *parent):
 	setUniformItemSizes(true);
 	setVerticalScrollBarPolicy(HbScrollArea::ScrollBarAlwaysOff);
 	setClampingStyle(HbScrollArea::StrictClamping );
-	CalenGridItemPrototype *gridItemPrototype = new CalenGridItemPrototype(this);
-	setItemPrototype(gridItemPrototype);
+	
+	// Get the content widget of the scroll area to draw the grid lines
+	mContentWidget = contentWidget();
+	
+	// Get the color of the grid lines
+	mGridLineColor = HbColorScheme::color("qtc_cal_grid_line");
+	
+	// Create the prototype
+	CalenGridItemPrototype* gridItemPrototype = new CalenGridItemPrototype(this);
+	// Create the model
 	mModel = new QStandardItemModel(14*KCalenDaysInWeek, 1, this);
-	setModel(mModel);
+	// Set the mode and the prototype
+	setModel(mModel,gridItemPrototype);
+	
+	// Register the widgetml and css files
+	HbStyleLoader::registerFilePath(":/");
+	
+	// Set the layout name
+	setLayoutName("calendarCustomGridItem");
+	
 	connect(this, SIGNAL(scrollingEnded()), this,
 			SLOT(scrollingFinished()));
 	
@@ -109,75 +128,77 @@ void CalenMonthGrid::updateMonthGridModel(QList<CalenMonthData> &monthDataArray,
 		mModel->insertRows(rowCount,countDiff);
 	}
 	QDateTime currDate = mView->getCurrentDay();
+	QDateTime currDateTime = CalenDateUtils::beginningOfDay(currDate);
 	QDateTime activeDay = mView->getActiveDay();
+	QDateTime activeDateTime = CalenDateUtils::beginningOfDay(activeDay);
+	
 	QModelIndex currentIndex;
+	
+	// Get the default text color to be set
+	QColor textColor = HbColorScheme::color("qtc_cal_month_notactive_dates");
+	HbExtendedLocale locale = HbExtendedLocale::system();
 	for (int i = 0; i < dataCount; i++) {
 		QDateTime dateTime = monthDataArray[i].Day();
 		currentIndex = mModel->index(i, 0);
-		HbExtendedLocale locale = HbExtendedLocale::system();
 		// Get the localised string for the day
 		QString date = locale.toString(dateTime.date().day());
-		mModel->itemFromIndex(currentIndex)->setData(date,
-									 CalendarNamespace::CalendarMonthDayRole);
+		
+		// Create the variant list to contain the date to depict a grid item
+		QVariantList itemData;
+		
+		// NOTE: Add the data in the order mentioned in the 
+		// CalendarNamespace::DataRole enum. Dont change the order.
+		itemData << date; 
 		
 		// Check for active day
-		if (CalenDateUtils::beginningOfDay(activeDay)
-		        == CalenDateUtils::beginningOfDay(dateTime)) {
+		if (activeDateTime == CalenDateUtils::beginningOfDay(dateTime)) {
 			mCurrentRow = currentIndex.row();
 			// Set the focus icon
-			mModel->itemFromIndex(currentIndex)->setData(
-									QString("qtg_fr_cal_focused_day_ind"),
-									CalendarNamespace::CalendarMonthFocusRole);
+			itemData << QString("qtg_fr_cal_focused_day_ind");
 		} else {
 			// reset the highlight
-			mModel->itemFromIndex(currentIndex)->setData(
-								QString(""),
-								CalendarNamespace::CalendarMonthFocusRole);
+			itemData << QString("");
 		}
 
 		// Check for current day
-		if (CalenDateUtils::beginningOfDay(currDate)
-		        == CalenDateUtils::beginningOfDay(dateTime)) {
+		if (currDateTime == CalenDateUtils::beginningOfDay(dateTime)) {
 			// Set the underline icon
-			mModel->itemFromIndex(currentIndex)->setData(true,
-								CalendarNamespace::CalendarMonthUnderlineRole);
-		} else {
-			mModel->itemFromIndex(currentIndex)->setData(false,
-								CalendarNamespace::CalendarMonthUnderlineRole);
+			itemData << true;
+		} else {			
+			itemData << false;
 		}
-
-		// Reset the event indicator attribute
-		mModel->itemFromIndex(currentIndex)->setData(QString(""),
-									 CalendarNamespace::CalendarMonthEventRole);
 
 		// Check for events
 		if (monthDataArray[i].HasEvents()) {
 			// Set the underline icon
-			mModel->itemFromIndex(currentIndex)->setData(QString(
-									"qtg_graf_cal_event_ind"),
-									CalendarNamespace::CalendarMonthEventRole);
+			itemData << QString("qtg_graf_cal_event_ind");
+		} else {
+			itemData << QString("");
 		}
-		// Check if this item falls on seventh column
-		if ((i % KCalenDaysInWeek) == 6) {
-			// Set the seventh column role
-			mModel->itemFromIndex(currentIndex)->setData(true,
-								CalendarNamespace::CalendarMonthSeventhColumn);
-		}
+		
+		// Add default text color
+		itemData << textColor;
+		mModel->itemFromIndex(currentIndex)->setData(itemData);
 	}
 	mMonthDataArray = monthDataArray;
 	
 	// Get the active month
 	QDateTime activeDate = mView->getActiveDay();
 	// Set the text color properly
-	setActiveDates(activeDate);
+	setActiveDates(activeDate.date());
 	
-	// Reset the view and update it again
-	reset();
-	update();
-	
-	// Calculate the last visible item in the grid
-	QModelIndex index = mModel->index(indexToBeScrolled, 0);
-	scrollTo(index);
+	// NOTE: To make sure that we always display proper month,
+	// two calls have been  made to scrollTo(), one with top
+	// visible item and other with bottom visible item
+    // Calculate the first visible item in the grid
+    QModelIndex firstVisibleIndex = mModel->index(indexToBeScrolled - 
+                                        (KNumOfVisibleRows * KCalenDaysInWeek - 1), 0);
+    scrollTo(firstVisibleIndex);
+    
+    
+    // Calculate the last visible item in the grid
+    QModelIndex lastVisibleIndex = mModel->index(indexToBeScrolled, 0);
+    scrollTo(lastVisibleIndex);
 }
 
 /*!
@@ -187,6 +208,9 @@ void CalenMonthGrid::downGesture (int value)
 {
 	Q_UNUSED(value)	
 	mDirection = down;
+	// Before we start scrolling, setthe active text color to previous month
+	QDateTime activeDate = mView->getActiveDay();
+	setActiveDates(activeDate.addMonths(-1).date());
 	HbScrollArea::downGesture(SCROLL_SPEEED);
 }
 
@@ -197,6 +221,9 @@ void CalenMonthGrid::upGesture (int value)
 {
 	Q_UNUSED(value)	
 	mDirection = up;
+	// Before we start scrolling, setthe active text color to future month
+	QDateTime activeDate = mView->getActiveDay();
+	setActiveDates(activeDate.addMonths(1).date());
 	HbScrollArea::upGesture(SCROLL_SPEEED);
 }
 
@@ -272,21 +299,6 @@ void CalenMonthGrid::scrollingFinished()
 			return; // return immediately
 		}
 	} else if(!mIsAtomicScroll) {
-		if (mDirection == down) {
-			// Before we start scrolling, setthe active text color to previous month
-			QDateTime activeDate = mView->getActiveDay();
-			if (!mIsNonActiveDayFocused) {
-				activeDate = activeDate.addMonths(-1);
-			}
-			setActiveDates(activeDate);
-		} else if (mDirection == up) {
-			// Before we start scrolling, setthe active text color to previous month
-			QDateTime activeDate = mView->getActiveDay();
-			if (!mIsNonActiveDayFocused) {
-				activeDate = activeDate.addMonths(1);
-			}
-			setActiveDates(activeDate);
-		}
 		// Before we do anything, set the focus to proper date
 		// Set it only when non active day was focussed. When inactive day
 		// was focussed, we need to focus the same day
@@ -320,6 +332,7 @@ void CalenMonthGrid::prependRows()
 {
 	mIsNonActiveDayFocused = false;
 	QDateTime currDate = mView->getCurrentDay();
+	QDateTime currDateTime = CalenDateUtils::beginningOfDay( currDate );
 	int rowsInFutMonthEarlier = mView->rowsInFutMonth();
 	int rowsInPrevMonthEarlier = mView->rowsInPrevMonth();
 	
@@ -341,34 +354,53 @@ void CalenMonthGrid::prependRows()
 	
 	// Add the new days
 	int countToBeAdded = rowsInPrevMonth * KCalenDaysInWeek;
+	
 	mModel->insertRows(0, countToBeAdded);
 	count = mModel->rowCount();
+	
+	// Get the default text color to be set
+	QColor textColor = HbColorScheme::color("qtc_cal_month_notactive_dates");
+	HbExtendedLocale locale = HbExtendedLocale::system();
+	
 	for (int i = 0; i < countToBeAdded; i++) {
 		QDateTime dateTime = monthDataList[i].Day();
-		int date = dateTime.date().day();
+		
+		// Get the localised string for the day
+		QString date = locale.toString(dateTime.date().day());
 		QModelIndex currentIndex = mModel->index(i, 0);
-		mModel->itemFromIndex(currentIndex)->setData(date,
-									 CalendarNamespace::CalendarMonthDayRole);
-		// Check for current date
-		if (CalenDateUtils::beginningOfDay( currDate ) == 
-				CalenDateUtils::beginningOfDay( dateTime )) {
+		
+		// Create the variant list to contain the date to depict a grid item
+		QVariantList itemData;
+		
+		// NOTE: Add the data in the order mentioned in the 
+		// CalendarNamespace::DataRole enum. Dont change the order.
+		itemData << date;
+				
+		// Diable the focus role
+		itemData << QString("");
+		
+		// Check for current day
+		if  (currDateTime == CalenDateUtils::beginningOfDay( dateTime )) {
 			// Set the underline icon
-			mModel->setData(mModel->index(i, 0), true,
-							CalendarNamespace::CalendarMonthUnderlineRole);
-		}
-		if (monthDataList[i].HasEvents()) {
-			// Set the underline icon
-			mModel->setData(mModel->index(i, 0), 
-						QString("qtg_graf_cal_event_ind"),
-						CalendarNamespace::CalendarMonthEventRole);
+			itemData << true;
+		} else {
+			itemData << false;
 		}
 		
-		// Check if this item falls on seventh column
-		if ((i%KCalenDaysInWeek) == 6) {
-			// Set the seventh column role
-			mModel->setData(mModel->index(i, 0), true,
-							CalendarNamespace::CalendarMonthSeventhColumn);
+		// Update the event indicators
+		if (monthDataList[i].HasEvents()) {
+			// Set the event indicator icon
+			itemData << QString("qtg_graf_cal_event_ind");
+		} else {
+			itemData << QString("");
 		}
+		
+		// Add default text color
+		
+		itemData << textColor;
+		
+		// Set the data to model
+		mModel->itemFromIndex(currentIndex)->setData(itemData);
 	}
 	
 	// Update the mCurrentRow
@@ -400,6 +432,7 @@ void CalenMonthGrid::appendRows()
 {
 	mIsNonActiveDayFocused = false;
 	QDateTime currDate = mView->getCurrentDay();
+	QDateTime currDateTime = CalenDateUtils::beginningOfDay( currDate );
 	int rowsInFutMonth = mView->rowsInFutMonth();
 	int rowsInPrevMonth = mView->rowsInPrevMonth();
 	// remove the cells in the previous month
@@ -414,46 +447,62 @@ void CalenMonthGrid::appendRows()
 	rowsInFutMonth = mView->rowsInFutMonth();
 	int countToBeAdded = rowsInFutMonth * KCalenDaysInWeek;
 	int lastVisibleIndex = monthDataList.count() - countToBeAdded;
+	
 	int rowCount = mModel->rowCount();
 	mModel->insertRows(rowCount, countToBeAdded);
+	
+	// Get the default text color to be set
+	QColor textColor = HbColorScheme::color("qtc_cal_month_notactive_dates");
 	for (int i = 0; i < countToBeAdded; i++) {
 		QMap<int, QVariant> data;
-		QModelIndex currentIndex = mModel->index(i, 0);
+		QModelIndex currentIndex = mModel->index(rowCount + i, 0);
 				
 		QDateTime dateTime = monthDataList[lastVisibleIndex + i].Day();
-		int date = dateTime.date().day();
+		HbExtendedLocale locale = HbExtendedLocale::system();
+		// Get the localised string for the day
+		QString date = locale.toString(dateTime.date().day());
 		data.insert(CalendarNamespace::CalendarMonthDayRole, date);
-		mModel->setItemData(mModel->index(rowCount + i, 0), data);
-		// Check for active day
-		if  (CalenDateUtils::beginningOfDay( currDate ) == 
-				CalenDateUtils::beginningOfDay( dateTime )) {
+		
+		// Create the variant list to contain the date to depict a grid item
+		QVariantList itemData;
+		
+		// NOTE: Add the data in the order mentioned in the 
+		// CalendarNamespace::DataRole enum. Dont change the order.
+		itemData << date;
+		
+		// Disable the focus role
+		itemData << QString("");
+		
+		// Check for current day
+		if (currDateTime == CalenDateUtils::beginningOfDay( dateTime )) {
 			// Set the underline icon
-			mModel->setData(mModel->index(rowCount + i, 0),true,
-							CalendarNamespace::CalendarMonthUnderlineRole);
+			itemData << true;
+		} else {
+			itemData << false;
 		}
 		
 		// Update the event indicators
 		if (monthDataList[lastVisibleIndex + i].HasEvents()) {
 			// Set the underline icon
-			mModel->setData(mModel->index(rowCount + i, 0), 
-						QString("qtg_graf_cal_event_ind"),
-						CalendarNamespace::CalendarMonthEventRole);
+			itemData << QString("qtg_graf_cal_event_ind");
+		} else {
+			itemData << QString("");
 		}
 		
-		if ((i%KCalenDaysInWeek) == 6) {
-			// Set the seventh column role
-			mModel->setData(mModel->index(rowCount + i, 0), true,
-							CalendarNamespace::CalendarMonthSeventhColumn);
-		}
+		// Add default text color
+		itemData << textColor;
+				
+		// Set the data to model
+		mModel->itemFromIndex(currentIndex)->setData(itemData);
 	}
 	
 	// Update the mCurrentRow
 	mCurrentRow -= (countToBeDeleted);
-	
-	mIsAtomicScroll = true;
 	for (int i = 0; i < countToBeDeleted; i++) {
 		mModel->removeRow(0);
 	}
+	mIsAtomicScroll = true;
+	
 	// Calculate the proper index to be scrolled to
 	int itemToBeScrolled = rowsInPrevMonth * KCalenDaysInWeek;
 	QModelIndex indexToBeScrolled = mModel->index(itemToBeScrolled, 0);
@@ -475,21 +524,28 @@ void CalenMonthGrid::itemActivated(const QModelIndex &index)
 		// Launch the agenda view
 		mView->launchDayView();
 	} else {
-		// Reset the focus attribute to this item
-		mModel->setData(mModel->index(mCurrentRow,0), QString(""),
-									CalendarNamespace::CalendarMonthFocusRole);
+		// Reset the focus attribute to this item		
+		QModelIndex itemIndex = mModel->index(mCurrentRow,0);
+		QVariant itemData = itemIndex.data(Qt::UserRole + 1);
+		QVariantList list = itemData.toList();
+		list.replace(CalendarNamespace::CalendarMonthFocusRole, QString(""));
+		mModel->itemFromIndex(itemIndex)->setData(list);
 		
 		// Inform view to update the context and preview panes
 		mCurrentRow = index.row();
-		mModel->setData(mModel->index(mCurrentRow,0), 
-									QString("qtg_fr_cal_focused_day_ind"),
-									CalendarNamespace::CalendarMonthFocusRole);
+		itemIndex = mModel->index(mCurrentRow,0);
+		itemData = itemIndex.data(Qt::UserRole + 1);
+		list = itemData.toList();
+		list.replace(CalendarNamespace::CalendarMonthFocusRole, 
+						 QString("qtg_fr_cal_focused_day_ind"));
+		mModel->itemFromIndex(itemIndex)->setData(list);
 		// Check if inactive date is tapped
-		QList<CalenMonthData> list = mView->monthDataList();
-		if(!list[mCurrentRow].isActive()){
+		QDateTime activeMonth = mView->getActiveDay();
+		int month = activeMonth.date().month();
+		if(month != mMonthDataArray[mCurrentRow].Day().date().month()){
 			// Set the flag
 			mIsNonActiveDayFocused = true;
-			mNonActiveFocusedDay = list[mCurrentRow].Day();
+			mNonActiveFocusedDay = mMonthDataArray[mCurrentRow].Day();
 			
 			// Get the current active month
 			QDateTime activeMonth = mView->getActiveDay();
@@ -529,14 +585,21 @@ void CalenMonthGrid::setFocusToProperDay()
 		indexEnd = (rowsInPrevMonth + 1) * KCalenDaysInWeek;
 	}
 	// Reset the focus attribute to earlier current item
-	mModel->setData(mModel->index(mCurrentRow,0), QString(""),
-								CalendarNamespace::CalendarMonthFocusRole);
+	QModelIndex index = mModel->index(mCurrentRow,0);
+	QVariant itemData = index.data(Qt::UserRole + 1);
+	QVariantList list = itemData.toList();
+	list.replace(CalendarNamespace::CalendarMonthFocusRole, QString(""));
+	mModel->itemFromIndex(index)->setData(list);
+	
 	// Search for this date in the model
 	for (int i = indexStart; i <= indexEnd; i++) {
 		if (monthDataList[i].Day().date() == dateToBeFocussed.date()) {
-			mModel->setData(mModel->index(i,0), 
-								QString("qtg_fr_cal_focused_day_ind"),
-								CalendarNamespace::CalendarMonthFocusRole);
+			index = mModel->index(i,0);
+			itemData = index.data(Qt::UserRole + 1);
+			list = itemData.toList();
+			list.replace(CalendarNamespace::CalendarMonthFocusRole,
+							 QString("qtg_fr_cal_focused_day_ind"));
+			mModel->itemFromIndex(index)->setData(list);
 			mCurrentRow = i;
 			mView->setContextForActiveDay(i);
 			break;
@@ -545,23 +608,89 @@ void CalenMonthGrid::setFocusToProperDay()
 }
 
 /*!
- Sets the appropriate text colot depending upon the active dates
+ Sets the appropriate text color depending upon the active dates
  */
-void CalenMonthGrid::setActiveDates(QDateTime activeDate)
+void CalenMonthGrid::setActiveDates(QDate activeDate)
 {
-	int month = activeDate.date().month();
-	for (int i = 0; i < mMonthDataArray.count(); i++) {
-	    QColor textColor;
-	    if (month == mMonthDataArray[i].Day().date().month()) {
-			// Set the active text color
-			textColor = HbColorScheme::color("qtc_cal_month_active_dates");
-		} else {
-			// Set the inactive text color
-			textColor = HbColorScheme::color("qtc_cal_month_notactive_dates");
+	// By default, text color will be set as inactive date color
+	// set active date color only for the dates that fall in current month
+	// So, in the whole data array, start from where the current month starts
+	// and stop the loop where it the current month ends
+	
+	int start = 0;
+	int end = mMonthDataArray.count();
+	
+	// Calculate the start and end values
+	QDate firstDateInGrid = mView->firstDayOfGrid().date();
+	
+	// Get the date where active month starts
+	QDate startOfActiveMonth(activeDate.year(), activeDate.month(),1);
+	// Number of days frm start of the grid to start of the month
+	start = firstDateInGrid.daysTo(startOfActiveMonth);
+	
+	// Get the date where active month ends
+	QDate endOfActiveMonth = startOfActiveMonth.addDays(
+													activeDate.daysInMonth());
+	// Number of days frm start of the grid to end of the month
+	end = firstDateInGrid.daysTo(endOfActiveMonth);
+	
+	// Set the active text color
+	QColor textColor = HbColorScheme::color("qtc_cal_month_active_dates");
+	if (textColor.isValid()) {
+		for (int i = start; i < end; i++) {	
+			QModelIndex index = mModel->index(i,0);
+			QVariant itemData = index.data(Qt::UserRole + 1);
+			QVariantList list = itemData.toList();
+			list.replace(CalendarNamespace::CalendarMonthTextColorRole, textColor);
+			mModel->itemFromIndex(index)->setData(list);
 		}
-		if (textColor.isValid()) {
-		    mModel->setData(mModel->index(i,0), textColor,
-		                    CalendarNamespace::CalendarMonthTextColorRole);
+	}
+	
+	// Now set the inactive text color to those which were active before the swipe
+	if (mDirection == invalid) {
+		// no need to do anything as other dates will be in inactive dates color
+		return;
+	}
+	
+	if (mDirection == up) {
+		// Came here as user did up gesture
+		// Get the activeDate that was set before the swipe
+		activeDate = activeDate.addMonths(-1);
+		
+		// Get the date where active month starts
+		startOfActiveMonth = QDate(activeDate.year(), activeDate.month(),1);
+		// Number of days frm start of the grid to start of the month
+		start = firstDateInGrid.daysTo(startOfActiveMonth);
+		
+		// Get the date where active month ends
+		QDate endOfActiveMonth = startOfActiveMonth.addDays(activeDate.daysInMonth());
+		// Number of days frm start of the grid to end of the month
+		end = firstDateInGrid.daysTo(endOfActiveMonth);
+	} else if (mDirection == down) {
+		// Came here as user did down gesture
+		// Get the activeDate that was set before the swipe
+		activeDate = activeDate.addMonths(1);
+		
+		// Get the activeDate that was set before the swipe
+		startOfActiveMonth = QDate(activeDate.year(), activeDate.month(),1); 
+		// Number of days frm start of the grid to start of the month
+		start = firstDateInGrid.daysTo(startOfActiveMonth);
+		
+		// Get the date where active month ends
+		QDate endOfActiveMonth = startOfActiveMonth.addDays(activeDate.daysInMonth());
+		// Number of days frm start of the grid to end of the month
+		end = firstDateInGrid.daysTo(endOfActiveMonth);
+	}
+	
+	// Set the inactive text color
+	textColor = HbColorScheme::color("qtc_cal_month_notactive_dates");
+	if (textColor.isValid()) {
+		for (int i = start; i < end; i++) {		
+			QModelIndex index = mModel->index(i,0);
+			QVariant itemData = index.data(Qt::UserRole + 1);
+			QVariantList list = itemData.toList();
+			list.replace(CalendarNamespace::CalendarMonthTextColorRole, textColor);
+			mModel->itemFromIndex(index)->setData(list);
 		}
 	}
 }
@@ -591,4 +720,66 @@ void CalenMonthGrid::orientationChanged(Qt::Orientation newOrientation)
 	// We are overriding this function to avoid the default behavior of
 	// hbgridview on orientation change as it swaps the row and column counts
 }
+
+/*!
+ Paint function to draw grid lines
+ */
+void CalenMonthGrid::paint(QPainter* painter,
+                          const QStyleOptionGraphicsItem* option,
+                          QWidget* widget)
+{
+	Q_UNUSED(option);
+	Q_UNUSED(widget);
+	
+	// Set the required attributes to the pen
+	QPen pen;
+	pen.setStyle(Qt::SolidLine);
+	pen.setWidth(GRIDLINE_WIDTH);
+	if (mGridLineColor.isValid()) {
+		pen.setBrush(mGridLineColor);
+	} else {
+		pen.setBrush(mGridBorderColor);
+	}
+	// Set the pen to the painter
+	painter->setPen(pen);
+	
+	// Get the sizes of content widget
+	qreal contentHeight = mContentWidget->size().height();
+	qreal contentWidth = mContentWidget->size().width();
+	
+	// Get the num of rows
+	int numOfRows = mModel->rowCount() / KCalenDaysInWeek;
+	// Draw horizontal lines
+	qreal rowWidth = contentHeight / numOfRows;
+	
+	QPointF startPoint = mContentWidget->pos();
+	QPointF endPoint(startPoint.x() + contentWidth, 
+	                 startPoint.y());
+	
+	// Create the list of points for which lines have to be drawn
+	// List should have even number of points so that it draws all the lines
+	// Painter draws the line for first two points in the list and then second 
+	// line for next two points in the list like that. Hence, list should 
+	// contain even number of points
+	QVector<QPointF> pointList;
+	for (int i = 0; i < numOfRows; i++) {
+		pointList.append(QPointF(startPoint.x(), 
+		                         startPoint.y() + (i * rowWidth)));
+		pointList.append(QPointF(endPoint.x(), endPoint.y() + (i * rowWidth)));
+	}
+	
+	// Draw vertical lines
+	qreal colWidth = contentWidth / KCalenDaysInWeek;
+	endPoint = QPointF(startPoint.x(), 
+	                   startPoint.y() + contentHeight);
+	for (int i = 1; i < KCalenDaysInWeek; i++) {
+		pointList.append(QPointF(startPoint.x() + (i * colWidth), 
+		                         startPoint.y()));
+		pointList.append(QPointF(endPoint.x() + (i * colWidth), endPoint.y()));
+	}
+	
+	// Draw the lines for the points in the vector list
+	painter->drawLines(pointList);
+}
+
 // End of File

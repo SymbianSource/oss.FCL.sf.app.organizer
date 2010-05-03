@@ -52,7 +52,13 @@
     
     // Create the Calendar service provider
     CalenServiceProvider service(controller);
-    return app.exec();
+    
+    int retValue = app.exec();
+    
+    // delete the controller
+    controller->Release();
+    
+    return retValue;
     }
 
 

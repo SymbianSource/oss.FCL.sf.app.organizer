@@ -33,8 +33,9 @@ struct SAlarmInfo
     TTime iTime;
     HBufC* iLocation;
     TBool iCanSnooze;
-    TBool iIsClockAlarm;
+    TInt iAlarmAlertType;
     TBool iIsSilent;
+    TBool iIsTimed;
 };
 
 /**

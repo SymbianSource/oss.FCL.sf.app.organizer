@@ -28,9 +28,10 @@
  */
 
 /*!
-	\fn void AgendaEventViewer::viewingCompleted(bool status = true)
+	\fn void AgendaEventViewer::viewingCompleted(const QDate date = QDate())
 
 	Signal is emitted when viewing of the agenda entry is complete
+	Returns QDate for calendar application to set context.
 	After receiving this signal use deleteLater() to detele this class object.
 
  */

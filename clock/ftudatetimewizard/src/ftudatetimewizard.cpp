@@ -64,8 +64,11 @@ FtuDateTimeWizard::~FtuDateTimeWizard()
 /*!
     Initialises the wizard.This is called by the FTU framework
  */
-void FtuDateTimeWizard::initializeWizard()
+void FtuDateTimeWizard::initializeWizard(qint32 cenrepOwnerId, int wizardIdx)
 {
+	Q_UNUSED(cenrepOwnerId)
+	Q_UNUSED(wizardIdx)
+
 	//Check if valid Nitz info is received
 	XQSettingsManager *settingsManager = new XQSettingsManager();
 	XQSettingsKey *validNitzCenrepKey = 

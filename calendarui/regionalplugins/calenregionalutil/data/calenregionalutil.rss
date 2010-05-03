@@ -20,7 +20,7 @@
 #include <avkon.rh>
 #include <avkon.rsg>
 
-#include <calendar.loc>
+#include "calendarregionalplugin.loc"
 NAME CLRU
 
 RESOURCE RSS_SIGNATURE { }

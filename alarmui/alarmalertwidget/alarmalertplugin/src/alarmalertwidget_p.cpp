@@ -30,10 +30,12 @@
 #include <hbextendedlocale.h>
 #include <hbi18ndef.h>
 #include <hbapplication.h>
+#include <hbaction.h>
 
 // User includes
 #include "alarmalertwidget_p.h"
 #include "alarmalert.h"
+#include "alarmalertdocloader.h"
 
 // ---------------------------------------------------------
 // AlarmAlertDialogPrivate::AlarmAlertDialogPrivate
@@ -42,23 +44,18 @@
 //
 AlarmAlertDialogPrivate::AlarmAlertDialogPrivate(const QVariantMap &parameters):
 	mClosedByClient(false),
-	mIsSilenceButton(false)
-{
-    // Extract all the parameters sent by the client
-    parseAndFetchParams(parameters);
-    
+	mIsSilenceKey(false)
+	{
+	// Extract all the parameters sent by the client
+	parseAndFetchParams(parameters);
+
 	// Set the dismiss policy and timeout property
 	setDismissPolicy(HbPopup::NoDismiss);
-    setTimeout(HbPopup::NoTimeout);
-	
-    // Initialize the user response
+	setTimeout(HbPopup::NoTimeout);
+
+	// Initialize the user response
 	mUserResponse = Other;
-	
-	/*if (isScreenLocked()) {
-	    setupSwipeUI();
-	} else {
-	    setupNormalUI();
-	}*/
+
 	// Load the translation file and install the editor specific translator
 	mTranslator = new QTranslator;
 	QString lang = QLocale::system().name();
@@ -67,19 +64,9 @@ AlarmAlertDialogPrivate::AlarmAlertDialogPrivate(const QVariantMap &parameters):
 	// TODO: Load the appropriate .qm file based on locale
 	//bool loaded = mTranslator->load("alarmui_" + lang, path);
 	HbApplication::instance()->installTranslator(mTranslator);
-	
-	setupNormalUI();
-	
-	// Find the content widget and set it to self
-	QGraphicsWidget *contentWidget = mDocLoader->findWidget("content");
-	Q_ASSERT_X(contentWidget, "alarmalertwidget_p.cpp", "Unable to find content widget");
-    setContentWidget(contentWidget);
-    
-    // Resize the dialog to accomodate the content widget
-    setPreferredSize(contentWidget->minimumSize());
-    
-    // TODO: Gestures not working. Integrate once support is available from Qt
-    grabGesture(Qt::SwipeGesture);
+
+	// TODO: Gestures not working. Integrate once support is available from Qt
+	grabGesture(Qt::SwipeGesture);
 }
 
 // ---------------------------------------------------------
@@ -90,10 +77,9 @@ AlarmAlertDialogPrivate::AlarmAlertDialogPrivate(const QVariantMap &parameters):
 AlarmAlertDialogPrivate::~AlarmAlertDialogPrivate()
 {
     // Cleanup
-    if (mDocLoader) {
-        delete mDocLoader;
-    }
-    
+	if (mAlertDocLoader) {
+		delete mAlertDocLoader;
+	}
     // Cancel any ongoing animations
     HbEffect::cancel(mSlider, "slideDownPortrait", false, false, false);
     HbEffect::cancel(mSlider, "slideDownLandscape", false, false, false);
@@ -190,47 +176,6 @@ void AlarmAlertDialogPrivate::closeEvent(QCloseEvent *event)
 }
 
 // ---------------------------------------------------------
-// AlarmAlertDialogPrivate::animationComplete
-// rest of the details are commented in the header
-// ---------------------------------------------------------
-//
-void AlarmAlertDialogPrivate::animationComplete(const HbEffect::EffectStatus &status)
-{
-    Q_UNUSED(status);
-    
-    // Restart the animation effects
-	if (Qt::Vertical == hbInstance->orientation()) {
-		HbEffect::start(mSlider, "slideDownPortrait", this, "animationComplete");
-	} else {
-	    HbEffect::start(mSlider, "slideDownLandscape", this, "animationComplete");
-	}
-}
-
-// ---------------------------------------------------------
-// AlarmAlertDialogPrivate::sceneEvent
-// rest of the details are commented in the header
-// ---------------------------------------------------------
-//
-bool AlarmAlertDialogPrivate::sceneEvent(QEvent *event)
-{
-    // TODO: Need to handle gestures once they are available
-    if (event->type() == QEvent::Gesture) {
-        QGestureEvent *gestureEvent =
-                static_cast<QGestureEvent*>(event);
-        if (const QGesture *gesture = gestureEvent->gesture(Qt::SwipeGesture)) {
-            if (Qt::GestureFinished == gesture->state()) {
-                event->accept();
-                close();
-                return true;
-            }
-            event->accept();
-            return true;
-        }
-    }
-    return HbWidget::sceneEvent(event);
-}
-
-// ---------------------------------------------------------
 // AlarmAlertDialogPrivate::handleOrientationChange
 // rest of the details are commented in the header
 // ---------------------------------------------------------
@@ -238,15 +183,6 @@ bool AlarmAlertDialogPrivate::sceneEvent(QEvent *event)
 void AlarmAlertDialogPrivate::handleOrientationChange ()
 {
     // TODO: Need to change this as per the UI concept
-    // Might need to disable orientation changes
-	bool loadSuccess(false);
-	if (Qt::Vertical == hbInstance->orientation()) {
-		mDocLoader->load(":/xml/alarmalert.docml", "portrait", &loadSuccess);
-		Q_ASSERT_X(loadSuccess, "alarmalertwidget_p.cpp", "Unable to load portrait section");
-	} else {
-		mDocLoader->load(":/xml/alarmalert.docml", "landscape", &loadSuccess);
-		Q_ASSERT_X(loadSuccess, "alarmalertwidget_p.cpp", "Unable to load landscape section");
-	}
 }
 
 // ---------------------------------------------------------
@@ -267,10 +203,10 @@ void AlarmAlertDialogPrivate::snoozed()
 //
 void AlarmAlertDialogPrivate::silenced()
 {
-	if (mIsSilenceButton) {
+	if (mIsSilenceKey) {
 		mUserResponse = Silence;
-		mSnoozeButton->setText(hbTrId("txt_calendar_button_alarm_snooze"));
-		mIsSilenceButton = false;
+		mSnoozeAction->setText(hbTrId("txt_calendar_button_alarm_snooze"));
+		mIsSilenceKey = false;
 		QVariantMap param;
 		param.insert(alarmCommand, mUserResponse);
 		emit deviceDialogData(param);
@@ -278,9 +214,6 @@ void AlarmAlertDialogPrivate::silenced()
 		mUserResponse = Snooze;
 		close();
 	}
-		
-
-
 }
   
 // ---------------------------------------------------------
@@ -313,87 +246,17 @@ void AlarmAlertDialogPrivate::parseAndFetchParams(const QVariantMap &parameters)
         } else if (alarmDateTime == key) {
             mAlarmTime = iter.value().toDateTime();
         } else if (alarmType == key) {
-            mIsClockAlarm = iter.value().toBool();
+            mAlarmAlertType = static_cast <AlarmType> (iter.value().toInt());
         } else if (alarmCanSnooze == key) {
             mCanSnooze = iter.value().toBool();
         } else if (alarmRingingType == key) {
             mIsSilent = iter.value().toBool();
-        } else {
+        } else if (alarmIsTimed == key) {
+            mIsTimedAlarm = iter.value().toBool();
+        }else {
             break;
         }
         iter++;
-    }
-}
-
-// ---------------------------------------------------------
-// AlarmAlertDialogPrivate::setupSwipeUI
-// rest of the details are commented in the header
-// ---------------------------------------------------------
-//
-void AlarmAlertDialogPrivate::setupSwipeUI()
-{
-    // Connect to orientation change signals
-    QList<HbMainWindow*> windowList = hbInstance->allMainWindows();
-    mMainWindow = windowList.at(0);
-    Q_ASSERT_X(mMainWindow, "alarmalertwidget_p.cpp", "Unable to get the main window");
-    connect(mMainWindow, SIGNAL(aboutToChangeOrientation()), this, SLOT(handleOrientationChange()));
-
-    // Load the docml file to get the content widget for the dialog
-    mDocLoader = new HbDocumentLoader();
-    bool loadSuccess = false;
-    mDocLoader->load(alarmSwipeUIDocml, &loadSuccess);
-    Q_ASSERT_X(loadSuccess, "alarmalertwidget_p.cpp", "Unable to load docml");
-    
-    // Get the reference to the slider widget
-    mSlider = mDocLoader->findWidget("sliderIcon");
-    Q_ASSERT_X(mSlider, "alarmalertwidget_p.cpp", "Unable to find slider widget");
-    
-    mAlarmDescription = qobject_cast<HbLabel*> (mDocLoader->findWidget("alarmDescription"));
-    Q_ASSERT_X(mAlarmDescription, "alarmalertwidget_p.cpp", "Unable to find alarm description label");
-    mAlarmDescription->setPlainText(mSubject);
-    
-    mAlarmDateTime = qobject_cast<HbLabel*> (mDocLoader->findWidget("alarmTime"));
-    Q_ASSERT_X(mAlarmDateTime, "alarmalertwidget_p.cpp", "Unable to find alarm time label");
-    
-    mAlarmIcon = qobject_cast<HbLabel*> (mDocLoader->findWidget("alarmIcon"));
-    Q_ASSERT_X(mAlarmIcon, "alarmalertwidget_p.cpp", "Unable to find alarm icon");
-        
-    if (!mIsClockAlarm) {
-        mAlarmIcon->setIcon(HbIcon(":/image/calendarAlarm"));
-    }
-    
-    // Set the time to the time label
-    HbExtendedLocale locale;
-    mAlarmDateTime->setPlainText(locale.format(mAlarmTime.time(), r_qtn_time_usual));
-    
-    // Add the required effects.
-    HbEffect::add(mSlider,
-                  QString(":/effect/animate_portrait.fxml"),
-                  "slideDownPortrait");
-    HbEffect::add(mSlider,
-                  QString(":/effect/animate_landscape.fxml"),
-                  "slideDownLandscape");
-    
-    // Based on the orientation, load the appropriate sections and animations
-    if (Qt::Vertical == hbInstance->orientation()) {
-        mDocLoader->load(":/xml/alarmalert.docml", "portrait", &loadSuccess);
-        Q_ASSERT_X(loadSuccess, "alarmalertwidget_p.cpp", "Unable to load portrait section");
-
-        HbEffect::start(mSlider, "slideDownPortrait", this, "animationComplete");
-    } else {
-        mDocLoader->load(":/xml/alarmalert.docml", "landscape", &loadSuccess);
-        Q_ASSERT_X(loadSuccess, "alarmalertwidget_p.cpp", "Unable to load landscape section");
-
-        HbEffect::start(mSlider, "slideDownLandscape", this, "animationComplete");
-    }
-    
-    // Get the reference to the snooze button
-    HbPushButton *snoozeButton = qobject_cast<HbPushButton*> (mDocLoader->findWidget("snoozeButton"));
-    Q_ASSERT_X(snoozeButton, "alarmalertwidget_p.cpp", "Unable to find snooze button");
-    connect(snoozeButton, SIGNAL(clicked()), this, SLOT(snoozed()));
-    
-    if (!mCanSnooze) {
-        snoozeButton->hide();
     }
 }
 
@@ -403,58 +266,22 @@ void AlarmAlertDialogPrivate::setupSwipeUI()
 // ---------------------------------------------------------
 //
 
-void AlarmAlertDialogPrivate::setupNormalUI()
-{
-    // Load the docml file to get the content widget for the dialog
-    mDocLoader = new HbDocumentLoader();
-    bool loadSuccess = false;
-    mDocLoader->load(alarmNormalUIDocml, &loadSuccess);
-    Q_ASSERT_X(loadSuccess, "alarmalertwidget_p.cpp", "Unable to load docml");
-    
-    mAlarmDescription = qobject_cast<HbLabel*> (mDocLoader->findWidget("alarmDescription"));
-    Q_ASSERT_X(mAlarmDescription, "alarmalertwidget_p.cpp", "Unable to find alarm description label");
-    mAlarmDescription->setPlainText(mSubject);
-    
-    mAlarmDateTime = qobject_cast<HbLabel*> (mDocLoader->findWidget("alarmTime"));
-    Q_ASSERT_X(mAlarmDateTime, "alarmalertwidget_p.cpp", "Unable to find alarm time label");
-    
-    mAlarmIcon = qobject_cast<HbLabel*> (mDocLoader->findWidget("alarmIcon"));
-    Q_ASSERT_X(mAlarmIcon, "alarmalertwidget_p.cpp", "Unable to find alarm icon");
-        
-    if (!mIsClockAlarm) {
-        mAlarmIcon->setIcon(HbIcon(":/image/calendarAlarm"));
-    }
-    
-    // Set the time to the time label
-    HbExtendedLocale locale = HbExtendedLocale::system();
-    mAlarmDateTime->setPlainText(
-    		hbTrId("txt_calendar_info_alarm_start_time").arg(
-    				locale.format(mAlarmTime.time(), r_qtn_time_usual)));
-    
-    // TODO: Based on the orientation, load the appropriate sections and animations
-    if (Qt::Vertical == hbInstance->orientation()) {
-    } else {
-    }
-    
+void AlarmAlertDialogPrivate::setupNormalUI(AlarmAlertDocLoader *alertDocLoader)
+    {
+	if(!alertDocLoader) {
+		// Nothing can be done. Simply return
+		return;
+	}
+	mAlertDocLoader = alertDocLoader;
 
-    
-    // Get the reference to the stop button
-    HbPushButton *stopButton = qobject_cast<HbPushButton*> (mDocLoader->findWidget("stopButton"));
-    Q_ASSERT_X(stopButton, "alarmalertwidget_p.cpp", "Unable to find stop button");
-    connect(stopButton, SIGNAL(clicked()), this, SLOT(dismissed()));
-    
-    if (mIsClockAlarm) {
-    	handleClockAlarms();
-    }else {
+	if (mAlarmAlertType == ClockAlarm) {
+        handleClockAlarms();
+    }else if(mAlarmAlertType == TodoAlarm) {
+        handleToDoAlarms();
+    }else if(mAlarmAlertType == CalendarAlarm) {
     	handleCalendarAlarms();
     }
-    
-    QList<HbMainWindow*> windowList = hbInstance->allMainWindows();
-    mMainWindow = windowList.at(0);
-    QRectF screenRect = mMainWindow->rect();
-    setPreferredPos(QPointF(screenRect.width()/2, screenRect.height()/2), HbPopup::Center);
 }
-
 
 // ---------------------------------------------------------
 // AlarmAlertDialogPrivate::handleClockAlarms
@@ -463,16 +290,58 @@ void AlarmAlertDialogPrivate::setupNormalUI()
 //
 void AlarmAlertDialogPrivate::handleClockAlarms()
 {
-	// Get the reference to the snooze button
-	HbPushButton *snoozeButton = qobject_cast<HbPushButton*> (mDocLoader->findWidget("snoozeButton"));
-	Q_ASSERT_X(snoozeButton, "alarmalertwidget_p.cpp", "Unable to find snooze button");
-	connect(snoozeButton, SIGNAL(clicked()), this, SLOT(snoozed()));
-	
+	QGraphicsWidget *headingWidget = mAlertDocLoader->findWidget("heading");
+	if (!headingWidget) {
+		qFatal("Unable to load the heading Widget");
+	}
+
+	mAlarmDateTime = qobject_cast<HbLabel*> (
+			mAlertDocLoader->findWidget("alarmTime"));
+	if (!mAlarmDateTime) {
+		qFatal("Unable to load the alarmTime label");
+	}
+	HbExtendedLocale locale = HbExtendedLocale::system();
+	mAlarmDateTime->setPlainText(
+			hbTrId("txt_calendar_info_alarm_start_time").arg(
+					locale.format(mAlarmTime.time(), r_qtn_time_usual)));
+
+	mAlarmDescription = qobject_cast<HbLabel*> (
+			mAlertDocLoader->findWidget("alarmDescription"));
+	if (!mAlarmDescription) {
+		qFatal("Unable to load the alarmDescription label");
+	}
+	mAlarmDescription->setPlainText(mSubject);
+
+	mAlarmIcon = qobject_cast<HbLabel*> (
+				mAlertDocLoader->findWidget("alarmIcon"));
+	if (!mAlarmIcon) {
+		qFatal("Unable to load the alarm icon");
+	}
+	//TODO: Add the proper icon for clock alarms in the docml
+	mAlarmIcon->setIcon(HbIcon(":/image/clockAlarm.svg"));
+
+	HbAction *snoozeAction = qobject_cast<HbAction*> (
+			mAlertDocLoader->findObject("snoozeAction"));
+	if (!snoozeAction) {
+		qFatal("Unable to load the snoozeAction softkey");
+	}
+	snoozeAction->setText(hbTrId("txt_calendar_button_alarm_snooze"));
+	disconnect(snoozeAction, SIGNAL(triggered()), this, SLOT(close()));
+	connect(snoozeAction, SIGNAL(triggered()), this, SLOT(snoozed()));
+
+	HbAction *stopAction = qobject_cast<HbAction*> (
+			mAlertDocLoader->findObject("stopAction"));
+	if (!stopAction) {
+		qFatal("Unable to load the stopAction softkey");
+	}
+	stopAction->setText(hbTrId("txt_calendar_button_alarm_dialog_snooze"));
+	disconnect(stopAction, SIGNAL(triggered()), this, SLOT(close()));
+	connect(stopAction, SIGNAL(triggered()), this, SLOT(dismissed()));
+
 	if (!mCanSnooze) {
-		snoozeButton->hide();
+		snoozeAction->setVisible(false);
 	}
 }
-
 
 // ---------------------------------------------------------
 // AlarmAlertDialogPrivate::handleCalendarAlarms
@@ -481,58 +350,179 @@ void AlarmAlertDialogPrivate::handleClockAlarms()
 //
 void AlarmAlertDialogPrivate::handleCalendarAlarms()
 {
-	mSnoozeButton = qobject_cast<HbPushButton*> (mDocLoader->findWidget("snoozeButton"));
-	Q_ASSERT_X(mSnoozeButton, "alarmalertwidget_p.cpp", "Unable to find snooze button");
-	connect(mSnoozeButton, SIGNAL(clicked()), this, SLOT(silenced()));
-	if(!mIsSilent) {
-		mSnoozeButton->setText(hbTrId("txt_calendar_button_alarm_silence"));
-		mIsSilenceButton = true;
+	bool success = false;
+	HbExtendedLocale locale = HbExtendedLocale::system();
+	// Check if the alarm has the time info or not.
+	// For all day events the time label has to be hidden
+	// So load the proper sections accordingly
+	if ( mIsTimedAlarm ) {
+		mAlertDocLoader->load(
+				alarmNormalUICalendarDocml, "calendarTimed",&success);
+		if (!success) {
+			qFatal("Unable to load the calendarTimed section");
+		}
+		mAlarmDateTime = qobject_cast<HbLabel*> (
+				mAlertDocLoader->findWidget("alarmTime"));
+		if (!mAlarmDateTime) {
+			qFatal("Unable to find the alarmTime label");
+		}
+		mAlarmDateTime->setPlainText(
+				hbTrId("txt_calendar_info_alarm_start_time").arg(
+						locale.format(mAlarmTime.time(), r_qtn_time_usual)));
+		HbLabel *alarmDate = qobject_cast<HbLabel*> (
+				mAlertDocLoader->findWidget("alarmDate"));
+		if (!alarmDate) {
+			qFatal("Unable to find the alarmDate label");
+		}
+		alarmDate->setPlainText(
+				hbTrId("txt_calendar_info_alarm_start_date").arg(
+				locale.format(mAlarmTime.date(), r_qtn_date_usual_with_zero)));
+		HbLabel *alarmDateNonTimed = qobject_cast<HbLabel*> (
+				mAlertDocLoader->findWidget("nonTimedAlarmDate"));
+		if (!alarmDateNonTimed) {
+			qFatal("Unable to find the nonTimedAlarmDate label");
+		}
+		alarmDateNonTimed->hide();
+	}else {
+		mAlertDocLoader->load(
+				alarmNormalUICalendarDocml, "nonTimedAlarm",&success);
+		if (!success) {
+			qFatal("Unable to load the nonTimedAlarm section");
+		}
+		mAlarmDateTime = qobject_cast<HbLabel*> (
+				mAlertDocLoader->findWidget("alarmTime"));
+		if (!mAlarmDateTime) {
+			qFatal("Unable to find the alarmTime label");
+		}
+		mAlarmDateTime->hide();
+		HbLabel *alarmDate = qobject_cast<HbLabel*> (
+				mAlertDocLoader->findWidget("alarmDate"));
+		if (!alarmDate) {
+			qFatal("Unable to find the alarmDate label");
+		}
+		alarmDate->hide();
+		HbLabel *alarmDateNonTimed = qobject_cast<HbLabel*> (
+				mAlertDocLoader->findWidget("nonTimedAlarmDate"));
+		if (!alarmDateNonTimed) {
+			qFatal("Unable to find the alarmDateNonTimed label");
+		}
+		alarmDateNonTimed->setPlainText(
+				hbTrId("txt_calendar_info_alarm_start_date").arg(
+				locale.format(mAlarmTime.date(), r_qtn_date_usual_with_zero)));
 	}
-	// Hide the snooze button if the alarm cannot be snoozed
+
+	QGraphicsWidget *headingWidget = mAlertDocLoader->findWidget("heading");
+	if (!headingWidget) {
+		qFatal("Unable to find the heading widget");
+	}
+	mAlarmDescription = qobject_cast<HbLabel*> (
+			mAlertDocLoader->findWidget("alarmDescription"));
+	if (!mAlarmDescription) {
+		qFatal("Unable to find the alarmDescription label");
+	}
+	mAlarmDescription->setPlainText(mSubject);
+
+	HbLabel *alarmLocation = qobject_cast<HbLabel*> (
+			mAlertDocLoader->findWidget("alarmLocation"));
+	if (!alarmLocation) {
+		qFatal("Unable to find the alarmLocation label");
+	}
+	alarmLocation->setPlainText(mLocation);
+	
+	mAlarmIcon = qobject_cast<HbLabel*> (
+			mAlertDocLoader->findWidget("alarmIcon"));
+	if (!mAlarmIcon) {
+		qFatal("Unable to find the alarm Icon");
+	}
+
+	mSnoozeAction = qobject_cast<HbAction*> (
+			mAlertDocLoader->findObject("snoozeAction"));
+	if (!mSnoozeAction) {
+		qFatal("Unable to find the snoozeAction softkey");
+	}
+	disconnect(mSnoozeAction, SIGNAL(triggered()), this, SLOT(close()));
 	if (!mCanSnooze) {
-		mSnoozeButton->hide();
+		mSnoozeAction->setVisible(false);
+	}else { 
+		if(!mIsSilent) {
+			mSnoozeAction->setText(hbTrId("txt_calendar_button_alarm_silence"));
+			connect(mSnoozeAction, SIGNAL(triggered()), this, SLOT(silenced()));
+			mIsSilenceKey = true;
+		} 	else {
+			mSnoozeAction->setText(hbTrId("txt_calendar_button_alarm_snooze"));
+			connect(mSnoozeAction, SIGNAL(triggered()), this, SLOT(snoozed()));
+		}
 	}
+	HbAction *stopAction = qobject_cast<HbAction*> (
+			mAlertDocLoader->findObject("stopAction"));
+	if (!stopAction) {
+		qFatal("Unable to find the stopAction softkey");
+	}
+	stopAction->setText(hbTrId("txt_calendar_button_alarm_dialog_snooze"));
+	disconnect(stopAction, SIGNAL(triggered()), this, SLOT(close()));
+	connect(stopAction, SIGNAL(triggered()), this, SLOT(dismissed()));
 }
 
-
-
 // ---------------------------------------------------------
-// AlarmAlertDialogPrivate::isScreenLocked
+// AlarmAlertDialogPrivate::handleToDoAlarms
 // rest of the details are commented in the header
 // ---------------------------------------------------------
 //
-bool AlarmAlertDialogPrivate::isScreenLocked()
+void AlarmAlertDialogPrivate::handleToDoAlarms()
 {
-    // TODO: Replace with actual API which gets the screen lock status
-    return false;
+	QGraphicsWidget *headingWidget = mAlertDocLoader->findWidget("heading");
+	if (!headingWidget) {
+		qFatal("Unable to load the heading widget");
+	}
+	HbExtendedLocale locale = HbExtendedLocale::system();
+	
+	HbLabel *alarmDate = qobject_cast<HbLabel*> (
+							mAlertDocLoader->findWidget("alarmDate"));
+	if (!alarmDate) {
+		qFatal("Unable to load the alarmDate label");
+	}
+	alarmDate->setPlainText(
+			hbTrId("txt_calendar_info_alarm_start_date").arg(
+					locale.format(mAlarmTime.date(), r_qtn_date_usual_with_zero)));
+	
+	mAlarmDescription = qobject_cast<HbLabel*> (
+							mAlertDocLoader->findWidget("alarmDescription"));
+	if (!mAlarmDescription) {
+		qFatal("Unable to load the alarmDescription label");
+	}
+	mAlarmDescription->setPlainText(mSubject);
+	
+	mAlarmIcon = qobject_cast<HbLabel*> (
+									mAlertDocLoader->findWidget("alarmIcon"));
+	if (!mAlarmIcon) {
+		qFatal("Unable to load the alarm Icon");
+	}
+	mSnoozeAction = qobject_cast<HbAction*> (
+								mAlertDocLoader->findObject("snoozeAction"));
+	if (!mSnoozeAction) {
+		qFatal("Unable to load the snoozeAction softkey");
+	}
+	disconnect(mSnoozeAction, SIGNAL(triggered()), this, SLOT(close()));
+	if (!mCanSnooze) {
+		mSnoozeAction->setVisible(false);
+	}else { 
+		if(!mIsSilent) {
+			mSnoozeAction->setText(hbTrId("txt_calendar_button_alarm_silence"));
+			connect(mSnoozeAction, SIGNAL(triggered()), this, SLOT(silenced()));
+			mIsSilenceKey = true;
+		} 	else {
+			mSnoozeAction->setText(hbTrId("txt_calendar_button_alarm_snooze"));
+			connect(mSnoozeAction, SIGNAL(triggered()), this, SLOT(snoozed()));
+		}
+	}
+	HbAction *stopAction = qobject_cast<HbAction*> (
+									mAlertDocLoader->findObject("stopAction"));
+	if (!stopAction) {
+		qFatal("Unable to load the stopAction softkey");
+	}
+	stopAction->setText(hbTrId("txt_calendar_button_alarm_dialog_snooze"));
+	disconnect(stopAction, SIGNAL(triggered()), this, SLOT(close()));
+	connect(stopAction, SIGNAL(triggered()), this, SLOT(dismissed()));
 }
 
-// ---------------------------------------------------------
-// AlarmAlertDialogPrivate::mousePressEvent
-// rest of the details are commented in the header
-// ---------------------------------------------------------
-//
-void AlarmAlertDialogPrivate::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
-    // TODO: Must be removed once gestures are available
-    mTapPoint = event->pos();
-    qDebug() << "Tap event";
-}
-
-// ---------------------------------------------------------
-// AlarmAlertDialogPrivate::mouseMoveEvent
-// rest of the details are commented in the header
-// ---------------------------------------------------------
-//
-void AlarmAlertDialogPrivate::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{
-    // TODO: THIS IS A HACK!!!
-    // Must be removed once gestures are available
-    QPointF curPos = event->pos();
-    if (curPos.y() - mTapPoint.y() > 40) {
-        qDebug() << "Sufficient drag";
-        if (mUserResponse == Other) {
-            dismissed();
-        }
-    }
-}
+// End of file  --Don't remove this.

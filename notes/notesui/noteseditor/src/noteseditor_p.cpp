@@ -17,7 +17,6 @@
 */
 
 // System includes
-#include <QDebug>
 #include <QDateTime>
 #include <QTranslator>
 #include <HbApplication>
@@ -52,8 +51,6 @@ NotesEditorPrivate::NotesEditorPrivate(AgendaUtil *agendaUtil, QObject *parent)
  mSaveEntry(true),
  mNoteId(0)
 {
-	qDebug() << "notes: NotesEditorPrivate::NotesEditorPrivate -->";
-
 	// First get the q-pointer.
 	q_ptr = static_cast<NotesEditor *> (parent);
 
@@ -77,8 +74,6 @@ NotesEditorPrivate::NotesEditorPrivate(AgendaUtil *agendaUtil, QObject *parent)
 	int success=mTranslator->load("notes",":/translations");
 
 	HbApplication::instance()->installTranslator(mTranslator);
-
-	qDebug() << "notes: NotesEditorPrivate::NotesEditorPrivate <--";
 }
 
 /*!
@@ -86,8 +81,6 @@ NotesEditorPrivate::NotesEditorPrivate(AgendaUtil *agendaUtil, QObject *parent)
  */
 NotesEditorPrivate::~NotesEditorPrivate()
 {
-	qDebug() << "notes: NotesEditorPrivate::~NotesEditorPrivate -->";
-
 	if (mOwnsAgendaUtil) {
 		delete mAgendaUtil;
 		mAgendaUtil = 0;
@@ -98,8 +91,6 @@ NotesEditorPrivate::~NotesEditorPrivate()
 		delete mTranslator;
 		mTranslator = 0;
 	}
-
-	qDebug() << "notes: NotesEditorPrivate::~NotesEditorPrivate <--";
 }
 
 
@@ -110,8 +101,6 @@ NotesEditorPrivate::~NotesEditorPrivate()
  */
 void NotesEditorPrivate::edit(const QString &string)
 {
-	qDebug() << "notes: NotesEditorPrivate::show -->";
-
 	// Create a agenda entry by setting the text as description for the note.
 	AgendaEntry newNote;
 	newNote.setType(AgendaEntry::TypeNote);
@@ -125,8 +114,6 @@ void NotesEditorPrivate::edit(const QString &string)
 
 	// launch note editor
 	mNoteEditor->execute(newNote);
-
-	qDebug() << "notes: NotesEditorPrivate::show <--";
 }
 
 /*!
@@ -137,11 +124,7 @@ void NotesEditorPrivate::edit(const QString &string)
  */
 void NotesEditorPrivate::edit(const QFile &handle)
 {
-	qDebug() << "notes: NotesEditorPrivate::show(handle) -->";
-
 	Q_UNUSED(handle)
-
-	qDebug() << "notes: NotesEditorPrivate::show(handle) <--";
 }
 
 /*!
@@ -151,8 +134,6 @@ void NotesEditorPrivate::edit(const QFile &handle)
  */
 void NotesEditorPrivate::edit(AgendaEntry entry)
 {
-	qDebug() << "notes: NotesEditorPrivate::show(entry) -->";
-
 	// Check if its a new note or a note being edited.
 	if (0 < entry.id()) {
 		mNewEntry = false;
@@ -182,8 +163,6 @@ void NotesEditorPrivate::edit(AgendaEntry entry)
 		// Invalid entry type.
 		return;
 	}
-
-	qDebug() << "notes: NotesEditorPrivate::show(entry) <--";
 }
 
 /*!
@@ -193,8 +172,6 @@ void NotesEditorPrivate::edit(AgendaEntry entry)
  */
 void NotesEditorPrivate::edit(ulong id)
 {
-	qDebug() << "notes: NotesEditorPrivate::show(id) -->";
-
 	// Fetch the entry using the id provided
 	AgendaEntry entry = mAgendaUtil->fetchById(id);
 	if (!entry.isNull()) {
@@ -205,7 +182,6 @@ void NotesEditorPrivate::edit(ulong id)
 		return;
 	}
 
-	qDebug() << "notes: NotesEditorPrivate::show(id) <--";
 }
 
 /*!
@@ -216,7 +192,6 @@ void NotesEditorPrivate::edit(ulong id)
  */
 void NotesEditorPrivate::create(NotesEditor::CreateType type)
 {
-	qDebug() << "notes: NotesEditorPrivate::create -->";
 
 	switch(type) {
 		case NotesEditor::CreateNote: {
@@ -266,7 +241,6 @@ void NotesEditorPrivate::create(NotesEditor::CreateType type)
 		break;
 	}
 
-	qDebug() << "notes: NotesEditorPrivate::create <--";
 }
 
 
@@ -277,7 +251,6 @@ void NotesEditorPrivate::create(NotesEditor::CreateType type)
  */
 ulong NotesEditorPrivate::close(NotesEditor::CloseType type)
 {
-	qDebug() << "notes: NotesEditorPrivate::close -->";
 
 	switch (type) {
 		case NotesEditor::CloseWithSave: {
@@ -316,7 +289,6 @@ ulong NotesEditorPrivate::close(NotesEditor::CloseType type)
 			mNoteId = 0;
 		break;
 	}
-	qDebug() << "notes: NotesEditorPrivate::close <--";
 	return mNoteId;
 }
 
@@ -389,15 +361,11 @@ QString NotesEditorPrivate::timeFormatString()
  */
 void NotesEditorPrivate::handleEntriesChanged(QList<ulong> ids)
 {
-	qDebug() << "notes: NotesEditorPrivate::handleEntriesChanged -->";
-
 	if (!mNewEntry) {
 		if (ids.contains(mModifiedNote.id())) {
 			mSaveEntry = false;
 		}
 	}
-
-	qDebug() << "notes: NotesEditorPrivate::handleEntriesChanged <--";
 }
 
 /*!
@@ -405,8 +373,6 @@ void NotesEditorPrivate::handleEntriesChanged(QList<ulong> ids)
  */
 void NotesEditorPrivate::markNoteAsTodo()
 {
-	qDebug() << "notes: NotesEditorPrivate::markNoteAsTodo -->";
-
 	// This function should not be called by any other function except the
 	// noteeditor.
 	if (mModifiedNote.type() != AgendaEntry::TypeNote) {
@@ -448,7 +414,6 @@ void NotesEditorPrivate::markNoteAsTodo()
 	window->removeView(mNoteEditor->mEditor);
 	mNoteEditor->deleteLater();
 
-	qDebug() << "notes: NotesEditorPrivate::markNoteAsTodo <--";
 }
 
 /*!
@@ -457,11 +422,9 @@ void NotesEditorPrivate::markNoteAsTodo()
  */
 void NotesEditorPrivate::updateNoteText()
 {
-	qDebug() << "notes: NotesEditorPrivate::updateNoteText -->";
 
 	mModifiedNote.setDescription(mNoteEditor->getDescription());
 
-	qDebug() << "notes: NotesEditorPrivate::updateNoteText <--";
 }
 
 /*!
@@ -469,7 +432,6 @@ void NotesEditorPrivate::updateNoteText()
  */
 void NotesEditorPrivate::deleteNote()
 {
-	qDebug() << "notes: NotesEditorPrivate::deleteNote -->";
 
 	if (!mNewEntry) {
 		// Delete the note. All the changes are discarded.
@@ -485,7 +447,6 @@ void NotesEditorPrivate::deleteNote()
 		mTodoEditor->deleteLater();
 	}
 
-	qDebug() << "notes: NotesEditorPrivate::deleteNote <--";
 }
 
 /*!
@@ -493,7 +454,6 @@ void NotesEditorPrivate::deleteNote()
  */
 bool NotesEditorPrivate::saveNote()
 {
-	qDebug() << "notes: NotesEditorPrivate::saveNote -->";
 
 	bool status = false;
 	QString description = mNoteEditor->getDescription();
@@ -506,6 +466,9 @@ bool NotesEditorPrivate::saveNote()
 				mModifiedNote.setDescription(description);
 				mModifiedNote.setLastModifiedDateTime(
 						QDateTime(QDate::currentDate(), QTime::currentTime()));
+				// Set the creation time as DTStamp time
+				mModifiedNote.setDTStamp(
+						QDateTime(QDate::currentDate(), QTime::currentTime()));
 			} else if (AgendaEntry::TypeTodo == mModifiedNote.type()) {
 				mModifiedNote.setSummary(description);
 				mModifiedNote.setDescription(description);
@@ -516,10 +479,9 @@ bool NotesEditorPrivate::saveNote()
 			// Now save the entry.
 			mNoteId = mAgendaUtil->addEntry(mModifiedNote);
 			if (mNoteId) {
-				HbNotificationDialog::launchDialog(
+				showNotification(
 						hbTrId("txt_notes_dpopinfo_new_note_saved"));
 			}
-
 		} else {
 			if (mOriginalNote.type() != mModifiedNote.type()) {
 				// Entry has been morphed, delete the original one and create
@@ -543,7 +505,7 @@ bool NotesEditorPrivate::saveNote()
 				if (isNoteEdited()) {
 					bool updateStatus = mAgendaUtil->updateEntry(mModifiedNote);
 					if (updateStatus) {
-						HbNotificationDialog::launchDialog(
+						showNotification(
 								hbTrId("txt_notes_dpopinfo_note_saved"));
 					}
 				}
@@ -555,7 +517,6 @@ bool NotesEditorPrivate::saveNote()
 		mNoteId = 0;
 	}
 
-	qDebug() << "notes: NotesEditorPrivate::saveNote <--";
 	return status;
 }
 
@@ -564,7 +525,6 @@ bool NotesEditorPrivate::saveNote()
  */
 bool NotesEditorPrivate::saveTodo()
 {
-	qDebug() << "notes: NotesEditorPrivate::saveTodo -->";
 
 	if (AgendaEntry::TypeTodo != mModifiedNote.type()) {
 		// This should never happen.
@@ -578,7 +538,7 @@ bool NotesEditorPrivate::saveTodo()
 			mNoteId = mAgendaUtil->addEntry(mModifiedNote);
 			if (mNoteId) {
 				status = true;
-				HbNotificationDialog::launchDialog(
+				showNotification(
 						hbTrId("txt_notes_dpopinfo_new_todo_note_saved"));
 			}
 		}
@@ -606,14 +566,13 @@ bool NotesEditorPrivate::saveTodo()
 				status = mAgendaUtil->updateEntry(mModifiedNote);
 				mNoteId = mModifiedNote.id();
 				if (status) {
-					HbNotificationDialog::launchDialog(
+					showNotification(
 							hbTrId("txt_notes_dpopinfo_todo_note_saved"));
 				}
 			}
 		}
 	}
 
-	qDebug() << "notes: NotesEditorPrivate::saveTodo <--";
 	return status;
 }
 
@@ -624,7 +583,6 @@ bool NotesEditorPrivate::saveTodo()
  */
 void NotesEditorPrivate::editingCompleted(bool status)
 {
-	qDebug() << "notes: NotesEditorPrivate::editingCompleted -->";
 
 	if(mNoteEditor) {
 		mNoteEditor->deleteLater();
@@ -634,7 +592,6 @@ void NotesEditorPrivate::editingCompleted(bool status)
 	}
 	emit q_ptr->editingCompleted(status);
 
-	qDebug() << "notes: NotesEditorPrivate::editingCompleted <--";
 }
 
 /*!
@@ -644,8 +601,6 @@ void NotesEditorPrivate::editingCompleted(bool status)
  */
 bool NotesEditorPrivate::isNoteEdited()
 {
-	qDebug() << "notes: NotesEditorPrivate::isNoteEdited -->";
-	qDebug() << "notes: NotesEditorPrivate::isNoteEdited <--";
 
 	if (mModifiedNote.description().compare(mOriginalNote.description())) {
 		return ETrue;
@@ -664,8 +619,6 @@ bool NotesEditorPrivate::isNoteEdited()
  */
 bool NotesEditorPrivate::isTodoEdited()
 {
-	qDebug() << "notes: NotesEditorPrivate::isTodoEdited -->";
-	qDebug() << "notes: NotesEditorPrivate::isTodoEdited <--";
 
 	if ( mModifiedNote.summary().compare(mOriginalNote.summary())) {
 		return ETrue;
@@ -687,5 +640,19 @@ bool NotesEditorPrivate::isTodoEdited()
 	}
 
 	return EFalse;
+}
+
+/*!
+	Shows the save/update notification.
+
+	\param text Text to be shown as notification.
+ */
+void NotesEditorPrivate::showNotification(QString text)
+{
+	HbNotificationDialog *notificationDialog = new HbNotificationDialog();
+	notificationDialog->setTimeout(
+			HbNotificationDialog::ConfirmationNoteTimeout);
+	notificationDialog->setTitle(text);
+	notificationDialog->show();
 }
 // End of file	--Don't remove this.

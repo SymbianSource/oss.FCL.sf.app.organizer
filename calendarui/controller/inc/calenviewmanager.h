@@ -22,6 +22,7 @@
 // INCLUDES
 
 #include <vwsdef.h>
+#include <QDate>
 
 #include "calennotificationhandler.h"   // MCalenNotificationHandler
 #include "hb_calencommands.hrh"
@@ -84,11 +85,6 @@ class  CalenViewManager :	public QObject,
 		 */
 		void constructAndActivateView(int view);
 		/**
-		 * Constructs the other views apart frm firstview and adds 
-		 * them to main window
-		 */
-		void constructOtherViews();
-		/**
 		 * Returns the first view
 		 */
 		int getFirstView();
@@ -136,10 +132,12 @@ class  CalenViewManager :	public QObject,
 		 * day
 		 */
 		void loadAlternateDayView();
+		
+	public slots:
+		void constructOtherViews();
         
     private slots:
-    
-		void handleViewingCompleted(bool status);
+		void handleViewingCompleted(const QDate date);
 		void handleEditingStarted();
 		void handleEditingCompleted();
 		void handleDeletingStarted();

@@ -39,19 +39,21 @@ class HbDataFormModelItem;
 class HbAction;
 class HbLineEdit;
 class HbPushButton;
-class HbDateTimePicker;
-class HbListWidget;
-class HbListWidgetItem;
 class HbCheckBox;
 class HbComboBox;
 class HbView;
-class HbRadioButtonList;
 class MCalenServices;
 class AgendaEntry;
 class AgendaUtil;
 class CalenEditor;
 class CalenEditorDocLoader;
 class CalenEditorCustomItem;
+class CalenEditorReminderField;
+class CalenEditorRepeatField;
+class CalenEditorDataHandler;
+
+// Constants
+const int KNoOfDaysInWeek = 7;
 
 class CalenEditorPrivate : public QObject
 {
@@ -97,6 +99,11 @@ public:
 	CalenEditorPrivate(AgendaUtil *agendaUtil,
 	                   QObject *parent);
 	virtual ~CalenEditorPrivate();
+	void addDiscardAction();
+	AgendaEntry* editedEntry();
+	AgendaEntry* originalEntry();
+	bool isNewEntry();
+	HbDataFormModelItem* allDayCheckBoxItem();
 
 private:
 	void edit(const QFile &handle, bool launchCalendar);
@@ -108,14 +115,13 @@ private:
 		            bool launchCalendar);
 	void showEditor(AgendaEntry entry);
 	void showEditOccurencePopup();
-	void addDiscardAction();
 	void setUpView();
 	void initModel();
 	void addSubjectItem();
 	void addAllDayCheckBoxItem();
 	void addCustomItemFrom();
 	void addCustomItemTo();
-	void addLocationItem();
+    void addCustomItemLocation();
 	void addReminderItem();
 	void addRepeatItem();
 	void insertRepeatUntilItem();
@@ -124,46 +130,21 @@ private:
 	void populateSubjectItem();
 	void populateAllDayItem();
 	void populateCustomItemDateTime();
+	void populateCustomItemLocation();
 	void populateLocationItem();
-	void populateReminderItem();
 	void populateRepeatItem();
 	void populateDescriptionItem();
 	void removeDescriptionItem();
 	void closeEditor();
 		
 	bool isChild() const ;
-	Error checkErrorsForThisAndAll();
-	bool isEdited() const;
-	bool isSummaryEdited() const;
-	bool isAllDayEdited() const;
-	bool isLocationEdited() const;
-	bool isStartDateTimeEdited() const;
-	bool isEndDateTimeEdited() const;
-	bool isAlarmEdited() const;
-	bool isRepeatRuleEdited() const;
-	bool isDescriptionEdited() const;
-	bool nonTextItemsEdited() const;
-	bool areTextItemsEmpty() const;
-	bool areTextItemsCleared() const;
-	bool isSummaryEmptied() const;
-	bool isLocationEmptied() const;
-	bool isDescriptionEmptied() const;
-	Action shouldSaveOrDeleteOrDoNothing() const;
-	bool durationGreaterThanRepeatIntervalError() const;
-	Error checkAlarmFieldsForErrors(bool series = false) const;
-	bool isAlarmInAcceptablePeriod(Error &error, const QDateTime &alarmTime,
-	                               const QDateTime &startTime) const;
+	
 	Action handleDone();
-	void updateEditedEntry();
 	bool saveEntry();
 	void deleteEntry(bool close = false);
-	void displayErrorMsg(int error);
-	void dispalyErrorMsgByRepeatType();
 	bool handleAllDayToSave();
 	void enableFromTotimeFileds(bool, QDateTime, QDateTime);
-	void connectSlots(bool toConnect);
 	int showDeleteConfirmationQuery();
-	void updateRepeatChoices();
 	
 private slots:
 	void handleSubjectChange(const QString subject);
@@ -171,20 +152,16 @@ private slots:
 	void saveFromDateTime(QDateTime& fromDateTime);
 	void saveToDateTime(QDateTime& toDateTime);
 	void handleLocationChange(const QString location);
-	void handleReminderIndexChanged(int index);
-	void handleRepeatIndexChanged(int index);
 	void handleDescriptionChange(const QString description);
 	void saveAndCloseEditor();
 	void handleDeleteAction();
 	void launchSettingsView();
 	void discardChanges();
-	void launchRepeatUntilDatePicker();
-	void setRepeatUntilDate();
 	void handleDescriptionAction();
 	void handleEditOccurence(int index);
 	void handleCancel();
 	void handleCalendarLaunchError(int error);
-
+	
 private:
 	enum EditRange {
 		ThisOnly,
@@ -192,37 +169,28 @@ private:
 		UserCancelled
 	};
 	
-	enum RepeatTypes {
-		RepeatOnce,
-		RepeatDaily,
-		RepeatWeekly,
-		RepeatBiWeekly,
-		RepeatMonthly,
-		RepeatYearly
-	};
 	CalenEditor *q_ptr;
 	AgendaUtil *mAgendaUtil;
-	EditRange mEditRange;
+	
 	CalenEditorDocLoader *mEditorDocLoader;
-	CalenEditorCustomItem *mViewFromItem;
-	CalenEditorCustomItem *mViewToItem;
 	HbView *mEditorView;
+	CalenEditorDataHandler* mDataHandler;
 	HbDataForm *mCalenEditorForm;
 	HbDataFormModel *mCalenEditorModel;
+	
 	HbDataFormModelItem *mSubjectItem;
+	CalenEditorCustomItem *mViewFromItem;
+	CalenEditorCustomItem *mViewToItem;
+	CalenEditorCustomItem *mViewLocationItem;
 	HbDataFormModelItem *mAllDayCheckBoxItem;
-	HbDataFormModelItem *mLocationItem;
-	HbDataFormModelItem *mReminderItem;
-	HbDataFormModelItem *mRepeatItem;
-	HbDataFormModelItem *mCustomRepeatUntilItem;
+
+	CalenEditorReminderField *mReminderField;
+	CalenEditorRepeatField *mRepeatField;
 	HbDataFormModelItem *mDescriptionItem;
 	
-	HbComboBox *mRepeatComboBox;
-	HbDateTimePicker* mDatePicker;
-	QHash<int, int> mReminderHash;
+	EditRange mEditRange;
+	
 	QDateTime mNewEntryDateTime;
-	QDate mRepeatUntilDate;
-	AgendaRepeatRule::RuleType mRepeatRuleType;
 		
 	AgendaEntry *mOriginalEntry;
 	AgendaEntry *mEditedEntry;
@@ -231,13 +199,9 @@ private:
 	HbAction *mDescriptionAction;
 	HbMainWindow *mMainWindow;
 	QTranslator *mTranslator;
-	int mMinutes;
-	int mHour;
 	
 	bool mNewEntry;
-	bool mRepeatUntilItemAdded;
 	bool mDescriptionItemAdded;
-	bool mIsBiWeekly;
 	bool mIsChild;
 	bool mIsAllDayItemAdded;
 	bool mOwnsAgendaUtil;

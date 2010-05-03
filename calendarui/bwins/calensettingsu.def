@@ -8,11 +8,12 @@ EXPORTS
 	??_ECalenSettings@@UAE@I@Z @ 7 NONAME ; CalenSettings::~CalenSettings(unsigned int)
 	??1CalenSettings@@UAE@XZ @ 8 NONAME ; CalenSettings::~CalenSettings(void)
 	?qt_metacall@CalenSettings@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 9 NONAME ; int CalenSettings::qt_metacall(enum QMetaObject::Call, int, void * *)
-	?qt_metacast@CalenSettings@@UAEPAXPBD@Z @ 10 NONAME ; void * CalenSettings::qt_metacast(char const *)
-	?staticMetaObject@CalenSettings@@2UQMetaObject@@B @ 11 NONAME ; struct QMetaObject const CalenSettings::staticMetaObject
-	?handleWeekNumberChange@CalenSettings@@QAEXXZ @ 12 NONAME ; void CalenSettings::handleWeekNumberChange(void)
-	?tr@CalenSettings@@SA?AVQString@@PBD0H@Z @ 13 NONAME ; class QString CalenSettings::tr(char const *, char const *, int)
-	?populateSettingList@CalenSettings@@QAEXXZ @ 14 NONAME ; void CalenSettings::populateSettingList(void)
-	?trUtf8@CalenSettings@@SA?AVQString@@PBD0@Z @ 15 NONAME ; class QString CalenSettings::trUtf8(char const *, char const *)
-	??0CalenSettings@@QAE@PAVHbDataForm@@PAVQObject@@@Z @ 16 NONAME ; CalenSettings::CalenSettings(class HbDataForm *, class QObject *)
+	?handleRegionalInfoChange@CalenSettings@@QAEXXZ @ 10 NONAME ; void CalenSettings::handleRegionalInfoChange(void)
+	?qt_metacast@CalenSettings@@UAEPAXPBD@Z @ 11 NONAME ; void * CalenSettings::qt_metacast(char const *)
+	?staticMetaObject@CalenSettings@@2UQMetaObject@@B @ 12 NONAME ; struct QMetaObject const CalenSettings::staticMetaObject
+	?handleWeekNumberChange@CalenSettings@@QAEXXZ @ 13 NONAME ; void CalenSettings::handleWeekNumberChange(void)
+	?tr@CalenSettings@@SA?AVQString@@PBD0H@Z @ 14 NONAME ; class QString CalenSettings::tr(char const *, char const *, int)
+	?populateSettingList@CalenSettings@@QAEXXZ @ 15 NONAME ; void CalenSettings::populateSettingList(void)
+	?trUtf8@CalenSettings@@SA?AVQString@@PBD0@Z @ 16 NONAME ; class QString CalenSettings::trUtf8(char const *, char const *)
+	??0CalenSettings@@QAE@PAVHbDataForm@@PAVQObject@@@Z @ 17 NONAME ; CalenSettings::CalenSettings(class HbDataForm *, class QObject *)
 

@@ -1,0 +1,10 @@
+EXPORTS
+	?AnimalYear@CCalenLunarLocalizedInfo@@QAEABVTDesC16@@XZ @ 1 NONAME ; class TDesC16 const & CCalenLunarLocalizedInfo::AnimalYear(void)
+	?SolarTerm@CCalenLunarLocalizedInfo@@QAEABVTDesC16@@XZ @ 2 NONAME ; class TDesC16 const & CCalenLunarLocalizedInfo::SolarTerm(void)
+	?GregorianDate@CCalenLunarLocalizedInfo@@QAEABVTDesC16@@XZ @ 3 NONAME ; class TDesC16 const & CCalenLunarLocalizedInfo::GregorianDate(void)
+	?LunarMonthAndDay@CCalenLunarLocalizedInfo@@QAEABVTDesC16@@XZ @ 4 NONAME ; class TDesC16 const & CCalenLunarLocalizedInfo::LunarMonthAndDay(void)
+	?Festival@CCalenLunarLocalizedInfo@@QAEABVTDesC16@@XZ @ 5 NONAME ; class TDesC16 const & CCalenLunarLocalizedInfo::Festival(void)
+	?ImplementationGroupProxy@@YAPBUTImplementationProxy@@AAH@Z @ 6 NONAME ; struct TImplementationProxy const * ImplementationGroupProxy(int &)
+	?FullLunarDate@CCalenLunarLocalizedInfo@@QAEABVTDesC16@@XZ @ 7 NONAME ; class TDesC16 const & CCalenLunarLocalizedInfo::FullLunarDate(void)
+	?LunarYear@CCalenLunarLocalizedInfo@@QAEABVTDesC16@@XZ @ 8 NONAME ; class TDesC16 const & CCalenLunarLocalizedInfo::LunarYear(void)
+

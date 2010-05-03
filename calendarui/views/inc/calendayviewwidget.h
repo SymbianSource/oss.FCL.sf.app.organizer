@@ -19,6 +19,7 @@
 #define CALENDAYVIEWWIDGET_H
 
 // System includes
+#include <QGraphicsLinearLayout>
 #include <QDateTime>
 #include <hbwidget.h>
 
@@ -32,6 +33,7 @@ class HbGroupBox;
 class HbListView;
 class HbLabel;
 class HbDateTimePicker;
+class XQSettingsManager;
 class MCalenServices;
 class CalenDayView;
 class AgendaEntry;
@@ -56,13 +58,13 @@ public:
      * @param services The reference to the MCalenServices object
      * @param docLoader The document loader object
      */
-	Q_DECL_EXPORT CalenDayViewWidget(MCalenServices &services,
+	IMPORT_C CalenDayViewWidget(MCalenServices &services,
 	                                 CalenDocLoader *docLoader);
 	
 	/**
 	 * @brief Default C++ destructor
 	 */
-	Q_DECL_EXPORT ~CalenDayViewWidget();
+	IMPORT_C ~CalenDayViewWidget();
 	
 	/**
 	 * @brief Initializes the widget to show all the events/to-do's
@@ -152,6 +154,12 @@ private:
      */
     int getIndexToScrollTo();
     
+    /**
+     * @brief To Show and hide regional plugin label depends upon settings
+     */
+    
+    void showHideRegionalInformation();
+    
 private slots:
 
     /**
@@ -211,11 +219,6 @@ private slots:
      * events for some day other than the current day
      */
     void goToToday();
-    
-    /**
-     * @brief Callback function for deleting multiple entries
-     */
-    void deleteEntries();
 
 private:
     /**
@@ -299,6 +302,25 @@ private:
 	 * @brief The date picker component
 	 */
 	HbDateTimePicker *mDatePicker;
+	
+	/**
+	 * @var mRegionalPluginLayout
+	 * @brief Regional Plugin layout pointer
+	 */
+	QGraphicsLinearLayout* mRegionalPluginLayout;
+	
+	/**
+	 * @var mRegionalInfoGroupBox
+	 * @brief Regional Plugin Info groupbox
+	 */
+	HbGroupBox *mRegionalInfoGroupBox;
+
+	/**
+	 * @var mSettingsManager
+	 * @brief Setting Manager pointer
+	 */
+	
+	XQSettingsManager *mSettingsManager;
 };
 
 #endif //CALENDAYVIEWWIDGET_H

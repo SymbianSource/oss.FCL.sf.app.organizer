@@ -16,14 +16,14 @@
 */
 
 
-#include "calendarui_debug.h"
-#include "CalenExtraRowFormatter.h"
+
 #include <calenregionalutil.rsg>
-#include <aknbiditextutils.h>
 #include <badesca.h> 
 #include <eikenv.h>
 #include <StringLoader.h>
 
+#include "calendarui_debug.h"
+#include "CalenExtraRowFormatter.h"
 
 // -----------------------------------------------------------------------------
 // CollapseDuplicatesL
@@ -158,11 +158,7 @@ void CCalenExtraRowFormatter::ConstructL()
 //
 EXPORT_C TPtrC CCalenExtraRowFormatter::FormatExtraRowInformationL( 
     CCalenLunarLocalizedInfo& aLocInfo, 
-    RArray<CCalenLunarLocalizedInfo::TField>& aPrioritizedFields,
-    TInt aMaxWidth,
-    const CFont& aFont
-    ,TBool aTwoLines
-    )
+    RArray<CCalenLunarLocalizedInfo::TField>& aPrioritizedFields )
     {
     TRACE_ENTRY_POINT;
     
@@ -190,158 +186,90 @@ EXPORT_C TPtrC CCalenExtraRowFormatter::FormatExtraRowInformationL(
         ASSERT( subLabels.Find( aPrioritizedFields[i] ) >= 0 ); 
         }
 
-    TBool fits = EFalse;
+	// Initialize substring array 
+	CPtrCArray* subs = new (ELeave) CPtrCArray(10);
+	CleanupStack::PushL( subs );
+	for ( TInt i = 0; i < subLabels.Count(); i++) 
+		{
+		subs->AppendL( TPtrC( KNullDesC ) );
+		}
+	// subs->InsertL( 0, TPtrC( KNullDesC ), 5 );
+	
+	// Set wanted fields to substring array
+	for ( TInt i = 0; i < aPrioritizedFields.Count(); i++)
+		{
+		CCalenLunarLocalizedInfo::TField field = aPrioritizedFields[i];
+		TInt subIx = subLabels.Find( field );
+		// Replace 
+		subs->Delete(subIx);
+		RDebug::Print( _L("A sub count  %d"), subs->Count() );
+		subs->InsertL(subIx, TPtrC( aLocInfo.GetField( field ) ) );
+		RDebug::Print( _L("B sub count %d"), subs->Count() );
+		RDebug::Print( _L("B field %S"), &(subs->At(subIx)) );
+		
+		}
+	
+	// Format all fields to extra row     
+	HBufC* extraRowFmt = StringLoader::LoadLC( R_CALE_EXTRA_ROW_LUNAR );
+	
+	RDebug::RawPrint( *extraRowFmt );
+	
+	TBuf<1000> fmt = *extraRowFmt;
+	for (TInt i=0; i < subLabels.Count(); i++)
+		{
+		RDebug::Print( _L("Before Format") );
+		RDebug::RawPrint( fmt );
+		StringLoader::Format( iText, 
+							  fmt,
+							  i + 1, // %0U is a separator 
+							  subs->At( i ) );
+		fmt = iText;
+		RDebug::Print( _L("After Format") );
+		RDebug::RawPrint( fmt );
+		}
+	
+	// Now we have something like "Year of Dog%0U%0U6/11%0U%0U" 
+	// First We need to remove multiple occurences of %0U
+	_LIT(KSeparatorFmt, "%0U");
+	
+	CollapseDuplicatesL( iText, 0, KSeparatorFmt );
+	RDebug::Print( _L("After collapse") );
+	RDebug::RawPrint( iText );
 
-    do 
-        {
-        // Initialize substring array 
-        CPtrCArray* subs = new (ELeave) CPtrCArray(10);
-        CleanupStack::PushL( subs );
-        for ( TInt i = 0; i < subLabels.Count(); i++) 
-            {
-            subs->AppendL( TPtrC( KNullDesC ) );
-            }
-        // subs->InsertL( 0, TPtrC( KNullDesC ), 5 );
-        
-        // Set wanted fields to substring array
-        for ( TInt i = 0; i < aPrioritizedFields.Count(); i++)
-            {
-            CCalenLunarLocalizedInfo::TField field = aPrioritizedFields[i];        
-            TInt subIx = subLabels.Find( field );
-            // Replace 
-            subs->Delete(subIx);
-            RDebug::Print( _L("A sub count  %d"), subs->Count() );                       
-            subs->InsertL(subIx, TPtrC( aLocInfo.GetField( field ) ) );
-            RDebug::Print( _L("B sub count %d"), subs->Count() );                       
-            RDebug::Print( _L("B field %S"), &(subs->At(subIx)) );                       
-            
-            }
-        
-        // Format all fields to extra row     
-        HBufC* extraRowFmt = StringLoader::LoadLC( R_CALE_EXTRA_ROW_LUNAR );
-        
-        RDebug::RawPrint( *extraRowFmt );
-        
-        TBuf<1000> fmt = *extraRowFmt;
-        for (TInt i=0; i < subLabels.Count(); i++)
-            {
-            RDebug::Print( _L("Before Format") );
-            RDebug::RawPrint( fmt );
-            StringLoader::Format( iText, 
-                                  fmt,
-                                  i + 1, // %0U is a separator 
-                                  subs->At( i ) );
-            fmt = iText;
-            RDebug::Print( _L("After Format") );
-            RDebug::RawPrint( fmt );
-            }
-        
-        // Now we have something like "Year of Dog%0U%0U6/11%0U%0U" 
-        // First We need to remove multiple occurences of %0U
-        _LIT(KSeparatorFmt, "%0U");
-        
-        CollapseDuplicatesL( iText, 0, KSeparatorFmt );
-        RDebug::Print( _L("After collapse") );
-        RDebug::RawPrint( iText );
+	// Remove leading and trailing %0U
+	// By now, we are sure that there is max 1 %0U in the beginning
+	// and in the end of string.
+	RemoveLeadingAndTrailingL( iText, KSeparatorFmt );
+	RDebug::Print( _L("After leading and trailing removal") );
+	RDebug::RawPrint( iText );
+	
 
-        // Remove leading and trailing %0U
-        // By now, we are sure that there is max 1 %0U in the beginning
-        // and in the end of string.
-        RemoveLeadingAndTrailingL( iText, KSeparatorFmt );
-        RDebug::Print( _L("After leading and trailing removal") );
-        RDebug::RawPrint( iText );
-        
-
-        // If there are now separators anymore, then do not fill them
-        TBool hasSeparators = iText.Find( KSeparatorFmt ) >= 0;
-        
-        if ( hasSeparators ) 
-            {
-        
-            // fill in separators
-            HBufC* separator = StringLoader::LoadLC( R_CALE_LUNAR_SEPARATOR );
-            fmt = iText;
-            StringLoader::Format( iText, 
-                                  fmt,
-                                  0, // %0U is a separator 
-                                  *separator );
-        
-            RDebug::Print( _L("After separator insert") );
-            RDebug::RawPrint( iText );
-            CleanupStack::PopAndDestroy( separator );
-            }
+	// If there are now separators anymore, then do not fill them
+	TBool hasSeparators = iText.Find( KSeparatorFmt ) >= 0;
+	
+	if ( hasSeparators ) 
+		{
+	
+		// fill in separators
+		HBufC* separator = StringLoader::LoadLC( R_CALE_LUNAR_SEPARATOR );
+		fmt = iText;
+		StringLoader::Format( iText, 
+							  fmt,
+							  0, // %0U is a separator 
+							  *separator );
+	
+		RDebug::Print( _L("After separator insert") );
+		RDebug::RawPrint( iText );
+		CleanupStack::PopAndDestroy( separator );
+		}
 
 
-        CleanupStack::PopAndDestroy( extraRowFmt );
-        CleanupStack::PopAndDestroy( subs );
-        
-        fits = TryToFitL( iText, aMaxWidth, aFont
-
-                          , aTwoLines
-
-                          ); 
-        if ( ! fits )
-            {
-            iText = KNullDesC;
-            TInt last = aPrioritizedFields.Count() - 1;
-            if ( last >= 0 )
-                {
-                aPrioritizedFields.Remove( last );
-                }
-            }
-
-        
-        } while ( ! fits && aPrioritizedFields.Count() );
-
+	CleanupStack::PopAndDestroy( extraRowFmt );
+	CleanupStack::PopAndDestroy( subs );
     CleanupStack::PopAndDestroy( &subLabels );
-    
-    
     
     TRACE_EXIT_POINT;
     return iText;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenExtraRowFormatter::TryToFitL
-// -----------------------------------------------------------------------------
-//
-TBool CCalenExtraRowFormatter::TryToFitL( const TDesC& aStr, TInt aMaxWidth, const CFont& aFont
-                                           , TBool aTwoLines )
-    {
-    TRACE_ENTRY_POINT;
-    
-    TBool result(EFalse);
-    if(aTwoLines)
-        {
-        CArrayFixFlat<TPtrC>* textLines = new(ELeave)CArrayFixFlat<TPtrC>( 3 );
-        CleanupStack::PushL( textLines );
-        
-        CArrayFixFlat<TInt>* lineWidths = new( ELeave )CArrayFixFlat<TInt>( 1 );
-        CleanupStack::PushL( lineWidths );
-        
-        lineWidths->AppendL( aMaxWidth );
-        
-        HBufC* visualText = AknBidiTextUtils::ConvertToVisualAndWrapToArrayWholeTextL(
-            aStr,
-            *lineWidths,
-            aFont,
-            *textLines);
-
-        result = (textLines->Count() <= 2);
-            
-        CleanupStack::PopAndDestroy( lineWidths );
-        CleanupStack::PopAndDestroy( textLines );
-        delete visualText;
-        }
-    else
-        {
-        CFont::TMeasureTextInput::TFlags logicalOrder = static_cast<CFont::TMeasureTextInput::TFlags>(0);
-        TInt textW = AknBidiTextUtils::MeasureTextBoundsWidth( aFont, aStr, logicalOrder );
-        result = (textW <= aMaxWidth);
-        }   
-    
-    TRACE_EXIT_POINT;
-    return result;
     }
 
 //EOF

@@ -60,6 +60,9 @@
 #include "caleneditordocloader.h"
 #include "caleneditorcommon.h"
 #include "calendateutils.h"
+#include "caleneditordatahandler.h"
+#include "caleneditorreminderfield.h"
+#include "caleneditorrepeatfield.h"
 
 /*!
 	\class CalenEditorPrivate
@@ -189,27 +192,28 @@
  */
 CalenEditorPrivate::CalenEditorPrivate(AgendaUtil *agendaUtil, 
                                        QObject *parent) :
-									QObject(parent), 
-									mAgendaUtil(NULL), 
-									mEditRange(ThisAndAll),
+									QObject(parent),
+									mAgendaUtil(NULL),
 									mEditorDocLoader(NULL),
+									mEditorView(NULL),
+									mDataHandler(NULL),
+									mCalenEditorForm(NULL),
+									mCalenEditorModel(NULL),
+									mSubjectItem(NULL),
 									mViewFromItem(NULL),
 									mViewToItem(NULL),
-									mEditorView(NULL), 
-									mCalenEditorForm(NULL), 
-									mCalenEditorModel(NULL),
-									mReminderItem(NULL), 
-									mRepeatItem(NULL),
-									mCustomRepeatUntilItem(NULL),
+                                    mViewLocationItem(NULL),
+									mAllDayCheckBoxItem(NULL),		                            
+									mReminderField(NULL),
+									mRepeatField(NULL),
 									mDescriptionItem(NULL),
-									mSubjectItem(NULL),
-									mAllDayCheckBoxItem(NULL),
-									mLocationItem(NULL),
-									mNewEntry(true), 
-									mRepeatUntilItemAdded(false),
-									mDescriptionItemAdded(false), 
+									mEditRange(ThisAndAll),
+									mOriginalEntry(NULL),
+									mEditedEntry(NULL),
+									mNewEntry(true),
+									mDescriptionItemAdded(false),
 									mIsChild(false),
-									mIsAllDayItemAdded(false), 
+									mIsAllDayItemAdded(false),
 									mLaunchCalendar(false),
 									mMenuItemAdded(false)
 {
@@ -466,6 +470,9 @@ void CalenEditorPrivate::showEditor(AgendaEntry entry)
 	mEditorView->setNavigationAction(mSoftKeyAction);
 	connect(mSoftKeyAction, SIGNAL(triggered()), this,
 	        SLOT(saveAndCloseEditor()));
+	
+	// Create the data handler
+	mDataHandler = new CalenEditorDataHandler(this,mEditedEntry, mOriginalEntry);
 }
 
 /*!
@@ -585,7 +592,7 @@ void CalenEditorPrivate::initModel()
 	
 	addCustomItemFrom();
 	addCustomItemTo();
-	addLocationItem();
+	addCustomItemLocation();
 	addReminderItem();
 	// Add the repeat information only if particular occurence is not being 
 	if (mEditRange == ThisAndAll) {
@@ -647,13 +654,17 @@ void CalenEditorPrivate::addCustomItemTo()
 /*!
 	Appends the Location Item to the Data form Model.
  */
-void CalenEditorPrivate::addLocationItem()
+
+/*!
+	Appends the custom Location widget to the Data form Model.
+ */
+void CalenEditorPrivate::addCustomItemLocation()
 {
-	// Creates and appends a data form model item to set location.
-	mLocationItem = mCalenEditorModel->appendDataFormItem(
-										HbDataFormModelItem::TextItem, hbTrId(
-										"txt_calendar_formlabel_val_location"),
-										mCalenEditorModel->invisibleRootItem());
+	HbDataFormModelItem::DataItemType
+    itemType =
+            static_cast<HbDataFormModelItem::DataItemType> (CustomWidgetLocation);
+    HbDataFormModelItem *customModelItem = new HbDataFormModelItem(itemType, hbTrId("txt_calendar_formlabel_val_location"));
+    mCalenEditorModel->appendDataFormItem(customModelItem);
 }
 
 /*!
@@ -661,58 +672,20 @@ void CalenEditorPrivate::addLocationItem()
  */
 void CalenEditorPrivate::addRepeatItem()
 {
-	mRepeatRuleType = mEditedEntry->repeatRule().type();
-	mRepeatItem = new HbDataFormModelItem();
-	mRepeatItem->setType(HbDataFormModelItem::ComboBoxItem);
-	mRepeatItem->setData(HbDataFormModelItem::LabelRole,
-	                     hbTrId("txt_calendar_setlabel_repeat"));
-
-	// Create the repeat choices
-	QStringList repeatChoices;
-	repeatChoices << hbTrId("txt_calendar_setlabel_repeat_val_only_once")
-	        << hbTrId("txt_calendar_setlabel_repeat_val_daily")
-	        << hbTrId("txt_calendar_setlabel_repeat_val_weekly")
-	        << hbTrId("txt_calendar_setlabel_repeat_val_fortnightly")
-	        << hbTrId("txt_calendar_setlabel_repeat_val_monthly")
-	        << hbTrId("txt_calendar_setlabel_repeat_val_yearly");
-
-	mRepeatItem->setContentWidgetData(QString("items"), repeatChoices);
-	mCalenEditorModel->appendDataFormItem( mRepeatItem,
-								mCalenEditorModel->invisibleRootItem());
+	// Create the editor reminder field class to handle reminder related
+	// features
+	mRepeatField = new CalenEditorRepeatField(this, mCalenEditorForm, 
+												  mCalenEditorModel, this);
 }
 /*!
  Appends the reminder item to the Data form Model.
  */
 void CalenEditorPrivate::addReminderItem()
 {
-	mReminderItem = new HbDataFormModelItem();
-	mReminderItem->setType(HbDataFormModelItem::ComboBoxItem);
-	mReminderItem->setData(HbDataFormModelItem::LabelRole,
-	                       hbTrId("txt_calendar_setlabel_alarm"));
-
-	// Create the remaindar choices
-	QStringList remaindarChoices;
-	remaindarChoices << hbTrId("txt_calendar_setlabel_alarm_val_off")
-	        << hbTrId("txt_calendar_setlabel_alarm_val_before_ln_minutes", 5)
-	        << hbTrId("txt_calendar_setlabel_alarm_val_before_ln_minutes", 10)
-	        << hbTrId("txt_calendar_setlabel_alarm_val_before_ln_minutes", 15)
-	        << hbTrId("txt_calendar_setlabel_alarm_val_before_ln_minutes", 30)
-	        << hbTrId("txt_calendar_setlabel_alarm_val_before_ln_hours", 1)
-	        << hbTrId("txt_calendar_setlabel_alarm_val_before_ln_hours", 2);
-
-	mReminderItem->setContentWidgetData(QString("items"), remaindarChoices);
-
-	// Build the hash map for the reminder.
-	mReminderHash[0] = 0; // OFF.
-	mReminderHash[1] = 5;
-	mReminderHash[2] = 10;
-	mReminderHash[3] = 15;
-	mReminderHash[4] = 30;
-	mReminderHash[5] = 60;
-	mReminderHash[6] = 120;
-
-	mCalenEditorModel->appendDataFormItem( mReminderItem,
-									mCalenEditorModel->invisibleRootItem());
+	// Create the editor reminder field class to handle reminder related
+	// features
+	mReminderField = new CalenEditorReminderField(this, mCalenEditorForm, 
+	                                              mCalenEditorModel, this);
 }
 
 /*!
@@ -743,8 +716,8 @@ void CalenEditorPrivate::populateModel()
 	}
 
 	populateCustomItemDateTime();
-	populateLocationItem();
-	populateReminderItem();
+	populateCustomItemLocation();
+	mReminderField->populateReminderItem(mNewEntry);
 
 	// Dont Populate the repeat field when particular occurence is being edited
 	if (mEditRange == ThisAndAll) {
@@ -829,17 +802,17 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 	} else {
 		// Check if it is on same day and set the default time and date accordingly.
 		bool isSameDay = CalenDateUtils::isOnToday(fromDateTime);
-		mMinutes = 0;
-		mHour = currentTime.hour();
+		int minutes = 0;
+		int hour = currentTime.hour();
 		if (isSameDay) {
-			mMinutes = currentTime.minute();
-			if (mMinutes > 0 && mMinutes < 31) {
-				mMinutes = 30;
+			minutes = currentTime.minute();
+			if (minutes > 0 && minutes < 31) {
+				minutes = 30;
 			} else {
-				mMinutes = 0;
+				minutes = 0;
 			}
-			currentTime.setHMS(mHour, mMinutes, 0, 0);
-			if (mMinutes == 0) {
+			currentTime.setHMS(hour, minutes, 0, 0);
+			if (minutes == 0) {
 				currentTime = currentTime.addSecs(60 * 60);
 			}
 			fromDateTime.setDate(fromDateTime.date());
@@ -907,7 +880,31 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 		                       mEditedEntry->endTime());
 	}
 }
-
+/*!
+	Populate location item from the editor model and set it in the widget and listen 
+	text change happend in the widget. 
+*/
+void CalenEditorPrivate::populateCustomItemLocation()
+{
+	//Get the index of the custom location  widget item of the event item.
+	// Check if all day has been added or not 
+	// and calculate the index accordingly
+	int itemIndex;
+	if (mIsAllDayItemAdded) {
+		itemIndex = LocationItem;
+	}
+	else {
+		itemIndex = LocationItem - 1;
+	}
+	QModelIndex index = mCalenEditorModel->index(itemIndex, 0);
+	mViewLocationItem = qobject_cast<CalenEditorCustomItem *> 
+	                      (mCalenEditorForm->dataFormViewItem(index));        
+                
+	connect(mViewLocationItem, SIGNAL(locationTextChanged(const QString)),
+			this, SLOT(handleLocationChange(const QString)));
+                    
+	mViewLocationItem->populateLocation(mEditedEntry->location());
+}
 /*!
 	Save the changed start time of the event.
  */
@@ -933,6 +930,11 @@ void CalenEditorPrivate::saveFromDateTime(QDateTime& fromDateTime)
 	}
 	// Set the times to edited entry
 	mEditedEntry->setStartAndEndTime(fromDateTime, endTime);
+	
+	if (mEditRange == ThisAndAll) {
+		// update the repeat choices depending on the meeting duration
+		mRepeatField->updateRepeatChoices();
+	}
 }
 
 /*!
@@ -962,73 +964,10 @@ void CalenEditorPrivate::saveToDateTime(QDateTime& toDateTime)
 	// Set the times to edited entry
 	mEditedEntry->setStartAndEndTime(startTime, toDateTime);
 
-	// update the repeat choices depending on the meeting duration
-	updateRepeatChoices();
-}
-
-/*!
-	Populates the Location item.
- */
-void CalenEditorPrivate::populateLocationItem()
-{
-	// Check if all day has been added or not 
-	// and calculate the index accordingly
-	int index;
-	if (mIsAllDayItemAdded) {
-		index = LocationItem;
-	} else {
-		index = LocationItem - 1;
+	if (mEditRange == ThisAndAll) {
+		// update the repeat choices depending on the meeting duration
+		mRepeatField->updateRepeatChoices();
 	}
-
-	mLocationItem->setContentWidgetData("text", mEditedEntry->location());
-	mSubjectItem->setContentWidgetData("minRows", 2);
-	mSubjectItem->setContentWidgetData("maxRows", 4);
-	mCalenEditorForm->addConnection(
-	                                mLocationItem,
-	                                SIGNAL(textChanged(const QString)),
-	                                this,
-	                                SLOT(handleLocationChange(const QString)));
-}
-
-/*!
-	Populates the reminder item.
- */
-void CalenEditorPrivate::populateReminderItem()
-{
-	// Check if all day has been added or not 
-	// and calculate the index accordingly
-	int index;
-	if (mIsAllDayItemAdded) {
-		index = ReminderItem;
-	} else {
-		index = ReminderItem - 1;
-	}
-	// Set the default reminder value to 15 minutes 
-	if (mNewEntry) {
-		mReminderItem->setContentWidgetData("currentIndex", 3);
-		// Save the reminder alarm for the entry
-		AgendaAlarm reminder;
-		reminder.setTimeOffset(mReminderHash.value(3));
-		reminder.setAlarmSoundName(QString(" "));
-		// Set the reminder to the entry as well as original entry.
-		mEditedEntry->setAlarm(reminder);
-		mOriginalEntry->setAlarm(reminder);
-	} else {
-		if (mEditedEntry->alarm().isNull()) {
-			// Alarm is set off
-			mReminderItem->setContentWidgetData("currentIndex", 0);
-		} else {
-			// Get the reminder offset value.
-			int reminderOffset = mEditedEntry->alarm().timeOffset();
-			// Get the index value for the reminder combo box from the hash 
-			// table.
-			int index = mReminderHash.key(reminderOffset);
-			mReminderItem->setContentWidgetData("currentIndex", index);
-		}
-	}
-	mCalenEditorForm->addConnection(mReminderItem,
-	                                SIGNAL(currentIndexChanged(int)), this,
-	                                SLOT(handleReminderIndexChanged(int)));
 }
 
 /*!
@@ -1044,64 +983,8 @@ void CalenEditorPrivate::populateRepeatItem()
 	} else {
 		index = RepeatItem - 1;
 	}
-	HbDataFormViewItem
-	        *item =
-	                qobject_cast<HbDataFormViewItem *> (
-										mCalenEditorForm->itemByIndex(
-										mCalenEditorModel->index( index, 0)));
-	mRepeatComboBox
-	        = qobject_cast<HbComboBox *> (item->dataItemContentWidget());
-
-	// Set the user roles for the combobox items so that we depend on these
-	// roles to identify the correct repeat type when repeat choices are 
-	// dynamically removed or added
-	mRepeatComboBox->setItemData(RepeatOnce, RepeatOnce, Qt::UserRole+100);
-	mRepeatComboBox->setItemData(RepeatDaily, RepeatDaily, Qt::UserRole+100);
-	mRepeatComboBox->setItemData(RepeatWeekly, RepeatWeekly, Qt::UserRole+100);
-	mRepeatComboBox->setItemData(RepeatBiWeekly, 
-	                             RepeatBiWeekly, Qt::UserRole+100);
-	mRepeatComboBox->setItemData(RepeatMonthly, 
-	                             RepeatMonthly, Qt::UserRole+100);
-	mRepeatComboBox->setItemData(RepeatYearly, RepeatYearly, Qt::UserRole+100);
 	
-	if (mEditedEntry->isRepeating()) {
-		switch (mEditedEntry->repeatRule().type()) {
-			case AgendaRepeatRule::DailyRule: {
-				mRepeatComboBox->setCurrentIndex(1);
-			}
-				break;
-			case AgendaRepeatRule::WeeklyRule: {
-				if (mEditedEntry->repeatRule().interval() == 1) {
-					mRepeatComboBox->setCurrentIndex(2);
-				} else {
-					mRepeatComboBox->setCurrentIndex(3);
-					mIsBiWeekly = true;
-				}
-			}
-				break;
-			case AgendaRepeatRule::MonthlyRule: {
-				mRepeatComboBox->setCurrentIndex(4);
-			}
-				break;
-			case AgendaRepeatRule::YearlyRule: {
-				mRepeatComboBox->setCurrentIndex(5);
-			}
-				break;
-			default:
-				break;
-		}
-		// If entry is repeating type then insert the repeatuntil item.
-		insertRepeatUntilItem();
-	} else {
-		mRepeatComboBox->setCurrentIndex(0);
-		// Set the Original entry value also.
-		mOriginalEntry->setRepeatRule(
-		                              AgendaRepeatRule(
-		                              AgendaRepeatRule::InvalidRule));
-	}
-	connect(mRepeatComboBox, SIGNAL(currentIndexChanged(int)), this,
-	        SLOT(handleRepeatIndexChanged(int)));
-
+	mRepeatField->populateRepeatItem(index);
 }
 
 /*!
@@ -1111,16 +994,16 @@ void CalenEditorPrivate::populateDescriptionItem()
 {
 	QModelIndex repeatIndex;
 	if (mEditRange == ThisOnly) {
-		repeatIndex = mCalenEditorModel->indexFromItem(mReminderItem);
+		repeatIndex = mReminderField->modelIndex();
 	} else {
-		repeatIndex = mCalenEditorModel->indexFromItem(mRepeatItem);
+		repeatIndex = mRepeatField->modelIndex();
 	}
 
 	int descIndex;
-	if (!mRepeatUntilItemAdded) {
-		descIndex = repeatIndex.row() + 1;
-	} else {
+	if (mRepeatField && mRepeatField->isRepeatUntilItemAdded()) {
 		descIndex = repeatIndex.row() + 2;
+	} else {
+		descIndex = repeatIndex.row() + 1;
 	}
 	mDescriptionItem
 	        = mCalenEditorModel->insertDataFormItem(
@@ -1128,6 +1011,7 @@ void CalenEditorPrivate::populateDescriptionItem()
 									QString(hbTrId(
 									"txt_calendar_formlabel_val_description")),
 									mCalenEditorModel->invisibleRootItem());
+	mDescriptionItem->setContentWidgetData("text", mEditedEntry->description());
 	mDescriptionItem->setContentWidgetData("minRows", 2);
 	mDescriptionItem->setContentWidgetData("maxRows", 4);
 	mCalenEditorForm->addConnection(
@@ -1152,15 +1036,15 @@ void CalenEditorPrivate::removeDescriptionItem()
 								   SLOT(handleDescriptionChange(const QString)));
 	QModelIndex repeatIndex;
 	if (mEditRange == ThisOnly) {
-		repeatIndex = mCalenEditorModel->indexFromItem(mReminderItem);
+		repeatIndex = mReminderField->modelIndex();
 	} else {
-		repeatIndex = mCalenEditorModel->indexFromItem(mRepeatItem);
+		repeatIndex = mRepeatField->modelIndex();
 	}
 	int descIndex;
-	if (!mRepeatUntilItemAdded) {
-		descIndex = repeatIndex.row() + 1;
-	} else {
+	if (mRepeatField && mRepeatField->isRepeatUntilItemAdded()) {
 		descIndex = repeatIndex.row() + 2;
+	} else {
+		descIndex = repeatIndex.row() + 1;
 	}
 	mCalenEditorModel->removeItem(mCalenEditorModel->index(descIndex, 0));
 	// Remove the description from the entry
@@ -1170,34 +1054,6 @@ void CalenEditorPrivate::removeDescriptionItem()
 	mDescriptionItemAdded = false;
 }
 
-/*!
-	Inserts the repeat until item to the dataform model
- */
-void CalenEditorPrivate::insertRepeatUntilItem()
-{
-	HbDataFormModelItem::DataItemType itemType =
-	        static_cast<HbDataFormModelItem::DataItemType> (RepeatUntilOffset);
-
-	QModelIndex repeatIndex = mCalenEditorModel->indexFromItem(mRepeatItem);
-	mCustomRepeatUntilItem = mCalenEditorModel->insertDataFormItem(
-										RepeatUntilItem,
-										itemType,
-										QString(
-										hbTrId(
-										"txt_calendar_setlabel_repeat_until")),
-										mCalenEditorModel->invisibleRootItem());
-	mRepeatUntilItemAdded = true;
-
-	mCalenEditorForm->addConnection(mCustomRepeatUntilItem, SIGNAL(clicked()),
-	                                this, SLOT(launchRepeatUntilDatePicker()));
-	if (!mNewEntry && mRepeatRuleType != AgendaRepeatRule::InvalidRule) {
-		HbExtendedLocale locale = HbExtendedLocale::system();
-		QString dateString = locale.format(mEditedEntry->repeatRule().until(),
-		                                   r_qtn_date_usual_with_zero);
-		mCustomRepeatUntilItem->setContentWidgetData("text", dateString);
-	}
-	//TODO: Scroll to functionality has to be implemented	
-}
 
 /*!
 	Close the Editor.
@@ -1225,6 +1081,7 @@ void CalenEditorPrivate::handleSubjectChange(const QString subject)
  */
 void CalenEditorPrivate::handleAllDayChange(int state)
 {
+	Q_UNUSED(state)
 	if (mAllDayCheckBoxItem->contentWidgetData("checkState") == Qt::Checked) {
 		// AllDayCheckBox is checked
 		// Set From/To times buttons Read-Only
@@ -1260,203 +1117,6 @@ void CalenEditorPrivate::handleLocationChange(const QString location)
 	addDiscardAction();
 }
 
-/*!
-	Triggerd from tapping on reminder item.
-	Handles the reminder time change and updates the same in the event.
-	\param index The new index chosen in the reminder list.
- */
-void CalenEditorPrivate::handleReminderIndexChanged(int index)
-{
-	AgendaAlarm reminder;
-	if (!mEditedEntry->alarm().isNull()) {
-		reminder = mEditedEntry->alarm();
-	}
-	// If value for the index in hash table is 0 i.e reminder is "OFF",
-	// then dont do anything only set the default constructed reminder to
-	// the entry which is Null.
-	if (mReminderHash.value(index)) {
-		// If not zero then set the reminder offset
-		// value to the entry.
-		reminder.setTimeOffset(mReminderHash.value(index));
-		reminder.setAlarmSoundName(QString(" "));
-	} else {
-		// Construct the default alarm which is NULL
-		reminder = AgendaAlarm();
-	}
-	// Set the reminder to the entry.
-	mEditedEntry->setAlarm(reminder);
-	addDiscardAction();
-}
-
-/*!
-	Triggerd from tapping on repeat item.
-	Handles the repeat rule change and updates the same in the event.
-	\param index The new index chosen in the repeat list.
- */
-void CalenEditorPrivate::handleRepeatIndexChanged(int index)
-{
-	mIsBiWeekly = false;
-
-	HbExtendedLocale locale = HbExtendedLocale::system();
-	// Get the user role w ehave set for this index
-	QVariant userRole = mRepeatComboBox->itemData(index, Qt::UserRole + 100);
-	int value = userRole.toInt();
-	switch (value) {
-		case 1: {
-			if (!mRepeatUntilItemAdded) {
-				insertRepeatUntilItem();
-			}
-			if (mCustomRepeatUntilItem) {
-				QDate date = mEditedEntry->startTime().date().addYears(1);
-				mCustomRepeatUntilItem->setContentWidgetData( "text", 
-												locale.format( date,
-												r_qtn_date_usual_with_zero));
-			}
-			mRepeatRuleType = AgendaRepeatRule::DailyRule;
-			mIsBiWeekly = false;
-		}
-		break;
-		case 2: {
-			if (!mRepeatUntilItemAdded) {
-				insertRepeatUntilItem();
-			}
-			if (mCustomRepeatUntilItem) {
-				QDate date = mEditedEntry->startTime().date().addYears(1);
-				mCustomRepeatUntilItem->setContentWidgetData( "text",
-												locale.format( date,
-												r_qtn_date_usual_with_zero));
-
-			}
-			mRepeatRuleType = AgendaRepeatRule::WeeklyRule;
-			mIsBiWeekly = false;
-		}
-		break;
-		case 3: {
-			if (!mRepeatUntilItemAdded) {
-				insertRepeatUntilItem();
-			}
-			if (mCustomRepeatUntilItem) {
-				QDate date = mEditedEntry->startTime().date().addYears(1);
-				mCustomRepeatUntilItem->setContentWidgetData( "text",
-												locale.format( date,
-												r_qtn_date_usual_with_zero));
-			}
-			mRepeatRuleType = AgendaRepeatRule::WeeklyRule;
-			mIsBiWeekly = true;
-				}
-				break;
-		case 4: {
-			if (!mRepeatUntilItemAdded) {
-				insertRepeatUntilItem();
-			}
-			if (mCustomRepeatUntilItem) {
-				QDate date = mEditedEntry->startTime().date().addYears(5);
-				mCustomRepeatUntilItem->setContentWidgetData( "text",
-												locale.format( date,
-												r_qtn_date_usual_with_zero));
-			}
-			mRepeatRuleType = AgendaRepeatRule::MonthlyRule;
-			mIsBiWeekly = false;
-		}
-		break;
-		case 5: {
-			if (!mRepeatUntilItemAdded) {
-				insertRepeatUntilItem();
-			}
-			if (mCustomRepeatUntilItem) {
-				QDate date = mEditedEntry->startTime().date().addYears(10);
-				mCustomRepeatUntilItem->setContentWidgetData( "text",
-												locale.format( date,
-												r_qtn_date_usual_with_zero));
-			}
-			mRepeatRuleType = AgendaRepeatRule::YearlyRule;
-			mIsBiWeekly = false;
-		}
-		break;
-		default: {
-			mRepeatRuleType = AgendaRepeatRule::InvalidRule;
-			if (mRepeatUntilItemAdded) {
-				QModelIndex repeatIndex =
-				        mCalenEditorModel->indexFromItem(mRepeatItem);
-				mCalenEditorModel->removeItem(
-				                              mCalenEditorModel->index(
-				                              repeatIndex.row()+ 1, 0));
-				mRepeatUntilItemAdded = false;
-				mCustomRepeatUntilItem = NULL;
-			}
-			mIsBiWeekly = false;
-		}
-		break;
-	}
-	addDiscardAction();
-}
-
-/*!
-	Launches the date picker by tapping on the repaet until pushbutton
- */
-void CalenEditorPrivate::launchRepeatUntilDatePicker()
-{
-	if (mDatePicker) {
-		mDatePicker = NULL;
-	}
-	if (mRepeatRuleType == AgendaRepeatRule::DailyRule) {
-		QDate minDate = mEditedEntry->endTime().date().addDays(1);
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, mEditorView);
-		mDatePicker->setMinimumDate(minDate);
-		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
-		mDatePicker->setDate(mRepeatUntilDate);
-	} else if (mRepeatRuleType == AgendaRepeatRule::WeeklyRule) {
-		QDate minDate;
-		if (!mIsBiWeekly) {
-			minDate = mEditedEntry->endTime().date().addDays(7);
-		} else {
-			minDate = mEditedEntry->endTime().date().addDays(14);
-		}
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, mEditorView);
-		mDatePicker->setMinimumDate(minDate);
-		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
-		mDatePicker->setDate(mRepeatUntilDate);
-	} else if (mRepeatRuleType == AgendaRepeatRule::MonthlyRule) {
-		QDate minDate = mEditedEntry->endTime().date().addMonths(1);
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, mEditorView);
-		mDatePicker->setMinimumDate(minDate);
-		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
-		mDatePicker->setDate(mRepeatUntilDate);
-	} else if (mRepeatRuleType == AgendaRepeatRule::YearlyRule) {
-		QDate minDate = mEditedEntry->endTime().date().addYears(1);
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, mEditorView);
-		mDatePicker->setMinimumDate(minDate);
-		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
-		mDatePicker->setDate(mRepeatUntilDate);
-	}
-	HbDialog popUp;
-	popUp.setDismissPolicy(HbDialog::NoDismiss);
-	popUp.setTimeout(HbDialog::NoTimeout);
-	popUp.setContentWidget(mDatePicker);
-	popUp.setHeadingWidget( new HbLabel(
-								hbTrId("txt_calendar_title_repeat_until")));
-	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
-	popUp.setPrimaryAction(okAction);
-	connect(okAction, SIGNAL(triggered()), this, SLOT(setRepeatUntilDate()));
-	connect(okAction, SIGNAL(triggered()), &popUp, SLOT(close()));
-	popUp.setSecondaryAction(new HbAction(hbTrId("txt_common_button_cancel"),
-								&popUp));
-	popUp.exec();
-}
-
-/*!
-	Sets the repeat until date on the repeat until item
- */
-void CalenEditorPrivate::setRepeatUntilDate()
-{
-	mRepeatUntilDate = mDatePicker->date();
-	if (mRepeatUntilDate.isValid()) {
-		HbExtendedLocale locale = HbExtendedLocale::system();
-		QString dateString = locale.format(mRepeatUntilDate,
-									r_qtn_date_usual_with_zero);
-		mCustomRepeatUntilItem->setContentWidgetData("text", dateString);
-	}
-}
 
 /*!
 	Triggered when the description editor is being edited.
@@ -1536,141 +1196,6 @@ void CalenEditorPrivate::discardChanges()
 }
 
 /*!
-	Connect or disconnect the slots.
- */
-void CalenEditorPrivate::connectSlots(bool toConnect)
-{
-	if (toConnect) {
-		mCalenEditorForm->addConnection( mSubjectItem,
-									SIGNAL(textChanged(const QString)), this,
-									SLOT(handleSubjectChange(const QString)));
-		if (mIsAllDayItemAdded) {
-			connect( mCalenEditorModel,
-				SIGNAL(dataChanged(const QModelIndex, const QModelIndex)), this,
-				SLOT(handleAllDayChange(const QModelIndex, const QModelIndex)));
-		}
-		mCalenEditorForm->addConnection( mLocationItem,
-				SIGNAL(textChanged(const QString)),	this,
-				SLOT(handleLocationChange(const QString)));
-		mCalenEditorForm->addConnection( mReminderItem,
-				SIGNAL(currentIndexChanged(int)), this,
-				SLOT(handleReminderIndexChanged(int)));
-		if (mEditRange == ThisAndAll) {
-			connect(mRepeatComboBox, SIGNAL(currentIndexChanged(int)), this,
-				SLOT(handleRepeatIndexChanged(int)));
-		}
-		if (mDescriptionItemAdded) {
-			mCalenEditorForm->addConnection( mDescriptionItem,
-				SIGNAL(textChanged(const QString)), this,
-				SLOT(handleDescriptionChange(const QString)));
-		}
-	} else {
-		mCalenEditorForm->removeConnection( mSubjectItem,
-				SIGNAL(textChanged(const QString)),this,
-				SLOT(handleSubjectChange(const QString)));
-		if (mIsAllDayItemAdded) { 
-			disconnect( mCalenEditorModel,
-				SIGNAL(dataChanged(const QModelIndex, const QModelIndex)), this,
-				SLOT(handleAllDayChange(const QModelIndex, const QModelIndex)));
-		}
-		mCalenEditorForm->removeConnection( mLocationItem,
-				SIGNAL(textChanged(const QString)), this,
-				SLOT(handleLocationChange(const QString)));
-		mCalenEditorForm->removeConnection( mReminderItem,
-				SIGNAL(currentIndexChanged(int)), this,
-				SLOT(handleReminderIndexChanged(int)));
-		if (mEditRange == ThisAndAll) {
-			disconnect(mRepeatComboBox, SIGNAL(currentIndexChanged(int)), this,
-				SLOT(handleRepeatIndexChanged(int)));
-		}
-		if (mDescriptionItemAdded) {
-			mCalenEditorForm->removeConnection( mDescriptionItem,
-				SIGNAL(textChanged(const QString)), this,
-				SLOT(handleDescriptionChange(const QString)));
-		}
-
-	}
-
-}
-
-/*!
-  Updates the repeat choices depending on the meeting duration
-*/
-void CalenEditorPrivate::updateRepeatChoices()
-{
-	// Only when editing all the occurences, repeat item will be shown
-	if (mEditRange == ThisAndAll) {
-		// Clear all the choices and add it again. If we dont do it 
-		// as user would have changed the end times many times and we would have
-		// deleted repeat options depending upon that
-		// Get the current choice
-		int choice = mRepeatComboBox->currentIndex();
-		mRepeatComboBox->clear();
-		QStringList repeatChoices;
-		repeatChoices << hbTrId("txt_calendar_setlabel_repeat_val_only_once")
-		        << hbTrId("txt_calendar_setlabel_repeat_val_daily")
-		        << hbTrId("txt_calendar_setlabel_repeat_val_weekly")
-		        << hbTrId("txt_calendar_setlabel_repeat_val_fortnightly")
-		        << hbTrId("txt_calendar_setlabel_repeat_val_monthly")
-		        << hbTrId("txt_calendar_setlabel_repeat_val_yearly");
-		mRepeatComboBox->addItems(repeatChoices);
-		// Set the user roles for the combobox items so that we depend on these
-		// roles to identify the correct repeat type when repeat choices are 
-		// dynamically removed or added
-		mRepeatComboBox->setItemData(RepeatOnce, RepeatOnce, Qt::UserRole + 100);
-		mRepeatComboBox->setItemData(RepeatDaily, RepeatDaily, 
-		                             Qt::UserRole + 100);
-		mRepeatComboBox->setItemData(RepeatWeekly, RepeatWeekly,
-		                             Qt::UserRole + 100);
-		mRepeatComboBox->setItemData(RepeatBiWeekly, RepeatBiWeekly,
-		                             Qt::UserRole + 100);
-		mRepeatComboBox->setItemData(RepeatMonthly, RepeatMonthly,
-		                             Qt::UserRole + 100);
-		mRepeatComboBox->setItemData(RepeatYearly, RepeatYearly, 
-		                             Qt::UserRole + 100);
-
-		// Now check if the duration of the meeting and remove the repeat choices 
-		// if necessary
-		int duration =
-		        mEditedEntry->startTime().daysTo(mEditedEntry->endTime());
-		if (mEditedEntry->endTime() >= (mEditedEntry->startTime().addYears(1))) {
-			// Remove all options except "RepeatOnce"
-			// Should be deletd in the descending order only
-			mRepeatComboBox->removeItem(RepeatYearly);
-			mRepeatComboBox->removeItem(RepeatMonthly);
-			mRepeatComboBox->removeItem(RepeatBiWeekly);
-			mRepeatComboBox->removeItem(RepeatWeekly);
-			mRepeatComboBox->removeItem(RepeatDaily);
-		} else if (mEditedEntry->endTime()
-		        >= (mEditedEntry->startTime().addMonths(1))) {
-			// Remove all the options except "Repeat Once"
-			// and "Repeat Yearly" options
-			// Should be deletd in the descending order only
-			mRepeatComboBox->removeItem(RepeatMonthly);
-			mRepeatComboBox->removeItem(RepeatBiWeekly);
-			mRepeatComboBox->removeItem(RepeatWeekly);
-			mRepeatComboBox->removeItem(RepeatDaily);
-		} else if (duration >= 14) {
-			// Remove daily, weekly and biweekly options
-			// Should be deletd in the descending order only
-			mRepeatComboBox->removeItem(RepeatBiWeekly);
-			mRepeatComboBox->removeItem(RepeatWeekly);
-			mRepeatComboBox->removeItem(RepeatDaily);
-		} else if (duration >= 7) {
-			// Remove daily and weekly options
-			// Should be deletd in the descending order only
-			mRepeatComboBox->removeItem(RepeatWeekly);
-			mRepeatComboBox->removeItem(RepeatDaily);
-		} else if (duration >= 1) {
-			// Remove ont daily option
-			mRepeatComboBox->removeItem(RepeatDaily);
-		}
-	// Set the previous user's choice
-	mRepeatComboBox->setCurrentIndex(choice);
-	handleRepeatIndexChanged(choice);
-	}
-}
-/*!
  * Show delete confirmation query
  */
 int CalenEditorPrivate::showDeleteConfirmationQuery()
@@ -1729,385 +1254,6 @@ bool CalenEditorPrivate::isChild() const
 	entry is not repeating.
 	\return enum Error which shows type of error.
  */
-CalenEditorPrivate::Error CalenEditorPrivate::checkErrorsForThisAndAll()
-{
-	const QDateTime startTime = mEditedEntry->startTime();
-	const QDateTime endTime = mEditedEntry->endTime();
-
-	// Repeating entry checks:
-	if (mEditedEntry->isRepeating()) {
-		// Check that repeat until date is a) later than start date
-		//										(for new notes)
-		//									b) not before start date
-		//										(for existing notes)
-		QDate repeatUntilDay = mEditedEntry->repeatRule().until();
-
-		QDate repeatStartDay;
-
-		// if new note or old note isnt repeating
-		// edited.repeatUntil date must be greater than edited.start date
-		// else
-		// if IsRepeatRuleEdited or IsStartDateTimeEdited 
-		// (either one above will make a new rule in which edited.startdate
-		// is the start date)
-		// edited.repeatUntil must be greater than edited.start date
-		// else
-		// edited.repeatUntil must be greater than start date on disk
-
-		if (mNewEntry || mOriginalEntry->repeatRule().isNull()
-				|| isRepeatRuleEdited() || isStartDateTimeEdited()) {
-			// We don't have an rrule so we can't get the rrule start date,
-			// or user has edited a field that will cause new start date to be
-			// used in the new rule.
-			// Use the edited entry's start date.
-			repeatStartDay = startTime.date();
-		} else {
-			// original rule is valid and new rule will not be created
-			repeatStartDay = mOriginalEntry->repeatRule().repeatRuleStart();
-		}
-
-		if (durationGreaterThanRepeatIntervalError()) {
-			return 
-			CalenEditorPrivate::CalenEditorErrorDurationGreaterThanRepeatInterval;
-		}
-		return CalenEditorPrivate::CalenEditorErrorNone;
-	}
-	return CalenEditorPrivate::CalenEditorErrorNone;
-}
-
-/*!
-	Returns true if the entry has been modified, false otherwise.
-	\return true if the entry has been modified, false otherwise.
- */
-bool CalenEditorPrivate::isEdited() const
-{
-	return (isSummaryEdited() ||
-			isAllDayEdited() ||
-			isLocationEdited() ||
-			isStartDateTimeEdited() ||
-			isEndDateTimeEdited() ||
-			isAlarmEdited() ||
-			isRepeatRuleEdited() ||
-			isDescriptionEdited());
-}
-
-/*!
-	Returns true if the summary has been edited, false otherwise.
-	\return true if the summary has been edited, false otherwise.
- */
-bool CalenEditorPrivate::isSummaryEdited() const
-{
-	return (mOriginalEntry->summary() != mEditedEntry->summary());
-}
-
-/*!
-	Returns true if the all day has been edited, false otherwise.
-	\return true if the all day has been edited, false otherwise.
- */
-bool CalenEditorPrivate::isAllDayEdited() const
-{
-	if (mAllDayCheckBoxItem) {
-		if (mOriginalEntry->type() == AgendaEntry::TypeEvent) {
-			if (mAllDayCheckBoxItem->contentWidgetData("checkState")
-			        == Qt::Checked) {
-				return false;
-			} else {
-				return true;
-			}
-		} else if (mOriginalEntry->type() == AgendaEntry::TypeAppoinment) {
-			if (mAllDayCheckBoxItem->contentWidgetData("checkState")
-			        == Qt::Checked) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-	}
-	return false;
-}
-
-/*!
-	Returns true if the location has been edited, false otherwise.
-	\return true if the location has been edited, false otherwise.
- */
-bool CalenEditorPrivate::isLocationEdited() const
-{
-	return (mOriginalEntry->location() != mEditedEntry->location());
-}
-
-/*!
-	Returns true if the start date/time has been edited, false otherwise.
-	\return true if the start date/time has been edited, false otherwise.
- */
-bool CalenEditorPrivate::isStartDateTimeEdited() const
-{
-	return (mOriginalEntry->startTime() != mEditedEntry->startTime());
-}
-
-/*!
-	Returns true if the end date/time has been edited, false otherwise.
-	\return true if the end date/time has been edited, false otherwise.
- */
-bool CalenEditorPrivate::isEndDateTimeEdited() const
-{
-	return (mOriginalEntry->endTime() != mEditedEntry->endTime());
-}
-
-/*!
-	Returns true if the alarm has been edited, false otherwise.
-	\return true if the alarm has been edited, false otherwise.
- */
-bool CalenEditorPrivate::isAlarmEdited() const
-{
-	return (mOriginalEntry->alarm() != mEditedEntry->alarm());
-}
-
-/*!
-	Returns true if the repeat rule has been edited, false otherwise.
-	\return true if the repeat rule has been edited, false otherwise.
- */
-bool CalenEditorPrivate::isRepeatRuleEdited() const
-{
-	if ((mOriginalEntry->repeatRule().type() == AgendaRepeatRule::InvalidRule)
-	        && (mEditedEntry->repeatRule().type()
-	                == AgendaRepeatRule::InvalidRule)) {
-		return false;
-	} else {
-		return (mOriginalEntry->repeatRule() != mEditedEntry->repeatRule());
-	}
-}
-
-/*!
-	Returns true if the Description field has been edited, false otherwise.
-	\return true if the Description field has been edited, false otherwise.
- */
-bool CalenEditorPrivate::isDescriptionEdited() const
-{
-	return (mOriginalEntry->description() != mEditedEntry->description());
-}
-
-/*!
-	Returns true if any of the non-text items (e.g. time fields) of the entry
-	have been edited, false otherwise.
-	\return true if any of the non text items edited,false otherwise.
- */
-bool CalenEditorPrivate::nonTextItemsEdited() const
-{
-	return (isAllDayEdited() ||
-			isStartDateTimeEdited() ||
-			isEndDateTimeEdited() ||
-			isAlarmEdited() ||
-			isRepeatRuleEdited());
-}
-
-/*!
-	Returns true if summary && location && description text items are all empty,
-	false otherwise.
-	\return true if text items are all empty,false otherwise.
- */
-bool CalenEditorPrivate::areTextItemsEmpty() const
-{
-	return (mEditedEntry->summary().isEmpty()
-	        && mEditedEntry->location().isEmpty()
-	        && mEditedEntry->description().isEmpty());
-}
-
-/*!
-	Returns true if the user cleared the text in the location and summary items,
-	false otherwise.
-	\return true if summary & location items are cleared,false otherwise.
- */
-bool CalenEditorPrivate::areTextItemsCleared() const
-{
-	if (mEditedEntry->summary().isEmpty() &&
-			mEditedEntry->location().isEmpty() &&
-			mEditedEntry->description().isEmpty()) {
-		if (isSummaryEmptied() 
-				|| isLocationEmptied() 
-				|| isDescriptionEmptied()) {
-			return true;
-		}
-	}
-	return false;
-}
-
-/*!
-	Returns true the summary was not empty in original && is empty
-	in the edited note,false otherwise
-	\return true if summary is cleared in edited note,false otherwise
- */
-bool CalenEditorPrivate::isSummaryEmptied() const
-{
-	return (!mOriginalEntry->summary().isEmpty()
-	        && mEditedEntry->summary().isEmpty());
-}
-
-/*!
-	Returns true the location was not empty in original && is empty
-	in the edited note,false otherwise
-	\return true if location is cleared in edited note,false otherwise
- */
-bool CalenEditorPrivate::isLocationEmptied() const
-{
-	return (!mOriginalEntry->location().isEmpty()
-	        && mEditedEntry->location().isEmpty());
-}
-
-/*!
-	Returns true the description was not empty in original && is empty
-	in the edited note,false otherwise
-	\return true if description is cleared in edited note,false otherwise
- */
-bool CalenEditorPrivate::isDescriptionEmptied() const
-{
-	return (!mOriginalEntry->description().isEmpty()
-	        && mEditedEntry->description().isEmpty());
-}
-
-/*!
-	Works out whether the entry should be deleted, saved, 
-	or whether no action should be taken.
-	\return enum Action
- */
-CalenEditorPrivate::Action CalenEditorPrivate::shouldSaveOrDeleteOrDoNothing() 
-																		const
-{
-	// Need to save the entry if third party calls editor to launch the
-	// calendar after that. So, that entry will be new entry adn we assume
-	// that client launches editor with some prefilled text items
-	if (!isEdited() && !mLaunchCalendar) {
-		// Not edited at all OR
-		// Only added space characters to text fields but not
-		// edited the non-text items
-		// no need to save the entry
-		return CalenEditorPrivate::ActionNothing;
-	}
-	// new entry is edited
-	if (mNewEntry) {
-		// Subject && Location && Description are text items.
-		// If text items as a whole is not empty, we can save the note
-		// If text items as a whole is empty, we can still save the note
-		// since we edited "non-text" fields
-		if (!nonTextItemsEdited() && areTextItemsEmpty()) {
-			return CalenEditorPrivate::ActionNothing;
-		} else {
-			return CalenEditorPrivate::ActionSave;
-		}
-	}
-	if (areTextItemsCleared() && !nonTextItemsEdited()) {
-		// ***** edited entry + text items emptied + non-text items not edited
-		// Even if user may have edited non-text fields, 
-		// delete the note 
-		return CalenEditorPrivate::ActionDelete;
-	}
-	// Save the note, since the text fields contain something
-	return CalenEditorPrivate::ActionSave;
-}
-
-/*!
-	Returns true if the duration of instances of the meeting is greater than
-	the repeat period of the series, false otherwise.
-	\return true if duration of meeting is greater than repeat period, false
-	otherwise
- */
-bool CalenEditorPrivate::durationGreaterThanRepeatIntervalError() const
-{
-	bool isError = false;
-	switch (mEditedEntry->repeatRule().type()) {
-		case AgendaRepeatRule::DailyRule: {
-			int durationDays =
-			        mEditedEntry->startTime().daysTo(mEditedEntry->endTime());
-			isError = durationDays >= 1;
-		}
-		break;
-		case AgendaRepeatRule::WeeklyRule: {
-			int durationDays =
-			        mEditedEntry->startTime().daysTo(mEditedEntry->endTime());
-			if (mEditedEntry->repeatRule().interval() == 1) {
-				isError = durationDays >= 7;
-			} else {
-				isError = durationDays >= 14;
-			}
-		}
-		break;
-		case AgendaRepeatRule::MonthlyRule: {
-			if (mEditedEntry->endTime()
-			        >= (mEditedEntry->startTime().addMonths(1))) {
-				isError = true;
-			}
-		}
-		break;
-		case AgendaRepeatRule::YearlyRule: {
-			if (mEditedEntry->endTime()
-			        >= (mEditedEntry->startTime().addYears(1))) {
-				isError = true;
-			}
-		}
-		break;
-		default:
-			// Not repeating, no error
-			isError = false;
-			break;
-	}
-	return isError;
-}
-
-/*!
-	Check the alarm fields for errors.
-	\return the error if found, or CalenEditorErrorNone if no error found.
- */
-CalenEditorPrivate::Error CalenEditorPrivate::checkAlarmFieldsForErrors(
-															bool series) const
-{
-	Error error = CalenEditorErrorNone;
-	// If alarm not active, no check
-	if (!mEditedEntry->alarm().isNull()) {
-		int alarm = mEditedEntry->alarm().timeOffset();
-		QDateTime startTime = mEditedEntry->startTime();
-		QDateTime alarmTime;
-		if (alarm > 0) {
-			alarmTime = startTime.addSecs(-alarm * 60);
-		} else {
-			alarmTime = startTime.addSecs(alarm * 60);
-		}
-		QDateTime currentTime = CalenDateUtils::now();
-		if (isAlarmInAcceptablePeriod(error, alarmTime, startTime)) {
-			if (!series && (alarmTime < currentTime)) {
-				// dont let non-repeating future entries have alarms in past
-				error = CalenEditorErrorAlarmTimePast;
-			}
-		}
-	}
-	return error;
-}
-
-/*!
-	Checks if AlarmTime is 31 days from StartTime, 
-	then sets Error to CalenEditorErrorAlarmDateTooManyDaysBeforeNote and
-	returns false
-	Checks if AlarmTime is later StartTime, 
-	then sets Error to CalenEditorErrorAlarmTimeLaterThanNote and returns false
-	\return true if error untouched, false otherwise 
- */
-bool CalenEditorPrivate::isAlarmInAcceptablePeriod(Error &error,
-										const QDateTime &alarmTime,
-										const QDateTime &startTime) const
-{
-	QDateTime upperLimit = startTime;
-
-	QDateTime lowerLimit = startTime.addDays(-31);
-	bool acceptable = true;
-	if (alarmTime < lowerLimit) {
-		acceptable = false;
-		error = CalenEditorErrorAlarmDateTooManyDaysBeforeNote;
-	} else {
-		if (alarmTime > upperLimit) {
-			acceptable = false;
-			error = CalenEditorErrorAlarmTimeLaterThanNote;
-		}
-	}
-	return acceptable;
-}
 
 /*!
 	Handle "Done". Usually saves, but can also delete or do nothing.
@@ -2116,9 +1262,11 @@ bool CalenEditorPrivate::isAlarmInAcceptablePeriod(Error &error,
  */
 CalenEditorPrivate::Action CalenEditorPrivate::handleDone()
 {
-	updateEditedEntry();
+	if (mEditRange == ThisAndAll) {
+		mRepeatField->saveRepeatRule();
+	}
 	// TODO: Need to check entry status here. EntryStillExistsL
-	switch (shouldSaveOrDeleteOrDoNothing()) {
+	switch (mDataHandler->shouldSaveOrDeleteOrDoNothing(mLaunchCalendar)) {
 		case CalenEditorPrivate::ActionSave:
 			if (saveEntry()) {
 				return CalenEditorPrivate::ActionSave;
@@ -2133,53 +1281,6 @@ CalenEditorPrivate::Action CalenEditorPrivate::handleDone()
 			break;
 	}
 	return CalenEditorPrivate::ActionNothing;
-}
-
-/*!
-	Updates the edited entry
- */
-void CalenEditorPrivate::updateEditedEntry()
-{
-	if (mEditRange == ThisAndAll) {
-		// saves repeat type of entry.
-		if (mRepeatRuleType != AgendaRepeatRule::InvalidRule) {
-			AgendaRepeatRule repeatRule(mRepeatRuleType);
-
-			//TODO : Set the repeat from and to dates
-			QVariant dateVariant =
-			        mCustomRepeatUntilItem->contentWidgetData("text");
-			QString dateString = dateVariant.toString();
-			QDate untilDate = QDate::fromString(dateString, "dd/MM/yyyy");
-			repeatRule.setRepeatRuleStart(mEditedEntry->startTime().date());
-			repeatRule.setInterval(1);
-			repeatRule.setUntil(mRepeatUntilDate);
-
-			// need to set the day for weekly & monthly repeat rule.
-			if (mRepeatRuleType == AgendaRepeatRule::WeeklyRule) {
-				QList<AgendaRepeatRule::Day> days;
-				if (mIsBiWeekly) {
-					repeatRule.setInterval(2);
-					mIsBiWeekly = false;
-				}
-				int dayOfWeek = mEditedEntry->startTime().date().dayOfWeek();
-				days.append(AgendaRepeatRule::Day(dayOfWeek - 1));
-				repeatRule.setByDay(days);
-			} else if (mRepeatRuleType == AgendaRepeatRule::MonthlyRule) {
-				QList<int> monthDays;
-				//TODO :
-				int dayNoInMonth = mEditedEntry->startTime().date().day();
-				monthDays.append(dayNoInMonth);
-				repeatRule.setByMonthDay(monthDays);
-			} else if (mRepeatRuleType == AgendaRepeatRule::YearlyRule) {
-				//TODO : Add yearly rule.Check if required.
-			}
-			mEditedEntry->setRepeatRule(repeatRule);
-		} else {
-			mEditedEntry->setRepeatRule( AgendaRepeatRule(
-												AgendaRepeatRule::InvalidRule));
-		}
-		// TODO: Need to update rDates here
-	}
 }
 
 /*!
@@ -2203,7 +1304,7 @@ bool CalenEditorPrivate::saveEntry()
 	}
 
 	CalenEditorPrivate::Error error = CalenEditorPrivate::CalenEditorErrorNone;
-	error = checkErrorsForThisAndAll();
+	error = mDataHandler->checkErrorsForThisAndAll();
 	if (CalenEditorPrivate::CalenEditorErrorNone == error) {
 		if (!handleAllDayToSave()) {
 			if (mNewEntry) {
@@ -2227,7 +1328,7 @@ bool CalenEditorPrivate::saveEntry()
 		}
 		emit q_ptr->entrySaved();
 	} else if (error) {
-		displayErrorMsg(error);
+		mDataHandler->displayErrorMsg(error);
 		return false;
 	}
 	return true;
@@ -2261,87 +1362,6 @@ void CalenEditorPrivate::deleteEntry(bool close)
 				closeEditor();
 			}
 		}
-	}
-
-}
-
-/*!
-	Display the given error msg
- */
-void CalenEditorPrivate::displayErrorMsg(int error)
-{
-	QString errorMsg = QString::Null();
-
-	switch (error) {
-		case CalenEditorPrivate::CalenEditorErrorAlarmTimeLaterThanNote:
-			errorMsg.append( hbTrId(
-						"txt_calendar_dpopinfo_alarm_later_than_note"));
-			break;
-		case CalenEditorPrivate::CalenEditorErrorAlarmTimePast:
-			errorMsg.append( hbTrId(
-						"txt_calendar_dpopinfo_the_time_for_the_note_alarm"));
-			break;
-		case CalenEditorPrivate::CalenEditorErrorAlarmDateTooManyDaysBeforeNote:
-			errorMsg.append( hbTrId(
-						"txt_calendar_dpopinfo_alarm_date_is_too_past"));
-			break;
-		case CalenEditorPrivate::CalenEditorErrorRepeatUntilEarlierThanNote:
-			errorMsg.append( hbTrId(
-						"txt_calendar_dpopinfo_repeat_until_has_to_be_later"));
-			break;
-		case 
-		CalenEditorPrivate::CalenEditorErrorDurationGreaterThanRepeatInterval:
-			dispalyErrorMsgByRepeatType();
-			break;
-		case CalenEditorPrivate::CalenEditorErrorStopTimeEarlierThanStartTime:
-			errorMsg.append( hbTrId(
-						"txt_calendar_dpopinfo_note_ends_before_than_starts"));
-			break;
-		default:
-			break;
-	}
-	if (!errorMsg.isNull()) {
-		HbMessageBox::information(errorMsg);
-	}
-}
-
-/*!
-	Display conflict error message regarding repeat type
- */
-void CalenEditorPrivate::dispalyErrorMsgByRepeatType()
-{
-	QString errorMsg = QString::Null();
-
-	int durationDays =
-	        mEditedEntry->startTime().daysTo(mEditedEntry->endTime());
-	int numDaysEntrySpan = durationDays + 1;
-	// Add the text proper text ids
-	switch (mEditedEntry->repeatRule().type()) {
-		case AgendaRepeatRule::DailyRule:
-			errorMsg.append( hbTrId(
-						"txt_calendar_dpopinfo_l1_day_meeting_cant_daily"));
-			break;
-		case AgendaRepeatRule::WeeklyRule:
-			if (mEditedEntry->repeatRule().interval() == 1) {
-				errorMsg.append( hbTrId(
-						"txt_calendar_dpopinfo_l1_day_meeting_cant_weekly"));
-			} else {
-				errorMsg.append("meeting duration is more than 2 weeks");
-			}
-			break;
-		case AgendaRepeatRule::MonthlyRule:
-			errorMsg.append( hbTrId(
-						"txt_calendar_dpopinfo_l1_day_meeting_cant_monthly"));
-			break;
-		case AgendaRepeatRule::YearlyRule:
-			errorMsg.append( hbTrId(
-						"txt_calendar_dpopinfo_l1_day_meeting_cant_yearly"));
-			break;
-		default:
-			break;
-	}
-	if (!errorMsg.isNull()) {
-		HbMessageBox::information(errorMsg.arg(numDaysEntrySpan));
 	}
 }
 
@@ -2409,5 +1429,37 @@ void CalenEditorPrivate::enableFromTotimeFileds(bool enableFileds,
 	mViewFromItem->enableFromTimeFieldAndSetTime(enableFileds, fromTime);
 	mViewToItem->enableToTimeFieldAndSetTime(enableFileds, toTime);
 
+}
+
+/*!
+ Returns pointer of entyr being edited
+ */
+AgendaEntry* CalenEditorPrivate::editedEntry()
+{
+	return mEditedEntry;
+}
+
+/*!
+ Returns the pointer of original entry
+ */
+AgendaEntry* CalenEditorPrivate::originalEntry()
+{
+	return mOriginalEntry;
+}
+
+/*!
+ Returns true if new entry being created else false
+ */
+bool CalenEditorPrivate::isNewEntry()
+{
+	return mNewEntry;
+}
+
+/*!
+ Returns the pointer of all day check box item
+ */
+HbDataFormModelItem* CalenEditorPrivate::allDayCheckBoxItem()
+{
+	return mAllDayCheckBoxItem;
 }
 // End of file	--Don't remove this.

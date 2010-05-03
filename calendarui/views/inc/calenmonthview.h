@@ -43,6 +43,7 @@ class CalenPreviewPane;
 class CalenDocLoader;
 class CalenThickLinesDrawer;
 class CalenMonthGrid;
+class CalenPluginLabel;
 
 // Constants
 const int KCalenDaysInWeek = 7;
@@ -82,6 +83,7 @@ public:  // From CCalenView
 	void updateModelWithFutureMonth();
 	void populatePreviewPane(QDateTime &dateTime);
 	void handlePreviewPaneGesture(bool rightGesture);
+	QDateTime firstDayOfGrid();
 	
 private:
 	void createGrid();
@@ -99,7 +101,9 @@ private:
 	void addWeekNumbers();
 	void removeWeekNumbers();
 	void addBackgroundFrame();
-	
+	void refreshViewOnGoToDate();
+	void showHideRegionalInformation();
+	void onContextChanged();
 	
 private slots:
 	void createEditor();
@@ -107,6 +111,7 @@ private slots:
 	void updateMonthDataArrayWithActiveDates();
 	void handleLeftEffectCompleted(const HbEffect::EffectStatus &status);
 	void handleRightEffectCompleted(const HbEffect::EffectStatus &status);
+	void addRemoveActionsInMenu();
 	
 public slots:
 	void launchDayView();
@@ -118,8 +123,14 @@ private:
 	CalenThickLinesDrawer *mDayNameWidget;
 	CalenMonthGrid *mMonthGrid;
 	HbWidget* mPrevPaneParent;
+	HbWidget* mPrevPaneLayoutWidget;
+	QGraphicsLinearLayout* mPrevPaneLayout;
 	HbWidget* mCurrPaneParent;
+	HbWidget* mCurrPaneLayoutWidget;
+	QGraphicsLinearLayout* mCurrPaneLayout;
 	HbWidget* mNextPaneParent;
+	HbWidget* mNextPaneLayoutWidget;
+	QGraphicsLinearLayout* mNextPaneLayout;
 	CalenPreviewPane* mCurrPreviewPane;
 	CalenPreviewPane* mPrevPreviewPane;
 	CalenPreviewPane* mNextPreviewPane;
@@ -158,6 +169,10 @@ private:
 	AgendaUtil *mAgendaUtil;
 	bool mIsPrevPaneGesture;
 	HbAction *mGoToTodayAction;
+	CalenPluginLabel *mPrevRegionalInfo;
+	CalenPluginLabel *mCurrRegionalInfo;
+	CalenPluginLabel *mNextRegionalInfo;
+	HbMenu *mDeleteSubMenu;
 };
 
 #endif //CALENMONTHVIEW_H

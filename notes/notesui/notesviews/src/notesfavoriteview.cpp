@@ -17,7 +17,6 @@
 */
 
 // System includes
-#include <QDebug>
 #include <QDateTime>
 #include <HbListView>
 #include <HbListWidget>
@@ -59,11 +58,7 @@ NotesFavoriteView::NotesFavoriteView(QGraphicsWidget *parent)
  mSelectedItem(0),
  mDeleteAction(0)
 {
-	qDebug() << "notes: NotesFavoriteView::NotesFavoriteView -->";
-
 	// Nothing yet.
-
-	qDebug() << "notes: NotesFavoriteView::NotesFavoriteView <--";
 }
 
 /*!
@@ -71,14 +66,11 @@ NotesFavoriteView::NotesFavoriteView(QGraphicsWidget *parent)
  */
 NotesFavoriteView::~NotesFavoriteView()
 {
-	qDebug() << "notes: NotesFavoriteView::~NotesFavoriteView -->";
-
 	if (mDocLoader) {
 	    delete mDocLoader;
 	    mDocLoader = 0;
     }
 
-	qDebug() << "notes: NotesFavoriteView::~NotesFavoriteView <--";
 }
 
 /*!
@@ -91,8 +83,6 @@ NotesFavoriteView::~NotesFavoriteView()
 void NotesFavoriteView::setupView(
 		NotesAppControllerIf &controllerIf, NotesDocLoader *docLoader)
 {
-	qDebug() << "notes: NotesMainView::setupView -->";
-
 	mDocLoader = docLoader;
 	mAppControllerIf = &controllerIf;
 	mNotesModel = mAppControllerIf->notesModel();
@@ -157,7 +147,9 @@ void NotesFavoriteView::setupView(
 			window, SIGNAL(orientationChanged(Qt::Orientation)),
 			this, SLOT(handleOrientationChanged(Qt::Orientation)));
 
-	qDebug() << "notes: NotesMainView::setupView <--";
+	// Set the graphics size for the icons.
+	HbListViewItem *prototype = mListView->listItemPrototype();
+	prototype->setGraphicsSize(HbListViewItem::SmallIcon);
 }
 
 /*!
@@ -166,16 +158,12 @@ void NotesFavoriteView::setupView(
  */
 void NotesFavoriteView::createNewNote()
 {
-	qDebug() << "notes: NotesFavoriteView::createNewNote -->";
-
 	// Here we Display an editor to the use to enter text.
 	mNotesEditor = new NotesEditor(mAgendaUtil, this);
 	connect(
 			mNotesEditor, SIGNAL(editingCompleted(bool)),
 			this, SLOT(handleEditingCompleted(bool)));
 	mNotesEditor->create(NotesEditor::CreateNote);
-
-	qDebug() << "notes: NotesFavoriteView::createNewNote <--";
 }
 
 /*!
@@ -188,12 +176,8 @@ void NotesFavoriteView::createNewNote()
  */
 void NotesFavoriteView::handleItemReleased(const QModelIndex &index)
 {
-	qDebug() << "notes: NotesFavoriteView::handleItemReleased -->";
-
 	// Sanity check.
 	if (!index.isValid()) {
-		qDebug() << "notes: NotesFavoriteView::handleItemReleased <--";
-
 		return;
 	}
 
@@ -202,8 +186,6 @@ void NotesFavoriteView::handleItemReleased(const QModelIndex &index)
 	ulong noteId = index.data(NotesNamespace::IdRole).value<qulonglong>();
 
 	if (0 >= noteId) {
-		qDebug() << "notes: NotesFavoriteView::handleItemReleased <--";
-
 		// Something wrong.
 		return;
 	}
@@ -212,7 +194,6 @@ void NotesFavoriteView::handleItemReleased(const QModelIndex &index)
 	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
 
 	if (entry.isNull()) {
-		qDebug() << "notes: NotesFavoriteView::handleItemReleased <--";
 
 		// Entry invalid.
 		return;
@@ -224,8 +205,6 @@ void NotesFavoriteView::handleItemReleased(const QModelIndex &index)
 			mNotesEditor, SIGNAL(editingCompleted(bool)),
 			this, SLOT(handleEditingCompleted(bool)));
 	mNotesEditor->edit(entry);
-
-	qDebug() << "notes: NotesFavoriteView::handleItemReleased <--";
 }
 
 /*!
@@ -239,8 +218,6 @@ void NotesFavoriteView::handleItemReleased(const QModelIndex &index)
 void NotesFavoriteView::handleItemLongPressed(
 		HbAbstractViewItem *item, const QPointF &coords)
 {
-	qDebug() << "notes: NotesFavoriteView::handleItemLongPressed -->";
-
 	mSelectedItem = item;
 
 	// Get the entry of the selected item.
@@ -252,6 +229,12 @@ void NotesFavoriteView::handleItemLongPressed(
 	HbMenu *contextMenu = new HbMenu();
 
 	// Add actions to the context menu.
+	mOpenAction =
+			contextMenu->addAction(hbTrId("txt_common_menu_open"));
+	connect(
+			mOpenAction, SIGNAL(triggered()),
+			this, SLOT(openNote()));
+
 	mDeleteAction =
 			contextMenu->addAction(hbTrId("txt_common_menu_delete"));
 	connect(
@@ -275,8 +258,6 @@ void NotesFavoriteView::handleItemLongPressed(
 
 	// Show the menu.
 	contextMenu->exec(coords);
-
-	qDebug() << "notes: NotesFavoriteView::handleItemLongPressed <--";
 }
 
 /*!
@@ -284,30 +265,22 @@ void NotesFavoriteView::handleItemLongPressed(
  */
 void NotesFavoriteView::deleteNote()
 {
-	qDebug() << "notes: NotesFavoriteView::deleteNote -->";
-
 	Q_ASSERT(mSelectedItem);
 
 	QModelIndex index = mSelectedItem->modelIndex();
 	if (!index.isValid()) {
-		qDebug() << "notes: NotesFavoriteView::deleteNote <--";
-
 		return;
 	}
 	ulong entryId =
 			index.data(NotesNamespace::IdRole).value<qulonglong>();
 	if (!entryId) {
-		qDebug() << "notes: NotesFavoriteView::deleteNote <--";
-
 		return;
 	}
 
-	// Delete the given note.
-	mAgendaUtil->deleteEntry(entryId);
+	// Emit the signal.Deletion would happen in view manager.
+	emit deleteEntry(entryId);
 
 	mSelectedItem = 0;
-
-	qDebug() << "notes: NotesFavoriteView::deleteNote <--";
 }
 
 /*!
@@ -315,8 +288,6 @@ void NotesFavoriteView::deleteNote()
  */
 void NotesFavoriteView::markNoteAsNotFavourite()
 {
-	qDebug() << "notes : NotesFavoriteView::markNoteAsNotFavourite -->";
-
 	ulong noteId = mSelectedItem->modelIndex().data(
 			NotesNamespace::IdRole).value<qulonglong>();
 	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
@@ -325,8 +296,6 @@ void NotesFavoriteView::markNoteAsNotFavourite()
 		entry.setFavourite(0);
 	}
 	mAgendaUtil->updateEntry(entry);
-
-	qDebug() << "notes : NotesFavoriteView::markNoteAsNotFavourite <--";
 }
 
 /*!
@@ -334,28 +303,21 @@ void NotesFavoriteView::markNoteAsNotFavourite()
  */
 void NotesFavoriteView::markNoteAsTodo()
 {
-	qDebug() << "notes : NotesFavoriteView::markNoteAsTodo -->";
-
 	Q_ASSERT(mSelectedItem);
 
 	QModelIndex index = mSelectedItem->modelIndex();
 	if (!index.isValid()) {
-		qDebug() << "notes: NotesFavoriteView::markNoteAsTodo <--";
 
 		return;
 	}
 	ulong noteId = index.data(NotesNamespace::IdRole).value<qulonglong> ();
 	if (!noteId) {
-		qDebug() << "notes: NotesFavoriteView::markNoteAsTodo <--";
-
 		return;
 	}
 	// Get the entry details.
 	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
 
 	if (entry.isNull()) {
-		qDebug() << "notes: NotesFavoriteView::markNoteAsTodo <--";
-
 		// Entry invalid.
 		return;
 	}
@@ -365,7 +327,10 @@ void NotesFavoriteView::markNoteAsTodo()
 	entry.setType(AgendaEntry::TypeTodo);
 
 	QDateTime dueDateTime;
-	dueDateTime.setDate(QDate::currentDate());
+	QDate currentDate(QDate::currentDate());
+	dueDateTime.setDate(
+			QDate(currentDate.year(),currentDate.month(),currentDate.day()+1));
+
 	dueDateTime.setTime(QTime::fromString("12:00 am", "hh:mm ap"));
 
 	entry.setStartAndEndTime(dueDateTime, dueDateTime);
@@ -387,8 +352,6 @@ void NotesFavoriteView::markNoteAsTodo()
 
 	// Delete the old entry.
 	mAgendaUtil->deleteEntry(entry.id());
-
-	qDebug() << "notes : NotesFavoriteView::markNoteAsTodo <--";
 }
 
 /*!
@@ -400,14 +363,10 @@ void NotesFavoriteView::markNoteAsTodo()
  */
 void NotesFavoriteView::handleEditingCompleted(bool status)
 {
-	qDebug() << "notes: NotesFavoriteView::handleEditingCompleted -->";
-
 	Q_UNUSED(status)
 
 	// Cleanup.
 	mNotesEditor->deleteLater();
-
-	qDebug() << "notes: NotesFavoriteView::handleEditingCompleted <--";
 }
 
 /*!
@@ -415,12 +374,8 @@ void NotesFavoriteView::handleEditingCompleted(bool status)
  */
 void NotesFavoriteView::displayCollectionView()
 {
-	qDebug() << "notes: NotesFavoriteView::displayCollectionView -->";
-
 	// Switch to collections view.
 	mAppControllerIf->switchToView(NotesNamespace::NotesCollectionViewId);
-
-	qDebug() << "notes: NotesFavoriteView::displayCollectionView <--";
 }
 
 /*!
@@ -428,12 +383,8 @@ void NotesFavoriteView::displayCollectionView()
  */
 void NotesFavoriteView::displayAllNotesView()
 {
-	qDebug() << "notes: NotesFavoriteView::displayAllNotesView -->";
-
 	// Switch to collections view.
 	mAppControllerIf->switchToView(NotesNamespace::NotesMainViewId);
-
-	qDebug() << "notes: NotesFavoriteView::displayAllNotesView <--";
 }
 
 /*!
@@ -441,11 +392,7 @@ void NotesFavoriteView::displayAllNotesView()
  */
 void NotesFavoriteView::handleActionStateChanged()
 {
-	qDebug() << "notes: NotesFavoriteView::handleActionStateChanged -->";
-
 	mAllNotesAction->setChecked(true);
-
-	qDebug() << "notes: NotesFavoriteView::handleActionStateChanged <--";
 }
 
 /*!
@@ -460,20 +407,28 @@ void NotesFavoriteView::handleOrientationChanged(Qt::Orientation orientation)
 
 	if (Qt::Horizontal == orientation) {
 		prototype->setStretchingStyle(HbListViewItem::StretchLandscape);
-
-		// Set the text in landscape mode
-		mAllNotesAction->setText(hbTrId("txt_notes_button_all"));
-		mViewCollectionAction->setText(hbTrId("txt_notes_button_collections"));
-		mAddNoteAction->setText(hbTrId("txt_notes_button_new_note"));
 	} else {
 		prototype->setStretchingStyle(HbListViewItem::NoStretching);
-
-		// Set empty text in portriat mode so that only icons are visible.
-		mAllNotesAction->setText("");
-		mViewCollectionAction->setText("");
-		mAddNoteAction->setText("");
 	}
 }
 
+/*
+	Opens the notes editor to edit the favorite note.
+ */
+void NotesFavoriteView::openNote()
+{
+	ulong noteId = mSelectedItem->modelIndex().data(
+			NotesNamespace::IdRole).value<qulonglong>();
+	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
+
+	// Construct notes editor.
+	mNotesEditor = new NotesEditor(mAgendaUtil, this);
+	connect(
+			mNotesEditor, SIGNAL(editingCompleted(bool)),
+			this, SLOT(handleEditingCompleted(bool)));
+
+	// Launch the notes editor with the obtained info.
+	mNotesEditor->edit(entry);
+}
 // End of file	--Don't remove this.
 

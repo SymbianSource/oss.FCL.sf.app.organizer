@@ -109,11 +109,11 @@ private:
     HbDeviceDialog *mDeviceDialog;
     
     /**
-     * @var mIsClockAlarm
-     * @brief Tells if the current alert being displayed
-     * is a clock (true) or calendar alert (false)
+     * @var mAlarmAlertType
+     * @brief Tells if the type of alert being displayed
+     * is a clock /calendar/to-do alert
      */
-    bool mIsClockAlarm;
+    int mAlarmAlertType;
     
     /**
      * @var mCanSnooze
@@ -128,6 +128,12 @@ private:
      * @brief Indicates if the alarm is silent or not
      */
     bool mIsSilent;
+    
+    /**
+     * @var mIsTimedAlarm
+     * @brief Indicates if the alarm has time info or not
+     */
+    bool mIsTimedAlarm;
     
     /**
      * @var mObserver

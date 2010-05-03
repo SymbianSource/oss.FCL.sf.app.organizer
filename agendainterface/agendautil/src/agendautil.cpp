@@ -390,8 +390,30 @@ void AgendaUtil::getNextInstanceTimes(AgendaEntry& entry,
 	 }
 }
 
+void AgendaUtil::markDatesWithEvents(QDateTime rangeStart, QDateTime rangeEnd,
+						 AgendaUtil::FilterFlags filter, QList<QDate>& dates)
+{
+	if(d) {
+		return d->markDatesWithEvents(rangeStart,rangeEnd,filter,dates);
+	 }
+}
+
 /*!
-    Returns the lower range limit of the time supported by the underlying platform for calendar entries
+	 Returns true if there are no entries in the database else returns false
+	 
+	 \return bool 
+ */
+bool AgendaUtil::areNoEntriesInCalendar()
+{
+	if(d) {
+		return d->areNoEntriesInCalendar();
+	 }
+	return false;
+}
+
+/*!
+    Returns the lower range limit of the time supported by the 
+    underlying platform for calendar entries
 
     \return QDateTime   Lower range time
 */
@@ -401,7 +423,8 @@ QDateTime AgendaUtil::minTime()
 }
 
 /*!
-    Returns the upper range limit of the time supported by the underlying platform for calendar entries
+    Returns the upper range limit of the time supported by the 
+    underlying platform for calendar entries
 
     \return QDateTime   Upper range time
 */
@@ -410,6 +433,15 @@ QDateTime AgendaUtil::maxTime()
      return AgendaUtilPrivate::maxTime();
  }
 
+/*!
+    Returns true if entry repeats on workdays else false
+
+    \return true if entry repeats on workdays else false
+ */
+bool AgendaUtil::isWorkdaysRepeatingEntry(const AgendaRepeatRule& repeatRule)
+{
+	return AgendaUtilPrivate::isWorkdaysRepeatingEntry(repeatRule);
+}
 /*!
     \fn void XQMedia::entriesChanged(QList<ulong> ids)
 

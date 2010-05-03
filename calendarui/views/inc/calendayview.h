@@ -87,13 +87,10 @@ public:
      */
     CALENDAYVIEW_EXPORT CalenDocLoader* docLoader();
 
-    
     /**
-     * @brief Called from the content widget to indicate if the day
-     * has any events or not
-     * @param yes true if day has events, false otherwise
-     */
-    void hasEvents(bool yes);
+	 * @brief Refreshes the view with the date set in the context
+	 */
+    void refreshViewOnGoToDate();
     
 protected:
     
@@ -162,12 +159,6 @@ private:
 	 */
 	HbAction *mGoToTodayAction;
 	
-	/**
-	 * @var mDeleteAction
-	 * Action which provides "Delete" functionality
-	 */
-	HbAction *mDeleteAction;
-	   
     // TODO: Remove these after gestures are available
     QPointF mTapPoint;
     bool mActionTaken;

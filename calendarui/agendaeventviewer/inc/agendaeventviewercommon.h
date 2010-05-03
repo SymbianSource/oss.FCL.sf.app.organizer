@@ -28,6 +28,7 @@
 #define AGENDA_EVENT_VIEWER_SUBJECT_WIDGET		"subjectWidget"
 #define AGENDA_EVENT_VIEWER_DATE_TIME_WIDGET	"dateTimeWidget"
 #define AGENDA_EVENT_VIEWER_LOCATION_WIDGET		"locationWidget"
+#define AGENDA_EVENT_VIEWER_MAPTILE_WIDGET      "maptileWidget"
 #define AGENDA_EVENT_VIEWER_REMINDER_WIDGET		"reminderWidget"
 #define AGENDA_EVENT_VIEWER_REPEAT_WIDGET		"repeatWidget"
 #define AGENDA_EVENT_VIEWER_DESCRIPTION_WIDGET	"descriptionWidget"

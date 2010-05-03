@@ -38,6 +38,7 @@ private slots:
 	void init();
 	void cleanup();
 	void initTestCase();
+	void cleanupTestCase();
 	
 	// Test cases.
 	void test_addEntry();
@@ -50,13 +51,7 @@ private slots:
 	void test_fetchAllEntries();
 	void test_deleteEntries();
 	void test_fetchEntriesInRange();
-	void test_createException();
-	void test_storeRepeatingEntries();
-	void test_setCompleted();
-	void test_clearRepeatingEntries();
-	void test_getNextInstanceTimes();
-	void test_getPreviousInstanceTimes();
-	
+
 private:
 	AgendaUtil *mAgendaUtil;
 	CActiveSchedulerWait* mWait;
@@ -73,7 +68,7 @@ private:
  */
 void TestAgendaUtil::init()
 {
-	QT_TRAP_THROWING(mAgendaUtil = new AgendaUtil);
+	/*QT_TRAP_THROWING(mAgendaUtil = new AgendaUtil);
 
 	Q_ASSERT_X(mAgendaUtil, "TestAgendaUtil::test_addEntry", "No agendautil");
 	
@@ -82,7 +77,7 @@ void TestAgendaUtil::init()
 			mAgendaUtil, SIGNAL(entriesDeleted(int)), this,
 			SLOT(handleEntriesDeletion(int)));
 
-	mWait = NULL;
+	mWait = NULL;*/
 }
 
 /*!
@@ -90,14 +85,13 @@ void TestAgendaUtil::init()
  */
 void TestAgendaUtil::cleanup()
 {
-	if (mAgendaUtil) {
-		delete mAgendaUtil;
-	}
-
-	if (mWait && mWait->IsStarted()) {
-		mWait->AsyncStop();
-	}
-	delete mWait;
+		
+	//User::Exit(0);
+    if (mWait && mWait->IsStarted()) {
+                mWait->AsyncStop();
+    }
+    delete mWait;
+    mWait = NULL;
 }
 /*!
 	This function is called to init the testcase.
@@ -116,6 +110,14 @@ void TestAgendaUtil::initTestCase()
 	mWait = NULL;
 }
 
+void TestAgendaUtil::cleanupTestCase()
+{
+    //User::Exit(0);
+    QCoreApplication::processEvents();
+    if (mAgendaUtil) {
+            delete mAgendaUtil;
+    }
+}
 /*
 	Tests the AgendaUtil::addEntry.
  */
@@ -180,8 +182,10 @@ void TestAgendaUtil::test_deleteRepeatedEntry()
 			QDateTime::currentDateTime());
 	AgendaRepeatRule repeatRule;
 	repeatRule.setType(AgendaRepeatRule::DailyRule);
-	repeatRule.setRepeatRuleStart(QDate(2019, 11, 3));
-	repeatRule.setUntil(QDate(2019, 12, 3));
+	QDateTime ruleStartDateTime(QDate(2019, 11, 3));
+	repeatRule.setRepeatRuleStart(ruleStartDateTime);
+	QDateTime until(QDate(2019, 12, 3));
+	repeatRule.setUntil(until);
 	repeatRule.setInterval(1);
 	entry.setRepeatRule(repeatRule);
 	
@@ -552,6 +556,10 @@ void TestAgendaUtil::test_fetchEntriesInRange()
 	// Verify
 	int num = entries.count();                             
 	QVERIFY( 1 == entries.count());
+	
+	//cleanup();
+	
+	//User::Exit(0);
 }
 
 /*!
@@ -564,273 +572,6 @@ void TestAgendaUtil::handleEntriesDeletion(int error)
 		mWait->AsyncStop();
 	}
 	QVERIFY(!error);
-}
-
-/*!
-	Test the api AgendaUtil::createException.
- */
-void TestAgendaUtil::test_createException()
-{
-	// Clean up all the entries.
-	QDateTime startRange(QDate(1900, 01, 1), QTime(0, 0, 0, 0));
-	QDateTime endRange(QDate(2100, 12, 30), QTime(23, 59, 59, 0));
-	mAgendaUtil->deleteEntries(startRange,endRange);
-
-	// Start the timer as the above operation is asynchronous   
-	if (!mWait) {
-		QT_TRAP_THROWING(mWait = new (ELeave) CActiveSchedulerWait;);
-		if (!mWait->IsStarted()) {
-			mWait->Start();
-		}
-	}
-	
-	// Test case setup.
-	// Create a repeating entry.
-	AgendaEntry entry;
-	QDate dateSet(2010, 05, 05);
-	QDate repeatUntilDate(2010, 05, 15);
-	QDateTime exceptionEntryDate(QDate(2010, 05, 15), QTime(0, 0, 0, 0));
-	QTime timeSet(10, 10, 10, 10);
-	QDateTime startDateTimeSet(dateSet,timeSet);
-	QDateTime endDateTimeSet = startDateTimeSet.addSecs(60*60);
-	entry.setType(AgendaEntry::TypeEvent);
-	entry.setSummary("parent");
-	AgendaRepeatRule repeatRule;
-	repeatRule.setType(AgendaRepeatRule::DailyRule);
-	repeatRule.setRepeatRuleStart(dateSet);
-	repeatRule.setInterval(1);
-	repeatRule.setUntil(repeatUntilDate);
-	entry.setRepeatRule(repeatRule);
-	entry.setStartAndEndTime(startDateTimeSet, endDateTimeSet);
-	
-	ulong id = mAgendaUtil->addEntry(entry);
-	
-	// Get the instance
-	QList<AgendaEntry> entriesList;
-	entriesList.append(mAgendaUtil->createEntryIdListForDay(exceptionEntryDate));
-	
-	AgendaEntry exceptionEntry = entriesList.at(0);
-	// Make some changes to make it exception
-	exceptionEntry.setSummary("child");
-	mAgendaUtil->createException(exceptionEntry);
-	
-	// Fetch the parent and child entry and check for changes.
-	entriesList.clear();													
-	entriesList.append(mAgendaUtil->createEntryIdListForDay(exceptionEntryDate));													
-	AgendaEntry parentEntry = mAgendaUtil->fetchById(id);               
-	QVERIFY(parentEntry.summary() == "parent");												
-	QVERIFY(entriesList[0].summary() == "child");
-}
-
-/*!
-	Test the api AgendaUtil::storeRepeatingEntries.
- */
-void TestAgendaUtil::test_storeRepeatingEntries()
-{
-	// Clean up all the entries.
-	QDateTime startRange(QDate(1900, 01, 1), QTime(0, 0, 0, 0));
-	QDateTime endRange(QDate(2100, 12, 30), QTime(23, 59, 59, 0));
-	mAgendaUtil->deleteEntries(startRange,endRange);
-
-	// Start the timer as the above operation is asynchronous   
-	if (!mWait) {
-		QT_TRAP_THROWING(mWait = new (ELeave) CActiveSchedulerWait;);
-		if (!mWait->IsStarted()) {
-			mWait->Start();
-		}
-	}
-	
-	// Test case setup.
-	// Create a repeating entry.
-	AgendaEntry entry;
-	QDate dateSet(2010, 05, 05);
-	QDate repeatUntilDate(2010, 05, 15);
-	QDateTime instanceEntryDate(QDate(2010, 05, 15), QTime(0, 0, 0, 0));
-	QTime timeSet(10, 10, 10, 10);
-	QDateTime startDateTimeSet(dateSet,timeSet);
-	QDateTime endDateTimeSet = startDateTimeSet.addSecs(60*60);
-	entry.setType(AgendaEntry::TypeEvent);
-	entry.setSummary("subject");
-	AgendaRepeatRule repeatRule;
-	repeatRule.setType(AgendaRepeatRule::DailyRule);
-	repeatRule.setRepeatRuleStart(dateSet);
-	repeatRule.setInterval(1);
-	repeatRule.setUntil(repeatUntilDate);
-	entry.setRepeatRule(repeatRule);
-	entry.setStartAndEndTime(startDateTimeSet, endDateTimeSet);
-	
-	ulong id = mAgendaUtil->addEntry(entry);
-	
-	// Fetch the repeating entry.
-	AgendaEntry  repeatingEntry = mAgendaUtil->fetchById(id);
-	
-	// Make some changes and store it back.
-	repeatingEntry.setSummary("changedsubject");
-	repeatingEntry.setLocation("addedlocation");
-	mAgendaUtil->storeRepeatingEntry(repeatingEntry, true);
-	
-	QList<AgendaEntry> entriesList(mAgendaUtil->createEntryIdListForDay(instanceEntryDate));
-	
-	// Check for the changes.
-	QVERIFY(entriesList[0].summary() == "changedsubject");
-	QVERIFY(entriesList[0].location() == "addedlocation");
-}
-
-/*!
-	Test the api AgendaUtil::setCompleted.
- */
-void TestAgendaUtil::test_setCompleted()
-{
-	// Clean up all the entries.
-	QDateTime startRange(QDate(1900, 01, 1), QTime(0, 0, 0, 0));
-	QDateTime endRange(QDate(2100, 12, 30), QTime(23, 59, 59, 0));
-	mAgendaUtil->deleteEntries(startRange,endRange);
-
-	// Start the timer as the above operation is asynchronous
-	if (!mWait) {
-		QT_TRAP_THROWING(mWait = new (ELeave) CActiveSchedulerWait;);
-		if (!mWait->IsStarted()) {
-			mWait->Start();
-		}
-	}
-	
-	// Create a todo.
-	AgendaEntry todo;
-	todo.setType(AgendaEntry::TypeTodo);
-	todo.setSummary("todo");
-	
-	ulong id = mAgendaUtil->addEntry(todo);
-	
-	// Fetch the todo back.
-	AgendaEntry fetchedToDo = mAgendaUtil->fetchById(id);
-	QDate completedDate(2010, 05, 05);
-	QTime completedTime(10, 10, 10);
-	QDateTime completedDateTime(completedDate, completedTime);
-	
-	// Mark it as completed.
-	mAgendaUtil->setCompleted(fetchedToDo, true, completedDateTime);
-	
-	// Check if there is only one completed ToDo and Zero Incompleted ToDo.
-	QList<AgendaEntry> entries = mAgendaUtil->fetchAllEntries(AgendaUtil::IncludeCompletedTodos);
-	QVERIFY(entries.count() == 1);
-	QVERIFY(entries[0].summary() == "todo");
-	entries.clear();
-	entries.append(mAgendaUtil->fetchAllEntries(AgendaUtil::IncludeIncompletedTodos));
-	QVERIFY(entries.count() == 0);
-}
-
-/*!
-	Test the api AgendaUtil::getNextInstanceTimes.
- */
-void TestAgendaUtil::test_getNextInstanceTimes()
-{
-	// Clean up all the entries.
-	QDateTime startRange(QDate(1900, 01, 1), QTime(0, 0, 0, 0));
-	QDateTime endRange(QDate(2100, 12, 30), QTime(23, 59, 59, 0));
-	mAgendaUtil->deleteEntries(startRange,endRange);
-
-	// Start the timer as the above operation is asynchronous   
-	if (!mWait) {
-		QT_TRAP_THROWING(mWait = new (ELeave) CActiveSchedulerWait;);
-		if (!mWait->IsStarted()) {
-			mWait->Start();
-		}
-	}
-
-	// Test case setup.
-	AgendaEntry entry;
-	QDate dateSet(2010, 05, 05);
-	QDate repeatUntilDate(2010, 05, 15);
-	QTime timeSet(10, 10, 10, 10);
-	QDateTime startDateTimeSet(dateSet,timeSet);
-	QDateTime endDateTimeSet = startDateTimeSet.addSecs(60*60);
-	entry.setType(AgendaEntry::TypeEvent);
-	entry.setSummary("createdentry");
-	AgendaRepeatRule repeatRule;
-	repeatRule.setType(AgendaRepeatRule::DailyRule);
-	repeatRule.setRepeatRuleStart(dateSet);
-	repeatRule.setInterval(1);
-	repeatRule.setUntil(repeatUntilDate);
-	entry.setRepeatRule(repeatRule);
-	entry.setStartAndEndTime(startDateTimeSet, endDateTimeSet);
-
-	ulong id = mAgendaUtil->addEntry(entry);
-
-	QDateTime startDateTime;
-	QDateTime endDateTime;
-
-	// Check for a date in between first and last instance.
-	QDateTime referenceDateTime(QDate(2010, 05, 8), QTime(0, 0, 0, 0));
-	QList<AgendaEntry> entriesList = mAgendaUtil->createEntryIdListForDay(referenceDateTime);
-	mAgendaUtil->getNextInstanceTimes(entriesList[0], startDateTime, endDateTime);
-
-	QVERIFY(startDateTime.date().day() == 9);
-	QVERIFY(startDateTime.date().month() == 5);
-	QVERIFY(endDateTime.date().day() == 9);
-	QVERIFY(endDateTime.date().month() == 5);
-	QVERIFY(startDateTime.time().hour() == 10);
-	QVERIFY(startDateTime.time().minute() == 10);
-	QVERIFY(endDateTime.time().hour() == 11);
-	QVERIFY(endDateTime.time().minute() == 10);
-	
-	// TODO: Need to check for the boundary condition.
-}
-
-/*!
-	Test the api AgendaUtil::getPreviousInstanceTimes.
- */
-void TestAgendaUtil::test_getPreviousInstanceTimes()
-{
-	// Clean up all the entries.
-	QDateTime startRange(QDate(1900, 01, 1), QTime(0, 0, 0, 0));
-	QDateTime endRange(QDate(2100, 12, 30), QTime(23, 59, 59, 0));
-	mAgendaUtil->deleteEntries(startRange,endRange);
-
-	// Start the timer as the above operation is asynchronous   
-	if (!mWait) {
-		QT_TRAP_THROWING(mWait = new (ELeave) CActiveSchedulerWait;);
-		if (!mWait->IsStarted()) {
-			mWait->Start();
-		}
-	}
-
-	// Test case setup.
-	AgendaEntry entry;
-	QDate dateSet(2010, 05, 05);
-	QDate repeatUntilDate(2010, 05, 15);
-	QTime timeSet(10, 10, 10, 10);
-	QDateTime startDateTimeSet(dateSet,timeSet);
-	QDateTime endDateTimeSet = startDateTimeSet.addSecs(60*60);
-	entry.setType(AgendaEntry::TypeEvent);
-	entry.setSummary("createdentry");
-	AgendaRepeatRule repeatRule;
-	repeatRule.setType(AgendaRepeatRule::DailyRule);
-	repeatRule.setRepeatRuleStart(dateSet);
-	repeatRule.setInterval(1);
-	repeatRule.setUntil(repeatUntilDate);
-	entry.setRepeatRule(repeatRule);
-	entry.setStartAndEndTime(startDateTimeSet, endDateTimeSet);
-
-	ulong id = mAgendaUtil->addEntry(entry);
-	
-	QDateTime startDateTime;
-	QDateTime endDateTime;
-	
-	// Check for a date in between first and last instance.
-	QDateTime referenceDateTime(QDate(2010, 05, 8), QTime(0, 0, 0, 0));
-	QList<AgendaEntry> entriesList = mAgendaUtil->createEntryIdListForDay(referenceDateTime);
-	mAgendaUtil->getPreviousInstanceTimes(entriesList[0], startDateTime, endDateTime);
-	
-	QVERIFY(startDateTime.date().day() == 7);
-	QVERIFY(startDateTime.date().month() == 5);
-	QVERIFY(endDateTime.date().day() == 7);
-	QVERIFY(endDateTime.date().month() == 5);
-	QVERIFY(startDateTime.time().hour() == 10);
-	QVERIFY(startDateTime.time().minute() == 10);
-	QVERIFY(endDateTime.time().hour() == 11);
-	QVERIFY(endDateTime.time().minute() == 10);
-	
-	// TODO: Need to check for the boundary condition.
 }
 
 /*!
@@ -878,59 +619,6 @@ int TestAgendaUtil::createMultipleEntries()
 	numOfEntries++;
 
 	return numOfEntries;
-}
-
-/*!
-	Test the api AgendaUtil::clearRepeatingEntries.
- */
-void TestAgendaUtil::test_clearRepeatingEntries()
-{
-	// TODO : Test case failing. Need to relook into this.
-	
-	/*// Clean up all the entries.
-	QDateTime startRange(QDate(1900, 01, 1), QTime(0, 0, 0, 0));
-	QDateTime endRange(QDate(2100, 12, 30), QTime(23, 59, 59, 0));
-	mAgendaUtil->deleteEntries(startRange,endRange);
-
-	// Start the timer as the above operation is asynchronous   
-	if (!mWait) {
-		QT_TRAP_THROWING(mWait = new (ELeave) CActiveSchedulerWait;);
-		if (!mWait->IsStarted()) {
-			mWait->Start();
-		}
-	}
-	
-	// Test case setup.
-	AgendaEntry entry;
-	QDate dateSet(2010, 05, 05);
-	QDate repeatUntilDate(2010, 05, 15);
-	QDateTime exceptionEntryDate(QDate(2010, 05, 15), QTime(0, 0, 0, 0));
-	QTime timeSet(10, 10, 10, 10);
-	QDateTime startDateTimeSet(dateSet,timeSet);
-	QDateTime endDateTimeSet = startDateTimeSet.addSecs(60*60);
-	entry.setType(AgendaEntry::TypeEvent);
-	entry.setSummary("createdentry");
-	AgendaRepeatRule repeatRule;
-	repeatRule.setType(AgendaRepeatRule::DailyRule);
-	repeatRule.setRepeatRuleStart(dateSet);
-	repeatRule.setInterval(1);
-	repeatRule.setUntil(repeatUntilDate);
-	entry.setRepeatRule(repeatRule);
-	entry.setStartAndEndTime(startDateTimeSet, endDateTimeSet);
-
-	ulong id = mAgendaUtil->addEntry(entry);
-	
-	// Fetch the stored entry.
-	AgendaEntry fetchedEntry = mAgendaUtil->fetchById(id);
-	QVERIFY(fetchedEntry.isRepeating() == true);
-	
-	// Clear repeating properties.
-	mAgendaUtil->clearRepeatingProperties(fetchedEntry);
-	QList<AgendaEntry> entries = mAgendaUtil->fetchAllEntries(AgendaUtil::IncludeAll);
-	int count = entries.count();
-	// Check if it is non-repeating now.
-	fetchedEntry = mAgendaUtil->fetchById(id);
-	QVERIFY(fetchedEntry.isRepeating() == false);*/
 }
 
 QTEST_MAIN(TestAgendaUtil)
