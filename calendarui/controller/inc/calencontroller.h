@@ -330,6 +330,23 @@ class CCalenController : public CBase,
         void GetAllCalendarInfoL( 
                     RPointerArray<CCalCalendarInfo>& aCalendarInfoList );
         
+        /**
+         * @brief sets the flag if the calendar application is launched
+         *  from external application.
+         * 
+         * @param aFlag The flag to be set.
+         */
+        void SetLaunchFromExternalApp( TBool aFlag );
+        
+        /**
+         * @brief Checks whether the calendar application is launched
+         * from external application.
+         * 
+         * @return ETrue If the calendar application is launched from
+         * external application else EFalse.
+         */
+        TBool IsLaunchFromExternalApp();
+        
     private:  // Construction and destruction
         /**
          * C++ constructor
@@ -416,6 +433,7 @@ class CCalenController : public CBase,
         TInt iResourceFileOffset;
         CAsyncCallBack* iSystemTimeChangedMsgDelayer;   
         TBool iFasterApp;
+        TBool iLaunchFromExternalApp;
     };
 
 #endif // CALENCONTROLLER_H

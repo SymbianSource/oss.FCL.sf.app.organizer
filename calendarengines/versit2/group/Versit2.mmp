@@ -29,6 +29,7 @@ CAPABILITY 		All -Tcb
 
 USERINCLUDE     ../inc
 USERINCLUDE     ../../inc
+USERINCLUDE     ../../agnversit2/inc
 
 //System include macro
 APP_LAYER_SYSTEMINCLUDE

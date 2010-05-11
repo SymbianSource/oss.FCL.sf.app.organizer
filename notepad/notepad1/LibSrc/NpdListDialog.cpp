@@ -64,6 +64,9 @@
 #include "NpdApi.h"
 #include "NpdLibPanic.h"
 
+//number of fixed item
+//currently, Notepad application have one fixed "New Note" item in main view. 
+const TInt KNumberOfFixedItem = 1; 
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -872,7 +875,7 @@ void CNotepadListDialog::DynInitMenuPaneL(
 		}
     iModel->SyncL(EFalse);
     CNotepadDialogBase::DynInitMenuPaneL( aResourceId, aMenuPane );
-    const TInt memoCount( iModel->MdcaCount() - 1 );
+    const TInt memoCount( iModel->MdcaCount() - KNumberOfFixedItem );
    	const TInt markCount(iListBox->SelectionIndexes()->Count());
 	TInt index;
 	switch (aResourceId )
@@ -1726,17 +1729,16 @@ TInt CNotepadListDialog::HandleNotifyL( TInt /* aCmdId */,
 //
 void CNotepadListDialog::HandleMarkListDynInitMenuPane( TInt aResourceId, CEikMenuPane *aMenu, CEikListBox *aListBox )
 	{
+    TInt numofNotes = aListBox->Model()->NumberOfItems() - KNumberOfFixedItem;
+    
 	if ( aResourceId == R_MENUPANE_MARKABLE_LIST_IMPLEMENTATION )
 		{
 		TInt currentItemIndex = aListBox->View()->CurrentItemIndex();
 		TBool markHidden = aListBox->View()->ItemIsSelected( currentItemIndex ) || currentItemIndex == 0;
 		TBool unmarkHidden =
 				!aListBox->View()->ItemIsSelected(currentItemIndex) || currentItemIndex == 0;
-		TBool markAllHidden = aListBox->Model()->NumberOfItems() == 0
-				|| aListBox->SelectionIndexes()->Count()
-						== aListBox->Model()->NumberOfItems() - 1;
-		TBool unmarkAllHidden = aListBox->Model()->NumberOfItems() == 0
-				|| aListBox->SelectionIndexes()->Count() == 0;
+		TBool markAllHidden = ( numofNotes == 0 ) || ( aListBox->SelectionIndexes()->Count() == numofNotes );
+		TBool unmarkAllHidden = ( numofNotes == 0 ) || ( aListBox->SelectionIndexes()->Count() == 0 );
 		aMenu->SetItemDimmed(EAknCmdMark, markHidden);
 		aMenu->SetItemDimmed(EAknCmdUnmark, unmarkHidden);
 		aMenu->SetItemDimmed(EAknMarkAll, markAllHidden);
@@ -1744,7 +1746,7 @@ void CNotepadListDialog::HandleMarkListDynInitMenuPane( TInt aResourceId, CEikMe
 		}
 	if ( aResourceId == R_MENUPANE_MARKABLE_LIST_EDIT_LIST_IMPLEMENTATION )
 		{
-		TBool editListHidden = aListBox->Model()->NumberOfItems() == 0;
+		TBool editListHidden = numofNotes == 0;
 
 		aMenu->SetItemDimmed(EAknCmdEditListMenu, editListHidden);
 		}

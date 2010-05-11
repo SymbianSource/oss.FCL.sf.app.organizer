@@ -37,7 +37,10 @@ data=DATAZ_\data\sounds\digital\alarm.aac     data\sounds\digital\alarm.aac
 
 #ifdef RD_CONTEXT_FRAMEWORK
 // Context framework scripts
-data=\epoc32\data\Z\private\10282BC4\Rules\alarmuisnooze.rul    private\10282BC4\Rules\alarmuisnooze.rul
+data=\epoc32\data\Z\private\10282BC4\Rules\alarmui_snooze.rul      private\10282BC4\Rules\alarmui_snooze.rul
+data=\epoc32\data\Z\private\10282BC4\Rules\alarmui_activate.rul    private\10282BC4\Rules\alarmui_activate.rul
+data=\epoc32\data\Z\private\10282BC4\Rules\alarmui_stop.rul        private\10282BC4\Rules\alarmui_stop.rul
+
 #endif // RD_CONTEXT_FRAMEWORK
 
 #endif  // __ALMALERT_IBY__

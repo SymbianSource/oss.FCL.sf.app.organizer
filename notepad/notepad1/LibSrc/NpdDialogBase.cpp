@@ -482,7 +482,11 @@ void CNotepadDialogBase::InsertSendMenuItemAfterL(
     TInt index(0);
     aMenuPane.ItemAndPos( aCommandId, index );
 	aSendUi.AddSendMenuItemL( aMenuPane, index+1, ENotepadCmdSend/*, TSendingCapabilities()*/ );
-	aMenuPane.SetItemSpecific(ENotepadCmdSend, ETrue);
+	
+    if ( IsNoteListDialog() )
+        {
+        aMenuPane.SetItemSpecific( ENotepadCmdSend, ETrue );
+        }	
     }
 
 // -----------------------------------------------------------------------------
@@ -869,8 +873,7 @@ void CNotepadDialogBase::CCreateAndAppendFiles::EndProgressDialog()
 // -----------------------------------------------------------------------------
 
 void CNotepadDialogBase::CCreateAndAppendFiles::StartAttachingL()
-	{
-	iStatus = KRequestPending;
+    {
 	if( iCount < iTotalCount )
 		iAttaching = ETrue;
 	else
@@ -879,20 +882,39 @@ void CNotepadDialogBase::CCreateAndAppendFiles::StartAttachingL()
 	
 	if( iAttaching )
 		{
-		TInt tempInt = iKeys[iCount];
-		HBufC* buf = iModel.ContentByKeyL(tempInt);
+        TInt tempInt = iKeys[iCount];
+        HBufC* buf = iModel.ContentByKeyL(tempInt);
 		
         CleanupStack::PushL(buf);
         iText->Reset();
-        iText->InsertL(0, *buf);
+
+        TRAPD( err, iText->InsertL( 0, *buf ) );
+    
+        if( err != KErrNone )
+            {
+            Cancel();
+            
+            if ( iProgressBar )
+                {
+                EndProgressDialog();
+                }
+            // release the member in advance to avoid memory-consumed erupted when endless send Notes by Messaging.			
+            ReleaseMemory();		  	
+        
+            User::LeaveIfError( err );
+            }
+        
         iFiles->AppendL(*iText);
  
         User::LeaveIfError( array->At(iCount).Open( iFs, iFiles->iSendFileName, EFileRead ) );
-   		imessageData->AppendAttachmentHandleL( array->At(iCount));
+        imessageData->AppendAttachmentHandleL( array->At(iCount));
 		
-		iCount++;
+        iCount++;
+    
         CleanupStack::PopAndDestroy(); // buf
-		}
+        }
+	
+	iStatus = KRequestPending;
 	SetActive();
 	TRequestStatus* status = &iStatus;
 	User::RequestComplete(status,KErrNone);
@@ -934,38 +956,9 @@ void CNotepadDialogBase::CCreateAndAppendFiles::RunL()
 			    
 			iListDialog->ClearSaveOrMarkedListItemsL(!iCanceled );   
 			iCanceled = EFalse;
-
-			if(iFiles)		
-			{
-				delete iFiles;
-			 	iFiles =NULL;
-			}
 			
-			if(iText)
-			{
-				delete iText;
-				iText =NULL;
-			}
-			
-			if(imessageData)
-			{
-			
-			delete imessageData;
-			imessageData =NULL;	
-			}
-			
-			if(array)
-			{
-			array->Reset();
-
-			delete array;
-			array =NULL;
-			}
-			
-			
-			iKeys.Close();
-
-			iFs.Close();
+			// release the member in advance in case of memory-consumed erupted when endless send Notes by Messaging.	
+			ReleaseMemory();
 			
 			RFs fs;
 			User::LeaveIfError(fs.Connect());
@@ -1000,4 +993,40 @@ void CNotepadDialogBase::CCreateAndAppendFiles::DoCancel()
 		}
 
 	}
+
+// -----------------------------------------------------------------------------
+// CNotepadDialogBase::CCreateAndAppendFiles::PrepareToClose
+// -----------------------------------------------------------------------------
+void CNotepadDialogBase::CCreateAndAppendFiles::ReleaseMemory()
+    {
+    if( iFiles )		
+        {
+        delete iFiles;
+        iFiles = NULL;
+        }
+
+    if( iText )
+        {
+        delete iText;
+        iText = NULL;
+        }
+
+    if( imessageData )
+        {	
+        delete imessageData;
+        imessageData = NULL;	
+        }
+
+    if( array )
+        {
+        array->Reset();
+
+        delete array;
+        array = NULL;
+        }
+
+    iKeys.Close();
+    iFs.Close();	
+    }
+
 // End of File  

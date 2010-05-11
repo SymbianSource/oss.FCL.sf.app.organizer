@@ -186,6 +186,13 @@ class CNotepadDialogBase : public CAknDialog
         * @return ETrue if this is a modeless dialog, otherwize EFalse.
         */
         inline TBool IsModeless();
+        
+        /**
+        * Check whether this dialog is for Notepad application ListDialog.
+        *
+        * @return ETrue if this is for for Notepad application ListDialog, otherwize EFalse.
+        */
+        inline TBool IsNoteListDialog() const;
 
         /**
         * Set iTitle text to title pane.
@@ -386,7 +393,14 @@ class CNotepadDialogBase : public CAknDialog
 				void DialogDismissedL( TInt aButtonId );
                 void RunL();
                 void DoCancel();
-            private: // data
+                
+            private:
+				/**
+		        * release memory allocated in the phase of appending Notes to Messaging.
+		        */                
+                void ReleaseMemory();
+                
+    private: // data
 				CSendUi& iSendAppUi;
 				TInt iCommandId;
 				CNotepadModel& iModel;

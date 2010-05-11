@@ -151,6 +151,13 @@ CCalenView::TNextPopulationStep CCalenMissedEventView::ActiveStepL()
         	{
         	cnt->CompletePopulationL();
         	RedrawStatusPaneL();
+        	
+        	//no tool bar in missed event view
+        	MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
+        	    if(toolbar && toolbar->IsVisible())
+        	      {
+        	      toolbar->SetToolbarVisibilityL(EFalse);  
+        	      } 
         	nextStep = CCalenView::EDone;
         	}
         	break;
@@ -234,12 +241,7 @@ void CCalenMissedEventView::DoActivateImplL( const TVwsViewId& aPrevViewId,
         }
     
     UpdateCbaL();
-    //no tool bar in missed event view
-    MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
-    if(toolbar)
-      {
-      toolbar->SetToolbarVisibilityL(EFalse);  
-      } 
+    
    
     TRACE_EXIT_POINT;
     }
@@ -254,6 +256,11 @@ void CCalenMissedEventView::DoDeactivateImpl()
     TRACE_ENTRY_POINT;
     
     iPreviousViewId.iViewUid = KNullUid;
+    MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
+    if(toolbar)
+        {
+        toolbar->SetToolbarVisibilityL(ETrue);  
+        }
 
         
     TRACE_EXIT_POINT;
@@ -316,21 +323,13 @@ void CCalenMissedEventView::HandleCommandL(TInt aCommand)
         case EAknSoftkeyClose:   
         case EAknSoftkeyBack:
 			{
-			MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
-            if(toolbar)
-             {
-             toolbar->SetToolbarVisibilityL(ETrue);  
-             } 
+		
 	        iServices.IssueNotificationL(ECalenNotifyMissedEventViewClosed);
 			break;
 			}
         case EAknSoftkeyExit: 
             {
-            MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
-            if(toolbar)
-             {
-             toolbar->SetToolbarVisibilityL(ETrue);  
-             }             
+                      
             CCalenNativeView::HandleCommandL(aCommand);
             }
             break;

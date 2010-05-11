@@ -48,7 +48,7 @@
 #include <wakeupalarm.h>
 #include <calalarm.h> // KUidAgendaModelAlarmCategory - the alarm category id for calendar alarms
 #include <AknUtils.h>
-#include <HWRMPowerStateSDKPSKeys.h>
+#include <hwrmpowerstatesdkpskeys.h>
 
 #ifndef SYMBIAN_CALENDAR_V2
 #include <agmalarm.h> // deprecated, use CalAlarm.h when SYMBIAN_CALENDAR_V2 flag is enabled

@@ -48,7 +48,7 @@
 #include <CalendarInternalCRKeys.h>
 #include <calenmulticalutil.h>
 
-#include <BAUTILS.H>
+#include <bautils.h>
 #include <calensvrmissedalarmmanagerresource.rsg>
 // Default Calendar database path
 _LIT( KCalendarDatabaseFilePath, "c:calendar" );
@@ -1394,6 +1394,7 @@ EXPORT_C void CCalenGlobalData::RemoveCalendarL(const TDesC& aCalendarFileName)
                 
                 // Set the modification time as home time.
                 keyBuff.Zero();
+                keyBuff.AppendNum(EModificationTime);
                 TTime modificationTime;
                 modificationTime.HomeTime();
                 TPckgC<TTime> pkgModificationTime(modificationTime);
@@ -1499,6 +1500,7 @@ EXPORT_C void CCalenGlobalData::GetAllCalendarInfoL(
                     RPointerArray<CCalCalendarInfo>& aCalendarInfoList )
 	{
 	TRACE_ENTRY_POINT;
+	CleanupClosePushL(aCalendarInfoList);
     RFs fsSession;
     CleanupClosePushL( fsSession );
     RResourceFile resourceFile;
@@ -1545,6 +1547,7 @@ EXPORT_C void CCalenGlobalData::GetAllCalendarInfoL(
 	        
 	    }
 	 CleanupStack::PopAndDestroy(2);
+	 CleanupStack::Pop(&aCalendarInfoList);
 	TRACE_EXIT_POINT;
 	}
 

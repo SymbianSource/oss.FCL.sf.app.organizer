@@ -1758,16 +1758,7 @@ void CClkDateTimeView::HandleDateSeparCmdL()
 //
 void CClkDateTimeView::HandleTimeCmdL()
     {
-    if( iExtension->GetActiveProtocol() )
-		{
-   
-		// User pressed Yes. We disable Automatic time update here.
-		iDateTimeInfo.iNITZ = EFalse;
-		iSrvModel->DeActivateAllProtocols();
-		iExtension->SetActiveProtocol( EFalse );
-       	ShowAutomaticTimeUpdateOffNoteL();
-		}
-
+    
     // User to be notified whether DST rollover happens in a day or has happen within a day if he tries to change the time.
 	TBool dstStatus = CheckForDSTChangesL();
 	
@@ -1778,6 +1769,15 @@ void CClkDateTimeView::HandleTimeCmdL()
 	    CAknTimeSettingPage* dlg = new ( ELeave ) CAknTimeSettingPage( R_DATE_TIME_TIME_PAGE, newTime );
 	    if( dlg->ExecuteLD( CAknSettingPage::EUpdateWhenAccepted ) )
 	        {
+	    
+            if( iExtension->GetActiveProtocol() )
+                {
+                // User pressed Yes. We disable Automatic time update here.
+                iDateTimeInfo.iNITZ = EFalse;
+                iSrvModel->DeActivateAllProtocols();
+                iExtension->SetActiveProtocol( EFalse );
+                ShowAutomaticTimeUpdateOffNoteL();
+                }
 	        TTime current;
 	        current.HomeTime();
 	        TDateTime cTime( current.DateTime() );

@@ -288,7 +288,7 @@ void CCalenUnifiedEditor::ConstructL()
     
     isReplaceLocation = EFalse;
     
-   
+    iCheck = EFalse;
     TCallBack callback(CCalenUnifiedEditor::AsyncProcessCommandL,this);
     iAsyncCallback = new(ELeave) CAsyncCallBack(callback,CActive::EPriorityStandard);
     
@@ -601,6 +601,7 @@ TBool CCalenUnifiedEditor::OkToExitL( TInt aButtonId )
              if( iServices->EntryViewL(colId) )
                  {
                  PIM_TRAPD_HANDLE( TryToSaveNoteOnForcedExitL() );
+                 iCheck = EFalse;
                  }
              if(EAknSoftkeyExit == aButtonId)
                  iServices->IssueCommandL(aButtonId);
@@ -1471,7 +1472,7 @@ void CCalenUnifiedEditor::TryToDeleteNoteL( TBool /* aIsViaDeleteMenu */ )
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void CCalenUnifiedEditor::TryInsertSendMenuL( TInt aResourceId, CEikMenuPane* aMenuPane )
+void CCalenUnifiedEditor::TryInsertSendMenuL( TInt /*aResourceId*/, CEikMenuPane* aMenuPane )
     {
     TRACE_ENTRY_POINT;
 
@@ -1925,15 +1926,19 @@ TBool CCalenUnifiedEditor::HandleDoneL()
         
         TTime startDate = Edited().StartDateTime();
         TTime endDate = Edited().EndDateTime();
+        TTimeIntervalDays differenceInTime = endDate.DaysFrom(startDate); // fix for AllDayEntry issue
         
         if( startDate == CalenDateUtils::BeginningOfDay( startDate ) &&
                 endDate == CalenDateUtils::BeginningOfDay( endDate ) )
             {
-            TTimeIntervalDays differenceInTime = endDate.DaysFrom(startDate); // fix for AllDayEntry issue
             if( CCalEntry::EAppt == Edited().EntryType() && startDate != endDate && differenceInTime.Int() >= 1 )
                 {
                 Edited().SetEntryType( CCalEntry::EEvent );
                 }
+            }
+        if(differenceInTime.Int() == 0 && (CCalEntry::EAppt == Edited().EntryType() || CCalEntry::EEvent == Edited().EntryType()))
+            {
+            Edited().SetEntryType( CCalEntry::EAppt ); //changed
             }
         
         switch ( EditorDataHandler().ShouldSaveOrDeleteOrDoNothingL() ) 
@@ -2245,7 +2250,7 @@ TInt CCalenUnifiedEditor::TryToSaveEntryWithEntryChangeL( TBool aForcedExit)
 void CCalenUnifiedEditor::TryToSaveNoteOnForcedExitL()
     {
     TRACE_ENTRY_POINT;
-    
+    iCheck = ETrue;
     if( EntryStillExistsL() == EEntryOk )
         {
         if( CheckSpaceBelowCriticalLevelL() )
@@ -3002,6 +3007,7 @@ void CCalenUnifiedEditor::SetAttachmentNamesToEditorL()
     if( attachmentCount )
         {
         RPointerArray<HBufC> attachmentNames;
+        CleanupResetAndDestroyPushL(attachmentNames);
         GetAttachmentNamesL(attachmentNames);
         attachmentCount = attachmentNames.Count();            
         TInt attachmentLength(0);        
@@ -3026,7 +3032,7 @@ void CCalenUnifiedEditor::SetAttachmentNamesToEditorL()
         
         // Cleanup
         delete attachmentNamesString;
-        attachmentNames.ResetAndDestroy();
+        CleanupStack::PopAndDestroy(&attachmentNames);
         }
     
     TRACE_EXIT_POINT;

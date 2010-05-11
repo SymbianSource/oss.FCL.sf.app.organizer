@@ -175,6 +175,18 @@ class CClockMainView : public CAknView,
 		*/
         void ResetAlarmL();
         
+        /**
+         * @brief Checks if DST changes will be applied in the next 24 hours.
+         * @return TBool ETrue if remaining time note has to be displayed.
+         */
+        TBool CheckForDstChangesL();
+        
+        /**
+        * @brief Displays the remaining time for the alarm to expire.
+        */
+        void DisplayRemainingTimeL();
+
+        
 	private:		// Data
 	
 		/**

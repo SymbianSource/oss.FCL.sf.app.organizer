@@ -133,11 +133,15 @@ CCalenView::TNextPopulationStep CCalenMissedAlarmsView::ActiveStepL()
                 
                 RedrawStatusPaneL();
                 UpdateCbaL();
+                
+                //no tool bar in missed alarms view
+                MCalenToolbar* toolbar = iServices.ToolbarOrNull();
+	       	    if(toolbar && toolbar->IsVisible())
+	       	        {
+                    toolbar->SetToolbarVisibilityL(EFalse);  
+	       	        } 
+	       	    nextStep = CCalenView::EDone;
 	       	    }
-       	    
-       	 
-
-        	nextStep = CCalenView::EDone;
         	}
         	break;	
         }
@@ -241,34 +245,20 @@ void CCalenMissedAlarmsView::HandleCommandL(TInt aCommand)
             break;
         case ECalenCmdGotoCalendar:            
             {
-            MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
-            if(toolbar)
-             {
-             toolbar->SetToolbarVisibilityL(ETrue);  
-             } 
             iHighlightedRowNumber = 0;
-            iServices.IssueCommandL(aCommand);
+			iServices.IssueCommandL(aCommand);
             }
             break;
         case EAknSoftkeyBack:
         case EAknSoftkeyClose:
             {
-            MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
-            if(toolbar)
-             {
-             toolbar->SetToolbarVisibilityL(ETrue);  
-             } 
             iHighlightedRowNumber = 0;
-            iServices.IssueNotificationL(ECalenNotifyMissedAlarmViewClosed);
-            }
+			iServices.IssueNotificationL(ECalenNotifyMissedAlarmViewClosed);
+			}
             break;
         case EAknSoftkeyExit:
             {
-            MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
-            if(toolbar)
-             {
-             toolbar->SetToolbarVisibilityL(ETrue);  
-             } 
+         
             CCalenNativeView::HandleCommandL(aCommand);
             }
             break;
@@ -315,13 +305,7 @@ void CCalenMissedAlarmsView::DoActivateImplL( const TVwsViewId& aPrevViewId,
     
     UpdateCbaL();
     
-    // Hide the toolbar.
-    MCalenToolbar* toolbar = iServices.ToolbarOrNull();
-    if(toolbar)
-        {
-        toolbar->SetToolbarVisibilityL(EFalse);  
-        }  
-    
+   
     TRACE_EXIT_POINT;
     }
 
@@ -333,6 +317,11 @@ void CCalenMissedAlarmsView::DoActivateImplL( const TVwsViewId& aPrevViewId,
 void CCalenMissedAlarmsView::DoDeactivateImpl()
     {
     TRACE_ENTRY_POINT;
+    MCalenToolbar* toolbar = iServices.ToolbarOrNull();
+    if(toolbar)
+        {
+        toolbar->SetToolbarVisibilityL(ETrue);  
+        } 
     
     TRACE_EXIT_POINT;
     }

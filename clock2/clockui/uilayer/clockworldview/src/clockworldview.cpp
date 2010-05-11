@@ -633,7 +633,10 @@ void CClockWorldView::HandleForegroundEventL( TBool aForeground )
     
     if( aForeground  && iContainer )
         {
-        RestartTimerL();
+        if( iTimer )
+            {
+            RestartTimerL();
+            }
 
         RClkSrvInterface clockServerClt;
         // Connect to clockserver

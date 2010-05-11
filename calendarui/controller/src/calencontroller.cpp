@@ -1133,5 +1133,33 @@ void CCalenController::GetAllCalendarInfoL(
     iGlobalData->GetAllCalendarInfoL(aCalendarInfoList);
     TRACE_EXIT_POINT;
     }
+
+// -----------------------------------------------------------------------------
+// CCalenController::SetLaunchFromExternalApp
+//
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+void CCalenController::SetLaunchFromExternalApp( TBool aFlag )
+    {
+    TRACE_ENTRY_POINT;
+    
+    iLaunchFromExternalApp = aFlag;
+    TRACE_EXIT_POINT;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenController::SetLaunchFromExternalApp
+//
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+TBool CCalenController::IsLaunchFromExternalApp()
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    
+    return iLaunchFromExternalApp;
+    }
 // End of file
 

@@ -67,10 +67,7 @@ CClockIndicatorPluginListener::CClockIndicatorPluginListener( CClockIndicatorPan
 //
 CClockIndicatorPluginListener::~CClockIndicatorPluginListener()
 	{
-	if( IsActive() )
-		{
-		Cancel();
-		}
+	Cancel();
 	}
 
 // ---------------------------------------------------------
@@ -97,7 +94,7 @@ void CClockIndicatorPluginListener::RunL()
 //
 void CClockIndicatorPluginListener::DoCancel()
 	{
-	// No implementation yet.
+    iPanePlugin->NotifyChangeCancel();
 	}
 
 // ---------------------------------------------------------
@@ -133,7 +130,7 @@ void CClockIndicatorPluginListener::NotifyChangeCancel()
 	// First cancel all requests
 	Cancel();
 	
-	iPanePlugin->NotifyChangeCancel();
+	//iPanePlugin->NotifyChangeCancel();
 	}
 	
 // End of file

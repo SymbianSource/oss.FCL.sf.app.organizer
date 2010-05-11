@@ -1151,7 +1151,8 @@ TTime CCalenUnifiedEditorControl::GetEndDateTimeL()
             TTime startDate = iUnifiedEditor.Edited().StartDateTime();
             startDate = CalenDateUtils::BeginningOfDay( startDate );
             iUnifiedEditor.Edited().SetStartDateTimeL(startDate);
-            if( result >= startDate )
+
+            if( result >= startDate && (!iUnifiedEditor.iCheck ) || iUnifiedEditor.Edited().EntryType() == CCalEntry::EEvent)
                 {
                 result += TTimeIntervalDays( KOneDay );
                 }

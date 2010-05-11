@@ -502,6 +502,7 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
          */
         void GetAttachmentNamesL(RPointerArray<HBufC>& aAttachmentNames);
         
+        TBool iCheck;
     protected:
         /**
          * From CEikDialog

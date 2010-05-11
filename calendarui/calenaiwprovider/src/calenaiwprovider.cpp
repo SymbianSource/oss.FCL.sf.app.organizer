@@ -33,6 +33,8 @@
 #include <calentry.h>
 #include <bautils.h>
 #include <data_caging_path_literals.hrh>
+#include <aknnavide.h>
+#include <akntitle.h>
 
 // User inlcudes.
 #include "calenaiwprovider.h"
@@ -425,10 +427,63 @@ TInt CCalenAiwProvider::SaveWithDialogL()
         User::LeaveIfError( errVal );
         }
     // Handle the command here.
+    
+    // Create settings own titlepane and navipane, and swap with existing ones
+    CEikStatusPane* sp = CEikonEnv::Static()->AppUiFactory()->StatusPane();
+
+    // Titlepane
+    CAknTitlePane* newtp = new( ELeave ) CAknTitlePane();
+    CleanupStack::PushL( newtp );
+    CCoeControl* oldtp = sp->SwapControlL( TUid::Uid(EEikStatusPaneUidTitle), newtp );
+    CleanupStack::Pop( newtp ); // ownership is passed to statuspane
+    TRect oldRect( 0, 0, 0, 0 );
+    if( oldtp )
+        {
+        CleanupStack::PushL( oldtp );
+        oldRect = oldtp->Rect();
+        CCoeControl* ctrl = sp->ContainerControlL( TUid::Uid( EEikStatusPaneUidTitle ));
+        newtp->SetContainerWindowL( *ctrl );
+        newtp->ConstructL();
+        newtp->SetRect(oldRect);
+        newtp->ActivateL();
+        }        
+
+    // NaviPane
+    CAknNavigationControlContainer* newnp = new( ELeave )CAknNavigationControlContainer();
+    CleanupStack::PushL( newnp );
+    CCoeControl* oldnp = sp->SwapControlL( TUid::Uid( EEikStatusPaneUidNavi ), newnp );
+    CleanupStack::Pop( newnp ); // ownership is passed to statuspane
+    if( oldnp )
+        {
+        CleanupStack::PushL( oldnp );
+        oldRect = oldnp->Rect();
+        CCoeControl* ctrl = sp->ContainerControlL( TUid::Uid( EEikStatusPaneUidNavi ) );
+        newnp->SetContainerWindowL( *ctrl );
+        newnp->ConstructL();
+        newnp->SetRect( oldRect );
+        newnp->PushDefaultL();
+        newnp->ActivateL();
+        }
         
     CMultiCalUiDialog* multiCalUiDialog = CMultiCalUiDialog::NewLC( iCalEntryArray );
     errVal =  multiCalUiDialog->LaunchL();
     CleanupStack::PopAndDestroy( multiCalUiDialog );   
+    
+    
+    // When setting is closed, swap back old titlepane and navipane
+   if( oldnp && sp->SwapControlL( TUid::Uid(EEikStatusPaneUidNavi), oldnp ) )
+       {
+       CleanupStack::Pop( oldnp );
+       delete newnp;
+       oldnp->ActivateL();
+       }
+
+   if( oldtp && sp->SwapControlL( TUid::Uid(EEikStatusPaneUidTitle), oldtp ) )
+       {
+       CleanupStack::Pop( oldtp );
+       delete newtp;
+       oldtp->ActivateL();
+       }
     
     return errVal;
     

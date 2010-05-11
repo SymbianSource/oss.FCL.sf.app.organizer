@@ -793,9 +793,6 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
 
                 if (err == KErrNone && markAsdelete)
                     {
-                    //BroadcastNotification(ECalenNotifyCloseDialog);
-                    BroadcastNotification(ECalenNotifyDeleteInstanceView);
-                    BroadcastNotification(ECalenNotifyCalendarFileDeleted);
                     iFilnameDeleted = aCalendarInfoChangeEntries[index]->FileNameL().AllocL();
                     iAsyncCallback->CallBack();
                     }
@@ -831,7 +828,10 @@ TInt CCalenNotifier::AsyncRemoveCalendarL(TAny* aThisPtr)
 void CCalenNotifier::AsyncRemoveCalendarL()
     {
     TRACE_ENTRY_POINT
+    BroadcastNotification(ECalenNotifyDeleteInstanceView);
     iGlobalData->RemoveCalendarL(iFilnameDeleted->Des());
+    BroadcastNotification(ECalenNotifyCalendarFileDeleted);
+                       
     delete iFilnameDeleted;
     iFilnameDeleted = NULL;
     TRACE_EXIT_POINT

@@ -46,7 +46,7 @@
 #include "calensetting.h"
 #include "calencontextfwlistener.h"
 #include "CleanupResetAndDestroy.h"
-#include "CalenAttachmentModel.h"
+#include "calenattachmentmodel.h"
 
 static const TUint32 KMaxMissedAlarms = 10;
 
@@ -1167,9 +1167,11 @@ void CCalenAlarmManager::HandleBackEventL()
     else if( iPreviousToEventViewUid!=KNullUid && 
             ( iPreviousToEventViewUid!= KUidCalenEventView || iPreviousToEventViewUid != KUidCalenMissedEventView ) )
         {
+        iViewManager.SetRepopulation(EFalse);
         TVwsViewId previousViewId(KUidCalendar, iPreviousToEventViewUid) ;
         iController.ViewManager().RequestActivationL(previousViewId);
         iPreviousToEventViewUid = KNullUid;
+        iViewManager.SetRepopulation(ETrue);
         }
 	else
 		{

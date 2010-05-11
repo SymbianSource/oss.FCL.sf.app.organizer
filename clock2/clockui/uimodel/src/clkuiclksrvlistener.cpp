@@ -43,6 +43,16 @@ CClkUiClkSrvListener::CClkUiClkSrvListener( RClkSrvInterface& aClkSrvSes,
     }
 
 // ---------------------------------------------------------
+// CClkUiClkSrvListener::~CClkUiClkSrvListener
+// rest of the details are commented in the header
+// ---------------------------------------------------------
+//
+CClkUiClkSrvListener::~CClkUiClkSrvListener()
+    {
+    Cancel();
+    }
+
+// ---------------------------------------------------------
 // CClkUiClkSrvListener::DoStart
 // rest of the details are commented in the header
 // ---------------------------------------------------------

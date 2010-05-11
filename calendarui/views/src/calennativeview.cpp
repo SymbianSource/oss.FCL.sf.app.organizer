@@ -797,17 +797,7 @@ void CCalenNativeView::DoActivateL( const TVwsViewId& aPrevViewId,
 	    DoDeactivate();	
 	    }
 
-    if (!iNaviContainer)
-        {
-        CEikStatusPane* sp = StatusPane();
-        iNaviContainer =
-            static_cast<CAknNavigationControlContainer*>(
-                        sp->ControlL(TUid::Uid(EEikStatusPaneUidNavi)));
-        }
-
-    iNaviContainer->Pop();
-
-    if( AknLayoutUtils::PenEnabled() )
+     if( AknLayoutUtils::PenEnabled() )
         {
         MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
         if(toolbarImpl)

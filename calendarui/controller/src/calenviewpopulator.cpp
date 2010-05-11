@@ -26,6 +26,9 @@
 #include "calenglobaldata.h"
 #include "calennotifier.h"
 
+#include <eikenv.h> // For CEikonEnv
+#include <apgtask.h>
+
 // ----------------------------------------------------------------------------
 // CCalenViewPopulator::NewL
 // 1st phase of construction
@@ -192,6 +195,16 @@ void CCalenViewPopulator::RunL()
         	{
         	iPopulatingView = NULL;
             iController.Notifier().BroadcastNotification( ECalenNotifyViewPopulationComplete );
+            
+            if( iController.IsLaunchFromExternalApp() )
+                {
+                CEikonEnv* eikenv = CEikonEnv::Static();
+                iController.SetLaunchFromExternalApp( EFalse );
+                const TUid KCalendarAppUID = { 0x10005901 };
+                TApaTaskList taskList( eikenv->WsSession() );
+                TApaTask task = taskList.FindApp( KCalendarAppUID );
+                task.BringToForeground();
+                }
         	}
             break;
         default:

@@ -425,7 +425,10 @@ void CCalenTodoView::HandleCommandL( TInt aCommand ) // command ID
             }
             break;
         case ECalenShowCalendars:            
-               ClearMarkedToDoItems();              
+			SaveCurrentItemIndexL();
+            Container()->MarkAllL( EFalse ); 
+			CCalenNativeView::HandleCommandL( aCommand );
+			break;
         default:
             SaveCurrentItemIndexL();
             CCalenNativeView::HandleCommandL( aCommand );
@@ -930,6 +933,7 @@ CCalenView::TNextPopulationStep CCalenTodoView::ActiveStepL()
             
             if(colIdArray.Count() > 0)
                 {
+                colIdArray.Close();
                 if( !iServices.InstanceViewL(colIdArray) )
                     {
                     TRACE_EXIT_POINT;
@@ -943,6 +947,7 @@ CCalenView::TNextPopulationStep CCalenTodoView::ActiveStepL()
                 }
             else
                 {
+                colIdArray.Close();
                 if( !iServices.InstanceViewL() )
                     {
                     TRACE_EXIT_POINT;
@@ -954,7 +959,6 @@ CCalenView::TNextPopulationStep CCalenTodoView::ActiveStepL()
                     return CCalenView::EKeepGoing;
                     }
                 }
-            colIdArray.Reset();
             }
             // else fall through...
         case ERequestedInstanceView:

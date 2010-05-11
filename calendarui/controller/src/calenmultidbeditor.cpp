@@ -30,6 +30,8 @@
 #include <calcalendarinfo.h>
 #include <Calendar.rsg>
 #include <calencommonui.rsg>
+#include <sysutil.h>
+#include <ErrorUI.h>
 
 #include "calenmultidbeditor.h"
 #include "calendarui_debug.h"
@@ -665,6 +667,12 @@ void CCalenMultiDBEditor::FocusChanged(TDrawNow /*aDrawNow*/)
 TBool CCalenMultiDBEditor::SaveNoteL( TInt aButtonId )
 	{
     TRACE_ENTRY_POINT;
+    
+    if( CheckSpaceBelowCriticalLevelL() )
+        {
+        TRACE_EXIT_POINT;
+        return EFalse; 
+        }
 
     if (Conflict() == CCalenMultiDBEditor::EConflictDelete)
         {
@@ -1202,6 +1210,32 @@ void CCalenMultiDBEditor::SetSyncFieldL( TBool aSyncVal )
     CleanupStack::PopAndDestroy( syncString );    
     TRACE_EXIT_POINT;
     }
+
+// -----------------------------------------------------------------------------
+// CheckSpaceBelowCriticalLevelL
+// Checks if the Flash File System storage will fall below critical level. 
+// If there is not enough space, display an error message and return EFalse.
+// Return ETrue otherwise.
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+TBool CCalenMultiDBEditor::CheckSpaceBelowCriticalLevelL()
+    {
+    TRACE_ENTRY_POINT;
+    
+    TBool retcode(EFalse);
+    if ( SysUtil::FFSSpaceBelowCriticalLevelL( &( iCoeEnv->FsSession() ) ) )
+        {
+        CErrorUI* errorUi = CErrorUI::NewLC();
+        errorUi->ShowGlobalErrorNoteL( KErrDiskFull );
+        CleanupStack::PopAndDestroy( errorUi ); 
+        retcode = ETrue;
+        }
+    TRACE_EXIT_POINT;
+    return retcode;
+    }
+
+
 // -----------------------------------------------------------------------------
 // CDbColorPicture::CDbColorPicture
 // C++ Constructor

@@ -258,6 +258,7 @@ TBool CCalenCmdLineLauncher::ProcessCommandParametersL(
             if( iController.ViewManager().ViewsActivated() )
                 {
                 iController.IssueCommandL( command );
+                iController.SetLaunchFromExternalApp( ETrue );
                 }
             else
                 {

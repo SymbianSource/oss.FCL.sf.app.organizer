@@ -45,8 +45,6 @@
 #include "CleanupResetAndDestroy.h"
 #include "calenviewmanager.h"
 
-//_LIT16( KTextDataType, ".txt" );
-const TInt KCalenAttachmentOverhead = 1024;
 
 // ----------------------------------------------------------------------------
 // CCalenAttachmentUi::NewL

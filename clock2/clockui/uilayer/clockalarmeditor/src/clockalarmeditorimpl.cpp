@@ -299,19 +299,6 @@ TInt CClockAlarmEditorImpl::SaveFormDataL()
     
     // Set the alarm, here we connect to the alarm server and set the alarm.
     SetAlarmL();
-
-    // Check if DST rule gets applied in 24hrs. If so we don't display the remaining time.
-    TBool displayRemainingTime( ETrue );
-    if( !iAlarmForEditing )
-        {
-        displayRemainingTime = CheckForDstChangesL();
-        }
-    
-    // Don't display the remaining time if dst changes are applicable.
-    if( displayRemainingTime )
-        {
-        DisplayRemainingTimeL();
-        }
     
     // Save the previous alarm time value.
     SetPreviousAlarmTimeL( iAlarmInfo.iAlarmTime );
@@ -955,10 +942,8 @@ void CClockAlarmEditorImpl::SetAlarmL()
 	
     // Here we connect to the alarm server to set the alarm. We don't need to use the alarm model
     // as the alarm editor doesn't need any notification from the alarm server about changes.
-    RASCliSession alarmSrvSes;
     TASShdAlarm newAlarm;
     // Connect to the alarm server.
-    User::LeaveIfError( alarmSrvSes.Connect() );
         
     // Build the alarm properties from the info provided.
     newAlarm.Category()           = KAlarmClockOne;
@@ -976,13 +961,12 @@ void CClockAlarmEditorImpl::SetAlarmL()
 #endif
     
     // This will add the alarm with the alarm server.
-    alarmSrvSes.AlarmAdd( newAlarm );
+	iAlarmSrvSes.AlarmAdd( newAlarm );
     
 	// Save the new alarm id.
     iAlarmId = newAlarm.Id();
     
     // Close the session with alarmserver.
-    alarmSrvSes.Close();
     
     // Update the alarm info.
     GetAlarmInformationL( iAlarmId, iAlarmInfo );

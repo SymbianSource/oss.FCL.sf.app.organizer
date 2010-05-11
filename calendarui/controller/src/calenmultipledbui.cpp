@@ -665,7 +665,7 @@ TInt CCalenMultipleDbUi::AddItemL()
   
     //Async dialog
     retValue = iDbEditor->ExecuteLD();
-    iDbEditor = NULL;
+    //iDbEditor = NULL;
      
     if(EAknCmdExit == retValue )
         {
@@ -684,6 +684,8 @@ TInt CCalenMultipleDbUi::AddItemL()
 void CCalenMultipleDbUi::UpdateOnAddOrEditL(TBool aItemAdded)
     {
     TRACE_ENTRY_POINT
+	
+	iDbEditor = NULL;
     
     if(aItemAdded)
         {
@@ -776,7 +778,7 @@ TInt CCalenMultipleDbUi::EditItemL()
 
     //Async dialog
     retValue = iDbEditor->ExecuteLD();
-    iDbEditor = NULL;
+    //iDbEditor = NULL;
     
     return retValue;
     TRACE_EXIT_POINT

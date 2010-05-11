@@ -521,7 +521,8 @@ void CCalenEditUi::EditEntryL( CCalEntry* aEntry,
     isEditorActive = EFalse;
     
     // Unhide the toolbar when settings is closed
-    if(toolbar)
+    TUid activeViewUid = iController.ViewManager().CurrentView();
+    if(toolbar && (activeViewUid != KUidCalenMissedAlarmsView ) &&(activeViewUid != KUidCalenMissedEventView ) )
         {
         toolbar->SetToolbarVisibilityL(ETrue); 
         }
@@ -556,7 +557,7 @@ void CCalenEditUi::EditEntryL( CCalEntry* aEntry,
                 {
                 // Show saved note for new entries
                 TInt res;
-                if( aEntry->EntryTypeL() == CCalEntry::ETodo )
+                if( context.InstanceId().iType == CCalEntry::ETodo )
                     {
                     res = R_QTN_CALE_NOTE_TODO_SAVED;
                     }

@@ -33,9 +33,15 @@ PRJ_EXPORTS
 ../inc/alarmsourcecontextdef.h  |../../inc/alarmsourcecontextdef.h
 
 // context framework scripts
-alarmuisnooze.rul           /epoc32/release/winscw/udeb/z/private/10282bc4/rules/alarmuisnooze.rul
-alarmuisnooze.rul           /epoc32/release/winscw/urel/z/private/10282bc4/rules/alarmuisnooze.rul
-alarmuisnooze.rul           /epoc32/data/z/private/10282bc4/rules/alarmuisnooze.rul
+alarmui_snooze.rul          /epoc32/release/winscw/udeb/z/private/10282bc4/rules/alarmui_snooze.rul
+alarmui_snooze.rul          /epoc32/release/winscw/urel/z/private/10282bc4/rules/alarmui_snooze.rul
+alarmui_snooze.rul          /epoc32/data/z/private/10282bc4/rules/alarmui_snooze.rul
+alarmui_activate.rul        /epoc32/release/winscw/udeb/z/private/10282bc4/rules/alarmui_activate.rul
+alarmui_activate.rul        /epoc32/release/winscw/urel/z/private/10282bc4/rules/alarmui_activate.rul
+alarmui_activate.rul        /epoc32/data/z/private/10282bc4/rules/alarmui_activate.rul
+alarmui_stop.rul            /epoc32/release/winscw/udeb/z/private/10282bc4/rules/alarmui_stop.rul
+alarmui_stop.rul            /epoc32/release/winscw/urel/z/private/10282bc4/rules/alarmui_stop.rul
+alarmui_stop.rul            /epoc32/data/z/private/10282bc4/rules/alarmui_stop.rul
 
 
 // alarm tones

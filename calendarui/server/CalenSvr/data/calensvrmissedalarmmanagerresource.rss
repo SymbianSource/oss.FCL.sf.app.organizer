@@ -47,6 +47,7 @@ RESOURCE AVKON_NOTE r_missed_alarm_soft_notification
     imagefile         = AVKON_ICON_FILE;     // Image file name (including path).
     imageid           = EMbmAvkonQgn_note_alarm_calendar; // Image id.
     imagemask         = EMbmAvkonQgn_note_alarm_calendar_mask;
+    flags             = EAknNoteLeftSoftkeyWhenTapped;
     }
 
 RESOURCE TBUF r_missed_alarm_group_singular {buf = qtn_notif_miss_cale_event_group;}

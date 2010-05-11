@@ -702,7 +702,7 @@ void CCalenViewManager::HandleViewActivation( const TVwsViewId& aNewlyActivatedV
     // check for iAvoidRepopulation to avoid repopulation whenever
     // 1) Application comes to foreground
     // 2) Applictaion is opened after fake exit
-    if(!iAvoidRepopulation)
+    if(!iAvoidRepopulation || iController.IsLaunchFromExternalApp() )
         {
         TRAPD(error,StartActiveStepL());
         if(error!=KErrNone)
@@ -1732,25 +1732,6 @@ void CCalenViewManager::ReloadAllPluginsL()
             RequestActivationL(targetViewId);
             iViewCycleIndex = position;
             CleanupStack::PopAndDestroy(repository);  
-            }
-        }
-    else // If default view is native view, then activate it
-        {
-        iAvoidRepopulation = EFalse;
-        // In case of launching missed event view or missed alarms view, there
-        // is no need to activate default view.
-        if( ( iCurrentViewId.iViewUid.iUid != KCalenMissedEventViewUidValue ) && 
-                          ( iCurrentViewId.iViewUid.iUid != KCalenMissedAlarmsViewUidValue ) )
-            {
-            // Find the default view in the view cycle list
-            TInt position = iViewInfoArray.Find(
-                    defaultViewUid, CCalenViewInfo::ViewInfoIdentifier );
-            if( position != KErrNotFound )
-                {
-                TVwsViewId targetViewId( KUidCalendar, defaultViewUid);
-                RequestActivationL(targetViewId);
-                iViewCycleIndex = position;
-                }
             }
         }
     

@@ -25,6 +25,7 @@
 // user include.
 #include "multicaluidialogmodel.h"
 #include "calendarui_debug.h"
+#include "cleanupresetanddestroy.h"
 
 // ----------------------------------------------------------------------------
 // CMultiCalUiDialogModel::CMultiCalUiDialogModel
@@ -260,6 +261,7 @@ void CMultiCalUiDialogModel::CreateCopyL(
     {
     TRACE_ENTRY_POINT;
 
+    CleanupResetAndDestroyPushL(aCalCopyEntries);
     for (TInt i = 0; i < iCalEntries.Count(); i++)
         {
         const CCalEntry* sourceEntry = iCalEntries[i];
@@ -281,7 +283,7 @@ void CMultiCalUiDialogModel::CreateCopyL(
 
         CleanupStack::Pop(copyEntry);
         }
-
+    CleanupStack::Pop(&aCalCopyEntries);
     TRACE_EXIT_POINT;;
     }
 

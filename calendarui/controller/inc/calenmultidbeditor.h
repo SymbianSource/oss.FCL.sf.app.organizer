@@ -255,6 +255,14 @@ private:
 	void SetTitlePaneL();  
 	
     void SetSyncFieldL( TBool aSyncVal );
+    
+    /**
+     * @breif Checks if the Flash File System storage will fall below
+     *        Critical Level. Warning will be displayed if storage
+     *        is below Critical Level.
+     * @return ETrue : Below critical level
+     */
+    TBool CheckSpaceBelowCriticalLevelL();
  protected:
 
 	/**
