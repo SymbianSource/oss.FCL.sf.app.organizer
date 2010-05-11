@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hbdocument version="0.9">
+    <widget name="calenEditorLocationWidget" type="HbWidget">
+        <widget name="locationLineEdit" type="HbLineEdit">
+            <real name="z" value="1"/>
+            <string name="text" value=""/>
+        </widget>
+        <widget name="locationPushButton" type="HbPushButton">
+            <real name="z" value="2"/>
+            <sizehint height="7.4un" type="MINIMUM" width="9.5un"/>
+            <sizehint height="7.4un" type="MAXIMUM" width="9.5un"/>
+        </widget>
+        <rect height="9.4un" name="geometry" width="53.73134un" x="0un" y="0un"/>
+        <sizehint height="9.4un" type="PREFERRED"/>
+        <sizehint height="9.4un" type="MINIMUM"/>
+        <sizehint height="9.4un" type="MAXIMUM"/>
+        <layout type="anchor">
+            <anchoritem dst="locationPushButton" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+            <anchoritem dst="locationPushButton" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
+            <anchoritem dst="locationLineEdit" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+            <anchoritem dst="locationLineEdit" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-middle-horizontal)" src="locationPushButton" srcEdge="LEFT"/>
+            <anchoritem dst="locationLineEdit" dstEdge="CENTERV" spacing="0un" src="locationPushButton" srcEdge="CENTERV"/>
+        </layout>
+    </widget>
+    <metadata activeUIState="Common ui state" display="NHD portrait" unit="un">
+        <uistate name="Common ui state" sections="#common"/>
+    </metadata>
+</hbdocument>
