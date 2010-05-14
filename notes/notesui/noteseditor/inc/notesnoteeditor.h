@@ -48,7 +48,6 @@ public:
 private:
 	void execute(AgendaEntry entry);
 	QString getDescription();
-	bool showDeleteConfirmationQuery();
 
 private slots:
 	void markNoteAsTodo();
@@ -63,6 +62,7 @@ private slots:
 	void handleEntrySaveFromCalendar();
 	void handleCalendarEditorClosed();
 	void handleNewNoteAction();
+	void selectedAction(HbAction *action);
 
 private:
 	HbView *mEditor;
@@ -77,6 +77,9 @@ private:
 	QPointer<HbAction> mMarkFavouriteAction;
 	QPointer<HbAction> mDiscardChangesAction;
 	QPointer<HbAction> mNewNoteAction;
+	HbAction *mDeleteNoteAction;
+	HbAction *mCancelDeleteAction;
+	ulong mEntryId;
 
 	NotesEditorDocLoader *mDocLoader;
 	NotesEditorPrivate* mOwner;

@@ -17,7 +17,6 @@
 */
 
 // System includes
-#include <QDebug>
 #include <QTimer>
 
 #include <QStandardItemModel>
@@ -55,8 +54,6 @@ ClockAlarmListModel::ClockAlarmListModel(
  mSourceModel(0),
  mAppControllerIf(controllerIf)
 {
-	qDebug() << "clock: ClockAlarmListModel::ClockAlarmListModel -->";
-
 	// Construct the source model.
 	mSourceModel = new QStandardItemModel(0, 1, this);
 	
@@ -74,8 +71,6 @@ ClockAlarmListModel::ClockAlarmListModel(
 	connect(
 			mTickTimer, SIGNAL(timeout()),
 			this, SLOT(updateRemainingTime()));
-	
-	qDebug() << "clock: ClockAlarmListModel::ClockAlarmListModel <--";
 }
 
 /*!
@@ -83,14 +78,10 @@ ClockAlarmListModel::ClockAlarmListModel(
  */
 ClockAlarmListModel::~ClockAlarmListModel()
 {
-	qDebug() << "clock: ClockAlarmListModel::~ClockAlarmListModel -->";
-
 	if (mSourceModel) {
 		delete mSourceModel;
 		mSourceModel = 0;
 	}
-
-	qDebug() << "clock: ClockAlarmListModel::~ClockAlarmListModel <--";
 }
 
 /*!
@@ -109,10 +100,6 @@ void ClockAlarmListModel::populateModel()
  */
 QAbstractItemModel *ClockAlarmListModel::sourceModel()
 {
-	qDebug() << "clock: ClockAlarmListModel::sourceModel -->";
-
-	qDebug() << "clock: ClockAlarmListModel::sourceModel <--";
-
 	return mSourceModel;
 }
 
@@ -121,8 +108,6 @@ QAbstractItemModel *ClockAlarmListModel::sourceModel()
  */
 void ClockAlarmListModel::populateSourceModel()
 {
-	qDebug() << "clock: ClockAlarmListModel::populateSourceModel -->";
-
 	// Clear the model if it has any data already.
 	mSourceModel->clear();
 	mSourceModel->setColumnCount(1);
@@ -153,7 +138,6 @@ void ClockAlarmListModel::populateSourceModel()
 		// Start the Timer for 1 minute.
 		mTickTimer->start(60000 - 1000 * QTime::currentTime().second());
 	}
-	qDebug() << "clock: ClockAlarmListModel::populateSourceModel <--";
 }
 
 /*!
@@ -163,8 +147,6 @@ void ClockAlarmListModel::populateSourceModel()
  */
 QString ClockAlarmListModel::calculateRemainingTime(AlarmInfo alarmInfo)
 {
-	qDebug() << "clock: ClockAlarmListModel::calculateRemainingTime -->";
-
 	QDateTime currentDateTime = QDateTime::currentDateTime();
 	QDateTime alarmTime = QDateTime(
 			alarmInfo.alarmDateTime, alarmInfo.nextDueTime);
@@ -217,8 +199,6 @@ QString ClockAlarmListModel::calculateRemainingTime(AlarmInfo alarmInfo)
 		formatTimeNote = hbTrId("txt_clock_main_view_setlabel_in_1days");
 		timeNote = formatTimeNote.arg(QString::number(dayleft));
 	}
-	qDebug() << "clock: ClockAlarmListModel::calculateRemainingTime <--";
-
 	return timeNote;
 }
 
@@ -264,8 +244,6 @@ int ClockAlarmListModel::getRemainingSeconds(QDateTime &alarmDateTime)
  */
 void ClockAlarmListModel::updateSourceModel(int alarmId)
 {
-	qDebug() << "clock: ClockAlarmListModel::updateSourceModel -->";
-	
 	Q_UNUSED(alarmId)
 	int alarmInfoCount;
 	int modelCount;
@@ -353,8 +331,6 @@ void ClockAlarmListModel::updateSourceModel(int alarmId)
 			mTickTimer->stop();
 		}
 	}
-
-	qDebug() << "clock: ClockAlarmListModel::updateSourceModel <--";
 }
 
 /*!
@@ -401,8 +377,6 @@ void ClockAlarmListModel::updateRemainingTime()
 QStringList ClockAlarmListModel::getDisplayStringListforAlarmItem(
 		AlarmInfo alarmInfo)
 {
-	qDebug() << "clock: ClockAlarmListModel::getDisplayStringforAlarmItem -->";
-	
 	QStringList displayStringList;
 	QString timeString;
 	if (Snoozed == alarmInfo.alarmState) {
@@ -426,7 +400,8 @@ QStringList ClockAlarmListModel::getDisplayStringListforAlarmItem(
 		QString remainingTime = calculateRemainingTime(alarmInfo);
 		displayStringList.append(remainingTime);
 	} else {
-		displayStringList.append(QString(" "));
+		// TODO: localization
+		displayStringList.append(QString("In-active"));
 	}
 
 	QString alarmDescription = alarmInfo.alarmDesc;
@@ -453,9 +428,6 @@ QStringList ClockAlarmListModel::getDisplayStringListforAlarmItem(
 		}
 	}
 	displayStringList.append(repeatTypeString);
-	
-	qDebug() << "clock: ClockAlarmListModel::getDisplayStringforAlarmItem <--";
-	
 	return displayStringList;
 }
 
@@ -479,22 +451,21 @@ void ClockAlarmListModel::appendAlarmToModel(AlarmInfo alarmInfo)
 		if (Weekly == alarmInfo.repeatType ||
 				Daily == alarmInfo.repeatType ||
 				Workday == alarmInfo.repeatType) {
-			displayiconList.append(HbIcon(":/clock/alarm_repeat"));
+			displayiconList.append(HbIcon("qtg_mono_repeat"));
 		} else {
 			displayiconList.append(QVariant());
 		}
 		item->setData(displayiconList, Qt::DecorationRole);
 		
-		// The status.
-		if (Enabled == alarmInfo.alarmStatus) {
-			item->setData(QString(":/clock/alarm_active"), AlarmIcon);
-		} else {
-			item->setData(QString(":/clock/alarm_inactive"), AlarmIcon);
-		}
 
-		// If the alarm is snoozed.
-		if (Snoozed == alarmInfo.alarmState) {
-			// TODO : Change the alarm icon also to alarm snooze icon
+		// Set the icon for active/in-active/snoozed alarm.
+		if (Disabled == alarmInfo.alarmStatus) {
+			item->setData(QString("qtg_mono_alarm_inactive"), AlarmIcon);
+		} else if (Snoozed == alarmInfo.alarmState) {
+			// Change the alarm icon also to alarm snooze icon
+			item->setData(QString("qtg_mono_alarm_snooze"), AlarmIcon);
+		} else {
+			item->setData(QString("qtg_mono_alarm"), AlarmIcon);
 		}
 
 		// The model for the list item will have:
@@ -534,24 +505,23 @@ void ClockAlarmListModel::updateAlarmDetails(
 		if (Weekly == alarmInfo.repeatType ||
 				Daily == alarmInfo.repeatType ||
 				Workday == alarmInfo.repeatType) {
-			displayiconList.append(HbIcon(":/clock/alarm_repeat"));
+			displayiconList.append(HbIcon("qtg_mono_repeat"));
 		} else {
 			displayiconList.append(QVariant());
 		}
 		mSourceModel->setData(
 				modelIndex, displayiconList, Qt::DecorationRole);
-		// The status.
-		if (Enabled == alarmInfo.alarmStatus) {
-			mSourceModel->setData(
-					modelIndex, QString(":/clock/alarm_active"), AlarmIcon);
+		
+		// Set the icon for active/in-active/snoozed alarm.
+		if (Disabled == alarmInfo.alarmStatus) {
+			mSourceModel->setData(modelIndex, 
+			    QString("qtg_mono_alarm_inactive"), AlarmIcon);
+		} else if (Snoozed == alarmInfo.alarmState) {
+			// Change the alarm icon also to alarm snooze icon
+			mSourceModel->setData(modelIndex, 
+			    QString("qtg_mono_alarm_snooze"), AlarmIcon);
 		} else {
-			mSourceModel->setData(
-					modelIndex, QString(":/clock/alarm_inactive"), AlarmIcon);
-		}
-
-		// If the alarm is snoozed.
-		if (Snoozed == alarmInfo.alarmState) {
-			// TODO : Change the alarm icon also to alarm snooze icon
+			mSourceModel->setData(modelIndex, QString("qtg_mono_alarm"), AlarmIcon);
 		}
 
 		// The model for the list item will have:

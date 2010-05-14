@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hbdocument version="1.0">
+    <object name="snoozeAction" type="HbAction">
+        <string name="role" value="HbDialog:primaryAction"/>
+        <string locid="txt_calendar_button_alarm_snooze" name="text" value="Snooze"/>
+    </object>
+    <object name="stopAction" type="HbAction">
+        <string name="role" value="HbDialog:secondaryAction"/>
+        <string locid="txt_calendar_button_alarm_dialog_snooze" name="text" value="Stop"/>
+    </object>
+    <widget name="dialog" type="HbDialog">
+        <widget name="heading" role="HbDialog:headingWidget" type="HbLabel">
+            <enums name="alignment" value="AlignLeft|AlignLeading"/>
+            <string locid="txt_calendar_title_todo_note_alarm" name="plainText" value="To-do note"/>
+        </widget>
+        <widget name="container" role="HbDialog:contentWidget" type="HbWidget">
+            <widget name="alarmDate" type="HbLabel">
+                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                <real name="z" value="2"/>
+                <sizehint height="var(hb-param-text-height-primary)" type="PREFERRED"/>
+                <string locid="txt_calendar_info_alarm_start_date" name="plainText" value="01/01/2010"/>
+            </widget>
+            <widget name="alarmDescription" type="HbLabel">
+                <enums name="textWrapping" value="TextWordWrap"/>
+                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                <real name="z" value="3"/>
+                <sizehint height="16un" type="PREFERRED"/>
+                <sizehint height="16un" type="MINIMUM"/>
+                <sizehint height="16un" type="MAXIMUM"/>
+                <string name="textFormat" value="PlainText"/>
+            </widget>
+            <widget name="alarmIcon" type="HbLabel">
+                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                <icon iconName="qtg_large_todo_alarm" name="icon"/>
+                <real name="z" value="5"/>
+                <sizehint height="15un" type="PREFERRED" width="15un"/>
+            </widget>
+            <layout type="anchor">
+                <anchoritem dst="alarmDate" dstEdge="LEFT" spacing="var(hb-param-margin-gene-popup)" src="" srcEdge="LEFT"/>
+                <anchoritem dst="alarmDate" dstEdge="TOP" spacing="var(hb-param-margin-gene-popup)" src="" srcEdge="TOP"/>
+                <anchoritem dst="alarmDate" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-popup)" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="alarmDescription" dstEdge="LEFT" spacing="var(hb-param-margin-gene-popup)" src="" srcEdge="LEFT"/>
+                <anchoritem dst="alarmDescription" dstEdge="TOP" spacing="var(hb-param-margin-gene-popup)" src="alarmDate" srcEdge="BOTTOM"/>
+                <anchoritem dst="alarmDescription" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-popup)" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="alarmIcon" dstEdge="LEFT" spacing="17.5un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="alarmIcon" dstEdge="TOP" spacing="var(hb-param-margin-gene-popup)" src="alarmDescription" srcEdge="BOTTOM"/>
+                <anchoritem dst="alarmIcon" dstEdge="BOTTOM" spacing="-var(hb-param-margin-gene-popup)" src="" srcEdge="BOTTOM"/>
+            </layout>
+        </widget>
+        <ref object="snoozeAction" role="HbDialog:primaryAction"/>
+        <ref object="stopAction" role="HbDialog:secondaryAction"/>
+    </widget>
+    <metadata activeUIState="Common ui state" display="NHD portrait" unit="un">
+        <uistate name="Common ui state" sections="#common"/>
+    </metadata>
+</hbdocument>

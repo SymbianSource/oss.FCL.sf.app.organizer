@@ -20,10 +20,7 @@
 #include <QGraphicsItem>
 #include <QStandardItem>
 #include <QStandardItemModel>
-#include <QDebug>
 #include <HbInstance>
-#include <HbLabel>
-#include <HbPushButton>
 #include <HbAbstractViewItem>
 #include <HbMenu>
 #include <HbAction>
@@ -38,7 +35,7 @@
 #include "settingsutility.h"
 #include "timezoneclient.h"
 #include "clockcityselectionlist.h"
-#include "listitemprototype.h"
+#include "clockhomecityitem.h"
 
 /*!
 	\class ClockWorldView
@@ -55,8 +52,6 @@ ClockWorldView::ClockWorldView(QGraphicsItem *parent)
 :HbView(parent),
  mSelectedItem(-1)
 {
-	qDebug("clock: ClockWorldView::ClockWorldView() -->");
-
 	// Timer for updating list data upon time change/update.
 	mRefreshTimer = new QTimer();
 	connect(
@@ -65,8 +60,6 @@ ClockWorldView::ClockWorldView(QGraphicsItem *parent)
 
 	// Create the model.
 	mCityListModel = new QStandardItemModel();
-
-	qDebug("clock: ClockWorldView::ClockWorldView() <--");
 }
 
 /*!
@@ -74,13 +67,13 @@ ClockWorldView::ClockWorldView(QGraphicsItem *parent)
  */
 ClockWorldView::~ClockWorldView()
 {
-	qDebug("clock: ClockWorldView::~ClockWorldView() -->");
-
 	if (mDocLoader) {
 		delete mDocLoader;
+		mDocLoader = 0;
 	}
-
-	qDebug("clock: ClockWorldView::~ClockWorldView() <--");
+	HbStyleLoader::unregisterFilePath(":/style/hblistviewitem.css");
+	HbStyleLoader::unregisterFilePath(
+			":/style/hblistviewitem.widgetml");
 }
 
 /*!
@@ -94,8 +87,6 @@ void ClockWorldView::setupView(
 		ClockAppControllerIf &controllerIf,
 		ClockDocLoader *docLoader)
 {
-	qDebug("clock: ClockWorldView::setupView() <--");
-
 	mDocLoader = docLoader;
 	mAppControllerIf = &controllerIf;
 
@@ -105,50 +96,43 @@ void ClockWorldView::setupView(
 	// Establish required connections.
 	connect(
 			mTimezoneClient, SIGNAL(timechanged()),
-			this, SLOT(updateClockDisplay()));
+			this, SLOT(updateAllLocationInfo()));
 	connect(
-			mTimezoneClient, SIGNAL(timechanged()),
-			this, SLOT(updateDayDateInfo()));
+			mTimezoneClient, SIGNAL(autoTimeUpdateChanged(int)),
+			this, SLOT(updateCurrentLocationInfo(int)));
 	connect(
-			mTimezoneClient, SIGNAL(timechanged()),
-			this, SLOT(updateCurrentLocationInfo()));
-	connect(
-			mTimezoneClient, SIGNAL(timechanged()),
-			this, SLOT(updateCurrentZoneInfo()));
+			mTimezoneClient, SIGNAL(cityUpdated()),
+			this, SLOT(updateAllLocationInfo()));
 
 	mDisplayWorldClockView = static_cast<HbAction *> (
-	            mDocLoader->findObject("worldClockAction"));
+			mDocLoader->findObject("worldClockAction"));
 
 	mDisplayWorldClockView->setCheckable(true);
 	mDisplayWorldClockView->setChecked(true);
 
 	connect(
-	        mDisplayWorldClockView, SIGNAL(changed()),
-            this, SLOT(refreshWorldView()));
+			mDisplayWorldClockView, SIGNAL(changed()),
+			this, SLOT(refreshWorldView()));
 
 	// Get the currently added locations to the list.
 	mCityInfoList = mTimezoneClient->getSavedLocations();
 
-	// Create the custom prototype.
-	ListItemPrototype *customPrototype = new ListItemPrototype();
+	// Get the homecity widget.
+	mHomeCityWidget = qobject_cast<ClockHomeCityItem *>(
+			mDocLoader->findWidget(CLOCK_WORLD_HOMECITY));
+	
+	// Get the city list item.
 	mCityListView = qobject_cast<HbListView *> (
-			mDocLoader->findWidget("worldClockCityListView"));
-	HbStyleLoader::registerFilePath(":/style/");
+			mDocLoader->findWidget(CLOCK_WORLD_CITYLIST));
+	HbStyleLoader::registerFilePath(":/style/hblistviewitem.css");
+	HbStyleLoader::registerFilePath(
+			":/style/hblistviewitem.widgetml");
+	mCityListView->setLayoutName("citylist-portrait");
 	mCityListView->setModel(mCityListModel);
-	mCityListView->setItemPrototype(customPrototype);
-	mCityListView->setLayoutName("custom");
-
-	mPlaceLabel =
-			qobject_cast<HbLabel *> (mDocLoader->findWidget("placeLabel"));
-//	mPlaceLabel->setTextWrapping(Hb::TextWordWrap);
-
-	mDayDateLabel =
-			qobject_cast<HbLabel *> (mDocLoader->findWidget("dateLabel"));
-
+	
 	// Get the toolbar/menu actions.
 	mAddCityAction = static_cast<HbAction *> (
 			mDocLoader->findObject("addCityAction"));
-	mAddCityAction->setIcon(HbIcon(":/clock/add_new_city.svg"));
 	connect(
 			mAddCityAction, SIGNAL(triggered()),
 			this, SLOT(handleAddLocation()));
@@ -159,13 +143,11 @@ void ClockWorldView::setupView(
 			mShowAlarmsViewAction, SIGNAL(triggered()),
 			this, SLOT(showAlarmsView()));
 
-	HbMainWindow *window;
-	window = hbInstance->allMainWindows().first();
-	updateToolbarTexts(window->orientation());
+	HbMainWindow *window = hbInstance->allMainWindows().first();
 
 	connect(
 			window, SIGNAL(orientationChanged(Qt::Orientation)),
-			this, SLOT(updateToolbarTexts(Qt::Orientation)));
+			this, SLOT(loadSection(Qt::Orientation)));
 
 	if (mCityInfoList.count() > 0) {
 		// There is atleast one city. Refresh needed.
@@ -175,25 +157,34 @@ void ClockWorldView::setupView(
 		mRefreshTimer->start(after * 1000);
 	}
 
-	// Update the date and day info.
-	updateDayDateInfo();
-
 	connect(
 			mCityListView,
 			SIGNAL(longPressed(HbAbstractViewItem *, const QPointF &)),
 			this,
 			SLOT(handleItemLongPressed(HbAbstractViewItem *, const QPointF &)));
 
-	// Populate the list.
-	int index = 0;
 	// Update current location info.
-	updateCurrentLocationInfo();
+	updateCurrentLocationInfo(mTimezoneClient->timeUpdateOn());
 
-	for (; index < mCityInfoList.count(); index++) {
+	// Populate the list.
+	for (int index = 0; index < mCityInfoList.count(); index++) {
 		addCityToList(mCityInfoList.at(index));
 	}
+	
+	// Adding the "Add city" in options menu.
+	mAddCityMenuAction = new HbAction(
+			QString(hbTrId("txt_clock_opt_add_city")),this);
+	menu()->addAction(mAddCityMenuAction);
+	mAddCityMenuAction->setVisible(true);
+	connect(
+			mAddCityMenuAction, SIGNAL(triggered()),
+			this, SLOT(handleAddLocation()));
 
-	qDebug("clock: ClockWorldView::setupView() <--");
+	// Check for disabling of addCityAction in view toolbar.
+	if ((KMaximumCityListCount-1) == mCityInfoList.count()) {
+		mAddCityAction->setEnabled(false);
+		mAddCityMenuAction->setVisible(false);
+	}
 }
 
 /*!
@@ -201,46 +192,19 @@ void ClockWorldView::setupView(
  */
 void ClockWorldView::refreshCityList()
 {
+	updateCurrentLocationInfo(mTimezoneClient->timeUpdateOn());
 	int cityInfoCount = mCityInfoList.count();
 
 	if (cityInfoCount) {
 		QStandardItem *item = 0;
 		for (int infoIndex = 0; infoIndex < cityInfoCount; infoIndex++) {
 			item = mCityListModel->item(infoIndex);
-
-			QDateTime dateTime = QDateTime::currentDateTime();
-			dateTime = dateTime.toUTC();
-			dateTime = dateTime.addSecs(
-					mCityInfoList.at(infoIndex).zoneOffset * 60);
-
-			// Display day/night indicators.
-			QString dayNightIconPath = "";
-			if (isDay(dateTime)) {
-				dayNightIconPath = ":/clock/day";
-			} else {
-				dayNightIconPath = ":/clock/night";
-			}
-			item->setData(dayNightIconPath, Qt::UserRole + 1000);
-
-			// Update the date info.
-			QString dateInfo = dateTime.toString(
-					mSettingsUtility->dateFormatString());
-			if (dateTime.date() == QDate::currentDate()) {
-				dateInfo = tr("Today");
-			}
-			item->setData(dateInfo, Qt::UserRole + 1001);
-
-			// Set the DST icon.
-			QString dstIconPath = "";
-			if (mCityInfoList.at(infoIndex).dstOn) {
-				dstIconPath = ":/clock/dst_icon";
-			}
-			item->setData(dstIconPath, Qt::UserRole + 1004);
-
-			// Update the time info.
-			QString timeInfo = dateTime.toString(
-					mSettingsUtility->timeFormatString());
-			item->setData(timeInfo, Qt::UserRole + 1005);
+			item->setData(
+					getCityListDisplayString(mCityInfoList.at(infoIndex)),
+					Qt::DisplayRole);
+			item->setData(
+					getCityListDecorationString(mCityInfoList.at(infoIndex)),
+					Qt::DecorationRole);
 		}
 
 		// Start the timer again for one minute.
@@ -249,101 +213,64 @@ void ClockWorldView::refreshCityList()
 }
 
 /*!
-	Updates the clock display.
- */
-void ClockWorldView::updateClockDisplay()
-{
-//	mSkinnableClock->updateDisplay(true);
-}
-
-/*!
-	Updates the day-date info.
- */
-void ClockWorldView::updateDayDateInfo()
-{
-	// Get the current datetime.
-	QDateTime dateTime = QDateTime::currentDateTime();
-	QString dayName = dateTime.toString("dddd");
-
-	QString currentDate = mSettingsUtility->date();
-	// Construct the day + date string.
-	QString dayDateString;
-	dayDateString+= dayName;
-	dayDateString += " ";
-	dayDateString += currentDate;
-
-	mDayDateLabel->clear();
-	mDayDateLabel->setPlainText(dayDateString);
-}
-
-/*!
 	Updates the current location info.
  */
-void ClockWorldView::updateCurrentLocationInfo()
+void ClockWorldView::updateCurrentLocationInfo(int networkTime)
 {
-	// Get the updated home city.
-	LocationInfo homeCity = mTimezoneClient->getCurrentZoneInfoL();
+	HbMainWindow *window = hbInstance->allMainWindows().first();
+	Qt::Orientation currentOrienation = window->orientation();
+	loadSection(currentOrienation);
 
-	// Construct the GMT +/- X string.
-	QString gmtOffset;
+	if (!networkTime) {
+		// Get the updated home city.
+		LocationInfo homeCity = mTimezoneClient->getCurrentZoneInfoL();
 
-	int utcOffset = homeCity.zoneOffset;
-	int offsetInHours (utcOffset/60);
-	int offsetInMinutes (utcOffset%60);
+		QMap<QString, QVariant> itemList;
+		QString value;
+		QDateTime dateTime = QDateTime::currentDateTime();
 
-	// Check wether the offset is +ve or -ve.
-	if (0 < utcOffset) {
-		// We have a positive offset. Append the '+' character.
-		gmtOffset += tr(" +");
-	} else if (0 > utcOffset) {
-		// We have a negative offset. Append the '-' character.
-		gmtOffset += tr(" -");
-		offsetInHours = -offsetInHours;
-	} else {
-		// We dont have an offset. We are at GMT zone.
-	}
+		// Show the date. If date is current date then show 'today'.
+		QString dateInfo = dateTime.toString(
+				mSettingsUtility->dateFormatString());
+		itemList.insert(value.setNum(ClockHomeCityItem::Date), dateInfo);
 
-	// Append the hour component.
-	gmtOffset += QString::number(offsetInHours);
+		// Show the city and country name.
+		QString placeInfo =
+				homeCity.cityName + tr(", ") + homeCity.countryName;
+		itemList.insert(value.setNum(ClockHomeCityItem::City), placeInfo);
 
-	// Get the time separator from settings and append it.
-	QStringList timeSeparatorList;
-	int index = mSettingsUtility->timeSeparator(timeSeparatorList);
-	gmtOffset += timeSeparatorList.at(index);
+		// Show the time at that location.
+		QString timeInfo = dateTime.toString(
+				mSettingsUtility->timeFormatString());
+		itemList.insert(value.setNum(ClockHomeCityItem::Time), timeInfo);
 
-	// Append the minute component.
-	// If minute component is less less than 10, append a '00'
-	if (0 <= offsetInMinutes && offsetInMinutes < 10) {
-		gmtOffset += tr("00");
-	} else {
-		gmtOffset += QString::number(offsetInMinutes);
-	}
+		// TODO: Use the home city specific icons.
+		// Display day/night indicators.
+		QString dayNightIconPath = "";
+		if (isDay(dateTime)) {
+			dayNightIconPath = "qtg_large_clock";
+		} else {
+			dayNightIconPath = "qtg_large_clock";
+		}
+		itemList.insert(value.setNum(
+				ClockHomeCityItem::DayNightIndicator), dayNightIconPath);
 
-	// Append space.
-	gmtOffset += tr(" ");
-
-	// Append GMT sting.
-	gmtOffset += hbTrId("txt_common_common_gmt");
-
-	// Append space.
-	gmtOffset += tr(" ");
-
-	// Append DST info.
-	if (homeCity.dstOn) {
-		gmtOffset += hbTrId("txt_common_setlabel_dst");
-	}
-
-	// Set the city and country name .
-	mPlaceLabel->clear();
-	if (mTimezoneClient->timeUpdateOn()) {
-		mPlaceLabel->setPlainText(homeCity.countryName + tr(" ") + gmtOffset);
-	} else {
-		mPlaceLabel->setPlainText(
-				homeCity.cityName + tr(", ") + homeCity.countryName
-				+ tr(" ") + gmtOffset);
+		// Show dst icon when needed.
+		if (homeCity.dstOn) {
+			QString dstIconPath = "qtg_mono_day_light_saving_time";
+			itemList.insert(value.setNum(ClockHomeCityItem::Dst), dstIconPath);
+		}
+		mHomeCityWidget->setHomeCityItemData(itemList);
 	}
 }
 
+/*!
+	Handles the long press on each item in the citylist.
+	Displays a list item specific context menu.
+
+	\param item The HbAbstractViewItem that was long pressed.
+	\param coords The position where mouse was pressed.
+ */
 void ClockWorldView::handleItemLongPressed(
 		HbAbstractViewItem *item, const QPointF &coords)
 {
@@ -355,19 +282,13 @@ void ClockWorldView::handleItemLongPressed(
 
 	// Add the actions to the context menu.
 	mSetCurrentLocationAction = itemContextMenu->addAction(
-	    hbTrId("txt_clk_menu_set_as_current_location"));
+			hbTrId("txt_clk_menu_set_as_current_location"));
 	mRemoveCityAction = itemContextMenu->addAction(
-	    hbTrId("txt_clk_menu_delete"));
-
-	connect(
-			mSetCurrentLocationAction, SIGNAL(triggered()),
-			this, SLOT(handleSetAsCurrentLocationAction()));
-	connect(
-			mRemoveCityAction, SIGNAL(triggered()),
-			this, SLOT(handleDeleteAction()));
+			hbTrId("txt_clk_menu_delete"));
 
 	// Show the menu.
-	itemContextMenu->exec(coords);
+	itemContextMenu->open(this, SLOT(selectedMenuAction(HbAction*)));
+	itemContextMenu->setPreferredPos(coords);
 }
 
 /*!
@@ -393,13 +314,9 @@ void ClockWorldView::handleAddLocation()
 void ClockWorldView::handleDeleteAction()
 {
 	if (-1 != mSelectedItem) {
-		int temp = mCityListModel->rowCount();
-
 		QStandardItem *item = mCityListModel->takeItem(mSelectedItem);
 		mCityListModel->removeRow(mSelectedItem);
 		delete item;
-
-		temp = mCityListModel->rowCount();
 
 		mCityInfoList.removeAt(mSelectedItem);
 		mSelectedItem = -1;
@@ -410,6 +327,10 @@ void ClockWorldView::handleDeleteAction()
 		if (mCityInfoList.count() <= 0) {
 			// No need to refresh the list anymore.
 			mRefreshTimer->stop();
+		} else if (mCityInfoList.count() < (KMaximumCityListCount-1) &&
+				!mAddCityAction->isEnabled()) {
+			mAddCityAction->setEnabled(true);
+			mAddCityMenuAction->setVisible(true);
 		}
 	}
 }
@@ -419,66 +340,37 @@ void ClockWorldView::handleDeleteAction()
  */
 void ClockWorldView::handleSetAsCurrentLocationAction()
 {
+	// Get the info of the selected item.
+	LocationInfo newHomeCity = mCityInfoList[mSelectedItem];
+
 	// Check if time update is set to ON.
 	// If yes, reset it to OFF and change the home location.
 	if (mTimezoneClient->timeUpdateOn()) {
 		mTimezoneClient->setTimeUpdateOn(false);
+
+		QStandardItem *item = mCityListModel->takeItem(mSelectedItem);
+		mCityListModel->removeRow(mSelectedItem);
+		delete item;
+
+		mCityInfoList.removeAt(mSelectedItem);
 	} else {
 		// The current location and home city should be swapped.
 		// Store the info of current home city.
 		LocationInfo oldHomeCity = mTimezoneClient->getCurrentZoneInfoL();
-		// Get the info of the selected item.
-		LocationInfo newHomeCity = mCityInfoList[mSelectedItem];
-
-		QStandardItem *cityItem = mCityListModel->item(mSelectedItem);
-		QDateTime dateTime = QDateTime::currentDateTime();
-
-		// Display day/night indicators.
-		QString dayNightIconPath = "";
-		if (isDay(dateTime)) {
-			dayNightIconPath = ":/clock/day";
-		} else {
-			dayNightIconPath = ":/clock/night";
-		}
-		cityItem->setData(dayNightIconPath, Qt::UserRole + 1000);
-
-		// Date.
-		QString dateString = dateTime.toString(
-				mSettingsUtility->dateFormatString());
-		if (dateTime.date() == QDate::currentDate()) {
-			dateString = tr("Today");
-			}
-		cityItem->setData(dateString, Qt::UserRole + 1001);
-
-		// The city/country name.
-		QString placeInfo =
-				oldHomeCity.cityName + tr(", ") + oldHomeCity.countryName;
-		cityItem->setData(placeInfo, Qt::UserRole + 1002);
-
-		// Dst icon.
-		QString dstIconPath = "";
-		if (oldHomeCity.dstOn) {
-			dstIconPath = ":/clock/dst_icon";
-		}
-		cityItem->setData(dstIconPath, Qt::UserRole + 1004);
-
-		// Time.
-		QString timeString = dateTime.toString(
-				mSettingsUtility->timeFormatString());
-		cityItem->setData(timeString, Qt::UserRole + 1005);
 
 		// Update the info list.
 		mCityInfoList.removeAt(mSelectedItem);
 		mCityInfoList.insert(mSelectedItem, oldHomeCity);
-		// Update the home city with the timezone server.
-		mTimezoneClient->setAsCurrentLocationL(newHomeCity);
 
-		// Update the current location info.
-		updateCurrentLocationInfo();
-
-		// Update the offset difference in each list item.
-		updateOffsetDifferences();
 	}
+	// Update the home city with the timezone server.
+	mTimezoneClient->setAsCurrentLocationL(newHomeCity);
+
+	// Update the current location info.
+	updateCurrentLocationInfo(mTimezoneClient->timeUpdateOn());
+
+	// Update the offset difference in each list item.
+	refreshCityList();
 
 	// Update the data file.
 	mTimezoneClient->saveLocations(mCityInfoList);
@@ -499,15 +391,20 @@ void ClockWorldView::handleCitySelected(LocationInfo info)
 		// Now we check if the city is already added in the list.
 		bool proceed = true;
 		for (int i = 0; i < mCityInfoList.count(); i++) {
-			if (info.timezoneId == mCityInfoList.at(i).timezoneId) {
+			if (info.timezoneId == mCityInfoList.at(i).timezoneId
+					&& (info.cityName == mCityInfoList.at(i).cityName)
+					&& (info.countryName == mCityInfoList.at(i).countryName) ) {
 				proceed = false;
 				break;
 			}
 		}
 
+		LocationInfo currentCity = mTimezoneClient->getCurrentZoneInfoL();
 		// Check if the selected city is not the home city.
-		if (info.timezoneId
-				== mTimezoneClient->getCurrentZoneInfoL().timezoneId) {
+		if (
+				(info.timezoneId == currentCity.timezoneId)
+				&& (info.cityName == currentCity.cityName)
+				&& (info.countryName == currentCity.countryName)) {
 			proceed = false;
 		}
 
@@ -528,7 +425,11 @@ void ClockWorldView::handleCitySelected(LocationInfo info)
 			}
 		}
 	}
-
+	if ((KMaximumCityListCount-1) == mCityInfoList.count() &&
+			mAddCityAction->isEnabled()) {
+		mAddCityAction->setEnabled(false);
+		mAddCityMenuAction->setVisible(false);
+	}
 	// Cleanup.
 	mCitySelectionList->deleteLater();
 }
@@ -536,87 +437,82 @@ void ClockWorldView::handleCitySelected(LocationInfo info)
 /*!
 	Navigates to the clock alarms view.
  */
-
 void ClockWorldView::showAlarmsView()
 {
-	qDebug() << "clock: ClockWorldView::showAlarmsView -->";
-
 	mAppControllerIf->switchToView(MainView);
-
-	qDebug() << "clock: ClockWorldView::showAlarmsView <--";
 }
 
 /*!
-	Updates the offset difference shown in each item with respect to the home
-	city.
- */
-void ClockWorldView::updateOffsetDifferences()
-{
-	// Get the home city information.
-	LocationInfo homeCityInfo = mTimezoneClient->getCurrentZoneInfoL();
-
-	for (int iter = 0; iter < mCityListModel->rowCount(); iter++) {
-		QModelIndex index = mCityListModel->index(iter, 0);
-		LocationInfo cityInfo = mCityInfoList[iter];
-
-		// Find out if the city being added has an offset greater than or less
-		// than the homecity offset.
-		QString offsetDifference;
-		if (cityInfo.zoneOffset < homeCityInfo.zoneOffset) {
-			offsetDifference += "-";
-		} else if (cityInfo.zoneOffset > homeCityInfo.zoneOffset) {
-			offsetDifference += "+";
-		}
-		// Now get the hours and minutes.
-		int difference =
-				qAbs(homeCityInfo.zoneOffset - cityInfo.zoneOffset);
-		int hours = difference / 60;
-		int minutes = difference % 60;
-		offsetDifference += QString::number(hours);
-		offsetDifference += "hrs";
-		if (minutes) {
-			offsetDifference += ", ";
-			offsetDifference += QString::number(minutes);
-			offsetDifference += "mins";
-		}
-		// TODO : Need to enable these code once we recieve the localisation.
-		/*QString displayFormat = tr("%1hrs, %2mins");
-		QString offsetString = displayFormat.arg(hours, minutes);
-		offsetDifference += offsetString;*/
-		mCityListModel->setData(index, offsetDifference, Qt::UserRole + 1003);
-	}
-}
-
-/*!
-    Slot which gets called when `World Clock' action is triggered from the view
-    toolbar. This is responsible for reloading the content of the world clock view.
+	Slot which gets called when `World Clock' action is triggered from the view
+	toolbar. This is responsible for reloading the content of worldclock view.
  */
 void ClockWorldView::refreshWorldView()
 {
-    qDebug() << "clock: ClockWorldView::refreshWorldView -->";
-
 	mDisplayWorldClockView->setChecked(true);
-
-    qDebug() << "clock: ClockWorldView::refreshWorldView <--";
 }
 
 /*!
-	Slot to handle orientation changes
+	Loads the appropriate section based on window orientaion.
  */
-void ClockWorldView::updateToolbarTexts(Qt::Orientation currentOrientation)
+void ClockWorldView::loadSection(Qt::Orientation orientation)
 {
-	if (Qt::Horizontal == currentOrientation) {
-		// Display toolbar item's texts
-		// TODO to use text ids from ts file.
-		mShowAlarmsViewAction->setText(tr("Alarms"));
-		mDisplayWorldClockView->setText(tr("World clock"));
-		mAddCityAction->setText(tr("Add city"));
-	} else if(Qt::Vertical == currentOrientation){
-		// Remove toolbar item's texts as only icons are shown.
-		// TODO to use text ids from ts file.
-		mShowAlarmsViewAction->setText(tr(""));
-		mDisplayWorldClockView->setText(tr(""));
-		mAddCityAction->setText("");
+	bool networkTime = mTimezoneClient->timeUpdateOn();
+	bool loadSuccess;
+	if (Qt::Horizontal == orientation) {
+		if (networkTime) {
+			// Do not show home city.
+			mDocLoader->load(
+					CLOCK_WORLD_VIEW_DOCML,
+					CLOCK_WORLD_VIEW_LANDSCAPE_NOHOMECITY_SECTION,
+					&loadSuccess);
+			mHomeCityWidget->hide();
+		} else {
+			mDocLoader->load(
+					CLOCK_WORLD_VIEW_DOCML,
+					CLOCK_WORLD_VIEW_LANDSCAPE_HOMECITY_SECTION,
+					&loadSuccess);
+			mHomeCityWidget->show();
+		}
+	} else if (Qt::Vertical == orientation) {
+		if (networkTime) {
+			// Do not show home city.
+			mDocLoader->load(
+					CLOCK_WORLD_VIEW_DOCML,
+					CLOCK_WORLD_VIEW_PORTRAIT_NOHOMECITY_SECTION,
+					&loadSuccess);
+			mHomeCityWidget->hide();
+		} else {
+			// Show home city.
+			mDocLoader->load(
+					CLOCK_WORLD_VIEW_DOCML,
+					CLOCK_WORLD_VIEW_PORTRAIT_HOMECITY_SECTION,
+					&loadSuccess);
+			mHomeCityWidget->show();
+		}
+	}
+	mCityListView->update();
+}
+
+/*!
+	Slot which gets called for timeChanged signal of timezone client.
+	Refreshes both homecity & city list.
+ */
+void ClockWorldView::updateAllLocationInfo()
+{
+	updateCurrentLocationInfo(mTimezoneClient->timeUpdateOn());
+	updateCityList();
+	refreshCityList();
+}
+
+/*!
+	Slot to handle the selected context menu actions
+ */
+void ClockWorldView::selectedMenuAction(HbAction *action)
+{
+	if (action == mSetCurrentLocationAction) {
+		handleSetAsCurrentLocationAction();
+	} else if (action == mRemoveCityAction) {
+		handleDeleteAction();
 	}
 }
 
@@ -630,95 +526,17 @@ QModelIndex ClockWorldView::addCityToList(const LocationInfo& locationInfo)
 	// Here we construct a model item and add it to the list model.
 	QStandardItem *modelItem = new QStandardItem();
 
-	QDateTime dateTime = QDateTime::currentDateTime();
-	dateTime = dateTime.toUTC();
-	dateTime = dateTime.addSecs(locationInfo.zoneOffset * 60);
-
-	// Display day/night indicators.
-	QString dayNightIconPath = "";
-	if (isDay(dateTime)) {
-		dayNightIconPath = ":/clock/day";
-	} else {
-		dayNightIconPath = ":/clock/night";
-	}
-	modelItem->setData(dayNightIconPath, Qt::UserRole + 1000);
-
-	// Show the date. If date is current date then show 'today'.
-	QString dateInfo = dateTime.toString(mSettingsUtility->dateFormatString());
-	if (dateTime.date() == QDate::currentDate()) {
-		dateInfo = tr("Today");
-	}
-	modelItem->setData(dateInfo, Qt::UserRole + 1001);
-
-	// Show the city and country name.
-	QString placeInfo =
-			locationInfo.cityName + tr(", ") + locationInfo.countryName;
-	modelItem->setData(placeInfo, Qt::UserRole + 1002);
-
-	// Get the homecity information.
-	LocationInfo homeCityInfo = mTimezoneClient->getCurrentZoneInfoL();
-	// Find out if the city being added has an offset greater than or less than
-	// the homecity offset.
-	QString offsetDifference;
-	if (locationInfo.zoneOffset < homeCityInfo.zoneOffset) {
-		offsetDifference += "-";
-	} else if (locationInfo.zoneOffset > homeCityInfo.zoneOffset) {
-		offsetDifference += "+";
-	}
-	// Now get the hours and minutes.
-	int difference = qAbs(homeCityInfo.zoneOffset - locationInfo.zoneOffset);
-	int hours = difference / 60;
-	int minutes = difference % 60;
-
-	if ( hours && minutes ) {
-		if (hours == 1) {
-			QString displayFormat =
-					hbTrId("txt_clock_dblist_daily_val_1_hr_2_mins");
-			QString offsetString = displayFormat.arg(hours).arg(minutes);
-			offsetDifference += offsetString;
-		}
-		else {
-			QString displayFormat =
-					hbTrId("txt_clock_dblist_daily_val_1_hrs_2_mins");
-			QString offsetString = displayFormat.arg(hours).arg(minutes);
-			offsetDifference += offsetString;
-		}
-	}
-	else if ( hours ){
-		if(hours == 1 ) {
-			QString displayFormat = hbTrId("txt_clock_dblist_val_1_hr");
-			QString offsetString = displayFormat.arg(hours);
-			offsetDifference += offsetString;
-		}
-		else {
-			QString displayFormat = hbTrId("txt_clock_dblist_val_1_hrs");
-			QString offsetString = displayFormat.arg(hours);
-			offsetDifference += offsetString;
-		}
-	}
-	else if (minutes){
-		QString displayFormat = hbTrId("txt_clock_dblist_val_1_mins");
-		QString offsetString = displayFormat.arg(minutes);
-		offsetDifference += offsetString;
-	}
-
-	modelItem->setData(offsetDifference, Qt::UserRole + 1003);
-
-	// Show dst icon when needed.
-	QString dstIconPath = "";
-	if (locationInfo.dstOn) {
-		dstIconPath = ":/clock/dst_icon";
-	}
-	modelItem->setData(dstIconPath, Qt::UserRole + 1004);
-
-	// Show the time at that location.
-	QString timeInfo = dateTime.toString(mSettingsUtility->timeFormatString());
-	modelItem->setData(timeInfo, Qt::UserRole + 1005);
-
 	// Add the item to the model.
 	mCityListModel->appendRow(modelItem);
 
-	return(mCityListModel->indexFromItem(modelItem));
+	QModelIndex index = mCityListModel->indexFromItem(modelItem);
+	mCityListModel->setData(
+			index, getCityListDisplayString(locationInfo), Qt::DisplayRole);
+	mCityListModel->setData(
+			index, getCityListDecorationString(locationInfo),
+			Qt::DecorationRole);
+
+	return index;
 }
 
 /*!
@@ -735,6 +553,169 @@ bool ClockWorldView::isDay(QDateTime dateTime)
 		return false;
 	}
 	return true;
+}
+
+/*!
+	Returns the QVariantList for citylist to be set for DisplayRole.
+	
+	/param locationInfo Details of the city to be added to the list.
+ */
+QVariantList ClockWorldView::getCityListDisplayString(
+		const LocationInfo& locationInfo)
+{
+	QVariantList displayString;
+	QDateTime dateTime = QDateTime::currentDateTime();
+	dateTime = dateTime.toUTC();
+	dateTime = dateTime.addSecs(locationInfo.zoneOffset * 60);
+
+	// Show the date. If date is current date then show 'today'.
+	QString dateInfo = dateTime.toString(mSettingsUtility->dateFormatString());
+	if (dateTime.date() == QDate::currentDate()) {
+		dateInfo = hbTrId("txt_clock_main_view_dblist_daily_val_today");
+	}
+	displayString.append(dateInfo);
+
+	// Show the city and country name.
+	QString placeInfo =
+			locationInfo.cityName + tr(", ") + locationInfo.countryName;
+	displayString.append(placeInfo);
+
+	// Get the homecity information.
+	LocationInfo homeCityInfo = mTimezoneClient->getCurrentZoneInfoL();
+	// Find out if the city being added has an offset greater than or less than
+	// the homecity offset.
+	QString offsetDifference;
+	if (locationInfo.zoneOffset < homeCityInfo.zoneOffset) {
+		offsetDifference += "-";
+	} else if (locationInfo.zoneOffset > homeCityInfo.zoneOffset) {
+		offsetDifference += "+";
+	}
+	// Now get the hours and minutes.
+	int difference = qAbs(homeCityInfo.zoneOffset - locationInfo.zoneOffset);
+	int hours = difference / 60;
+	int minutes = difference % 60;
+	QString displayFormat("");
+	QString offsetString("");
+
+	if ( hours && minutes ) {
+		if (hours == 1) {
+			displayFormat =
+					hbTrId("txt_clock_dblist_daily_val_1_hr_2_mins");
+			offsetString = displayFormat.arg(hours).arg(minutes);
+			offsetDifference += offsetString;
+		}
+		else {
+			displayFormat =
+					hbTrId("txt_clock_dblist_daily_val_1_hrs_2_mins");
+			offsetString = displayFormat.arg(hours).arg(minutes);
+			offsetDifference += offsetString;
+		}
+	}
+	else if ( hours ){
+		if(hours == 1 ) {
+			displayFormat = hbTrId("txt_clock_dblist_val_1_hr");
+			offsetString = displayFormat.arg(hours);
+			offsetDifference += offsetString;
+		}
+		else {
+			displayFormat = hbTrId("txt_clock_dblist_val_1_hrs");
+			offsetString = displayFormat.arg(hours);
+			offsetDifference += offsetString;
+		}
+	}
+	else if (minutes){
+		displayFormat = hbTrId("txt_clock_dblist_val_1_mins");
+		offsetString = displayFormat.arg(minutes);
+		offsetDifference += offsetString;
+	} else {
+		displayFormat = hbTrId("txt_clock_dblist_val_1_hrs");
+		offsetString = displayFormat.arg(0);
+		offsetDifference += offsetString;
+	}
+	displayString.append(offsetDifference);
+
+	// Show the time at that location.
+	QString timeInfo = dateTime.toString(mSettingsUtility->timeFormatString());
+	displayString.append(timeInfo);
+
+	return displayString;
+}
+
+/*!
+	Returns the QVariantList for citylist to be set for DecorationRole.
+
+	/param locationInfo Details of the city to be added to the list.
+ */
+QVariantList ClockWorldView::getCityListDecorationString(
+		const LocationInfo& locationInfo)
+{
+	QVariantList decorationString;
+	QDateTime dateTime = QDateTime::currentDateTime();
+	dateTime = dateTime.toUTC();
+	dateTime = dateTime.addSecs(locationInfo.zoneOffset * 60);
+
+	// Display day/night indicators.
+	// TODO: change the icon name for night when available.
+	QString dayNightIconPath = "";
+	if (isDay(dateTime)) {
+		dayNightIconPath = "qtg_large_clock";
+	} else {
+		dayNightIconPath = "qtg_large_clock";
+	}
+	decorationString.append(HbIcon(dayNightIconPath));
+
+	// Show dst icon when needed.
+	if (locationInfo.dstOn) {
+		QString dstIconPath = "qtg_mono_day_light_saving_time";
+		decorationString.append(HbIcon(dstIconPath));
+	}
+	return decorationString;
+	
+}
+
+/*!
+	Updates the city list according to the home city.
+ */
+void ClockWorldView::updateCityList()
+{
+	int cityInfoCount = mCityInfoList.count();
+
+	if (cityInfoCount) {
+		bool deletion = false;
+		int index;
+		LocationInfo currentCity = mTimezoneClient->getCurrentZoneInfoL();
+		for (index = 0; index < cityInfoCount; index++) {
+			if (currentCity.timezoneId == mCityInfoList.at(index).timezoneId
+					&& (currentCity.cityName ==
+							mCityInfoList.at(index).cityName)
+					&& (currentCity.countryName ==
+							mCityInfoList.at(index).countryName) ) {
+				deletion = true;
+				break;
+			}
+		}
+		if (deletion) {
+			QStandardItem *item = mCityListModel->takeItem(index);
+			mCityListModel->removeRow(index);
+			delete item;
+
+			mCityInfoList.removeAt(index);
+			index = -1;
+
+			// Update the data file.
+			mTimezoneClient->saveLocations(mCityInfoList);
+
+			if (mCityInfoList.count() <= 0) {
+				// No need to refresh the list anymore.
+				mRefreshTimer->stop();
+			} else if (mCityInfoList.count() < (KMaximumCityListCount-1) &&
+					!mAddCityAction->isEnabled()) {
+				mAddCityAction->setEnabled(true);
+				mAddCityMenuAction->setVisible(true);
+			}
+			
+		}
+	}
 }
 
 // End of file-- Don't delete.

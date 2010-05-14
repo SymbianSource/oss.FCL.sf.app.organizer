@@ -57,7 +57,8 @@
 NotesTodoView::NotesTodoView(QGraphicsWidget *parent)
 :HbView(parent),
  mSelectedItem(0),
- mDeleteAction(0)
+ mDeleteAction(0),
+ mIsLongTop(false)
 {
 	// Nothing yet.
 }
@@ -149,9 +150,6 @@ void NotesTodoView::setupView(
 	mSubTitle = static_cast<HbGroupBox *>(
 			mDocLoader->findWidget("subtitleGroupBox"));
 
-	// Update sub heading text for to-do collections view.
-	updateSubTitle();
-
 	connect(
 			mAgendaUtil, SIGNAL(entryAdded(ulong)),
 			this,SLOT(updateSubTitle(ulong)));
@@ -165,6 +163,14 @@ void NotesTodoView::setupView(
 	// Set the graphics size for the icons.
 	HbListViewItem *prototype = mListView->listItemPrototype();
 	prototype->setGraphicsSize(HbListViewItem::SmallIcon);
+}
+
+/*
+	Updates the title text for the first launch
+ */
+void NotesTodoView::updateTitle()
+{
+	updateSubTitle();
 }
 
 /*!
@@ -190,28 +196,30 @@ void NotesTodoView::createNewTodo()
  */
 void NotesTodoView::handleItemReleased(const QModelIndex &index)
 {
-	// Sanity check.
-	if (!index.isValid()) {
-		return;
+	if(!mIsLongTop) {
+		// Sanity check.
+		if (!index.isValid()) {
+			return;
+		}
+
+		// First get the id of the to-do and get the corresponding information from
+		// agendautil.
+		ulong toDoId = index.data(NotesNamespace::IdRole).value<qulonglong>();
+
+		if (0 >= toDoId) {
+			// Something wrong.
+			return;
+		}
+
+		// Construct agenda event viewer.
+		mAgendaEventViewer = new AgendaEventViewer(mAgendaUtil, this);
+
+		connect(
+				mAgendaEventViewer, SIGNAL(viewingCompleted(const QDate)),
+				this, SLOT(handleViewingCompleted()));
+		// Launch agenda event viewer
+		mAgendaEventViewer->view(toDoId, AgendaEventViewer::ActionEditDelete);
 	}
-
-	// First get the id of the to-do and get the corresponding information from
-	// agendautil.
-	ulong toDoId = index.data(NotesNamespace::IdRole).value<qulonglong>();
-
-	if (0 >= toDoId) {
-		// Something wrong.
-		return;
-	}
-
-	// Construct agenda event viewer.
-	mAgendaEventViewer = new AgendaEventViewer(mAgendaUtil, this);
-
-	connect(
-			mAgendaEventViewer, SIGNAL(viewingCompleted(const QDate)),
-			this, SLOT(handleViewingCompleted()));
-	// Launch agenda event viewer
-	mAgendaEventViewer->view(toDoId, AgendaEventViewer::ActionEditDelete);
 }
 
 /*!
@@ -226,6 +234,7 @@ void NotesTodoView::handleItemLongPressed(
 		HbAbstractViewItem *item, const QPointF &coords)
 {
 	mSelectedItem = item;
+	mIsLongTop = true;
 
 	// Get the entry of the selected item.
 	ulong noteId = item->modelIndex().data(
@@ -234,46 +243,34 @@ void NotesTodoView::handleItemLongPressed(
 
 	// Display a context specific menu.
 	HbMenu *contextMenu = new HbMenu();
+	connect(
+			contextMenu,SIGNAL(aboutToClose()),
+			this, SLOT(handleMenuClosed()));
 
 	// Add actions to the context menu.
 	mOpenAction =
 			contextMenu->addAction(hbTrId("txt_common_menu_open"));
-	connect(
-			mOpenAction, SIGNAL(triggered()),
-			this, SLOT(openTodo()));
 
 	mEditAction = contextMenu->addAction(
 			hbTrId("txt_common_menu_edit"));
-	connect(
-			mEditAction, SIGNAL(triggered()),
-			this, SLOT(editTodo()));
 
 	mDeleteAction = contextMenu->addAction(
 			hbTrId("txt_common_menu_delete"));
-	connect(
-			mDeleteAction, SIGNAL(triggered()),
-			this, SLOT(deleteTodo()));
 
 	if (AgendaEntry::TypeTodo == entry.type()) {
 		if (AgendaEntry::TodoNeedsAction == entry.status()) {
 			mTodoStatusAction = contextMenu->addAction(
 					hbTrId("txt_notes_menu_mark_as_done"));
-			connect(
-					mTodoStatusAction , SIGNAL(triggered()),
-					this, SLOT(markTodoStatus()));
-
 		} else if (AgendaEntry::TodoCompleted == entry.status()) {
 			mTodoStatusAction =
 					contextMenu->addAction(
 							hbTrId("txt_notes_menu_mark_as_not_done"));
-			connect(
-					mTodoStatusAction , SIGNAL(triggered()),
-					this, SLOT(markTodoStatus()));
 		}
 	}
 
 	// Show the menu.
-	contextMenu->exec(coords);
+	contextMenu->open(this, SLOT(selectedMenuAction(HbAction*)));
+	contextMenu->setPreferredPos(coords);
 }
 
 /*!
@@ -465,4 +462,28 @@ void NotesTodoView::openTodo()
 			entry, AgendaEventViewer::ActionEditDelete);
 }
 
+/*
+	Slot to handle the context menu actions.
+ */
+void NotesTodoView::selectedMenuAction(HbAction *action)
+{
+	if (action == mOpenAction) {
+		openTodo();
+	} else if (action == mEditAction) {
+		editTodo();
+	} else if (action == mDeleteAction) {
+		deleteTodo();
+	} else if (action == mTodoStatusAction) {
+		markTodoStatus();
+	}
+}
+
+
+/*!
+	Slot to handle the context menu closed.
+ */
+void NotesTodoView::handleMenuClosed()
+{
+	mIsLongTop = false;
+}
 // End of file	--Don't remove this.

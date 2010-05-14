@@ -33,7 +33,6 @@
 #include "calengriditemprototype.h"
 #include "calencommon.h"
 
-#define GRIDLINE_WIDTH 0.075 //units
 /*!
  \class CalenGridItemPrototype
 
@@ -43,19 +42,45 @@
 /*!
  Constructor.
  */
-CalenGridItemPrototype::CalenGridItemPrototype(QGraphicsWidget *parent) :
+CalenGridItemPrototype::CalenGridItemPrototype(QColor todayIndColor, QColor activeColor, QColor inActiveColor,
+                                               QGraphicsWidget *parent) :
 	HbGridViewItem(parent),
-	mLayout(0),
+	mTodayUnderLineColor(todayIndColor),
+	mActiveTextColor(activeColor),
+	mInActiveTextColor(inActiveColor),
 	mCurrentDateColor(Qt::black),
 	mGridBorderColor(Qt::gray),
 	mEventIndicatorItem(0),
 	mMonthDayInfoItem(0),
 	mFocusIndicatorItem(0),
-	mTodayIndicatorItem(0),
-	mTodayUnderLineColor(Qt::gray)
+	mTodayIndicatorItem(0)
 	{
-	mTodayUnderLineColor = HbColorScheme::color("qtc_cal_month_current_day");
 	}
+
+/*!
+	Constructs all the primitives
+*/
+void CalenGridItemPrototype::createPrimitives()
+{
+	if (!mMonthDayInfoItem) {
+		mMonthDayInfoItem = new HbTextItem(this);
+		HbStyle::setItemName(mMonthDayInfoItem,
+				 QLatin1String("monthDayInfoTextItem"));
+		mMonthDayInfoItem->setElideMode(Qt::ElideNone);
+	}
+		
+	if (!mFocusIndicatorItem) {
+		mFocusIndicatorItem = new HbFrameItem(this);
+		mFocusIndicatorItem->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
+		mFocusIndicatorItem->setZValue(-1);
+		HbStyle::setItemName(mFocusIndicatorItem, QLatin1String("focusIconItem"));
+	}
+	
+	if (!mEventIndicatorItem) {
+		mEventIndicatorItem = new HbIconItem(this);
+		HbStyle::setItemName(mEventIndicatorItem, QLatin1String("eventIconItem"));
+	}
+}
 
 /*!
  From HbAbstractViewItem.
@@ -65,7 +90,9 @@ CalenGridItemPrototype::CalenGridItemPrototype(QGraphicsWidget *parent) :
  */
 HbAbstractViewItem *CalenGridItemPrototype::createItem()
 {
-	return new CalenGridItemPrototype(*this);
+	CalenGridItemPrototype* item = new CalenGridItemPrototype(*this);
+	item->createPrimitives();
+	return item;
 }
 
 /*!
@@ -74,49 +101,31 @@ HbAbstractViewItem *CalenGridItemPrototype::createItem()
  \sa HbAbstractViewItem, HbGridViewItem
  */
 void CalenGridItemPrototype::updateChildItems()
-{
-	
-	// base class implementation
-	HbGridViewItem::updateChildItems();
-		
+{		
 	// Here update content of each item.
 	QVariant monthDayRole;
-	QVariant monthFocusRole;
+	bool monthFocusRole;
 	bool underlineEnabled = false;
-	QVariant monthEventRole;
-	QVariant monthTextColorRole;
+	bool monthEventRole;
+	bool monthTextColorRole;
 	QVariant itemData = modelIndex().data(Qt::UserRole + 1);
 	if (itemData.isValid()) {
 		if (itemData.canConvert<QVariantList>()) {
+		
 			// Get the item list
 			QVariantList itemList = itemData.toList();
 			// Get the day text
 			monthDayRole = itemList.at(CalendarNamespace::CalendarMonthDayRole);
 			if (monthDayRole.canConvert<QString>()) {
-				QString monthDayText = monthDayRole.toString();
-
-				if (!mMonthDayInfoItem) {
-					mMonthDayInfoItem = new HbTextItem(this);
-					HbStyle::setItemName(mMonthDayInfoItem,
-							 QLatin1String("monthDayInfoTextItem"));
-
-				}
-
-				mMonthDayInfoItem->setText(monthDayText);
-				mMonthDayInfoItem->setElideMode(Qt::ElideNone);
+				mMonthDayInfoItem->setText(monthDayRole.toString());
 			}
 			
 			// Get the focus data
-			monthFocusRole = itemList.at(CalendarNamespace::CalendarMonthFocusRole);
-			if (monthFocusRole.canConvert<QString>()) {
-				QString focusIconPath = monthFocusRole.toString();
-				if (!mFocusIndicatorItem) {
-					mFocusIndicatorItem = new HbFrameItem(this);
-					mFocusIndicatorItem->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
-					mFocusIndicatorItem->setZValue(-1);
-					HbStyle::setItemName(mFocusIndicatorItem, QLatin1String("focusIconItem"));
-				}
-				mFocusIndicatorItem->frameDrawer().setFrameGraphicsName(focusIconPath);
+			monthFocusRole = itemList.at(CalendarNamespace::CalendarMonthFocusRole).value<bool>();
+			if (monthFocusRole) {
+				mFocusIndicatorItem->frameDrawer().setFrameGraphicsName(focusIconName);
+			} else {
+				mFocusIndicatorItem->frameDrawer().setFrameGraphicsName(QString(""));
 			}
 			
 			// Get the today indicator role
@@ -124,25 +133,29 @@ void CalenGridItemPrototype::updateChildItems()
 			drawUnderline(underlineEnabled);
 			
 			// Get the event indicator data
-			monthEventRole = itemList.at(CalendarNamespace::CalendarMonthEventRole);
-			if (monthEventRole.canConvert<QString>()) {
-				QString eventIconPath = monthEventRole.toString();
-				if (!mEventIndicatorItem) {
-					mEventIndicatorItem = new HbIconItem(this);
-					HbStyle::setItemName(mEventIndicatorItem, QLatin1String("eventIconItem"));
-				}
-				mEventIndicatorItem->setIconName(eventIconPath);
+			monthEventRole = itemList.at(CalendarNamespace::CalendarMonthEventRole).value<bool>();
+			if (monthEventRole) {
+				// Set the event indicator
+				//QString iconName(focusIconName);
+				mEventIndicatorItem->setIconName(eventIndname);
+			} else {
+				mEventIndicatorItem->setIconName(QString(""));
 			}
 			
 			// Get the text color
-			monthTextColorRole = itemList.at(CalendarNamespace::CalendarMonthTextColorRole);
-			if (monthTextColorRole.canConvert<QColor>()) {
-				QColor monthTextColor = monthTextColorRole.value<QColor>();
-				mMonthDayInfoItem->setTextColor(monthTextColor);
+			monthTextColorRole = itemList.at(CalendarNamespace::CalendarMonthTextColorRole).value<bool>();
+			if (monthTextColorRole) {
+				// Set the active text color
+				mMonthDayInfoItem->setTextColor(mActiveTextColor);
+			} else {
+				// Set the inactive text color
+				mMonthDayInfoItem->setTextColor(mInActiveTextColor);
 			}
 		}
 	}
 	
+	// base class implementation
+	HbGridViewItem::updateChildItems();
 }
 
 /*!

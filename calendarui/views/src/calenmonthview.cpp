@@ -79,6 +79,8 @@ CalenMonthView::CalenMonthView(MCalenServices &services) :
 	mLocale = HbExtendedLocale::system();
 	mFirstWeekLabel = NULL;
 	mIsPrevPaneGesture = false;
+	// Get the week day color from the theme
+	mWeekDaysColor = HbColorScheme::color("qtc_cal_week_day");
 }
 
 /*!
@@ -209,22 +211,44 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 
 	mMonthGrid->setView(this);
 
+	
+	
+	mIsFirstTimeLoad = true;
+	
+}
+
+/*!
+ Constructs the remaining part of the month view that was kept as 
+ part if lazy loading
+ */
+void CalenMonthView::doLazyLoading()
+{
+	// Add background items to all the widgets
+	addBackgroundFrame();
+	
+	// Construct and add the previous month and next month items to the view
+	mMonthGrid->updateMonthGridWithInActiveMonths(mMonthDataArray);
+	
+	// Check if regional information needs to be shown
+	// and add it or remove it
+	showHideRegionalInformation();
+	
 	// Connect to the menu actions
 	HbAction
-	        *newEventAction =
-	                qobject_cast<HbAction *> (
+			*newEventAction =
+					qobject_cast<HbAction *> (
 						mDocLoader->findObject(CALEN_MONTVIEW_MENU_NEWEVENT));
 
 	connect(newEventAction, SIGNAL(triggered()), this, SLOT(createEditor()));
 
 	mGoToTodayAction =
-	                qobject_cast<HbAction *> (
+					qobject_cast<HbAction *> (
 							mDocLoader->findObject(CALEN_MONTVIEW_MENU_GOTOTODAY));
 	connect(mGoToTodayAction, SIGNAL(triggered()), this, SLOT(goToToday()));
 	
 	HbAction
-	        *goToDateAction =
-	                qobject_cast<HbAction *> (
+			*goToDateAction =
+					qobject_cast<HbAction *> (
 						mDocLoader->findObject(CALEN_MONTVIEW_MENU_GOTODATE));
 
 	connect(goToDateAction, SIGNAL(triggered()), this, SLOT(goToDate()));
@@ -269,12 +293,7 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 	// Connect to the signal when options menu is shown
 	// This is required to add/remove dynamically some options
 	connect(menu(), SIGNAL(aboutToShow ()), this,
-	        SLOT(addRemoveActionsInMenu()));
-	
-	mIsFirstTimeLoad = true;
-	
-	// Add background items to all the widgets
-	addBackgroundFrame();
+			SLOT(addRemoveActionsInMenu()));	
 }
 
 /*!
@@ -529,29 +548,26 @@ void CalenMonthView::updateWeekNumGridModel()
 		long weekNumber(day.date().weekNumber());
 		mWeekNumbers.append(weekNumber);
 	}
-	
-	// Get the week day color from the theme
-	QColor weekDayColor = HbColorScheme::color("qtc_cal_week_day");
 
 	// Update the week labels text
 	QString text = QString::number(mWeekNumbers.at(0));
 	mFirstWeekLabel->setPlainText(text);
-	mFirstWeekLabel->setTextColor(weekDayColor);
+	mFirstWeekLabel->setTextColor(mWeekDaysColor);
 	text = QString::number(mWeekNumbers.at(1));
 	mSecondWeekLabel->setPlainText(text);
-	mSecondWeekLabel->setTextColor(weekDayColor);
+	mSecondWeekLabel->setTextColor(mWeekDaysColor);
 	text = QString::number(mWeekNumbers.at(2));
 	mThirdWeekLabel->setPlainText(text);
-	mThirdWeekLabel->setTextColor(weekDayColor);
+	mThirdWeekLabel->setTextColor(mWeekDaysColor);
 	text = QString::number(mWeekNumbers.at(3));
 	mFourthWeekLabel->setPlainText(text);
-	mFourthWeekLabel->setTextColor(weekDayColor);
+	mFourthWeekLabel->setTextColor(mWeekDaysColor);
 	text = QString::number(mWeekNumbers.at(4));
 	mFifthWeekLabel->setPlainText(text);
-	mFifthWeekLabel->setTextColor(weekDayColor);
+	mFifthWeekLabel->setTextColor(mWeekDaysColor);
 	text = QString::number(mWeekNumbers.at(5));
 	mSixthWeekLabel->setPlainText(text);
-	mSixthWeekLabel->setTextColor(weekDayColor);
+	mSixthWeekLabel->setTextColor(mWeekDaysColor);
 }
 
 /*!
@@ -617,22 +633,22 @@ void CalenMonthView::doPopulation()
 			handleChangeOrientation();
 		}
 	}
-	mIsFirstTimeLoad = false;
+	
 	// prepare for the population like reading the date frm the context 
 	// calculating the start of the grid etc.,
 	prepareForPopulation();
-
-	// fetch list of required calendar instances
-	populateWithInstanceView();
-
-	populatePreviewPane(mDate);
-
+	
+	// Populate the view and preview panes only if we are not opening the calendar
+	if (!mIsFirstTimeLoad) {
+		// fetch list of required calendar instances
+		populateWithInstanceView();
+		// Populate the preview panes
+		populatePreviewPane(mDate);
+	}
+	
 	// Create the grid items with proper dates
 	createGrid();
 	
-	// Check if regional information needs to be shown
-	// and add it or remove it
-	showHideRegionalInformation();
 
 	// Complete the population
 	completePopulation();
@@ -642,6 +658,14 @@ void CalenMonthView::doPopulation()
 	
 	// Start the auto scroll on current preview pane
 	mCurrPreviewPane->startAutoScroll();
+	
+	// Handle regional data here if we are not populating the month view for
+	// the first time
+	if (!mIsFirstTimeLoad) {
+		showHideRegionalInformation();
+	}
+	// Reset the first time load flag
+	mIsFirstTimeLoad = false;
 }
 
 /*!
@@ -651,6 +675,7 @@ void CalenMonthView::prepareForPopulation()
 {
 	setActiveDay(dateFromContext(mServices.Context()));
 	setDate();
+	updateMonthDataArrayWithActiveDates();
 }
 
 /*!
@@ -660,13 +685,15 @@ void CalenMonthView::refreshViewOnGoToDate()
 {
 	setActiveDay(dateFromContext(mServices.Context()));
 	setDate();
+	updateMonthDataArrayWithActiveDates();
 	setDateToLabel();
 	// fetch list of required calendar instances
 	populateWithInstanceView();
 
 	populatePreviewPane(mDate);
 	
-	mMonthGrid->updateMonthGridModel(mMonthDataArray, mIndexToBeScrolled);
+	mMonthGrid->updateMonthGridModel(mMonthDataArray, mIndexToBeScrolled, 
+	                                 mIsFirstTimeLoad);
 	
 	// Start the auto scroll on current preview pane
 	mCurrPreviewPane->startAutoScroll();
@@ -804,7 +831,8 @@ QList<CalenMonthData> CalenMonthView::monthDataList()
 void CalenMonthView::createGrid()
 {
 	// Update the month grid
-	mMonthGrid->updateMonthGridModel(mMonthDataArray, mIndexToBeScrolled);
+	mMonthGrid->updateMonthGridModel(mMonthDataArray, mIndexToBeScrolled, 
+	                                 mIsFirstTimeLoad);
 
 	// Read the week number setting from cenrep
 	QVariant value = mSettingsManager->readItemValue(*mWeekNumberCenrepKey);
@@ -1016,7 +1044,7 @@ void CalenMonthView::updateMonthDataArrayWithActiveDates()
 /*!
  Fetches the calenda entries for a given range
  */
-void CalenMonthView::getInstanceList(QList<AgendaEntry> &list,
+void CalenMonthView::getInstanceList(QList<QDate> &list,
                                      QDateTime rangeStart, QDateTime rangeEnd)
 {
 	AgendaUtil::FilterFlags filter =
@@ -1025,7 +1053,7 @@ void CalenMonthView::getInstanceList(QList<AgendaEntry> &list,
 	                | AgendaUtil::IncludeEvents
 	                | AgendaUtil::IncludeReminders
 	                | AgendaUtil::IncludeIncompletedTodos);
-	list = mAgendaUtil->fetchEntriesInRange(rangeStart, rangeEnd, filter);
+	mAgendaUtil->markDatesWithEvents(rangeStart, rangeEnd, filter, list);
 }
 
 /*!
@@ -1040,18 +1068,10 @@ void CalenMonthView::populateWithInstanceView()
 	const int todayIndex(gridStart.daysTo(today)); 
 
 	QDateTime gridEnd(mLastDayOfGrid.date(), QTime(23, 59, 59, 0));
-	QList<AgendaEntry> list;
-
-	AgendaUtil::FilterFlags filter =
-		        AgendaUtil::FilterFlags(AgendaUtil::IncludeAnniversaries
-		                | AgendaUtil::IncludeAppointments
-		                | AgendaUtil::IncludeEvents
-		                | AgendaUtil::IncludeReminders
-		                | AgendaUtil::IncludeIncompletedTodos);
 	
 	// Get the list of dates which have events
 	QList<QDate> datesWithEvents;
-	mAgendaUtil->markDatesWithEvents(gridStart,gridEnd,filter,datesWithEvents);
+	getInstanceList(datesWithEvents,gridStart,gridEnd);
 	
 	// Parse thru the list of dates and set the required flags
 	for(int i(0); i < datesWithEvents.count(); i++) {
@@ -1068,7 +1088,6 @@ void CalenMonthView::populateWithInstanceView()
  */
 void CalenMonthView::populatePrevMonth()
 {
-	QList<AgendaEntry> list;
 	const QDateTime gridStart(CalenDateUtils::beginningOfDay(mFirstDayOfGrid));
 	const QDateTime today(CalenDateUtils::today());
 
@@ -1077,23 +1096,15 @@ void CalenMonthView::populatePrevMonth()
 	QDateTime gridEnd(end.date(), QTime(23, 59, 59, 0));
 
 
-	AgendaUtil::FilterFlags filter =
-		        AgendaUtil::FilterFlags(AgendaUtil::IncludeAnniversaries
-		                | AgendaUtil::IncludeAppointments
-		                | AgendaUtil::IncludeEvents
-		                | AgendaUtil::IncludeReminders
-		                | AgendaUtil::IncludeIncompletedTodos);
-						
 	// Get the list of dates which have events
 	QList<QDate> datesWithEvents;
-	mAgendaUtil->markDatesWithEvents(gridStart,gridEnd,filter,datesWithEvents);
+	getInstanceList(datesWithEvents,gridStart,gridEnd);
 	
 	// Parse thru the list of dates and set the required flags
 	for(int i(0); i < datesWithEvents.count(); i++) {
 		int offset = mFirstDayOfGrid.date().daysTo(datesWithEvents.at(i));
 		mMonthDataArray[offset].SetHasEvents(true);
 	}
-	
 	datesWithEvents.clear();
 }
 
@@ -1112,27 +1123,30 @@ void CalenMonthView::populateNextMonth()
 	const int todayIndex(gridStart.daysTo(today)); // grid index for "today"
 	QDateTime gridEnd(mLastDayOfGrid.date(), QTime(23, 59, 59, 0));
 
-
-	AgendaUtil::FilterFlags filter =
-		        AgendaUtil::FilterFlags(AgendaUtil::IncludeAnniversaries
-		                | AgendaUtil::IncludeAppointments
-		                | AgendaUtil::IncludeEvents
-		                | AgendaUtil::IncludeReminders
-		                | AgendaUtil::IncludeIncompletedTodos);
-						
 	// Get the list of dates which have events
 	QList<QDate> datesWithEvents;
-	mAgendaUtil->markDatesWithEvents(gridStart,gridEnd,filter,datesWithEvents);
+	getInstanceList(datesWithEvents,gridStart,gridEnd);
 	
 	// Parse thru the list of dates and set the required flags
 	for(int i(0); i < datesWithEvents.count(); i++) {
 		int offset = mFirstDayOfGrid.date().daysTo(datesWithEvents.at(i));
 		mMonthDataArray[offset].SetHasEvents(true);
 	}
-
-
-	
 	datesWithEvents.clear();
+}
+
+/*!
+	Function that gets called when instacne view is created, so that it can
+	query agenda server for any entries
+ */
+void CalenMonthView::fetchEntriesAndUpdateModel()
+{
+	// Get to know if entries are there from the agenda server
+	populateWithInstanceView();
+	// Update the month grid model
+	mMonthGrid->updateMonthGridWithEventIndicators(mMonthDataArray);
+	// Populate the preview panes
+	populatePreviewPane(mDate);
 }
 
 /*!
@@ -1160,29 +1174,6 @@ void CalenMonthView::completePopulation()
 void CalenMonthView::handleGridItemActivated()
 {
 	mServices.IssueCommandL(ECalenDayView);
-}
-
-/*!
- Handles the long press on a grid item
- */
-void CalenMonthView::handleGridItemLongPressed(int index, QPointF &coords)
-{
-	QDateTime newActiveDay = CalenDateUtils::futureOf(mFirstDayOfGrid, index);
-
-	// set the context
-	mServices.Context().setFocusDateL(newActiveDay, KCalenMonthViewUidValue);
-
-	HbMenu *contextMenu = new HbMenu(this);
-
-	connect(contextMenu->addAction(hbTrId("txt_common_menu_open")), SIGNAL( triggered() ), this,
-	        SLOT( launchDayView()));
-	// TODO: Add the text id
-	connect(contextMenu->addAction("New Todo"), SIGNAL( triggered() ), this,
-	        SLOT( createEditor()));
-
-	// Show context sensitive menu. 
-	// Param const QPointF& coordinate - is a longpress position.
-	contextMenu->exec(coords);
 }
 
 /*!

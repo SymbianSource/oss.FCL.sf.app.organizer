@@ -41,7 +41,8 @@ symbian: {
 			-lbafl \
 			-ltimezonelocalization \
 			-ltzclient \
-			-lclockserverclient
+			-lclockserverclient \
+			-lxqsettingsmanager
 
 	BLD_INF_RULES.prj_exports += \
 		"../../data/timezonedata/timezonelocalization.loc	APP_LAYER_LOC_EXPORT_PATH(timezonelocalization.loc)" \

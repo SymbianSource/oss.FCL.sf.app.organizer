@@ -44,15 +44,15 @@ data=DATAZ_\resource\mcc\mcc.rsc										RESOURCE_FILES_DIR\mcc\mcc.rsc
 // Binaries.
 file=ABI_DIR\BUILD_DIR\clockalarmclient.dll								SHARED_LIB_DIR\clockalarmclient.dll
 file=ABI_DIR\BUILD_DIR\timezoneclient.dll								SHARED_LIB_DIR\timezoneclient.dll
-file=ABI_DIR\BUILD_DIR\clockstopwatchengine.dll							SHARED_LIB_DIR\clockstopwatchengine.dll
 file=ABI_DIR\BUILD_DIR\clocksettingsutility.dll							SHARED_LIB_DIR\clocksettingsutility.dll
 file=ABI_DIR\BUILD_DIR\clocksettingsview.dll							SHARED_LIB_DIR\clocksettingsview.dll
-file=ABI_DIR\BUILD_DIR\clockwidgetproto.dll								SHARED_LIB_DIR\clockwidgetproto.dll
 file=ABI_DIR\BUILD_DIR\clockcityselectionlist.dll						SHARED_LIB_DIR\clockcityselectionlist.dll
 file=ABI_DIR\BUILD_DIR\clockalarmeditor.dll								SHARED_LIB_DIR\clockalarmeditor.dll
 file=ABI_DIR\BUILD_DIR\clockappcontroller.dll							SHARED_LIB_DIR\clockappcontroller.dll
 file=ABI_DIR\BUILD_DIR\clockviewmanager.dll								SHARED_LIB_DIR\clockviewmanager.dll
 file=ABI_DIR\BUILD_DIR\clockviews.dll									SHARED_LIB_DIR\clockviews.dll
+file=ABI_DIR\BUILD_DIR\clockwidget.dll									SHARED_LIB_DIR\clockwidget.dll
+file=ABI_DIR\BUILD_DIR\clockwidgetplugin.dll									SHARED_LIB_DIR\clockwidgetplugin.dll
 
 file=ABI_DIR\BUILD_DIR\datetimesettingsplugin.dll				        SHARED_LIB_DIR\datetimesettingsplugin.dll
 data=\epoc32\data\c\resource\qt\plugins\controlpanel\datetimesettingsplugin.qtplugin					resource\qt\plugins\controlpanel\datetimesettingsplugin.qtplugin

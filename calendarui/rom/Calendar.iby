@@ -31,7 +31,6 @@ data = ZPRIVATE\10005901\backup_registration.xml  PRIVATE\10005901\backup_regist
 
 // Application registration file.
 data=DATAZ_\private\10003a3f\import\apps\CALENDAR_REG.RSC		\private\10003a3f\import\apps\CALENDAR_REG.RSC
-data=\epoc32\data\c\resource\qt\plugins\controlpanel\calensettingsplugin.qtplugin             resource\qt\plugins\controlpanel\calensettingsplugin.qtplugin
 data=\epoc32\data\z\pluginstub\calengriditemstyleplugin.qtplugin   \private\10005901\calengriditemstyleplugin.qtplugin
 data=\epoc32\data\z\resource\qt\plugins\calendar\agendaeventviewerplugin.qtplugin             resource\qt\plugins\calendar\agendaeventviewerplugin.qtplugin
 
@@ -44,7 +43,6 @@ file=ABI_DIR\BUILD_DIR\calencustomisationmanager.dll SHARED_LIB_DIR\calencustomi
 file=ABI_DIR\BUILD_DIR\caleneditor.dll SHARED_LIB_DIR\caleneditor.dll
 file=ABI_DIR\BUILD_DIR\calenviews.dll SHARED_LIB_DIR\calenviews.dll
 file=ABI_DIR\BUILD_DIR\calensettings.dll SHARED_LIB_DIR\calensettings.dll
-file=ABI_DIR\BUILD_DIR\calensettingsplugin.dll SHARED_LIB_DIR\calensettingsplugin.dll
 file=ABI_DIR\BUILD_DIR\calengriditemstyleplugin.dll SHARED_LIB_DIR\calengriditemstyleplugin.dll
 file=ABI_DIR\BUILD_DIR\calencontroller.dll SHARED_LIB_DIR\calencontroller.dll
 file=ABI_DIR\BUILD_DIR\agendaeventviewer.dll SHARED_LIB_DIR\agendaeventviewer.dll

@@ -11,21 +11,22 @@ EXPORTS
 	_ZN16CCalenController19CancelNotificationsEP25MCalenNotificationHandler @ 10 NONAME
 	_ZN16CCalenController20CustomisationManagerEv @ 11 NONAME
 	_ZN16CCalenController21BroadcastNotificationE18TCalenNotification @ 12 NONAME
-	_ZN16CCalenController21checkMultipleCreationEv @ 13 NONAME
-	_ZN16CCalenController24handleServiceManagerSlotEiRK9QDateTime @ 14 NONAME
-	_ZN16CCalenController25RegisterForNotificationsLEP25MCalenNotificationHandler18TCalenNotification @ 15 NONAME
-	_ZN16CCalenController25RegisterForNotificationsLEP25MCalenNotificationHandlerR6RArrayI18TCalenNotificationE @ 16 NONAME
-	_ZN16CCalenController7InfobarEv @ 17 NONAME
-	_ZN16CCalenController7ReleaseEv @ 18 NONAME
-	_ZN16CCalenController7contextEv @ 19 NONAME
-	_ZN16CCalenController8NotifierEv @ 20 NONAME
-	_ZN16CCalenController8ServicesEv @ 21 NONAME
-	_ZN16CCalenController9InstanceLEv @ 22 NONAME
-	_ZN16CCalenController9OfferMenuEP6HbMenu @ 23 NONAME
-	_ZN16CCalenControllerC1Eb @ 24 NONAME
-	_ZN16CCalenControllerC2Eb @ 25 NONAME
-	_ZN16CCalenControllerD1Ev @ 26 NONAME
-	_ZN16CCalenControllerD2Ev @ 27 NONAME
-	_ZTI16CCalenController @ 28 NONAME
-	_ZTV16CCalenController @ 29 NONAME
+	_ZN16CCalenController21ReleaseCustomisationsEv @ 13 NONAME
+	_ZN16CCalenController21checkMultipleCreationEv @ 14 NONAME
+	_ZN16CCalenController24handleServiceManagerSlotEiRK9QDateTime @ 15 NONAME
+	_ZN16CCalenController25RegisterForNotificationsLEP25MCalenNotificationHandler18TCalenNotification @ 16 NONAME
+	_ZN16CCalenController25RegisterForNotificationsLEP25MCalenNotificationHandlerR6RArrayI18TCalenNotificationE @ 17 NONAME
+	_ZN16CCalenController7InfobarEv @ 18 NONAME
+	_ZN16CCalenController7ReleaseEv @ 19 NONAME
+	_ZN16CCalenController7contextEv @ 20 NONAME
+	_ZN16CCalenController8NotifierEv @ 21 NONAME
+	_ZN16CCalenController8ServicesEv @ 22 NONAME
+	_ZN16CCalenController9InstanceLEv @ 23 NONAME
+	_ZN16CCalenController9OfferMenuEP6HbMenu @ 24 NONAME
+	_ZN16CCalenControllerC1Eb @ 25 NONAME
+	_ZN16CCalenControllerC2Eb @ 26 NONAME
+	_ZN16CCalenControllerD1Ev @ 27 NONAME
+	_ZN16CCalenControllerD2Ev @ 28 NONAME
+	_ZTI16CCalenController @ 29 NONAME
+	_ZTV16CCalenController @ 30 NONAME
 

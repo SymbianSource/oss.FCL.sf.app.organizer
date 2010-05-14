@@ -19,10 +19,11 @@
 #define FTUDATETIMEVIEW_H
 
 // System includes
-#include <hbwidget.h>
-#include <hbview.h>
-#include <hbdialog.h>
-#include <qdatetime.h>
+#include <QPointer>
+#include <QDateTime>
+#include <HbWidget>
+#include <HbView>
+#include <HbDialog>
 #include "clockcityselectionlist.h"
 
 // Forward declarations.
@@ -56,6 +57,7 @@ private slots:
 	void updateDate();
 	void updateTime();
 	void HandleLocationChange(LocationInfo);
+	void selectedAction(HbAction *action);
 
 private:
 	void createMainLayout();
@@ -63,22 +65,27 @@ private:
 	void populateDateTimeGroup();
 	void populatePlaceGroup();
 	void wizardEditedDate(const QDate &date);
-	
+
+private:
 	HbDataForm* mDateTimePlaceForm;
 	HbDataFormModel* mDateTimePlaceModel;
-	
+
 	HbDataFormModelItem *mDateItem;
 	HbDataFormModelItem *mTimeItem;
 	HbDataFormModelItem *mAutoTimeUpdateItem;
 	HbDataFormModelItem *mPlaceGroup;
 	HbDataFormModelItem *mCountryItem;
 	HbDataFormModelItem *mCityItem;
-	
+
 	HbDateTimePicker* mDatePicker;
 	HbDateTimePicker* mTimePicker;
-	HbDialog* mDatetimepopup;
+	QPointer<HbDialog> mDatePickerDialog;
+	QPointer<HbDialog> mTimePickerDialog;
+
+	HbAction *mOkAction;
+	HbAction *mCancelAction;
 	SettingsUtility *mSettingsUtility;
-	
+
 	TimezoneClient *mTimeZoneClient;
 	ClockCitySelectionList* mCitySelectionList;
 	bool mTimeAutoUpdate;

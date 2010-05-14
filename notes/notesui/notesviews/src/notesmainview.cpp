@@ -57,7 +57,8 @@
 NotesMainView::NotesMainView(QGraphicsWidget *parent)
 :HbView(parent),
  mSelectedItem(0),
- mDeleteAction(0)
+ mDeleteAction(0),
+ mIsLongTop(false)
 {
 	// Nothing yet.
 }
@@ -122,9 +123,26 @@ void NotesMainView::setupView(
 			this, SLOT(scrollTo(QModelIndex)));
 
 	// Get the view heading label
-	mViewHeading = static_cast<HbLabel *> (
+/*	mViewHeading = static_cast<HbLabel *> (
+			mDocLoader->findWidget("viewHeading"));*/
+
+	mSubTitle = static_cast<HbGroupBox *>(
 			mDocLoader->findWidget("viewHeading"));
 
+	// Handles the orientation change for list items
+	HbMainWindow *window = hbInstance->allMainWindows().first();
+	handleOrientationChanged(window->orientation());
+	connect(
+			window, SIGNAL(orientationChanged(Qt::Orientation)),
+			this, SLOT(handleOrientationChanged(Qt::Orientation)));
+
+	// Set the graphics size for the icons.
+	HbListViewItem *prototype = mListView->listItemPrototype();
+	prototype->setGraphicsSize(HbListViewItem::SmallIcon);
+}
+
+void NotesMainView::setupAfterViewReady()
+{
 	// Get the toolbar/menu actions.
 	mAddNoteAction = static_cast<HbAction *> (
 			mDocLoader->findObject("newNoteAction"));
@@ -159,19 +177,6 @@ void NotesMainView::setupView(
 			mViewCollectionAction, SIGNAL(triggered()),
 			this, SLOT(displayCollectionView()));
 
-	mSubTitle = static_cast<HbGroupBox *>(
-			mDocLoader->findWidget("viewHeading"));
-
-	// Handles the orientation change for list items
-	HbMainWindow *window = hbInstance->allMainWindows().first();
-	handleOrientationChanged(window->orientation());
-	connect(
-			window, SIGNAL(orientationChanged(Qt::Orientation)),
-			this, SLOT(handleOrientationChanged(Qt::Orientation)));
-
-	// Update sub heading text for main view.
-	updateSubTitle();
-
 	connect(
 			mAgendaUtil, SIGNAL(entryAdded(ulong)),
 			this,SLOT(updateSubTitle(ulong)));
@@ -181,10 +186,14 @@ void NotesMainView::setupView(
 	connect(
 			mAgendaUtil, SIGNAL(entryUpdated(ulong)),
 			this, SLOT(updateSubTitle(ulong)));
+}
 
-	// Set the graphics size for the icons.
-	HbListViewItem *prototype = mListView->listItemPrototype();
-	prototype->setGraphicsSize(HbListViewItem::SmallIcon);
+/*
+	Updates the title text for the first launch
+ */
+void NotesMainView::updateTitle()
+{
+	updateSubTitle();
 }
 
 /*!
@@ -212,46 +221,48 @@ void NotesMainView::createNewNote()
  */
 void NotesMainView::handleItemReleased(const QModelIndex &index)
 {
-	// Sanity check.
-	if (!index.isValid()) {
-		return;
-	}
+	if(!mIsLongTop) {
+		// Sanity check.
+		if (!index.isValid()) {
+			return;
+		}
 
-	// First get the id of the note and get the corresponding information from
-	// agendautil.
-	ulong noteId = index.data(NotesNamespace::IdRole).value<qulonglong>();
+		// First get the id of the note and get the corresponding information from
+		// agendautil.
+		ulong noteId = index.data(NotesNamespace::IdRole).value<qulonglong>();
 
-	if (0 >= noteId) {
-		// Something wrong.
-		return;
-	}
+		if (0 >= noteId) {
+			// Something wrong.
+			return;
+		}
 
-	// Get the entry details.
-	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
-	if (entry.isNull()) {
-		// Entry invalid.
-		return;
-	}
+		// Get the entry details.
+		AgendaEntry entry = mAgendaUtil->fetchById(noteId);
+		if (entry.isNull()) {
+			// Entry invalid.
+			return;
+		}
 
-	if(AgendaEntry::TypeTodo == entry.type()) {
-		// Construct agenda event viewer.
-		mAgendaEventViewer = new AgendaEventViewer(mAgendaUtil, this);
+		if(AgendaEntry::TypeTodo == entry.type()) {
+			// Construct agenda event viewer.
+			mAgendaEventViewer = new AgendaEventViewer(mAgendaUtil, this);
 
-		connect(
-				mAgendaEventViewer, SIGNAL(viewingCompleted(const QDate)),
-				this, SLOT(handleViewingCompleted()));
-		// Launch agenda event viewer
-		mAgendaEventViewer->view(
-				entry, AgendaEventViewer::ActionEditDelete);
-	}else if(AgendaEntry::TypeNote == entry.type()) {
-		// Construct notes editor.
-		mNotesEditor = new NotesEditor(mAgendaUtil, this);
-		connect(
-				mNotesEditor, SIGNAL(editingCompleted(bool)),
-				this, SLOT(handleEditingCompleted(bool)));
+			connect(
+					mAgendaEventViewer, SIGNAL(viewingCompleted(const QDate)),
+					this, SLOT(handleViewingCompleted()));
+			// Launch agenda event viewer
+			mAgendaEventViewer->view(
+					entry, AgendaEventViewer::ActionEditDelete);
+		}else if(AgendaEntry::TypeNote == entry.type()) {
+			// Construct notes editor.
+			mNotesEditor = new NotesEditor(mAgendaUtil, this);
+			connect(
+					mNotesEditor, SIGNAL(editingCompleted(bool)),
+					this, SLOT(handleEditingCompleted(bool)));
 
-		// Launch the notes editor with the obtained info.
-		mNotesEditor->edit(entry);
+			// Launch the notes editor with the obtained info.
+			mNotesEditor->edit(entry);
+		}
 	}
 }
 
@@ -266,6 +277,7 @@ void NotesMainView::handleItemReleased(const QModelIndex &index)
 void NotesMainView::handleItemLongPressed(
 		HbAbstractViewItem *item, const QPointF &coords)
 {
+	mIsLongTop = true;
 	mSelectedItem = item;
 
 	ulong noteId = item->modelIndex().data(
@@ -274,74 +286,48 @@ void NotesMainView::handleItemLongPressed(
 
 	// Display a context specific menu.
 	HbMenu *contextMenu = new HbMenu();
+	connect(
+			contextMenu,SIGNAL(aboutToClose()),
+			this, SLOT(handleMenuClosed()));
+
 	mOpenAction =
 			contextMenu->addAction(hbTrId("txt_common_menu_open"));
-	connect(
-			mOpenAction, SIGNAL(triggered()),
-			this, SLOT(openNote()));
 
 	// Add actions to the context menu.
 	if (AgendaEntry::TypeTodo == entry.type()) {
 		mEditTodoAction =
 				contextMenu->addAction(hbTrId("txt_common_menu_edit"));
-		connect(
-				mEditTodoAction, SIGNAL(triggered()),
-				this, SLOT(editTodo()));
 	}
 
 	mDeleteAction =
 			contextMenu->addAction(hbTrId("txt_common_menu_delete"));
-	connect(
-			mDeleteAction, SIGNAL(triggered()),
-			this, SLOT(deleteNote()));
 
 	if (AgendaEntry::TypeNote == entry.type()) {
 		if (entry.favourite()) {
 			mMakeFavouriteAction = contextMenu->addAction(
 					hbTrId("txt_notes_menu_remove_from_favorites"));
-
-			connect(
-					mMakeFavouriteAction, SIGNAL(triggered()),
-					this, SLOT(markNoteAsFavourite()));
-
 		} else {
 			mMakeFavouriteAction = contextMenu->addAction(
 					hbTrId("txt_notes_menu_mark_as_favorite"));
-
-			connect(
-					mMakeFavouriteAction, SIGNAL(triggered()),
-					this, SLOT(markNoteAsFavourite()));
 		}
 
 		mMarkTodoAction =
 				contextMenu->addAction(
 						hbTrId("txt_notes_menu_make_it_as_todo_note"));
-		connect(
-				mMarkTodoAction, SIGNAL(triggered()),
-				this, SLOT(markNoteAsTodo()));
 
 	} else if (AgendaEntry::TypeTodo == entry.type()) {
 		if (AgendaEntry::TodoNeedsAction == entry.status()) {
 			mTodoStatusAction = contextMenu->addAction(
 					hbTrId("txt_notes_menu_mark_as_done"));
-
-			connect(
-					mTodoStatusAction , SIGNAL(triggered()),
-					this, SLOT(markTodoStatus()));
-
 		} else if (AgendaEntry::TodoCompleted == entry.status()) {
 			mTodoStatusAction = contextMenu->addAction(
 					hbTrId("txt_notes_menu_mark_as_not_done"));
-
-			connect(
-					mTodoStatusAction , SIGNAL(triggered()),
-					this, SLOT(markTodoStatus()));
 		}
 	}
 
 	// Show the menu.
-	contextMenu->exec(coords);
-
+	contextMenu->open(this, SLOT(selectedMenuAction(HbAction*)));
+	contextMenu->setPreferredPos(coords);
 }
 
 /*!
@@ -453,10 +439,7 @@ void NotesMainView::scrollTo(QModelIndex index)
  */
 void NotesMainView::handleViewingCompleted()
 {
-
-
 	mAgendaEventViewer->deleteLater();
-
 }
 
 /*!
@@ -473,7 +456,6 @@ void NotesMainView::handleActionStateChanged()
 
 void NotesMainView::editTodo()
 {
-
 	// Get the selected list item index
 	QModelIndex index = mSelectedItem->modelIndex();
 	if (!index.isValid()) {
@@ -619,4 +601,33 @@ void NotesMainView::openNote()
 				entry, AgendaEventViewer::ActionEditDelete);
 	}
 }
+
+/*!
+	 Slot to handle the selected context menu actions
+ */
+void NotesMainView::selectedMenuAction(HbAction *action)
+{
+	if (action == mOpenAction) {
+		openNote();
+	} else if (action == mEditTodoAction) {
+		editTodo();
+	} else if (action == mDeleteAction) {
+		deleteNote();
+	} else if (action == mMakeFavouriteAction) {
+		markNoteAsFavourite();
+	} else if (action == mMarkTodoAction) {
+		markNoteAsTodo();
+	} else if (action == mTodoStatusAction) {
+		markTodoStatus();
+	}
+}
+
+/*!
+	Slot to handle the context menu closed.
+ */
+void NotesMainView::handleMenuClosed()
+{
+	mIsLongTop = false;
+}
+
 // End of file	--Don't remove this.

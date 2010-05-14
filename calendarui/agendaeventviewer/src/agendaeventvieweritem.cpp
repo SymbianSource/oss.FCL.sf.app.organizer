@@ -40,7 +40,8 @@
  */
 AgendaEventViewerItem::AgendaEventViewerItem(QGraphicsItem *parent) :
 	HbWidget(parent), mPrimaryText(NULL), mSecondaryText(NULL),
-	        mPrimaryIcon(NULL), mSecondaryIcon(NULL)
+	        mPrimaryIcon(NULL), mSecondaryIcon(NULL),mPrimaryRightIcon(NULL),
+	        mPrimaryLeftIcon(NULL)
 {
 
 	// Path for widgetml and css files.
@@ -70,10 +71,15 @@ void AgendaEventViewerItem::setEventViewerItemData(const QStringList &itemData,
 	if (!itemData.isEmpty()) {
 		QString firstItemData(QString::null);
 		QString secondItemData(QString::null);
-
-		if (itemData.count() == 2) {
+		QString thirdItemData(QString::null);
+        if (itemData.count() == 2) {
+            firstItemData = itemData.at(0);
+            secondItemData = itemData.at(1);
+        }
+        else if (itemData.count() == 3) {
 			firstItemData = itemData.at(0);
 			secondItemData = itemData.at(1);
+			thirdItemData = itemData.at(2);
 		} else {
 			firstItemData = itemData.at(0);
 		}
@@ -107,28 +113,43 @@ void AgendaEventViewerItem::setEventViewerItemData(const QStringList &itemData,
 				}
 		} else {
 			if (role == Qt::DecorationRole) {
-				if (!firstItemData.isEmpty()) {
-					if (!mPrimaryIcon) {
-						mPrimaryIcon = new HbIconItem(this);
+               if (!firstItemData.isEmpty()) {
+                   if (!mPrimaryLeftIcon) {
+                   mPrimaryLeftIcon = new HbIconItem(this);
+                   }
+                   HbStyle::setItemName(mPrimaryLeftIcon, "primaryLeftIconItem");
+                   mPrimaryLeftIcon->setVisible(true);
+                   mPrimaryLeftIcon->setIconName(firstItemData);
+
+               } else {
+                   if (mPrimaryLeftIcon) {
+                       HbStyle::setItemName(mPrimaryLeftIcon,"");
+                       mPrimaryLeftIcon->setVisible(false); 
+                   }
+                   
+               }
+				if (!secondItemData.isEmpty()) {
+					if (!mPrimaryRightIcon) {
+					mPrimaryRightIcon = new HbIconItem(this);
 					}
-					HbStyle::setItemName(mPrimaryIcon, "primaryIconItem");
-					mPrimaryIcon->setVisible(true);
-					mPrimaryIcon->setIconName(firstItemData);
+					HbStyle::setItemName(mPrimaryRightIcon, "primaryRightIconItem");
+					mPrimaryRightIcon->setVisible(true);
+					mPrimaryRightIcon->setIconName(secondItemData);
 
 				} else {
-					if (mPrimaryIcon) {
-						HbStyle::setItemName(mPrimaryIcon,"");
-						mPrimaryIcon->setVisible(false); 
+					if (mPrimaryRightIcon) {
+						HbStyle::setItemName(mPrimaryRightIcon,"");
+						mPrimaryRightIcon->setVisible(false); 
 					}
 					
 				}
-				if (!secondItemData.isEmpty()) {
+				if (!thirdItemData.isEmpty()) {
 					if (!mSecondaryIcon) {
 						mSecondaryIcon = new HbIconItem(this);
 						HbStyle::setItemName(mSecondaryIcon, 
 						                     "secondaryIconItem");
 					}
-					mSecondaryIcon->setIconName(secondItemData);
+					mSecondaryIcon->setIconName(thirdItemData);
 
 				} else {
 					if (mSecondaryIcon) {

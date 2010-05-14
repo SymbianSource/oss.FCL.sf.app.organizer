@@ -187,7 +187,7 @@ void NotesTodoEditorCustomItem::launchTimePicker()
 	mTimePickerDialog->setHeadingWidget(timeLabel);
 	// Create the tumbler.
 	HbDateTimePicker *timePicker = new HbDateTimePicker(mTimePickerDialog);
-	
+
 	// Set the format for time picker.
 	timePicker->setDisplayFormat(mNotesTodoeditorPvt->timeFormatString());
 	// Set the time needs to be displayed in time picker.
@@ -197,21 +197,15 @@ void NotesTodoEditorCustomItem::launchTimePicker()
 	// Set the tumbler as the content widget.
 	mTimePickerDialog->setContentWidget(timePicker);
 
+	mOkAction = new HbAction(
+			hbTrId("txt_common_button_ok"), mTimePickerDialog);
+	mTimePickerDialog->addAction(mOkAction);
 
-	HbAction *okAction = new HbAction(QString("Ok"), mTimePickerDialog);
-	mTimePickerDialog->setPrimaryAction(okAction);
-	connect(
-			okAction, SIGNAL(triggered()),
-			this, SLOT(handleOkAction()));
+	mCancelAction = new HbAction(
+			hbTrId("txt_common_button_cancel"), mTimePickerDialog);
+	mTimePickerDialog->addAction(mCancelAction);
 
-	HbAction *cancelAction = new HbAction(QString("Cancel"), mTimePickerDialog);
-	mTimePickerDialog->setSecondaryAction(cancelAction);
-
-	connect(
-			cancelAction, SIGNAL(triggered()),
-			this, SLOT(handleCancelAction()));
-
-	mTimePickerDialog->exec();
+	mTimePickerDialog->open(this, SLOT(selectedAction(HbAction *)));
 }
 
 /*!
@@ -238,32 +232,90 @@ void NotesTodoEditorCustomItem::launchDatePicker()
 	datePicker->setDateRange(QDate::fromString("01/01/1900",
 		mNotesTodoeditorPvt->dateFormatString()), QDate::fromString("31/12/2100",
 			mNotesTodoeditorPvt->dateFormatString()));
-	
+
 	// Set the date format in date picker.
 	datePicker->setDisplayFormat(mNotesTodoeditorPvt->dateFormatString());
 	// Set the date needs to be in focus in date picker.
 	datePicker->setDate(QDate::fromString(mDateWidget->text(),
 		mNotesTodoeditorPvt->dateFormatString()));
 
-	
+
 	// Set the tumbler as the content widget.
 	mDatePickerDialog->setContentWidget(datePicker);
 
+	mOkAction = new HbAction(
+			hbTrId("txt_common_button_ok"), mDatePickerDialog);
+	mDatePickerDialog->addAction(mOkAction);
 
-	HbAction *okAction = new HbAction(QString("Ok"), mDatePickerDialog);
-	mDatePickerDialog->setPrimaryAction(okAction);
-	connect(
-			okAction, SIGNAL(triggered()),
-			this, SLOT(handleOkAction()));
+	mCancelAction = new HbAction(
+			hbTrId("txt_common_button_cancel"), mDatePickerDialog);
+	mDatePickerDialog->addAction(mCancelAction);
 
-	HbAction *cancelAction = new HbAction(QString("Cancel"), mDatePickerDialog);
-	mDatePickerDialog->setSecondaryAction(cancelAction);
-	connect(
-			cancelAction, SIGNAL(triggered()),
-			this, SLOT(handleCancelAction()));
-
-	mDatePickerDialog->exec();
+	mDatePickerDialog->open(this, SLOT(selectedAction(HbAction *)));
 }
+
+/*
+	Launches date picker for selecting the due date
+ */
+void NotesTodoEditorCustomItem::selectDueDate()
+{
+	if( mDueDateItem->isDown()) {
+		mDueDateItem->setDown(false);
+		return;
+	}
+
+	mDueDatePickerIsActive = true;
+
+	if (mDatePickerDialog) {
+		delete mDatePickerDialog;
+	}
+
+	// Create the dialog.
+	mDatePickerDialog = new HbDialog;
+	mDatePickerDialog->setTimeout(HbDialog::NoTimeout);
+	mDatePickerDialog->setDismissPolicy(HbDialog::NoDismiss);
+
+	// Create date picker
+	HbDateTimePicker *datePicker = new HbDateTimePicker(mDatePickerDialog);
+	// Set the min/max date for the editor.
+	datePicker->setDateRange(QDate::fromString("01/01/1900",
+		mNotesTodoeditorPvt->dateFormatString()), QDate::fromString("31/12/2100",
+			mNotesTodoeditorPvt->dateFormatString()));
+
+	// Set the format of date picker.
+	datePicker->setDisplayFormat(mNotesTodoeditorPvt->dateFormatString());
+	// Set the date needs to be displayed in datepicker.
+	datePicker->setDate(QDate::fromString(mDueDateItem->text(),
+		mNotesTodoeditorPvt->dateFormatString()));
+
+	// Set the heading text
+	HbLabel *label = new HbLabel(hbTrId("txt_notes_formlabel_due_date"));
+	mDatePickerDialog->setHeadingWidget(label);
+
+	// Set the tumbler as the content widget.
+	mDatePickerDialog->setContentWidget(datePicker);
+
+	mOkAction = new HbAction(
+			hbTrId("txt_common_button_ok"), mDatePickerDialog);
+	mDatePickerDialog->addAction(mOkAction);
+
+	mCancelAction = new HbAction(
+			hbTrId("txt_common_button_cancel"), mDatePickerDialog);
+	mDatePickerDialog->addAction(mCancelAction);
+
+	mDatePickerDialog->open(this, SLOT(selectedAction(HbAction *)));
+}
+
+/*!
+	 Slot to handle the selected action.
+ */
+void NotesTodoEditorCustomItem::selectedAction(HbAction *action)
+{
+	if (action == mOkAction) {
+		handleOkAction();
+	}
+}
+
 /*!
 	 Handles the ok action of date/time picker dialog.
  */
@@ -339,77 +391,6 @@ void NotesTodoEditorCustomItem::handleOkAction()
 			alarmDateItem->setContentWidgetData("alarmDate",dueDateText);
 		}
 	}
-
-	handleCancelAction();
-}
-/*!
-	 Handles the ok action of date/time picker dialog.
- */
-void NotesTodoEditorCustomItem::handleCancelAction()
-{
-	// Close the dialog.
-	if (mDatePickerDialog) {
-		mDatePickerDialog->close();
-		mDatePickerDialog->deleteLater();
-	}else {
-		mTimePickerDialog->close();
-		mTimePickerDialog->deleteLater();
-	}
-}
-
-/*
-	Launches date picker for selecting the due date
- */
-void NotesTodoEditorCustomItem::selectDueDate()
-{
-	if( mDueDateItem->isDown()) {
-		mDueDateItem->setDown(false);
-		return;
-	}
-
-	mDueDatePickerIsActive = true;
-
-	if (mDatePickerDialog) {
-		delete mDatePickerDialog;
-	}
-
-	// Create the dialog.
-	mDatePickerDialog = new HbDialog;
-	mDatePickerDialog->setTimeout(HbDialog::NoTimeout);
-	mDatePickerDialog->setDismissPolicy(HbDialog::NoDismiss);
-
-	// Create date picker
-	HbDateTimePicker *datePicker = new HbDateTimePicker(mDatePickerDialog);
-	// Set the min/max date for the editor.
-	datePicker->setDateRange(QDate::fromString("01/01/1900",
-		mNotesTodoeditorPvt->dateFormatString()), QDate::fromString("31/12/2100",
-			mNotesTodoeditorPvt->dateFormatString()));
-	
-	// Set the format of date picker.
-	datePicker->setDisplayFormat(mNotesTodoeditorPvt->dateFormatString());
-	// Set the date needs to be displayed in datepicker.
-	datePicker->setDate(QDate::fromString(mDueDateItem->text(),
-		mNotesTodoeditorPvt->dateFormatString()));
-
-	// Set the heading text
-	HbLabel *label = new HbLabel(hbTrId("txt_notes_formlabel_due_date"));
-	mDatePickerDialog->setHeadingWidget(label);
-
-	// Add actions to date picker
-	HbAction *okAction = new HbAction(tr("Ok"));
-	mDatePickerDialog->setPrimaryAction(okAction);
-	connect(
-			okAction, SIGNAL(triggered()),
-			this, SLOT(handleOkAction()));
-
-	HbAction *cancelAction = new HbAction(tr("Cancel"));
-	mDatePickerDialog->setSecondaryAction(cancelAction);
-	connect(
-			cancelAction, SIGNAL(triggered()),
-			this, SLOT(handleCancelAction()));
-
-	mDatePickerDialog->setContentWidget(datePicker);
-	mDatePickerDialog->exec();
 }
 
 // End of file	--Don't delete.

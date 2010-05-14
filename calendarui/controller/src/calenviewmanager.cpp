@@ -53,8 +53,16 @@ CalenViewManager::CalenViewManager( CCalenController& aController,
 	mMonthViewDocLoader = NULL;
 	mDayViewDocLoader = NULL;	
 	mDayViewAltDocLoader = NULL;
+	mCalenDayView = NULL;
+	mCalenMonthView = NULL;
+	mCalenDayViewAlt = NULL;
 	
-	mController.MainWindow().setItemVisible(Hb::NaviPaneItem, false);
+	// Connect to instance view and entry view creation signals from agenda
+	// interface
+	connect(mController.agendaInterface(), SIGNAL(instanceViewCreationCompleted(int)),
+	        this, SLOT(handleInstanceViewCreation(int)));
+	connect(mController.agendaInterface(), SIGNAL(entryViewCreationCompleted(int)),
+		        this, SLOT(handleEntryViewCreation(int)));
 	
 	if (isFromServiceFrmwrk) {
 		// Dont load any views until our remote slot gets called in
@@ -69,7 +77,7 @@ CalenViewManager::CalenViewManager( CCalenController& aController,
 		// Connect to the view ready signal so that we construct other view 
 		// once this view is shown
 		connect(&mController.MainWindow(), SIGNAL(viewReady()), 
-						this, SLOT(constructOtherViews()));
+						this, SLOT(handleMainViewReady()));
 		
 		mController.MainWindow().addView(mCalenMonthView);
 		mController.MainWindow().setCurrentView(mCalenMonthView);
@@ -106,18 +114,28 @@ CalenViewManager::~CalenViewManager()
 void CalenViewManager::constructAndActivateView(int view)
 {
 	TRACE_ENTRY_POINT;
+	// We are here because, some other application is launching calendar with 
+	// the view, hence connect to viewReady() signal to do any lazy loading
+	// in the slot
+	
+	// Connect to the view ready signal so that we construct other view 
+	// once this view is shown
+	connect(&mController.MainWindow(), SIGNAL(viewReady()), 
+					this, SLOT(handleMainViewReady()));
 	if (view == ECalenMonthView) {
 		mFirstView = ECalenMonthView;
 		loadMonthView();
 		ActivateDefaultViewL(ECalenMonthView);
 		// Add month view to mainwindow.
 		mController.MainWindow().addView(mCalenMonthView);
+		mController.MainWindow().setCurrentView(mCalenMonthView);
 	} else if (view == ECalenDayView) {
 		mFirstView = ECalenDayView;
 		loadDayView();
 		ActivateDefaultViewL(ECalenDayView);
 		// Add day view to mainwindow.
 		mController.MainWindow().addView(mCalenDayView);
+		mController.MainWindow().setCurrentView(mCalenDayView);
 	}
 	TRACE_EXIT_POINT;
 }
@@ -150,7 +168,7 @@ void CalenViewManager::loadMonthView()
 	// Get the calenmonth view from the loader.
 	mCalenMonthView = static_cast<CalenMonthView *> 
 							(mMonthViewDocLoader->findWidget(CALEN_MONTHVIEW));
-	Q_ASSERT_X(mCalenDayView, "calenviewmanager.cpp", 
+	Q_ASSERT_X(mCalenMonthView, "calenviewmanager.cpp", 
 											"Unable to load calenMonth view");
 	
 	// Setup the month view.
@@ -192,6 +210,27 @@ void CalenViewManager::loadDayView()
 }
 
 // ----------------------------------------------------------------------------
+// CalenViewManager::handleMainViewReady
+// Slot to handle viewReady() signal from mainwindow
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CalenViewManager::handleMainViewReady()
+{
+	// Construct the month view part that is kept for lazy loading
+	if (mCalenMonthView) {
+		mCalenMonthView->doLazyLoading();
+	}
+	
+	// Construct other views
+	constructOtherViews();
+	
+	// disconnect the view ready signal as we dont need it anymore
+	disconnect(&mController.MainWindow(), SIGNAL(viewReady()), 
+			   this, SLOT(handleMainViewReady()));
+}
+
+// ----------------------------------------------------------------------------
 // CalenViewManager::constructOtherViews
 // Constructs the other views apart frm firstview and adds them to main window
 // (other items were commented in a header).
@@ -217,10 +256,6 @@ void CalenViewManager::constructOtherViews()
 
 	// Setup the settings view
 	mSettingsView = new CalenSettingsView(mController.Services());
-	
-	// disconnect the view ready signal as we dont need it anymore
-	disconnect(&mController.MainWindow(), SIGNAL(viewReady()), 
-	           this, SLOT(constructOtherViews()));
 }
 
 // ----------------------------------------------------------------------------
@@ -283,22 +318,22 @@ void CalenViewManager::showPrevDay()
     mCurrentViewId = ECalenDayView;
     if (mController.MainWindow().currentView() == mCalenDayView) {
         HbEffect::add(mCalenDayView,
-                      ":/fxml/view_show",
+                      ":/fxml/view_hide_back",
                       "hide");
         HbEffect::add(mCalenDayViewAlt,
-                      ":/fxml/view_hide",
+                      ":/fxml/view_show_back",
                       "show");
         mCalenDayViewAlt->doPopulation();
-        mController.MainWindow().setCurrentView(mCalenDayViewAlt, true, Hb::ViewSwitchUseBackAnim);
+        mController.MainWindow().setCurrentView(mCalenDayViewAlt, true, Hb::ViewSwitchUseNormalAnim);
     } else {
         HbEffect::add(mCalenDayViewAlt,
-                      ":/fxml/view_show",
+                      ":/fxml/view_hide_back",
                       "hide");
         HbEffect::add(mCalenDayView,
-                      ":/fxml/view_hide",
+                      ":/fxml/view_show_back",
                       "show");
         mCalenDayView->doPopulation();
-        mController.MainWindow().setCurrentView(mCalenDayView, true, Hb::ViewSwitchUseBackAnim);
+        mController.MainWindow().setCurrentView(mCalenDayView, true, Hb::ViewSwitchUseNormalAnim);
     }
 }
 
@@ -309,6 +344,8 @@ void CalenViewManager::showPrevDay()
 //
 void CalenViewManager::removeDayViews()
 {
+    mCalenDayView->clearListModel();
+    mCalenDayViewAlt->clearListModel();
     mController.MainWindow().removeView(mCalenDayView);
     mController.MainWindow().removeView(mCalenDayViewAlt);
 }
@@ -358,22 +395,28 @@ void CalenViewManager::activateCurrentView()
 		    if (mController.MainWindow().currentView() == mCalenDayView) {
 		        // This happens when settings view or event viewer is opened
 		        // from the agenda view. Simply repopulate the view
-                mCalenDayView->doPopulation();
-                mController.MainWindow().setCurrentView(mCalenDayView);
+		    	if (mCalenDayView) {
+					mCalenDayView->doPopulation();
+					mController.MainWindow().setCurrentView(mCalenDayView);
+		    	}
 		    } else if (mController.MainWindow().currentView() == mCalenDayViewAlt){
 		        // This happens when settings view or event viewer is opened
 		        // from the agenda view. Simply repopulate the view
-		        mCalenDayViewAlt->doPopulation();
-		        mController.MainWindow().setCurrentView(mCalenDayViewAlt);
+		    	if (mCalenDayViewAlt) {
+					mCalenDayViewAlt->doPopulation();
+					mController.MainWindow().setCurrentView(mCalenDayViewAlt);
+		    	}
 		    } else {
 		        // This is called whenever the day view is opened from the month
 		        // view. Since the day view is not added to the mainwindow,
 		        // add the day views to mainwindow and set any one of them as 
 		        // current view
-		        mCalenDayView->doPopulation();
-		        mController.MainWindow().addView(mCalenDayView);
-		        mController.MainWindow().setCurrentView(mCalenDayView);
-		        mController.MainWindow().addView(mCalenDayViewAlt);
+		    	if (mCalenDayView) {
+		    		mCalenDayView->doPopulation();
+					mController.MainWindow().addView(mCalenDayView);
+					mController.MainWindow().setCurrentView(mCalenDayView);
+					mController.MainWindow().addView(mCalenDayViewAlt);
+		    	}
 		    }
 			break;
 		case ECalenLandscapeDayView:
@@ -611,4 +654,27 @@ void CalenViewManager::handleDeletingCompleted()
 	qDebug() <<"calendar: CalenViewManager::handleEditingStarted <--";
 }
 
+// ----------------------------------------------------------------------------
+// CalenViewManager::handleInstanceViewCreation
+//  Slot to handle completion of instance view creation
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CalenViewManager::handleInstanceViewCreation(int status)
+{
+	Q_UNUSED(status);
+	mCalenMonthView->fetchEntriesAndUpdateModel();
+}
+
+// ----------------------------------------------------------------------------
+// CalenViewManager::handleDeletingCompleted
+//  Slot to handle completion of entry view creation
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CalenViewManager::handleEntryViewCreation(int status)
+{
+	// Nothing Yet
+	Q_UNUSED(status);
+}
 // End of file	--Don't remove this.

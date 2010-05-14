@@ -67,7 +67,7 @@ ClockCitySelectionListPrivate::ClockCitySelectionListPrivate(
 
 	mClient = client;
 	if (!mClient) {
-		mClient = new TimezoneClient(this);
+		mClient = TimezoneClient::getInstance();
 		mOwnsClient = true;
 	}
 }
@@ -77,8 +77,8 @@ ClockCitySelectionListPrivate::ClockCitySelectionListPrivate(
  */
 ClockCitySelectionListPrivate::~ClockCitySelectionListPrivate()
 {
-	if (mOwnsClient) {
-		delete mClient;
+	if (mOwnsClient && !mClient->isNull()) {
+		mClient->deleteInstance();
 	}
 	if (mLoader) {
 		mLoader->reset();
@@ -103,7 +103,7 @@ ClockCitySelectionListPrivate::~ClockCitySelectionListPrivate()
 void ClockCitySelectionListPrivate::populateListModel()
 {
 	// First get the data from the timezone client.
-	QList<LocationInfo> infoList = mClient->getLocations();
+	QList<LocationInfo> &infoList = mClient->getLocations();
 
 	// Sanity check.
 	if (!mListModel) {
@@ -135,6 +135,9 @@ void ClockCitySelectionListPrivate::populateListModel()
 		mListModel->setData(
 				index, info.countryName, Qt::UserRole + 104);
 	}
+
+	// Cleanup.
+	infoList.clear();
 }
 
 /*!
@@ -273,20 +276,14 @@ void ClockCitySelectionListPrivate::handleAddOwnCityAction()
 	widget->setLayout(layout);
 
 	// Add actions to the dialog
-	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
-	mAddOwnCityDialog->setPrimaryAction(okAction);
-	connect(
-			okAction, SIGNAL(triggered()),
-			this, SLOT(handleOkAction()));
+	mOkAction = new HbAction(hbTrId("txt_common_button_ok"));
+	mCancelAction = new HbAction(hbTrId("txt_common_button_cancel"));
 
-	HbAction *cancelAction = new HbAction(hbTrId("txt_common_button_cancel"));
-	mAddOwnCityDialog->setSecondaryAction(cancelAction);
-	connect(
-			cancelAction, SIGNAL(triggered()),
-			this, SLOT(handleCancelAction()));
+	mAddOwnCityDialog->addAction(mOkAction);
+	mAddOwnCityDialog->addAction(mCancelAction);
 
 	mAddOwnCityDialog->setContentWidget(widget);
-	mAddOwnCityDialog->exec();
+	mAddOwnCityDialog->open(this, SLOT(selectedAction(HbAction*)));
 }
 
 /*!
@@ -321,21 +318,6 @@ void ClockCitySelectionListPrivate::handleOkAction()
 			populateListModel();
 		}
 	}
-
-	// Close the popup
-	handleCancelAction();
-}
-
-/*!
-	Handles Cancel action of add own city dialog
- */
-void ClockCitySelectionListPrivate::handleCancelAction()
-{
-	// Close the dialog.
-	if (mAddOwnCityDialog) {
-		mAddOwnCityDialog->close();
-		mAddOwnCityDialog->deleteLater();
-	}
 }
 
 /*!
@@ -363,6 +345,15 @@ void ClockCitySelectionListPrivate::handleTimeZoneSelection(int index)
 	}
 }
 
+/*!
+	Slot to handle the selected action
+ */
+void ClockCitySelectionListPrivate::selectedAction(HbAction *action)
+{
+	if (action==mOkAction) {
+		handleOkAction();
+	}
+}
 /*!
 	Displays the city selection list.
  */
@@ -399,7 +390,7 @@ void ClockCitySelectionListPrivate::showCityList()
 	connect(
 			mSearchBox, SIGNAL(criteriaChanged(QString)),
 			this, SLOT(updateSearchCriteria(QString)));
-	
+
 	// Construct the source model.
 	if (!mListModel) {
 		mListModel = new QStandardItemModel(0, 1, this);
@@ -441,7 +432,7 @@ void ClockCitySelectionListPrivate::showCityList()
 
 	// Add the view to the main window and show it.
 	HbMainWindow *window = hbInstance->allMainWindows().at(0);
-	mBackAction = new HbAction(Hb::BackAction, this);
+	mBackAction = new HbAction(Hb::BackNaviAction, this);
 	mView->setNavigationAction(mBackAction);
 	connect(
 			mBackAction, SIGNAL(triggered()),

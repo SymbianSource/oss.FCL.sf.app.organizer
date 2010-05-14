@@ -42,11 +42,11 @@ public:
 	~SettingsUtility();
 
 public:
-	void setTime(const QString &time);
+//	void setTime(const QString &time);
 	QString time();
 
-	void setTimeZone(const QString &timezone);
-	QString timeZone();
+/*	void setTimeZone(const QString &timezone);
+	QString timeZone();*/
 
 	void setTimeFormat(const QString &format);
 	int timeFormat(QStringList &format);
@@ -57,10 +57,10 @@ public:
 	void setTimeSeparator(const QString &separator);
 	int timeSeparator(QStringList &list);
 
-	void setAutoUpdate(const QString &value);
-	int autoUpdate(QStringList &list);
+/*	void setAutoUpdate(const QString &value);
+	int autoUpdate(QStringList &list);*/
 
-	void setDate(const QString &date);
+//	void setDate(const QString &date);
 	QString date();
 
 	void setDateFormat(const QString &format);
@@ -91,8 +91,6 @@ private:
 	QStringList mDateSeparatorList;
 	QStringList mAutoUpdateValueList;
 	QStringList mSnoozeValueList;
-
-	TimezoneClient *mTimeZoneClient;
 };
 
 #endif // SETTINGSUTILITY_H

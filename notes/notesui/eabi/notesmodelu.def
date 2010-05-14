@@ -41,4 +41,5 @@ EXPORTS
 	_ZTV25NotesSortFilterProxyModel @ 40 NONAME
 	_ZN10NotesModel16dateFormatStringEv @ 41 NONAME
 	_ZN10NotesModel16timeFormatStringEv @ 42 NONAME
+	_ZN10NotesModel35handleInstanceViewCreationCompletedEi @ 43 NONAME
 

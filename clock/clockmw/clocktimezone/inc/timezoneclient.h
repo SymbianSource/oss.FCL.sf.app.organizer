@@ -41,6 +41,8 @@
 class CEnvironmentChangeNotifier;
 class QStandardItemModel;
 class CTzLocalizer;
+class XQSettingsManager;
+class XQSettingsKey;
 
 const int KInitialEvent = (
 		EChangesLocale |
@@ -56,29 +58,31 @@ class TIMEZONECLIENT_EXPORT TimezoneClient : public QObject, public CBase
 	Q_OBJECT
 
 public:
-	TimezoneClient(QObject* parent = 0);
+	/*TIMEZONECLIENT_EXPORT*/ static TimezoneClient* getInstance();
+	/*TIMEZONECLIENT_EXPORT*/ void deleteInstance();
+	/*TIMEZONECLIENT_EXPORT*/ bool isNull();
+
+private:
+	TimezoneClient();
 	~TimezoneClient();
 
+private:
+
+private:
+	static TimezoneClient *mTimezoneClient;
+	static int mReferenceCount;
+
+// TODO: still refatoring
 public:
-	QList<LocationInfo> getLocations();
-	bool getUtcDstOffsetL(int &dstOffset,
-						  const CTzId &tzId);
-	LocationInfo getCurrentZoneInfoL();
-	void setAsCurrentLocationL(LocationInfo &location);
-	bool isDSTOnL(int timezoneId);
-	int getStandardOffset(int timezoneId);
-	void getDstRulesL(
-			QDateTime &startTime, QDateTime &endTime,int timezoneId);
+	/*TIMEZONECLIENT_EXPORT*/ 	QList<LocationInfo> &getLocations();
+	/*TIMEZONECLIENT_EXPORT*/ LocationInfo getCurrentZoneInfoL();
+	/*TIMEZONECLIENT_EXPORT*/ void setAsCurrentLocationL(LocationInfo &location);
+	/*TIMEZONECLIENT_EXPORT*/ bool isDSTOnL(int timezoneId);
+	/*TIMEZONECLIENT_EXPORT*/ int getStandardOffset(int timezoneId);
 	QList<LocationInfo> getSavedLocations();
 	void saveLocations(const QList<LocationInfo> &locationList);
 	void getCountries(QMap<QString, int>& countries);
-	void getCitiesForCountry(
-			int id, QMap<QString, int>& cities);
-	void getLocationInfo(
-			int groupId, int cityIndex, LocationInfo& cityInfo);
 	bool dstOn(int tzId);
-	int getCityGroupIdByName(const QString& name);
-	int getCityOffsetByNameAndId(const QString& name, int tzId);
 	void setDateTime(QDateTime dateTime);
 	void setTimeUpdateOn(bool timeUpdate = true);
 	bool timeUpdateOn();
@@ -96,13 +100,25 @@ public:
 signals:
 	void timechanged();
 	void listUpdated();
-
+	void autoTimeUpdateChanged(int value);
+	void cityUpdated();
+	
 private:
 	int getDstZoneOffset(int tzId);
 	TMonth intToMonth(int month);
+	bool getUtcDstOffsetL(int &dstOffset, const CTzId &tzId);
+	void getDstRulesL(
+			QDateTime &startTime, QDateTime &endTime,int timezoneId);
+	void getCitiesForCountry(
+			int id, QMap<QString, int>& cities);
+	void getLocationInfo(
+			int groupId, int cityIndex, LocationInfo& cityInfo);
+	int getCityGroupIdByName(const QString& name);
+	int getCityOffsetByNameAndId(const QString& name, int tzId);
 
 private slots:
-    void populateCities();
+	void populateCities();
+	void eventMonitor(const XQSettingsKey& key, const QVariant& value);
 
 public:
 	CEnvironmentChangeNotifier *mNotifier;
@@ -112,14 +128,16 @@ private:
 	QMap<QString, int> mAllCountries;
 	QList<LocationInfo> mAllLocations;
 	QStandardItemModel *mWorldClockModel;
+	XQSettingsManager *mSettingsManager;
+	XQSettingsKey *mAutoTimeUpdateKey;
 
 	QList<int> mTimeZoneIds;
 
-	bool mTimeUpdateOn;
-	int mFetchCount;
+//	bool mTimeUpdateOn;
 	int mCountryCount;
+	int mAutoTimeUpdateValue;
 };
 
-#endif      // __TIMEZONECLIENT_H__
+#endif		// __TIMEZONECLIENT_H__
 
 // End of file

@@ -32,8 +32,6 @@
  */
 int main(int argc, char *argv[])
 {
-	qDebug("clock: main() -->");
-
 	// Initialization
 	HbApplication app(argc, argv);
 
@@ -55,8 +53,6 @@ int main(int argc, char *argv[])
 
 	// Show widget
 	window.show();
-
-	qDebug("clock: main() <--");
 
 	// Enter event loop
 	return app.exec();

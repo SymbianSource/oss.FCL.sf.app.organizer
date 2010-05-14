@@ -120,6 +120,8 @@ Q_SIGNALS:
 	void entryDeleted(ulong id);
 	void entryUpdated(ulong id);
 	void entriesDeleted(int status);
+	void entryViewCreationCompleted(int status);
+	void instanceViewCreationCompleted(int status);
 
 private:
 	friend class AgendaUtilPrivate;

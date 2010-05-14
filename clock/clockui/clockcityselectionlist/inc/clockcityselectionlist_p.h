@@ -58,8 +58,8 @@ private slots:
 	void updateSearchCriteria(const QString &criteria);
 	void handleAddOwnCityAction();
 	void handleOkAction();
-	void handleCancelAction();
 	void handleTimeZoneSelection(int index);
+	void selectedAction(HbAction *action);
 
 private:
 	void showCityList();
@@ -80,6 +80,9 @@ private:
 	QPointer<HbLineEdit> mCityNameEdit;
 	QPointer<HbComboBox> mTimeZoneComboBox;
 	QPointer<HbComboBox> mCountryComboBox;
+
+	HbAction *mOkAction;
+	HbAction *mCancelAction;
 
 	ClockCitySelectionList *q_ptr;
 	TimezoneClient *mClient;

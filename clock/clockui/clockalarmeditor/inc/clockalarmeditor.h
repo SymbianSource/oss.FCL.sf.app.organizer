@@ -43,13 +43,15 @@ class TimezoneClient;
 class ClockAlarmCustomItem;
 class QTranslator;
 
-class ClockAlarmEditor : public HbView
+class ClockAlarmEditor : public QObject
 {
 	Q_OBJECT
 
 public:
 	CLOCKALARMEDITOR_EXPORT ClockAlarmEditor(
-			int alarmId = 0, QGraphicsWidget *parent = 0);
+			AlarmClient& alarmClient,
+			int alarmId = 0,
+			QObject *parent = 0);
 	CLOCKALARMEDITOR_EXPORT virtual ~ClockAlarmEditor();
 
 public:
@@ -61,10 +63,10 @@ public slots:
 	void handleDiscardAction();
 	void handleTimeChange(const QString &text);
 	void handleOccurenceChanged(int index);
-	void handleCancelAction();
 	void handleOkAction();
 	void launchTimePicker();
-	void handleAlarmSoundChanged();
+	void handleAlarmSoundChanged(int checkedState);
+	void selectedAction(HbAction *action);
 
 signals:
 	void alarmSet();
@@ -73,7 +75,6 @@ private:
 	void initModel();
 	void populateModelItems();
 	void initAlarmInfo();
-	void createMenu();
 	void createToolbar();
 	void setAlarm(
 			QString timeInfo, QString descInfo, int repeatType,
@@ -85,9 +86,12 @@ private:
 	void displayRemainingTimeNote(AlarmInfo& alarmInfo);
 	void getDayText(int alarmDay,QString& dayText);
 	int getRemainingSeconds(QDateTime& alarmDateTime);
+	void launchDialog(QString title, QString text = 0);
+    void sortAlarmDaysList(QStringList& alarmDays);
 
 private:
 	int mAlarmId;
+	int mStartOfWeek;
 	bool mAlarmDayItemInserted;
 	QString mTimeFormat;
 
@@ -99,7 +103,7 @@ private:
 	HbDataFormModelItem *mAlarmSoundItem;
 	HbDataFormModelItem *mAlarmDescription;
 
-	HbView *mPreviousView;
+	HbView *mAlarmEditorView;
 	HbAction *mDiscardAction;
 	HbAction *mDeleteAction;
 	HbAction *mDoneAction;
@@ -111,7 +115,7 @@ private:
 	XQSettingsManager *mSettingsManager;
 	XQSettingsKey *mPreviosAlarmTime;
 
-	AlarmClient *mAlarmClient;
+	AlarmClient &mAlarmClient;
 	AlarmInfo mAlarmInfo;
 	TimezoneClient *mTimezoneClient;
 	QTranslator *mTranslator;

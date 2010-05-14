@@ -117,9 +117,6 @@ void NotesCollectionView::setupView(
 			mListView, SIGNAL(activated(const QModelIndex &)),
 			this, SLOT(handleActivated(const QModelIndex &)));
 
-	// Populate the content of the view.
-	populateListView();
-
 	// Get the toolbar/menu actions.
 	mAllNotesAction = static_cast<HbAction *> (
 			mDocLoader->findObject("allNotesAction"));
@@ -155,6 +152,46 @@ void NotesCollectionView::setupView(
 	connect(
 			mAddNoteAction, SIGNAL(triggered()),
 			this, SLOT(createNewNote()));
+}
+
+/*!
+	Populate the content of the view.
+ */
+void NotesCollectionView::populateListView()
+{
+	QStandardItemModel *model = new QStandardItemModel(this);
+	model->setColumnCount(1);
+
+	QString countString(hbTrId("txt_notes_list_note_count"));
+
+	// Add To-do's item.
+	QStandardItem *item = new QStandardItem();
+	QStringList todoStringList;
+	todoStringList.append(hbTrId("txt_notes_list_todos"));
+	todoStringList.append(countString.arg(QString::number(todosCount())));
+	item->setData(todoStringList, Qt::DisplayRole);
+	model->appendRow(item);
+
+	// Add Favorites item.
+	item = new QStandardItem();
+	QStringList favStringList;
+	favStringList.append(hbTrId("txt_notes_list_favorites"));
+	favStringList.append(countString.arg(mFavouriteModel->rowCount()));
+	item->setData(favStringList, Qt::DisplayRole);
+	model->appendRow(item);
+
+	// Add Recent notes item.
+	item = new QStandardItem();
+	QStringList notesStringList;
+	notesStringList.append(hbTrId("txt_notes_list_plain_notes"));
+	notesStringList.append(
+			countString.arg(QString::number(recentNotesCount())));
+	item->setData(notesStringList, Qt::DisplayRole);
+	model->appendRow(item);
+
+	HbStyleLoader::registerFilePath(":/style");
+	mListView->setLayoutName("custom");
+	mListView->setModel(model);
 }
 
 /*!
@@ -313,46 +350,6 @@ void NotesCollectionView::updateFavouritesCount(
 void NotesCollectionView::handleActionStateChanged()
 {
 	mViewCollectionAction->setChecked(true);
-}
-
-/*!
-	Populate the content of the view.
- */
-void NotesCollectionView::populateListView()
-{
-	QStandardItemModel *model = new QStandardItemModel(this);
-	model->setColumnCount(1);
-
-	QString countString(hbTrId("txt_notes_list_note_count"));
-
-	// Add To-do's item.
-	QStandardItem *item = new QStandardItem();
-	QStringList todoStringList;
-	todoStringList.append(hbTrId("txt_notes_list_todos"));
-	todoStringList.append(countString.arg(QString::number(todosCount())));
-	item->setData(todoStringList, Qt::DisplayRole);
-	model->appendRow(item);
-
-	// Add Favorites item.
-	item = new QStandardItem();
-	QStringList favStringList;
-	favStringList.append(hbTrId("txt_notes_list_favorites"));
-	favStringList.append(countString.arg(mFavouriteModel->rowCount()));
-	item->setData(favStringList, Qt::DisplayRole);
-	model->appendRow(item);
-
-	// Add Recent notes item.
-	item = new QStandardItem();
-	QStringList notesStringList;
-	notesStringList.append(hbTrId("txt_notes_list_plain_notes"));
-	notesStringList.append(
-			countString.arg(QString::number(recentNotesCount())));
-	item->setData(notesStringList, Qt::DisplayRole);
-	model->appendRow(item);
-
-	HbStyleLoader::registerFilePath(":/style");
-	mListView->setLayoutName("custom");
-	mListView->setModel(model);
 }
 
 

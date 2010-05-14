@@ -71,7 +71,6 @@ private:
 	void addMenu();
 	bool validAlarmSet();
 	void addDiscardChangesAction();
-	bool showDeleteConfirmationQuery();
 
 private slots:
 	void saveTodo();
@@ -80,6 +79,7 @@ private slots:
 	void handleRemoveDescriptionAction();
 	void handleDeleteAction();
 	void handleDiscardChangesAction();
+	void selectedAction(HbAction *action);
 
 private:
 	NotesEditorPrivate* mOwner;
@@ -99,7 +99,8 @@ private:
 	HbAction *mDoneAction;
 	HbAction *mDiscardAction;
 	QPointer<HbAction> mDescriptionAction;
-
+	HbAction *mDeleteTodoAction;
+	HbAction *mCancelDeleteAction;
 	HbGroupBox *mSubHeading;
 
 	NotesEditorDocLoader *mDocLoader;

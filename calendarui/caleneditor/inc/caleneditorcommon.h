@@ -35,7 +35,8 @@ enum CustomItemOffset {
     CustomWidgetFrom = HbDataFormModelItem::CustomItemBase + 1,
     CustomWidgetTo,
     CustomWidgetLocation,
-    RepeatUntilOffset
+    RepeatUntilOffset,
+    ReminderTimeOffset
 };
 
 #endif /* CALENEDITORCOMMON_H_ */

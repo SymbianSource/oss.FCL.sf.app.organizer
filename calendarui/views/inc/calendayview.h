@@ -88,6 +88,11 @@ public:
     CALENDAYVIEW_EXPORT CalenDocLoader* docLoader();
 
     /**
+     * @brief clears the list model from the view
+     */
+    CALENDAYVIEW_EXPORT void clearListModel();
+
+	/*
 	 * @brief Refreshes the view with the date set in the context
 	 */
     void refreshViewOnGoToDate();

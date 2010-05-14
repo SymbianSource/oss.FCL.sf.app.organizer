@@ -31,16 +31,12 @@
     
     // Main window for providing the scene context
 	HbMainWindow window;
-	window.setRenderHints(
-			QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
-	window.setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
 	
     //For translation, loading and installing translator
 	QTranslator translator;
     QString lang = QLocale::system().name();
     QString path = "Z:/resource/qt/translations/";
     // TODO: Load the appropriate .qm file based on locale
-    //bool loaded = translator.load("calendar_" + lang, path);
     bool loaded = translator.load("calendar_en_GB",":/translations");
     app.installTranslator(&translator);
 
@@ -56,6 +52,7 @@
     int retValue = app.exec();
     
     // delete the controller
+    controller->ReleaseCustomisations();
     controller->Release();
     
     return retValue;

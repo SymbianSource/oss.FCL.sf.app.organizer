@@ -206,4 +206,6 @@ EXPORTS
 	_ZTV14AgendaAttendee @ 205 NONAME
 	_ZTV14AgendaCategory @ 206 NONAME
 	_ZN10AgendaUtil22areNoEntriesInCalendarEv @ 207 NONAME
+	_ZN10AgendaUtil26entryViewCreationCompletedEi @ 208 NONAME
+	_ZN10AgendaUtil29instanceViewCreationCompletedEi @ 209 NONAME
 

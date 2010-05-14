@@ -375,21 +375,27 @@ void CCalenLunarChinesePlugin::ExecuteMessageDialogL(TDesC& aMsgText)
 	TRACE_ENTRY_POINT;	
 	QString text = QString::fromUtf16(aMsgText.Ptr(),aMsgText.Length());
 	
-    // Instantiate a popup
-	HbMessageBox popup;
-	popup.setDismissPolicy(HbDialog::NoDismiss);
-	popup.setTimeout(HbDialog::NoTimeout);
-	popup.setIconVisible(false);
+	// Instantiate a popup
+	HbMessageBox *popup = new HbMessageBox();
+	popup->setDismissPolicy(HbDialog::NoDismiss);
+	popup->setTimeout(HbDialog::NoTimeout);
+	popup->setIconVisible(false);
+	popup->setAttribute( Qt::WA_DeleteOnClose, true );
+	
+	popup->setHeadingWidget(new HbLabel("Lunar Calendar"));
+	popup->setText(text);
+	
+	// Remove the default actions
+	QList<QAction*> list = popup->actions();
+	for(int i=0; i < list.count(); i++)
+	{
+		popup->removeAction(list[i]);
+	}
+	// Sets the primary action
+	popup->addAction(new HbAction(hbTrId("txt_calendar_button_cancel"), popup));
 
-    popup.setHeadingWidget(new HbLabel("Lunar Calendar"));
-    popup.setText(text);
-    
-    // Sets the primary action
-    popup.setPrimaryAction(new HbAction(hbTrId("txt_calendar_button_cancel"),
-                                        &popup));
-
-    // Launch popup syncronously
-    popup.exec();
+	// Launch popup
+	popup->open();
    	TRACE_EXIT_POINT;
 	}
 

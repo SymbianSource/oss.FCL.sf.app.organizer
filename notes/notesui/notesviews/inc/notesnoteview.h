@@ -49,7 +49,7 @@ public:
 public:
 	NOTESVIEWS_EXPORT void setupView(
 			NotesAppControllerIf &controllerIf, NotesDocLoader *docLoader);
-	
+
 signals:
 	void deleteEntry(ulong entryId);
 
@@ -67,6 +67,8 @@ private slots:
 	void handleActionStateChanged();
 	void handleOrientationChanged(Qt::Orientation);
 	void openNote();
+	void selectedMenuAction(HbAction *action);
+	void handleMenuClosed();
 
 private:
 	HbListView *mListView;
@@ -88,6 +90,7 @@ private:
 	NotesModel *mNotesModel;
 	NotesSortFilterProxyModel *mProxyModel;
 	NotesEditor *mNotesEditor;
+	bool mIsLongTop;
 };
 
 #endif // NOTESNOTEVIEW_H

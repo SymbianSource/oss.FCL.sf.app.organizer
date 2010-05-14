@@ -15,9 +15,6 @@
 *
 */
 
-// System includes
-#include <QDebug>
-
 // User includes
 #include "clockappcontroller.h"
 #include "clockappcontrollerifimpl.h"
@@ -38,8 +35,6 @@ ClockAppController::ClockAppController(QObject *parent)
  mViewManager(0),
  mIfImpl(0)
 {
-	qDebug() << "clock: ClockAppController::ClockAppController -->";
-
 	// Construct the interface implementation.
 	mIfImpl = new ClockAppControllerIfImpl(this, this);
 
@@ -48,8 +43,6 @@ ClockAppController::ClockAppController(QObject *parent)
 	Q_ASSERT_X(
 			mViewManager, "clockappcontroller.cpp",
 			"ClockViewManager is 0");
-
-	qDebug() << "clock: ClockAppController::ClockAppController <--";
 }
 
 /*!
@@ -57,8 +50,6 @@ ClockAppController::ClockAppController(QObject *parent)
  */
 ClockAppController::~ClockAppController()
 {
-	qDebug() << "clock: ClockAppController::~ClockAppController -->";
-
 	if (mViewManager) {
 		delete mViewManager;
 		mViewManager = 0;
@@ -67,8 +58,6 @@ ClockAppController::~ClockAppController()
 		delete mIfImpl;
 		mIfImpl = 0;
 	}
-
-	qDebug() << "clock: ClockAppController::~ClockAppController <--";
 }
 
 // End of file	--Don't remove this.

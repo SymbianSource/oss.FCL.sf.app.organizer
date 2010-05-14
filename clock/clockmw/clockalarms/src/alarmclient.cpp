@@ -18,8 +18,6 @@
 
 // System includes
 #include <e32cmn.h>
-#include <QDebug>
-
 // User includes
 #include "alarmclient.h"
 #include "alarmlistener.h"
@@ -34,18 +32,11 @@
 AlarmClient::AlarmClient(QObject* parent)
 :QObject(parent),
 mListener(0)
-{
-	qDebug("clock: AlarmClient::AlarmClient() -->");
-
+{	
 	// Connect to the alarm server.
 	User::LeaveIfError(mAlarmSrvSession.Connect());
-
-	qDebug("clock: AlarmClient::AlarmClient() - Connection done, looks ok.");
-
 	// Construct the listener, but do not start it.
 	mListener = new AlarmListener(this, mAlarmSrvSession);
-
-	qDebug("clock: AlarmClient::AlarmClient() <--");
 }
 
 /*!
@@ -53,7 +44,6 @@ mListener(0)
  */
 AlarmClient::~AlarmClient()
 {
-	qDebug("clock: AlarmClient::~AlarmClient() -->");
 
 	if (mListener) {
 		mListener->stop();
@@ -61,8 +51,6 @@ AlarmClient::~AlarmClient()
 		mListener = 0;
 	}
 	mAlarmSrvSession.Close();
-
-	qDebug("clock: AlarmClient::~AlarmClient() <--");
 }
 
 /*!
@@ -72,8 +60,6 @@ AlarmClient::~AlarmClient()
  */
 void AlarmClient::getAlarmList(QList<AlarmInfo>& alarmList)
 {
-	qDebug() << "clock: AlarmClient::getAlarmList -->";
-
 	// This will hold the alarm ids returned from alarm server.
 	RArray<TAlarmId> alarmIdArray;
 	AlarmInfo alarmInfo;
@@ -135,8 +121,6 @@ void AlarmClient::getAlarmList(QList<AlarmInfo>& alarmList)
 	}
 	// Cleanup.
 	alarmIdArray.Close();
-
-	qDebug() << "clock: AlarmClient::getAlarmList <--";
 }
 
 /*!
@@ -144,8 +128,6 @@ void AlarmClient::getAlarmList(QList<AlarmInfo>& alarmList)
  */
 void AlarmClient::setAlarm(AlarmInfo& alarmInfo)
 {
-	qDebug() << "clock: AlarmClient::setAlarm -->";
-
 	// Get the current home time
 	TTime homeTime;
 	homeTime.HomeTime();
@@ -222,14 +204,10 @@ void AlarmClient::setAlarm(AlarmInfo& alarmInfo)
 
 		alarmInfo.alarmDateTime = alarmDate;
 	}
-
-	qDebug() << "clock: AlarmClient::setAlarm <--";
 }
 
 void AlarmClient::setAlarmState(TAlarmState state, AlarmState& alarmState)
 {
-	qDebug() << "clock: AlarmClient::setAlarmState -->";
-
 	switch (state) {
 		case EAlarmStateInPreparation:
 			alarmState = InPreparation;
@@ -253,13 +231,10 @@ void AlarmClient::setAlarmState(TAlarmState state, AlarmState& alarmState)
 			break;
 	}
 
-	qDebug() << "clock: AlarmClient::setAlarmState <--";
 }
 
 void AlarmClient::setAlarmState(AlarmState state, TAlarmState& alarmState)
 {
-	qDebug() << "clock: AlarmClient::setAlarmState -->";
-
 	switch (state) {
 		case InPreparation:
 			alarmState = EAlarmStateInPreparation;
@@ -282,15 +257,11 @@ void AlarmClient::setAlarmState(AlarmState state, TAlarmState& alarmState)
 		default:
 			break;
 	}
-
-	qDebug() << "clock: AlarmClient::setAlarmState <--";
 }
 
 void AlarmClient::setAlarmRepeatType(
 		TAlarmRepeatDefinition repeat, AlarmRepeatType& repeatType)
 {
-	qDebug() << "clock: AlarmClient::setAlarmRepeatType -->";
-
 	switch (repeat) {
 		case EAlarmRepeatDefintionRepeatOnce:
 			repeatType = Once;
@@ -307,15 +278,11 @@ void AlarmClient::setAlarmRepeatType(
 		default:
 			break;
 	}
-
-	qDebug() << "clock: AlarmClient::setAlarmRepeatType <--";
 }
 
 void AlarmClient::setAlarmRepeatType(
 		AlarmRepeatType repeat, TAlarmRepeatDefinition& repeatType)
 {
-	qDebug() << "clock: AlarmClient::setAlarmRepeatType -->";
-
 	switch (repeat) {
 		case Once:
 			repeatType = EAlarmRepeatDefintionRepeatOnce;
@@ -332,24 +299,41 @@ void AlarmClient::setAlarmRepeatType(
 		default:
 			break;
 	}
-
-	qDebug() << "clock: AlarmClient::setAlarmRepeatType <--";
 }
 
 void AlarmClient::deleteAlarm(int alarmId)
 {
-	qDebug() << "clock: AlarmClient::deleteAlarm -->";
-
 	// Request the alarmserver to delete the alarm.
 	mAlarmSrvSession.AlarmDelete(alarmId);
+}
 
-	qDebug() << "clock: AlarmClient::deleteAlarm <--";
+/*!
+	 Delete the snoozed alarm.
+	 
+	 \param alarmId needs to be deleted and reset again.
+	 \return int error value if any.
+ */
+int AlarmClient::deleteSnoozedAlarm(int alarmId)
+{
+	AlarmInfo alarmInfo;
+	int retVal(KErrNone);
+	int returnVal = getAlarmInfo(alarmId, alarmInfo);
+	if (KErrNone != retVal) {
+		return retVal;
+	}
+	returnVal = mAlarmSrvSession.AlarmDelete(alarmId);
+	if (KErrNone != retVal) {
+		return retVal;
+	}
+	alarmInfo.alarmState = InPreparation;
+	alarmInfo.nextDueTime = alarmInfo.origAlarmTime;
+	setAlarm(alarmInfo);
+	
+	return retVal;
 }
 
 int AlarmClient::getAlarmInfo(int alarmId, AlarmInfo& alarmInfo)
 {
-	qDebug() << "clock: AlarmClient::getAlarmInfo -->";
-
 	TASShdAlarm tempSharedAlarm;
 
 	// Get the requested alarm info from the alarm server.
@@ -373,11 +357,15 @@ int AlarmClient::getAlarmInfo(int alarmId, AlarmInfo& alarmInfo)
 				tempSharedAlarm.NextDueTime().DateTime().Minute(),
 				tempSharedAlarm.NextDueTime().DateTime().Second());
 
-		// Alarm day
+		// Alarm date
 		alarmInfo.alarmDateTime.setYMD(
 				tempSharedAlarm.OriginalExpiryTime().DateTime().Year(),
 				tempSharedAlarm.OriginalExpiryTime().DateTime().Month()+1,
 				tempSharedAlarm.OriginalExpiryTime().DateTime().Day()+1);
+		
+		// Set alarm day.
+		alarmInfo.alarmDay =
+			tempSharedAlarm.OriginalExpiryTime().DayNoInWeek();
 
 		// The alarm status
 		if (EAlarmStatusEnabled == tempSharedAlarm.Status()) {
@@ -404,46 +392,31 @@ int AlarmClient::getAlarmInfo(int alarmId, AlarmInfo& alarmInfo)
 			alarmInfo.volumeStatus = AlarmVolumeOff;
 		}
 	}
-
-	qDebug() << "clock: AlarmClient::getAlarmInfo <--";
-
 	return error;
 }
 
 void AlarmClient::toggleAlarmStatus(int alarmId, int alarmStatus)
 {
-	qDebug() << "clock: AlarmClient::toggleAlarmStatus -->";
 
 	mAlarmSrvSession.SetAlarmStatus(alarmId, (TAlarmStatus)alarmStatus);
 
-	qDebug() << "clock: AlarmClient::toggleAlarmStatus <--";
 }
 
 void AlarmClient::startListener()
 {
-	qDebug("clock: AlarmClient::startListener() -->");
+		mListener->start();
 
-	mListener->start();
-
-	qDebug("clock: AlarmClient::startListener() <--");
 }
 
 void AlarmClient::stopListener()
 {
-	qDebug("clock: AlarmClient::stopListener() -->");
-
 	mListener->stop();
 
-	qDebug("clock: AlarmClient::stopListener() <--");
 }
 
 void AlarmClient::notifyChange(int alarmId)
 {
-	qDebug() << "clock: AlarmClient::notifyChange -->";
-
-	emit alarmStateChanged(alarmId);
-
-	qDebug() << "clock: AlarmClient::notifyChange <--";
+		emit alarmStateChanged(alarmId);
 }
 
 // End of file	--Don't remove this.

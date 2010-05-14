@@ -71,7 +71,8 @@ private:
 	void removeAllWidgets();
 	void addAllWidgets();
 	void showDeleteOccurencePopup();
-	int showDeleteConfirmationQuery();
+	void showDeleteConfirmationQuery();
+	void getSubjectIcon(AgendaEntry::Type type, QString &subjectIcon);
 
 private slots:
 	void markTodoStatus();
@@ -84,7 +85,7 @@ private slots:
 	void handleNoteEditorClosed(bool status);
 	void handleCalendarEditorClosed();
 	void handleDeleteOccurence(int index);
-
+	void handleDeleteAction();
 private:
 	
 	HbView *mViewer;

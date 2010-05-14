@@ -17,7 +17,6 @@
 */
 
 // System includes
-#include <QDebug>
 #include <HbPushButton>
 
 // User includes
@@ -37,9 +36,7 @@
 	\parent of type QGraphicsItem.
  */
 ClockAlarmListItemPrototype::ClockAlarmListItemPrototype(QGraphicsItem *parent)
-:HbListViewItem(parent),
- mParent(parent),
- malarmIconItem(0)
+:HbListViewItem(parent)
 {
 	// Nothing yet.
 }
@@ -68,19 +65,11 @@ void ClockAlarmListItemPrototype::updateChildItems()
 			QString alarmIconPath = alarmIconRole.toString();
 			if (!malarmIconItem) {
 				malarmIconItem = new HbPushButton(this);
-				HbStyle::setItemName(malarmIconItem,
-				                     QLatin1String("alarmIconItem"));
+				HbStyle::setItemName(
+						malarmIconItem, QLatin1String("alarmIconItem"));
 				connect(
 						malarmIconItem, SIGNAL(clicked()),
 						this, SLOT(handleAlarmStatusChanged()));
-				if (mParent) {
-					connect(
-							this,
-							SIGNAL(alarmStatusHasChanged(int)),
-							qobject_cast<ClockMainView*>(
-									static_cast<QGraphicsWidget*>(mParent)),
-							SLOT(handleAlarmStatusChanged(int)));
-				}
 			}
 			malarmIconItem->setIcon(alarmIconPath);
 		}
@@ -94,7 +83,7 @@ void ClockAlarmListItemPrototype::updateChildItems()
  */
 ClockAlarmListItemPrototype *ClockAlarmListItemPrototype::createItem()
 {
-	return new ClockAlarmListItemPrototype(mParent);
+	return new ClockAlarmListItemPrototype(*this);
 }
 
 /*!
@@ -103,7 +92,8 @@ ClockAlarmListItemPrototype *ClockAlarmListItemPrototype::createItem()
 void ClockAlarmListItemPrototype::handleAlarmStatusChanged()
 {
 	int row = modelIndex().row();
-	emit alarmStatusHasChanged(row);
+	emit static_cast<ClockAlarmListItemPrototype*>(
+			prototype())->alarmStatusHasChanged(row);
 }
 
 // End of file	--Don't remove this.

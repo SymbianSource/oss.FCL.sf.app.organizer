@@ -95,6 +95,8 @@ class  CalenViewManager :	public QObject,
 		
 		void removeDayViews();
 		
+		void constructOtherViews();
+		
 	public: // from MCalenNotificationHandler
    
         /**
@@ -132,16 +134,16 @@ class  CalenViewManager :	public QObject,
 		 * day
 		 */
 		void loadAlternateDayView();
-		
-	public slots:
-		void constructOtherViews();
         
     private slots:
+		void handleMainViewReady();
 		void handleViewingCompleted(const QDate date);
 		void handleEditingStarted();
 		void handleEditingCompleted();
 		void handleDeletingStarted();
 		void handleDeletingCompleted();
+		void handleInstanceViewCreation(int status);
+		void handleEntryViewCreation(int status);
 		
     private:  // Data        
 

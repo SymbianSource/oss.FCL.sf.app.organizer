@@ -41,4 +41,5 @@ EXPORTS
 	?populateSourceModel@NotesModel@@AAEXXZ @ 40 NONAME ; void NotesModel::populateSourceModel(void)
 	?dateFormatString@NotesModel@@AAE?AVQString@@XZ @ 41 NONAME ; class QString NotesModel::dateFormatString(void)
 	?timeFormatString@NotesModel@@AAE?AVQString@@XZ @ 42 NONAME ; class QString NotesModel::timeFormatString(void)
+	?handleInstanceViewCreationCompleted@NotesModel@@AAEXH@Z @ 43 NONAME ; void NotesModel::handleInstanceViewCreationCompleted(int)
 

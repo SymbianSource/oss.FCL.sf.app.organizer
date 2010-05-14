@@ -1510,8 +1510,6 @@ void CCalEntryImpl::SetLastModifiedDateL(const TCalTime& aModifiedTime)
 
 void CCalEntryImpl::SetDTStampL(const TCalTime& aDTStampTime)
 	{
-	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
-					User::Leave(KErrNotSupported));
 	LoadFullEntryL();
 	iFullEntry->SetDTStampUtcL(aDTStampTime.TimeUtcL());
 	}

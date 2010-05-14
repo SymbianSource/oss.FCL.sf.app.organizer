@@ -60,8 +60,7 @@
 FtuDateTimeView::FtuDateTimeView() :
 HbView(),
 mDatePicker(NULL),
-mTimePicker(NULL),
-mDatetimepopup(NULL)
+mTimePicker(NULL)
 {
 	//TODO: Localisation has to be done
 	// set title for wizard
@@ -73,10 +72,10 @@ mDatetimepopup(NULL)
 			new FtuDateTimeCustomItem(mDateTimePlaceForm);
 	prototypes.append(customItem);
 	mDateTimePlaceForm->setItemPrototypes(prototypes);
-	
+
 	// Construct the settings utility.
 	mSettingsUtility = new SettingsUtility();
-	mTimeZoneClient = new TimezoneClient();
+	mTimeZoneClient = TimezoneClient::getInstance();
 	mTimeAutoUpdate = mTimeZoneClient->timeUpdateOn();
 }
 
@@ -88,6 +87,10 @@ FtuDateTimeView::~FtuDateTimeView()
 	delete mDateTimePlaceForm;
 	delete mDateTimePlaceModel;
 	delete mSettingsUtility;
+
+	if (!mTimeZoneClient->isNull()) {
+		mTimeZoneClient->deleteInstance();
+	}
 }
 /*!
     Creates the main view.
@@ -123,7 +126,7 @@ void FtuDateTimeView::createMainLayout()
  */
 void FtuDateTimeView::populateDateTimeGroup()
 {
-	HbDataFormModelItem *dateTimeGroup = 
+	HbDataFormModelItem *dateTimeGroup =
 			mDateTimePlaceModel->appendDataFormGroup
 			(QString(tr("Date and Time")),
 			 mDateTimePlaceModel->invisibleRootItem());
@@ -146,7 +149,7 @@ void FtuDateTimeView::populateDateTimeGroup()
 								SLOT(populateDatePicker()));
 	mDateTimePlaceForm->addConnection(mTimeItem, SIGNAL(clicked()), this,
 								SLOT(populateTimePicker()));
-	mDateTimePlaceForm->addConnection(mAutoTimeUpdateItem, SIGNAL(clicked()), 
+	mDateTimePlaceForm->addConnection(mAutoTimeUpdateItem, SIGNAL(clicked()),
 								this, SLOT(setAutoTimeupDate()));
 }
 
@@ -165,14 +168,14 @@ void FtuDateTimeView::populatePlaceGroup()
 	mCityItem = mDateTimePlaceModel->appendDataFormItem(
 									HbDataFormModelItem::CustomItemBase,
 									QString(tr("City")), mPlaceGroup);
-	
+
 	// Connect the items to the proper slots
 	mDateTimePlaceForm->addConnection(mCountryItem, SIGNAL(clicked()), this,
 									SLOT(populateCitySelectionList()));
 	mDateTimePlaceForm->addConnection(mCityItem, SIGNAL(clicked()), this,
 									SLOT(populateCitySelectionList()));
-	
-	
+
+
 }
 
 /*!
@@ -189,12 +192,12 @@ void FtuDateTimeView::setItemDisplayed()
 	} else {
 		mAutoTimeUpdateItem->setContentWidgetData("text", tr("OFF"));
 	}
-	mCountryItem->setContentWidgetData("text", 
+	mCountryItem->setContentWidgetData("text",
 							mTimeZoneClient->getCurrentZoneInfoL().countryName);
-	mCityItem->setContentWidgetData("text", 
+	mCityItem->setContentWidgetData("text",
 							mTimeZoneClient->getCurrentZoneInfoL().cityName);
 
-	// Set the date,time,country and city fields disable 
+	// Set the date,time,country and city fields disable
 	// if auto time update is ON
 	if (mTimeAutoUpdate) {
 		mDateItem->setEnabled(false);
@@ -209,14 +212,13 @@ void FtuDateTimeView::setItemDisplayed()
  */
 void FtuDateTimeView::populateDatePicker()
 {
-	if (mDatetimepopup) {
-		delete mDatetimepopup;
-		mDatetimepopup = NULL;
+	if (mDatePickerDialog) {
+		delete mDatePickerDialog;
 	}
-	mDatetimepopup = new HbDialog();
+	mDatePickerDialog = new HbDialog();
 
-	mDatetimepopup->setDismissPolicy(HbDialog::NoDismiss);
-	mDatetimepopup->setTimeout(HbDialog::NoDismiss);
+	mDatePickerDialog->setDismissPolicy(HbDialog::NoDismiss);
+	mDatePickerDialog->setTimeout(HbDialog::NoDismiss);
 
 	if(mDatePicker) {
 		mDatePicker = NULL;
@@ -225,54 +227,53 @@ void FtuDateTimeView::populateDatePicker()
 	                                   this);
 	mDatePicker->setMinimumDate(QDate::fromString("01/01/1900", "dd/MM/yyyy"));
 	mDatePicker->setMaximumDate(QDate::fromString("31/12/2100", "dd/MM/yyyy"));
-	mDatePicker->setDisplayFormat(mSettingsUtility->dateFormatString());
 
-	// Sets the primary action and secondary action
-	HbAction *primaryAction = new HbAction(tr("OK"), mDatetimepopup);
-	HbAction *secondaryAction = new HbAction(tr("Cancel"), mDatetimepopup);
+	mDatePickerDialog->setContentWidget(mDatePicker);
 
-	mDatetimepopup->setPrimaryAction(primaryAction);
-	mDatetimepopup->setSecondaryAction(secondaryAction);
-	mDatetimepopup->setContentWidget(mDatePicker);
+	// Add ok and cancel actions.
+	mOkAction = new HbAction(
+			hbTrId("txt_common_button_ok"), mDatePickerDialog);
+	mCancelAction =  new HbAction(
+			hbTrId("txt_common_button_cancel"), mDatePickerDialog);
 
-	connect(primaryAction, SIGNAL(triggered()), this, SLOT(updateDate()));
-	connect(secondaryAction, SIGNAL(triggered()), mDatetimepopup, SLOT(close()));
-	mDatetimepopup->exec();
+	mDatePickerDialog->addAction(mOkAction);
+	mDatePickerDialog->addAction(mCancelAction);
+
+	mDatePickerDialog->open(this, SLOT(selectedAction(HbAction *)));
 }
 
 /*!
     Populates the Time Picker.
  */
 void FtuDateTimeView::populateTimePicker()
-{   
-	if (mDatetimepopup) {
-		delete mDatetimepopup;
-		mDatetimepopup = NULL;
+{
+	if (mTimePickerDialog) {
+		delete mTimePickerDialog;
 	}
-	mDatetimepopup = new HbDialog();
-	mDatetimepopup->setDismissPolicy(HbDialog::NoDismiss);
-	mDatetimepopup->setTimeout(HbDialog::NoDismiss);
+	mTimePickerDialog = new HbDialog();
+	mTimePickerDialog->setDismissPolicy(HbDialog::NoDismiss);
+	mTimePickerDialog->setTimeout(HbDialog::NoDismiss);
 
 	if(mTimePicker) {
 		mTimePicker = NULL;
 	}
-	mTimePicker = new HbDateTimePicker(QTime().currentTime(),
-	                                   this);
+	mTimePicker = new HbDateTimePicker(
+			QTime().currentTime(), this);
 	mTimePicker->setDisplayFormat(mSettingsUtility->timeFormatString());
 
-	// Sets the primary action and secondary action
-	HbAction *primaryAction = new HbAction(tr("OK"), mDatetimepopup);
-	HbAction *secondaryAction = new HbAction(tr("Cancel"), mDatetimepopup);
+	mTimePickerDialog->setContentWidget(mTimePicker);
 
-	mDatetimepopup->setPrimaryAction(primaryAction);
-	mDatetimepopup->setSecondaryAction(secondaryAction);
+	// Add ok and cancel actions.
+	mOkAction = new HbAction(
+			hbTrId("txt_common_button_ok"), mTimePickerDialog);
 
-	mDatetimepopup->setContentWidget(mTimePicker);
+	mCancelAction = new HbAction(
+			hbTrId("txt_common_button_cancel"), mTimePickerDialog);
 
-	connect(primaryAction, SIGNAL(triggered()), this, SLOT(updateTime()));
-	connect(secondaryAction, SIGNAL(triggered()), mDatetimepopup, SLOT(close()));
+	mTimePickerDialog->addAction(mOkAction);
+	mTimePickerDialog->addAction(mCancelAction);
 
-	mDatetimepopup->exec();
+	mTimePickerDialog->open(this, SLOT(selectedAction(HbAction*)));
 }
 
 /*!
@@ -334,6 +335,27 @@ void FtuDateTimeView::HandleLocationChange(LocationInfo location)
 }
 
 /*!
+	Slot to handle the selected action.
+ */
+void FtuDateTimeView::selectedAction(HbAction *action)
+{
+	// Update time/date based on the picker selected.
+	if (action == mOkAction) {
+		if (mTimePickerDialog) {
+			updateTime();
+		} else if(mDatePickerDialog) {
+			updateDate();
+		}
+	}else {
+		if(mTimePickerDialog) {
+			mTimePickerDialog->deleteLater();
+		} else if(mDatePickerDialog) {
+			mDatePickerDialog->deleteLater();
+		}
+	}
+}
+
+/*!
     Sets the device date.
  */
 void FtuDateTimeView::updateDate()
@@ -341,7 +363,7 @@ void FtuDateTimeView::updateDate()
 	QDate date = mDatePicker->date();
 	// Set device Date
 	if (date.isValid()) {
-		mDateItem->setContentWidgetData("text", 
+		mDateItem->setContentWidgetData("text",
 						date.toString(mSettingsUtility->dateFormatString()));
 		mTimeZoneClient->setDateTime(QDateTime(date, QTime::currentTime()));
 		wizardEditedDate(date);
@@ -356,7 +378,7 @@ void FtuDateTimeView::updateTime()
 	QTime time = mTimePicker->time();
 	// Set device Time
 	if (time.isValid()) {
-		mTimeItem->setContentWidgetData("text", 
+		mTimeItem->setContentWidgetData("text",
 						time.toString(mSettingsUtility->timeFormatString()));
 		mTimeZoneClient->setDateTime(QDateTime(QDate::currentDate(), time));
 		wizardEditedDate(QDate::currentDate());
@@ -370,7 +392,7 @@ void FtuDateTimeView::updateTime()
 QDate FtuDateTimeView::getWizardCompletedDate()
 {
 	XQSettingsManager *settingsManager = new XQSettingsManager();
-	XQSettingsKey *ftuPluginDateCenrepKey = 
+	XQSettingsKey *ftuPluginDateCenrepKey =
 			new XQSettingsKey(XQSettingsKey::TargetCentralRepository,
 			                  KCRUidClockApp, KFtuPluginDate);
 	// Read the initial values from the cenrep
@@ -392,10 +414,10 @@ QDate FtuDateTimeView::getWizardCompletedDate()
 void FtuDateTimeView::wizardEditedDate(const QDate &date)
 {
 	XQSettingsManager *settingsManager = new XQSettingsManager();
-	XQSettingsKey *ftuPluginDateCenrepKey = 
+	XQSettingsKey *ftuPluginDateCenrepKey =
 			new XQSettingsKey(XQSettingsKey::TargetCentralRepository,
 			                  KCRUidClockApp, KFtuPluginDate);
-	QString dateString = date.toString(mSettingsUtility->dateFormatString());  
+	QString dateString = date.toString(mSettingsUtility->dateFormatString());
 	settingsManager->writeItemValue(*ftuPluginDateCenrepKey,dateString);
 
 	// Cleanup.

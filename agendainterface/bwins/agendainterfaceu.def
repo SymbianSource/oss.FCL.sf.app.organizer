@@ -178,4 +178,6 @@ EXPORTS
 	?setRecurrenceId@AgendaEntry@@QAEXAAVQDateTime@@@Z @ 177 NONAME ; void AgendaEntry::setRecurrenceId(class QDateTime &)
 	?isNull@AgendaGeoValue@@QBE_NXZ @ 178 NONAME ; bool AgendaGeoValue::isNull(void) const
 	?areNoEntriesInCalendar@AgendaUtil@@QAE_NXZ @ 179 NONAME ; bool AgendaUtil::areNoEntriesInCalendar(void)
+	?entryViewCreationCompleted@AgendaUtil@@IAEXH@Z @ 180 NONAME ; void AgendaUtil::entryViewCreationCompleted(int)
+	?instanceViewCreationCompleted@AgendaUtil@@IAEXH@Z @ 181 NONAME ; void AgendaUtil::instanceViewCreationCompleted(int)
 

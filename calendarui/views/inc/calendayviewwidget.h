@@ -32,6 +32,7 @@ class HbAbstractViewItem;
 class HbGroupBox;
 class HbListView;
 class HbLabel;
+class HbAction;
 class HbDateTimePicker;
 class XQSettingsManager;
 class MCalenServices;
@@ -89,6 +90,11 @@ public:
      * @brief Callback function to handle system locale change
      */
     void handleLocaleChange();
+    
+    /**
+     * @brief clears the list model from the view
+     */
+    void clearListModel();
     
 private:
     
@@ -219,6 +225,17 @@ private slots:
      * events for some day other than the current day
      */
     void goToToday();
+    
+    /**
+     * @brief This slot connected to aboutToClose()signal of contextmenu
+     * To reset the flag of mLongTapEventFlag
+     */
+    void contextMenuClosed();
+    
+    /**
+     * @brief Called when contextMenu item is triggered
+     */
+    void contextManuTriggered(HbAction *action);
 
 private:
     /**
@@ -321,6 +338,13 @@ private:
 	 */
 	
 	XQSettingsManager *mSettingsManager;
+	
+	/**
+	 * @var mLongTapeventFlag
+	 * @brief Set flag true if contextmenu is opened
+	 */
+	bool mLongTapEventFlag;
+	
 };
 
 #endif //CALENDAYVIEWWIDGET_H

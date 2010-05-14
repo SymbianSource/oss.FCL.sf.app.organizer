@@ -2,16 +2,6 @@
 <!DOCTYPE TS>
 <TS version="3.0" language="en_GB" sourcelanguage="en_GB">
 <context>
-<message numerus="no" id="txt_clock_setlabel_time_format">
-    <comment>1st label in Regional date &amp; time settings view</comment>        
-    <source>Time format</source>
-    <translation variants="no">Time format</translation>
-    <extra-loc-layout_id>qtl_dataform_heading_pri</extra-loc-layout_id>    
-    <extra-loc-viewid>Clock_Date &amp; time settings_P04_3</extra-loc-viewid>
-    <extra-loc-positionid>setlabel_1</extra-loc-positionid>
-    <extra-loc-feature>Cl</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
 <message numerus="no" id="txt_common_common_clock">
     <comment>Title for Date and time settings view</comment>        
     <source>Clock</source>
@@ -20,6 +10,16 @@
     <extra-loc-viewid>Common</extra-loc-viewid>
     <extra-loc-positionid>Common</extra-loc-positionid>
     <extra-loc-feature>Co</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_clock_setlabel_time_format">
+    <comment>1st label in Regional date &amp; time settings view</comment>        
+    <source>Time format</source>
+    <translation variants="no">Time format</translation>
+    <extra-loc-layout_id>qtl_dataform_heading_pri</extra-loc-layout_id>    
+    <extra-loc-viewid>Clock_Date &amp; time settings_P04_3</extra-loc-viewid>
+    <extra-loc-positionid>setlabel_1</extra-loc-positionid>
+    <extra-loc-feature>Cl</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
 <message numerus="no" id="txt_cp_main_view_list_time_info_date_info">
@@ -127,7 +127,7 @@
     <source>Monday</source>
     <translation variants="no">Monday</translation>
     <extra-loc-layout_id>qtl_dataform_group_pri</extra-loc-layout_id>    
-    <extra-loc-viewid>Clock_Date &amp; time settings_P04_1</extra-loc-viewid>
+    <extra-loc-viewid>Clock_Alarm editor_P03</extra-loc-viewid>
     <extra-loc-positionid>setlabel_1_val</extra-loc-positionid>
     <extra-loc-feature>Cl</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
@@ -137,21 +137,8 @@
     <source>Thursday</source>
     <translation variants="no">Thursday</translation>
     <extra-loc-layout_id>qtl_dataform_group_pri</extra-loc-layout_id>    
-    <extra-loc-viewid>Clock_Date &amp; time settings_P04_1</extra-loc-viewid>
+    <extra-loc-viewid>Clock_Alarm editor_P03</extra-loc-viewid>
     <extra-loc-positionid>setlabel_4_val</extra-loc-positionid>
-    <extra-loc-feature>Cl</extra-loc-feature>
-    <extra-loc-blank>False</extra-loc-blank>
-</message>
-<message numerus="yes" id="txt_clock_list_ln_minutes">
-    <comment>Alarm snooze time details in the list box (5mins, 10mins, 15mins, 30mins)</comment>        
-    <source>%Ln minutes</source>
-    <translation>
-        <numerusform variants="no">(s)%Ln minutes</numerusform>
-        <numerusform variants="no">(p)%Ln minutes</numerusform>
-    </translation>
-    <extra-loc-layout_id>qtl_dataform_combobox_sec</extra-loc-layout_id>    
-    <extra-loc-viewid>Clock_Date &amp; time settings_P04_1</extra-loc-viewid>
-    <extra-loc-positionid>set</extra-loc-positionid>
     <extra-loc-feature>Cl</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -160,7 +147,7 @@
     <source>Friday</source>
     <translation variants="no">Friday</translation>
     <extra-loc-layout_id>qtl_dataform_group_pri</extra-loc-layout_id>    
-    <extra-loc-viewid>Clock_Date &amp; time settings_P04_1</extra-loc-viewid>
+    <extra-loc-viewid>Clock_Alarm editor_P03</extra-loc-viewid>
     <extra-loc-positionid>setlabel_5_val</extra-loc-positionid>
     <extra-loc-feature>Cl</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
@@ -190,7 +177,7 @@
     <source>Sunday</source>
     <translation variants="no">Sunday</translation>
     <extra-loc-layout_id>qtl_dataform_group_pri</extra-loc-layout_id>    
-    <extra-loc-viewid>Clock_Date &amp; time settings_P04_1</extra-loc-viewid>
+    <extra-loc-viewid>Clock_Alarm editor_P03</extra-loc-viewid>
     <extra-loc-positionid>setlabel_7_val</extra-loc-positionid>
     <extra-loc-feature>Cl</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
@@ -210,7 +197,7 @@
     <source>Tuesday</source>
     <translation variants="no">Tuesday</translation>
     <extra-loc-layout_id>qtl_dataform_group_pri</extra-loc-layout_id>    
-    <extra-loc-viewid>Clock_Date &amp; time settings_P04_1</extra-loc-viewid>
+    <extra-loc-viewid>Clock_Alarm editor_P03</extra-loc-viewid>
     <extra-loc-positionid>setlabel_2_val</extra-loc-positionid>
     <extra-loc-feature>Cl</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
@@ -242,6 +229,16 @@
     <extra-loc-layout_id>qtl_dataform_pri</extra-loc-layout_id>    
     <extra-loc-viewid>Clock_Date &amp; time settings_P04_3</extra-loc-viewid>
     <extra-loc-positionid>setlabel_1</extra-loc-positionid>
+    <extra-loc-feature>Cl</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_clock_subhead_settings">
+    <comment>Sub-title for Settings view</comment>        
+    <source>Settings</source>
+    <translation variants="no">Settings</translation>
+    <extra-loc-layout_id>qtl_groupbox_simple_sec</extra-loc-layout_id>    
+    <extra-loc-viewid>Clock_Date &amp; time settings_P04_1</extra-loc-viewid>
+    <extra-loc-positionid>subhead</extra-loc-positionid>
     <extra-loc-feature>Cl</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
@@ -295,6 +292,29 @@
     <extra-loc-feature>Cl</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
+<message numerus="no" id="txt_clock_setlabel_alarm_snooze_time">
+    <comment>Primary text label for Clock Type</comment>        
+    <source>Alarm snooze time</source>
+    <translation variants="no">Alarm snooze time</translation>
+    <extra-loc-layout_id>qtl_dataform_pri_graphic</extra-loc-layout_id>    
+    <extra-loc-viewid>Clock_Date &amp; time settings_P04_1</extra-loc-viewid>
+    <extra-loc-positionid>setlabel_1</extra-loc-positionid>
+    <extra-loc-feature>Cl</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="yes" id="txt_clock_set_ln_mins">
+    <comment>Alarm snooze time details in the list box (5mins, 10mins, 15mins, 30mins)</comment>        
+    <source>%Ln mins</source>
+        <translation>
+            <numerusform variants = "no">%Ln mins</numerusform>
+            <numerusform variants = "no">%Ln mins</numerusform>
+        </translation>
+    <extra-loc-layout_id>qtl_dataform_combobox_sec</extra-loc-layout_id>    
+    <extra-loc-viewid>Clock_Date &amp; time settings_P04_1</extra-loc-viewid>
+    <extra-loc-positionid>set</extra-loc-positionid>
+    <extra-loc-feature>Cl</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
 <message numerus="no" id="txt_clock_setlabel_clock_type">
     <comment>Primary text label for Clock Type</comment>        
     <source>Clock Type</source>
@@ -320,7 +340,7 @@
     <source>Saturday</source>
     <translation variants="no">Saturday</translation>
     <extra-loc-layout_id>qtl_dataform_group_pri</extra-loc-layout_id>    
-    <extra-loc-viewid>Clock_Date &amp; time settings_P04_1</extra-loc-viewid>
+    <extra-loc-viewid>Clock_Alarm editor_P03</extra-loc-viewid>
     <extra-loc-positionid>setlabel_6_val</extra-loc-positionid>
     <extra-loc-feature>Cl</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
@@ -330,7 +350,7 @@
     <source>Wednesday</source>
     <translation variants="no">Wednesday</translation>
     <extra-loc-layout_id>qtl_dataform_group_pri</extra-loc-layout_id>    
-    <extra-loc-viewid>Clock_Date &amp; time settings_P04_1</extra-loc-viewid>
+    <extra-loc-viewid>Clock_Alarm editor_P03</extra-loc-viewid>
     <extra-loc-positionid>setlabel_3_val</extra-loc-positionid>
     <extra-loc-feature>Cl</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>

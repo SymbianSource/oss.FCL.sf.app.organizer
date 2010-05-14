@@ -24,4 +24,5 @@ EXPORTS
 	_ZNK11AlarmClient10metaObjectEv @ 23 NONAME
 	_ZTI11AlarmClient @ 24 NONAME
 	_ZTV11AlarmClient @ 25 NONAME
+	_ZN11AlarmClient18deleteSnoozedAlarmEi @ 26 NONAME
 

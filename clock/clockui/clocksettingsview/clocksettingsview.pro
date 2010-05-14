@@ -23,7 +23,6 @@ DEFINES += CLOCKSETTINGSVIEW_LIB
 
 INCLUDEPATH += \
 		./inc \
-		../clockwidget/inc \
 		../../clockmw/clocksettingsutility/inc \
 		../../clockmw/clocktimezone/inc \
 		../clockcityselectionlist/inc \
@@ -43,7 +42,7 @@ symbian: {
 		-ltimezoneclient \
 		-lclocksettingsutility \
 		-lclockcityselectionlist \
-		-lclockwidgetproto
+		-lxqsettingsmanager
 }
 
 SOURCES += \

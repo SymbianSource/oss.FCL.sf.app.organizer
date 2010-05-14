@@ -19,7 +19,7 @@
 #define FTUDATETIMEWIZARDFACTORY_H
 
 // System includes
-#include <qobject>
+#include <QObject>
 
 // User includes
 #include "ftuwizardfactory.h"

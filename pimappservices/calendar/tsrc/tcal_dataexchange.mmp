@@ -22,7 +22,9 @@ SOURCEPATH		.
 SOURCE			tcal_dataexchange.cpp
 
 USERINCLUDE		.
+APP_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE	/epoc32/include
+
 
 LIBRARY			calinterimapi.lib
 LIBRARY			euser.lib estor.lib efsrv.lib caltestlib.lib

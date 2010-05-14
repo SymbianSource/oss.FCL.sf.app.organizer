@@ -108,70 +108,24 @@ bool AgendaUtilPrivate::prepareSession()
 		delete filter;
 		}
 
-	/*
-	// If view creation is in progress, then wait till it gets completed
-	if((iCalEntryView && !mEntryViewCreated)
-			|| (iCalInstanceView && !mInstanceViewCreated))
-	{
-		if(!iWait)
-		{
-			TRAP(iError, iWait = new (ELeave) CActiveSchedulerWait;);
-			if(!iWait->IsStarted())
-			{
-				iWait->Start();
-			}
-		}
+	// First construct the CCalInstanceView if not already available.
+	// The CCalEntryView is constructed in CompletedL. Instance view
+	// is created before entry view since entry view is required only
+	// when editing/saving any entry. So we will construct it later
+	if (!iCalInstanceView) {
+	    TRAP (iError, iCalInstanceView = CCalInstanceView::NewL(*iCalSession,
+	                                                           *this);)
 	}
-	*/
-
-	// First construct the CCalEntryView if not already available.
-	// The CCalInstanceView is constructed in ::CompletedL. We block the
-	// thread here until everything is setup.
-	if (!iCalEntryView)
-		{
-		TRAP(
-				iError,
-				iCalEntryView = CCalEntryView::NewL(*iCalSession, *this);
-		);
-		if (!iWait)
-			{
-			TRAP(
-					iError,
-					iWait = new (ELeave) CActiveSchedulerWait;
-			)
-			if (!iWait->IsStarted())
-				{
-				iWait->Start();
-				}
-			}
-		}
-
-	// Comes here only when timer is expired, hence one more
-	// check is needed here.
-	if (iCalSession && mEntryViewCreated && mInstanceViewCreated)
-		{
-		// Everything is ready.
-		return true;
-		}
-
-	else
-		{
-		return false;
-		}
+	
+	// All the requests have been made
+	return true;
 }
 
 AgendaUtilPrivate::~AgendaUtilPrivate()
 {
 	delete iCalEntryView;
 	delete iCalInstanceView;
-	if (iWait && iWait->IsStarted())
-	{
-		iWait->AsyncStop();
-	}
-
-	delete iWait;
-	if (iCalSession)
-	{
+	if (iCalSession) {
 		iCalSession->StopChangeNotification();
 	}
 	delete iCalSession;
@@ -188,39 +142,33 @@ void AgendaUtilPrivate::Completed(TInt aError)
 		emit q->entriesDeleted(iError);
 	}
 
-	if(KErrNone != iError)
-	{
+	if (KErrNone != iError) {
 		// Something has gone wrong, return
+		if (iCalEntryView) {
 		delete iCalEntryView;
 		iCalEntryView = NULL;
+		}
+		if (iCalInstanceView) {
 		delete iCalInstanceView;
 		iCalInstanceView = NULL;
+		}
 		return;
 	}
 
-	if(iCalEntryView && !mEntryViewCreated)
-	{
+	if (iCalInstanceView && !mInstanceViewCreated) {
+	    // Instance view is now created.
+	    mInstanceViewCreated = true;
+	    emit q->instanceViewCreationCompleted(iError);
+	    // Start with the construction of entry view
+		if (!iCalEntryView) {
+		    TRAP (iError,
+		          iCalEntryView = CCalEntryView::NewL(*iCalSession, *this);
+		    );
+		}
+	} else if(iCalEntryView && !mEntryViewCreated) {
+	    // Entry view is now constructed
 		mEntryViewCreated = true;
-
-		// Start creating the instance view.
-		if(!iCalInstanceView)
-		{
-			TRAP(iError, iCalInstanceView = CCalInstanceView::NewL(
-					*iCalSession, *this);)
-		}
-	}
-	else if(iCalInstanceView && !mInstanceViewCreated)
-	{
-		mInstanceViewCreated = true;
-	}
-
-	// Stop the wait timer
-	if( iWait && iWait->IsStarted())
-	{
-		if(mEntryViewCreated &&  mInstanceViewCreated)
-		{
-			iWait->AsyncStop();
-		}
+		emit q->entryViewCreationCompleted(iError);
 	}
 }
 
@@ -248,7 +196,7 @@ ulong AgendaUtilPrivate::addEntry(const AgendaEntry& entry)
 	int success = 0;
 
 	// First check if the session to the calendar database is prepared or not.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Something went wrong
 		return localUid;
 	}
@@ -309,7 +257,7 @@ ulong AgendaUtilPrivate::addEntry(const AgendaEntry& entry)
 						dtStamp.time().minute(), 0, 0);
 				TTime creationTTime(creationDateTime);
 				creationCalTime.SetTimeLocalL(creationTTime);
-				//newEntry->SetDTStampL(creationCalTime);
+				newEntry->SetDTStampL(creationCalTime);
 
 				// Finally set the entry to the database using the entry view.
 				entryArray.AppendL(newEntry);
@@ -467,7 +415,7 @@ ulong AgendaUtilPrivate::cloneEntry(
 		const AgendaEntry &entry, AgendaEntry::Type type)
 {
 	// First prepare the session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Something went wrong.
 		return 0;
 	}
@@ -671,7 +619,7 @@ ulong AgendaUtilPrivate::cloneEntry(
 bool AgendaUtilPrivate::deleteEntry(ulong id)
 {
 	// First prepare the session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Something went wrong.
 		return false;
 	}
@@ -709,7 +657,7 @@ void AgendaUtilPrivate::deleteRepeatedEntry(
 	qDebug("AgendaUtilPrivate::deleteRepeatedEntry");
 
 	// First prepare the session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Something went wrong.
 		return;
 	}
@@ -766,7 +714,7 @@ void AgendaUtilPrivate::deleteRepeatedEntry(
 bool AgendaUtilPrivate::updateEntry(const AgendaEntry& entry, bool isChild)
 {
 	// First prepare the session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Something went wrong.
 		return false;
 	}
@@ -1033,7 +981,7 @@ bool AgendaUtilPrivate::storeRepeatingEntry(const AgendaEntry& entry,
                                             bool copyToChildren)
 {
 	// First prepare the session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Something went wrong.
 		return false;
 	}
@@ -1203,7 +1151,7 @@ bool AgendaUtilPrivate::createException(const AgendaEntry& entry)
 {
 
 	// First prepare the session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Something went wrong.
 		return false;
 	}
@@ -1464,7 +1412,7 @@ AgendaEntry AgendaUtilPrivate::fetchById(ulong id)
 	AgendaEntry entry;
 
 	// First check if the session with the calendar exists.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Return empty AgendaEntry.
 		return entry;
 	}
@@ -1500,7 +1448,7 @@ QList<ulong> AgendaUtilPrivate::entryIds(AgendaUtil::FilterFlags filter)
 	QList<ulong> listOfIds;
 
 	// First check if the session with agenda server exists.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Return empty list.
 		return listOfIds;
 	}
@@ -1561,7 +1509,7 @@ QList<AgendaEntry> AgendaUtilPrivate::fetchAllEntries(
 	QList<AgendaEntry> entryList;
 
 	// First check if the session with agenda server exists.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Return empty list.
 		return entryList;
 	}
@@ -1619,7 +1567,7 @@ QList<AgendaEntry> AgendaUtilPrivate::fetchEntriesInRange(
 		AgendaUtil::FilterFlags filter)
 {
     QList<AgendaEntry> entryList;
-    if(!prepareSession())
+    if(!mInstanceViewCreated)
         {
             // return empty list
             return entryList;
@@ -1676,6 +1624,12 @@ void AgendaUtilPrivate::markDatesWithEvents(QDateTime rangeStart,
 	QDateTime rangeEnd,AgendaUtil::FilterFlags filter, QList<QDate>& dates)
 {
 	RPointerArray<CCalInstance> instanceList;
+	
+	if(!mInstanceViewCreated) {
+	    // return empty list
+	    return;
+	}
+	
 	CleanupClosePushL(instanceList);
 	CalCommon::TCalViewFilter filters = filter;
 	TCalTime startDateForInstanceSearch;
@@ -1757,7 +1711,7 @@ QList<AgendaEntry> AgendaUtilPrivate::createEntryIdListForDay( QDateTime day,
                             AgendaUtil::FilterFlags filter )
 {
     QList<AgendaEntry> entryList;
-    if(!prepareSession()) {
+    if(!mInstanceViewCreated) {
         // return empty list
         return entryList;
     }
@@ -1833,7 +1787,7 @@ int AgendaUtilPrivate::importvCalendar(const QString& fileName,
 	int success = -1 ;
 
 	// First prepare the session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		return success;
 	}
 
@@ -1886,7 +1840,7 @@ bool AgendaUtilPrivate::exportAsvCalendar(
 		const QString& fileName, ulong calendarEntryId)
 {
 	// First prepare session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		return false;
 	}
 	TRAP(
@@ -2022,7 +1976,7 @@ AgendaEntry AgendaUtilPrivate::parentEntry(AgendaEntry& entry)
 {
 	AgendaEntry parentEntry;
 	// First check if the session with the calendar exists.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Return empty AgendaEntry.
 		return entry;
 	}
@@ -2458,6 +2412,11 @@ void AgendaUtilPrivate::getNextInstanceTimes(AgendaEntry& entry,
  */
 bool AgendaUtilPrivate::areNoEntriesInCalendar()
 {
+	// First prepare the session with the agenda server.
+	if (!mInstanceViewCreated) {
+		return false;
+	}
+	
 	bool isEmpty;
 	// Query for the entries for entire range
 	RPointerArray<CCalInstance> instanceList;
@@ -2846,7 +2805,7 @@ bool AgendaUtilPrivate::addAttendeesToEntry(
 		const QList<AgendaAttendee>& attendees, CCalEntry& entry)
 {
 	// First prepare the session with the agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		return false;
 	}
 
@@ -2878,7 +2837,7 @@ bool AgendaUtilPrivate::addCategoriesToEntry(
 		const QList<AgendaCategory>& categories, CCalEntry& entry)
 {
 	// First prepare the session with the agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		return false;
 	}
 	TRAP(
@@ -2984,7 +2943,7 @@ TTime AgendaUtilPrivate::LimitToValidTime( const TTime& aTime )
 
 CCalInstance* AgendaUtilPrivate::findPossibleInstance(AgendaEntry& entry)
 {
-    if(!prepareSession()) {
+    if(!mInstanceViewCreated) {
         // return empty list
         return NULL;
     }

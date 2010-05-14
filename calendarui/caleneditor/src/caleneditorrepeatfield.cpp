@@ -18,6 +18,7 @@
 
 
 // System Includes
+#include <QDate>
 #include <hbdataformmodelitem.h>
 #include <hbdataformviewitem.h>
 #include <hbdataformmodel.h>
@@ -178,11 +179,11 @@ void CalenEditorRepeatField::populateRepeatItem(int index)
 									  AgendaRepeatRule(
 									  AgendaRepeatRule::InvalidRule));
 	}
-	connect(mRepeatComboBox, SIGNAL(currentIndexChanged(int)), this,
-			SLOT(handleRepeatIndexChanged(int)));
 	
 	// Update the repeat choices depending upon the duration
 	updateRepeatChoices();
+	connect(mRepeatComboBox, SIGNAL(currentIndexChanged(int)), this,
+				SLOT(handleRepeatIndexChanged(int)));
 }
 
 /*!
@@ -296,6 +297,7 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 		break;
 	}
 	mCalenEditor->addDiscardAction();
+	mCalenEditor->updateReminderChoices();
 }
 
 /*!
@@ -314,10 +316,13 @@ void CalenEditorRepeatField::insertRepeatUntilItem()
 {
 	HbDataFormModelItem::DataItemType itemType =
 	        static_cast<HbDataFormModelItem::DataItemType> (RepeatUntilOffset);
-
-	QModelIndex repeatIndex = mCalenEditorModel->indexFromItem(mRepeatItem);
+	
+	int index = CalenEditorPrivate::RepeatUntilItem;
+	if (!mCalenEditor->isReminderTimeForAllDayAdded()) {
+		index -= 1;
+	}
 	mCustomRepeatUntilItem = mCalenEditorModel->insertDataFormItem(
-										CalenEditorPrivate::RepeatUntilItem,
+										index,
 										itemType,
 										QString(
 										hbTrId(
@@ -351,12 +356,19 @@ bool CalenEditorRepeatField::isRepeatUntilItemAdded()
  */
 void CalenEditorRepeatField::launchRepeatUntilDatePicker()
 {
+	HbDialog *popUp = new HbDialog();
+	popUp->setDismissPolicy(HbDialog::NoDismiss);
+	popUp->setTimeout(HbDialog::NoTimeout);
+	popUp->setHeadingWidget( new HbLabel(
+									hbTrId("txt_calendar_title_repeat_until")));
+	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
+	
 	if (mDatePicker) {
 		mDatePicker = NULL;
 	}
 	if (mRepeatRuleType == AgendaRepeatRule::DailyRule) {
 		QDate minDate = mCalenEditor->editedEntry()->endTime().date().addDays(1);
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate);
+		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
 		mDatePicker->setMinimumDate(minDate);
 		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
 		mDatePicker->setDate(mRepeatUntilDate);
@@ -367,36 +379,30 @@ void CalenEditorRepeatField::launchRepeatUntilDatePicker()
 		} else {
 			minDate = mCalenEditor->editedEntry()->endTime().date().addDays(14);
 		}
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate);
+		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
 		mDatePicker->setMinimumDate(minDate);
 		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
 		mDatePicker->setDate(mRepeatUntilDate);
 	} else if (mRepeatRuleType == AgendaRepeatRule::MonthlyRule) {
 		QDate minDate = mCalenEditor->editedEntry()->endTime().date().addMonths(1);
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate);
+		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
 		mDatePicker->setMinimumDate(minDate);
 		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
 		mDatePicker->setDate(mRepeatUntilDate);
 	} else if (mRepeatRuleType == AgendaRepeatRule::YearlyRule) {
 		QDate minDate = mCalenEditor->editedEntry()->endTime().date().addYears(1);
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate);
+		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
 		mDatePicker->setMinimumDate(minDate);
 		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
 		mDatePicker->setDate(mRepeatUntilDate);
 	}
-	HbDialog popUp;
-	popUp.setDismissPolicy(HbDialog::NoDismiss);
-	popUp.setTimeout(HbDialog::NoTimeout);
-	popUp.setContentWidget(mDatePicker);
-	popUp.setHeadingWidget( new HbLabel(
-								hbTrId("txt_calendar_title_repeat_until")));
+	popUp->setContentWidget(mDatePicker);
+	
 	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
-	popUp.setPrimaryAction(okAction);
+	popUp->addAction(okAction);
 	connect(okAction, SIGNAL(triggered()), this, SLOT(setRepeatUntilDate()));
-	connect(okAction, SIGNAL(triggered()), &popUp, SLOT(close()));
-	popUp.setSecondaryAction(new HbAction(hbTrId("txt_common_button_cancel"),
-								&popUp));
-	popUp.exec();
+	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"), popUp));
+	popUp->open();
 }
 
 /*!
@@ -411,6 +417,15 @@ void CalenEditorRepeatField::setRepeatUntilDate()
 									r_qtn_date_usual_with_zero);
 		mCustomRepeatUntilItem->setContentWidgetData("text", dateString);
 	}
+	mCalenEditor->updateReminderChoices();
+}
+
+/*!
+	Returns the repeatuntildate displayed.
+ */
+QDate CalenEditorRepeatField::repeatUntilDate()
+{
+	return mRepeatUntilDate;
 }
 
 /*!
@@ -526,7 +541,6 @@ void CalenEditorRepeatField::updateRepeatChoices()
 	}
 	// Set the previous user's choice
 	mRepeatComboBox->setCurrentIndex(choice);
-	handleRepeatIndexChanged(choice);
 }
 
 /*!

@@ -53,6 +53,9 @@ public:
 public:
 	NOTESVIEWS_EXPORT void setupView(
 			NotesAppControllerIf &controllerIf, NotesDocLoader *docLoader);
+	NOTESVIEWS_EXPORT void setupAfterViewReady();
+	NOTESVIEWS_EXPORT void updateTitle();
+
 signals:
 	void deleteEntry(ulong entryId);
 
@@ -74,6 +77,8 @@ private slots:
 	void updateSubTitle(ulong id=0);
 	void markNoteAsTodo();
 	void openNote();
+	void selectedMenuAction(HbAction *action);
+	void handleMenuClosed();
 
 private:
 	HbListView *mListView;
@@ -102,6 +107,7 @@ private:
 	NotesSortFilterProxyModel *mProxyModel;
 	NotesEditor *mNotesEditor;
 	AgendaEventViewer *mAgendaEventViewer;
+	bool mIsLongTop;
 };
 
 #endif // NOTESMAINVIEW_H

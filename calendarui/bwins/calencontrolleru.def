@@ -24,4 +24,5 @@ EXPORTS
 	?OfferMenu@CCalenController@@QAEXPAVHbMenu@@@Z @ 23 NONAME ; void CCalenController::OfferMenu(class HbMenu *)
 	?RegisterForNotificationsL@CCalenController@@QAEXPAVMCalenNotificationHandler@@AAV?$RArray@W4TCalenNotification@@@@@Z @ 24 NONAME ; void CCalenController::RegisterForNotificationsL(class MCalenNotificationHandler *, class RArray<enum TCalenNotification> &)
 	?NewServicesL@CCalenController@@UAEPAVMCalenServices@@XZ @ 25 NONAME ; class MCalenServices * CCalenController::NewServicesL(void)
+	?ReleaseCustomisations@CCalenController@@QAEXXZ @ 26 NONAME ; void CCalenController::ReleaseCustomisations(void)
 

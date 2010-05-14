@@ -56,6 +56,7 @@ public:
 	void getAlarmList(QList<AlarmInfo>& alarmList);
 	void setAlarm(AlarmInfo& alarmInfo);
 	void deleteAlarm(int alarmId);
+	int deleteSnoozedAlarm(int alarmId);
 	int getAlarmInfo(int alarmId, AlarmInfo& alarmInfo);
 	void toggleAlarmStatus(int alarmId, int alarmStatus);
 

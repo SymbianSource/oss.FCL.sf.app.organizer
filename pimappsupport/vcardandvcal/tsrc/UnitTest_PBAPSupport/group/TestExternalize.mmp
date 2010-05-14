@@ -21,6 +21,8 @@ CAPABILITY   None
 SOURCEPATH		../src
 USERINCLUDE		../inc
 USERINCLUDE		../../../inc
+
+APP_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE		/epoc32/include
 
 SOURCE			TestExternalize.cpp

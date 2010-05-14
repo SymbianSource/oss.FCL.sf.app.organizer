@@ -67,7 +67,8 @@ EXPORT_C CalenDayViewWidget::CalenDayViewWidget(MCalenServices &services,
                                        CalenDocLoader *docLoader) :
 mServices(services),
 mDocLoader(docLoader),
-mRegionalInfoGroupBox(NULL)
+mRegionalInfoGroupBox(NULL),
+mLongTapEventFlag(false)
 {
     // Construct the list view prototype
     mListViewPrototype = new CalenEventListViewItem(this);
@@ -954,6 +955,7 @@ void CalenDayViewWidget::markAsDone()
 void CalenDayViewWidget::itemLongPressed(HbAbstractViewItem* listViewItem,
                                          const QPointF& coords)
 {
+	mLongTapEventFlag = true;
     // Update the selection index first
     mSelectedIndex = listViewItem->modelIndex().row();
     
@@ -968,29 +970,34 @@ void CalenDayViewWidget::itemLongPressed(HbAbstractViewItem* listViewItem,
     HbMenu *contextMenu = new HbMenu();
     
     // Add the open option
-    HbAction *openAction = contextMenu->addAction(hbTrId("txt_common_menu_open"));
-    connect(openAction, SIGNAL(triggered()), this, SLOT(viewEntry()));
+    HbAction *openAction = contextMenu->addAction(
+									hbTrId("txt_common_menu_open"));
     
     // Check the type of event
     if (AgendaEntry::TypeTodo == entry.type()) {
         // Add an option to mark the note as complete
-        HbAction *completeAction = contextMenu->addAction(hbTrId("txt_calendar_menu_mark_as_done"));
-        connect(completeAction, SIGNAL(triggered()), this, SLOT(markAsDone()));
+        HbAction *completeAction = contextMenu->addAction(
+									hbTrId("txt_calendar_menu_mark_as_done"));
     }
     
     // Add the edit option
-    HbAction *editAction = contextMenu->addAction(hbTrId("txt_common_menu_edit"));
-    connect(editAction, SIGNAL(triggered()), this, SLOT(editEntry()));
+    HbAction *editAction = contextMenu->addAction(
+									hbTrId("txt_common_menu_edit"));
     
     // Add the delete option
-    HbAction *deleteAction = contextMenu->addAction(hbTrId("txt_common_menu_delete"));
-    connect(deleteAction, SIGNAL(triggered()), this, SLOT(deleteEntry()));
+    HbAction *deleteAction = contextMenu->addAction(
+									hbTrId("txt_common_menu_delete"));
     
     contextMenu->setDismissPolicy(HbMenu::TapAnywhere);
 
     // Show context sensitive menu. 
     // Param const QPointF& coordinate - is a longpress position.
-    contextMenu->exec(coords);
+    contextMenu->setPreferredPos(coords);
+    connect(contextMenu, SIGNAL(aboutToClose()),
+								this, 
+								SLOT(contextMenuClosed()));
+    
+    contextMenu->open(this, SLOT(contextManuTriggered(HbAction *)));
 }
 
 // ----------------------------------------------------------------------------
@@ -1007,9 +1014,10 @@ void CalenDayViewWidget::itemActivated(const QModelIndex &index)
     if (mSelectedIndex < 0 || mSelectedIndex > mInstanceArray.count()) {
         return;
     }
-    
+    if( !mLongTapEventFlag ) {
     // Open the event for viewing
     viewEntry();
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -1051,4 +1059,42 @@ void CalenDayViewWidget::goToToday()
     mView->refreshViewOnGoToDate();
 }
 
+// ----------------------------------------------------------------------------
+// CalenDayViewWidget::contextMenuClosed
+// Rest of the details are commented in the header
+// ----------------------------------------------------------------------------
+//
+void CalenDayViewWidget::contextMenuClosed()
+{
+	mLongTapEventFlag = false;
+}
+
+// ----------------------------------------------------------------------------
+// CalenDayViewWidget::contextManuTriggered
+// Rest of the details are commented in the header
+// ----------------------------------------------------------------------------
+//
+void CalenDayViewWidget::contextManuTriggered(HbAction *action)
+{
+	if (action->text() == hbTrId("txt_common_menu_open")) {
+		viewEntry();
+	} else if (action->text() == hbTrId("txt_calendar_menu_mark_as_done")) {
+		markAsDone();
+	} else if (action->text() == hbTrId("txt_common_menu_edit")) {
+		editEntry();
+	} else {
+		if (action->text() == hbTrId("txt_common_menu_delete")) {
+			deleteEntry();
+		}
+	}
+}
+// ----------------------------------------------------------------------------
+// CalenDayViewWidget::clearListModel
+// clears the list model 
+// ----------------------------------------------------------------------------
+// 
+void CalenDayViewWidget::clearListModel()
+    {
+    mListModel->clear();
+    }
 // End of file	--Don't remove this.

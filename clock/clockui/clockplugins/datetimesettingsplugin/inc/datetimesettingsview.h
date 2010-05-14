@@ -10,22 +10,46 @@
 * Nokia Corporation - initial contribution.
 *
 * Contributors:
- *
- * Description:   
- *
+*
+* Description:
+* Header file for DateTimeSettingsView class.
+*
 */
 
 #ifndef	DATETIMESETTINGSVIEW_H_
 #define	DATETIMESETTINGSVIEW_H_
 
-#include <cpbasesettingview.h>
+// User includes
+#include <cpsettingformentryitemdata.h>
 
-class DateTimeSettingsView : public CpBaseSettingView
+// Forward declarations
+class QTimer;
+class TimezoneClient;
+
+class DateTimeSettingsView : public CpSettingFormEntryItemData
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    explicit DateTimeSettingsView(QGraphicsItem *parent = 0);
-    virtual ~DateTimeSettingsView();
+	explicit DateTimeSettingsView(
+			CpItemDataHelper &itemDataHelper, const QString &text = QString(),
+			const QString &description = QString(),
+			const HbIcon &icon = HbIcon(),
+			const HbDataFormModelItem *parent = 0);
+	virtual ~DateTimeSettingsView();
+
+private slots:
+	void onLaunchView();
+	void updateDisplayTime();
+	
+private:
+	virtual CpBaseSettingView *createSettingView() const;
+
+private:
+	QTimer *mTickTimer;
+	TimezoneClient *mTimezoneClient;
 
 };
-#endif//	DATETIMESETTINGSVIEW_H_
+
+#endif // DATETIMESETTINGSVIEW_H_
+
+// End of file	--Don't remove this

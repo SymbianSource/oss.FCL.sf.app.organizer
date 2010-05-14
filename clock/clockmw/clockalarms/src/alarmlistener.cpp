@@ -25,57 +25,39 @@ AlarmListener::AlarmListener(AlarmClient* client, RASCliSession& session)
 mClient(client),
 mSession(session)
 {
-	qDebug("clock: AlarmListener::AlarmListener -->");
-
-	// Nothing to do.
-
-	qDebug("clock: AlarmListener::AlarmListener <--");
+		// Nothing to do.
 }
 
 AlarmListener::~AlarmListener()
 {
-	qDebug("clock: AlarmListener::~AlarmListener -->");
-
 	if (IsActive()) {
 		Cancel();
 	}
 
-	qDebug("clock: AlarmListener::~AlarmListener <--");
 }
 
 void AlarmListener::start()
 {
-	qDebug("clock: AlarmListener::start -->");
-
 	// Add the AO to the scheduler.
 	CActiveScheduler::Add(this);
 
 	// Subscrive for async notification from alarm server.
 	mSession.NotifyChange(iStatus, mAlarmId);
 
-	qDebug("clock: AlarmListener::start - Successfully subscribed for change notifiation.");
-
 	// Set the AO active.
 	SetActive();
 
-	qDebug("clock: AlarmListener::start <--");
 }
 
 void AlarmListener::stop()
 {
-	qDebug("clock: AlarmListener::stop -->");
-
 	if (IsActive()) {
 		Cancel();
 	}
-
-	qDebug("clock: AlarmListener::stop <--");
 }
 
 void AlarmListener::RunL()
 {
-	qDebug("clock: AlarmListener::RunL --");
-
 	if (iStatus != KRequestPending) {
 		// We get notification for various changes with the alarm server.
 		// Only the required Events are used to emit a signal.
@@ -95,18 +77,13 @@ void AlarmListener::RunL()
 
 		SetActive();
 	}
-
-	qDebug("clock: AlarmListener::RunL <--");
 }
 
 void AlarmListener::DoCancel()
 {
-	qDebug("clock: AlarmListener::DoCancel -->");
-
 	// Cancel async request.
 	mSession.NotifyChangeCancel();
 
-	qDebug("clock: AlarmListener::DoCancel <--");
 }
 
 // End of file

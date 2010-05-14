@@ -62,25 +62,32 @@ class CALENCONTROLLER_EXPORT CCalenController : public MCalenServicesFactory
     {
   
     public:  // Construction and destruction
-	/**
+		/**
 		 * C++ constructor
 		 */
 		CCalenController(bool isFromServiceFrmwrk);
 		
 		/**
-			 * Constructs CCalenController with existing CAknViewAppUi. If the
-			 * controller has been previously initialized with the same CAknViewAppUi,
-			 * the existing instance will be returned.
-			 * @param aAppUi Reference to CAknViewAppUi
-			 * @return CCalenController pointer
-			 */
-			static CCalenController* InstanceL();
+		 * Constructs CCalenController with existing CAknViewAppUi. If the
+		 * controller has been previously initialized with the same CAknViewAppUi,
+		 * the existing instance will be returned.
+		 * @param aAppUi Reference to CAknViewAppUi
+		 * @return CCalenController pointer
+		 */
+		static CCalenController* InstanceL();
 
-			/**
-			 * CCalenController is a reference counting singleton. Call Release()
-			 * when you are done with it, it will clean itself when it needs to
-			 */
-			 void Release();
+		 
+		 /**
+		 * Releases all plugins, should only be called when 
+		 * the application is exiting.
+		 */
+		void ReleaseCustomisations();
+
+		/**
+		 * CCalenController is a reference counting singleton. Call Release()
+		 * when you are done with it, it will clean itself when it needs to
+		 */
+		void Release();
 		
 		/**
 		 * destructor

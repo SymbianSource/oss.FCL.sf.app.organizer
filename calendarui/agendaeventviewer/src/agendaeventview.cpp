@@ -64,6 +64,10 @@
 //because HbLabel by default not displaying the actual size of image 
 const int height = 128;
 const int width =  330;
+
+//This Property is use for setting a primary left icon
+static const char *primaryLeftIconItem("leftPrimaryIconItem");
+
 /*!
 	\class AgendaEventView.
 
@@ -112,6 +116,9 @@ AgendaEventView::AgendaEventView(
 	// Load all the widgets.
 	mSubjectWidget = qobject_cast<AgendaEventViewerItem *> (
 			mDocLoader->findWidget(AGENDA_EVENT_VIEWER_SUBJECT_WIDGET));
+
+    //load layout that supports icon before subject label
+    mSubjectWidget->setProperty(primaryLeftIconItem,true);  
 
 	mDateTimeWidget = qobject_cast<AgendaEventViewerItem *> (
 			mDocLoader->findWidget(AGENDA_EVENT_VIEWER_DATE_TIME_WIDGET));
@@ -228,7 +235,7 @@ void AgendaEventView::execute(AgendaEntry entry,
 	}
 	
 	// Add softkey after adding view on window
-	mBackAction = new HbAction(Hb::BackAction);
+	mBackAction = new HbAction(Hb::BackNaviAction);
 	mViewer->setNavigationAction(mBackAction);
 		
 	connect(mBackAction, SIGNAL(triggered()), this, SLOT(close()));
@@ -383,11 +390,14 @@ void AgendaEventView::addSubjectAndPriorityData()
 
 	mSubjectWidget->setEventViewerItemData(itemList, Qt::DisplayRole);
 
-	itemList.clear();
-	QString priorityIcon(QString::null);
-	getPriorityIcon(mAgendaEntry.priority(), priorityIcon);
-	itemList.append(priorityIcon);
-	itemList.append(QString::null);
+    itemList.clear();
+    QString priorityIcon(QString::null);
+    QString subjectIcon(QString::null);
+    getPriorityIcon(mAgendaEntry.priority(), priorityIcon);
+    getSubjectIcon(mAgendaEntry.type(),subjectIcon);
+    itemList.append(subjectIcon);
+    itemList.append(priorityIcon);
+    itemList.append(QString::null);
 
 	mSubjectWidget->setEventViewerItemData(itemList, Qt::DecorationRole);
 
@@ -410,7 +420,11 @@ void AgendaEventView::addDateTimeData()
     QDateTime endDateTime = mAgendaEntry.endTime();
     
     itemData.append(QString::null);
+    itemData.append(QString::null);
     itemData.append("qtg_small_calendar");
+
+    mDateTimeWidget->setProperty(primaryLeftIconItem, false);  
+
     mDateTimeWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
     itemData.clear();
     itemData.append(QString::null);
@@ -492,7 +506,9 @@ void AgendaEventView::addLocationData()
 	qDebug() << "AgendaEventViewer: AgendaEventView::addLocationData -->";
 	QStringList itemData;
 	itemData.append(QString::null);
-	itemData.append("qtg_small_location");
+    itemData.append(QString::null);
+    itemData.append("qtg_small_location");
+    mLocationWidget->setProperty(primaryLeftIconItem, false); 
 	mLocationWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 	itemData.clear();
 	itemData.append(QString::null);
@@ -518,7 +534,7 @@ void AgendaEventView::addMapTileImage()
         {                        
             QIcon mapTileIcon(mMaptilePath);
             QPainter painter;
-            QPixmap baloon(HbIcon("qtg_small_location.svg").pixmap());
+            QPixmap baloon(HbIcon("qtg_small_location").pixmap());
             QPixmap map (mapTileIcon.pixmap(width,height));
             //Display pin image in the center of maptile image
             painter.begin( &map );
@@ -549,14 +565,16 @@ void AgendaEventView::addReminderData()
 	qDebug() << "AgendaEventViewer: AgendaEventView::addReminderData -->";
 	QStringList itemData;
 	itemData.append(QString::null);
-	itemData.append("qtg_small_reminder");
+    itemData.append(QString::null);
+    itemData.append("qtg_small_reminder");
+    mReminderWidget->setProperty(primaryLeftIconItem, false); 
 	mReminderWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 	itemData.clear();
 	itemData.append(QString::null);
 	itemData.append(alarmTimeText());
 	mReminderWidget->setEventViewerItemData(itemData, Qt::DisplayRole);
 	qDebug() << "AgendaEventViewer: AgendaEventView::addReminderData <--";
-}
+    }
 
 /*!
 	Add completed to-do data to Event viewer
@@ -566,10 +584,11 @@ void AgendaEventView::addCompletedTodoData()
 	qDebug() << "AgendaEventViewer: AgendaEventView::addCompletedTodoData -->";
 	QStringList itemData;
 	QString     completedText;
-	HbExtendedLocale systemLocale = HbExtendedLocale::system();;
-	
+    HbExtendedLocale systemLocale = HbExtendedLocale::system();;
+    itemData.append(QString::null);
 	itemData.append(QString::null);
 	itemData.append(QString::null);
+    mReminderWidget->setProperty(primaryLeftIconItem, false);
 	mReminderWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 	itemData.clear();
 	completedText = systemLocale.format(mAgendaEntry.completedDateTime().date(),
@@ -588,7 +607,9 @@ void AgendaEventView::addRepeatData()
 	qDebug() << "AgendaEventViewer: AgendaEventView::addRepeatData -->";
 	QStringList itemData;
 	itemData.append(QString::null);
-	itemData.append("qtg_mono_repeat.svg");
+    itemData.append(QString::null);
+    itemData.append("qtg_mono_repeat.svg");
+    mRepeatWidget->setProperty(primaryLeftIconItem, false);
 	mRepeatWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 	itemData.clear();
 	itemData.append(QString::null);
@@ -606,6 +627,8 @@ void AgendaEventView::addDescriptionData()
 	QStringList itemData;
 	itemData.append(QString::null);
 	itemData.append(QString::null);
+    itemData.append(QString::null);
+    mDescriptionWidget->setProperty(primaryLeftIconItem, false);
 	mDescriptionWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 	itemData.clear();
 	itemData.append(hbTrId("txt_calendar_dblist_description"));
@@ -859,10 +882,11 @@ void AgendaEventView::addAllWidgets()
 void AgendaEventView::showDeleteOccurencePopup()
 {
 	qDebug()
-	      << "AgendaEventViewer: AgendaEventView::showDeleteOccurencePopup -->";
-	HbDialog popUp;
-	popUp.setDismissPolicy(HbDialog::NoDismiss);
-	popUp.setTimeout(HbDialog::NoTimeout);
+		<< "AgendaEventViewer: AgendaEventView::showDeleteOccurencePopup -->";
+	HbDialog *popUp = new HbDialog();
+	popUp->setDismissPolicy(HbDialog::NoDismiss);
+	popUp->setTimeout(HbDialog::NoTimeout);
+	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
 
 	QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
 	HbWidget *deleteWidget = new HbWidget(mViewer);
@@ -872,84 +896,94 @@ void AgendaEventView::showDeleteOccurencePopup()
 
 	QStringList list;
 	list << hbTrId("txt_calendar_info_this_occurrence_only") 
-		 << hbTrId("txt_calendar_info_all_occurences");
+				<< hbTrId("txt_calendar_info_all_occurences");
 
 	deleteButtonList->setItems(list);
 
 	layout->addItem(deleteButtonList);
 
-	popUp.setContentWidget(deleteWidget);
-	popUp.setHeadingWidget(new HbLabel(
-						hbTrId("txt_calendar_title_delete_repeated_entry")));
+	popUp->setContentWidget(deleteWidget);
+	popUp->setHeadingWidget(new HbLabel(
+			hbTrId("txt_calendar_title_delete_repeated_entry")));
 
 	connect(deleteButtonList, SIGNAL(itemSelected(int)), this,
-	        SLOT(handleDeleteOccurence(int)));
-	connect(deleteButtonList, SIGNAL(itemSelected(int)), &popUp, SLOT(close()));
+											SLOT(handleDeleteOccurence(int)));
+	connect(deleteButtonList, SIGNAL(itemSelected(int)), popUp, SLOT(close()));
 
-	// Create secondary action
-	HbAction *cancelAction = new HbAction(
-						hbTrId("txt_calendar_button_softkey1_cancel"));
-	popUp.setSecondaryAction(cancelAction);
-	connect(cancelAction, SIGNAL(triggered()), &popUp, SLOT(close()));
+	popUp->addAction(new HbAction(
+			hbTrId("txt_calendar_button_softkey1_cancel")));
 
 	// Show the popup
-	popUp.exec();
+	popUp->open();
 
 	qDebug()
-	      << "AgendaEventViewer: AgendaEventView::showDeleteOccurencePopup <--";
+		<< "AgendaEventViewer: AgendaEventView::showDeleteOccurencePopup <--";
 }
 
+/*!
+	Show delete confirmation query
+ */
+void AgendaEventView::showDeleteConfirmationQuery()
+    {
+    qDebug()
+		<< "AgendaEventViewer: AgendaEventView::showDeleteConfirmationQuery -->";
+    
+    HbMessageBox *popup = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
+    popup->setDismissPolicy(HbDialog::NoDismiss);
+    popup->setTimeout(HbDialog::NoTimeout);
+    popup->setAttribute( Qt::WA_DeleteOnClose, true );
+
+    QString text = 0;
+
+    switch (mAgendaEntry.type()) {
+        case AgendaEntry::TypeAppoinment:
+        case AgendaEntry::TypeEvent: {
+        text.append(hbTrId("txt_calendar_info_delete_meeting"));
+        break;
+        }
+        case AgendaEntry::TypeAnniversary: {
+        text.append(hbTrId("txt_calendar_info_delete_anniversary"));
+        break;
+        }
+        case AgendaEntry::TypeTodo: {
+        text.append(hbTrId("txt_calendar_info_delete_todo_note"));
+        break;
+        }
+        case AgendaEntry::TypeNote: {
+        text.append(hbTrId("txt_calendar_info_delete_anniversary"));
+        break;
+        }
+    }
+    popup->setText(text);
+    
+    QList<QAction*> list = popup->actions();
+    for(int i=0; i < list.count(); i++)
+        {
+        popup->removeAction(list[i]);
+        }
+    HbAction *deleteAction = 
+					new HbAction(hbTrId("txt_calendar_button_delete"), popup);
+    popup->addAction(deleteAction);
+    connect(deleteAction, SIGNAL(triggered()), this ,
+												SLOT(handleDeleteAction()));
+    popup->addAction(new HbAction(hbTrId("txt_calendar_button_cancel"), popup));
+    popup->open();
+    qDebug()
+		<< "AgendaEventViewer: AgendaEventView::showDeleteConfirmationQuery <--";
+}
 
 /*!
- * Show delete confirmation query
+	Handles the delete action
  */
-int AgendaEventView::showDeleteConfirmationQuery()
-{
-	qDebug()
-	   << "AgendaEventViewer: AgendaEventView::showDeleteConfirmationQuery -->";
-	int retStatus = 0;
+void AgendaEventView::handleDeleteAction()
+    {
+    // If delete button is pressed delete the entry
+    // To notify client that deleting Started
+    // Calendar Application changing state from viewing to deleting.
+    mOwner->deletingStarted();
 
-	HbMessageBox popup(HbMessageBox::MessageTypeQuestion);
-	popup.setDismissPolicy(HbDialog::NoDismiss);
-	popup.setTimeout(HbDialog::NoTimeout);
-	popup.setIconVisible(true);
-
-	QString text = 0;
-
-	switch (mAgendaEntry.type()) {
-		case AgendaEntry::TypeAppoinment:
-		case AgendaEntry::TypeEvent: {
-			text.append(hbTrId("txt_calendar_info_delete_meeting"));
-			break;
-		}
-		case AgendaEntry::TypeAnniversary: {
-			text.append(hbTrId("txt_calendar_info_delete_anniversary"));
-			break;
-		}
-		case AgendaEntry::TypeTodo: {
-			text.append(hbTrId("txt_calendar_info_delete_todo_note"));
-			break;
-		}
-		case AgendaEntry::TypeNote: {
-			text.append(hbTrId("txt_calendar_info_delete_anniversary"));
-			break;
-		}
-	}
-
-	popup.setText(text);
-	
-	popup.setPrimaryAction(new HbAction(
-								hbTrId("txt_calendar_button_delete"), &popup));
-	popup.setSecondaryAction(new HbAction(
-								hbTrId("txt_calendar_button_cancel"), &popup));
-	HbAction *selected = popup.exec();
-	if (selected == popup.primaryAction()) { 
-		retStatus = 1;
-	}
-
-	qDebug()
-	   << "AgendaEventViewer: AgendaEventView::showDeleteConfirmationQuery <--";
-	return retStatus;
+    // Delete the entry.
+    mOwner->mAgendaUtil->deleteEntry(mAgendaEntry.id());
 }
 
 /*!
@@ -1038,15 +1072,7 @@ void AgendaEventView::deleteAgendaEntry()
 		// Query user if he wants to delete whole series or just this occurence
 		showDeleteOccurencePopup();
 	} else {
-		if (showDeleteConfirmationQuery()) {
-			
-			// To notify client that deleting Started
-			// Calendar Application changing state from viewing to deleting.
-			mOwner->deletingStarted();
-				
-			// Delete the entry.
-			mOwner->mAgendaUtil->deleteEntry(mAgendaEntry.id());
-		}
+        showDeleteConfirmationQuery();
 	}
 
 	qDebug() << "AgendaEventViewer: AgendaEventView::deleteAgendaEntry <--";
@@ -1215,5 +1241,39 @@ void AgendaEventView::handleDeleteOccurence(int index)
 
 	qDebug() << "AgendaEventViewer: AgendaEventView::handleDeleteOccurence <--";
 }
+
+/*!
+    Returns subject icon
+ */
+void AgendaEventView::getSubjectIcon(AgendaEntry::Type type, QString &subjectIcon)
+    {
+    qDebug() << "AgendaEventViewer: AgendaEventView::getSubjectIcon -->";
+    switch(type) {
+        case AgendaEntry::TypeAppoinment:
+            {
+            subjectIcon.append("qtg_small_favorite");//@to do add proper icon
+            }
+            break;
+        case AgendaEntry::TypeTodo:
+            {
+            subjectIcon.append("qtg_small_todo");
+            }
+            break;
+        case AgendaEntry::TypeEvent:
+            {
+            subjectIcon.append("qtg_small_allday");//@ TODO add proper icon
+            }
+            break;
+        case AgendaEntry::TypeAnniversary:
+            {
+            subjectIcon.append("qtg_small_anniversary");
+            }
+            break;
+        default:
+            break;
+    }
+
+    qDebug() << "AgendaEventViewer: AgendaEventView::getSubjectIcon <--";
+    }
 
 // End of file

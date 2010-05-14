@@ -534,7 +534,7 @@
 </message>
 <message numerus="no" id="txt_notes_button_alarm_date">
     <comment>Layout ID Parent. Date  Push Button in Dataform to set alarm date for a To-do note. This action opens the date picker component</comment>        
-    <source>%1</source>
+    <source>%2</source>
     <translation variants="no" type="unfinished"></translation>
     <extra-loc-layout_id>txt_notes_button_2</extra-loc-layout_id>    
     <extra-loc-viewid>Notes_P8</extra-loc-viewid>
@@ -600,6 +600,16 @@
     <extra-loc-viewid>Notes_P4</extra-loc-viewid>
     <extra-loc-positionid>opt</extra-loc-positionid>
     <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_tsw_caption_notes">
+    <comment>Notes application name  in Task Switcher</comment>        
+    <source>Notes</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>txt_tsw_caption_notes</extra-loc-layout_id>    
+    <extra-loc-viewid>tsw01</extra-loc-viewid>
+    <extra-loc-positionid>caption</extra-loc-positionid>
+    <extra-loc-feature>ts</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>
 <message numerus="no" id="txt_notes_subhead_collections">
@@ -809,6 +819,16 @@
     <extra-loc-layout_id>qtl_menu_sec</extra-loc-layout_id>    
     <extra-loc-viewid>Notes_P1</extra-loc-viewid>
     <extra-loc-positionid>menu</extra-loc-positionid>
+    <extra-loc-feature>No</extra-loc-feature>
+    <extra-loc-blank>False</extra-loc-blank>
+</message>
+<message numerus="no" id="txt_notes_dpopinfo_note_moved_to_todos">
+    <comment>If a plain note is marked as To-do note in the list view, the marked item disappears from the current view with a notification dialog </comment>        
+    <source>Note moved to To-do&apos;s</source>
+    <translation variants="no" type="unfinished"></translation>
+    <extra-loc-layout_id>qtl_notifdialog_pri2</extra-loc-layout_id>    
+    <extra-loc-viewid>Notes</extra-loc-viewid>
+    <extra-loc-positionid>dpopinfo</extra-loc-positionid>
     <extra-loc-feature>No</extra-loc-feature>
     <extra-loc-blank>False</extra-loc-blank>
 </message>

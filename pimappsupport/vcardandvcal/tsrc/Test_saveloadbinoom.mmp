@@ -23,6 +23,7 @@ sourcepath ../tsrc
 userinclude ../tsrc
 userinclude ../inc
 
+APP_LAYER_SYSTEMINCLUDE
 systeminclude /epoc32/include 
 source Test_saveloadbinoom.cpp
 library euser.lib estor.lib efsrv.lib

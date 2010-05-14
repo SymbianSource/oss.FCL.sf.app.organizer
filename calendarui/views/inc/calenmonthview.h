@@ -66,8 +66,8 @@ public:
 public:  // From CCalenView
 	virtual void doPopulation();
 	void setupView(CalenDocLoader *docLoader);
+	void doLazyLoading();
 	void handleGridItemActivated();
-	void handleGridItemLongPressed(int index, QPointF &coords);
 	void setContextForActiveDay(int index);
 	QDateTime getCurrentDay();
 	QDateTime getActiveDay();
@@ -84,6 +84,7 @@ public:  // From CCalenView
 	void populatePreviewPane(QDateTime &dateTime);
 	void handlePreviewPaneGesture(bool rightGesture);
 	QDateTime firstDayOfGrid();
+	void fetchEntriesAndUpdateModel();
 	
 private:
 	void createGrid();
@@ -93,8 +94,8 @@ private:
 	QDateTime dateFromContext( const MCalenContext &context );
 	void setActiveDay(QDateTime day);
 	void setDate();
-	void getInstanceList(QList<AgendaEntry> &list,
-						QDateTime rangeStart, QDateTime rangeEnd);
+	void getInstanceList(QList<QDate> &list,
+                         QDateTime rangeStart, QDateTime rangeEnd);
 	void handleChangeOrientation();
 	void setDateToLabel();
 	void updateWeekNumGridModel();
@@ -173,6 +174,7 @@ private:
 	CalenPluginLabel *mCurrRegionalInfo;
 	CalenPluginLabel *mNextRegionalInfo;
 	HbMenu *mDeleteSubMenu;
+	QColor mWeekDaysColor;
 };
 
 #endif //CALENMONTHVIEW_H

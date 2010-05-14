@@ -56,7 +56,11 @@ public:
 	~CalenMonthGrid();
 	void setView(CalenMonthView *view);
 	void updateMonthGridModel(QList<CalenMonthData> &monthDataArray,
-                                int indexToBeScrolled);
+                                int indexToBeScrolled, bool isFirstTime);
+	void updateMonthGridWithInActiveMonths(
+										QList<CalenMonthData> &monthDataArray);
+	void updateMonthGridWithEventIndicators(
+										QList<CalenMonthData> &monthDataArray);
 	void setCurrentIdex(int index);
 	int getCurrentIndex();
 
@@ -64,11 +68,15 @@ protected:
 	void orientationChanged(Qt::Orientation newOrientation);
 		
 private:
+	void handlePrependingRows(QList<CalenMonthData > &monthDataList);
+	void handleAppendingRows(QList<CalenMonthData > &monthDataList);
+	void handlePanGestureFinished();
 	void mousePressEvent(QGraphicsSceneMouseEvent* event);
 	void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 	void setFocusToProperDay();
 	void setActiveDates(QDate activeDate);
-	void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
+	void paint(QPainter* painter, 
+	           const QStyleOptionGraphicsItem* option, QWidget* widget);
 	
 public slots:
 	void scrollingFinished();
@@ -80,7 +88,6 @@ protected slots:
 	void downGesture(int value);
 	void upGesture(int value);
 	void panGesture(const QPointF &delta);
-	void timerExpired();
 
 private:
 	QStandardItemModel *mModel;
@@ -97,6 +104,8 @@ private:
 	QColor mGridLineColor;
 	QColor mGridBorderColor;
 	QGraphicsWidget* mContentWidget;
+	QList<QString> mLocalisedDates;
+	QPointF mStartPos;
 };
 
 #endif // CALENMONTHGRID_H

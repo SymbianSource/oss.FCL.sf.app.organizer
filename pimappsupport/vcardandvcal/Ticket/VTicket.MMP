@@ -22,6 +22,7 @@ VENDORID 0x70000001
 SOURCEPATH	../Ticket
 
 userinclude     ../inc
+APP_LAYER_SYSTEMINCLUDE
 systeminclude   /epoc32/include
 
 source      	VTicketMaster.CPP

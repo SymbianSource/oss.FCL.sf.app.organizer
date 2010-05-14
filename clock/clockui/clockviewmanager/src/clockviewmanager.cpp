@@ -17,7 +17,6 @@
 */
 
 // System includes
-#include <QDebug>
 #include <HbMainWindow>
 #include <HbInstance>
 
@@ -44,14 +43,17 @@
 ClockViewManager::ClockViewManager(
 		ClockAppControllerIf &controllerIf, QObject *parent)
 :QObject(parent),
- mAppControllerIf(controllerIf)
+ mAppControllerIf(controllerIf),
+ mWorldClockView(0)
 {
-	qDebug("clock: ClockViewManager::ClockViewManager() -->");
+	// Load the main view at the start up.
+	loadMainView();
 
-	// Load the document and the views.
-	loadViews();
-
-	qDebug("clock: ClockViewManager::ClockViewManager() <--");
+	// Delay loading of other views till main view is loaded.
+	HbMainWindow *window = hbInstance->allMainWindows().first();
+	connect(
+			window, SIGNAL(viewReady()),
+			this, SLOT(loadOtherViews()));
 }
 
 /*!
@@ -90,30 +92,10 @@ void ClockViewManager::showView(ClockViews view)
 }
 
 /*!
-	Loads the views from the docml file.
- */
-void ClockViewManager::loadViews()
-{
-	qDebug() << "clock: ClockViewManager::loadViews -->";
-
-	// Load the main view.
-	loadMainView();
-	// Load the world clock view.
-	loadWorldClockView();
-
-	// Set the main view to the window
-	hbInstance->allMainWindows().first()->addView(mMainView);
-
-	qDebug() << "clock: ClockViewManager::loadViews <--";
-}
-
-/*!
 	Loads the clock main view.
  */
 void ClockViewManager::loadMainView()
 {
-	qDebug() << "clock: ClockViewManager::loadMainView -->";
-
 	bool loadSuccess;
 
 	// Construct the document loader instance
@@ -121,10 +103,6 @@ void ClockViewManager::loadMainView()
 
 	// Load the application xml.
 	docLoader->load(CLOCK_MAIN_VIEW_DOCML, &loadSuccess);
-	Q_ASSERT_X(
-			loadSuccess,
-			"viewmanager.cpp",
-			"Unable to load the main view app xml");
 
 	// Find the main view.
 	mMainView = static_cast<ClockMainView *> (
@@ -133,7 +111,8 @@ void ClockViewManager::loadMainView()
 	// Setup the view.
 	mMainView->setupView(mAppControllerIf, docLoader);
 
-	qDebug() << "clock: ClockViewManager::loadMainView <--";
+	// Set the main view to the window
+	hbInstance->allMainWindows().first()->addView(mMainView);
 }
 
 /*!
@@ -147,20 +126,30 @@ void ClockViewManager::loadWorldClockView()
 	bool loadSuccess;
 
 	// Construct the world list view from doc loader.
-	docLoader->load(":/xml/worldclockview.docml", &loadSuccess);
+	docLoader->load(CLOCK_WORLD_VIEW_DOCML, &loadSuccess);
 
 	// Get the world list view.
-	mWorldClockView =
-			static_cast<ClockWorldView *> (docLoader->findWidget("worldClockView"));
+	mWorldClockView = static_cast<ClockWorldView *> (
+			docLoader->findWidget(CLOCK_WORLD_VIEW));
 
 	mWorldClockView->setupView(mAppControllerIf, docLoader);
+}
 
-/*	// Get the world list widget.
-	WorldListWidget *listWidget =
-			qobject_cast<WorldListWidget *> (docLoader->findWidget("worldListWidget"));
-	Q_ASSERT_X(listWidget,
-	           "viewmanager.cpp", "Unable to load the world list widget");
-	listWidget->setupWidget(mWorldListView, docLoader);*/
+/*!
+	Load other views
+ */
+void ClockViewManager::loadOtherViews()
+{
+	mMainView->setupAfterViewReady();
+	
+	// Load world clock view
+	loadWorldClockView();
+
+	// Disconnect the signal viewReady as all the views are loaded.
+	HbMainWindow *window = hbInstance->allMainWindows().first();
+	disconnect(
+			window, SIGNAL(viewReady()),
+			this, SLOT(loadOtherViews()));
 }
 
 // End of file	--Don't remove this.

@@ -81,7 +81,7 @@ void CalenSettingsView::initializeForm()
     
     // Add view on main window and set back softkey
 	mServices.MainWindow().addView(this);
-	mSoftKeyAction = new HbAction(Hb::BackAction);
+	mSoftKeyAction = new HbAction(Hb::BackNaviAction);
 	setNavigationAction(mSoftKeyAction);
 	connect(mSoftKeyAction, SIGNAL(triggered()), 
 											this, SLOT(launchPreviousView()));

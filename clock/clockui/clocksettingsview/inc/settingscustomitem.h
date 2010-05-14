@@ -53,21 +53,13 @@ protected:
 
 private slots:
 	void launchTimePicker();
-	void handleTimeOkAction();
-	void handleTimeCancelAction();
-
+	void handleOkAction();
 	void launchDatePicker();
-	void handleDateOkAction();
-	void handleDateCancelAction();
-
 	void launchCitySelectionList();
 	void updatePlaceItem(LocationInfo info);
-
 	void launchRegSettingsView();
-	
-private:
-	
-	
+	void selectedAction(HbAction *action);
+
 private:
 	QStringList mWeekdaysList;
 
@@ -76,6 +68,9 @@ private:
 	QPointer<HbPushButton> mTimeWidget;
 	QPointer<HbPushButton> mDateWidget;
 	QPointer<HbPushButton> mPlaceWidget;
+
+	HbAction *mOkAction;
+	HbAction *mCancelAction;
 
 	SettingsUtility *mSettingsUtility;
 	ClockCitySelectionList *mCitySelectionList;

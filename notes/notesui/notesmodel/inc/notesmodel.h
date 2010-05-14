@@ -55,6 +55,7 @@ private slots:
 	void populateSourceModel(QList<ulong> ids);
 	void addEntryToModel(ulong id);
 	void removeEntryFromModel(ulong id);
+	void handleInstanceViewCreationCompleted(int status);
 
 private:
 	void modifyEntryInModel(ulong id, int row);

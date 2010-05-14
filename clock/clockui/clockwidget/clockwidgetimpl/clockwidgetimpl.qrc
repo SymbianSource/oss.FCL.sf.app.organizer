@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/resource" >
+        <file alias="analogclockwidget.widgetml">resource/analogclockwidget.widgetml</file>
+        <file alias="analogclockwidget.css">resource/analogclockwidget.css</file>
+    </qresource>
+</RCC>

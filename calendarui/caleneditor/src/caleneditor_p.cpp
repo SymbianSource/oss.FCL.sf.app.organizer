@@ -41,7 +41,6 @@
 #include <hbextendedlocale.h>
 #include <hbi18ndef.h>
 #include <qdatetime.h>
-#include <HbMessageBox>
 #include <hbgroupbox.h>
 #include <hbapplication.h>
 #include <hbradiobuttonlist.h>
@@ -290,7 +289,7 @@ void CalenEditorPrivate::edit(AgendaEntry entry, bool launchCalendar)
 {
 	mNewEntry = false;
 	mLaunchCalendar = launchCalendar;
-	showEditor(entry);
+	openEditor(entry);
 }
 
 /*!
@@ -326,7 +325,7 @@ void CalenEditorPrivate::create(CalenEditor::CreateType type,
 			break;
 	}
 	mLaunchCalendar = launchCalendar;
-	showEditor(entry);
+	openEditor(entry);
 }
 
 /*!
@@ -350,7 +349,7 @@ void CalenEditorPrivate::create(CalenEditor::CreateType type,
 	}
 	mNewEntryDateTime = entry.startTime();
 	mLaunchCalendar = launchCalendar;
-	showEditor(entry);
+	openEditor(entry);
 }
 
 /*!
@@ -358,10 +357,11 @@ void CalenEditorPrivate::create(CalenEditor::CreateType type,
  */
 void CalenEditorPrivate::showEditOccurencePopup()
 {
-	HbDialog popUp;
-	popUp.setDismissPolicy(HbDialog::NoDismiss);
-	popUp.setTimeout(HbDialog::NoTimeout);
-
+	HbDialog *popUp = new HbDialog();
+	popUp->setDismissPolicy(HbDialog::NoDismiss);
+	popUp->setTimeout(HbDialog::NoTimeout);
+	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
+	
 	QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
 	HbWidget *editWidget = new HbWidget();
 	editWidget->setLayout(layout);
@@ -376,22 +376,20 @@ void CalenEditorPrivate::showEditOccurencePopup()
 
 	layout->addItem(editButtonList);
 
-	popUp.setContentWidget(editWidget);
-	popUp.setHeadingWidget(new HbLabel(hbTrId("txt_calendar_title_edit")));
+	popUp->setContentWidget(editWidget);
+	popUp->setHeadingWidget(new HbLabel(hbTrId("txt_calendar_title_edit")));
 
-	// Create secondary action
+	// Create cancel action
 	HbAction *cancelAction =
 	        new HbAction(hbTrId("txt_calendar_button_softkey1_cancel"));
-	popUp.setSecondaryAction(cancelAction);
+	popUp->addAction(cancelAction);
 	connect(editButtonList, SIGNAL(itemSelected(int)), this,
 	        SLOT(handleEditOccurence(int)));
-	connect(editButtonList, SIGNAL(itemSelected(int)), &popUp, SLOT(close()));
-
-	connect(cancelAction, SIGNAL(triggered()), &popUp, SLOT(close()));
+	connect(editButtonList, SIGNAL(itemSelected(int)), popUp, SLOT(close()));
 	connect(cancelAction, SIGNAL(triggered()), this, SLOT(handleCancel()));
 
 	// Show the popup
-	popUp.exec();
+	popUp->open();
 }
 
 /*!
@@ -409,6 +407,13 @@ void CalenEditorPrivate::handleEditOccurence(int index)
 			mEditRange = ThisAndAll;
 			break;
 	}
+	// If user has selected to edit all the occurences, 
+	// then get the parent of it
+	AgendaEntry entryToBeEdited = mEntry;
+	if (mEditRange == ThisAndAll) {
+		entryToBeEdited = mAgendaUtil->parentEntry(mEntry);
+	}
+	showEditor(entryToBeEdited);
 }
 
 /*!
@@ -418,6 +423,36 @@ void CalenEditorPrivate::handleCancel()
 {
 	// User has chosen not to edit the event, hence return
 	mEditRange = UserCancelled;
+	// Do cleanup and return
+	emit q_ptr->dialogClosed();
+	return;
+}
+
+/*!
+	Opens the editor.
+ */
+void CalenEditorPrivate::openEditor(AgendaEntry entry)
+{
+	if (0 < entry.id()) {
+		mNewEntry = false;
+	}
+	if (!mNewEntry) {
+		// Before we do anything, check in the entry is repeating
+		// OR its a child item
+		mIsChild = !(entry.recurrenceId().isNull());
+		bool isRepeating = entry.isRepeating();
+		// For later reference
+		mEntry = entry;
+		if (mIsChild || isRepeating) {
+			// Query user if he wants to edit whole series 
+			// or just this occurence
+			showEditOccurencePopup();
+			return;
+		}else {
+			mEditRange = ThisAndAll;
+		}
+	}
+	showEditor(entry);
 }
 
 /*!
@@ -425,52 +460,23 @@ void CalenEditorPrivate::handleCancel()
  */
 void CalenEditorPrivate::showEditor(AgendaEntry entry)
 {
-	
-	if (0 < entry.id()) {
-		mNewEntry = false;
-	}
-
-	AgendaEntry entryToBeEdited = entry;
-	if (!mNewEntry) {
-		// Before we do anything, check in the entry is repeating
-		// OR its a child item
-		mIsChild = !(entry.recurrenceId().isNull());
-		bool isRepeating = entry.isRepeating();
-		if (mIsChild || isRepeating) {
-			// Query user if he wants to edit whole series 
-			// or just this occurence
-			showEditOccurencePopup();
-			// If user has selected to edit all the occurences, 
-			// then get the parent of it
-			if (mEditRange == ThisAndAll) {
-				entryToBeEdited = mAgendaUtil->parentEntry(entry);
-			} else if (mEditRange == UserCancelled) {
-				// Do cleanup and return
-				emit q_ptr->dialogClosed();
-				return;
-			}
-		} else {
-			mEditRange = ThisAndAll;
-		}
-	}
-
-	mOriginalEntry = new AgendaEntry(entryToBeEdited);
-	mEditedEntry = new AgendaEntry(entryToBeEdited);
+	mOriginalEntry = new AgendaEntry(entry);
+	mEditedEntry = new AgendaEntry(entry);
 
 	if (!mEditedEntry->description().isEmpty()) {
 		mDescriptionItemAdded = true;
 	}
 	// Construct the view using docloader
 	setUpView();
-		
+
 	// Set the title text. 
 	mEditorView->setTitle(hbTrId("txt_calendar_title_calendar"));
 
-	mSoftKeyAction = new HbAction(Hb::BackAction);
+	mSoftKeyAction = new HbAction(Hb::BackNaviAction);
 	mEditorView->setNavigationAction(mSoftKeyAction);
 	connect(mSoftKeyAction, SIGNAL(triggered()), this,
 	        SLOT(saveAndCloseEditor()));
-	
+
 	// Create the data handler
 	mDataHandler = new CalenEditorDataHandler(this,mEditedEntry, mOriginalEntry);
 }
@@ -514,7 +520,7 @@ void CalenEditorPrivate::setUpView()
 							mEditorDocLoader->findObject(
 										CALEN_EDITOR_DELETE_EVENT_ACTION));
 	connect(deleteEventAction, SIGNAL(triggered()), this,
-							SLOT(handleDeleteAction()));
+							SLOT(showDeleteConfirmationQuery()));
 
 	if (!mNewEntry) {
 		//TODO: Add the text id based on the entry type Anniversary or meeting
@@ -582,14 +588,9 @@ void CalenEditorPrivate::initModel()
 
 	// Add all day check box for new entry creation or while editing
 	// parent entry or existing non repeating event
-	if (mNewEntry) {
+	if (mNewEntry || (mEditRange == ThisAndAll)) {
 		addAllDayCheckBoxItem();
-	} else { 
-		if (!mEditedEntry->isRepeating() || (mEditRange == ThisAndAll)) {
-			addAllDayCheckBoxItem();
-		}
 	}
-	
 	addCustomItemFrom();
 	addCustomItemTo();
 	addCustomItemLocation();
@@ -598,7 +599,6 @@ void CalenEditorPrivate::initModel()
 	if (mEditRange == ThisAndAll) {
 		addRepeatItem();
 	}
-
 	mCalenEditorForm->setModel(mCalenEditorModel);
 }
 
@@ -793,7 +793,7 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 			QDateTime endTime =
 			        mEditedEntry-> startTime().addSecs(durationInSeconds);
 
-			// set this to the original entr as well as edited entry
+			// set this to the original entry as well as edited entry
 			mOriginalEntry->setStartAndEndTime(mOriginalEntry->startTime(),
 										endTime);
 			mEditedEntry->setStartAndEndTime(mEditedEntry->startTime(), endTime);
@@ -859,6 +859,12 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 									nextInstanceStartTime.addDays(-1).date());
 			mViewToItem->setDateRange(prevInstanceEndTime.date().addDays(1),
 			                        nextInstanceEndTime.date().addDays(-1));
+			
+			// If repeating daily then disable the date fields as 
+			// date cannot be changed
+ 			if (mEditedEntry->repeatRule().type() == AgendaRepeatRule::DailyRule) {
+				mViewFromItem->disableFromToDateField();
+			}
 		}
 	} else {
 		toDateTime = fromDateTime.addSecs(60 * 60);
@@ -871,9 +877,9 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 	if (mNewEntry) {
 		mOriginalEntry->setStartAndEndTime(fromDateTime, toDateTime);
 	}
-	if (mAllDayCheckBoxItem
-	        && (mAllDayCheckBoxItem->contentWidgetData("checkState")
-	                == Qt::Checked)) {
+	if ((mAllDayCheckBoxItem && 
+		(mAllDayCheckBoxItem->contentWidgetData("checkState") == Qt::Checked))
+		|| (!mNewEntry && mEditedEntry->type() == AgendaEntry::TypeEvent)) {
 		// If the all day option is checked, we need to
 		// disable the time fields
 		enableFromTotimeFileds(false, mEditedEntry->startTime(),
@@ -898,11 +904,11 @@ void CalenEditorPrivate::populateCustomItemLocation()
 	}
 	QModelIndex index = mCalenEditorModel->index(itemIndex, 0);
 	mViewLocationItem = qobject_cast<CalenEditorCustomItem *> 
-	                      (mCalenEditorForm->dataFormViewItem(index));        
-                
+	                      (mCalenEditorForm->itemByIndex(index));
+
 	connect(mViewLocationItem, SIGNAL(locationTextChanged(const QString)),
 			this, SLOT(handleLocationChange(const QString)));
-                    
+
 	mViewLocationItem->populateLocation(mEditedEntry->location());
 }
 /*!
@@ -935,6 +941,49 @@ void CalenEditorPrivate::saveFromDateTime(QDateTime& fromDateTime)
 		// update the repeat choices depending on the meeting duration
 		mRepeatField->updateRepeatChoices();
 	}
+
+	updateReminderChoices();
+}
+
+void CalenEditorPrivate::updateReminderChoices()
+{
+	QDate referenceDate;
+	
+	// Start date or repeat until date will be the reference to decide 
+	// whether the event is in past or future.
+	if (mRepeatField && mRepeatField->isRepeatUntilItemAdded()) {
+		referenceDate = mRepeatField->repeatUntilDate();
+	} else {
+		referenceDate = mEditedEntry->startTime().date();
+	}
+	
+	// Check if all day event or not.
+	if (isAllDayEvent()) {
+		int currentIndex = mReminderField->currentReminderIndex();
+		mReminderField->updateReminderChoicesForAllDay(referenceDate);
+		int numberOfReminderChoices = mReminderField->reminderItemsCount();
+		if (currentIndex >= numberOfReminderChoices) {
+			currentIndex = 0;
+			mReminderField->disableReminderTimeField();
+		} 
+		mReminderField->setCurrentIndex(currentIndex);
+		if(currentIndex == 0 && mReminderField->isReminderTimeForAllDayAdded()) {
+			mReminderField->removeReminderTimeField();
+		}
+	} else { 
+		if ((referenceDate < QDate::currentDate())
+						|| (referenceDate == QDate::currentDate()
+				&& (mEditedEntry->startTime().time() < QTime::currentTime())))
+				 {
+					mReminderField->setReminderOff();
+		} else {
+			// Enabled implies future. If changing from future to future do not 
+			// do anything.
+			if (!mReminderField->isReminderFieldEnabled()) {
+				mReminderField->setReminderChoices();
+			}
+		}
+	}
 }
 
 /*!
@@ -943,17 +992,21 @@ void CalenEditorPrivate::saveFromDateTime(QDateTime& fromDateTime)
 void CalenEditorPrivate::saveToDateTime(QDateTime& toDateTime)
 {
 	QDateTime startTime = mEditedEntry->startTime();
+	bool fromDateChanged = false;
 	// Update the start time accordingly on UI - duration will be 60 mins
 	// bydefault for new entry and if it crosses the starttime
 	if (mNewEntry && toDateTime < startTime) {
 		startTime = toDateTime.addSecs(-3600);
-	} else { // for exisitng entry
+		fromDateChanged = true;
+	} else { 
+		// for exisitng entry
 		// we need to see if user has moved end time before the start time
 		// then substract the duration of the meeting that was saved earlier to 
 		// the new end time to get the new start time
 		if (toDateTime < startTime) {
 			int duration = mEditedEntry->durationInSecs();
 			startTime = toDateTime.addSecs(-duration);
+			fromDateChanged = true;
 		}
 	}
 	// Set the new start time to the form
@@ -968,6 +1021,11 @@ void CalenEditorPrivate::saveToDateTime(QDateTime& toDateTime)
 		// update the repeat choices depending on the meeting duration
 		mRepeatField->updateRepeatChoices();
 	}
+	
+	// Update reminder choices if start time got changed.
+	if (fromDateChanged) {
+		updateReminderChoices();
+	}
 }
 
 /*!
@@ -977,11 +1035,14 @@ void CalenEditorPrivate::populateRepeatItem()
 {
 	// Check if all day has been added or not 
 	// and calculate the index accordingly
+	// all day added implies reminder time field is also added
 	int index;
-	if (mIsAllDayItemAdded) {
+	if (mIsAllDayItemAdded && !isReminderTimeForAllDayAdded()) {
+		index = RepeatItem - 1;
+	} else if (!mNewEntry && isReminderTimeForAllDayAdded()) {
 		index = RepeatItem;
 	} else {
-		index = RepeatItem - 1;
+		index = RepeatItem - 2;
 	}
 	
 	mRepeatField->populateRepeatItem(index);
@@ -1096,13 +1157,38 @@ void CalenEditorPrivate::handleAllDayChange(int state)
 		tempEndTime.setTime(tempEndQTime);
 
 		enableFromTotimeFileds(false, tempSartTime, tempEndTime);
+		QDate referenceDate;
+		if (mRepeatField->isRepeatUntilItemAdded()) {
+			referenceDate = mRepeatField->repeatUntilDate();
+		} else {
+			referenceDate = mEditedEntry->startTime().date();
+		}
+		mReminderField->updateReminderChoicesForAllDay(referenceDate);
+		// If the reminder field is enabled and it is not off 
+		// it implies default alarm day and time is being displayed.
+		if (mReminderField->isReminderFieldEnabled() && 
+					mReminderField->currentReminderIndex() != 0) {
+			// Set the default alarm for all day.
+			mReminderField->setDefaultAlarmForAllDay();
+		} else {
+			// Remove reminder time field.
+			mReminderField->removeReminderTimeField();
+		}
 	} else {
 		// AllDayCheckBox in un-checked
 		// Set From/To times buttons editable
 		// Update Start/End Times with Edited entry values
 		enableFromTotimeFileds(true, mEditedEntry->startTime(),
 		                       mEditedEntry->endTime());
-
+		int index;
+		if (mIsAllDayItemAdded) {
+			index = ReminderTimeForAllDayItem;
+		} else {
+			index = ReminderTimeForAllDayItem - 1;
+		}
+		mReminderField->removeReminderTimeField();
+		mReminderField->setReminderChoices();
+		updateReminderChoices();
 	}
 	addDiscardAction();
 }
@@ -1135,7 +1221,9 @@ void CalenEditorPrivate::handleDescriptionChange(const QString description)
 void CalenEditorPrivate::saveAndCloseEditor()
 {
 	Action action = handleDone();
-	closeEditor();
+	if (CalenEditorPrivate::ActionDelete != action) {
+		closeEditor();
+	}
 
 	if (CalenEditorPrivate::ActionSave == action) {
 		// check if we need to launch the calendar application
@@ -1165,17 +1253,14 @@ void CalenEditorPrivate::handleCalendarLaunchError(int error)
  */
 void CalenEditorPrivate::handleDeleteAction()
 {
-
+	// If its a new entry just close the editor
 	if (mNewEntry) {
-		if (showDeleteConfirmationQuery()) {
-			closeEditor();
-		}
+		closeEditor();
 		return;
+	}else {
+		// Delete entry and close editor
+		deleteEntry(true);
 	}
-	
-	// Delete entry and close editor
-	deleteEntry(true);
-
 }
 
 /*!
@@ -1198,14 +1283,12 @@ void CalenEditorPrivate::discardChanges()
 /*!
  * Show delete confirmation query
  */
-int CalenEditorPrivate::showDeleteConfirmationQuery()
+void CalenEditorPrivate::showDeleteConfirmationQuery(bool closeEditor)
 {
-	int retStatus = 0;
-
-	HbMessageBox popup(HbMessageBox::MessageTypeQuestion);
-	popup.setDismissPolicy(HbDialog::NoDismiss);
-	popup.setTimeout(HbDialog::NoTimeout);
-	popup.setIconVisible(true);
+	HbMessageBox *popup = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
+	popup->setDismissPolicy(HbDialog::NoDismiss);
+	popup->setTimeout(HbDialog::NoTimeout);
+	popup->setAttribute( Qt::WA_DeleteOnClose, true );
 
 	QString text = 0;
 
@@ -1225,18 +1308,27 @@ int CalenEditorPrivate::showDeleteConfirmationQuery()
 		}
 	}
 
-	popup.setText(text);
-
-	popup.setPrimaryAction(new HbAction(hbTrId("txt_calendar_button_delete"),
-	                                    &popup));
-	popup.setSecondaryAction(new HbAction(hbTrId("txt_calendar_button_cancel"),
-	                                      &popup));
-	HbAction *selected = popup.exec();
-	if (selected == popup.primaryAction()) {
-		retStatus = 1;
+	popup->setText(text);
+	
+    QList<QAction*> list = popup->actions();
+    for(int i=0; i < list.count(); i++)
+        {
+        popup->removeAction(list[i]);
+        }
+	HbAction *deleteAction = new HbAction(hbTrId("txt_calendar_button_delete"),
+										popup);
+	popup->addAction(deleteAction);
+	connect(deleteAction, SIGNAL(triggered()), this, 
+										SLOT(handleDeleteAction()));
+	HbAction *cancelAction = new HbAction(hbTrId("txt_calendar_button_cancel"),
+											popup);
+	// Editor should not be closed for all the cases when cancel is pressed
+	if(closeEditor) {
+		connect(cancelAction, SIGNAL(triggered()), this, 
+											SLOT(closeEditor()));
 	}
-
-	return retStatus;
+	popup->addAction(cancelAction);
+	popup->open();
 }
 
 /*!
@@ -1273,7 +1365,7 @@ CalenEditorPrivate::Action CalenEditorPrivate::handleDone()
 			}
 			return CalenEditorPrivate::ActionNothing;
 		case CalenEditorPrivate::ActionDelete:
-			deleteEntry();
+			showDeleteConfirmationQuery(true);
 			return CalenEditorPrivate::ActionDelete;
 		case CalenEditorPrivate::ActionNothing:
 			return CalenEditorPrivate::ActionNothing;
@@ -1341,26 +1433,22 @@ bool CalenEditorPrivate::saveEntry()
  */
 void CalenEditorPrivate::deleteEntry(bool close)
 {
-
 	// if editor is launched from Notes then don't delete entry
 	// Just exit from calendar editor
 	if (mOriginalEntry->id() > 0) {
-
 		// If user is editing single instanc then delete single instance 
 		// else delete entry
-		if (showDeleteConfirmationQuery()) {
-			if (mEditRange == ThisOnly) {
-				// User wants to delete only this occurence
-				mAgendaUtil->deleteRepeatedEntry(*mOriginalEntry,
-				                                 AgendaUtil::ThisOnly);
-			} else {
-				// Delete the entry.
-				mAgendaUtil->deleteEntry(mOriginalEntry->id());
-			}
+		if (mEditRange == ThisOnly) {
+			// User wants to delete only this occurence
+			mAgendaUtil->deleteRepeatedEntry(*mOriginalEntry,
+			                                 AgendaUtil::ThisOnly);
+		} else {
+			// Delete the entry.
+			mAgendaUtil->deleteEntry(mOriginalEntry->id());
+		}
 
-			if (close) {
-				closeEditor();
-			}
+		if (close) {
+			closeEditor();
 		}
 	}
 }
@@ -1462,4 +1550,74 @@ HbDataFormModelItem* CalenEditorPrivate::allDayCheckBoxItem()
 {
 	return mAllDayCheckBoxItem;
 }
+
+/*!
+	Checks if all day item is added and if selected implies reminder time is added.
+	When editing single occurence irrespective of type of the event 
+	the all day item is not shown.
+	Used to calculate the index of other items which are dependant on this.
+ */
+bool CalenEditorPrivate::isReminderTimeForAllDayAdded()
+{
+	return mReminderField->isReminderTimeForAllDayAdded();
+}
+
+/*!
+	Checks if it is an all day event or not.
+ */
+bool CalenEditorPrivate::isAllDayEvent()
+{
+	if (mAllDayCheckBoxItem) {
+		return (mAllDayCheckBoxItem->contentWidgetData("checkState") 
+													== Qt::Checked)? true:false;
+	} else if (!mNewEntry && mEditedEntry->type() == AgendaEntry::TypeEvent) {
+		// If editing single occurence then all day item not shown but still it 
+		// is an all day event..
+		return true;;
+	} else {
+		return false;
+	}
+}
+
+/*!
+	Returns the current index of the reminder field.
+ */
+int CalenEditorPrivate::currentIndexOfReminderField()
+{
+	return mReminderField->currentReminderIndex();
+}
+
+/*!
+	Sets the index. 
+	/param index indicates the index value to be set.
+ */
+void CalenEditorPrivate::setCurrentIndexOfReminderField(int index)
+{
+	mReminderField->setCurrentIndex(index);
+}
+
+/*!
+	Sets the reminder choices for a non all day event.
+ */
+void CalenEditorPrivate::setReminderChoices()
+{
+		mReminderField->setReminderChoices();
+}
+
+/*!
+	Checks if editing all occurences or a single occurence.
+ */
+bool CalenEditorPrivate::isEditRangeThisOnly()
+{
+	return (mEditRange == ThisOnly);
+}
+
+/*!
+	Checks if all day field is added.
+ */
+bool CalenEditorPrivate::isAllDayFieldAdded()
+{
+	return mIsAllDayItemAdded;
+}
+
 // End of file	--Don't remove this.

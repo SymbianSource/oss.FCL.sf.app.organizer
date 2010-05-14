@@ -26,6 +26,7 @@
 #include <HbGroupBox>
 #include <HbListViewItem>
 #include <HbInstance>
+#include <HbNotificationDialog>
 
 // User includes
 #include "notesnoteview.h"
@@ -53,7 +54,8 @@
 NotesNoteView::NotesNoteView(QGraphicsWidget *parent)
 :HbView(parent),
  mSelectedItem(0),
- mDeleteAction(0)
+ mDeleteAction(0),
+ mIsLongTop(false)
  {
 	// Nothing yet.
  }
@@ -170,34 +172,36 @@ void NotesNoteView::createNewNote()
  */
 void NotesNoteView::handleItemReleased(const QModelIndex &index)
 {
-	// Sanity check.
-	if (!index.isValid()) {
-		return;
+	if(!mIsLongTop) {
+		// Sanity check.
+		if (!index.isValid()) {
+			return;
+		}
+
+		// First get the id of the note and get the corresponding information from
+		// agendautil.
+		ulong noteId = index.data(NotesNamespace::IdRole).value<qulonglong>();
+
+		if (0 >= noteId) {
+			// Something wrong.
+			return;
+		}
+
+		// Get the entry details.
+		AgendaEntry entry = mAgendaUtil->fetchById(noteId);
+
+		if (entry.isNull()) {
+			// Entry invalid.
+			return;
+		}
+
+		// Now launch the editor with the obtained info.
+		mNotesEditor = new NotesEditor(mAgendaUtil, this);
+		connect(
+				mNotesEditor, SIGNAL(editingCompleted(bool)),
+				this, SLOT(handleEditingCompleted(bool)));
+		mNotesEditor->edit(entry);
 	}
-
-	// First get the id of the note and get the corresponding information from
-	// agendautil.
-	ulong noteId = index.data(NotesNamespace::IdRole).value<qulonglong>();
-
-	if (0 >= noteId) {
-		// Something wrong.
-		return;
-	}
-
-	// Get the entry details.
-	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
-
-	if (entry.isNull()) {
-		// Entry invalid.
-		return;
-	}
-
-	// Now launch the editor with the obtained info.
-	mNotesEditor = new NotesEditor(mAgendaUtil, this);
-	connect(
-			mNotesEditor, SIGNAL(editingCompleted(bool)),
-			this, SLOT(handleEditingCompleted(bool)));
-	mNotesEditor->edit(entry);
 }
 
 /*!
@@ -212,6 +216,7 @@ void NotesNoteView::handleItemLongPressed(
 		HbAbstractViewItem *item, const QPointF &coords)
 {
 	mSelectedItem = item;
+	mIsLongTop = true;
 
 	ulong noteId = item->modelIndex().data(
 			NotesNamespace::IdRole).value<qulonglong>();
@@ -219,48 +224,32 @@ void NotesNoteView::handleItemLongPressed(
 
 	// Display a context specific menu.
 	HbMenu *contextMenu = new HbMenu();
+	connect(
+			contextMenu,SIGNAL(aboutToClose()),
+			this, SLOT(handleMenuClosed()));
 
 	// Add actions to the context menu.
 	mOpenAction =
 			contextMenu->addAction(hbTrId("txt_common_menu_open"));
-	connect(
-			mOpenAction, SIGNAL(triggered()),
-			this, SLOT(openNote()));
 
 	mDeleteAction =
 			contextMenu->addAction(hbTrId("txt_common_menu_delete"));
-	connect(
-			mDeleteAction, SIGNAL(triggered()),
-			this, SLOT(deleteNote()));
 
 	if (AgendaEntry::TypeNote == entry.type()) {
 		if (entry.favourite()) {
-			mMakeFavouriteAction =
-					contextMenu->addAction(
+			mMakeFavouriteAction = contextMenu->addAction(
 							hbTrId("txt_notes_menu_remove_from_favorites"));
-
-			connect(
-					mMakeFavouriteAction, SIGNAL(triggered()),
-					this, SLOT(markNoteAsFavourite()));
-
 		} else {
-			mMakeFavouriteAction =
-					contextMenu->addAction(
+			mMakeFavouriteAction = contextMenu->addAction(
 							hbTrId("txt_notes_menu_mark_as_favorite"));
-
-			connect(
-					mMakeFavouriteAction, SIGNAL(triggered()),
-					this, SLOT(markNoteAsFavourite()));
 		}
 		mMarkTodoAction = contextMenu->addAction(
 				hbTrId("txt_notes_menu_make_it_as_todo_note"));
-		connect(
-				mMarkTodoAction, SIGNAL(triggered()),
-				this, SLOT(markNoteAsTodo()));
 	}
 
 	// Show the menu.
-	contextMenu->exec(coords);
+	contextMenu->open(this, SLOT(selectedMenuAction(HbAction*)));
+	contextMenu->setPreferredPos(coords);
 }
 
 /*!
@@ -357,6 +346,13 @@ void NotesNoteView::markNoteAsTodo()
 	// Delete the old entry.
 	mAgendaUtil->deleteEntry(entry.id());
 
+	// Show the soft notification.
+	HbNotificationDialog *notificationDialog = new HbNotificationDialog();
+	notificationDialog->setTimeout(
+			HbNotificationDialog::ConfirmationNoteTimeout);
+	notificationDialog->setTitle(
+			hbTrId("txt_notes_dpopinfo_note_moved_to_todos"));
+	notificationDialog->show();
 }
 
 /*!
@@ -436,6 +432,30 @@ void NotesNoteView::openNote()
 
 	// Launch the notes editor with the obtained info.
 	mNotesEditor->edit(entry);
+}
+
+/*!
+	Slot to handle context menu actions.
+ */
+void NotesNoteView::selectedMenuAction(HbAction *action)
+{
+	if (action == mOpenAction) {
+		openNote();
+	} else if (action == mDeleteAction) {
+		deleteNote();
+	} else if (action == mMakeFavouriteAction) {
+		markNoteAsFavourite();
+	} else if (action == mMarkTodoAction) {
+		markNoteAsTodo();
+	}
+}
+
+/*!
+	Slot to handle the context menu closed.
+ */
+void NotesNoteView::handleMenuClosed()
+{
+	mIsLongTop = false;
 }
 // End of file	--Don't remove this.
 

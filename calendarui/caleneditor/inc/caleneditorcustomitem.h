@@ -39,6 +39,7 @@ public:
 	~CalenEditorCustomItem();
 	virtual HbAbstractViewItem* createItem();
 	void enableFromTimeFieldAndSetTime(bool, QDateTime);
+	void disableFromToDateField();
 	void enableToTimeFieldAndSetTime(bool, QDateTime);	
 	void populateDateTime(QDateTime defaultDateTime, bool isFromItem);
 	void populateLocation( QString location);
@@ -78,6 +79,7 @@ private:
 	HbPushButton* mPushButtonTime;
 	HbPushButton* mPushButtonDate;
 	HbPushButton *mRepeatUntilWidget;
+	HbPushButton *mReminderTimeWidget;
 
 	HbDateTimePicker *mDatePicker;
 	HbDateTimePicker *mTimePicker;

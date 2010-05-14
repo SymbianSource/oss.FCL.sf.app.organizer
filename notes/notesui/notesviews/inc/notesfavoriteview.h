@@ -67,6 +67,8 @@ private slots:
 	void handleActionStateChanged();
 	void handleOrientationChanged(Qt::Orientation);
 	void openNote();
+	void selectedMenuAction(HbAction *action);
+	void handleMenuClosed();
 
 private:
 	HbListView *mListView;
@@ -87,6 +89,7 @@ private:
 	NotesModel *mNotesModel;
 	NotesSortFilterProxyModel *mProxyModel;
 	NotesEditor *mNotesEditor;
+	bool mIsLongTop;
 };
 
 #endif // NOTESFAVORITEVIEW_H

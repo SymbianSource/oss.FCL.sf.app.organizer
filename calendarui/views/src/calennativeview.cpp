@@ -95,27 +95,31 @@ void CalenNativeView::deleteAllEntries()
  */
 void CalenNativeView::goToDate()
 {
+	// Create a popup with datepicker for the user to select date.
+	HbDialog *popUp = new HbDialog();
+	popUp->setDismissPolicy(HbDialog::NoDismiss);
+	popUp->setTimeout(HbDialog::NoTimeout);
+	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
+	popUp->setHeadingWidget(new HbLabel(hbTrId("txt_calendar_opt_go_to_date")));
+	
 	// Get the current date.
 	QDateTime currentDateTime = CalenDateUtils::today();
 	QDate currentDate = currentDateTime.date();
-	mDatePicker = new HbDateTimePicker(currentDate, this);
-
+	if(mDatePicker) {
+		mDatePicker = NULL;
+	}
+	mDatePicker = new HbDateTimePicker(currentDate, popUp);
 	// Set the date range.
 	mDatePicker->setMinimumDate(CalenDateUtils::minTime().date());
 	mDatePicker->setMaximumDate(CalenDateUtils::maxTime().date());
-
-	// Create a popup with datepicker for the user to select date.
-	HbDialog popUp;
-	popUp.setDismissPolicy(HbDialog::NoDismiss);
-	popUp.setTimeout(HbDialog::NoTimeout);
-	popUp.setHeadingWidget(new HbLabel(hbTrId("txt_calendar_opt_go_to_date")));
-	popUp.setContentWidget(mDatePicker);
+	mDatePicker->setDate(currentDate);
+	
+	popUp->setContentWidget(mDatePicker);
 	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
-	popUp.setPrimaryAction(okAction);
+	popUp->addAction(okAction);
 	connect(okAction, SIGNAL(triggered()), this, SLOT(goToSelectedDate()));
-	connect(okAction, SIGNAL(triggered()), &popUp, SLOT(close()));
-	popUp.setSecondaryAction(new HbAction(hbTrId("txt_common_button_cancel"), &popUp));
-	popUp.exec();
+	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"), popUp));
+	popUp->open();
 }
 
 /*

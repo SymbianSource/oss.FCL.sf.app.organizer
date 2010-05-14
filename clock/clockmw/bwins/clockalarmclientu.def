@@ -24,4 +24,5 @@ EXPORTS
 	?setAlarmRepeatType@AlarmClient@@AAEXW4TAlarmRepeatDefinition@@AAW4AlarmRepeatType@@@Z @ 23 NONAME ; void AlarmClient::setAlarmRepeatType(enum TAlarmRepeatDefinition, enum AlarmRepeatType &)
 	?qt_metacall@AlarmClient@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 24 NONAME ; int AlarmClient::qt_metacall(enum QMetaObject::Call, int, void * *)
 	?getAlarmInfo@AlarmClient@@QAEHHAAUAlarmInfo@@@Z @ 25 NONAME ; int AlarmClient::getAlarmInfo(int, struct AlarmInfo &)
+	?deleteSnoozedAlarm@AlarmClient@@QAEHH@Z @ 26 NONAME ; int AlarmClient::deleteSnoozedAlarm(int)
 

@@ -32,8 +32,6 @@
 class QGraphicsItem;
 class QStandardItemModel;
 class QTimer;
-class HbLabel;
-class HbPushButton;
 class HbListView;
 class HbListWidgetItem;
 class HbAbstractViewItem;
@@ -42,6 +40,8 @@ class ClockAppControllerIf;
 class TimezoneClient;
 class SettingsUtility;
 class ClockCitySelectionList;
+class HbGroupBox;
+class ClockHomeCityItem;
 
 class ClockWorldView : public HbView
 {
@@ -57,22 +57,24 @@ public:
 
 private slots:
 	void refreshCityList();
-	void updateClockDisplay();
-	void updateDayDateInfo();
-	void updateCurrentLocationInfo();
+	void updateCurrentLocationInfo(int networkTime);
 	void handleItemLongPressed(HbAbstractViewItem *item, const QPointF &coord);
 	void handleAddLocation();
 	void handleDeleteAction();
 	void handleSetAsCurrentLocationAction();
 	void handleCitySelected(LocationInfo info);
 	void showAlarmsView();
-	void updateOffsetDifferences();
 	void refreshWorldView();
-	void updateToolbarTexts(Qt::Orientation currentOrientation);
+	void loadSection(Qt::Orientation orientation);
+	void updateAllLocationInfo();
+	void selectedMenuAction(HbAction *action);
 
 private:
 	QModelIndex addCityToList(const LocationInfo& locationInfo);
 	bool isDay(QDateTime dateTime);
+	QVariantList getCityListDisplayString(const LocationInfo& locationInfo);
+	QVariantList getCityListDecorationString(const LocationInfo& locationInfo);
+	void updateCityList();
 
 private:
 	QTimer *mRefreshTimer;
@@ -80,14 +82,14 @@ private:
 	QStandardItemModel *mCityListModel;
 
 	QPointer<HbListView> mCityListView;
-	HbLabel *mDayDateLabel;
-	HbLabel *mPlaceLabel;
+	ClockHomeCityItem *mHomeCityWidget;
 	HbAction *mAddCityAction;
 	HbAction *mSetCurrentLocationAction;
 	HbAction *mRemoveCityAction;
 	HbAction *mBackAction;
 	HbAction *mShowAlarmsViewAction;
 	HbAction *mDisplayWorldClockView;
+	HbAction *mAddCityMenuAction;
 
 	ClockDocLoader *mDocLoader;
 	ClockAppControllerIf *mAppControllerIf;

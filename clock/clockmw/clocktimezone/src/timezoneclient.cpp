@@ -19,17 +19,17 @@
 // System includes
 #include <QList>
 #include <QStandardItemModel>
-#include <QDebug>
 #include <QtAlgorithms>
 #include <tzlocalizationdatatypes.h>
 #include <tzlocalizer.h>
 #include <tz.h>
 #include <vtzrules.h>
+#include <xqsettingsmanager.h>
+#include <xqsettingskey.h>
 
 // User includes
 #include "timezoneclient.h"
 #include "clockcommon.h"
-#include "debug.h"
 #include "clockserverclt.h"
 
 const int KDaysInWeek(7);
@@ -44,39 +44,78 @@ const int KNoDifference(0);
 	tzserver and timezonelocalization.
  */
 
+TimezoneClient* TimezoneClient::mTimezoneClient = 0;
+int TimezoneClient::mReferenceCount = 0;
 /*!
-	Default constructor.
-
-	\param parent The parent.
+	Call this funtion to instantiate the TimezoneClient class.
  */
-TimezoneClient::TimezoneClient(QObject* parent)
-:QObject(parent),
- mTimeUpdateOn(false),
- mFetchCount(0)
+TimezoneClient* TimezoneClient::getInstance()
 {
-	qDebug("clock: TimezoneClient::TimezoneClient() -->");
+	if (!mTimezoneClient) {
+		mTimezoneClient = new TimezoneClient();
+	}
 
+	mReferenceCount++;
+	return mTimezoneClient;
+}
+
+/*!
+	Call this function to clean up the instance of TimezoneClient class.
+ */
+void TimezoneClient::deleteInstance()
+{
+	mReferenceCount--;
+
+	if (0 == mReferenceCount) {
+		delete mTimezoneClient;
+		mTimezoneClient = 0;
+	}
+}
+
+/*!
+	Call this function to check if the object is NULL.
+ */
+bool TimezoneClient::isNull()
+{
+	bool deleted = false;
+	if (0 == mReferenceCount) {
+		deleted = true;
+	}
+	return deleted;
+}
+
+/*!
+	The constructor.
+ */
+TimezoneClient::TimezoneClient()
+{
 	TCallBack callback(environmentCallback, this);
 
 	mNotifier = CEnvironmentChangeNotifier::NewL(
 			CActive::EPriorityStandard, callback);
 	mNotifier->Start();
 
-	RClkSrvInterface clkSrvInterface1;
-	User::LeaveIfError(clkSrvInterface1.Connect());
-	TBool aUpdate;
-	clkSrvInterface1.IsAutoTimeUpdateOn(aUpdate);
-	if(aUpdate){
-	mTimeUpdateOn = true;
-	}
-	else {
-	mTimeUpdateOn = false;
-	}
-	clkSrvInterface1.Close();
-
 	mTzLocalizer = CTzLocalizer::NewL();
 
-	qDebug("clock: TimezoneClient::TimezoneClient() <--");
+	// Create the settings manager.
+	mSettingsManager = new XQSettingsManager(this);
+
+	// Create the key for auto time update.
+	mAutoTimeUpdateKey = new XQSettingsKey(
+			XQSettingsKey::TargetCentralRepository,
+			KCRUidNitz,
+			KActiveProtocol);
+
+	// Start the monitoring for the auto time update key.
+	mSettingsManager->startMonitoring(*mAutoTimeUpdateKey);
+
+	// Get the value of auto time update from cenrep.
+	mAutoTimeUpdateValue = timeUpdateOn();
+
+	// Listen to the key value changes.
+	connect(
+			mSettingsManager, SIGNAL(valueChanged(XQSettingsKey, QVariant)),
+			this, SLOT(eventMonitor(XQSettingsKey, QVariant)));
 }
 
 /*!
@@ -99,6 +138,11 @@ TimezoneClient::~TimezoneClient()
 	if (mTimeZoneIds.count()) {
 		mTimeZoneIds.clear();
 	}
+	// Clear the locations if exist.
+	if (mAllLocations.count()) {
+		mAllLocations.clear();
+	}
+
 }
 
 /*!
@@ -109,20 +153,15 @@ TimezoneClient::~TimezoneClient()
 			valid cityName, countryName, tz id and city group id. None of the other
 			data is filled.
  */
-QList<LocationInfo> TimezoneClient::getLocations()
+QList<LocationInfo>& TimezoneClient::getLocations()
 {
-	qDebug("clock: TimezoneClient::getLocations() -->");
-
-	// This list will contain the info of the cities fetched from tz server.
-	QList<LocationInfo> infoList;
-
-	// Construct the timezone localizer.
-	CTzLocalizer* localizer = CTzLocalizer::NewL();
-	CleanupStack::PushL(localizer);
+	if (mAllLocations.count()) {
+		mAllLocations.clear();
+	}
 
 	// Get the cities, in alphabetical-ascending sorted order.
 	CTzLocalizedCityArray* cityArray =
-			localizer->GetCitiesL(CTzLocalizer::ETzAlphaNameAscending);
+			mTzLocalizer->GetCitiesL(CTzLocalizer::ETzAlphaNameAscending);
 	ASSERT(cityArray);
 	CleanupStack::PushL(cityArray);
 	int cityCount = cityArray->Count();
@@ -150,7 +189,7 @@ QList<LocationInfo> TimezoneClient::getLocations()
 			if (country) {
 				delete country;
 			}
-			country = localizer->GetCityGroupL(cityGroupId);
+			country = mTzLocalizer->GetCityGroupL(cityGroupId);
 			countryName.Set(country->Name());
 		}
 
@@ -162,16 +201,12 @@ QList<LocationInfo> TimezoneClient::getLocations()
 				cityName.Ptr(), cityName.Length());
 		cityInfo.countryName = QString::fromUtf16(
 				countryName.Ptr(), countryName.Length());
-		infoList.append(cityInfo);
+		mAllLocations.append(cityInfo);
 	}
 
 	// Cleanup.
 	CleanupStack::PopAndDestroy(cityArray);
-	CleanupStack::PopAndDestroy(localizer);
-
-	qDebug("clock: TimezoneClient::getLocations() <--");
-
-	return infoList;
+	return mAllLocations;
 }
 
 bool TimezoneClient::getUtcDstOffsetL(int& dstOffset, const CTzId& timezoneId)
@@ -246,8 +281,6 @@ bool TimezoneClient::getUtcDstOffsetL(int& dstOffset, const CTzId& timezoneId)
 
 LocationInfo TimezoneClient::getCurrentZoneInfoL()
 {
-	qDebug() << "clock: TimezoneClient::getCurrentZoneInfoL -->";
-
 	// Current zone info.
 	LocationInfo currentLocation;
 	int timezoneId(0);
@@ -281,140 +314,130 @@ LocationInfo TimezoneClient::getCurrentZoneInfoL()
 	timeZones.Close();
 	zoneOffsets.Close();
 
-	// Construct CTzLocalizer object to get the timezone from the ID.
-	CTzLocalizer* tzLocalizer = CTzLocalizer::NewL();
-
 	// Get all the localized timezones for the current timezone ID.
 	CTzLocalizedTimeZone* localizedTimeZone(NULL);
 
-	if (tzLocalizer) {
-		// Get the currently set localized timezone.
-		CleanupStack::PushL(tzLocalizer);
-		localizedTimeZone =
-			tzLocalizer->GetLocalizedTimeZoneL(tzId->TimeZoneNumericID());
+	localizedTimeZone =
+			mTzLocalizer->GetLocalizedTimeZoneL(tzId->TimeZoneNumericID());
 
-		if (localizedTimeZone) {
-			CleanupStack::PushL(localizedTimeZone);
+	if (localizedTimeZone) {
+		CleanupStack::PushL(localizedTimeZone);
 
-			// Get the frequently used localized city.
-			CTzLocalizedCity* localizedCity(0);
-			localizedCity = tzLocalizer->GetFrequentlyUsedZoneCityL(
-					CTzLocalizedTimeZone::ECurrentZone);
-			CleanupStack::PushL(localizedCity);
+		// Get the frequently used localized city.
+		CTzLocalizedCity* localizedCity(0);
+		localizedCity = mTzLocalizer->GetFrequentlyUsedZoneCityL(
+				CTzLocalizedTimeZone::ECurrentZone);
+		CleanupStack::PushL(localizedCity);
 
-			// Get all the city groups.
-			CTzLocalizedCityGroupArray* cityGroupArray =
-					tzLocalizer->GetAllCityGroupsL(
-							CTzLocalizer::ETzAlphaNameAscending);
-			CleanupStack::PushL(cityGroupArray);
+		// Get all the city groups.
+		CTzLocalizedCityGroupArray* cityGroupArray =
+				mTzLocalizer->GetAllCityGroupsL(
+						CTzLocalizer::ETzAlphaNameAscending);
+		CleanupStack::PushL(cityGroupArray);
 
-			// Get the index of the country corresponding to the city group ID.
-			int countryIndex(1);
+		// Get the index of the country corresponding to the city group ID.
+		int countryIndex(1);
 
-			for (int index = 0; index < cityGroupArray->Count(); index++) {
-				if (localizedCity->GroupId() ==
-						cityGroupArray->At(index).Id()) {
-					countryIndex = index;
-				}
+		for (int index = 0; index < cityGroupArray->Count(); index++) {
+			if (localizedCity->GroupId() ==
+					cityGroupArray->At(index).Id()) {
+				countryIndex = index;
 			}
+		}
 
-			// Get all the cities within the currently set country.
-			CTzLocalizedCityArray* cityList = tzLocalizer->GetCitiesInGroupL(
-					(cityGroupArray->At(countryIndex )).Id(),
-					CTzLocalizer::ETzAlphaNameAscending);
-			CleanupStack::PushL(cityList);
+		// Get all the cities within the currently set country.
+		CTzLocalizedCityArray* cityList = mTzLocalizer->GetCitiesInGroupL(
+				(cityGroupArray->At(countryIndex )).Id(),
+				CTzLocalizer::ETzAlphaNameAscending);
+		CleanupStack::PushL(cityList);
 
-			// Check if automatic time update is enabled.
-			bool timeUpdateOn( false );
+		// Check if automatic time update is enabled.
+		bool timeUpdateOn( false );
 
-			// Connect to the clock server.
-			// TODO: connect to the clock server and get auto update status in
-			// var:  timeUpdateOn
-			// Check if the country contains only one city or if automatic
-			// time update is on.
-			if (1 == cityList->Count() || timeUpdateOn) {
-				// If yes, then display only the country name.
-				// TODO
+		// Connect to the clock server.
+		// TODO: connect to the clock server and get auto update status in
+		// var:  timeUpdateOn
+		// Check if the country contains only one city or if automatic
+		// time update is on.
+		if (1 == cityList->Count() || timeUpdateOn) {
+			// If yes, then display only the country name.
+			// TODO
+		} else {
+			// Display city name.
+			// TODO:
+		}
+
+		// Get the country name.
+		TPtrC countryName(cityGroupArray->At(countryIndex).Name());
+		currentLocation.countryName = QString::fromUtf16(
+				countryName.Ptr(), countryName.Length());
+
+		// Get the city name.
+		TPtrC cityName(localizedCity->Name());
+		currentLocation.cityName = QString::fromUtf16(
+				cityName.Ptr(), cityName.Length());
+
+		// Get the UTC offset.
+		timezoneId = localizedCity->TimeZoneId();
+
+		if (timezoneId) {
+			// Check if the DST is on for the current timezone.
+			if (isDSTOnL(timezoneId)) {
+				// Get the offset with DST enabled.
+				getUtcDstOffsetL(utcOffset, *tzId);
+
+				currentLocation.dstOn = true;
+				currentLocation.timezoneId = timezoneId;
+				currentLocation.zoneOffset = utcOffset;
 			} else {
-				// Display city name.
-				// TODO:
+				// Use the standard offset.
+				currentLocation.dstOn = false;
+				currentLocation.timezoneId = timezoneId;
+				currentLocation.zoneOffset = initialTimeZoneOffset;
 			}
-
-			// Get the country name.
-			TPtrC countryName(cityGroupArray->At(countryIndex).Name());
-			currentLocation.countryName = QString::fromUtf16(
-					countryName.Ptr(), countryName.Length());
-
-			// Get the city name.
-			TPtrC cityName(localizedCity->Name());
-			currentLocation.cityName = QString::fromUtf16(
-					cityName.Ptr(), cityName.Length());
-
-			// Get the UTC offset.
-			timezoneId = localizedCity->TimeZoneId();
-
-			if (timezoneId) {
-				// Check if the DST is on for the current timezone.
-				if (isDSTOnL(timezoneId)) {
-					// Get the offset with DST enabled.
-					getUtcDstOffsetL(utcOffset, *tzId);
-
-					currentLocation.dstOn = true;
-					currentLocation.timezoneId = timezoneId;
-					currentLocation.zoneOffset = utcOffset;
-				} else {
-					// Use the standard offset.
-					currentLocation.dstOn = false;
-					currentLocation.timezoneId = timezoneId;
-					currentLocation.zoneOffset = initialTimeZoneOffset;
-				}
-			}
-
-			// Cleanup.
-			CleanupStack::PopAndDestroy( cityList );
-			CleanupStack::PopAndDestroy( cityGroupArray );
-			CleanupStack::PopAndDestroy( localizedCity );
-			CleanupStack::PopAndDestroy( localizedTimeZone );
 		}
 
 		// Cleanup.
-		CleanupStack::PopAndDestroy( tzLocalizer );
+		CleanupStack::PopAndDestroy( cityList );
+		CleanupStack::PopAndDestroy( cityGroupArray );
+		CleanupStack::PopAndDestroy( localizedCity );
+		CleanupStack::PopAndDestroy( localizedTimeZone );
 	}
 
 	// Cleanup.
 	CleanupStack::PopAndDestroy( tzId );
 	CleanupStack::PopAndDestroy( &tzHandle );
-
-	qDebug() << "clock: TimezoneClient::getCurrentZoneInfoL <--";
-
 	return currentLocation;
 }
 
 void TimezoneClient::setAsCurrentLocationL(LocationInfo &location)
 {
-	Debug::writeDebugMsg(
+/*	Debug::writeDebugMsg(
 			"In time zone client setAsCurrentLocationL " + location.cityName +
 			" " +
 			location.countryName +
 			" " +
-			QString::number(location.zoneOffset));
+			QString::number(location.zoneOffset));*/
 
-	// Construct CTzLocalizer object.
-	CTzLocalizer* tzLocalizer = CTzLocalizer::NewL();
-	CleanupStack::PushL( tzLocalizer );
-	tzLocalizer->SetTimeZoneL( location.timezoneId );
+	LocationInfo prevLocationInfo ;
+	prevLocationInfo = getCurrentZoneInfoL();
+
+	mTzLocalizer->SetTimeZoneL( location.timezoneId );
 
 	TPtrC ptrCityName(
 			reinterpret_cast<const TText*>(location.cityName.constData()));
 	CTzLocalizedCity* localizedCity =
-			tzLocalizer->FindCityByNameL(ptrCityName, location.timezoneId);
+			mTzLocalizer->FindCityByNameL(ptrCityName, location.timezoneId);
 	CleanupStack::PushL( localizedCity );
-	tzLocalizer->SetFrequentlyUsedZoneL(
+	mTzLocalizer->SetFrequentlyUsedZoneL(
 			*localizedCity, CTzLocalizedTimeZone::ECurrentZone);
 
 	// Cleanup.
 	CleanupStack::PopAndDestroy( localizedCity );
-	CleanupStack::PopAndDestroy( tzLocalizer );
+
+	if(prevLocationInfo.timezoneId == location.timezoneId) {
+		emit cityUpdated();	
+	}
 }
 
 bool TimezoneClient::isDSTOnL(int timezoneId)
@@ -588,16 +611,11 @@ void TimezoneClient::saveLocations(const QList<LocationInfo> &locationList)
 
 void TimezoneClient::getCountries(QMap<QString, int>& countries)
 {
-	// Construct the timezone localizer.
-	CTzLocalizer* localizer = CTzLocalizer::NewL();
-	CleanupStack::PushL(localizer);
-
 	// Get all the city groups(countries).
 	QTime t;
 	t.start();
 	CTzLocalizedCityGroupArray* cityGroupArray =
-		localizer->GetAllCityGroupsL(CTzLocalizer::ETzAlphaNameAscending);
-	qDebug() << "Fetching city groups from tzloc: " << t.elapsed();
+			mTzLocalizer->GetAllCityGroupsL(CTzLocalizer::ETzAlphaNameAscending);
 	CleanupStack::PushL(cityGroupArray);
 
 	t.restart();
@@ -611,27 +629,18 @@ void TimezoneClient::getCountries(QMap<QString, int>& countries)
 				countryName.Ptr(),countryName.Length());
 	    countries[qCountryName] = cityGroup.Id();
 	}
-	qDebug() << "Converting " <<
-			cityGroupArray->Count() <<
-			"countries to qstring: " <<
-			t.elapsed();
 
 	// Cleanup.
 	CleanupStack::PopAndDestroy(cityGroupArray);
-	CleanupStack::PopAndDestroy(localizer);
 }
 
 void TimezoneClient::getCitiesForCountry(int id, QMap<QString, int>& cities)
 {
-	// Construct the timezone localizer.
-	CTzLocalizer* localizer = CTzLocalizer::NewL();
-	CleanupStack::PushL(localizer);
-
 	// Get the city group for the given id.
-	CTzLocalizedCityArray* cityArray = localizer->GetCitiesInGroupL(id,
+	CTzLocalizedCityArray* cityArray = mTzLocalizer->GetCitiesInGroupL(id,
 			CTzLocalizer::ETzAlphaNameAscending);
 	CleanupStack::PushL(cityArray);
-	CTzLocalizedCityArray* unsortedArray = localizer->GetCitiesInGroupL(id,
+	CTzLocalizedCityArray* unsortedArray = mTzLocalizer->GetCitiesInGroupL(id,
 			CTzLocalizer::ETzUnsorted);
 	CleanupStack::PushL(unsortedArray);
 
@@ -654,7 +663,6 @@ void TimezoneClient::getCitiesForCountry(int id, QMap<QString, int>& cities)
 	// Cleanup.
 	CleanupStack::PopAndDestroy(unsortedArray);
 	CleanupStack::PopAndDestroy(cityArray);
-	CleanupStack::PopAndDestroy(localizer);
 }
 
 void TimezoneClient::getLocationInfo(
@@ -663,15 +671,12 @@ void TimezoneClient::getLocationInfo(
 	TRAPD(
 			error,
 
-			// Construct the localizer.
-			CTzLocalizer* localizer = CTzLocalizer::NewLC();
-
 			// Get the localized city group.
-			CTzLocalizedCityGroup* cityGroup = localizer->GetCityGroupL(groupId);
+			CTzLocalizedCityGroup* cityGroup = mTzLocalizer->GetCityGroupL(groupId);
 			CleanupStack::PushL(cityGroup);
 
 			// Get the localized city array for the given city group.
-			CTzLocalizedCityArray* cityArray = localizer->GetCitiesInGroupL(
+			CTzLocalizedCityArray* cityArray = mTzLocalizer->GetCitiesInGroupL(
 					groupId, CTzLocalizer::ETzUnsorted);
 			CleanupStack::PushL(cityArray);
 
@@ -690,7 +695,6 @@ void TimezoneClient::getLocationInfo(
 			// Cleanup.
 			CleanupStack::PopAndDestroy(cityArray);
 			CleanupStack::PopAndDestroy(cityGroup);
-			CleanupStack::PopAndDestroy(localizer);
 	)
 	Q_UNUSED(error)
 }
@@ -787,11 +791,8 @@ int TimezoneClient::getCityGroupIdByName(const QString& name)
 	TPtrC namePtr;
 	namePtr.Set(name.utf16(), name.length());
 
-	// Construct the timezone localizer.
-	CTzLocalizer *localizer = CTzLocalizer::NewLC();
-
 	// Get the citygroup matching the name.
-	CTzLocalizedCityGroup *cityGroup = localizer->FindCityGroupByNameL(namePtr);
+	CTzLocalizedCityGroup *cityGroup = mTzLocalizer->FindCityGroupByNameL(namePtr);
 	CleanupStack::PushL(cityGroup);
 
 	// Get the id.
@@ -799,7 +800,6 @@ int TimezoneClient::getCityGroupIdByName(const QString& name)
 
 	// Cleanup.
 	CleanupStack::PopAndDestroy(cityGroup);
-	CleanupStack::PopAndDestroy(localizer);
 
 	return id;
 }
@@ -809,11 +809,8 @@ int TimezoneClient::getCityOffsetByNameAndId(const QString& name, int tzId)
 	TPtrC namePtr;
 	namePtr.Set(name.utf16(), name.length());
 
-	// Construct the timezone localizer.
-	CTzLocalizer *localizer = CTzLocalizer::NewLC();
-
 	// Get the citygroup matching the name.
-	CTzLocalizedCityArray *cityArray = localizer->GetCitiesL(tzId);
+	CTzLocalizedCityArray *cityArray = mTzLocalizer->GetCitiesL(tzId);
 	CleanupStack::PushL(cityArray);
 
 	int id;
@@ -828,10 +825,8 @@ int TimezoneClient::getCityOffsetByNameAndId(const QString& name, int tzId)
 
 	// Cleanup.
 	CleanupStack::PopAndDestroy(cityArray);
-	CleanupStack::PopAndDestroy(localizer);
 
 	return id;
-
 }
 
 void TimezoneClient::setDateTime(QDateTime dateTime)
@@ -850,21 +845,25 @@ void TimezoneClient::setDateTime(QDateTime dateTime)
 
 void TimezoneClient::setTimeUpdateOn(bool timeUpdate)
 {
-    RClkSrvInterface clkSrvInterface;
-    User::LeaveIfError(clkSrvInterface.Connect());
-    if (timeUpdate) {
-    clkSrvInterface.ActivateAllProtocols();
-    }
-    else {
-    clkSrvInterface.DeActivateAllProtocols();
-    }
-	mTimeUpdateOn = timeUpdate;
+	RClkSrvInterface clkSrvInterface;
+	User::LeaveIfError(clkSrvInterface.Connect());
+	if (timeUpdate) {
+		clkSrvInterface.ActivateAllProtocols();
+	}
+	else {
+		clkSrvInterface.DeActivateAllProtocols();
+	}
 	clkSrvInterface.Close();
 }
 
 bool TimezoneClient::timeUpdateOn()
 {
-	return mTimeUpdateOn;
+	TBool autoTimeUpdateOn;
+	RClkSrvInterface clkSrvInterface;
+	User::LeaveIfError(clkSrvInterface.Connect());
+	clkSrvInterface.IsAutoTimeUpdateOn(autoTimeUpdateOn);
+	clkSrvInterface.Close();
+	return autoTimeUpdateOn;
 }
 
 QStandardItemModel *TimezoneClient::locationSelectorModel()
@@ -1244,5 +1243,30 @@ LocationInfo TimezoneClient::addCity(
 	CleanupStack::PopAndDestroy(newCity);
 
 	return info;
+}
+
+/*!
+	Slot which is called when the value changes in cevrep.
+
+	\param key The key which got changed in cenrep.
+	\param value The new value of that key.
+ */
+void TimezoneClient::eventMonitor(const XQSettingsKey& key, const QVariant& value)
+{
+	if (key.uid() == KCRUidNitz && key.key() == KActiveProtocol) {
+		if (mSettingsManager->error() == XQSettingsManager::NoError) {
+
+			// New value of auto time update.
+			int autoTimeUpdate = value.toInt();
+
+			// Check if the auto time update value has actually changed.
+			bool keyValueChanged = (autoTimeUpdate != mAutoTimeUpdateValue);
+
+			if(keyValueChanged) {
+				mAutoTimeUpdateValue = autoTimeUpdate;
+				emit autoTimeUpdateChanged(mAutoTimeUpdateValue);
+			}
+		}
+	}
 }
 // End of file	--Don't remove this.

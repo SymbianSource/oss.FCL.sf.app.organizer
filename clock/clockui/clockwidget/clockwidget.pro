@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008-2009 Nokia Corporation and/or its subsidiary(-ies).
+# Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
 # under the terms of "Eclipse Public License v1.0"
@@ -11,40 +11,12 @@
 #
 # Contributors:
 #
-# Description:  Project definition file for clockui
-# 
+# Description:
+#
 
-TEMPLATE = lib
-TARGET = clockwidgetproto
-DEFINES += CLOCKWIDGET_LIB
-CONFIG += hb
-
-DEPENDPATH += . \
-			  ./src \
-			  ./inc \
-			  ../../data
-INCLUDEPATH += . \
-			   ../../clockmw/clocktimezone/inc \
-			   ../../clockmw/clocksettingsutility/inc \
-			   ../../inc
-
-symbian: {
-	TARGET.CAPABILITY = ALL -TCB
-	TARGET.EPOCALLOWDLLDATA = 1
-	TARGET.UID3 = 0x2002E6B4
-
-	LIBS += -ltimezoneclient \
-			-lclocksettingsutility
-}
-
-SOURCES += skinnableclock.cpp \
-		   analogclock.cpp \
-		   digitalclock.cpp
-
-HEADERS += skinnableclock.h \
-		   analogclock.h \
-		   digitalclock.h
-
-RESOURCES += ../../data/clockwidget.qrc
-
-# End of file	--Don't remove this.
+ 
+           
+TEMPLATE = subdirs
+SUBDIRS += clockwidgetimpl
+SUBDIRS += clockwidgetplugin
+CONFIG += ordered

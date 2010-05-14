@@ -28,13 +28,18 @@ class QGraphicsLinearLayout;
 class HbIconItem;
 class HbTextItem;
 class HbFrameItem;
-class CalenGridItem;
+
+// CONSTANTS
+const QString focusIconName = "qtg_fr_cal_focused_day_ind";
+const QString eventIndname = "qtg_graf_cal_event_ind";
 
 class CalenGridItemPrototype : public HbGridViewItem
 {
 	Q_OBJECT
 
 public:
+	CalenGridItemPrototype(QColor todayIndColor, QColor activeColor, QColor inActiveColor, 
+	                       QGraphicsWidget *parent = 0);
 	CalenGridItemPrototype(QGraphicsWidget *parent = 0);
 	virtual ~CalenGridItemPrototype()
 	{
@@ -46,19 +51,20 @@ public:
 	void pressStateChanged(bool pressed,bool animate);
 	void pressStateChanged(bool  animate);
 	bool canSetModelIndex(const QModelIndex& index);
+	void createPrimitives();
 
 private:
 	void drawUnderline(bool underlineEnabled);
 private:
-	QGraphicsLinearLayout *mLayout;
-	CalenGridItem *mWidget;
+	QColor mTodayUnderLineColor;
+	QColor mActiveTextColor;
+	QColor mInActiveTextColor;
 	QColor mCurrentDateColor;
 	QColor mGridBorderColor;
 	HbIconItem *mEventIndicatorItem;
 	HbTextItem *mMonthDayInfoItem;
 	HbFrameItem *mFocusIndicatorItem;
 	HbIconItem *mTodayIndicatorItem;
-	QColor mTodayUnderLineColor;
 };
 
 #endif // CALENGRIDITEMPROTOTYPE_H

@@ -53,6 +53,7 @@ public:
 	void updateRepeatChoices();
 	void saveRepeatRule();
 	bool isRepeatUntilItemAdded();
+	QDate repeatUntilDate();          
 
 private:
 	void insertRepeatUntilItem();

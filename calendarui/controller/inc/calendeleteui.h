@@ -29,11 +29,19 @@
 #include "calenactionuiutils.h"
 #include "calennotificationhandler.h"
 #include "calencommandhandler.h"
-
+#include "hb_calencommands.hrh"
 
 // FORWARD DECLARATIONS
 class CCalenController;
+class HbAction;
 
+enum TDeleteConfirmationType
+{
+	EDeleteEntry = 1,
+	EDeleteToDo,
+	EDeleteToDos,
+	EDeleteAll
+};
 
 // CLASS DECLARATION
 /**
@@ -121,28 +129,21 @@ private: // own methods
     void deleteEntriesEndingAtMidnight( QDateTime aMidnight );
 
     /**
-     * Delete entry by passing CCalEntryView and CCalEntry
-     * Will query user for confirmation before deletion
-     * @return ETrue user confirms to delete EFalse otherwise 
-     */
-    TBool DeleteEntryL( AgendaEntry& aEntry );
-    
-    /**
      * Delete entry without querying the user
      */
     TBool DeleteEntryWithoutQueryL();
-
+    
     /**
      * Delete the given entry. Ask the user whether to delete the
      * instance or the entire series.
      */
-    TBool DeleteSingleInstanceL( AgendaEntry& aInstance );
+    void DeleteSingleInstanceL( AgendaEntry& aInstance );
 
     /**
      * Delete the given entry, using aRepeatType to determine
      * whether to delete the instance or the entire series.
      */
-    TBool DeleteSingleInstanceL( AgendaEntry& aInstance, 
+    void DeleteSingleInstanceL( AgendaEntry& aInstance, 
             AgendaUtil::RecurrenceRange aRepeatType );
     
     /**
@@ -152,7 +153,7 @@ private: // own methods
      * @param aRepeatType Repeat type choosen to apply on delete
      * @return ETrue is user confirms to delete, EFalse otherwise
      */
-    TBool DoDeleteSingleInstanceL( AgendaEntry& aInstance,
+    void DoDeleteSingleInstanceL( AgendaEntry& aInstance,
                                    bool aHasRepeatType,
                                    AgendaUtil::RecurrenceRange aRepeatType );
     
@@ -160,11 +161,6 @@ private: // own methods
      * Leaving function, handle ECalenNotifyViewCreated
      */
     void HandleECalenNotifyViewCreatedL();
-    
-   /**
-    * Multiple entries delete query
-    */ 
-    TInt ShowMultipleEntriesDeleteQueryL(int aCount);
     
    /**
     * Get the date from user.
@@ -177,6 +173,18 @@ private: // own methods
      * or the entire series of a repeating entry
      */
     void showRepeatingEntryDeleteQuery();
+    
+    /**
+     * Shows a confirmation query to the user if
+     * he/she wants to delete instance/instances
+     */
+    void showDeleteQuery(const TDeleteConfirmationType type,
+                         const int count = 0);
+    
+    /**
+     * Deletes the entries before the selected date
+     */
+    void getSelectedDateAndDelete();
 
 private: // own methods
     /**
@@ -200,7 +208,9 @@ protected:  // Methods derived from MProgressDialogCallback
 public slots:
 
     void doCompleted( int aFirstPassError );
-    void getSelectedDate();
+    void handleDateQuery(HbAction* action);
+    void handleDeletion(HbAction* action);
+    void handleDeleteCancel();
     
 private slots:
     void handleRepeatedEntryDelete(int index);
@@ -228,20 +238,20 @@ private: // data
     bool iIsDeleting; // True, if asynchronous delete is running
     QDateTime iStartTime;
     QDateTime iEndTime;
-    QDateTime mDateTime; // Get the date selected by user.
     HbDateTimePicker *mDatePicker;
     // Confirmation note id is stored here. Note is shown when asynchronous
     // delete completes.
     int iConfirmationNoteId;
     CCalenController& iController;
-
+    TCalenCommandId mDeleteCommand;
+    AgendaUtil::RecurrenceRange mRecurrenceRange;
+    
     // Stored command if the entry view
     // needs to constructed asyncronously
     TCalenCommand iStoredCommand;
     int iMutlipleContextIdsCount;
     bool iMoreEntriesToDelete;
     bool iDisplayQuery;
-    bool mIsDateValid;
     int iEntriesToDelete;
     };
 

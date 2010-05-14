@@ -29,7 +29,7 @@
 #include <HbExtendedLocale>
 #include <HbListWidget>
 #include <HbComboBox>
-#include <HBListWidgetItem>
+#include <HbListWidgetItem>
 #include <HbApplication>
 #include <QTranslator>
 
@@ -134,7 +134,7 @@ void ClockRegionalSettingsView::showView()
 	window->setCurrentView(mView);
 
 	// Add the back softkey.
-	mBackAction = new HbAction(Hb::BackAction);
+	mBackAction = new HbAction(Hb::BackNaviAction);
 	mView->setNavigationAction(mBackAction);
 	connect(
 			mBackAction, SIGNAL(triggered()),
@@ -271,8 +271,6 @@ void ClockRegionalSettingsView::handleDateSeparatorChange(QString text)
 void ClockRegionalSettingsView::handleDataChanged(
 		const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
-	qDebug("clock: ClockRegionalSettingsView::handleDataChanged() -->");
-
 	Q_UNUSED(bottomRight)
 
 

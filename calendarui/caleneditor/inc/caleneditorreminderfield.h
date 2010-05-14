@@ -30,6 +30,7 @@
 class HbDataFormModelItem;
 class HbDataForm;
 class HbDataFormModelItem;
+class HbDateTimePicker;
 class CalenEditorDataHandler;
 
 class CalenEditorReminderField : public QObject
@@ -43,20 +44,37 @@ public:
 	virtual ~CalenEditorReminderField();
 
 public:
+	void setReminderChoices();
 	void addItemToModel();
 	void removeItemFromModel();
 	void populateReminderItem(bool newEntry);
 	QModelIndex modelIndex();
-	
+	void setReminderOff();
+	void setDefaultAlarmForAllDay();
+	void updateReminderChoicesForAllDay(QDate repeatUntilDate);
+	void insertReminderTimeField();
+	void setDisplayTime();
+	void removeReminderTimeField();
+	bool isReminderFieldEnabled();
+	int reminderItemsCount();
+	int currentReminderIndex();
+	void setCurrentIndex(int index);
+	void disableReminderTimeField();
+	bool isReminderTimeForAllDayAdded();
 private slots:
 	void handleReminderIndexChanged(int index);
-	
+	void launchReminderTimePicker();
+	void setReminderTimeForAllDay();
 private:
 	CalenEditorPrivate* mCalenEditor;
 	HbDataForm* mEditorForm;
 	HbDataFormModel* mCalenEditorModel;
 	HbDataFormModelItem* mReminderItem;
+	HbDataFormModelItem *mCustomReminderTimeItem;
+	HbDateTimePicker *mTimePicker;
+	QTime mReminderTimeForAllDay;
 	QHash<int, int> mReminderHash;
+	bool mReminderTimeAdded;
 };
 
 #endif // CALENEDITORREMINDERFIELD_H

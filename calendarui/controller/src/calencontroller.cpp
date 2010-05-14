@@ -51,6 +51,7 @@ CCalenController::CCalenController(bool isFromServiceFrmwrk)
     TRACE_ENTRY_POINT;
     iIsFromServiceFrmWrk = isFromServiceFrmwrk;
     iNextServicesCommandBase = KCustomCommandRangeStart;
+    iRefCount = 0;
     
     // Store the pointer in tls, also avoid multiple creations
     checkMultipleCreation();
@@ -171,7 +172,24 @@ CCalenController* CCalenController::InstanceL()
     TRACE_EXIT_POINT;
     return self;    
     }
+
+// ----------------------------------------------------------------------------
+// CCalenController::ReleaseCustomisations
+// Releases any plugins by deleting the customisation manager
+// should only be called on exiting by the application.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenController::ReleaseCustomisations()
+    {
+    TRACE_ENTRY_POINT;
     
+    delete iCustomisationManager;
+    iCustomisationManager = NULL;
+    
+    TRACE_EXIT_POINT;
+    }
+
 // ----------------------------------------------------------------------------
 // CCalenController::Release
 // Decrement the reference count of this singleton.
@@ -204,14 +222,38 @@ void CCalenController::Release()
 CCalenController::~CCalenController()
     {
     TRACE_ENTRY_POINT;
+    
     if ( iServices )
         {
         iServices->Release();
         }
-    delete iNotifier;
-    delete iActionUi;
-    delete iViewManager;
-    delete iCustomisationManager;
+    
+    if( iNotifier )
+		{
+    	delete iNotifier;
+    	iNotifier = NULL;
+		}
+    
+   if( iActionUi )
+	   {
+	   delete iActionUi;
+	   iActionUi = NULL;
+	   }
+   
+    if( iViewManager )
+		{
+    	delete iViewManager;
+    	iViewManager = NULL;
+		}
+    
+    if( iCustomisationManager )
+		{
+    	delete iCustomisationManager;
+    	iCustomisationManager = NULL;
+		}
+    
+    
+    Dll::SetTls( NULL );
     
     TRACE_EXIT_POINT;
     }

@@ -111,7 +111,7 @@ void CalenDayView::doPopulation()
     
     // Dont override the soft key behavior if day view is the first view
     if (ECalenDayView != mServices.getFirstView()) {
-		mSoftKeyAction = new HbAction(Hb::BackAction);
+		mSoftKeyAction = new HbAction(Hb::BackNaviAction);
 		setNavigationAction(mSoftKeyAction);
 		// Connect to the signal triggered by clicking on back button.
 		connect(mSoftKeyAction, SIGNAL(triggered()), this,
@@ -307,5 +307,15 @@ void CalenDayView::launchMonthView()
     // Issue the command to launch the month view
     mServices.IssueCommandL(ECalenMonthView);
 }
+
+// ----------------------------------------------------------------------------
+// CCalenDayView::clearListModel
+// clears the list model 
+// ----------------------------------------------------------------------------
+// 
+void CalenDayView::clearListModel()
+    {
+    mDayViewWidget->clearListModel();
+    }
 
 // End of file	--Don't remove this.
