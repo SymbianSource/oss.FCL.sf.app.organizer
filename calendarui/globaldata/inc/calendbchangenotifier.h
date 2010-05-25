@@ -27,6 +27,7 @@
 // FORWARD DECLARATIONS
 class CCalSession;                  //Calendar session
 class CCalenGlobalData;             //Calendar global data
+class CMissedAlarm;
 
 // CLASS DECLARATION
 
@@ -126,6 +127,14 @@ NONSHARABLE_CLASS(CCalenDbChangeNotifier) : public CActive,
         * Cancels iNotificationTimer if started
         */
         void DoCancel();
+        void HandleMissedAlarmsL(const RArray<TCalChangeEntry>& aChangeItems);
+        class  TCalLuidFilename
+            {
+        public:
+            TCalLocalUid iLuid;
+            TFileName iFilename;
+            };
+        static TBool DoFindEntryByLuid(const TCalLuidFilename* aLuidFilename,const CMissedAlarm& aCalendarInfo);
 
     private:    // Data
 

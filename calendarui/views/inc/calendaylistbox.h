@@ -98,7 +98,7 @@ private:    // From CCoeControl
      * From CCoeControl Draws itself
      */
     void Draw(const TRect& aRect) const;
-
+   
     /**
      * From CCoeControl Handle global resource change
      */

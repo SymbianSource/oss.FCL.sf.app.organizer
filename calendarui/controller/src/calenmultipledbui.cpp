@@ -770,7 +770,7 @@ TInt CCalenMultipleDbUi::EditItemL()
     keyBuff.Zero();
     keyBuff.AppendNum( ESyncStatus ); 
     TPckgC<TBool> pckgSyncStatusValue(syncstatus);
-    pckgSyncStatusValue.Set(iCalendarInfoEdited->PropertyValueL( keyBuff ));
+    TRAP_IGNORE(pckgSyncStatusValue.Set(iCalendarInfoEdited->PropertyValueL( keyBuff ))); 
     iCalendarInfoOriginal->SetPropertyL( keyBuff, pckgSyncStatusValue );                
 
     iDbEditor = CCalenMultiDBEditor::NewL(*this,*iCalendarInfoEdited, iController,
@@ -875,7 +875,7 @@ TBool CCalenMultipleDbUi::CheckForChangesL( CCalCalendarInfo& aCalendarInfoOrigi
     TPckgC<TBool> pckgSyncStatusValueOriginal(syncstatusOriginal);
     pckgSyncStatusValueOriginal.Set(aCalendarInfoOriginal.PropertyValueL( keyBuff ));
     TPckgC<TBool> pckgSyncStatusValueModified(syncstatusModified);
-    pckgSyncStatusValueModified.Set(aCalendarInfoModified.PropertyValueL( keyBuff ));
+    TRAP_IGNORE(pckgSyncStatusValueModified.Set(aCalendarInfoModified.PropertyValueL( keyBuff )));
     syncstatusOriginal = pckgSyncStatusValueOriginal();
     syncstatusModified = pckgSyncStatusValueModified();
     if (editedName->Compare(aCalendarInfoOriginal.NameL())

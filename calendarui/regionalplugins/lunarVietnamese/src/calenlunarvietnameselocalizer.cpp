@@ -137,8 +137,8 @@ void CCalenLunarVietnameseLocalizer::LocalizeMonthAndDayL(
     day.Num( TInt64(aInfo.iLunarDate.iDay ));
     CPtrCArray* monthAndDaySubs = new (ELeave) CPtrCArray(2);
     CleanupStack::PushL( monthAndDaySubs );
-    monthAndDaySubs->AppendL(month);
     monthAndDaySubs->AppendL(day);
+    monthAndDaySubs->AppendL(month);
     
     HBufC* tmp = StringLoader::LoadLC( dateResource, *monthAndDaySubs );
     aLocInfo->iLunarMonthAndDay = *tmp;

@@ -1285,8 +1285,7 @@ void CCalenUnifiedEditor::DynInitMenuPaneL(
             
             aMenuPane->AddMenuItemsL( R_CALEN_UNIFIED_EDITOR_DEFAULT_MENUPANE );
 
-            if( ( ctrlid != ECalenEditorPlace ) || 
-                    ( !CCalenLocationUtil::IsMapProviderAvailableL() ) )
+            if(  !CCalenLocationUtil::IsMapProviderAvailableL() )   
                 {
                 aMenuPane->DeleteMenuItem( ECalenGetLocation );
                 }
@@ -2599,7 +2598,8 @@ CCalenUnifiedEditor::TEntryExistenceStatus CCalenUnifiedEditor::EntryStillExists
 void CCalenUnifiedEditor::UpdateLocationInfoToFormL()
     {
     TRACE_ENTRY_POINT;
-	
+    // set the focus to location field as the address is inserted/updated to location field.
+    TryChangeFocusToL(ECalenEditorPlace);
 	// Get location details from context
 	MCalenContext& context = iServices->Context();
 	CPosLandmark* landmark = context.GetLandMark();
@@ -3273,6 +3273,16 @@ void CCalenUnifiedEditor::GetAttachmentNamesL(RPointerArray<HBufC>& aAttachmentN
         {
         Edited().AttachmentNamesL(aAttachmentNames);
         }
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenUnifiedEditor::GetServices
+// Gets services reference
+// -----------------------------------------------------------------------------
+//
+MCalenServices& CCalenUnifiedEditor::GetServices()
+    {
+    return *iServices;
     }
 	
 // -----------------------------------------------------------------------------

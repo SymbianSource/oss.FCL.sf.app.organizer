@@ -356,6 +356,11 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
     public:
         
         /**
+         * @brief Gets the iServices reference.
+         */
+        MCalenServices& GetServices();
+        
+        /**
          * @brief Inserts dialog line (form field) defined by aResourceId 
          *        and aControlId after existing dialog line aPrevControlId.
          * @resourceId dialog line resource

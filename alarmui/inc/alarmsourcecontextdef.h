@@ -88,14 +88,18 @@ _LIT_CONTEXT_VALUES( KAlarmUISourceCommandValues ) =
     _S( "Stop" ),
 
     // command to snooze an active alarm
-    _S( "Snooze" )
+    _S( "Snooze" ),
+    
+    // command to silence an active alarm
+    _S( "Silence" )    
     };
 
 // Enumerations for accessing values array
 enum TAlarmSourceCommandValues
     {
     ECommandAlarmStop,
-    ECommandAlarmSnooze
+    ECommandAlarmSnooze,
+    ECommandAlarmSilence
     };
 
 //-----------------------------------------------------------------------------
@@ -157,6 +161,9 @@ _LIT_CONTEXT_VALUES( KAlarmUIActions ) =
     // stop the active alarm
     _S( "AlarmUI.Stop" ),
 
+    // stop the active alarm
+    _S( "AlarmUI.Silence" ),    
+    
     // print a debug string
     _S( "AlarmUI.Debug" )
 
@@ -167,6 +174,7 @@ enum TAlarmUIActionValues
     {
     EActionSnooze,
     EActionStop,
+    EActionSilence,    
     EDebug
     };
 

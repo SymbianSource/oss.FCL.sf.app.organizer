@@ -56,6 +56,7 @@
 #include <AknGlobalNote.h>
 #include <featdiscovery.h>
 #include <ProfileEngineDomainCRKeys.h>
+#include <mediafilelist.h>
 
 // User Includes
 #include "clkuiclksrvmodel.h"
@@ -2437,39 +2438,31 @@ void CClkDateTimeView::HandleClockAlarmToneCmdL()
     // Set the flag to indicate that the tone selection list is in use.
     iExtension->SetAlarmToneListInUse( ETrue );    
 	
-	// Open the resource file.
-    RConeResourceLoader resourceLoader( *( CCoeEnv::Static() ) );
-    OpenFileListResourceLC( resourceLoader );
+    CMediaFileList* list = CMediaFileList::NewL();
+    CleanupStack::PushL( list );
     
-    // Launch filelist using your custom resource.
-	CFLDFileListContainer* alarmToneList = CFLDFileListContainer::NewLC( R_FILELIST_MODEL_NOVIDEO );
+    TInt nullItem( KErrNotFound );
     
-	// Populate the list with "Default" and "Off" strings.
-	alarmToneList->InsertNullItemL( iDefaultToneTxt->Des(), iDefaultAlarmToneName );
-	alarmToneList->InsertEndNullItemL( iSoundOffTxt->Des(), iExtension->GetSilentToneStr()->Des() );
-	// Do not show videos.
-	alarmToneList->AddExclusiveMediaTypeL( ECLFMediaTypeVideo );
-	alarmToneList->SetAutomatedType( CDRMHelper::EAutomatedTypeClockAlarm );
-    // Do not show items over the file size limit, if configured.
-    if ( CFeatureDiscovery::IsFeatureSupportedL(
-         KFeatureIdFfLimitedMessageAndAlarmToneSize ) )
-        {
-         // Max file size allowed (in KB).  0 == no limit.
-        TInt fileSizeLimit = 0;
-        CRepository* profilesCenRep = CRepository::NewLC( KCRUidProfileEngine );
+    // default tone
+    list->SetNullItemL( iDefaultToneTxt->Des(), iDefaultAlarmToneName,
+            CMediaFileList::EMediaFileTypeAudio,
+            CMediaFileList::ENullItemIconDefaultTone );    
+    
+    // off
+    list->SetNullItemL( iSoundOffTxt->Des(), iExtension->GetSilentToneStr()->Des(),
+            CMediaFileList::EMediaFileTypeAudio,
+            CMediaFileList::ENullItemIconOff );      
+    
 
-        // Reading the repository should not fail, but if it does, the default
-        // value we have for the file size limit is acceptable.
-        profilesCenRep->Get( KProEngRingingToneMaxSize, fileSizeLimit ); // codescanner::crepository
-        CleanupStack::PopAndDestroy( profilesCenRep );
-
-        if ( fileSizeLimit > 0 )
-            {
-            alarmToneList->SetMaxFileSize( fileSizeLimit * KKilo );
-            }
-        }
+	list->SetAttrL( CMediaFileList::EAttrAutomatedType, CDRMHelper::EAutomatedTypeClockAlarm );
+    list->SetAttrL( CMediaFileList::EAttrExcludeFolder, CMediaFileList::EMediaFileTypeVideo );
+    	
 	// Launch the list. ETrue is returned if OK is pressed. EFalse otherwise.
-    if( alarmToneList->LaunchL( iAlarmToneName, *iToneListHeader ) )
+    TBool ok( list->ShowMediaFileListL( &iAlarmToneName, &nullItem, NULL, NULL ) );
+
+    // Cleanup.
+    CleanupStack::PopAndDestroy( list );    	
+    if( ok )
 		{
 		// User has selected the tone and pressed OK.
 		// Holder for the old alarm tone.
@@ -2489,12 +2482,7 @@ void CClkDateTimeView::HandleClockAlarmToneCmdL()
         // Cleanup.
         CleanupStack::PopAndDestroy( cenRep );
 		}
-	// User pressed Cancel.
-    iExtension->SetAlarmToneListInUse( EFalse );
-    
-    // Cleanup.
-    CleanupStack::PopAndDestroy( alarmToneList );
-    CleanupStack::PopAndDestroy( &resourceLoader );
+    iExtension->SetAlarmToneListInUse( EFalse );   	
     }
 
 // ---------------------------------------------------------

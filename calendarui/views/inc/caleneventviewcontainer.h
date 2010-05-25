@@ -499,15 +499,6 @@ public: // New methods
      */
     void AddCalendarInfoFieldL();
     
-    /*
-     * @brief Find calendarinfo object based on calendar name
-     * 
-     * @param aName calendar filename
-     * @param aCalendarInfo referance for calendarinfo
-     * @return TBool find status
-     */
-    static TBool CalendarInfoIdentifierL(const HBufC* aName,
-            const CCalCalendarInfo& aCalendarInfo);
     /**
      * Adds the attachment field in the viewer
      */
@@ -547,6 +538,16 @@ public:
      * To stop the alarm in auto snooze case.and to open the event viewer in normal mode.
      */
      void HandleStopCommandL();
+     
+     /*
+      * @brief Find calendarinfo object based on calendar name
+      * 
+      * @param aName calendar filename
+      * @param aCalendarInfo referance for calendarinfo
+      * @return TBool find status
+      */
+     static TBool CalendarInfoIdentifierL(const HBufC* aName,
+             const CCalCalendarInfo& aCalendarInfo);
 
 protected:
 

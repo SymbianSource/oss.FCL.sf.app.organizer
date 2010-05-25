@@ -22,10 +22,14 @@
 #include <CalenInterimUtils2.h>
 #include <calcalendarinfo.h>
 #include <calcalendariterator.h>
+#include <calenmulticaluids.hrh>
+
 // user include.
 #include "multicaluidialogmodel.h"
 #include "calendarui_debug.h"
 #include "cleanupresetanddestroy.h"
+
+const TInt KBuffLength = 24;
 
 // ----------------------------------------------------------------------------
 // CMultiCalUiDialogModel::CMultiCalUiDialogModel
@@ -304,11 +308,29 @@ void CMultiCalUiDialogModel::GetAllCalendarInfoL(RPointerArray<
     CCalCalendarIterator* calIter = CCalCalendarIterator::NewL(
             *iCalendarsSession);
     CleanupStack::PushL(calIter);
-    CCalCalendarInfo* calendarInfo = calIter->FirstL();
-    while (calendarInfo)
+
+    for( CCalCalendarInfo* calendarInfo = calIter->FirstL();
+            calendarInfo!=NULL;calendarInfo = calIter->NextL())
         {
-        aCalendarInfoList.AppendL(calendarInfo);
-        calendarInfo = calIter->NextL();
+            TBuf8<KBuffLength> keyBuff;
+            // Mark the meta property as SoftDeleted
+            keyBuff.Zero();
+            keyBuff.AppendNum(EMarkAsDelete);
+            TBool softDelete = EFalse;
+            TPckgC<TBool> pkgSoftDelete( softDelete );
+            TRAPD(err,pkgSoftDelete.Set(calendarInfo->PropertyValueL(keyBuff)));
+            if( KErrNone == err )
+                {
+                softDelete = pkgSoftDelete();
+                }
+            if(!softDelete)
+                {
+                aCalendarInfoList.Append(calendarInfo);
+                }
+            else
+                {
+                delete calendarInfo;
+                }
         }
     CleanupStack::PopAndDestroy(calIter);
 

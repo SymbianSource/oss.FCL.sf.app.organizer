@@ -67,7 +67,11 @@ CAgnSimpleEntry::~CAgnSimpleEntry()
 @internalComponent
 */
 	{
-	delete iRptDef;
+    if (iRptDef)
+        {
+        delete iRptDef;
+        iRptDef = NULL;
+        }
 	}
 
 
@@ -394,8 +398,15 @@ EXPORT_C void CAgnSimpleEntry::AdjustStartUntilTimeForRepEntryL()
 			// Ensure that the start date actually falls on a repeating instance. For example,
 			// if the repeat rule is every Wednesday, and the DtStart is a Monday, it should be 
 			// nudged forwards to the Wednesday of that week.
-
-			TTime startTimeUtc = EntryTime().UtcL();
+			TTime startTimeUtc;
+			if (Type() == CCalEntry::ETodo)
+				{
+				startTimeUtc = StartTime().UtcL();
+				}
+			else
+				{
+			    startTimeUtc = EntryTime().UtcL();
+				}
 
 			startTimeUtc -= TTimeIntervalMicroSeconds(1);
 			TTime firstInstanceUtc;
@@ -428,7 +439,7 @@ E.g. if an event has a DTSTART on a Monday but repeats every Wednesday, the DTST
 	TTime startTime = aNewEntryTimeLocal;
 	if (Type() == CCalEntry::ETodo)
 		{
-		startTime = DurationMinusL(startTime);
+		//startTime = DurationMinusL(startTime);
 		}
 	TAgnCalendarTime startAgnTime;
 	TAgnCalendarTime endAgnTime;

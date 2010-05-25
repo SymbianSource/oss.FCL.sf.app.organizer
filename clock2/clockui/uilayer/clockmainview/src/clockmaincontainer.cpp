@@ -38,6 +38,7 @@
 #include <tzlocalizer.h>
 #include <tzlocalizationdatatypes.h>
 #include <vtzrules.h>
+#include <aknbutton.h>
 
 // User includes
 #include "clockmaincontainer.h"
@@ -67,6 +68,8 @@ const TInt KDayNames[] =
     R_QTN_WEEK_LONG_SATURDAY,
     R_QTN_WEEK_LONG_SUNDAY
     };
+
+TInt const KSwitchDelay = 200*1000;
 
 // Literals
 _LIT( KIconFileName, "\\resource\\apps\\clockapp.mif" );
@@ -155,7 +158,9 @@ CClockMainContainer::~CClockMainContainer()
 	    delete iTimeZoneString;
 	    iTimeZoneString = NULL;
 	    }
-		
+
+	delete iNewAlarmButton;
+	iNewAlarmButton = NULL;
 	__PRINTS( "CClockMainContainer::~CClockMainContainer - Exit" );
     }
 
@@ -189,12 +194,78 @@ TKeyResponse CClockMainContainer::OfferKeyEventL( const TKeyEvent& aKeyEvent,
         if( EKeyUpArrow == aKeyEvent.iCode ||
             EKeyDownArrow == aKeyEvent.iCode )
             {
-            if( iListBox )
+
+            TInt itemCount = iListBox->Model()->ItemTextArray()->MdcaCount();
+            // if neither has focus just then select button to be focused
+            if( !iNewAlarmButton->IsFocused() && !iListBox->IsFocused() )
                 {
-    
-                    
-                // Send the event to the listbox to handle the event.
+                iListBox->View()->ItemDrawer()->SetFlags( CListItemDrawer::EDisableHighlight );
+                iNewAlarmButton->SetFocus( ETrue );
+                DrawDeferred();
+                retVal = EKeyWasConsumed;
+                }
+            // button not focused and no list items -> set focus to button
+            else if( itemCount == 0 && !iNewAlarmButton->IsFocused() )
+                {
+                iListBox->View()->ItemDrawer()->SetFlags( CListItemDrawer::EDisableHighlight );
+                iListBox->SetFocus( EFalse );
+                iNewAlarmButton->SetFocus( ETrue );
+                DrawDeferred();
+                retVal = EKeyWasConsumed;
+                }
+            // button focused and listbox has items
+            else if( iNewAlarmButton->IsFocused() && itemCount > 0 )
+                {
+                iListBox->View()->ItemDrawer()->ClearFlags( CListItemDrawer::EDisableHighlight );
+                iNewAlarmButton->SetFocus( EFalse );
+                iListBox->SetFocus( ETrue );
+                if( EKeyDownArrow == aKeyEvent.iCode )
+                    {
+                    iListBox->SetCurrentItemIndex( itemCount - 1 );
+                    }
+                else
+                    {
+                    iListBox->SetCurrentItemIndex( 0 );
+                    }
                 retVal = iListBox->OfferKeyEventL( aKeyEvent, aType );
+                }
+            // listbox focused
+            else if( iListBox->IsFocused() && itemCount > 0 )
+                {
+                // first item when only one item in the list
+                if( iListBox->CurrentItemIndex() == 0 && itemCount == 1 )
+                    {
+                    iListBox->View()->ItemDrawer()->SetFlags( CListItemDrawer::EDisableHighlight );
+                    iListBox->SetFocus( EFalse );
+                    iNewAlarmButton->SetFocus( ETrue );
+                    DrawDeferred();
+                    retVal = EKeyWasConsumed;
+                    }
+                // first item
+                else if( iListBox->CurrentItemIndex() == 0 && EKeyUpArrow == aKeyEvent.iCode )
+                    {
+                    iListBox->View()->ItemDrawer()->SetFlags( CListItemDrawer::EDisableHighlight );
+                    iListBox->SetFocus( EFalse );
+                    iNewAlarmButton->SetFocus( ETrue );
+                    DrawDeferred();
+                    retVal = EKeyWasConsumed;
+                    }
+                //last item
+                else if( iListBox->CurrentItemIndex() == ( itemCount - 1 )
+                        && EKeyDownArrow == aKeyEvent.iCode )
+                    {
+                    iListBox->View()->ItemDrawer()->SetFlags( CListItemDrawer::EDisableHighlight );
+                    iListBox->SetFocus( EFalse);
+                    iNewAlarmButton->SetFocus( ETrue );
+                    DrawDeferred();
+                    retVal = EKeyWasConsumed;
+                    }
+                // Send the event to the listbox to handle the event.
+                else
+                    {
+                    iListBox->View()->ItemDrawer()->ClearFlags( CListItemDrawer::EDisableHighlight );
+                    retVal = iListBox->OfferKeyEventL( aKeyEvent, aType );
+                    }
                 }
             }
 
@@ -203,7 +274,7 @@ TKeyResponse CClockMainContainer::OfferKeyEventL( const TKeyEvent& aKeyEvent,
             {
             // Handle backspace command. Deletes the selected alarm.
 			//Single click integration
-            if ( iView->MenuBar()->ItemSpecificCommandsEnabled() )
+            if ( iListBox->IsFocused() && iView->MenuBar()->ItemSpecificCommandsEnabled() )
                 {
                 // if highlighted
                 iView->HandleCommandL( EClockRemoveAlarm );
@@ -215,8 +286,27 @@ TKeyResponse CClockMainContainer::OfferKeyEventL( const TKeyEvent& aKeyEvent,
 		//Single click integration
         if ( aKeyEvent.iCode == EKeyOK || aKeyEvent.iCode == EKeyEnter )
             {
-            // Send the event to the listbox to handle the event.
-            iListBox->OfferKeyEventL( aKeyEvent, aType );
+            // Send the event to the listbox to handle the event
+            // if listbox is focused
+            if( iListBox->IsFocused() && iListBox->Model()->ItemTextArray()->MdcaCount() > 0 )
+                {
+                iListBox->OfferKeyEventL( aKeyEvent, aType );
+                retVal = EKeyWasConsumed;
+                }
+            else
+                {
+                // default action for the enter is button press
+                TKeyEvent keyEvent;
+                keyEvent.iCode = EKeyOK;  
+                keyEvent.iScanCode = EStdKeyDevice3;
+                keyEvent.iModifiers = 0;
+                keyEvent.iRepeats = 0;
+                iNewAlarmButton->OfferKeyEventL( keyEvent, EEventKeyDown );
+                iNewAlarmButton->OfferKeyEventL( keyEvent, EEventKey );
+                iNewAlarmButton->OfferKeyEventL( keyEvent, EEventKeyUp );
+                retVal = EKeyWasConsumed;
+                
+                }
             }
 
         }
@@ -280,11 +370,6 @@ void CClockMainContainer::FocusChanged( TDrawNow /*aDrawNow*/ )
     {
 	__PRINTS( "CClockMainContainer::FocusChanged - Entry" );
 	
-    if( iListBox )
-        {
-        iListBox->SetFocus( IsFocused() );
-        }
-		
 	__PRINTS( "CClockMainContainer::FocusChanged - Exit" );
     }
 
@@ -304,10 +389,28 @@ void CClockMainContainer::HandlePointerEventL( const TPointerEvent& aPointerEven
 		
         return;
         }
-
-    // Let the listbox handle the event.
-    iListBox->HandlePointerEventL( aPointerEvent );
-		
+    
+    // to get the vibes let's handle skinnable clock as a special case
+    // no need to to delegate pointer events to it
+    if( iSkinnableClock && iSkinnableClock->Rect().Contains( aPointerEvent.iPosition ) )
+        {
+        if( aPointerEvent.iType == TPointerEvent::EButton1Down  )
+            {
+            TTime now;
+            now.HomeTime();
+            TInt64 launchFreq = now.MicroSecondsFrom( iPreviousClockTypeSwitch ).Int64();
+            if( launchFreq > MAKE_TINT64( 0, KSwitchDelay )  )
+                {
+                iView->GiveVibes();
+                iView->HandleCommandL( EClockSwitchClockType ); 
+                iPreviousClockTypeSwitch.HomeTime();
+                }   
+            }
+        } 
+    else
+        {
+        CCoeControl::HandlePointerEventL( aPointerEvent );
+        }
 	__PRINTS( "CClockMainContainer::HandlePointerEventL - Exit" );
     }
 
@@ -319,42 +422,15 @@ void CClockMainContainer::HandlePointerEventL( const TPointerEvent& aPointerEven
 void CClockMainContainer::HandleListBoxEventL( CEikListBox* aListBox, TListBoxEvent aEventType )
     {
     __PRINTS( "CClockMainContainer::HandleListBoxEventL - Entry" );
-
     if( aListBox == iListBox &&
-        aEventType == EEventItemSingleClicked )
+        ( aEventType == EEventItemSingleClicked || aEventType == EEventEnterKeyPressed ) )
         {
         // Check if the user has double clicked on the list item.
         if( !iView->IsAlarmEditorOpen() )
             {
-            // If the user has selected the first item, launch alarm editor.
-            if( KErrNone == aListBox->CurrentItemIndex() )
-                {
-                iView->HandleCommandL( EClockNewAlarm );
-                }
-            else
-                {
-				//Single click integration
-                iView->HandleCommandL( EClockResetAlarm ); 
-
-                }
+            iView->HandleCommandL( EClockResetAlarm ); 
             }
         }
-	//Single click integration
-    else if ( aListBox == iListBox && aEventType == EEventEnterKeyPressed )
-        {
-        if( !iView->IsAlarmEditorOpen() )
-            {
-            if ( iListBox->CurrentItemIndex() == 0 ) 
-                {
-                iView->HandleCommandL( EClockNewAlarm );
-                }
-            else 
-                {
-                iView->HandleCommandL( EClockResetAlarm ); 
-                }
-            }
-        }
-
     
     __PRINTS( "CClockMainContainer::HandleListBoxEventL - Entry" );
     }
@@ -378,7 +454,8 @@ void CClockMainContainer::UpdateAlarmListL( SClkAlarmInfo& /*aAlarmInfo*/, TAlar
     // Update the listbox.
     iListBox->ScrollToMakeItemVisible( itemIndex );
     iListBox->SetCurrentItemIndexAndDraw( itemIndex );
-	
+    SetCorrectRectForNewAlarmButton();
+    iNewAlarmButton->DrawDeferred();
 	__PRINTS( "CClockMainContainer::UpdateAlarmListL - Exit" );
     }
 
@@ -393,27 +470,34 @@ void CClockMainContainer::RemoveAlarmL( TInt aIndex )
 	
     // Reinitialize the alarm list.
     iAlarmArray->InitIdList();
+    TInt count = iListBox->Model()->ItemTextArray()->MdcaCount();
     
-    if( ( KZeroAlarms <= aIndex ) &&
-        ( aIndex == iListBox->Model()->ItemTextArray()->MdcaCount() ) )
+    //SetCorrectRectForNewAlarmButton();
+    
+    // if only one item
+    if( ( KZeroAlarms == aIndex ) && ( aIndex == count ) )
+        {
+        iListBox->SetCurrentItemIndex( KZeroAlarms );
+        SetCorrectRectForNewAlarmButton();
+        }  
+    // last item when more than one exists
+    else if( ( KZeroAlarms < aIndex ) && ( aIndex == count ) )
         {
         // Last alarm in the list is deleted hence set the previous alarm.
         iListBox->ScrollToMakeItemVisible( aIndex - 1 );
         iListBox->SetCurrentItemIndexAndDraw( aIndex - 1 );
-        
-        
+        iListBox->HandleItemRemovalL();
+        DrawNow();
         }
-    else if( ( KZeroAlarms <= aIndex ) &&
-             ( KZeroAlarms < iListBox->Model()->ItemTextArray()->MdcaCount() ) )
+    // not last item
+    else if( ( KZeroAlarms <= aIndex ) && ( aIndex < count ) )
         {
         // Highlight the alarm item replacing the deleted element
         iListBox->ScrollToMakeItemVisible( aIndex );
         iListBox->SetCurrentItemIndexAndDraw( aIndex );
+        iListBox->HandleItemRemovalL();
+        DrawNow();
         }
-    
-    // Update the listbox.
-    iListBox->HandleItemRemovalL();
-    DrawNow();
 	
 	__PRINTS( "CClockMainContainer::RemoveAlarmL - Exit" );
     }
@@ -768,6 +852,8 @@ void CClockMainContainer::SizeChanged()
                                   AknLayoutScalable_Apps::popup_clock_analogue_window_cp03( KVGAPortraitVariant ).LayoutLine() );
         }
     
+    SetCorrectRectForNewAlarmButton();
+    
     // Update the skinnable clock.
     iSkinnableClock->SetExtent( skinClockRect.Rect().iTl, skinClockRect.Rect().Size() );
     iSkinnableClock->UpdateDisplay();
@@ -789,7 +875,7 @@ TInt CClockMainContainer::CountComponentControls() const
 	
 	__PRINTS( "CClockMainContainer::CountComponentControls - Exit" );
 	
-    return 2;
+    return 3;
     }
 
 // ---------------------------------------------------------
@@ -812,6 +898,14 @@ CCoeControl* CClockMainContainer::ComponentControl( TInt aIndex ) const
             }
             
         case 1:
+            {
+            __PRINTS( "CClockMainContainer::ComponentControl - Exit" );
+            
+            // Return the new alarm button.
+            return iNewAlarmButton;
+            }            
+            
+        case 2:
             {
 			__PRINTS( "CClockMainContainer::ComponentControl - Exit" );
 			
@@ -863,6 +957,13 @@ void CClockMainContainer::HandleResourceChange( TInt aType )
         {
         iSkinnableClock->HandleResourceChange( aType );
         }
+
+    // Allow the listbox to handle the resource change.
+    if( iNewAlarmButton )
+        {
+        iNewAlarmButton->HandleResourceChange( aType );
+        }
+
     // Allow the listbox to handle the resource change.
     if( iListBox )
         {
@@ -1202,7 +1303,21 @@ void CClockMainContainer::ConstructL( CClockMainView* aView, const TRect& aRect,
 	
     // Cleanup.
 	CleanupStack::Pop( iconArray );
-	
+
+    // construct the "New Alarm" button
+    iNewAlarmButton = CAknButton::NewL( NULL, NULL, NULL, NULL,
+            iAlarmArray->NewAlarmText()->Des(),iAlarmArray->NewAlarmText()->Des(), 0, 0 );
+    iNewAlarmButton->SetParent( this );
+    iNewAlarmButton->SetContainerWindowL( *this );
+    //TAknLayoutRect newAlarmButtonRect;
+    // Get the skinnable clock rect.
+    //newAlarmButtonRect.LayoutRect( listRect.Rect(),
+    //        AknLayoutScalable_Apps::main_clock2_btn_pane( layoutOrientation  ).LayoutLine() );
+    
+    //iNewAlarmButton->SetRect( newAlarmButtonRect.Rect() );
+    SetCorrectRectForNewAlarmButton();
+    iNewAlarmButton->SetObserver( this );
+    iNewAlarmButton->ActivateL();
     // Add the icon for DST indicator.
     AknsUtils::CreateColorIconL( AknsUtils::SkinInstance(),
                                  KAknsIIDQgnIndiDstAdd,
@@ -1479,4 +1594,80 @@ TBool CClockMainContainer::GetAutoTimeUpdateState() const
         return timeUpdateOn;
 }
 
+void CClockMainContainer::HandleControlEventL( CCoeControl* aControl,
+            TCoeEvent aEventType )
+    {
+    if ( aControl == iNewAlarmButton && aEventType == MCoeControlObserver::EEventStateChanged )
+        {
+        iView->HandleCommandL( EClockNewAlarm );
+        }
+    }
+
+void CClockMainContainer::SetCorrectRectForNewAlarmButton()
+    {
+    if( iNewAlarmButton )
+        {
+        TRect paneRect = this->Rect();
+        TAknLayoutRect newAlarmButtonRect;
+        TAknLayoutRect mainRect;
+        TInt displayOrientation( Layout_Meta_Data::IsLandscapeOrientation() ? 1 : 0 );
+        // Get the layout for the main rect.
+        mainRect.LayoutRect( paneRect,
+                AknLayoutScalable_Apps::main_clock2_pane().LayoutLine() );
+        if( displayOrientation )
+            {
+            // landscape
+            TInt alarmCount( 0 );
+            if( iListBox )
+                {
+                alarmCount = iListBox->Model()->ItemTextArray()->MdcaCount();
+                }
+            if( alarmCount > 0 )
+                {
+            if( iListBox )
+                {
+                iListBox->MakeVisible( ETrue );
+                }
+                // landscape if not empty alarm list
+                newAlarmButtonRect.LayoutRect( mainRect.Rect(),
+                        AknLayoutScalable_Apps::main_clock2_btn_pane( displayOrientation ).LayoutLine() );
+                }
+            else
+                {
+                // landscape if empty alarm list
+                if( iListBox )
+                    {
+                    iListBox->MakeVisible( EFalse );
+                    }
+                newAlarmButtonRect.LayoutRect( mainRect.Rect(),
+                        AknLayoutScalable_Apps::main_clock2_btn_pane_cp01( displayOrientation ).LayoutLine() );
+                }
+            }
+        else
+            {
+            // portrait
+            if( iListBox )
+                {
+                iListBox->MakeVisible( ETrue );
+                }
+            newAlarmButtonRect.LayoutRect( mainRect.Rect(),
+                    AknLayoutScalable_Apps::main_clock2_btn_pane( displayOrientation ).LayoutLine() );
+            }
+        iNewAlarmButton->SetRect( newAlarmButtonRect.Rect() );
+        }
+
+    }
+
+void CClockMainContainer::SwitchClockTypeL()
+    {
+    TRect skinClockRect = iSkinnableClock->Rect();
+    delete iSkinnableClock;
+    iSkinnableClock = NULL;
+    // Construct the skinnable clock.
+    iSkinnableClock = CAknSkinnableClock::NewL( this, ETrue, EFalse );
+    // Set the size of the clock.
+    iSkinnableClock->SetExtent( skinClockRect.iTl, skinClockRect.Size() );
+    iSkinnableClock->ActivateL();
+    iSkinnableClock->DrawDeferred();
+    }
 // End of file

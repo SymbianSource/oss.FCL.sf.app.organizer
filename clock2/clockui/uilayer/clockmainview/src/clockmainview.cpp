@@ -26,6 +26,7 @@
 #include <vtzrules.h>
 #include <clockalarmeditor.h>
 #include <hlplch.h>
+#include <touchfeedback.h>
 
 // User includes
 #include "clockmainview.h"
@@ -228,6 +229,73 @@ void CClockMainView::SetNewAlarmL()
     }
 
 // ---------------------------------------------------------
+//papercut clock2 Remove_Snooze Start - rajender
+// CClockMainView::RemoveSnoozeL
+// rest of the details are commented in the header
+// ---------------------------------------------------------
+//
+void CClockMainView::RemoveSnoozeL()
+    {  
+    __PRINTS( "CClockMainView::RemoveSnoozeL - Entry" );       
+    // First get the index of the selected item in the list.
+    TInt itemIndex( iContainer->ListBox()->CurrentItemIndex() );
+    
+    if( KErrNone > itemIndex )
+        {
+        __PRINTS( "CClockMainView::RemoveSnoozeL - Exit" );
+        return;
+        }
+
+        SClkAlarmInfo alarmInfo;
+        TAlarmId alarmId;
+        // Get the alarm id from alarm model.
+        iAlarmArray->GetSortedAlmIdInfo( itemIndex, alarmId, alarmInfo );
+        
+        // Delete the alarm.
+        User::LeaveIfError( iAlarmModel->AlarmRemoveSnooze( alarmId ) );
+                
+        // Update the container.
+        iContainer->ListBox()->HandleItemAdditionL();
+        
+        // Display the confirmation note to the user about alarm deletion.
+        //CAknConfirmationNote* confNote = new( ELeave ) CAknConfirmationNote;
+        //HBufC* confNoteText = StringLoader::LoadLC( R_QTN_CLOCK_SNOOZE_NOTE_REMOVED, iCoeEnv );
+        // Display the note.
+        //confNote->ExecuteLD( *confNoteText );
+        // Cleanup.
+        //CleanupStack::PopAndDestroy( confNoteText );
+        
+        __PRINTS( "CClockMainView::RemoveSnoozeL - Exit" );        
+        
+    }
+
+// ---------------------------------------------------------
+// CClockMainView::RemoveAlarmL
+// rest of the details are commented in the header
+// ---------------------------------------------------------
+//
+void CClockMainView::RemoveAlarmL( TAlarmId aAlarmId )
+    {
+    __PRINTS( "CClockMainView::RemoveAlarmL - Entry" );
+    
+    // First get the index of the selected item in the list.
+    TInt itemIndex( iAlarmArray->ListBoxIndex( aAlarmId ) );
+    
+    if( KErrNone > itemIndex )
+        {
+        __PRINTS( "CClockMainView::RemoveAlarmL - Exit" );
+        
+        return;
+        }
+        // Delete the alarm.
+        User::LeaveIfError( iAlarmModel->DeleteClockAlarm( aAlarmId ) );
+        // Update the container.
+        iContainer->RemoveAlarmL( itemIndex );
+        
+    __PRINTS( "CClockMainView::RemoveAlarmL - Exit" );
+    }
+
+// ---------------------------------------------------------
 // CClockMainView::RemoveAlarmL
 // rest of the details are commented in the header
 // ---------------------------------------------------------
@@ -239,7 +307,7 @@ void CClockMainView::RemoveAlarmL()
     // First get the index of the selected item in the list.
     TInt itemIndex( iContainer->ListBox()->CurrentItemIndex() );
     
-    if( KErrNone >= itemIndex )
+    if( KErrNone > itemIndex )
         {
 		__PRINTS( "CClockMainView::RemoveAlarmL - Exit" );
 		
@@ -254,15 +322,6 @@ void CClockMainView::RemoveAlarmL()
         
         // Delete the alarm.
         User::LeaveIfError( iAlarmModel->DeleteClockAlarm( alarmId ) );
-        
-        // Display the confirmation note to the user about alarm deletion.
-        CAknConfirmationNote* confNote = new( ELeave ) CAknConfirmationNote;
-        HBufC* confNoteText = StringLoader::LoadLC( R_QTN_CLOCK_ALARM_NOTE_DELETED, iCoeEnv );
-        // Display the note.
-        confNote->ExecuteLD( *confNoteText );
-        // Cleanup.
-        CleanupStack::PopAndDestroy( confNoteText );
-        
         // Update the container.
         iContainer->RemoveAlarmL( itemIndex );
         
@@ -365,7 +424,25 @@ void CClockMainView::ResetAlarmL()
 	
 	 // Show the navigation pane again.
     appUi->MakeNavigationPaneVisible( ETrue, EClockAppMainViewId );
+
+    if(  EClockAlarmDelete == iAlarmId )
+        {
+        // Mark the alarm editor as closed.
+        iAlarmEditorOpen = EFalse;
     
+        if( alarmEditor )
+            {
+            delete alarmEditor;
+            alarmEditor = NULL;
+            }
+        __PRINTS( "CClockMainView::ResetAlarmL:EClockAlarmDelete - Exit" ); 
+        
+        // do the removing of the alarm
+        RemoveAlarmL( alarmId );
+        
+        return;
+        }    
+
     if( EClockAlarmExit == iAlarmId )
         {		
         // Mark the alarm editor as closed.
@@ -555,7 +632,15 @@ void CClockMainView::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
     clockAppUi->MakeNavigationPaneVisible( ETrue, EClockAppMainViewId );
     
     // Activate the container.
-    iContainer->ActivateL();
+    if( clockAppUi->TransitionOngoing() )
+        {
+        //clockAppUi->DoAppearTransition( iContainer );
+        iContainer->ActivateL();
+        }
+    else
+        {
+        iContainer->ActivateL();
+        }
     
 	__PRINTS( "CClockMainView::DoActivateL - Exit" );
     }
@@ -575,7 +660,11 @@ void CClockMainView::DoDeactivate()
 	
 	if( iContainer )
 		{
-	
+	    CClockAppUi* clockAppUi( static_cast< CClockAppUi* > ( AppUi() ) );
+        if( clockAppUi->TransitionOngoing() )
+            {
+            //clockAppUi->DoDisappearTransition( iContainer );
+            }
 		// First remove the container from the control stack
 		( AppUi() )->RemoveFromStack( iContainer );
 		// And then destroy it.
@@ -600,14 +689,7 @@ void CClockMainView::HandleCommandL( TInt aCommand )
 		//Single click integration
 	    case EClockSelect:
 		    {
-		    if ( iContainer->ListBox()->CurrentItemIndex() == 0 )
-		        {
-		        SetNewAlarmL(); 
-		        }
-		    else
-		        {
-		        ResetAlarmL(); 
-		        } 
+		    ResetAlarmL();
 		    }
 		    break; 
 
@@ -645,7 +727,18 @@ void CClockMainView::HandleCommandL( TInt aCommand )
 		    RemoveAlarmL();
 		    }
 		    break;
-		    
+		case EClockRemoveSnooze:
+		    {
+		    // Remove snooze on the selected alarm
+		    RemoveSnoozeL();
+		    }
+		    break;
+	      case EClockSwitchClockType:
+            {
+            // Switches clock type
+            SwitchClockTypeL();
+            }
+            break;
 		case EClockSettings:
 		    {
 		    // Let the appui handle the command.
@@ -705,7 +798,14 @@ void CClockMainView::HandleUpdateL( TInt /*aReason*/ )
         if( KErrNotFound == currentlyFocussedItem ) 
             {
             TInt itemCount = iContainer->ListBox()->Model()->ItemTextArray()->MdcaCount();
-        	iContainer->ListBox()->SetCurrentItemIndexAndDraw( itemCount -1 );
+			if( itemCount > 0 )
+                {
+                iContainer->ListBox()->SetCurrentItemIndexAndDraw( itemCount -1 );
+                }
+            else
+                {
+                iContainer->ListBox()->SetCurrentItemIndexAndDraw( KZeroAlarms );
+                }
         	
         	
             }    
@@ -741,16 +841,17 @@ void CClockMainView::DynInitMenuPaneL( TInt aResourceId, CEikMenuPane* aMenuPane
 
 	
     TInt alarmCount = iAlarmArray->MdcaCount();
+    TBool deleteRemoveSnooze( EFalse );
 
-    // There are no alarms set or the current focussed listitem is "New Alarm" then remove alarm specific options 
-    if( KZeroAlarms >= alarmCount || ( KErrNone == iContainer->ListBox()->CurrentItemIndex() ) )
+    // There are no alarms set 
+    if( KZeroAlarms >= alarmCount )
         {
         // There are no alarms set. Remove the irrelevant options from the menu.
-        aMenuPane->DeleteMenuItem( EClockNewAlarm );
         aMenuPane->DeleteMenuItem( EClockResetAlarm );
         aMenuPane->DeleteMenuItem( EClockRemoveAlarm );
         aMenuPane->DeleteMenuItem( EClockActivateAlarm );           
         aMenuPane->DeleteMenuItem( EClockDeactivateAlarm );                                 
+        deleteRemoveSnooze = ETrue;
         }
     else
         {
@@ -773,16 +874,26 @@ void CClockMainView::DynInitMenuPaneL( TInt aResourceId, CEikMenuPane* aMenuPane
                 {
                 // Alarm is not recurring. Remove the deactivate option from the menu.
                 aMenuPane->DeleteMenuItem( EClockDeactivateAlarm ); 
+                // no snooze removing needed for not recurring
+                deleteRemoveSnooze = ETrue;
+                }
+            // if the alarm is not snoozed, Remove the 'Remove snooze' option
+            if (alarmInfo.iState != EAlarmStateSnoozed )
+                {
+                deleteRemoveSnooze = ETrue;
                 }
             }
         else        
             {
             // Alarm is already inactive. Remove the deactivate option from the menu. 
             aMenuPane->DeleteMenuItem( EClockDeactivateAlarm );
+            deleteRemoveSnooze = ETrue;
             }
         }
-
-   
+       if( deleteRemoveSnooze )
+           {
+           aMenuPane->DeleteMenuItem( EClockRemoveSnooze );
+           }
 		
 	__PRINTS( "CClockMainView::DynInitMenuPaneL - Exit" );
     }
@@ -1229,6 +1340,29 @@ TBool CClockMainView::CheckForDstChangesL()
     __PRINTS( "CClockAlarmEditorImpl::CheckForDstChangesL - Exit" );
 
     return returnValue;
+    }
+
+void CClockMainView::GiveVibes()
+    {
+    CClockAppUi* clockAppUi( static_cast< CClockAppUi* > ( AppUi() ) );
+    if ( clockAppUi->GetFeedback() &&
+            clockAppUi->GetFeedback()->TouchFeedbackSupported() )
+        {
+        clockAppUi->GetFeedback()->InstantFeedback( ETouchFeedbackBasic );
+        }    
+    }
+
+void CClockMainView::SwitchClockTypeL()
+    {
+    TLocale phoneLocale;
+    // Set the new clock format with the locale.
+    phoneLocale.SetClockFormat( ( EClockAnalog == phoneLocale.ClockFormat() )
+            ? EClockDigital : EClockAnalog );
+    phoneLocale.Set();
+    if( iContainer )
+        {
+        iContainer->SwitchClockTypeL();
+        }
     }
 
 // End of file

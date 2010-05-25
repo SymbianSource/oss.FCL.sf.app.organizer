@@ -30,8 +30,7 @@
 
 // Constants
 const TInt KTimeStringLength( 25 );
-const TInt KFirstAlarmIndex( 1 );
-const TInt KNewAlarmIndex( 0 );
+const TInt KFirstAlarmIndex( 0 );
 
 // Literals
 _LIT( KFieldSeparator, "\t" );
@@ -151,35 +150,6 @@ TInt CClockAlarmArray::MdcaCount() const
 TPtrC16 CClockAlarmArray::MdcaPoint( TInt aIndex ) const
     {
 	__PRINTS( "CClockAlarmArray::MdcaPoint - Entry" );
-	
-    // Set "New Alarm" as the first index of the listitem.
-    if( KNewAlarmIndex == aIndex )
-        {
-        iListBoxEntry->Des().Zero();
-		
-		TPtr listEntryPtr = iListBoxEntry->Des();		      
-        
-        listEntryPtr.Append( KFieldSeparator );    
-           
-		//Single click integration
-        listEntryPtr.Append( iNewAlarmText->Des() );
-
-        listEntryPtr.Append( KFieldSeparator );
-        
-        
-        listEntryPtr.Append( KFieldSeparator );
-    
-        listEntryPtr.AppendNum( EBlankIconIndex );
-    
-        listEntryPtr.Append( KFieldSeparator );
-    
-        listEntryPtr.AppendNum( EBlankIconIndex );
-        
-        __PRINTS( "CClockAlarmArray::MdcaPoint - Exit" );
-        
-        return listEntryPtr;
-        }
-
     SClkAlarmInfo alarmInfo;
     TBuf< KTimeStringLength > timeString;
     TAlarmId alarmId;
@@ -258,13 +228,13 @@ TPtrC16 CClockAlarmArray::MdcaPoint( TInt aIndex ) const
             
         case EAlarmRepeatDefintionRepeatDaily:
             {
-            listEntryPtr.Append( ( *iOccuranceList )[ 2 ] );
+            listEntryPtr.Append( ( *iOccuranceList )[ 1 ] );
             }
             break;
             
         case EAlarmRepeatDefintionRepeatWorkday:
             {
-            listEntryPtr.Append( ( *iOccuranceList )[ 3 ]);
+            listEntryPtr.Append( ( *iOccuranceList )[ 2 ]);
             }
             break;
             
@@ -491,8 +461,6 @@ void CClockAlarmArray::InitIdList()
     // Get the ids from alarmserver.
     iAlarmModel->GetClkAlarmIds( iAlarmIdArray );
     
-    // Add a dummy index for "New Alarm" Option as first item in the Id array.
-    iAlarmIdArray.Insert( KNewAlarmIndex, KNewAlarmIndex );
     
     SClkAlarmInfo alarmInfo;      
     TInt alarmCount( iAlarmIdArray.Count() );
@@ -548,7 +516,7 @@ void CClockAlarmArray::GetSortedAlmIdInfo( TInt aIndex, TAlarmId& aAlarmId, SClk
     TInt enabledAlarmCount( GetEnabledAlarmCount() );
         
     // If info of an active alarm is needed.       
-    if( aIndex <= enabledAlarmCount )
+    if( aIndex < enabledAlarmCount )
     	{
     	GetActiveAlarmInfo( aIndex, aAlarmId , aAlarmInfo );
     	}
@@ -612,21 +580,22 @@ void CClockAlarmArray::GetActiveAlarmInfo(  TInt aIndex, TAlarmId& aAlarmId, SCl
     iAlarmModel->GetClkAlarmIds( alarmIdArray );
     
     TInt alarmIdCount( alarmIdArray.Count() );
-    TInt alarmIndex( NULL );
+    TInt alarmIndex( 0 );
         
-	for( TInt index( NULL ); index < alarmIdCount; index++ )
+	for( TInt index( 0 ); index < alarmIdCount; index++ )
 	    {
 	    // Get information of each alarm.
 	    SClkAlarmInfo alarmInfo;
 	    TInt errorValue( iAlarmModel->ClockAlarmInfo( alarmIdArray[ index ], alarmInfo ) );
 	    
-	    if( ( KErrNone == errorValue ) &&
+	    if(  !( ( KErrNone == errorValue ) &&
 	        ( EAlarmStateInPreparation != alarmInfo.iState &&
 	          EAlarmStateNotified != alarmInfo.iState &&
-	          EAlarmStatusEnabled == alarmInfo.iStatus ) )
+	          EAlarmStatusEnabled == alarmInfo.iStatus ) ) )
 	        {
-	        alarmIndex++;
+	        continue;
 	        }
+	    
 	    if( aIndex == alarmIndex )
 	        {
 	        // We have a match, return the values.
@@ -637,8 +606,9 @@ void CClockAlarmArray::GetActiveAlarmInfo(  TInt aIndex, TAlarmId& aAlarmId, SCl
 	        // Break the loop.
 	        return;
 	        }
-	     }
-   	  }
+	    alarmIndex++;
+	    }
+   	}
     
 // ---------------------------------------------------------
 // CClockAlarmArray::GetInActiveAlarmInfo
@@ -655,19 +625,19 @@ void CClockAlarmArray::GetInActiveAlarmInfo(  TInt aIndex, TAlarmId& aAlarmId, S
 	
     // Get the alarms which are enabled and active.
     TInt enabledAlarmCount = GetEnabledAlarmCount();
-
-    for( TInt index( NULL ); index < alarmIdCount; index++ )
+    
+    for( TInt index( 0 ); index < alarmIdCount; index++ )
         {
         // Get information of each alarm.
         SClkAlarmInfo alarmInfo;
         TInt errorValue( iAlarmModel->ClockAlarmInfo( alarmIdArray[ index ], alarmInfo ) );
 
-        if( ( KErrNone == errorValue ) &&
+        if( !( ( KErrNone == errorValue ) &&
             ( EAlarmStateInPreparation != alarmInfo.iState &&
               EAlarmStateNotified != alarmInfo.iState &&
-              EAlarmStatusEnabled != alarmInfo.iStatus ) )
+              EAlarmStatusEnabled != alarmInfo.iStatus ) ) )
             {
-            alarmIndex++;
+            continue;
             }
         // Disabled alarms are always indexed after the enabled alarms.
         if( ( enabledAlarmCount + alarmIndex ) == aIndex )
@@ -679,6 +649,7 @@ void CClockAlarmArray::GetInActiveAlarmInfo(  TInt aIndex, TAlarmId& aAlarmId, S
             // Break the loop.
             return;
             }
+        alarmIndex++;
         }
    	 }
     
@@ -758,4 +729,8 @@ TInt CClockAlarmArray::Power( TInt aNum ) const
     return returnValue;
     }
 
+HBufC* CClockAlarmArray::NewAlarmText() const
+        {
+        return iNewAlarmText;
+        }
 // End of file

@@ -38,6 +38,7 @@
 #include <centralrepository.h>
 #include <CommonUiInternalCRKeys.h>
 #include <akntitle.h>
+#include <touchfeedback.h>
 
 #include <NpdLib.rsg>
 #include "NpdLib.hrh"
@@ -106,6 +107,7 @@ EXPORT_C CNotepadViewerDialog::~CNotepadViewerDialog()
         }
     delete iFilename;
     delete iSendUi;
+    iAutoFinder->SetItemFinderObserverL (0);
     delete iAutoFinder;
     delete iFindMenu;
     if( iNotifier )
@@ -234,7 +236,7 @@ EXPORT_C void CNotepadViewerDialog::LoadFileL()
     iEditor->SetAmountToFormat(iEditor->Text()->DocumentLength());
     iEditor->HandleTextChangedL();
     iAutoFinder->SetEditor((CEikRichTextEditor**)&iEditor);
-
+    iAutoFinder->SetItemFinderObserverL( this );
     RefreshTitleL();
     }
 
@@ -252,7 +254,7 @@ EXPORT_C void CNotepadViewerDialog::LoadFileL(RFile& aFile)
     iEditor->SetAmountToFormat(iEditor->Text()->DocumentLength()); 
     iEditor->HandleTextChangedL();
     iAutoFinder->SetEditor((CEikRichTextEditor**)&iEditor);
-
+    iAutoFinder->SetItemFinderObserverL( this );
     RefreshTitleL();
     if( error != KErrNone)
         {
@@ -363,6 +365,7 @@ TBool CNotepadViewerDialog::OkToExitL( TInt aButtonId )
         case EAknSoftkeyContextOptions:
 	   		{
 	   		iFlags |= ENotepadMenuByOkKey;
+	   		iFlags &= ~EMenuByItemActication;
 	   		DisplayMenuL();
 	   		isOk= EFalse;
 	   		}
@@ -377,6 +380,7 @@ TBool CNotepadViewerDialog::OkToExitL( TInt aButtonId )
         case EAknSoftkeyOptions:
              iTaskSwapperFlag = ETrue;
         default:
+            iFlags &= ~EMenuByItemActication;
             isOk = CAknDialog::OkToExitL(aButtonId);
             break;
         }
@@ -530,7 +534,9 @@ void CNotepadViewerDialog::ActivateL()
         iEditor->SetAmountToFormat(iContent.Length()); // Will ensure first Format in SetTextL is in correct mode
         iEditor->HandleTextChangedL();
         iAutoFinder->SetEditor((CEikRichTextEditor**)&iEditor);
+        iAutoFinder->SetItemFinderObserverL( this );
         RefreshTitleL();
+        iEditor->EnableKineticScrollingL( ETrue );
         }
     }
 
@@ -577,6 +583,17 @@ TKeyResponse CNotepadViewerDialog::OfferKeyEventL(
  
     return keyResponse;
     }
+void CNotepadViewerDialog::HandleFindItemEventL(
+                const CItemFinder::CFindItemExt& aItem,
+                MAknItemFinderObserver::TEventFlag aEvent,
+                TUint aFlags)
+    {
+    if ( MAknItemFinderObserver::EPointerEvent == aEvent )
+        {
+        iFlags |= ENotepadMenuByOkKey;
+        }
+    iFlags |= EMenuByItemActication;
+    }
 // -----------------------------------------------------------------------------
 // CNotepadViewerDialog::HandleDialogPointerEventL
 // from CoeControl
@@ -588,17 +605,40 @@ void CNotepadViewerDialog::HandleDialogPointerEventL( const TPointerEvent& aPoin
         {
         return;
         }
-	 
-    if( aPointerEvent.iType == TPointerEvent::EButton1Up ) 
-        {
-        TRect rect = iEditor->Rect();  
-        if ( !iAutoFinder->ItemWasTappedL( aPointerEvent.iPosition - rect.iTl ) )
-            {
-            return;
-            }
-        
-        DisplayMenuL();
-        }
+    if( CItemFinder::ENoneSelected == iAutoFinder->CurrentItemExt().iItemType )
+	{
+	// when you selected is not item, return
+	return;
+	}
+    MTouchFeedback* feedback = MTouchFeedback::Instance();
+    TTouchLogicalFeedback fbLogicalType;
+    TTouchFeedbackType fbType;
+    switch( aPointerEvent.iType )
+    	{
+    	case TPointerEvent::EButton1Down:
+    		{
+    		fbLogicalType = ETouchFeedbackBasic;
+    		fbType = TTouchFeedbackType( ETouchFeedbackAudio|ETouchFeedbackVibra );
+    		}
+    		break;
+    	case TPointerEvent::EButton1Up:
+    		{
+    		fbLogicalType = ETouchFeedbackIncreasingPopUp;
+    		fbType = ETouchFeedbackVibra;
+    		}
+    		break;
+    	default:
+    		return;
+    	}
+    if ( feedback )
+    	{
+    	feedback->InstantFeedback( this,
+    			fbLogicalType, fbType, TPointerEvent() );
+    	if( ETouchFeedbackVibra == fbType )
+    		{
+    		DisplayMenuL();
+    		}
+    	}
     }
 
 // -----------------------------------------------------------------------------
@@ -689,7 +729,24 @@ void CNotepadViewerDialog::ProcessCommandL(TInt aCommandId)
             {
             if ( iFindMenu->CommandIsValidL(aCommandId) ) // can't really leave
                 {
+                TBool selectionVisibility ( ETrue );
+                if ( aCommandId == EFindItemCmdCopy && iAutoFinder && iEditor && iEditor->TextView() )
+                    {
+                    selectionVisibility = iEditor->TextView()->SelectionVisible();
+                    iEditor->TextView()->SetSelectionVisibilityL( EFalse );
+                    const CItemFinder::CFindItemExt& item = iAutoFinder->CurrentItemExt();
+                    iEditor->SetSelectionL( item.iStart, item.iEnd + 1 );
+                    }
+
                 iFindMenu->HandleItemFinderCommandL(aCommandId);
+
+                if ( aCommandId == EFindItemCmdCopy && iAutoFinder && iEditor && iEditor->TextView() )
+                    {
+                    iEditor->TextView()->SetSelectionVisibilityL( selectionVisibility );
+                    iEditor->ClearSelectionL();
+                    iEditor->DrawDeferred(); // sometimes editor does not update itself
+                    }
+
                 return;
                 }
             CNotepadDialogBase::ProcessCommandL(aCommandId);
@@ -710,6 +767,16 @@ void CNotepadViewerDialog::DynInitMenuPaneL(
     __ASSERT_DEBUG(aResourceId > 0, Panic(ENotepadLibraryPanicNoMenuResource));
     __ASSERT_DEBUG(aMenuPane, Panic(ENotepadLibraryPanicNullMenuPane));
     __ASSERT_DEBUG(iEditor, Panic(ENotepadLibraryPanicNoEdwin));
+
+    const TBool activatedByItemActication = iFlags & EMenuByItemActication;
+    if ( !activatedByItemActication && iEditor && iAutoFinder
+            && iEditor->SelectionLength() !=
+            ( iAutoFinder->CurrentItemExt().iEnd -
+              iAutoFinder->CurrentItemExt().iStart + 1 ) )
+        {
+        iAutoFinder->ResetCurrentItem(); // do not show item specific commands
+        }
+
     TInt index;
     switch ( aResourceId )
         {

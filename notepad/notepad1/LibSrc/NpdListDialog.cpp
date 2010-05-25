@@ -965,6 +965,11 @@ void CNotepadListDialog::DynInitMenuPaneL(
                 // this must after InsertSendMenuItemAfterL
                 aMenuPane->DeleteMenuItem(ENotepadCmdOpen);
                 }
+            if ( markCount >= 1  )
+                {
+                aMenuPane->SetItemSpecific( ENotepadCmdSend, EFalse );
+                aMenuPane->SetItemSpecific( ENotepadCmdDelete, EFalse );
+                }
             if ( iListBox->CurrentItemIndex() == 0 && IsNotepad() && memoCount > 0)
 				{                    
 				aMenuPane->SetItemDimmed( ENotepadCmdDelete, ETrue );				 

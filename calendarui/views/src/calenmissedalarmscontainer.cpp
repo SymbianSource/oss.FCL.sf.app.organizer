@@ -917,7 +917,9 @@ void CCalenMissedAlarmsContainer::SetContextFromMissedAlarmEntryL(TInt aIndex)
     TCalenInstanceId missedAlarm = iMissedAlarmsArray[aIndex];
             
     CCalEntry* entry = iServices.EntryViewL(missedAlarm.iColId)->FetchL( missedAlarm.iEntryLocalUid );
-    User::LeaveIfNull( entry );
+    //User::LeaveIfNull( entry );
+    if (entry)
+    	{
     CleanupStack::PushL( entry );
     
     TTime instanceTime;
@@ -933,6 +935,7 @@ void CCalenMissedAlarmsContainer::SetContextFromMissedAlarmEntryL(TInt aIndex)
     context.SetInstanceIdL( id, context.ViewId() ); 
     
     CleanupStack::PopAndDestroy( entry );
+    }
     
     TRACE_EXIT_POINT;
     }

@@ -121,8 +121,9 @@ EXPORT_C TBool CAgnCalendarInfo::Enabled() const
 EXPORT_C CDesC8Array* CAgnCalendarInfo::PropertyKeysL() const
     {
     const TInt KPropertyCount(iProperties.Count());
+    const TInt propertyCount = KPropertyCount==0 ? 1 : KPropertyCount;
     
-    CDesC8Array* propertyKeys = new(ELeave) CDesC8ArrayFlat(KPropertyCount);
+    CDesC8Array* propertyKeys = new(ELeave) CDesC8ArrayFlat(propertyCount);
     CleanupStack::PushL(propertyKeys);
     
     for (TInt i(0) ; i < KPropertyCount ; ++i)

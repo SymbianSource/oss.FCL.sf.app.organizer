@@ -70,4 +70,5 @@ EXPORTS
 	_ZTV29CClkUiMdlIntermediateObserver @ 69 NONAME ; #<VT>#
 	_ZThn4_N18CClkUiIdleObserver13HandleUpdateLEi @ 70 NONAME ; #<thunk>#
 	_ZThn4_N29CClkUiMdlIntermediateObserver13HandleUpdateLEi @ 71 NONAME ; #<thunk>#
+	_ZN16CClkUiAlarmModel17AlarmRemoveSnoozeEi @ 72 NONAME
 

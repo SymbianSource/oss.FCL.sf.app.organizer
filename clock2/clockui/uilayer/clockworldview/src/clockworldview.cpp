@@ -592,7 +592,15 @@ void CClockWorldView::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
         }
 
     // Activate the container.
-    iContainer->ActivateL();
+    if( ClockApplicationUi()->TransitionOngoing() )
+        {
+        //ClockApplicationUi()->DoAppearTransition( iContainer );
+        iContainer->ActivateL();
+        }
+    else
+        {
+        iContainer->ActivateL();
+        }
     iContainer->SetRect( ClientRect() );
     
     
@@ -937,7 +945,6 @@ void CClockWorldView::RemoveLocationL()
         return;
         }
         
-	HBufC* queryText( NULL );
     TInt currentListItem( iContainer->ListBox()->CurrentItemIndex() );
     
     // Get information about the city selected.

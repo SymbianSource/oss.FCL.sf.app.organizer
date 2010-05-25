@@ -45,13 +45,10 @@
 const TInt KZerothDay( 0 );
 const TInt KDaysInWeek( 7 );
 const TInt KFirstLine( 1 );
-const TInt KNextDayIndex( 1 );
 const TInt KRepeatOnceIndex( 0 );
-const TInt KWithIn24HoursIndex( 1 );
-const TInt KDailyIndex( 2 );
-const TInt KWorkdaysIndex( 3 );
-const TInt KWeeklyIndex( 4 );
-const TInt KCurrentDayIndex( 0 );
+const TInt KDailyIndex( 1 );
+const TInt KWorkdaysIndex( 2 );
+const TInt KWeeklyIndex( 3 );
 const TInt KMaxCharsInNote( 32 );
 const TInt KZerothRule( 0 );
 const TInt KOneMinuteInMicrosecond( 1000000 * 60 );
@@ -123,7 +120,7 @@ void CClockAlarmEditorImpl::LoadAlarmInformationL( SClkAlarmInfo& aAlarmInfo, TB
     // The Description is "Alarm" by default too.
     if( !iAlarmForEditing )
         {
-        iAlarmInfo.iRepeat = EAlarmRepeatDefintionRepeatNext24Hours;
+        iAlarmInfo.iRepeat = EAlarmRepeatDefintionRepeatOnce;
         
         // Here we have to load the default description.
         HBufC* defaultDescription = StringLoader::LoadLC( R_QTN_CLOCK_ALARM_EDITOR_DESC_DEFAULT, iCoeEnv );
@@ -188,8 +185,7 @@ void CClockAlarmEditorImpl::SetInitialCurrentLineL()
         
     // We don't display the alarm day selection item for repeated alarms of type daily, next 24 hours and
     // workdays. So when this functions is called, we check for the type and update the form accordingly.
-    if( KWithIn24HoursIndex == iOccuranceIndex ||
-        KDailyIndex == iOccuranceIndex ||
+    if( KDailyIndex == iOccuranceIndex ||
         KWorkdaysIndex == iOccuranceIndex )
         {
         DeleteAlmDayCtrlL();
@@ -246,33 +242,23 @@ TInt CClockAlarmEditorImpl::SaveFormDataL()
         case KRepeatOnceIndex:
             {
             iAlarmInfo.iRepeat = EAlarmRepeatDefintionRepeatOnce;
-            }
             break;
-            
-        case KWithIn24HoursIndex:
-            {
-            iAlarmInfo.iRepeat = EAlarmRepeatDefintionRepeatNext24Hours;
             }
-            break;
-            
         case KDailyIndex:
             {
             iAlarmInfo.iRepeat = EAlarmRepeatDefintionRepeatDaily;
-            }
             break;
-            
-        case KWeeklyIndex:
-            {
-            iAlarmInfo.iRepeat = EAlarmRepeatDefintionRepeatWeekly;
-            }
-            break;
-            
+            }        
         case KWorkdaysIndex:
             {
             iAlarmInfo.iRepeat = EAlarmRepeatDefintionRepeatWorkday;
-            }
             break;
-            
+            }                        
+        case KWeeklyIndex:
+            {
+            iAlarmInfo.iRepeat = EAlarmRepeatDefintionRepeatWeekly;
+            break;
+            }        
         default:
 			{
 			// No implementation yet.
@@ -424,8 +410,7 @@ void CClockAlarmEditorImpl::PreLayoutDynInitL()
     
     // We don't display the alarm day selection item for repeated alarms of type daily, next 24 hours and
     // workdays. So when this functions is called, we check for the type and update the form accordingly.
-    if( KWithIn24HoursIndex == iOccuranceIndex ||
-        KDailyIndex == iOccuranceIndex ||
+    if( KDailyIndex == iOccuranceIndex ||
         KWorkdaysIndex == iOccuranceIndex )
         {
         DeleteAlmDayCtrlL();
@@ -543,11 +528,7 @@ void CClockAlarmEditorImpl::DynInitMenuPaneL( TInt aResourceId, CEikMenuPane* aM
     
     // Do not show Delete option when editing an alarm.
     // Do not show Discard changes option if its a new alarm.
-    if( iAlarmForEditing )
-        {
-        aMenuPane->SetItemDimmed( EClockAlarmDelete, ETrue );
-        }
-    else
+    if( !iAlarmForEditing )
         {
         aMenuPane->SetItemDimmed( EClockAlarmDiscardChanges, ETrue );
         }
@@ -655,12 +636,6 @@ void CClockAlarmEditorImpl::HandleOccuranceCmdL()
             }
             break;
         
-        case KWithIn24HoursIndex:
-            {
-            iAlarmInfo.iRepeat = EAlarmRepeatDefintionRepeatNext24Hours;
-            }
-            break;
-        
         case KDailyIndex:
             {
             iAlarmInfo.iRepeat = EAlarmRepeatDefintionRepeatDaily;
@@ -691,8 +666,7 @@ void CClockAlarmEditorImpl::HandleOccuranceCmdL()
     
     // We don't display the alarm day selection item for repeated alarms of type daily, next 24 hours and
     // workdays. So when this functions is called, we check for the type and update the form accordingly.
-    if( KWithIn24HoursIndex == iOccuranceIndex ||
-        KDailyIndex == iOccuranceIndex ||
+    if( KDailyIndex == iOccuranceIndex ||
         KWorkdaysIndex == iOccuranceIndex )
         {
         DeleteAlmDayCtrlL();
@@ -742,13 +716,6 @@ void CClockAlarmEditorImpl::GetSelectedOccIndex()
             iOccuranceIndex = KRepeatOnceIndex;
             }
             break;
-            
-        case EAlarmRepeatDefintionRepeatNext24Hours:
-            {
-            iOccuranceIndex = KWithIn24HoursIndex;
-            }
-            break;
-
         case EAlarmRepeatDefintionRepeatDaily:
             {
             iOccuranceIndex = KDailyIndex;
@@ -985,8 +952,8 @@ void CClockAlarmEditorImpl::GetActualAlarmTime( const TTime& aHomeTime, TTime& a
     // Get the current day of the week.
     TInt currentDay( aHomeTime.DayNoInWeek() );
         
-    if( ( EAlarmRepeatDefintionRepeatOnce == iOccuranceIndex ) ||
-        ( EAlarmRepeatDefintionRepeatWeekly == iOccuranceIndex ) )
+    if( ( KRepeatOnceIndex == iOccuranceIndex ) ||
+        ( KWeeklyIndex == iOccuranceIndex ) )
         {
         TInt dateOffset( KZerothDay );
 
@@ -1013,16 +980,6 @@ void CClockAlarmEditorImpl::GetActualAlarmTime( const TTime& aHomeTime, TTime& a
             }
         aTimeFromForm += TTimeIntervalDays( dateOffset );
         }
-    else if( EAlarmRepeatDefintionRepeatNext24Hours == iOccuranceIndex )  
-        {
-        TInt dayIndex( KCurrentDayIndex );
-        if( aTimeFromForm < aHomeTime )
-            {
-            dayIndex = KNextDayIndex;   
-            }
-        aTimeFromForm += TTimeIntervalDays( dayIndex );
-        }
-    
     __PRINTS( "CClockAlarmEditorImpl::GetActualAlarmTime - Exit" );
     }
 
@@ -1341,7 +1298,6 @@ void CClockAlarmEditorImpl::DisplayRemainingTimeL()
     // Choose the appropriate Repeat type.
     switch( iAlarmInfo.iRepeat )
         {
-        case EAlarmRepeatDefintionRepeatNext24Hours:
         case EAlarmRepeatDefintionRepeatOnce:
             {
             if( oneDayDifference )

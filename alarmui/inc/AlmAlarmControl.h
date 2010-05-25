@@ -105,6 +105,11 @@ NONSHARABLE_CLASS( CAlmAlarmControl ) : public CCoeControl,
     * @since 5.0
     **/
     TBool CanSnooze();
+    /**
+    * Returns handle to alarmutils
+    * @since TB9.2
+    **/
+    CAlarmUtils* AlarmUtils() const;
  private:  // New functions
     /**
      * Alarm UI Panic.

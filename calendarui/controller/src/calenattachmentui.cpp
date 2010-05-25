@@ -441,6 +441,7 @@ TBool CCalenAttachmentUi::OkToExitL( const TDesC& aDriveAndPath, const TEntry& a
         if( KErrNone != err )
             {
             // if any error in opening file then return EFalse
+            CleanupStack::PopAndDestroy(filename);
             return EFalse;
             }
         
@@ -673,9 +674,17 @@ void CCalenAttachmentUi::AddAttachmentsToEntryL()
                             attachment->SetMimeTypeL(attachmentInfo->DataType().Des8());
                             entry->AddAttachmentL(*attachment);
                             CleanupStack::Pop(attachment);
-                            }                
+                            }
+                        else
+                            {
+                            CleanupStack::PopAndDestroy(data);
+                            }                        
                         }
-                        CleanupStack::PopAndDestroy(&fileHandle);
+                    else
+                        {
+                        CleanupStack::PopAndDestroy(data);
+                        }
+                    CleanupStack::PopAndDestroy(&fileHandle);
                     }
                 }
                         
@@ -845,11 +854,11 @@ void CCalenAttachmentUi::CheckDRMStatus( const TDesC& aFileName,TBool& aProtecti
         {
         aProtection = ETrue;
         
-        //DRM protected file: can't attach the DRM protected file 
-        CAknInformationNote* note = new ( ELeave ) CAknInformationNote(ETrue);
+        //DRM protected file: can't attach the DRM protected file
         HBufC* cannotAttach = StringLoader::LoadLC( 
                 R_QTN_CALEN_INFO_CANNOT_OPEN, CCoeEnv::Static() );
-        note->ExecuteLD( *cannotAttach );
+        CAknInformationNote* note = new ( ELeave ) CAknInformationNote(ETrue);
+        note->ExecuteLD( *cannotAttach );        
         CleanupStack::PopAndDestroy( cannotAttach );
         }
     else

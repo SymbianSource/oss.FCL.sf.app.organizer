@@ -77,6 +77,15 @@ CCalenLocationUi* CCalenLocationUi::NewL( CCalenController& aController )
 CCalenLocationUi::~CCalenLocationUi()
     {
     TRACE_ENTRY_POINT;
+    if(iMapView)
+       {
+       iMapView->Cancel();
+       iMapView->ResetLandmarksToShow();
+       delete iMapView;
+       iMapView = NULL;    
+       }
+    ReleaseLandmarkResources();
+       
     if(iLocationSelector)
 	    {
 	    delete iLocationSelector;	
@@ -252,6 +261,16 @@ void CCalenLocationUi::HandleNotification(const TCalenNotification aNotification
 	    case ECalenNotifyCancelMapLaunch:
 	    	{
 	    	// Cancel any pending async requests
+	    	
+	    	if(iMapView)
+               {
+               iMapView->Cancel();
+               iMapView->ResetLandmarksToShow();
+               delete iMapView;
+               iMapView = NULL;    
+               }
+            ReleaseLandmarkResources();
+	    	            
 	    	iLocationSelector->DoCancel();
 	    	if(iProvider)
 	    	    {

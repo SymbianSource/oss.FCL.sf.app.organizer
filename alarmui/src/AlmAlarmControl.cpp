@@ -1323,4 +1323,9 @@ void CAlmAlarmControl::HandleAlmInfoCRChangeL(TUint32 /*aCount*/)
  	return iStopFromContextFw;
  }
 
-// End of File
+ CAlarmUtils* CAlmAlarmControl::AlarmUtils() const
+     {
+     return iAlarmUtils;
+     }
+ // End of File
+ 

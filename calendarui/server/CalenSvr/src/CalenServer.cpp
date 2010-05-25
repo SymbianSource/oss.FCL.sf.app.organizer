@@ -53,8 +53,7 @@ const TInt KBuffLength = 128;
 const TInt KComma( ',' );
 
 _LIT(KPersonal,"Personal");
-_LIT(KFamily,"Family");
-_LIT(KFriends,"Friends");
+
 
 // ================= MEMBER FUNCTIONS =======================
 //
@@ -382,15 +381,7 @@ void CCalenServer::ReadCalendarNamesFromResourceL(CDesC16ArrayFlat& aCalendarNam
         aCalendarNames.AppendL( personalBuffer->Des() );    
        CleanupStack::PopAndDestroy( personalBuffer );
        
-    // famliy
-        HBufC* familyBuffer = KFamily().AllocLC();    
-       aCalendarNames.AppendL( familyBuffer->Des() );    
-       CleanupStack::PopAndDestroy( familyBuffer );
-       
-    //friends
-       HBufC* friendBuffer = KFriends().AllocLC();    
-      aCalendarNames.AppendL( friendBuffer->Des() );    
-      CleanupStack::PopAndDestroy( friendBuffer );
+   
    
     
     TRACE_EXIT_POINT;

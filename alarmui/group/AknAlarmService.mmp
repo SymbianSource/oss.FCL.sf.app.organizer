@@ -88,6 +88,9 @@ LIBRARY         remconinterfacebase.lib
 LIBRARY         remconextensionapi.lib
 LIBRARY         platformenv.lib
 LIBRARY         featmgr.lib
+LIBRARY         ws32.lib
+
+
 //MPIN-73VCR2
 // For cover display support:
 LIBRARY eikdlg.lib

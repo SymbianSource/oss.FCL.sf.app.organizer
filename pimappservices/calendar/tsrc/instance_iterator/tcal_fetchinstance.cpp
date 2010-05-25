@@ -435,8 +435,24 @@ void CInstanceIteratorTestManager::TestFetchRepeatingTodoInstanceL()
 	test.Printf(_L("test the instance time"));
 	test(repeatingTodoInstance1->Time().TimeLocalL() == instanceTime1.TimeLocalL());
 	test.Printf(_L("test the entry start and end times"));
-	test(repeatingTodoInstance1->Entry().StartTimeL().TimeLocalL() == startTime.TimeLocalL());
-	test(repeatingTodoInstance1->Entry().EndTimeL().TimeLocalL() == endTime.TimeLocalL());
+	
+	// Modified Start-> if DtStart date is equal to end date then align start date with DtStart date and 
+	// end date = end date + duration of the entry. 
+	// Thus moving the time window based on DtStart date   
+	test(repeatingTodoInstance1->Entry().StartTimeL().TimeLocalL() == endTime.TimeLocalL()); 
+	
+	TTime newEndTime(endTime.TimeLocalL());
+	TTimeIntervalMinutes deltaMinutes;
+	endTime.TimeLocalL().MinutesFrom(startTime.TimeLocalL(), deltaMinutes);
+	newEndTime += deltaMinutes;
+	    
+	TTimeIntervalMicroSeconds deltaMicroSeconds = 
+	        endTime.TimeLocalL().MicroSecondsFrom(startTime.TimeLocalL() + deltaMinutes);
+	newEndTime += deltaMicroSeconds;
+	
+	test(repeatingTodoInstance1->Entry().EndTimeL().TimeLocalL() == newEndTime);
+	//Modified End<-
+	
 	test.Printf(_L("fetch the description"));
 	test(repeatingTodoInstance1->Entry().DescriptionL().Compare(KEntryDescription) == 0);
 	CleanupStack::PopAndDestroy(repeatingTodoInstance1);
@@ -448,8 +464,24 @@ void CInstanceIteratorTestManager::TestFetchRepeatingTodoInstanceL()
 	test.Printf(_L("test the instance time"));
 	test(repeatingTodoInstance2->Time().TimeLocalL() == instanceTime2.TimeLocalL());
 	test.Printf(_L("test the entry start and end times"));
-	test(repeatingTodoInstance2->Entry().StartTimeL().TimeLocalL() == startTime.TimeLocalL());
-	test(repeatingTodoInstance2->Entry().EndTimeL().TimeLocalL() == endTime.TimeLocalL());
+	
+	// Modified Start-> if DtStart date is equal to end date then align start date with DtStart date and 
+    // end date = end date + duration of the entry. 
+    // Thus moving the time window based on DtStart date   
+    test(repeatingTodoInstance2->Entry().StartTimeL().TimeLocalL() == endTime.TimeLocalL()); 
+    
+    newEndTime = endTime.TimeLocalL();
+    
+    endTime.TimeLocalL().MinutesFrom(startTime.TimeLocalL(), deltaMinutes);
+    newEndTime += deltaMinutes;
+        
+    deltaMicroSeconds = 
+            endTime.TimeLocalL().MicroSecondsFrom(startTime.TimeLocalL() + deltaMinutes);
+    newEndTime += deltaMicroSeconds;
+    
+    test(repeatingTodoInstance2->Entry().EndTimeL().TimeLocalL() == newEndTime);
+    //Modified End<-
+    
 	test.Printf(_L("fetch the description"));
 	test(repeatingTodoInstance2->Entry().DescriptionL().Compare(KEntryDescription) == 0);
 	CleanupStack::PopAndDestroy(repeatingTodoInstance2);
@@ -461,8 +493,24 @@ void CInstanceIteratorTestManager::TestFetchRepeatingTodoInstanceL()
 	test.Printf(_L("test the instance time"));
 	test(repeatingTodoInstance3->Time().TimeLocalL() == instanceTime3.TimeLocalL());
 	test.Printf(_L("test the entry start and end times"));
-	test(repeatingTodoInstance3->Entry().StartTimeL().TimeLocalL() == startTime.TimeLocalL());
-	test(repeatingTodoInstance3->Entry().EndTimeL().TimeLocalL() == endTime.TimeLocalL());
+	
+	// Modified Start-> if DtStart date is equal to end date then align start date with DtStart date and 
+    // end date = end date + duration of the entry. 
+    // Thus moving the time window based on DtStart date   
+    test(repeatingTodoInstance3->Entry().StartTimeL().TimeLocalL() == endTime.TimeLocalL()); 
+    
+    newEndTime = endTime.TimeLocalL();
+    
+    endTime.TimeLocalL().MinutesFrom(startTime.TimeLocalL(), deltaMinutes);
+    newEndTime += deltaMinutes;
+        
+    deltaMicroSeconds = 
+            endTime.TimeLocalL().MicroSecondsFrom(startTime.TimeLocalL() + deltaMinutes);
+    newEndTime += deltaMicroSeconds;
+    
+    test(repeatingTodoInstance3->Entry().EndTimeL().TimeLocalL() == newEndTime);
+    //Modified End<-
+    
 	test.Printf(_L("fetch the description"));
 	test(repeatingTodoInstance3->Entry().DescriptionL().Compare(KEntryDescription) == 0);
 	CleanupStack::PopAndDestroy(repeatingTodoInstance3);
@@ -474,8 +522,24 @@ void CInstanceIteratorTestManager::TestFetchRepeatingTodoInstanceL()
 	test.Printf(_L("test the instance time"));
 	test(repeatingTodoInstance4->Time().TimeLocalL() == instanceTime4.TimeLocalL());
 	test.Printf(_L("test the entry start and end times"));
-	test(repeatingTodoInstance4->Entry().StartTimeL().TimeLocalL() == startTime.TimeLocalL());
-	test(repeatingTodoInstance4->Entry().EndTimeL().TimeLocalL() == endTime.TimeLocalL());
+	
+	// Modified Start-> if DtStart date is equal to end date then align start date with DtStart date and 
+    // end date = end date + duration of the entry. 
+    // Thus moving the time window based on DtStart date   
+    test(repeatingTodoInstance4->Entry().StartTimeL().TimeLocalL() == endTime.TimeLocalL()); 
+    
+    newEndTime = endTime.TimeLocalL();
+    
+    endTime.TimeLocalL().MinutesFrom(startTime.TimeLocalL(), deltaMinutes);
+    newEndTime += deltaMinutes;
+        
+    deltaMicroSeconds = 
+            endTime.TimeLocalL().MicroSecondsFrom(startTime.TimeLocalL() + deltaMinutes);
+    newEndTime += deltaMicroSeconds;
+    
+    test(repeatingTodoInstance4->Entry().EndTimeL().TimeLocalL() == newEndTime);
+    //Modified End<-
+    
 	test.Printf(_L("fetch the description"));
 	test(repeatingTodoInstance4->Entry().DescriptionL().Compare(KEntryDescription) == 0);
 	CleanupStack::PopAndDestroy(repeatingTodoInstance4);
@@ -486,8 +550,24 @@ void CInstanceIteratorTestManager::TestFetchRepeatingTodoInstanceL()
 	test.Printf(_L("test the instance time"));
 	test(rDateInstance->Time().TimeLocalL() == rDateTime.TimeLocalL());
 	test.Printf(_L("test the entry start and end times"));
-	test(rDateInstance->Entry().StartTimeL().TimeLocalL() == startTime.TimeLocalL());
-	test(rDateInstance->Entry().EndTimeL().TimeLocalL() == endTime.TimeLocalL());
+	
+	// Modified Start-> if DtStart date is equal to end date then align start date with DtStart date and 
+    // end date = end date + duration of the entry. 
+    // Thus moving the time window based on DtStart date   
+    test(rDateInstance->Entry().StartTimeL().TimeLocalL() == endTime.TimeLocalL()); 
+    
+    newEndTime = endTime.TimeLocalL();
+    
+    endTime.TimeLocalL().MinutesFrom(startTime.TimeLocalL(), deltaMinutes);
+    newEndTime += deltaMinutes;
+        
+    deltaMicroSeconds = 
+            endTime.TimeLocalL().MicroSecondsFrom(startTime.TimeLocalL() + deltaMinutes);
+    newEndTime += deltaMicroSeconds;
+    
+    test(rDateInstance->Entry().EndTimeL().TimeLocalL() == newEndTime);
+    //Modified End<-
+    
 	test.Printf(_L("fetch the description"));
 	test(rDateInstance->Entry().DescriptionL().Compare(KEntryDescription) == 0);
 	CleanupStack::PopAndDestroy(rDateInstance);

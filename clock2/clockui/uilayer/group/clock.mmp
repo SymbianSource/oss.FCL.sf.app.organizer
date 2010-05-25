@@ -164,7 +164,9 @@ LIBRARY				psmclient.lib
 LIBRARY				hlplch.lib
 LIBRARY				iaupdateapi.lib
 LIBRARY				featmgr.lib
-
-LIBRARY           thumbnailmanager.lib
+LIBRARY             		gfxtrans.lib // effect manager
+LIBRARY             		thumbnailmanager.lib
+LIBRARY       			ws32.lib
+LIBRARY             		touchfeedback.lib
 
 // End of file

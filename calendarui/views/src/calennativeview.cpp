@@ -707,6 +707,7 @@ void CCalenNativeView::CommonConstructL( TInt aViewResource )
     notificationArray.Append(ECalenNotifyStopAlarm);
 	notificationArray.Append(ECalenNotifyDeleteFailed);
 	notificationArray.Append(ECalenNotifyEntryDeleted);
+	notificationArray.Append(ECalenNotifyResourceChanged);
 	
     iServices.RegisterForNotificationsL( this,notificationArray);
     
@@ -1164,6 +1165,19 @@ void CCalenNativeView::HandleNotification(const TCalenNotification aNotification
                 }
             }
             break;
+		case ECalenNotifyResourceChanged:
+		    {
+		    if(iContainer )
+		        {
+                CAknAppUi* Appui = (CAknAppUi*)CEikonEnv::Static()->EikAppUi();
+                //handle this event when the app is in background
+                if(!Appui->IsForeground())
+                    {
+                    iContainer->HandleResourceChange(KEikDynamicLayoutVariantSwitch);
+                    }
+		        }
+		    }
+		    break;
         default:
             ASSERT( 0 ); // should never get here
             break;

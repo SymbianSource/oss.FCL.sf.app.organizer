@@ -43,4 +43,5 @@ EXPORTS
 	?SetModelObserver@CClkUiModelBase@@QAEXPAVMClkModelObserver@@@Z @ 42 NONAME ; void CClkUiModelBase::SetModelObserver(class MClkModelObserver *)
 	?Start@CClkUiModelBase@@QAEXXZ @ 43 NONAME ; void CClkUiModelBase::Start(void)
 	?Stop@CClkUiModelBase@@QAEXXZ @ 44 NONAME ; void CClkUiModelBase::Stop(void)
+	?AlarmRemoveSnooze@CClkUiAlarmModel@@QAEHH@Z @ 45 NONAME ; int CClkUiAlarmModel::AlarmRemoveSnooze(int)
 

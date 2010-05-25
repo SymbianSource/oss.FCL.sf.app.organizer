@@ -32,6 +32,7 @@
 #include "alarmcontextfwsupport.h"
 #endif // RD_ALMALERT__SENSOR_SUPPORT
 
+#include <w32std.h>
 #include <almconst.h>
 #include <eikenv.h>
 #include <AknCapServer.h>
@@ -1666,6 +1667,53 @@ void CAlarmUtils::SetCalendarAlarmViewer(TBool aCalendarAlarmViewer)
 TBool CAlarmUtils::IsCalendarAlarmViewer()
     {
     return iCalendarAlarmViewer;
+    }
+
+// ---------------------------------------------------------
+// Silence the notifying alarm 
+// ---------------------------------------------------------
+//
+void CAlarmUtils::DoSilence()
+    {
+    TRACE_ENTRY_POINT;
+    
+    // silence only if snoozing is possible
+    // this way user must hear the last "call"
+    if( CanSnooze() )
+        {
+        delete iAlarmPlayer;
+        iAlarmPlayer = NULL;
+        SetBackLight( EFalse );
+        
+        if( IsCalendarAlarm() )
+            {
+    
+            // calendar alarm needs extra handling due to having stop - silence
+            //simulate right softkey pressing
+            RWsSession wsSession=CCoeEnv::Static()->WsSession();
+            TKeyEvent keyEvent;
+            keyEvent.iCode = EKeyCBA2;  
+            keyEvent.iScanCode = EStdKeyDevice1;
+            keyEvent.iModifiers = 0;
+            keyEvent.iRepeats = 0;
+            wsSession.SimulateKeyEvent( keyEvent );
+            wsSession.Flush();
+            }
+        // clockalarm
+        else
+            {
+            StartAutoSnoozeTimer();
+            }
+    
+        #if defined( RD_ALMALERT__SENSOR_SUPPORT )
+        // notify the result through the context framework
+        if( iCFSupport )
+            {
+            PIM_TRAPD_ASSERT( iCFSupport->PublishAlarmResultL( EResultAlarmSilenced ); )
+            }
+        #endif // RD_ALMALERT__SENSOR_SUPPORT
+        }
+    TRACE_EXIT_POINT;     
     }
 
 // End of File

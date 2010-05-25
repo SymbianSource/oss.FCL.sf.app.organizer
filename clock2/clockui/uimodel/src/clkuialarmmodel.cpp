@@ -101,6 +101,32 @@ EXPORT_C TInt CClkUiAlarmModel::DeleteClockAlarm( TAlarmId aAlarmId )
     }
 
 // ---------------------------------------------------------
+// CClkUiAlarmModel::StopClockAlarm
+// rest of the details are commented in the header
+// ---------------------------------------------------------
+//
+EXPORT_C TInt CClkUiAlarmModel::AlarmRemoveSnooze ( TAlarmId aAlarmId )
+    {
+
+    TInt returnVal( KErrNone );
+    SClkAlarmInfo alarmInfo;
+    returnVal = ClockAlarmInfo( aAlarmId, alarmInfo);
+    if ( returnVal != KErrNone )
+        {
+        return returnVal;
+        }
+    returnVal = iAlarmSrvSes.AlarmDelete( aAlarmId );
+    if ( returnVal != KErrNone )
+        {
+        return returnVal;
+        }
+    alarmInfo.iState = EAlarmStateInPreparation;
+    alarmInfo.iAlarmTime = alarmInfo.iOrigExpiryTime;
+    return ClockAlarmSet( alarmInfo );    
+    
+    }
+
+// ---------------------------------------------------------
 // CClkUiAlarmModel::ClockAlarmEnable
 // rest of the details are commented in the header
 // ---------------------------------------------------------

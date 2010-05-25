@@ -36,9 +36,10 @@ class CCoeEnv;
 class CAknDoubleStyleListBox;
 
 class CClockMarqueeLabel;
+class CAknButton;
 
 // Constants
-const TInt KZeroAlarms( 1 );
+const TInt KZeroAlarms( 0 );
 
 // Class declaration
 /**
@@ -47,7 +48,8 @@ const TInt KZeroAlarms( 1 );
 * @exe clock.exe
 */
 class CClockMainContainer : public CCoeControl,
-                            public MEikListBoxObserver
+                            public MEikListBoxObserver,
+                            public MCoeControlObserver
 	{
 	public:			// Constructor and destructor
 			
@@ -103,6 +105,8 @@ class CClockMainContainer : public CCoeControl,
         * may be obtained by accessing the list box itself.
         */
         void HandleListBoxEventL( CEikListBox* aListBox, TListBoxEvent aEventType );
+        
+        void HandleControlEventL( CCoeControl* aControl, TCoeEvent aEventType );
     	
 	public:         // New functions
 	    
@@ -146,6 +150,16 @@ class CClockMainContainer : public CCoeControl,
 		* @brief Reconstructs the marquee label and prepares it for marqueeing again.
 		*/
 		void ResetMarqueeLabelL();
+
+      /**
+        * @brief Calculates correct rect and sets if ro NewAlarmButton
+        */
+		void SetCorrectRectForNewAlarmButton();
+
+		/**
+        * @brief Switches clock type
+        */
+		void SwitchClockTypeL();
     	
    	private:    	// Functions from base classes
 
@@ -316,6 +330,10 @@ class CClockMainContainer : public CCoeControl,
 		* @brief Holds the date.
 		*/
 		HBufC*									iDateString;
+		
+		CAknButton*   iNewAlarmButton;
+		
+		TTime                                   iPreviousClockTypeSwitch;
 
 	};
 

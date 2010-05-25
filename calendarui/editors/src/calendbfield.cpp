@@ -304,7 +304,16 @@ void CCalenDbField::ReadDataFromFormL( TBool /*aContinueOnError*/ )
     RPointerArray<CCalCalendarInfo> calendarInfoList; 
     iServices->GetAllCalendarInfoL(calendarInfoList);
     CleanupClosePushL( calendarInfoList );
-    TInt pos = iDbNamesTextValues->CurrentValueIndex();
+    TInt pos;
+    if( calendarInfoList.Count() == 1 )
+        {
+         pos = 0;
+        }
+    else
+        {
+        pos = iDbNamesTextValues->CurrentValueIndex();
+        }
+    
     HBufC* calendarFileName = calendarInfoList[pos]->FileNameL().AllocLC();
     iCurrentColId = iServices->SessionL(*calendarFileName).CollectionIdL();
     CleanupStack::PopAndDestroy(calendarFileName);

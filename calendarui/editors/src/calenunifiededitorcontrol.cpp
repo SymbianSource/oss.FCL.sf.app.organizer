@@ -329,7 +329,15 @@ void CCalenUnifiedEditorControl::InitDefaultEditorsL()
         iRepeatField->InitRepetFieldLayoutL();
         }
 
-    iDbField->InitDbFieldLayoutL();
+    RPointerArray<CCalCalendarInfo> calendarInfoList; 
+    iUnifiedEditor.GetServices().GetAllCalendarInfoL(calendarInfoList);
+    CleanupClosePushL( calendarInfoList );
+    if( calendarInfoList.Count() > 1 )
+      {
+        iDbField->InitDbFieldLayoutL();
+      }
+    CleanupStack::PopAndDestroy( &calendarInfoList );
+    
     iDescription->InitDescritpionFieldLayoutL();
     
     TRACE_EXIT_POINT;
@@ -344,10 +352,27 @@ void CCalenUnifiedEditorControl::AddDefaultBirthDayEditorL()
     {
     TRACE_ENTRY_POINT;
     // event type, subject, date & year,more details
-     
-    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
-                  ECalenEditorStartDate, ECalenEditorSubject ); 
+    
+    RPointerArray<CCalCalendarInfo> calendarInfoList; 
+    iUnifiedEditor.GetServices().GetAllCalendarInfoL(calendarInfoList);
+    CleanupClosePushL( calendarInfoList );
 
+    if( calendarInfoList.Count() > 1 )
+        {
+        iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
+            ECalenEditorDBName, ECalenEditorSubject );
+
+        iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
+            ECalenEditorStartDate, ECalenEditorDBName );
+        }
+    else
+        {
+        iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
+            ECalenEditorStartDate, ECalenEditorSubject );
+        }
+
+    CleanupStack::PopAndDestroy( &calendarInfoList );
+    
     // "Start Date" Label should be "Date of Birth" for Birthday
     iUnifiedEditor.SetControlCaptionL( ECalenEditorStartDate,
                     R_QTN_CALEN_EDITOR_DATE_OF_BIRTH );
@@ -359,13 +384,13 @@ void CCalenUnifiedEditorControl::AddDefaultBirthDayEditorL()
                     ECalenEditorPlace, ECalenEditorReminder );
 /*    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_PEOPLE_ITEM,
                     ECalenEditorPeople, ECalenEditorPlace );
-*/    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
-                    ECalenEditorDBName, ECalenEditorPlace );
+*/   /* iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
+                    ECalenEditorDBName, ECalenEditorPlace );*/
 
     // TODO: Uncomment this when enabling attachment support
     // Replace ECalenEditorDBName with ECalenEditorAttachment in the next statement
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_ATTACHMENT_ITEM,
-                    ECalenEditorAttachment, ECalenEditorDBName );
+                    ECalenEditorAttachment, ECalenEditorPlace );
 
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DESCRIPTION_ITEM,
                     ECalenEditorDescription, ECalenEditorAttachment );
@@ -388,10 +413,26 @@ void CCalenUnifiedEditorControl::AddDefaultMeetingEditorL()
     // all day event 
     // subject,event type,all day,start date,end date,place,more details 
     
-  
-    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_ALL_DAY_ITEM,
-            ECalenEditorAllDayItem, ECalenEditorSubject );
+    RPointerArray<CCalCalendarInfo> calendarInfoList; 
+    iUnifiedEditor.GetServices().GetAllCalendarInfoL(calendarInfoList);
+    CleanupClosePushL( calendarInfoList );
 
+    if( calendarInfoList.Count() > 1 )
+        {
+    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
+            ECalenEditorDBName, ECalenEditorSubject );
+
+    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_ALL_DAY_ITEM,
+            ECalenEditorAllDayItem, ECalenEditorDBName );
+        }
+    else
+        {
+    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_ALL_DAY_ITEM, 
+            ECalenEditorAllDayItem, ECalenEditorSubject );
+        }
+
+    CleanupStack::PopAndDestroy( &calendarInfoList );
+    
     if( !iUnifiedEditor.Edited().IsAllDayEvent() )
         {
         iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_TIME_ITEM, 
@@ -418,13 +459,13 @@ void CCalenUnifiedEditorControl::AddDefaultMeetingEditorL()
     /*iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_PEOPLE_ITEM,
                     ECalenEditorPeople, ECalenEditorRepeat );
     */
-    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
+   /* iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
                     ECalenEditorDBName, ECalenEditorRepeat );
-    
+    */
     // TODO: Uncomment this when enabling attachment support
     // Replace ECalenEditorDBName with ECalenEditorAttachment in the next statement
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_ATTACHMENT_ITEM,
-                    ECalenEditorAttachment, ECalenEditorDBName );
+                    ECalenEditorAttachment, ECalenEditorRepeat );
     
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DESCRIPTION_ITEM,
                     ECalenEditorDescription, ECalenEditorAttachment );
@@ -441,9 +482,25 @@ void CCalenUnifiedEditorControl::AddDefaultTodoEditorL()
     {
     TRACE_ENTRY_POINT;
     // event type,subject,due date,more details
+   RPointerArray<CCalCalendarInfo> calendarInfoList; 
+   iUnifiedEditor.GetServices().GetAllCalendarInfoL(calendarInfoList);
+   CleanupClosePushL( calendarInfoList );
+   
+    if( calendarInfoList.Count() > 1 )
+        {
+        iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
+                        ECalenEditorDBName, ECalenEditorSubject );
+        
+        iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
+                            ECalenEditorStartDate, ECalenEditorDBName );
+        }
+    else
+        {
+        iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
+                               ECalenEditorStartDate, ECalenEditorSubject );
+        }
     
-    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
-                    ECalenEditorStartDate, ECalenEditorSubject );
+    CleanupStack::PopAndDestroy( &calendarInfoList );
 
     // "Start Date" Label should be "Due date" for To-Do
     iUnifiedEditor.SetControlCaptionL( ECalenEditorStartDate,
@@ -455,13 +512,13 @@ void CCalenUnifiedEditorControl::AddDefaultTodoEditorL()
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_PRIORITY_ITEM, 
                     ECalenEditorPriority, ECalenEditorReminder );
 
-    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
-                    ECalenEditorDBName, ECalenEditorPriority );
+    /*iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
+                    ECalenEditorDBName, ECalenEditorPriority );*/
     
     // TODO: Uncomment this when enabling attachment support
     // Replace ECalenEditorDBName with ECalenEditorAttachment in the next statement
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_ATTACHMENT_ITEM,
-                    ECalenEditorAttachment, ECalenEditorDBName );
+                    ECalenEditorAttachment, ECalenEditorPriority );
     
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DESCRIPTION_ITEM,
                     ECalenEditorDescription, ECalenEditorAttachment );
@@ -868,8 +925,11 @@ void CCalenUnifiedEditorControl::DeleteExtendedEntryFields( CCalEntry::TType aPr
         iUnifiedEditor.DeleteLine( ECalenEditorPeople );
         }
     */
-    iUnifiedEditor.DeleteLine( ECalenEditorDBName );
-    
+    CCoeControl* dbNameCtrl = iUnifiedEditor.ControlOrNull( ECalenEditorDBName );
+    if( dbNameCtrl )
+        {
+        iUnifiedEditor.DeleteLine( ECalenEditorDBName );
+        }
     // TODO: Uncomment this when enabling attachment support
     iUnifiedEditor.DeleteLine( ECalenEditorAttachment );
     
@@ -1283,8 +1343,12 @@ void CCalenUnifiedEditorControl::UpdateLinesOnLocaleChangeL()
         case CCalEntry::EAnniv:
             {
             iUnifiedEditor.DeleteLine( ECalenEditorStartDate, EFalse );
-            iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_BIRTHDAY_YEAR_ITEM, 
+            iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
                     ECalenEditorStartDate, ECalenEditorEventType );
+            
+            // "Start Date" Label should be "Date of Birth" for Birthday
+            iUnifiedEditor.SetControlCaptionL( ECalenEditorStartDate,
+                            R_QTN_CALEN_EDITOR_DATE_OF_BIRTH );
             
             }
             break;

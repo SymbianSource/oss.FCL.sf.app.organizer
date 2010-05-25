@@ -540,6 +540,10 @@ TBool  CCalenViewManager::HandleCommandL( const TCalenCommand& aCommand )
                 iPreviousToDayView.iViewUid = KNullUid;
                 }
             RequestActivationL( KUidCalenDayView, KCalenDummyUid, KNullDesC8() );
+            if(iController.IsLaunchFromExternalApp())
+                {
+                iAvoidRepopulation = ETrue;
+                }
             }
             break;
         case ECalenTodoView:
@@ -1796,5 +1800,14 @@ void CCalenViewManager::ActivateViewOnFakeExitL(TUid aDefView)
                                   TVwsViewId( KUidCalendar, aDefView) );
     
     TRACE_EXIT_POINT;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenViewManager::ActivateLocalViewL
+// Activate the local view if application already in back ground
+// -----------------------------------------------------------------------------
+void CCalenViewManager::ActivateLocalViewL(TUid aDefView)
+    {
+    iAppUi.ActivateLocalViewL( aDefView );      
     }
 // End of file

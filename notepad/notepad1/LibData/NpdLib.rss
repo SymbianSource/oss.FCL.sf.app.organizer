@@ -442,17 +442,17 @@ RESOURCE MENU_PANE r_notepad_list_menu_first
         // 'Send' is added by SendUi.
         MENU_ITEM
             {
-            command = ENotepadCmdAdd;
-            txt = qtn_nmake_om_add_new;
-            },
-        MENU_ITEM
-            {
             command = ENotepadCmdDelete;
             txt = qtn_nmake_om_delete_memo;
             flags = EEikMenuItemSpecific;
-            }
+            },
+        MENU_ITEM
+            {
+            command = ENotepadCmdAdd;
+            txt = qtn_nmake_om_add_new;
+            },            
         // START CSW change
-        ,MENU_ITEM
+        MENU_ITEM
             {
             command = ENotepadCmdPrint; // Same ID as in interest. 
             txt = ""; // AIW plugin will set the text.

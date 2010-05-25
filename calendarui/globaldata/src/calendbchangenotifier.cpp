@@ -21,9 +21,14 @@
 #include "calendarui_debug.h"
 
 // INCLUDE FILES
+#include "CleanupResetAndDestroy.h"
 #include "calendbchangenotifier.h"    // CCalenDbChangeNotifier
 #include "calenglobaldata.h"            // Calendar global data
 #include <calsession.h>                 // CalSession
+#include <missedalarm.h>
+#include <missedalarmstore.h>
+#include <missedalarmstorecrkeys.h>
+#include <calcalendarinfo.h>
 
 // -----------------------------------------------------------------------------
 // KTimerResolution limits the number of notifications sent to registered
@@ -148,10 +153,11 @@ TTime CCalenDbChangeNotifier::LastDBModificationTime() const
 // to the one we are currently using.
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
-void CCalenDbChangeNotifier::CalChangeNotification( RArray<TCalChangeEntry>& /*aChangeItems*/ )
+void CCalenDbChangeNotifier::CalChangeNotification( RArray<TCalChangeEntry>& aChangeItems )
     {
     TRACE_ENTRY_POINT;
 
+    TRAP_IGNORE(HandleMissedAlarmsL(aChangeItems));
     // Always update the last notification time, even if we don't notify 
     // our observers
     iLastDbChangeNotification.UniversalTime();
@@ -167,6 +173,52 @@ void CCalenDbChangeNotifier::CalChangeNotification( RArray<TCalChangeEntry>& /*a
         }
 
     TRACE_EXIT_POINT;
+    }
+void CCalenDbChangeNotifier::HandleMissedAlarmsL(const RArray<TCalChangeEntry>& aChangeItems)
+    {
+    TRACE_ENTRY_POINT
+    CRepository* missedAlarmStoreRepository = CRepository::NewL(
+            KCRUidMissedAlarmStore);
+    // Create missed alarm store
+    CMissedAlarmStore* missedAlarmStore = CMissedAlarmStore::NewL(
+            *missedAlarmStoreRepository);
+    CleanupStack::PushL(missedAlarmStore);
+    RPointerArray<CMissedAlarm> missedAlarmStorelist;
+    CleanupResetAndDestroyPushL(missedAlarmStorelist);
+    missedAlarmStore->GetL(missedAlarmStorelist);
+    CCalCalendarInfo* calendarInfo = iSession.CalendarInfoL();
+    CleanupStack::PushL(calendarInfo);
+    CCalenDbChangeNotifier::TCalLuidFilename calLuidFilename;
+    calLuidFilename.iFilename = calendarInfo->FileNameL();
+    if (missedAlarmStorelist.Count())
+        {
+        for (TInt idx = 0; idx < aChangeItems.Count(); idx++)
+            {
+            if (aChangeItems[idx].iChangeType == EChangeDelete)
+                {
+                calLuidFilename.iLuid = aChangeItems[idx].iEntryId;
+                TInt index = missedAlarmStorelist.Find(
+                        calLuidFilename,CCalenDbChangeNotifier::DoFindEntryByLuid);
+                if(index != KErrNotFound)
+                    {
+                    CMissedAlarm* missedAlarm = missedAlarmStorelist[index];
+                    missedAlarmStore->RemoveL(*missedAlarm);
+                    }
+                }
+            }
+        }
+    CleanupStack::PopAndDestroy(calendarInfo);
+    CleanupStack::PopAndDestroy(&missedAlarmStorelist);
+    CleanupStack::PopAndDestroy(missedAlarmStore);
+    TRACE_EXIT_POINT    
+    }
+TBool CCalenDbChangeNotifier::DoFindEntryByLuid(
+                const TCalLuidFilename* aLuidFilename,const CMissedAlarm& aMissedAlarm)
+    {
+    TRACE_ENTRY_POINT
+    TRACE_EXIT_POINT
+    return (aLuidFilename->iLuid == aMissedAlarm.iLuid 
+            && !aLuidFilename->iFilename.CompareF(aMissedAlarm.iCalFileName));
     }
 
 // -----------------------------------------------------------------------------
