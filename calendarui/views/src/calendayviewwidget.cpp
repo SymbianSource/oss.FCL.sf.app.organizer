@@ -42,7 +42,7 @@
 #include "CalenUid.h"
 #include "caleneventlistviewitem.h"
 #include "calenpluginlabel.h"
-#include "CalendarInternalCRKeys.h"
+#include "calendarprivatecrkeys.h"
 
 // Constants
 static const QString singleSpace(" ");
@@ -230,16 +230,7 @@ void CalenDayViewWidget::orientationChanged(Qt::Orientation orientation)
 //
 void CalenDayViewWidget::handleLocaleChange()
 {
-    if(mListViewPrototype) {
-        HbExtendedLocale locale = HbExtendedLocale::system();
-        HbExtendedLocale::TimeStyle timeStyle = locale.timeStyle();
-        if (HbExtendedLocale::Time12 == timeStyle) {
-            mListViewPrototype->setTimeFormat12Hr(true);
-        } else {
-            mListViewPrototype->setTimeFormat12Hr(false);
-        }
-        
-    }
+
 }
 
 // ----------------------------------------------------------------------------
@@ -518,17 +509,15 @@ void CalenDayViewWidget::addTimedEventToList(int index, AgendaEntry entry)
         // Raise the flag to indicate that the list item
         // would wrap to two lines
         twoLines = true;
+        // Append space
+        eventTime.append(" ");
         // Append '-' to indicate an end time is present
         eventTime.append("-");
-        // Append new line to wrap to next line
-        eventTime.append(newLine);
-        // Event is a not a zero duration meeting
-        // Only in this case, append the end time
-        eventTime.append(locale.format(eventEndTime, r_qtn_time_usual_with_zero));
     } else {
-        // Append new line to wrap to next line
-        eventTime.append(newLine);
+    	// To align the subject properly if the start and endtime are same
+    	eventTime.append("  ");
     }
+    
     // Add the event time to the text list
     // This MUST be the first item to be added to the list 
     textData << eventTime;
@@ -573,7 +562,17 @@ void CalenDayViewWidget::addTimedEventToList(int index, AgendaEntry entry)
         // iconData << HbIcon(locationIcon);
         textData << entry.location();
     }
-    
+    // Add the end time to the list item	
+    if (eventStartTime < eventEndTime) {
+    	QString endtime = locale.format(eventEndTime, r_qtn_time_usual_with_zero);
+    	textData << endtime;
+    }else {
+    	if (entry.location().isEmpty()) {
+    		textData << QVariant();
+    	}else {
+    		textData << singleSpace;
+    	}
+    }
     // Get the list model index and set the text and icon data
     QModelIndex listIndex = mListModel->index(index, 0);
     mListModel->setData(listIndex, textData, Qt::DisplayRole);
@@ -637,12 +636,16 @@ void CalenDayViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
         // Append the all-day icon
         iconData << HbIcon(allDayIcon);
         
-        // Check if alarm is enabled for the entry       
+        // Check if alarm is enabled for the entry
         if (entry.alarm().isNull()) {
-            // Insert a blank icon. Else the next icon
-            // will get replaced in this icon's position
-            iconData << QVariant();
+            // Insert a blank icon. Else next text item will get shifted to left
+            iconData << HbIcon();
         } else {
+        	// if entry is not repeating in place of reminder icon put a blank 
+        	// icon and move reminder icon to the place of repeating icon 
+        	 if (!entry.isRepeating()) {
+        		 iconData << HbIcon();
+        	 }
             iconData << HbIcon(reminderIcon);
         }
 
@@ -650,9 +653,11 @@ void CalenDayViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
         if (entry.isRepeating()) {
             iconData << HbIcon(repeatIcon);
         } else {
-            // Insert a blank icon. Else the next icon
-            // will get replaced in this icon's position
-            iconData << QVariant();
+        	// put the blank icon only when both reminder and repeating icons 
+        	// are not there
+        	if (entry.alarm().isNull()) {
+        	iconData << HbIcon();
+        	}
         }
         
         // Append the location
@@ -662,8 +667,10 @@ void CalenDayViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
             // only if valid geo-coordinates are present
             // iconData << HbIcon(locationIcon);
         } else {
-            textData << singleSpace;
+            textData << QVariant();
         }
+        // The fourth text item has to be empty
+        textData << QVariant();
         
     } else if (entryType == AgendaEntry::TypeTodo) {
         // Append the to-do icon
@@ -691,22 +698,31 @@ void CalenDayViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
         
         textData << dueDateString.arg(dueText);
         
-        // Check if alarm is enabled for the entry       
+        // The fourth text item has to be empty
+        textData << QVariant();
+       
+        // Check if alarm is enabled for the entry
         if (entry.alarm().isNull()) {
-            // Insert a blank icon. Else the next icon
-            // will get replaced in this icon's position
-            iconData << QVariant();
+        	// Insert a blank icon. Else next text item will get shifted to left
+        	iconData << HbIcon();
         } else {
-            iconData << HbIcon(reminderIcon);
+        	// if entry is not repeating in place of reminder icon put a blank 
+        	// icon and move reminder icon to the place of repeating icon 
+        	if (!entry.isRepeating()) {
+        		iconData << HbIcon();
+        	}
+        	iconData << HbIcon(reminderIcon);
         }
-        
+
         // Check if the entry is recurring
         if (entry.isRepeating()) {
-            iconData << HbIcon(repeatIcon);
+        	iconData << HbIcon(repeatIcon);
         } else {
-            // Insert a blank icon. Else the next icon
-            // will get replaced in this icon's position
-            iconData << QVariant();
+        	// Insert the blank icon only when both reminder and repeating icons 
+        	// are not there
+        	if (entry.alarm().isNull()) {
+        		iconData << HbIcon();
+        	}
         }
     }
     
@@ -812,7 +828,7 @@ int CalenDayViewWidget::getIndexToScrollTo()
 void CalenDayViewWidget::showHideRegionalInformation()
 {
     XQSettingsKey regionalInfo(XQSettingsKey::TargetCentralRepository,
-                               KCRUidCalendar.iUid, KShowRegionalInformation);
+                               KCRUidCalendar, KCalendarShowRegionalInfo);
     
     int showRegionalInfo = mSettingsManager->readItemValue(regionalInfo).toUInt();
     if (showRegionalInfo) {
@@ -821,6 +837,7 @@ void CalenDayViewWidget::showHideRegionalInformation()
         	mRegionalInfoGroupBox = new HbGroupBox();
         	CalenPluginLabel *regionalInfo = new CalenPluginLabel(
 															mServices, this);
+            regionalInfo->setFontSpec(HbFontSpec(HbFontSpec::Primary));
             mRegionalInfoGroupBox->setContentWidget(regionalInfo);
             mRegionalPluginLayout->insertItem(1, mRegionalInfoGroupBox);
         }
@@ -940,9 +957,7 @@ void CalenDayViewWidget::markAsDone()
         entry.setCompletedDateTime(mDate);
         
         // Update the entry in the database
-        AgendaUtil agendaUtil;
-        agendaUtil.setCompleted(entry, true, mDate);
-
+        mServices.agendaInterface()->setCompleted(entry, true, mDate);
 		mServices.IssueCommandL(ECalenStartActiveStep);
     }
 }

@@ -27,11 +27,12 @@ class CalenPluginLabel : public HbLabel
 	Q_OBJECT
 
 public:
-	CalenPluginLabel(MCalenServices &services, QGraphicsItem *parent = 0);
-	~CalenPluginLabel();
+	IMPORT_C CalenPluginLabel(MCalenServices &services, QGraphicsItem *parent = 0);
+	IMPORT_C ~CalenPluginLabel();
 
-private:
-	void mousePressEvent(QGraphicsSceneMouseEvent *event);
+protected:
+	void gestureEvent(QGestureEvent *event);
+
 	
 private:
 	MCalenServices	&mServices;

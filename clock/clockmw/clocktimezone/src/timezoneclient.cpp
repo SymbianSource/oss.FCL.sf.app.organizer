@@ -31,6 +31,7 @@
 #include "timezoneclient.h"
 #include "clockcommon.h"
 #include "clockserverclt.h"
+#include "clockprivatecrkeys.h"
 
 const int KDaysInWeek(7);
 const int KZerothRule(0);

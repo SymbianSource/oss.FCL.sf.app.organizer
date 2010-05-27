@@ -608,7 +608,7 @@ void AgendaEventView::addRepeatData()
 	QStringList itemData;
 	itemData.append(QString::null);
     itemData.append(QString::null);
-    itemData.append("qtg_mono_repeat.svg");
+    itemData.append("qtg_small_repeat");
     mRepeatWidget->setProperty(primaryLeftIconItem, false);
 	mRepeatWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 	itemData.clear();
@@ -1261,7 +1261,7 @@ void AgendaEventView::getSubjectIcon(AgendaEntry::Type type, QString &subjectIco
             break;
         case AgendaEntry::TypeEvent:
             {
-            subjectIcon.append("qtg_small_allday");//@ TODO add proper icon
+            subjectIcon.append("qtg_small_day");
             }
             break;
         case AgendaEntry::TypeAnniversary:

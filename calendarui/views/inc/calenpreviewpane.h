@@ -23,7 +23,6 @@
 // System includes
 #include <qdatetime.h>
 #include <hbscrollarea.h>
-#include <hbgridviewitem.h>
 
 // Forward declarations
 class HbLabel;
@@ -50,11 +49,11 @@ public:
 	void populateLabel( QDateTime date);
 	QDateTime Date();
 	void startAutoScroll();
-	void mousePressEvent(QGraphicsSceneMouseEvent* event);
-	void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
-	void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
 	void setView(CalenMonthView* view);
 	void stopScrolling();
+	
+protected:
+	void gestureEvent(QGestureEvent *event);
 	
 private:
 	void GetInstanceListL();
@@ -82,6 +81,8 @@ private:
 	HbLabel* mNoEntriesLabel;
 	bool mIsNoEntriesAdded;
 	bool mIsGestureHandled;
+	qreal mHtDiff;
+	int mScrollDuration;
 };
 
 #endif /* CALENPREVIEWPANE_H_ */

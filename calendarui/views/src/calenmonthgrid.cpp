@@ -20,6 +20,8 @@
 #include <hbabstractviewitem.h>
 #include <hbstyleloader.h>
 #include <hbcolorscheme.h>
+#include <hbpangesture.h>
+#include <hbswipegesture.h>
 
 // User includes
 #include "calenmonthgrid.h"
@@ -30,7 +32,7 @@
 #include "calencommon.h"
 
 // Constants
-#define SCROLL_SPEEED 2000 
+#define SCROLL_SPEEED 3000 
 #define GRIDLINE_WIDTH 0.075 //units
 
 /*!
@@ -49,7 +51,7 @@ CalenMonthGrid::CalenMonthGrid(QGraphicsItem *parent):
 	mIsPanGesture(false),
 	mIsAtomicScroll(true),
 	mView(NULL),
-	mCurrentRow(0),
+	mCurrentRow(-100),
 	mIsNonActiveDayFocused(false),
 	mIgnoreItemActivated(false),
 	mGridBorderColor(Qt::gray)
@@ -64,6 +66,7 @@ CalenMonthGrid::CalenMonthGrid(QGraphicsItem *parent):
 	setVerticalScrollBarPolicy(HbScrollArea::ScrollBarAlwaysOff);
 	setClampingStyle(HbScrollArea::StrictClamping);
 	setEnabledAnimations(HbAbstractItemView::None);
+	setFrictionEnabled(false);
 	resetTransform();
 	
 	// Get the content widget of the scroll area to draw the grid lines
@@ -84,10 +87,6 @@ CalenMonthGrid::CalenMonthGrid(QGraphicsItem *parent):
 	// Connect to scrolling finished signal
 	connect(this, SIGNAL(scrollingEnded()), this,
 			SLOT(scrollingFinished()));
-	
-	// Connect to item activated signal
-	connect(this, SIGNAL(activated(const QModelIndex &)), this,
-				SLOT(itemActivated(const QModelIndex &)));
 }
 
 /*!
@@ -270,6 +269,14 @@ void CalenMonthGrid::updateMonthGridWithInActiveMonths(
 	indexToBeScrolled = mModel->index(itemToBeScrolled, 0);
 	mIsAtomicScroll = true;
 	scrollTo(indexToBeScrolled);
+	
+	// Update the sart position of the content widget
+	mStartPos = mContentWidget->pos();
+	
+	// Now connect to the signal which gets emitted when any item on the grid 
+	// is tapped.
+	connect(this, SIGNAL(activated(const QModelIndex &)), this,
+						SLOT(itemActivated(const QModelIndex &)));
 }
 
 /*!
@@ -292,31 +299,27 @@ void CalenMonthGrid::updateMonthGridWithEventIndicators(
 }
 
 /*!
- Listens for down gesture
+ Scrolls the content dowmwards
  */
-void CalenMonthGrid::downGesture (int value)
+void CalenMonthGrid::downGesture()
 {
-	Q_UNUSED(value)	
-	mDirection = down;
-	mIsAtomicScroll = false;
-	setAttribute(Hb::InteractionDisabled);
-	
-	// pass it to parent
-	HbScrollArea::downGesture(value);
+    mDirection = down;
+    mIsAtomicScroll = false;
+    setAttribute(Hb::InteractionDisabled);
+    QPointF targetPos(0.0, 0.0);
+    scrollContentsTo(targetPos,500);
 }
 
 /*!
- Listens for Up gesture
+ Scrolls the content upwards
  */
-void CalenMonthGrid::upGesture (int value)
+void CalenMonthGrid::upGesture()
 {
-	Q_UNUSED(value)	
-	mDirection = up;
-	mIsAtomicScroll = false;
-	setAttribute(Hb::InteractionDisabled);
-	
-	// pass it to parent
-	HbScrollArea::upGesture(value);
+    mDirection = up;
+    mIsAtomicScroll = false;
+    setAttribute(Hb::InteractionDisabled);
+    QPointF targetPos(0.0, mStartPos.y() - size().height());
+    scrollContentsTo(-targetPos,500);
 	
 }
 
@@ -325,7 +328,6 @@ void CalenMonthGrid::upGesture (int value)
  */
 void CalenMonthGrid::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-	mPressedPos = event->pos();
 	// Pass it to parent
 	HbGridView::mousePressEvent(event);
 }
@@ -335,38 +337,59 @@ void CalenMonthGrid::mousePressEvent(QGraphicsSceneMouseEvent* event)
  */
 void CalenMonthGrid::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-	int posDiff = mPressedPos.y() - event->pos().y();
-	if (posDiff < -50) {
-		mDirection = down;
-	} else if (posDiff > 50){
-		mDirection = up;
+	// Pass it grid view if pan gesture is not in progress else pass it to
+	// scrollarea. Problem here is, if we pass to gridview when panning, then 
+	// its emitting item activated signal simply becasue of which focus item
+	// is getting changed when you finish the pan / shake
+	if (!mIsPanGesture) {
+		HbGridView::mouseReleaseEvent(event);
+	} else {
+		HbScrollArea::mouseReleaseEvent(event);
 	}
-	// Pass it to parent
-	HbGridView::mouseReleaseEvent(event);
 }
 
 /*!
- Listens for pan gesture
+    Function to list for all the gesture events
  */
-void  CalenMonthGrid::panGesture(const QPointF &  delta)
+void CalenMonthGrid::gestureEvent(QGestureEvent *event)
 {
-	setAttribute(Hb::InteractionDisabled);
-	mIsAtomicScroll = false;
-	if (!mIsPanGesture) {
-		mIsPanGesture = true;
-		mIgnoreItemActivated = true;
-		mStartPos = mContentWidget->pos();
-		// Get to know the direction of the gesture
-		if (delta.y() > 0) {
-			mDirection = down;
-		} else {
-			mDirection = up;
-		}
-	}
-	
-	// Call the parent class to perform the pan gesture
-	// When scrolling finished, month grid will adjust to show the proper month
-	HbScrollArea::panGesture(delta);
+   if(HbPanGesture *gesture = qobject_cast<HbPanGesture *>(event->gesture(Qt::PanGesture))) {
+        if (gesture->state() == Qt::GestureStarted) {
+            setAttribute(Hb::InteractionDisabled);
+            mIsAtomicScroll = false;
+            if (!mIsPanGesture) {
+                mIsPanGesture = true;
+                mIgnoreItemActivated = true;
+                mStartPos = mContentWidget->pos();
+                // Get to know the direction of the gesture
+                QPointF velocity = gesture->velocity();
+                if (velocity.y() > 0) {
+                    mDirection = down;
+                } else {
+                    mDirection = up;
+                }
+            }
+        } else if(gesture->state() == Qt::GestureFinished) {
+		// TODO: Need to handle here to avoid followOn animation
+        }
+    } else if(HbSwipeGesture *gesture = qobject_cast<HbSwipeGesture *>(event->gesture(Qt::SwipeGesture))) {
+        if (gesture->state() == Qt::GestureStarted) {
+            setAttribute(Hb::InteractionDisabled);
+            mIsAtomicScroll = false;
+            if (gesture->swipeAngle() > 250 && gesture->swipeAngle() < 290 && 
+                    gesture->verticalDirection() == QSwipeGesture::Down) {
+                mDirection = down;
+            } else if (gesture->swipeAngle() > 70 && gesture->swipeAngle() < 110 && 
+                    gesture->verticalDirection() == QSwipeGesture::Up) {
+                mDirection = up;
+            }
+        }
+        gesture->setSpeed(SCROLL_SPEEED);
+    }
+   
+    // Call the parent class to perform the pan gesture
+    // When scrolling finished, month grid will adjust to show the proper month
+    HbScrollArea::gestureEvent(event);
 }
 
 /*!
@@ -374,7 +397,6 @@ void  CalenMonthGrid::panGesture(const QPointF &  delta)
  */
 void CalenMonthGrid::scrollingFinished()
 {
-	
 	if (mIsPanGesture) {
 		handlePanGestureFinished();
 	} else if(!mIsAtomicScroll) {
@@ -426,11 +448,12 @@ void CalenMonthGrid::handlePanGestureFinished()
 				date.addDays(KNumOfVisibleRows*KCalenDaysInWeek).date().day() >=
 				(prevMonth.date().daysInMonth()) / 2) {
 			// up gesture to bring the next month
-			upGesture(SCROLL_SPEEED);
+			upGesture();
 		} else {
 			// we should again show the current month by scrolling downwards
 			mDirection = down;
 			mIsAtomicScroll = true;
+			setAttribute(Hb::InteractionDisabled);
 			scrollContentsTo(-mStartPos,500);
 		}
 	} else if (month == prevMonth.date().month()) {
@@ -440,22 +463,32 @@ void CalenMonthGrid::handlePanGestureFinished()
 			// we should again show the current month by scrolling upwards
 			mDirection = up;
 			mIsAtomicScroll = true;
+			setAttribute(Hb::InteractionDisabled);
 			scrollContentsTo(-mStartPos,500);
 		} else {
 			// down gesture to show the previous month
-			downGesture(SCROLL_SPEEED);
+			downGesture();
 		}
+	} else if (month == prevMonth.addMonths(-1).date().month()) {
+		// first visible date belong to previous to previous month
+		// hence, scroll down to bring the previous month
+		downGesture();
 	} else if (month == nextMonth.date().month()) {
 		// first visible item belongs to next month
 		// Check if the date is more than half of the next month
 		if (date.date().day() > (nextMonth.date().daysInMonth()) / 2) {
 			// up gesture to bring the next month
-			upGesture(SCROLL_SPEEED);
+			upGesture();
 		} else {
 			// we should again show the current month by scrolling upwards
 			mDirection = invalid;
+			setAttribute(Hb::InteractionDisabled);
 			scrollContentsTo(-mStartPos,500);
 		}
+	} else if (month == nextMonth.addMonths(1).date().month()) {
+		// first visible date belongs to next to next month
+		// hence, scroll up to show the next month
+		upGesture();
 	}
 }
 
@@ -521,6 +554,9 @@ void CalenMonthGrid::prependRows()
 	scrollTo(indexToBeScrolled);
 	// Update the mCurrentRow
 	mCurrentRow += countToBeAdded;
+	
+	// Update the sart position of the content widget
+	mStartPos = mContentWidget->pos();
 }
 
 /*!
@@ -641,6 +677,9 @@ void CalenMonthGrid::appendRows()
 	indexToBeScrolled = mModel->index(itemToBeScrolled, 0);
 	mIsAtomicScroll = true;
 	scrollTo(indexToBeScrolled);
+	
+	// Update the sart position of the content widget
+    mStartPos = mContentWidget->pos();
 }
 
 /*!
@@ -713,6 +752,10 @@ void CalenMonthGrid::itemActivated(const QModelIndex &index)
 	} else {
 		// Reset the focus attribute to this item		
 		QModelIndex itemIndex = mModel->index(mCurrentRow,0);
+		if(itemIndex.row() < 0 || itemIndex.row() >= mModel->rowCount() ||
+				itemIndex.column() < 0 || itemIndex.column() > mModel->columnCount()) {
+			return;
+		}
 		QVariant itemData = itemIndex.data(Qt::UserRole + 1);
 		QVariantList list = itemData.toList();
 		list.replace(CalendarNamespace::CalendarMonthFocusRole, false);
@@ -740,12 +783,12 @@ void CalenMonthGrid::itemActivated(const QModelIndex &index)
 				mNonActiveFocusedDay.date().month()) {
 				mDirection = up;
 				// up gesture
-				upGesture(SCROLL_SPEEED);
+				upGesture();
 				setActiveDates(activeMonth.date());
 			} else {
 				mDirection = down;
 				// down gesture
-				downGesture(SCROLL_SPEEED);
+				downGesture();
 				setActiveDates(activeMonth.addMonths(-2).date());
 			}
 		} 

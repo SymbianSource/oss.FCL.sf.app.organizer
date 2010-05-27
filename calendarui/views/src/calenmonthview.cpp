@@ -46,7 +46,7 @@
 #include "calendocloader.h"
 #include "calenthicklinesdrawer.h"
 #include "calencommon.h"
-#include "CalendarInternalCRKeys.h"
+#include "calendarprivatecrkeys.h"
 #include "calenpluginlabel.h"
 /*!
  \class CalenMonthView
@@ -74,7 +74,7 @@ CalenMonthView::CalenMonthView(MCalenServices &services) :
 	mSettingsManager = new XQSettingsManager(this);
 	mWeekNumberCenrepKey
 	        = new XQSettingsKey(XQSettingsKey::TargetCentralRepository,
-	                            KCRUidCalendar.iUid, KCalendarWeekViewTitle);
+	                            KCRUidCalendar, KCalendarShowWeekNum);
 
 	mLocale = HbExtendedLocale::system();
 	mFirstWeekLabel = NULL;
@@ -322,7 +322,15 @@ void CalenMonthView::addWeekNumbers()
 			= qobject_cast<HbLabel *> (
 					mDocLoader->findWidget(CALEN_MONTVIEW_SIXTH_WEEK_LABEL));
 	}
-
+	
+	// Set the text colors well before instead of setting it again and again
+	mFirstWeekLabel->setTextColor(mWeekDaysColor);
+	mSecondWeekLabel->setTextColor(mWeekDaysColor);
+	mThirdWeekLabel->setTextColor(mWeekDaysColor);
+	mFourthWeekLabel->setTextColor(mWeekDaysColor);
+	mFifthWeekLabel->setTextColor(mWeekDaysColor);
+	mSixthWeekLabel->setTextColor(mWeekDaysColor);
+	
 	// Calculate the week numbers and set them to the week labels
 	updateWeekNumGridModel();
 
@@ -411,58 +419,51 @@ void CalenMonthView::addBackgroundFrame()
 {
     // Set the background items for all the widgets
     HbFrameItem* frame = NULL;
+    HbFrameDrawer *drawer = NULL;
     HbWidget* monthViewExceptPreviewPane = qobject_cast<HbWidget *> (
 						 mDocLoader->findWidget(CALEN_MONTHVIEW_EXCEPT_PANE));
     if (monthViewExceptPreviewPane) {
+        drawer = new HbFrameDrawer("qtg_fr_cal_monthgrid_bg", HbFrameDrawer::NinePieces);
         // The grid background
-        frame = new HbFrameItem(this);
-        frame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
-
-        frame->frameDrawer().setFrameGraphicsName("qtg_fr_cal_monthgrid_bg");
+        frame = new HbFrameItem(drawer, this);
         monthViewExceptPreviewPane->setBackgroundItem(frame->graphicsItem(), -2);
     }
     if (mTitleLabel) {
         // The month title
-        frame = new HbFrameItem(this);
-        frame->frameDrawer().setFrameType(HbFrameDrawer::ThreePiecesHorizontal);
-
-        frame->frameDrawer().setFrameGraphicsName("qtg_fr_cal_monthgrid_title_bg");
+        drawer = new HbFrameDrawer("qtg_fr_cal_monthgrid_title_bg", HbFrameDrawer::ThreePiecesHorizontal);
+        frame = new HbFrameItem(drawer, this);
         mTitleLabel->setBackgroundItem(frame->graphicsItem(), -2);
     }
     
     // Set the frame to the preview pane
-    frame = new HbFrameItem(this);
-    frame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
-
-    frame->frameDrawer().setFrameGraphicsName("qtg_fr_cal_preview_bg");
+    drawer = new HbFrameDrawer("qtg_fr_cal_preview_bg", HbFrameDrawer::NinePieces);
+    frame = new HbFrameItem(drawer, this);
     mPrevPaneLayoutWidget->setBackgroundItem(frame->graphicsItem(), -5);
     
     // Set the frame to the preview pane
-    frame = new HbFrameItem(this);
-    frame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
-
-    frame->frameDrawer().setFrameGraphicsName("qtg_fr_cal_preview_bg");
+    drawer = new HbFrameDrawer("qtg_fr_cal_preview_bg", HbFrameDrawer::NinePieces);
+       frame = new HbFrameItem(drawer, this);
     mCurrPaneLayoutWidget->setBackgroundItem(frame->graphicsItem(), -5);
     
     // Set the frame to the preview pane
-    frame = new HbFrameItem(this);
-    frame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
-
-    frame->frameDrawer().setFrameGraphicsName("qtg_fr_cal_preview_bg");
+    drawer = new HbFrameDrawer("qtg_fr_cal_preview_bg", HbFrameDrawer::NinePieces);
+           frame = new HbFrameItem(drawer, this);
     mNextPaneLayoutWidget->setBackgroundItem(frame->graphicsItem(), -5);
 }
 
 void CalenMonthView::showHideRegionalInformation()
 {
     XQSettingsKey regionalInfo(XQSettingsKey::TargetCentralRepository,
-                               KCRUidCalendar.iUid, KShowRegionalInformation);
+                               KCRUidCalendar, KCalendarShowRegionalInfo);
     
     int showRegionalInfo = mSettingsManager->readItemValue(regionalInfo).toUInt();
     if (showRegionalInfo) {
 		
         // Add the regional information to the preview panes
         if (!mPrevRegionalInfo) {
-            mPrevRegionalInfo = new CalenPluginLabel(mServices, this);
+            mPrevRegionalInfo = qobject_cast<CalenPluginLabel *> 
+							(mDocLoader->findWidget(CALEN_PREVREGIONALINFO));
+            mPrevRegionalInfo->show();
             mPrevPaneLayout->insertItem(0, mPrevRegionalInfo);
 
             HbFrameItem *frameCurr = new HbFrameItem(this);
@@ -471,7 +472,9 @@ void CalenMonthView::showHideRegionalInformation()
             mPrevRegionalInfo->setBackgroundItem(frameCurr->graphicsItem(), -2);
         }
         if (!mCurrRegionalInfo) {
-            mCurrRegionalInfo = new CalenPluginLabel(mServices, this);
+            mCurrRegionalInfo = qobject_cast<CalenPluginLabel *> 
+							(mDocLoader->findWidget(CALEN_CURRREGIONALINFO));
+            mCurrRegionalInfo->show();
             mCurrPaneLayout->insertItem(0, mCurrRegionalInfo);
             
             HbFrameItem *frameCurr = new HbFrameItem(this);
@@ -480,7 +483,9 @@ void CalenMonthView::showHideRegionalInformation()
             mCurrRegionalInfo->setBackgroundItem(frameCurr->graphicsItem(), -2);
         }
         if (!mNextRegionalInfo) {
-            mNextRegionalInfo = new CalenPluginLabel(mServices, this);
+            mNextRegionalInfo = qobject_cast<CalenPluginLabel *> 
+							(mDocLoader->findWidget(CALEN_NEXTREGIONALINFO));
+            mNextRegionalInfo->show();
             mNextPaneLayout->insertItem(0, mNextRegionalInfo);
 
             HbFrameItem *frameCurr = new HbFrameItem(this);
@@ -498,17 +503,17 @@ void CalenMonthView::showHideRegionalInformation()
     } else {
         if (mPrevRegionalInfo) {
             mPrevPaneLayout->removeItem(mPrevRegionalInfo);
-            delete mPrevRegionalInfo;
+            mPrevRegionalInfo->hide();
             mPrevRegionalInfo = NULL;
         }
         if (mCurrRegionalInfo) {
             mPrevPaneLayout->removeItem(mCurrRegionalInfo);
-            delete mCurrRegionalInfo;
+            mCurrRegionalInfo->hide();
             mCurrRegionalInfo = NULL;
         }
         if (mNextRegionalInfo) {
             mPrevPaneLayout->removeItem(mNextRegionalInfo);
-            delete mNextRegionalInfo;
+            mNextRegionalInfo->hide();
             mNextRegionalInfo = NULL;
         }
     }
@@ -552,22 +557,16 @@ void CalenMonthView::updateWeekNumGridModel()
 	// Update the week labels text
 	QString text = QString::number(mWeekNumbers.at(0));
 	mFirstWeekLabel->setPlainText(text);
-	mFirstWeekLabel->setTextColor(mWeekDaysColor);
 	text = QString::number(mWeekNumbers.at(1));
 	mSecondWeekLabel->setPlainText(text);
-	mSecondWeekLabel->setTextColor(mWeekDaysColor);
 	text = QString::number(mWeekNumbers.at(2));
 	mThirdWeekLabel->setPlainText(text);
-	mThirdWeekLabel->setTextColor(mWeekDaysColor);
 	text = QString::number(mWeekNumbers.at(3));
 	mFourthWeekLabel->setPlainText(text);
-	mFourthWeekLabel->setTextColor(mWeekDaysColor);
 	text = QString::number(mWeekNumbers.at(4));
 	mFifthWeekLabel->setPlainText(text);
-	mFifthWeekLabel->setTextColor(mWeekDaysColor);
 	text = QString::number(mWeekNumbers.at(5));
 	mSixthWeekLabel->setPlainText(text);
-	mSixthWeekLabel->setTextColor(mWeekDaysColor);
 }
 
 /*!
@@ -626,12 +625,13 @@ void CalenMonthView::addRemoveActionsInMenu()
  */
 void CalenMonthView::doPopulation()
 {
-	if (!mIsFirstTimeLoad) {
-		Qt::Orientation orientation = mServices.MainWindow().orientation();
-		if (mOrientation != orientation) {
-			mOrientation = orientation;
-			handleChangeOrientation();
-		}
+	// Get the layout and add the preview pane layout.
+	QGraphicsLinearLayout* viewLayout = static_cast<QGraphicsLinearLayout *>
+														(widget()->layout());
+	if (viewLayout->count() == 1) {
+		// Count is 1 implies view has only month grid.
+		// Add the preview pane at corresponding position.
+		viewLayout->addItem(mCurrPaneParent);
 	}
 	
 	// prepare for the population like reading the date frm the context 
@@ -655,9 +655,6 @@ void CalenMonthView::doPopulation()
 
 	// Population is complete, inform it
 	populationComplete();
-	
-	// Start the auto scroll on current preview pane
-	mCurrPreviewPane->startAutoScroll();
 	
 	// Handle regional data here if we are not populating the month view for
 	// the first time
@@ -694,9 +691,10 @@ void CalenMonthView::refreshViewOnGoToDate()
 	
 	mMonthGrid->updateMonthGridModel(mMonthDataArray, mIndexToBeScrolled, 
 	                                 mIsFirstTimeLoad);
-	
-	// Start the auto scroll on current preview pane
-	mCurrPreviewPane->startAutoScroll();
+	// Update the week Numbers model
+	if (mIsWeekNumbersShown) {
+		updateWeekNumGridModel();
+	}
 }
 
 /*!
@@ -1157,6 +1155,9 @@ void CalenMonthView::populatePreviewPane(QDateTime &dateTime)
 	mPrevPreviewPane->populateLabel(dateTime.addDays(-1));
 	mCurrPreviewPane->populateLabel(dateTime);
 	mNextPreviewPane->populateLabel(dateTime.addDays(1));
+	
+	// Start the auto scroll on current preview pane
+    mCurrPreviewPane->startAutoScroll();
 }
 
 /*!
@@ -1189,8 +1190,6 @@ void CalenMonthView::setContextForActiveDay(int index)
 	
 	if(!mIsPrevPaneGesture) {
 		populatePreviewPane(mDate);
-		// Start the auto scroll on current preview pane
-		mCurrPreviewPane->startAutoScroll();
 	} else {
 		// reset flag
 		mIsPrevPaneGesture = false;
@@ -1219,13 +1218,11 @@ void CalenMonthView::launchDayView()
  */
 void CalenMonthView::changeOrientation(Qt::Orientation orientation)
 {
-	if (this == mServices.MainWindow().currentView()) {
 		if (mOrientation != orientation) {
 			// change the orientation here
 			mOrientation = orientation;
 			handleChangeOrientation();
 		}
-	}
 }
 
 /*!
@@ -1251,16 +1248,11 @@ void CalenMonthView::handleChangeOrientation()
 	QGraphicsLinearLayout* viewLayout = static_cast<QGraphicsLinearLayout *>
 													(widget()->layout());
 	viewLayout->removeAt(1);
-	viewLayout->addItem(mCurrPaneParent);
-	
-
-	// Check the weeknumber setting and update it accordingly
-	if (mIsWeekNumbersShown) {
-		// Add week numbers to week grid
-		addWeekNumbers();
-	} else {
-		// remove the weeknumbergrid from the layout
-		removeWeekNumbers();
+	// Add this item only when orientaion is changed on month view
+	// if it is changed in other views, adding the preview pane here was
+	// overlapping with the month grid, hence, its been added in dopopulation()
+	if (this == mServices.MainWindow().currentView()) {
+		viewLayout->addItem(mCurrPaneParent);
 	}
 }
 

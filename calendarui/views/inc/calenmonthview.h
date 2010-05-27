@@ -23,6 +23,7 @@
 #include <qdatetime.h>
 #include <hblabel.h>
 #include <hbextendedlocale.h>
+#include <hbframeitem.h>
 
 // User includes
 #include "calennativeview.h"

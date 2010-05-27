@@ -383,9 +383,9 @@ void CalenEditorPrivate::showEditOccurencePopup()
 	HbAction *cancelAction =
 	        new HbAction(hbTrId("txt_calendar_button_softkey1_cancel"));
 	popUp->addAction(cancelAction);
+	connect(editButtonList, SIGNAL(itemSelected(int)), popUp, SLOT(close()));
 	connect(editButtonList, SIGNAL(itemSelected(int)), this,
 	        SLOT(handleEditOccurence(int)));
-	connect(editButtonList, SIGNAL(itemSelected(int)), popUp, SLOT(close()));
 	connect(cancelAction, SIGNAL(triggered()), this, SLOT(handleCancel()));
 
 	// Show the popup
@@ -519,6 +519,7 @@ void CalenEditorPrivate::setUpView()
 	HbAction *deleteEventAction = qobject_cast<HbAction *> (
 							mEditorDocLoader->findObject(
 										CALEN_EDITOR_DELETE_EVENT_ACTION));
+	deleteEventAction->setText(hbTrId("txt_common_menu_delete"));
 	connect(deleteEventAction, SIGNAL(triggered()), this,
 							SLOT(showDeleteConfirmationQuery()));
 

@@ -38,7 +38,7 @@
 #include <QTranslator>
 
 // User includes
-#include "clockcommon.h"
+#include "clockprivatecrkeys.h"
 #include "clockalarmeditor.h"
 #include "alarmclient.h"
 #include "settingsutility.h"

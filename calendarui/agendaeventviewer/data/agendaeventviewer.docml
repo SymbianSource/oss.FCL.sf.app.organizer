@@ -5,7 +5,7 @@
 			<widget name="groupBox" type="HbGroupBox">
                 <real name="z" value="1"/>
                 <bool name="collapsable" value="FALSE"/>
-                <string locid="txt_calendar_subhead_event" name="titleText" value="Event"/>
+                <string locid="txt_calendar_subhead_event" name="heading" value="Event"/>
             </widget>
             <widget name="scrollArea" type="HbScrollArea">
                 <widget name="scrollAreaContents" role="HbScrollArea:contents" type="HbWidget">

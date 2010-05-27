@@ -18,25 +18,46 @@ ClockAlarmListItemPrototype::text-1{
 	text-line-count-min: 2;
     text-line-count-max: 2;
 }
-ClockAlarmListItemPrototype::text-2{
+ClockAlarmListItemPrototype::text-2:portrait{
     top: -var(hb-param-margin-gene-top);
     right: var(hb-param-margin-gene-right);
     text-height: var(hb-param-text-height-tiny);
 	fixed-width: 28.7un;
     text-align: left;
 }
-ClockAlarmListItemPrototype::text-3{
+ClockAlarmListItemPrototype::text-3:portrait{
     text-height: var(hb-param-text-height-primary);
     top: -var(hb-param-margin-gene-middle-vertical);
     right: var(hb-param-margin-gene-right);
     fixed-width: 28.7un;
     text-align: left;
 }
-ClockAlarmListItemPrototype::text-4{
+ClockAlarmListItemPrototype::text-4:portrait{
     text-height: var(hb-param-text-height-primary-small);
     top: -var(hb-param-margin-gene-middle-vertical);
     bottom: var(hb-param-margin-gene-bottom);
-	fixed-width: 28.7un;
+    fixed-width: 28.7un;
+    text-align: left;
+}
+ClockAlarmListItemPrototype::text-2:landscape{
+    top: -var(hb-param-margin-gene-top);
+    right: var(hb-param-margin-gene-right);
+    text-height: var(hb-param-text-height-tiny);
+    fixed-width: 21un;
+    text-align: left;
+}
+ClockAlarmListItemPrototype::text-3:landscape{
+    text-height: var(hb-param-text-height-primary);
+    top: -var(hb-param-margin-gene-middle-vertical);
+    right: var(hb-param-margin-gene-right);
+    fixed-width: 21un;
+    text-align: left;
+}
+ClockAlarmListItemPrototype::text-4:landscape{
+    text-height: var(hb-param-text-height-primary-small);
+    top: -var(hb-param-margin-gene-middle-vertical);
+    bottom: var(hb-param-margin-gene-bottom);
+    fixed-width: 21un;
     text-align: left;
 }
 ClockAlarmListItemPrototype::alarmIconItem{

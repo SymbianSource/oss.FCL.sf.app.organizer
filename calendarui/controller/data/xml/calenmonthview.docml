@@ -221,6 +221,12 @@
                     </layout>
                 </widget>
 				<widget name="prevPaneWidget" type="HbWidget">
+					<widget name="prevRegionalInfo" type="HbLabel">
+					<enums name="alignment" value="AlignCenter"/>
+					<fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+					<string name="textColor" value="qtc_cal_day_preview_heading"/>
+					<contentsmargins bottom="0.75un" left="var(hb-param-margin-gene-left)" right="var(hb-param-margin-gene-right)" top="0.75un"/>
+					</widget>
 	                <widget name="prevPaneLayout" type="HbWidget">
 	                    <widget name="prevPaneContainer" type="HbWidget">
 	                        <widget name="prevPreviewPane" type="HbScrollArea">
@@ -235,7 +241,7 @@
 	                            <enums name="horizontalScrollBarPolicy" value="ScrollBarAlwaysOff"/>
 	                            <enums name="clampingStyle" value="StrictClamping"/>
 								<enums name="scrollingStyle" value="PanOrFlick"/>
-								<bool name="frictionEnabled" value="FALSE"/>
+								<bool name="frictionEnabled" value="TRUE"/>
 	                        </widget>
 	                        <widget name="NoEntriesLabelPrev" type="HbLabel">
 	                            <string locid="txt_calendar_empty_list_no_entries" name="plainText"/>
@@ -270,6 +276,12 @@
 	                </layout>
 	            </widget>
                 <widget name="currPaneWidget" type="HbWidget">
+					<widget name="currRegionalInfo" type="HbLabel">
+					<enums name="alignment" value="AlignCenter"/>
+					<fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+					<string name="textColor" value="qtc_cal_day_preview_heading"/>
+					<contentsmargins bottom="0.75un" left="var(hb-param-margin-gene-left)" right="var(hb-param-margin-gene-right)" top="0.75un"/>
+					</widget>
                     <widget name="currPaneLayout" type="HbWidget">
                         <widget name="currPaneContainer" type="HbWidget">
                             <widget name="currPreviewPane" type="HbScrollArea">
@@ -284,7 +296,7 @@
 	                            <enums name="horizontalScrollBarPolicy" value="ScrollBarAlwaysOff"/>
 	                            <enums name="clampingStyle" value="StrictClamping"/>
 								<enums name="scrollingStyle" value="PanOrFlick"/>
-								<bool name="frictionEnabled" value="FALSE"/>
+								<bool name="frictionEnabled" value="TRUE"/>
                             </widget>
                             <widget name="NoEntriesLabelCurr" type="HbLabel">
                                 <string locid="txt_calendar_empty_list_no_entries" name="plainText"/>
@@ -319,6 +331,12 @@
                     </layout>
                 </widget>
                 <widget name="nextPaneWidget" type="HbWidget">
+					<widget name="nextRegionalInfo" type="HbLabel">
+					<enums name="alignment" value="AlignCenter"/>
+					<fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+					<string name="textColor" value="qtc_cal_day_preview_heading"/>
+					<contentsmargins bottom="0.75un" left="var(hb-param-margin-gene-left)" right="var(hb-param-margin-gene-right)" top="0.75un"/>
+					</widget>
                     <widget name="nextPaneLayout" type="HbWidget">
                         <widget name="nextPaneContainer" type="HbWidget">
                             <widget name="nextPreviewPane" type="HbScrollArea">
@@ -333,7 +351,7 @@
 	                            <enums name="horizontalScrollBarPolicy" value="ScrollBarAlwaysOff"/>
 	                            <enums name="clampingStyle" value="StrictClamping"/>
 								<enums name="scrollingStyle" value="PanOrFlick"/>
-								<bool name="frictionEnabled" value="FALSE"/>
+								<bool name="frictionEnabled" value="TRUE"/>
                             </widget>
                             <widget name="NoEntriesLabelNext" type="HbLabel">
                                 <string locid="txt_calendar_empty_list_no_entries" name="plainText"/>

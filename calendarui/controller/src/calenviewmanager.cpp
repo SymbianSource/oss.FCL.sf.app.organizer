@@ -396,9 +396,11 @@ void CalenViewManager::activateCurrentView()
 		        // This happens when settings view or event viewer is opened
 		        // from the agenda view. Simply repopulate the view
 		    	if (mCalenDayView) {
+		    		// Remove month view from mainwindow.
+		    		mController.MainWindow().removeView(mCalenMonthView);
 					mCalenDayView->doPopulation();
 					mController.MainWindow().setCurrentView(mCalenDayView);
-		    	}
+		    	} 
 		    } else if (mController.MainWindow().currentView() == mCalenDayViewAlt){
 		        // This happens when settings view or event viewer is opened
 		        // from the agenda view. Simply repopulate the view
@@ -502,14 +504,12 @@ TBool CalenViewManager::HandleCommandL(const TCalenCommand& command)
 	switch (command.Command()) {
 		case ECalenMonthView:
 		    removeDayViews();
-			// Add month view to mainwindow.
+		    // Add month view to mainwindow.
 			mController.MainWindow().addView(mCalenMonthView);
 			mCurrentViewId = ECalenMonthView;
 			activateCurrentView();
 			break;
 		case ECalenDayView:
-			// Remove month view from mainwindow.
-			mController.MainWindow().removeView(mCalenMonthView);
 			mCurrentViewId = ECalenDayView;
 			activateCurrentView();
 			break;

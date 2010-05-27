@@ -16,6 +16,7 @@
 */
 
 // System includes
+#include <hbtapgesture.h>
 
 // User includes
 #include "calenservices.h"
@@ -29,31 +30,37 @@
 /*!
  constructor
  */
-CalenPluginLabel::CalenPluginLabel(MCalenServices& services, 
+EXPORT_C CalenPluginLabel::CalenPluginLabel(MCalenServices& services, 
                                    QGraphicsItem* parent) :
 	HbLabel(parent),mServices(services)
 {
 	setAlignment(Qt::AlignCenter);
-	setFontSpec(HbFontSpec(HbFontSpec::Secondary));
-	setPlainText("Reg plugin");
+	grabGesture(Qt::TapGesture);
 }
 
 /*!
  Destructor
  */
-CalenPluginLabel::~CalenPluginLabel()
+EXPORT_C CalenPluginLabel::~CalenPluginLabel()
 {
 }
 
+
 /*!
- To handle mouse press event.
- \sa QGraphicsItem
- */
-void CalenPluginLabel::mousePressEvent(QGraphicsSceneMouseEvent* event)
+	Functo listen for all gestures
+*/
+void CalenPluginLabel::gestureEvent(QGestureEvent *event)
 {
-	Q_UNUSED(event);
-	
-	mServices.IssueCommandL(ECalenRegionalPluginTapEvent);
+    if(HbTapGesture *gesture = qobject_cast<HbTapGesture *>(event->gesture(Qt::TapGesture))) {
+        if (gesture->state() == Qt::GestureFinished) {
+            if (gesture->tapStyleHint() == HbTapGesture::Tap) {
+                // Regional label is tapped
+                mServices.IssueCommandL(ECalenRegionalPluginTapEvent);
+                event->accept(Qt::TapGesture);
+            }
+        }
+    }
 }
+
 
 // End of file  --Don't remove this.

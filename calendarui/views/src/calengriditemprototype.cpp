@@ -92,6 +92,13 @@ HbAbstractViewItem *CalenGridItemPrototype::createItem()
 {
 	CalenGridItemPrototype* item = new CalenGridItemPrototype(*this);
 	item->createPrimitives();
+	
+	// Set the default frame to NULL so that HbGridView does not add its 
+	// default frame for items
+	HbFrameBackground frame;
+	frame.setFrameGraphicsName(QString(""));
+	item->setDefaultFrame(frame);
+	
 	return item;
 }
 

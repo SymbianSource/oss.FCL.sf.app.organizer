@@ -98,11 +98,7 @@ public:
     void refreshViewOnGoToDate();
     
 protected:
-    
-    // TODO: Remove these after gestures are available
-    void mousePressEvent(QGraphicsSceneMouseEvent *event);
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-    bool eventFilter(QObject *source, QEvent *event);
+    void gestureEvent(QGestureEvent *event);
 
 private:
     

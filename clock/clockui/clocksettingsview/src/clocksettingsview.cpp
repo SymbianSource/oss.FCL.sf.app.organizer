@@ -29,6 +29,7 @@
 #include <QTranslator>
 #include <xqsettingsmanager.h>
 #include <xqsettingskey.h>
+#include <clockdomaincrkeys.h>
 
 // User includes
 #include "clocksettingsview.h"
@@ -38,7 +39,6 @@
 #include "timezoneclient.h"
 #include "settingsdatatypes.h"
 #include "settingscustomitem.h"
-#include "clockcommon.h"
 
 /*!
 	\class ClockSettingsView

@@ -35,6 +35,7 @@ symbian: {
 	"../rom/calenlunarchinese_variant.iby	CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(calenlunarchinese_variant.iby)" \
 	# Generic configuration interface for component cenrep settings  
 	"../conf/calendarUI.confml				APP_LAYER_CONFML(calendarUI.confml)" \
+	"../conf/CI_calendarUI.confml			APP_LAYER_CONFML(CI_calendarUI.confml)" \
 	"../conf/calendarUI_101F874B.crml		APP_LAYER_CRML(calendarUI_101F874B.crml)" 	
 
 	LIBS += -lcalencontroller \

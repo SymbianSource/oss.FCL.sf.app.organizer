@@ -16,7 +16,7 @@
         <widget name="dayViewWidget" role="HbView:widget" type="HbWidget">
 			<widget name="headingRegionalPluginWidget" type="HbWidget">
 	            <widget name="headingWidget" type="HbGroupBox">
-	                <string name="titleText" value=""/>
+	                <string name="heading" value=""/>
 	                <real name="z" value="1"/>
 	                <sizehint type="PREFERRED" width="53.43284un"/>
 	                <bool name="collapsable" value="FALSE"/>

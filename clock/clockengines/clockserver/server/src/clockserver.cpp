@@ -216,7 +216,7 @@ TInt CClkSrvMain::GetActivePluginL( TInt& aPluginId ) const
 	CRepository* cenRep( NULL );
 	
 	// Open the repository.
-	TRAPD( errVal, cenRep = CRepository::NewL( KCRUidNitz ) );
+	TRAPD( errVal, cenRep = CRepository::NewL( TUid::Uid(KCRUidNitz ) ) );
 	if( KErrNone == errVal ) 
 		{
 		// Read the key.
@@ -248,7 +248,7 @@ TInt CClkSrvMain::SetActivePluginL( TInt aPluginId )
     CRepository* cenRep( NULL );
     
     // Open the repository.
-    TRAPD( errVal, cenRep = CRepository::NewL( KCRUidNitz ) );
+    TRAPD( errVal, cenRep = CRepository::NewL( TUid::Uid(KCRUidNitz ) ) );
     if( KErrNone == errVal ) 
         {
         // Update the key.

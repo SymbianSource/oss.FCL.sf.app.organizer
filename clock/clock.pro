@@ -19,21 +19,20 @@ TEMPLATE = subdirs
 SUBDIRS += \
 		clockengines \
 		clockmw \
-		clockui \
-		ftudatetimewizard
+		clockui
 		
 CONFIG += ordered
 
 symbian: {
     BLD_INF_RULES.prj_exports += \
     "./rom/clock.iby                    CORE_APP_LAYER_IBY_EXPORT_PATH(clock.iby)" \
-    "./rom/clockengines.iby             CORE_APP_LAYER_IBY_EXPORT_PATH(clockengines.iby)" \
-    "./rom/ftudatetimewizard.iby        CORE_APP_LAYER_IBY_EXPORT_PATH(ftudatetimewizard.iby)" \
+    "./rom/clockengines.iby             CORE_APP_LAYER_IBY_EXPORT_PATH(clockengines.iby)" \    
 	"./rom/clockresources.iby           LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(clockresources.iby)" \
 	\
     "./conf/clockapp.confml             APP_LAYER_CONFML(clockapp.confml)" \
+	"./conf/CI_clockapp.confml			APP_LAYER_CONFML(CI_clockapp.confml)" \
     "./conf/clockapp_101F874D.crml      APP_LAYER_CRML(clockapp_101F874D.crml)" \
-    "./conf/clockapp_101F8876.crml      APP_LAYER_CRML(clockapp_101F8876.crml)" \
+    "./conf/clockapp_101F8876.crml      APP_LAYER_CRML(clockapp_101F8876.crml)"
 }
 
 # End of file   --Don't remove this.

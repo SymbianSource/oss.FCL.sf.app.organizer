@@ -244,13 +244,13 @@ void ClockWorldView::updateCurrentLocationInfo(int networkTime)
 				mSettingsUtility->timeFormatString());
 		itemList.insert(value.setNum(ClockHomeCityItem::Time), timeInfo);
 
-		// TODO: Use the home city specific icons.
+		// Use the home city specific icons.
 		// Display day/night indicators.
 		QString dayNightIconPath = "";
 		if (isDay(dateTime)) {
-			dayNightIconPath = "qtg_large_clock";
+			dayNightIconPath = "qtg_large_clock_home";
 		} else {
-			dayNightIconPath = "qtg_large_clock";
+			dayNightIconPath = "qtg_large_clock_night_home";
 		}
 		itemList.insert(value.setNum(
 				ClockHomeCityItem::DayNightIndicator), dayNightIconPath);
@@ -660,7 +660,7 @@ QVariantList ClockWorldView::getCityListDecorationString(
 	if (isDay(dateTime)) {
 		dayNightIconPath = "qtg_large_clock";
 	} else {
-		dayNightIconPath = "qtg_large_clock";
+		dayNightIconPath = "qtg_large_clock_night";
 	}
 	decorationString.append(HbIcon(dayNightIconPath));
 

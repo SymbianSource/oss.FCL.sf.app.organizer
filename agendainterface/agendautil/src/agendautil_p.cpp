@@ -1175,17 +1175,6 @@ bool AgendaUtilPrivate::createException(const AgendaEntry& entry)
 				// create new (child) entry
 				// Use original instance time for recurrenceID as this entry hasn't got one.
 				TCalTime originalCalTime = calEntry->StartTimeL();
-				TDateTime origDateTime = originalCalTime.TimeLocalL().DateTime();
-				// set the instance date to this
-				QDate date = entry.startTime().date();
-				QTime time =entry.startTime().time();
-				origDateTime.Set(date.year(),
-								 static_cast<TMonth> (date.month() - 1),
-								 date.day() - 1,
-								 time.hour(),
-								 time.minute(),time.second(), 0);
-				TTime originalTime(origDateTime);
-				originalCalTime.SetTimeLocalL(originalTime);
 				// create the new child now
 				CCalEntry* newEntry = CCalEntry::NewL( calEntry->EntryTypeL(), 
 													   guid,
@@ -1252,19 +1241,6 @@ bool AgendaUtilPrivate::createException(const AgendaEntry& entry)
 				// create new (child) entry
 				// Use original instance time for recurrenceID as this entry hasn't got one.
 				TCalTime originalCalTime = calEntry->StartTimeL();
-				TDateTime origDateTime = originalCalTime.TimeLocalL().DateTime();
-				// set only the instance date but not the time to this
-				QDate date = entry.startTime().date();
-				QTime time =entry.startTime().time();
-				origDateTime.Set(date.year(),
-				                 static_cast<TMonth> (date.month() - 1),
-								 date.day() - 1,
-                                 origDateTime.Hour(),
-                                 origDateTime.Minute(),
-                                 origDateTime.Second(), 
-                                 origDateTime.MicroSecond());
-				TTime originalTime(origDateTime);
-				originalCalTime.SetTimeLocalL(originalTime);
 				// create the new child now
 				CCalEntry* newEntry = CCalEntry::NewL( calEntry->EntryTypeL(), 
 													   guid,
@@ -1666,8 +1642,11 @@ void AgendaUtilPrivate::markDatesWithEvents(QDateTime rangeStart,
 		TCalTime startCalTime = instanceList[i]->StartTimeL();
 		TCalTime endCalTime = instanceList[i]->EndTimeL();
 		TDateTime startDateTime = startCalTime.TimeLocalL().DateTime();
+    TDateTime endDateTime = endCalTime.TimeLocalL().DateTime();
 		QDate startDate(startDateTime.Year(), startDateTime.Month()+1,
 						startDateTime.Day() + 1);
+    QDate endDate(endDateTime.Year(), endDateTime.Month()+1,
+                    endDateTime.Day() + 1);
 		if (type == CCalEntry::EEvent || type == CCalEntry::EAppt ||
 				type == CCalEntry::EReminder) {
 			if(endsAtStartOfDay(instanceList[i], endCalTime.TimeLocalL())) {
@@ -1680,31 +1659,65 @@ void AgendaUtilPrivate::markDatesWithEvents(QDateTime rangeStart,
 					continue;
 				}
 			}
-			
-			// Mark the required dates frm start date to end date
-			TTimeIntervalDays days = endCalTime.TimeLocalL().DaysFrom(startCalTime.TimeLocalL());
-			for (int j = -1; j < days.Int(); j++) {
-				QDate date = startDate.addDays(j+1);
-				if (date <= rangeEnd.date()) {
-					dates.append(date);
-				} else {
-					break;
-				}
-			}
-		} else if (type == CCalEntry::EAnniv) {
-			if (startDate <= rangeEnd.date()) {
-				dates.append(startDate);
-			}
-		} else if (type == CCalEntry::ETodo) {
-			// if start time is less that today, then mark it for today
-			if (startDate < QDate::currentDate()) {
-				dates.append(QDate::currentDate());
-			} else {
-				dates.append(startDate);
-			}
-		}
-	}
-	CleanupStack::PopAndDestroy();
+        // Mark the required dates frm start date to end date
+        TTimeIntervalDays days ;
+        //check if the start date of the entry is before the start day of the grid
+        if(startDate < rangeStart.date()){
+            if(endDate<=rangeEnd.date()){
+                //if the end date of entry is lying in the grid ,
+                //then mark the entry from start day of the grid to the end date of the entry
+                days = endCalTime.TimeLocalL().DaysFrom(startDateForInstanceSearch.TimeLocalL());
+            }
+            else{
+                //if end date of the entry is greater then the last date of grid, 
+                //then mark all the date of the grid with the entry 
+                days = endDateForInstanceSearch.TimeLocalL().DaysFrom(startDateForInstanceSearch.TimeLocalL()) ;
+            }
+            //start the entries from the first day of the grid
+            for (int j = 0; j <= days.Int(); j++) {
+                QDate date = rangeStart.date().addDays(j);
+                if (date <= rangeEnd.date()) {
+                    dates.append(date);
+                } else {
+                    break;
+                }
+            }
+        }
+        //if the start date of the entry is lying inside the grid
+        else{
+            if(endDate<=rangeEnd.date()){
+                //if the end date of entry is lying in the grid ,
+                //then mark the entry from start date of the entry to the end date of the entry
+                days = endCalTime.TimeLocalL().DaysFrom(startCalTime.TimeLocalL()) ;
+            }
+            else{
+                //if end date of the entry is greater then the last date of grid, 
+                //then mark all the date from start date of the entry to the end date of the grid 
+                days = endDateForInstanceSearch.TimeLocalL().DaysFrom(startCalTime.TimeLocalL()) ;
+            }
+            for (int j = 0; j <= days.Int(); j++) {
+                QDate date = startDate.addDays(j);
+                if (date <= rangeEnd.date()) {
+                    dates.append(date);
+                } else {
+                    break;
+                }
+            }   
+        }
+    } else if (type == CCalEntry::EAnniv) {
+        if (startDate <= rangeEnd.date()) {
+            dates.append(startDate);
+        }
+    } else if (type == CCalEntry::ETodo) {
+            // if start time is less that today, then mark it for today
+            if (startDate < QDate::currentDate()) {
+                dates.append(QDate::currentDate());
+            } else {
+                dates.append(startDate);
+            }
+        }
+    }
+    CleanupStack::PopAndDestroy();
 }
 
 QList<AgendaEntry> AgendaUtilPrivate::createEntryIdListForDay( QDateTime day,

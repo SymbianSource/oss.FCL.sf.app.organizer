@@ -19,6 +19,8 @@
 #include <QGraphicsSceneEvent>
 #include <hbmainwindow.h>
 #include <hbaction.h>
+#include <hbpangesture.h>
+#include <hbswipegesture.h>
 
 // User includes
 #include "calendayview.h"
@@ -41,6 +43,7 @@ mGoToTodayAction(NULL),
 mActionTaken(false)
 {
     // No implementation yet
+    grabGesture(Qt::SwipeGesture);
 }
 
 // ----------------------------------------------------------------------------
@@ -168,66 +171,22 @@ CalenDocLoader* CalenDayView::docLoader()
     return mDocLoader;
 }
 
-// ----------------------------------------------------------------------------
-// CalenDayView::handleLocaleChange
-// Rest of the details are commented in the header
-// ----------------------------------------------------------------------------
-//
-void CalenDayView::mousePressEvent(QGraphicsSceneMouseEvent *event)
+/*
+	Function to listen for gestures
+*/
+void CalenDayView::gestureEvent(QGestureEvent *event)
 {
-    // TODO: Remove these after gestures are available
-    mTapPoint = event->pos();
-    event->accept();
-}
-
-// ----------------------------------------------------------------------------
-// CalenDayView::handleLocaleChange
-// Rest of the details are commented in the header
-// ----------------------------------------------------------------------------
-//
-void CalenDayView::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{
-    // TODO: Remove these after gestures are available
-    QPointF curPos = event->pos();
-    if (abs(curPos.y() - mTapPoint.y()) > 20) {
-        event->accept();
-        return;
-    }
-    if (curPos.x() - mTapPoint.x() > 50) {
-        mTapPoint = QPointF(0, 0);
-        mServices.IssueCommandL(ECalenShowPrevDay);
-        mActionTaken = true;
-    } else if (curPos.x() - mTapPoint.x() < -50) {
-        mTapPoint = QPointF(0, 0);
-        mServices.IssueCommandL(ECalenShowNextDay);
-        mActionTaken = true;
-    }
-    event->accept();
-}
-
-// ----------------------------------------------------------------------------
-// CCalenDayView::eventFilter
-// Rest of the details are commented in the header
-// ----------------------------------------------------------------------------
-//
-bool CalenDayView::eventFilter(QObject *source, QEvent *event)
-{
-    // TODO : remove this line after gestures are available
-    mActionTaken = false;
-    Q_UNUSED(source)
-    if (event->type() == QEvent::GraphicsSceneMousePress) {
-        QGraphicsSceneMouseEvent *mouseEvent = static_cast<QGraphicsSceneMouseEvent*>(event);
-        mousePressEvent(mouseEvent);
-    } else if (event->type() == QEvent::GraphicsSceneMouseMove) {
-        QGraphicsSceneMouseEvent *mouseEvent = static_cast<QGraphicsSceneMouseEvent*>(event);
-        mouseMoveEvent(mouseEvent);
-    }
-    if (mActionTaken) {
-        // Swipe gesture has been enforced.
-        // Do not pass the event to the source
-        return true;
-    }
-    return false;
+    if(HbSwipeGesture *gesture = qobject_cast<HbSwipeGesture *>(event->gesture(Qt::SwipeGesture))) {
+        if (gesture->state() == Qt::GestureStarted) {
+            if(QSwipeGesture::Left == gesture->horizontalDirection()) {
+                mServices.IssueCommandL(ECalenShowNextDay);
+                event->accept(Qt::SwipeGesture);
+            } else if(QSwipeGesture::Right == gesture->horizontalDirection()) {
+                mServices.IssueCommandL(ECalenShowPrevDay);
+               event->accept(Qt::SwipeGesture);
+            }
+        }
+    } 
 }
 
 // ----------------------------------------------------------------------------

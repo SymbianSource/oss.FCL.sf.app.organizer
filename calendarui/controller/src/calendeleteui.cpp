@@ -35,7 +35,6 @@
 #include "CleanupResetAndDestroy.h"
 #include "caleninstanceid.h"
 #include "calenactionuiutils.h"
-#include "CalendarPrivateCRKeys.h"  // includes CalendarInternalCRKeys.h
 #include "calendateutils.h"
 #include "calenagendautils.h"
 

@@ -571,7 +571,8 @@ void CClkSrvImpl::NotifyTimeChangeL( CClockTimeSourceInterface& aPluginImpl )
                     TInt validNitz( KSetValidNitz );
                     CRepository* cenRep( NULL );
     
-                    TRAPD( errorVal, cenRep = CRepository::NewL( KCRUidNitz ) );
+                    TRAPD( errorVal, cenRep =
+                    		CRepository::NewL( TUid::Uid(KCRUidNitz) ) );
                     if( errorVal == KErrNone )
                         {
                         errorVal = cenRep->Set( KValidNitz, validNitz );
@@ -656,7 +657,8 @@ void CClkSrvImpl::NotifyTimeChangeL( CClockTimeSourceInterface& aPluginImpl )
                     TInt validNitz( KSetValidNitz );
                     CRepository* cenRep( NULL );
     
-                    TRAPD( errorVal, cenRep = CRepository::NewL( KCRUidNitz ) );
+                    TRAPD( errorVal, cenRep =
+                    		CRepository::NewL( TUid::Uid(KCRUidNitz) ) );
                     if( errorVal == KErrNone )
                         {
                         errorVal = cenRep->Set( KValidNitz, validNitz );
