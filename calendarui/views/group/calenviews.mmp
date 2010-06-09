@@ -154,6 +154,7 @@ LIBRARY			calencommonutils.lib
 LIBRARY			missedalarmstore.lib  
 LIBRARY			apmime.lib
 LIBRARY         multicaluidialog.lib
+LIBRARY			touchfeedback.lib //MTouchFeedBack
 
 // File logging
 LIBRARY flogger.lib

@@ -278,7 +278,7 @@ CCalenTodoContainer::~CCalenTodoContainer()
     delete iController;
     delete iDesArray;
     delete iListBox;
-    delete iEmptyListText;
+    //delete iEmptyListText;
     
     iColorUidArray.Close();
     TRACE_EXIT_POINT;
@@ -390,10 +390,16 @@ void CCalenTodoContainer::ConstructImplL()
     // Transfer iconlist ownership to the listbox
     iListBox->ItemDrawer()->ColumnData()->SetIconArray( iconList );
 
-    // Save empty text and set null for list box.
+    /*// Save empty text and set null for list box.
     // It is made not to display "No data".
     iEmptyListText = iListBox->View()->EmptyListText()->AllocL();
-    iListBox->View()->SetListEmptyTextL( KNullDesC );
+    //iListBox->View()->SetListEmptyTextL( KNullDesC );*/
+    
+    // Set text for empty listbox
+    HBufC* emptyText = StringLoader::LoadLC(R_CALEN_QTN_CALE_NO_EVENTS,
+                                            iEikonEnv);
+    iListBox->View()->SetListEmptyTextL( *emptyText ); //Whenever listbox is empty, it will set with this empty text.
+    CleanupStack::PopAndDestroy(emptyText);
 
     TRACE_EXIT_POINT;
     }
@@ -476,11 +482,13 @@ void CCalenTodoContainer::SetHighlightingL()
     TRACE_ENTRY_POINT;
 
     TInt focusIx = KErrNotFound;
-
+    TInt topIx = KErrNotFound;
+    
+    topIx = iListBox->TopItemIndex();
     // If top item is specified, set it
-    if ( iFirstEntryOnScreenIndex != KErrNotFound )
+    if ( topIx != KErrNotFound )
         {
-        iListBox->SetTopItemIndex( iFirstEntryOnScreenIndex );
+        iListBox->SetTopItemIndex( topIx );
         }
 
     if ( iHighlightedRowNumber != KErrNotFound )
@@ -591,7 +599,7 @@ void CCalenTodoContainer::CreateEntryItertorL()
     CleanupStack::PopAndDestroy( listDes );
     CleanupStack::PopAndDestroy( &calendarInfoList ); 
     iListBox->HandleItemAdditionL();
-    iListBox->View()->SetListEmptyTextL( *iEmptyListText );
+    //iListBox->View()->SetListEmptyTextL( *iEmptyListText );
 
     TRACE_EXIT_POINT;
     }
@@ -1186,7 +1194,12 @@ void CCalenTodoContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent
         {
         TInt pointerIndex(-1);
         TBool isItem (iListBox->View()->XYPosToItemIndex(aPointerEvent.iPosition, pointerIndex));
-
+        
+        if(aPointerEvent.iType == TPointerEvent::EButton1Down)
+		{
+                this->GenerateTactileFeedback(); //Tactile feedback.
+		}	
+        
         if(isItem == EFalse && IsEmptyView())
             {
             iListBox->HandlePointerEventL(aPointerEvent);

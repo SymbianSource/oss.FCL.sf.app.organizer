@@ -1679,7 +1679,7 @@ RESOURCE MENU_PANE r_calen_event_view_menupane
             {
             command = ECalenDeleteCurrentEntry;
             txt = qtn_cale_om_delete;
-            },
+            },   
         MENU_ITEM
             {
             command = ECalenCompleteTodo;
@@ -1697,6 +1697,12 @@ RESOURCE MENU_PANE r_calen_event_view_menupane
             },
         MENU_ITEM
             {
+            command = EFindItemMenuPlaceHolder;
+            txt = qtn_options_find;
+            cascade = r_calen_view_find_sub_menupane;
+            },        
+        MENU_ITEM
+            {
             command = ECalenShowLocation;
             txt = qtn_cale_om_show_on_map;
             },
@@ -1710,12 +1716,7 @@ RESOURCE MENU_PANE r_calen_event_view_menupane
             {
             command = ECalenGetLocationAndReplace;
             txt = qtn_cale_om_find_on_map;
-            },        
-        MENU_ITEM
-	        { 
-	        command = EFindItemMenuPlaceHolder;
-			txt = "Automatic HL"; 
-	        },                      
+            },                         
         MENU_ITEM
             {
             command = EAknCmdHelp;
@@ -1727,7 +1728,32 @@ RESOURCE MENU_PANE r_calen_event_view_menupane
             txt = qtn_options_exit;
             }
         };
-    }  
+    } 
+
+// ---------------------------------------------------------
+// Find UI for calendar viewers
+// ---------------------------------------------------------
+RESOURCE MENU_PANE r_calen_view_find_sub_menupane
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = ECalenCmdFindPhoneNum;
+            txt = qtn_options_find_phone_number;
+            },
+        MENU_ITEM
+            {
+            command = ECalenCmdFindEmail; 
+            txt = qtn_options_find_email_address;
+            },
+        MENU_ITEM
+            {
+            command = ECalenCmdFindURL; 
+            txt = qtn_options_find_url_address;
+            }
+        };
+    }
 
 
 // ---------------------------------------------------------
@@ -3082,5 +3108,7 @@ RESOURCE TBUF64 r_qtn_calen_size_exceeded
     { 
     buf = qtn_cale_max_attachment_size;
     }
+
+
 
 // End of File

@@ -34,6 +34,7 @@
 #include "calencmdlineparser.h"         // CCalCmdLineParser
 #include "CalenUid.h"
 #include "calensend.h"
+#include "calendialogshutter.h"
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -92,6 +93,12 @@ CCalenCmdLineLauncher::~CCalenCmdLineLauncher()
         }
 
     delete iCalendarLaunchCallBack;
+    
+    if ( iShutter )
+        {
+        delete iShutter;
+        iShutter = NULL;
+        }
 
     TRACE_EXIT_POINT;
     }
@@ -119,7 +126,7 @@ void CCalenCmdLineLauncher::ConstructL()
     iController.RegisterForNotificationsL( this, exitFlags );
     
     exitFlags.Reset();
-
+    iShutter = CCalenDialogShutter::NewL( CEikonEnv::Static() );
     TRACE_EXIT_POINT;
     }
 
@@ -153,22 +160,10 @@ TBool CCalenCmdLineLauncher::ProcessCommandParametersL(
             // Tell the editui that whatever it was doing, it should not alter
             // the focus state
             iController.IssueCommandL( ECalenNotifyFocusChange );
-
-            // Send a key event to the currently open dialog (viewer / editor)
-            // to dismiss it
-            /*TKeyEvent key;
-            key.iRepeats = 0;
-            key.iCode = EKeyEscape;
-            key.iModifiers = 0;
-            CCoeEnv::Static()->SimulateKeyEventL( key, EEventKey );*/
-            AknDialogShutter::ShutDialogsL( *CEikonEnv::Static() );
-            // Break is added to close the messaging editor as the messagng editor is not 
-            // consuming the escape key event.
-            /*if( iGlobalData->CalenSendL().IsMessagingEditorOpen() )
-                {
-            break;
-                }*/
-                 
+            
+            iShutter->Cancel();
+            //close all open dialogs in asynchronous way
+            iShutter->ShutDialogsL();
             }
 
         // Interpret 8bit data as 16bit unicode data

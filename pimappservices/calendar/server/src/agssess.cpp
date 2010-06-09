@@ -4046,7 +4046,7 @@ void CAgnSessionFile::AddFileChangeToBufferL(CAgnFileChangeInfo& aFileChangeInfo
             {
              // Clear all the notifications in the buffer
             iFileBufferedNotification->Reset();
-            iFileBufferedNotificationStream.Open(*iBufferedNotification);       
+            iFileBufferedNotificationStream.Open(*iFileBufferedNotification);       
         
             // Add a single 'Undefined Change' notification to the notification buffer
             CAgnFileChangeInfo* fileChang = CAgnFileChangeInfo::NewL(NULL, MCalFileChangeObserver::ECalendarInfoUpdated);

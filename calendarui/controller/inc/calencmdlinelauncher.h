@@ -31,6 +31,7 @@
 class CCalenController;
 class CCalenGlobalData;
 class CAknViewAppUi;
+class CCalenDialogShutter;
 
 // CLASS DEFINITIONS
 
@@ -145,6 +146,7 @@ class CCalenCmdLineLauncher : public CBase,
         
         TBool iDelayCallBack;
         CAknViewAppUi& iAppUi;
+        CCalenDialogShutter* iShutter;
     };
 
 #endif // CALENCMDLINELAUNCHER_H

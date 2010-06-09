@@ -236,6 +236,21 @@ public: // New methods
      * Returns ETrue if event has location text else EFalse
      */
     TBool IsEventHasNoLocationTextL();
+    
+    /**
+     * Find a phone number in the form
+     */
+    void OnCmdFindPhoneNumL();
+    
+    /**
+     * Find an email address in the form
+     */
+    void OnCmdFindEmailL();
+    
+    /**
+     * Find a URL in the form
+     */
+    void OnCmdFindUrlL();
   
     
  private:
@@ -458,20 +473,6 @@ public: // New methods
 	 
      void SetLabelContentL( CEikLabel& aLabel );
 
-    /**
-    * Reads the shared data value used to initialize automatic highlighting
-    * @return TBool, ETrue if automatic highlighting is to be used
-    */
-    void ReadAutoHlCenRepValueAndSetNotifyL();
-    
-    /**
-    * From MCenRepNotifyHandlerCallback
-    * Handles the incoming notifications of key changes
-    * @since Series60 3.0
-    * @param aId, Key that has changed
-    * @param aNewValue, New value of the key    
-    */
-    void HandleNotifyInt( TUint32 aId, TInt aNewValue );
 
     /**
     * From MCenRepNotifyHandlerCallback
@@ -482,17 +483,6 @@ public: // New methods
     */
     void HandleNotifyError( TUint32 aId,TInt aError,CCenRepNotifyHandler* aHandler );
     
-	/**
-	* Set the state of automatic highlighting
-	* @param aSwitchON, ETrue if automatic highlighting is to used, otherwise EFalse
-	*/
-    void SetAutomaticHighlightL( const TBool aSwitchON );
-    
-    /**
-	* This method is used when phone number is 
-	* found and pressing phone key would make call
-	*/
-    void HandleNumberCallL();
 
     /**
      * Add calendar info field to the viewer
@@ -599,11 +589,8 @@ private:
      // Notifier to listen changes of offline state
      CCenRepNotifyHandler* iNotifier;
      TInt iNumOfLinesBeforeLocField; // Number of lines before locaiton field in the rich text editor
-     TInt iTimeFieldLines;  // Number of lines occupied by time field on the viewer
-     TBool iAutomaticHlValue;
-     TBool iAutomaticHlInitialized;   
+     TInt iTimeFieldLines;  // Number of lines occupied by time field on the viewer   
      TBool iEmbeddedFileOpened;
-     CItemFinder*  iAutoFinder; // text finder 
      CFindItemMenu* iFindMenu;  
      TCursorSelection iSelectedText; // Cursor selection for the text editor
      TBool iLocaleChanged;

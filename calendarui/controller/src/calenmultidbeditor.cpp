@@ -712,8 +712,7 @@ TBool CCalenMultiDBEditor::SaveNoteL( TInt aButtonId )
         // If in editing mode, just save the name used before.
         if( iEditFlag )
             {
-            iCalendarName = iCalendarInfo.NameL().AllocLC();
-            CleanupStack::Pop( iCalendarName );
+			iCalendarName->Des().Copy(iCalendarInfo.NameL());
             SetEdwinTextL( ECalenMultiDbName, iCalendarName );
             }
         else

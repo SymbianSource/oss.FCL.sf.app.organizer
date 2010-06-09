@@ -333,6 +333,20 @@ void CCalenMissedEventView::HandleCommandL(TInt aCommand)
             CCalenNativeView::HandleCommandL(aCommand);
             }
             break;
+        case ECalenCmdFindPhoneNum:
+            {
+            cnt->OnCmdFindPhoneNumL();
+             }
+             break;
+        case ECalenCmdFindEmail:
+            {
+            cnt->OnCmdFindEmailL();
+            }
+            break;
+        case ECalenCmdFindURL:
+            {
+            cnt->OnCmdFindUrlL();
+            }
         default:
             if(cnt->GetFindItemMenu()->CommandIsValidL(aCommand))
                 {
@@ -381,7 +395,7 @@ void CCalenMissedEventView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMe
                       }
                 }
             
-		  	cnt->GetFindItemMenu()->AddItemFindMenuL(cnt->GetItemFinder(),aMenuPane,EFindItemMenuPlaceHolder,KNullDesC);
+		  
 		  	 
 		  	 if(CCalenLocationUtil::IsMapProviderAvailableL())
             	{

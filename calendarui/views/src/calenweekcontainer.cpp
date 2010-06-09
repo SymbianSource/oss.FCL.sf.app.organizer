@@ -904,6 +904,8 @@ void CCalenWeekContainer::SetListBoxDataL()
     iListBox->View()->SetDisableRedraw(EFalse);
     DrawDeferred();
 
+//Changing RSK to back / exit
+    WeekView().UpdateCbaL();
     TRACE_EXIT_POINT;
     }
 
@@ -2188,6 +2190,7 @@ void CCalenWeekContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent
             {
             case TPointerEvent::EButton1Down:
                 {
+                this->GenerateTactileFeedback(); //Tactile feedback.
                 if(isItem)
                     {
                     oldRow = iListBox->View()->CurrentItemIndex();

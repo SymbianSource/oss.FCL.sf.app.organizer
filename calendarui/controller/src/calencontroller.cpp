@@ -212,6 +212,7 @@ void CCalenController::ConstructL()
     notificationArray.Append(ECalenNotifySystemTimeChanged);
     notificationArray.Append(ECalenNotifyAppForegrounded);
     notificationArray.Append(ECalenNotifyDayViewClosed);
+    notificationArray.Append(ECalenNotifyWeekViewClosed);
     notificationArray.Append(ECalenNotifyAppBackgrounded);
     notificationArray.Append(ECalenNotifyViewPopulationComplete);
     notificationArray.Append(ECalenNotifyCalendarFieldChanged);

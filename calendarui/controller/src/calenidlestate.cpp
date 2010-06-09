@@ -100,6 +100,7 @@ TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
         case ECalenDayView:
         case ECalenTodoView:
         case ECalenForwardsToDayView:
+        case ECalenForwardsToWeekView:
         case ECalenNextView:
         case ECalenPrevView:
         case ECalenSwitchView:

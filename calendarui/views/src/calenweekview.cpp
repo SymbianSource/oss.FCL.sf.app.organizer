@@ -44,6 +44,9 @@
 #include "calendar.hrh"
 
 
+// Button position of the MSK CBA button
+const TInt KSK2CBAPosition = 2;
+
 //  LOCAL CONSTANTS AND MACROS
 #define iWeekContainer static_cast<CCalenWeekContainer*>( iContainer )
 
@@ -163,12 +166,20 @@ void CCalenWeekView::SetStatusPaneFromActiveContextL()
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenWeekView::DoActivateImplL( const TVwsViewId& /*aPrevViewId*/,
-                                      TUid /*aCustomMessageId*/,
+void CCalenWeekView::DoActivateImplL( const TVwsViewId& aPrevViewId,
+                                      TUid aCustomMessageId,
                                       const TDesC8& /*aCustomMessage*/ )
     {
     TRACE_ENTRY_POINT;
-
+    if( aPrevViewId.iAppUid == KUidCalendar )    // switch from internal view
+            {
+            iShowBackButtonOnCba =
+                ( aCustomMessageId == KUidCalenShowBackCba ? ETrue : EFalse );
+            }
+        else
+            {
+            iShowBackButtonOnCba = EFalse;
+            }
     iWeekContainer->SetCursorToActiveDayL();
     //SetStatusPaneFromActiveContextL();
     
@@ -367,12 +378,42 @@ void CCalenWeekView::HandleCommandL( TInt aCommand )
             iServices.IssueCommandL( aCommand );
             }
             break;
-
+        case EAknSoftkeyBack:
+            {
+            
+            SetCbaL( R_CALEN_MONTH_AND_WEEK_VIEW_CBA );
+            
+            iServices.IssueNotificationL(ECalenNotifyWeekViewClosed);
+            }
+            break;
         default:
             CCalenNativeView::HandleCommandL( aCommand );
             break;
         }
 
+    TRACE_EXIT_POINT;
+    }
+// ---------------------------------------------------------
+// CCalenWeekView::UpdateCbaL
+// Set context menubar and also CBA button back / exit.
+// (other items were commented in a header).
+// ---------------------------------------------------------
+//
+void CCalenWeekView::UpdateCbaL()
+    {
+    TRACE_ENTRY_POINT;
+
+    if( iShowBackButtonOnCba )
+        {
+        CEikButtonGroupContainer*  cba = Cba();
+        cba->SetCommandL( KSK2CBAPosition, R_CALEN_BACK_CBA_BUTTON);
+        cba->DrawNow();
+        }
+    else
+        {
+        SetCbaL(R_CALEN_MONTH_AND_WEEK_VIEW_CBA);
+        }
+ 
     TRACE_EXIT_POINT;
     }
 

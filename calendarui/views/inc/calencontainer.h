@@ -50,6 +50,7 @@ class MCalenPreview;
 class MAknNaviDecoratorObserver;
 class MCCalenNaviLabelObserver;
 
+class MTouchFeedback;
 
 class CCalenPreview;
 
@@ -246,6 +247,12 @@ public:     // New function
      * returns previewpane pointer
      */
     virtual const MCalenPreview* PreviewPane(){return NULL; };
+    
+    /**
+    * Generates tactile feedback on user touch action
+    */        
+    virtual void GenerateTactileFeedback();
+    
 private: // New functions
     /**
      * Return number of icons needed to be displayed
@@ -337,6 +344,9 @@ protected:
     MCalenServices& iServices;
     RArray<MCalenServices::TCalenIcons> iIconIndices;
     CCalenContainerLayoutManager* iLayoutManager;
+    
+private:
+    MTouchFeedback* iFeedBack;
     };
 
 #endif // CALENCONTAINER_H

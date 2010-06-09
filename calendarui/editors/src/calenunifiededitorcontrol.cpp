@@ -811,21 +811,24 @@ void CCalenUnifiedEditorControl::OnEventTypeChangedL( CCalEntry::TType aNewEvent
     {
     TRACE_ENTRY_POINT;
     
-    // update Entry type of Edited entry
-    iUnifiedEditor.Edited().SetEntryType( aNewEventType );
-
-    // Delete, previous entry type fields from editor
-    DeletePreviousEntryTypeFieldsL();
-    
-    // Add new fiedls to editor
-    AddNewEntryTypeFieldsL( aNewEventType );
-    iUnifiedEditor.SetEntryType( aNewEventType );
-
-    // after changing the event type, update the fields with default values
-    InitDefaultEditorsL();
-    SetDataToEditorL();
-    
-    iUnifiedEditor.UpdateFormL();
+    if(iUnifiedEditor.GetEntryType() != aNewEventType)
+    	{
+	    // update Entry type of Edited entry
+	    iUnifiedEditor.Edited().SetEntryType( aNewEventType );
+	
+	    // Delete, previous entry type fields from editor
+	    DeletePreviousEntryTypeFieldsL();
+	    
+	    // Add new fiedls to editor
+	    AddNewEntryTypeFieldsL( aNewEventType );
+	    iUnifiedEditor.SetEntryType( aNewEventType );
+	
+	    // after changing the event type, update the fields with default values
+	    InitDefaultEditorsL();
+	    SetDataToEditorL();
+	    
+	    iUnifiedEditor.UpdateFormL();
+	  	}
     
     TRACE_EXIT_POINT;
     }

@@ -500,20 +500,24 @@ EXPORT_C void CCalenCustomisationManager::UnloadPluginsL( const RArray<TUid>& aP
         TInt position = iPlugins.Find( aPlugins[index], CPluginInfo::Identifier );
         if ( position != KErrNotFound ) 
 	        {
-        	if((iInfoBarProviderUid != iPlugins[position]->Uid())
-        		&& (iPreviewPaneProviderUid != iPlugins[ position]->Uid()))
-	            {
-	            CPluginInfo* removedPlugin = iPlugins[ position ];
-	            iPlugins.Remove( position );
-	            delete removedPlugin;
-	            }
-        	else 
-	        	{
-	        	iPlugins[position]->Disable(ETrue);
-				iDefferedUnloadPluginList.AppendL(iPlugins[position]->Uid());
-				iInfoBarProviderUid = KNullUid;
-				iPreviewPaneProviderUid = KNullUid;
-	        	}
+            TUid pluginUid = iPlugins[ position]->Uid();
+            if(!(iRomBasedPlugins.Find(pluginUid) != KErrNotFound))
+                {
+                    if((iInfoBarProviderUid != iPlugins[position]->Uid())
+                        && (iPreviewPaneProviderUid != iPlugins[ position]->Uid()))
+                        {
+                        CPluginInfo* removedPlugin = iPlugins[ position ];                   
+                        iPlugins.Remove( position );
+                        delete removedPlugin;
+                        }
+                    else 
+                        {
+                        iPlugins[position]->Disable(ETrue);
+                        iDefferedUnloadPluginList.AppendL(iPlugins[position]->Uid());
+                        iInfoBarProviderUid = KNullUid;
+                        iPreviewPaneProviderUid = KNullUid;
+                        }
+                }     
 		   }
         }
     TRACE_EXIT_POINT;
@@ -735,7 +739,7 @@ EXPORT_C const RPointerArray<CCalenViewInfo>& CCalenCustomisationManager::Views(
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenCustomisationManager::DoImmediatePluginLoadingL()
+void CCalenCustomisationManager::DoImmediatePluginLoadingL(TBool aLoadViewbasedPulgins)
     {
     TRACE_ENTRY_POINT;
 
@@ -755,7 +759,22 @@ void CCalenCustomisationManager::DoImmediatePluginLoadingL()
     for ( TInt index( 0 ); index < pluginCount; ++index )
         {
         TUid pluginUid = iPluginInfo[index]->ImplementationUid();
-        if ( iActivePlugins.Find( pluginUid ) != KErrNotFound )
+        TBool loadPlugins(EFalse);
+        
+        if(aLoadViewbasedPulgins)
+            {
+            if ( (iActivePlugins.Find( pluginUid ) != KErrNotFound) && 
+                 !(iRomBasedPlugins.Find( pluginUid ) != KErrNotFound) )
+                {
+                loadPlugins = ETrue;
+                }                
+            }
+        else if((iActivePlugins.Find( pluginUid ) != KErrNotFound))
+            {
+            loadPlugins = ETrue;
+            }       
+        
+        if (loadPlugins)
             {
             TRAPD( error, LoadPluginL( pluginUid ) );
             if ( error )
@@ -1473,8 +1492,8 @@ TBool CCalenCustomisationManager::PluginAvailabilityFinder( const TUid* aUid,
 EXPORT_C void CCalenCustomisationManager::DoPluginLoadingL()
     {
     TRACE_ENTRY_POINT;
-    // Reset and destroy the contents of the owned arrays
-    iPlugins.ResetAndDestroy();
+    // Reset and destroy the contents of the owned arrays    
+    //iPlugins.ResetAndDestroy();
 
     iPluginInfo.ResetAndDestroy();
 
@@ -1485,7 +1504,7 @@ EXPORT_C void CCalenCustomisationManager::DoPluginLoadingL()
     // create active plugin list
     CreateActivePluginListL();
     
-    DoImmediatePluginLoadingL();
+    DoImmediatePluginLoadingL(ETrue);
     iSetting->LoadL();
     iSetting->UpdatePluginListL(*this);
     

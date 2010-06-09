@@ -46,7 +46,7 @@
 #include <centralrepository.h>
 #include <cenrepnotifyhandler.h>
 #include <CommonUiInternalCRKeys.h>
-#include <AknUtils.h>
+#include <AknUtils.h> 
 #include <avkon.hrh>    // EAknCmdHelp
 #include <avkon.mbg>
 #include <avkon.rsg>
@@ -99,9 +99,8 @@ enum TPanicCode
 CCalenMissedEventContainer::CCalenMissedEventContainer(CCalenNativeView* aView,
                               MCalenServices& aServices  )
     : CCalenContainer( aView, aServices ),
-    					  iEntry(NULL),
-    					  iAutomaticHlValue(ETrue),
-    					  iAutomaticHlInitialized(EFalse)
+    					  iEntry(NULL)
+    					 
     {
 	TRACE_ENTRY_POINT;
 	TRACE_EXIT_POINT;
@@ -131,7 +130,7 @@ CCalenMissedEventContainer::~CCalenMissedEventContainer()
     delete iTimeFormat;
     delete iDateFormat;
     
-    delete iAutoFinder;
+ 
     delete iFindMenu;
     
     if( iNotifier )
@@ -162,7 +161,7 @@ void CCalenMissedEventContainer::ConstructImplL()
                                                            Rect(),
                                                            ETrue );
      
-    iAutoFinder = CItemFinder::NewL();
+   
     iFindMenu = CFindItemMenu::NewL( EFindItemMenuPlaceHolder );
     iFindMenu->AttachItemFinderMenuL(0);
     
@@ -171,14 +170,13 @@ void CCalenMissedEventContainer::ConstructImplL()
 	
 	iTextEditor = new (ELeave) CEikRichTextEditor;
     iTextEditor->ConstructL(this, 0, 0, CEikEdwin::EReadOnly | CEikEdwin::EAvkonDisableCursor | 
-    									CEikEdwin::ENoAutoSelection|CEikEdwin::EAvkonEditor);
+    									CEikEdwin::ENoAutoSelection|CEikEdwin::EAvkonEditor); 
     iTextEditor->SetMopParent(this);
     iTextEditor->SetRect( Rect() );
 	
     
-    ReadAutoHlCenRepValueAndSetNotifyL();
-    SetAutomaticHighlightL(iAutomaticHlValue);
-	TRACE_EXIT_POINT;
+	iTextEditor->EnableKineticScrollingL(ETrue);
+   	TRACE_EXIT_POINT;
 	}
 
 // ----------------------------------------------------------------------------
@@ -216,11 +214,6 @@ void CCalenMissedEventContainer::CreateIconIndicesL( RArray<MCalenServices::TCal
 void CCalenMissedEventContainer::CompletePopulationL()
 	{
 	TRACE_ENTRY_POINT;
-	
-	 if(iTextEditor && iTextEditor->Text()->DocumentLength() > 0 && iAutoFinder)
-    	{
-        iAutoFinder->SetEditor((CEikRichTextEditor**)&iTextEditor);
-    	}
     
     iTextEditor->SetFocus(ETrue);
 	ActivateL();
@@ -345,14 +338,14 @@ TKeyResponse CCalenMissedEventContainer::OfferKeyEventL(const TKeyEvent& aKeyEve
             {
             case EKeyUpArrow:
                 {
-                 iAutoFinder->NextItemOrScrollL( CItemFinder::ENextUp );
+               
                 // Scroll the text view up by one line
                 iTextEditor->MakeVisible(EFalse);
                 TInt scrollLines = KScrollViewerUp;
                 iTextEditor->TextView()->ScrollDisplayLinesL(scrollLines);
                 iTextEditor->UpdateScrollBarsL();
                 iTextEditor->MakeVisible(ETrue);
-                //Set focus immediately for highlight of auto find text
+                //Set focus immediately for highlight of auto find text 
                 iTextEditor->SetFocus(ETrue);
                 keyResponse = EKeyWasConsumed;
                 }
@@ -360,7 +353,7 @@ TKeyResponse CCalenMissedEventContainer::OfferKeyEventL(const TKeyEvent& aKeyEve
 
             case EKeyDownArrow:
                 {
-                iAutoFinder->NextItemOrScrollL( CItemFinder::ENextDown );
+               
                 // Scroll the text view down by one line
                 iTextEditor->MakeVisible(EFalse);
                 TInt scrollLines = KScrollViewerDown;
@@ -388,7 +381,6 @@ TKeyResponse CCalenMissedEventContainer::OfferKeyEventL(const TKeyEvent& aKeyEve
                 break;
             case EKeyPhoneSend:
              	{
-             	HandleNumberCallL();
                 if(CCalenLocationUtil::IsMapProviderAvailableL())	
 					{
 					iServices.IssueCommandL(ECalenGetLocationAndSave);
@@ -429,25 +421,6 @@ TKeyResponse CCalenMissedEventContainer::OfferKeyEventL(const TKeyEvent& aKeyEve
  
     }
 
-// ----------------------------------------------------------------------------
-// CCalenMissedEventContainer::HandleNumberCallL
-// ----------------------------------------------------------------------------
-//
-void CCalenMissedEventContainer::HandleNumberCallL()
-	{
-	TRACE_ENTRY_POINT;
-	
-	const CItemFinder::CFindItemExt& findItem = iAutoFinder->CurrentItemExt(); 
-     
-     if(findItem.iItemType != CItemFinder::EPhoneNumber)
-        {
-         return;
-        }
-     
-     iFindMenu->HandleCallL( findItem.iItemDescriptor->Des() );  
-	
-	TRACE_EXIT_POINT;
-	}
 
 // ----------------------------------------------------------------------------
 // CCalenMissedEventContainer::HandlePointerEventL
@@ -463,7 +436,7 @@ void CCalenMissedEventContainer::HandlePointerEventL(const TPointerEvent& aPoint
 	 {
 	 	return;
 	 }
-   
+    CCalenContainer::HandlePointerEventL( aPointerEvent );
     if(iTextEditor->Rect().Contains(aPointerEvent.iPosition))
     	{
     	switch(aPointerEvent.iType)
@@ -483,10 +456,6 @@ void CCalenMissedEventContainer::HandlePointerEventL(const TPointerEvent& aPoint
     			iTextEditor->SetFocus(ETrue);
     			TInt curPos = iTextEditor->CursorPos();	
 		        TRect rect = iTextEditor->Rect();  
-		       	if ( !iAutoFinder->ItemWasTappedL( aPointerEvent.iPosition - rect.iTl ) )
-		         	{
-				 	//	return;
-				 	} 
     			break;	
     			}
     		default:
@@ -494,7 +463,6 @@ void CCalenMissedEventContainer::HandlePointerEventL(const TPointerEvent& aPoint
     			break;	
     			}	
     		}
-       	iTextEditor->HandlePointerEventL(aPointerEvent);
        	}    
        	
     TRACE_EXIT_POINT;
@@ -2104,58 +2072,12 @@ CCalenEntryUtil* CCalenMissedEventContainer::GetEventViewData()
 	return iEventViewData;	
 	}
 
-// -----------------------------------------------------------------------------
-// CCalenMissedEventContainer::ReadAutoHlCenRepValueAndSetNotifyL
-// 
-// -----------------------------------------------------------------------------
-//
-void CCalenMissedEventContainer::ReadAutoHlCenRepValueAndSetNotifyL()
-	{
-	TRACE_ENTRY_POINT;
-	
-	if ( iAutomaticHlInitialized )
-	     return;
-	
-    // Create the session
-    iCenRepSession = CRepository::NewL( KCRUidCommonUi );
-    
-    if( iCenRepSession )
-        {
-        // Get the value of AutomaticHighlight key
-        iCenRepSession->Get( KCuiAutomaticHighlight, iAutomaticHlValue );
-        // Create the notifer
-        iNotifier = 
-            CCenRepNotifyHandler::NewL( 
-                *this, *iCenRepSession, CCenRepNotifyHandler::EIntKey,
-                KCuiAutomaticHighlight );
-        // Start listening
-        iNotifier->StartListeningL();       
-        }
-    
-    iAutomaticHlInitialized = ETrue; // Done once per viewer
-	
-	TRACE_EXIT_POINT;
-	}
 
 // -----------------------------------------------------------------------------
-// CCalenMissedEventContainer::HandleNotifyInt
-// Handles the incoming notifications of key changes
+// CCalenMissedEventContainer::HandleNotifyError
+// From MCenRepNotifyHandlerCallback
 // -----------------------------------------------------------------------------
-//		
-void CCalenMissedEventContainer::HandleNotifyInt( TUint32 /*aId*/, TInt aNewValue )
-	{
-	TRACE_ENTRY_POINT;
-	
-	// Notifies changes on KCuiAutomaticHighlight
-    TRAPD(error,SetAutomaticHighlightL( aNewValue ));
-	if ( error != KErrNone )
-		{
-		 User::Panic(_L("CCalenMissedEventContainer"),error);
-		}
-	TRACE_EXIT_POINT;
-	}
-
-
+//	
 void CCalenMissedEventContainer::HandleNotifyError( TUint32 /*aId*/,TInt /*aError*/,
 												CCenRepNotifyHandler* /*aHandler*/ )
 	{
@@ -2174,47 +2096,7 @@ void CCalenMissedEventContainer::HandleNotifyError( TUint32 /*aId*/,TInt /*aErro
 	TRACE_EXIT_POINT;
 	}
 
-// -----------------------------------------------------------------------------
-// CCalenMissedEventContainer::SetAutomaticHighlightL
-// -----------------------------------------------------------------------------
-//	
-void CCalenMissedEventContainer::SetAutomaticHighlightL( const TBool aSwitchON )
-	{
-	TRACE_ENTRY_POINT;
-	
-	if ( iAutoFinder )
-        {
-        // content highlight
-        if ( aSwitchON )
-            { // switch ON
-            iAutoFinder->SetFindModeL( 
-                CItemFinder::EPhoneNumber |
-                CItemFinder::EUrlAddress |
-                CItemFinder::EEmailAddress );
-               
-            }
-        else
-            { // switch OFF
-            iAutoFinder->SetFindModeL( 
-                CItemFinder::ENoneSelected );
-                
-            }
-        }
-        
-	TRACE_EXIT_POINT;
-	}
-	
-// -----------------------------------------------------------------------------
-// CCalenMissedEventContainer::GetItemFinder
-// -----------------------------------------------------------------------------
-//
-CItemFinder* CCalenMissedEventContainer::GetItemFinder()
-	{
-	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;
-	
-	return iAutoFinder;
-	}
+
 // -----------------------------------------------------------------------------
 // CCalenMissedEventContainer::GetFindItemMenu
 // -----------------------------------------------------------------------------
@@ -2277,6 +2159,56 @@ TBool CCalenMissedEventContainer::IsEventHasNoLocationTextL()
 		return EFalse;
 		}
 	}
+// -----------------------------------------------------------------------------
+// OnCmdFindPhoneNumL
+// Find phone numbers in the form.
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+void CCalenMissedEventContainer::OnCmdFindPhoneNumL()
+    {
+    TRACE_ENTRY_POINT;
+    
+    BuildSearchBufferL();
+    CFindItemDialog* finder = CFindItemDialog::NewL( *iSearchBuf, CFindItemEngine::EFindItemSearchPhoneNumberBin);
+    finder->ExecuteLD();
+       
+    TRACE_EXIT_POINT;
+    }
+
+// -----------------------------------------------------------------------------
+// OnCmdFindUrlL
+// Find urls in the form.
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+void CCalenMissedEventContainer::OnCmdFindUrlL()
+    {
+    TRACE_ENTRY_POINT;
+   
+    BuildSearchBufferL();
+    CFindItemDialog* finder = CFindItemDialog::NewL( *iSearchBuf, CFindItemEngine::EFindItemSearchURLBin);
+    finder->ExecuteLD();
+  
+    TRACE_EXIT_POINT;
+    }
+
+// -----------------------------------------------------------------------------
+// OnCmdFindEmailL
+// Find email addresses in the form.
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+void CCalenMissedEventContainer::OnCmdFindEmailL()
+    {
+    TRACE_ENTRY_POINT;
+    
+    BuildSearchBufferL();
+    CFindItemDialog* finder = CFindItemDialog::NewL( *iSearchBuf, CFindItemEngine::EFindItemSearchMailAddressBin);
+    finder->ExecuteLD();
+    
+    TRACE_EXIT_POINT;
+    }
 	
 // end of file
 

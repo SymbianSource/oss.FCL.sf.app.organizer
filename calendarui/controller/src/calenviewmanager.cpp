@@ -578,6 +578,14 @@ TBool  CCalenViewManager::HandleCommandL( const TCalenCommand& aCommand )
             RequestActivationL( KUidCalenDayView, KUidCalenShowBackCba );
             }
             break;
+        case ECalenForwardsToWeekView:
+            {
+            // set the view iPreviousToWeekView to handle the week view's cba
+            // From month view -> week view 
+            iPreviousToWeekView = iCurrentViewId;
+            RequestActivationL( KUidCalenWeekView, KUidCalenShowBackCba );
+            }
+            break;
         case ECalenNextView:
             {
             CycleNextViewL();
@@ -1102,6 +1110,10 @@ void CCalenViewManager::HandleNotificationL( TCalenNotification aNotification )
 			    
 			    ReloadAllPluginsL();
 			    }
+            else
+                {
+                iAvoidRepopulation = EFalse;
+                }
         	}
         	break;
         case ECalenNotifyDayViewClosed:
@@ -1111,6 +1123,16 @@ void CCalenViewManager::HandleNotificationL( TCalenNotification aNotification )
                 // activate the previous view from where day view is launched
                 // From month/week view -> day view
                 RequestActivationL(iPreviousToDayView.iViewUid);
+                }
+            }
+            break;
+        case ECalenNotifyWeekViewClosed:
+            {
+            if(iPreviousToWeekView.iViewUid!= KNullUid)
+                {
+                // activate the previous view from where day view is launched
+                // From month/week view -> day view
+                RequestActivationL(iPreviousToWeekView.iViewUid);
                 }
             }
             break;

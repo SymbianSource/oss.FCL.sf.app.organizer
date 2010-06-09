@@ -358,7 +358,7 @@ NONSHARABLE_CLASS( CCalenTodoContainer ) : public CCalenContainer,
             };
 
         TStepPopulate iStepState;
-        HBufC* iEmptyListText;
+        //HBufC* iEmptyListText;
         // view specific data, references to view data
         TInt& iHighlightedRowNumber;     // The row number highlighted.
         TInt& iFirstEntryOnScreenIndex;  // The offset of the topmost item on screen to the first entry.

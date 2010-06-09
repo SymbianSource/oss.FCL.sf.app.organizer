@@ -1520,8 +1520,9 @@ EXPORT_C void CCalenGlobalData::GetAllCalendarInfoL(
             const TPtrC16 ptrPBuffer(( TText16*) personalBuffer->Ptr(),
                                              ( personalBuffer->Length()+1 )>>1 );    
             HBufC *personalCalendar = ptrPBuffer.AllocL();    
+            CleanupStack::PushL(personalCalendar);
             iCalendarInfoList[index]->SetNameL(*personalCalendar);
-            CleanupStack::PopAndDestroy( personalBuffer );
+            CleanupStack::PopAndDestroy( 2,personalBuffer );
             }
        
 	   

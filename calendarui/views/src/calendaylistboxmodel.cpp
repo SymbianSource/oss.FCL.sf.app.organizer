@@ -484,6 +484,11 @@ HBufC* CCalenDayListBoxModel::WrapTextL(
     HBufC* result = NULL;
     if ( doesFit )
         {
+        if ( aLineArray.Count() == 1 )
+            {
+            aLineArray.AppendL( TPtrC(KNullDesC) );
+            }
+            
         // If we could fit, we return visualText and caller has
         // to memory manage it. TPtrs in aLineArray points to this text
         // buffer.
@@ -512,6 +517,11 @@ HBufC* CCalenDayListBoxModel::WrapTextL(
         // be put to empty line after text!
         // We have to manually add that empty line.
         if ( aLineArray.Count() < triedLines )
+            {
+            aLineArray.AppendL( TPtrC(KNullDesC) );
+            }
+            
+        if ( aLineArray.Count() == 1 )
             {
             aLineArray.AppendL( TPtrC(KNullDesC) );
             }
@@ -661,8 +671,14 @@ void CCalenDayListBoxModel::CreateListBoxDataL(
                 {
                 isEndDisplayed = EFalse;
                 }
-            for (TInt i(1); i < textLines->Count() || !isEndDisplayed; i++)
+            TInt textLinesCount = textLines->Count();
+            for (TInt i(1); i <= textLinesCount || !isEndDisplayed; i++)
                 {
+                if(i == textLinesCount)
+                    {
+                    itemInfo.iBottomLine = iItemTextArray->Count();
+                    break;
+                    }
                 if (itemInfo.iTopLine == KIndexError)
                     {
                     itemInfo.iTopLine = iItemTextArray->Count();

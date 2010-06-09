@@ -1215,7 +1215,9 @@ void CCalenUnifiedEditor::HandleDialogPageEventL( TInt aEventID )
 TInt CCalenUnifiedEditor::AsyncProcessCommandL( TAny* aThisPtr )
     {
     TInt focusControl( static_cast<CCalenUnifiedEditor*>(aThisPtr)->IdOfFocusControl() );
-    CEikEdwin* edwin = static_cast<CEikEdwin*>( static_cast<CCalenUnifiedEditor*>(aThisPtr)->Control( focusControl ) );  
+    if(focusControl == ECalenEditorDescription)
+        {
+        CEikEdwin* edwin = static_cast<CEikEdwin*>( static_cast<CCalenUnifiedEditor*>(aThisPtr)->Control( focusControl ) );  
         if ( edwin && edwin->Text()->DocumentLength() == 0 )
             {
             static_cast<CCalenUnifiedEditor*>(aThisPtr)->ProcessCommandL(ECalenCmdAddDescription);
@@ -1224,7 +1226,7 @@ TInt CCalenUnifiedEditor::AsyncProcessCommandL( TAny* aThisPtr )
             {
             static_cast<CCalenUnifiedEditor*>(aThisPtr)->ProcessCommandL(ECalenCmdShowDescription);
             }
-    
+        }
     return 0;
     }
 
@@ -1912,7 +1914,17 @@ TBool CCalenUnifiedEditor::HandleDoneL()
     const TBool continueOnError = EFalse;
     iUnifiedEditorControl->ReadDataFromEditorL( continueOnError );
     
-    TEntryExistenceStatus status = EntryStillExistsL();
+    TEntryExistenceStatus status;
+    
+	if(!IsCreatingNewEntry())
+		{
+        status = EntryStillExistsL();
+		}
+    else
+		{
+		status = EEntryOk;
+		}
+	 
     TTimeIntervalDays aDay(0);
     if( iCurrentDurationDay<aDay )
         {
@@ -3258,7 +3270,8 @@ void CCalenUnifiedEditor::GetAttachmentNamesL(RPointerArray<HBufC>& aAttachmentN
     TInt attachCount = iServices->GetAttachmentData()->NumberOfItems();
     if( attachCount )
         {    
-        RPointerArray<CCalenAttachmentInfo> attachmentInfoList;      
+        RPointerArray<CCalenAttachmentInfo> attachmentInfoList;  
+		CleanupClosePushL( attachmentInfoList );
         iServices->GetAttachmentData()->GetAttachmentListL(attachmentInfoList);
         for( TInt index =0; index<attachCount; index++ )
             {
@@ -3268,6 +3281,7 @@ void CCalenUnifiedEditor::GetAttachmentNamesL(RPointerArray<HBufC>& aAttachmentN
             attachmentName->Des().Copy(fileNameParser.NameAndExt());
             aAttachmentNames.Append(attachmentName);
             }
+		CleanupStack::PopAndDestroy( &attachmentInfoList );		
         }
     else
         {

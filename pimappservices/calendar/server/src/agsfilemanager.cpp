@@ -1263,7 +1263,7 @@ CAgnCalendarInfo* CAgnServFile::GetCalendarInfoLC() const
     
     TStreamId calendarInfoStreamId = iDictionary->At(KUidAgnCalendarInfo);
     
-    if (calendarInfoStreamId != KNullStreamId)
+    if (calendarInfoStreamId != KNullStreamId && iStore)
         {
         // Calendar info has been set on this file
         RStoreReadStream readStream;

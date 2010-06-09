@@ -30,6 +30,7 @@
 #include <layoutmetadata.cdl.h>
 #include <calentoolbar.h>
 #include <akntoolbar.h>
+#include <touchfeedback.h>
 
 // user includes
 #include "calendarui_debug.h"
@@ -876,4 +877,25 @@ void CCalenContainer::UpdateTodayToolbarItemL()
     TRACE_EXIT_POINT;
     }
 
+
+// ----------------------------------------------------------------------------
+// CCalenContainer::GenerateTactileFeedback()
+// Generates tactile feedback on user touch action
+// ----------------------------------------------------------------------------
+void CCalenContainer::GenerateTactileFeedback()
+    {
+    TRACE_ENTRY_POINT;
+    
+    if(!iFeedBack)
+        {
+        iFeedBack = MTouchFeedback::Instance();
+        }
+    
+    if ( iFeedBack && iFeedBack->TouchFeedbackSupported() )
+        {
+        iFeedBack->InstantFeedback( ETouchFeedbackBasic );
+        }
+    
+    TRACE_EXIT_POINT;
+    }
 // End of File

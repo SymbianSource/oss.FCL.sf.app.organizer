@@ -1625,7 +1625,8 @@ void CCalenMonthContainer::HandleWeekNumberTapL(const TPoint &aPosition)
         		                                 TVwsViewId( KUidCalendar, KUidCalenMonthView ) );
             
             SetActiveDayL( newActiveDay );
-            iServices.IssueCommandL( ECalenWeekView );
+            //iServices.IssueCommandL( ECalenWeekView );
+            iServices.IssueCommandL( ECalenForwardsToWeekView );
             }
         }
 
@@ -1662,6 +1663,7 @@ void CCalenMonthContainer::HandlePointerEventL(const TPointerEvent& aPointerEven
         CCoeControl* control( NULL );
         if(aPointerEvent.iType == TPointerEvent::EButton1Down)
             {
+            this->GenerateTactileFeedback(); //Tactile feedback.
             control = iLayoutManager->ControlOrNull();
             if(control)
                 {

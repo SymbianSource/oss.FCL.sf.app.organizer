@@ -54,6 +54,7 @@ public: // Data
         TCalenInstanceId iId;
         TBool iTimedNote;
         TInt iTopLine;
+        TInt iBottomLine;
 
         // Fetched instance is temporarily stored to iTmpInstance 
         // This is destroyed after construction phase is over.

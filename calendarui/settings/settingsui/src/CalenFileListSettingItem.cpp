@@ -267,7 +267,7 @@ void CCalenFileListSettingItem::EditItemL( TBool /*aCalledFromMenu*/ )
     // default tone
     list->SetNullItemL(*iToneDefaultText, iDefaultToneFile,
             CMediaFileList::EMediaFileTypeAudio,
-            CMediaFileList::ENullItemIconOff);
+            CMediaFileList::ENullItemIconDefaultTone);
     
     list->SetAttrL(CMediaFileList::EAttrExcludeFolder, CMediaFileList::EMediaFileTypeVideo);
     list->SetAttrL(CMediaFileList::EAttrAutomatedType, CDRMHelper::EAutomatedTypeCalendarAlarm);

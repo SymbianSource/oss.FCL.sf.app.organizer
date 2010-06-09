@@ -950,7 +950,7 @@ void CNotepadListDialog::DynInitMenuPaneL(
             TInt ignore;
             TInt itemMarked = iListBox->SelectionIndexes()->Find( currIndex, itemKey, ignore );
             if ( memoCount > 0 && 
-                ( markCount == 0 || IsNotepad() ) )
+                ( markCount == 0 || IsNotepad() || IsTemplates()) )
                 {
                 // this must preceed DeleteMenuItem(ENotepadCmdOpen)
                 InsertSendMenuItemAfterL( *iSendUi, *aMenuPane, 
@@ -965,12 +965,22 @@ void CNotepadListDialog::DynInitMenuPaneL(
                 // this must after InsertSendMenuItemAfterL
                 aMenuPane->DeleteMenuItem(ENotepadCmdOpen);
                 }
-            if ( markCount >= 1  )
+            if ( markCount >= 1 && IsNoteListDialog() )
                 {
                 aMenuPane->SetItemSpecific( ENotepadCmdSend, EFalse );
                 aMenuPane->SetItemSpecific( ENotepadCmdDelete, EFalse );
                 }
-            if ( iListBox->CurrentItemIndex() == 0 && IsNotepad() && memoCount > 0)
+            
+            if ( IsTemplateListDialog() )
+                {
+                aMenuPane->SetItemSpecific( ENotepadCmdSend, ETrue );
+                if ( markCount >= 1 )
+                    {
+                    aMenuPane->SetItemDimmed( ENotepadCmdSend, ETrue );
+                    }
+                 }
+            
+            if ( iListBox->CurrentItemIndex() == 0 && IsNotepad() && memoCount > 0 && markCount == 0 )
 				{                    
 				aMenuPane->SetItemDimmed( ENotepadCmdDelete, ETrue );				 
 				aMenuPane->SetItemDimmed( ENotepadCmdSend, ETrue );				 

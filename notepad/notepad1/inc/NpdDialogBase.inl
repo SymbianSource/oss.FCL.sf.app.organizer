@@ -76,4 +76,12 @@ inline TBool CNotepadDialogBase::IsNoteListDialog() const
     return iResId == R_NOTEPAD_LIST_DIALOG_ORG;
     }
 
+// -----------------------------------------------------------------------------
+// CNotepadDialogBase::IsTemplateListDialog
+// -----------------------------------------------------------------------------
+//
+inline TBool CNotepadDialogBase::IsTemplateListDialog() const
+    {
+    return iResId == R_NOTEPAD_TEMPLATE_LIST_DIALOG_ORG;
+    }
 // End of file

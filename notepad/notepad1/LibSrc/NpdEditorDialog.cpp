@@ -1205,6 +1205,7 @@ TInt CNotepadEditorDialog::PreviousKeyInSequence() const
 TInt CNotepadEditorDialog::DoSearchL(CFindItemEngine::TFindItemSearchCase aCase)
     {
     CFindItemDialog* dialog = CFindItemDialog::NewL( iEditor->Text()->Read( 0 ), aCase );
+    dialog->EnableSingleClick( ETrue );
     TInt ret = dialog->ExecuteLD();
     return ret;
     }

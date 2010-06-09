@@ -77,6 +77,7 @@ _LIT( KPlusGMT, " \x202A+" );
 _LIT( KMinusGMT, " \x202A" );
 _LIT( KPDF, " \x202C" );
 _LIT( KZero, "0" );
+_LIT( KSpace, " " );
 
 // ---------------------------------------------------------
 // CClockMainContainer::NewL
@@ -390,6 +391,15 @@ void CClockMainContainer::HandlePointerEventL( const TPointerEvent& aPointerEven
         return;
         }
     
+    // to highlight the item in alarm list after long tapping
+    //( when new alarm button is focused)
+    if( iListBox && iListBox->Rect().Contains( aPointerEvent.iPosition ) &&
+            aPointerEvent.iType == TPointerEvent::EButton1Down &&
+            !iListBox->IsFocused() && iListBox->IsVisible() )
+        {
+        iListBox->View()->ItemDrawer()->ClearFlags( CListItemDrawer::EDisableHighlight );
+        }
+    
     // to get the vibes let's handle skinnable clock as a special case
     // no need to to delegate pointer events to it
     if( iSkinnableClock && iSkinnableClock->Rect().Contains( aPointerEvent.iPosition ) )
@@ -405,6 +415,10 @@ void CClockMainContainer::HandlePointerEventL( const TPointerEvent& aPointerEven
                 iView->HandleCommandL( EClockSwitchClockType ); 
                 iPreviousClockTypeSwitch.HomeTime();
                 }   
+            }
+        else
+            {
+            CCoeControl::HandlePointerEventL( aPointerEvent );
             }
         } 
     else
@@ -471,8 +485,6 @@ void CClockMainContainer::RemoveAlarmL( TInt aIndex )
     // Reinitialize the alarm list.
     iAlarmArray->InitIdList();
     TInt count = iListBox->Model()->ItemTextArray()->MdcaCount();
-    
-    //SetCorrectRectForNewAlarmButton();
     
     // if only one item
     if( ( KZeroAlarms == aIndex ) && ( aIndex == count ) )
@@ -1306,15 +1318,9 @@ void CClockMainContainer::ConstructL( CClockMainView* aView, const TRect& aRect,
 
     // construct the "New Alarm" button
     iNewAlarmButton = CAknButton::NewL( NULL, NULL, NULL, NULL,
-            iAlarmArray->NewAlarmText()->Des(),iAlarmArray->NewAlarmText()->Des(), 0, 0 );
+            iAlarmArray->NewAlarmText()->Des(), KNullDesC, 0, 0 );
     iNewAlarmButton->SetParent( this );
     iNewAlarmButton->SetContainerWindowL( *this );
-    //TAknLayoutRect newAlarmButtonRect;
-    // Get the skinnable clock rect.
-    //newAlarmButtonRect.LayoutRect( listRect.Rect(),
-    //        AknLayoutScalable_Apps::main_clock2_btn_pane( layoutOrientation  ).LayoutLine() );
-    
-    //iNewAlarmButton->SetRect( newAlarmButtonRect.Rect() );
     SetCorrectRectForNewAlarmButton();
     iNewAlarmButton->SetObserver( this );
     iNewAlarmButton->ActivateL();
@@ -1395,55 +1401,87 @@ void CClockMainContainer::DrawMainViewText( CWindowGc& aWindowGc ) const
         
     TRect mainClockPane( parentRect.Rect() );
    
-    // Get the layout for the day string.
-    layoutText.LayoutText( mainClockPane, AknLayoutScalable_Apps::main_clock2_pane_t1( displayOrientation ).LayoutLine() );
-
-    TPtr dayStringPtr = iDayNameString->Des();
-    // Day long format.
-    layoutText.DrawText( aWindowGc, *iDayNameString, ETrue, cachedColor );
+    if( Layout_Meta_Data::IsLandscapeOrientation() )
+        {
+        // main_clock2_pane_cp01_t1 Day + date
+       HBufC* dayAndDateString = HBufC::NewLC( iDayNameString->Length() + iDateString->Length() + 1 );
+       TPtr dayAndDateStringPtr = dayAndDateString->Des();
+       dayAndDateStringPtr.Append( *iDayNameString );
+       dayAndDateStringPtr.Append( KSpace );
+       TPtr dateStringPtr = iDateString->Des();
+       AknTextUtils::DisplayTextLanguageSpecificNumberConversion( dateStringPtr );
+       dayAndDateStringPtr.Append( *iDateString );
+       
+       layoutText.LayoutText( mainClockPane, AknLayoutScalable_Apps::main_clock2_pane_cp01_t1( displayOrientation ).LayoutLine() );
+       layoutText.DrawText( aWindowGc, *dayAndDateString , ETrue, cachedColor );
+       
+       CleanupStack::PopAndDestroy( dayAndDateString );
+       dayAndDateString = NULL;
+       
+       // main_clock2_pane_cp01_t3 zone + country
+       HBufC* timeZoneAndCountryString = HBufC::NewLC( iTimeZoneString->Length() + iLocationString->Length() + 1 );
+       TPtr timeZoneAndCountryStringPtr = timeZoneAndCountryString->Des();
+       TPtr timeZoneStringPtr = iTimeZoneString->Des();
+       AknTextUtils::DisplayTextLanguageSpecificNumberConversion( timeZoneStringPtr );
+       timeZoneAndCountryStringPtr.Append( *iTimeZoneString );
+       timeZoneAndCountryStringPtr.Append( KSpace );
+       timeZoneAndCountryStringPtr.Append( *iLocationString );
+       
+       layoutText.LayoutText( mainClockPane, AknLayoutScalable_Apps::main_clock2_pane_cp01_t3( displayOrientation ).LayoutLine() );
+       layoutText.DrawText( aWindowGc, *timeZoneAndCountryString, ETrue, cachedColor );
+       /*
+       TAknTextComponentLayout labelLayout;
+       labelLayout = AknLayoutScalable_Apps::main_clock2_pane_cp01_t3( Layout_Meta_Data::IsLandscapeOrientation() );
+       AknLayoutUtils::LayoutLabel( iLocationLabel, parentRect.Rect(), labelLayout.LayoutLine() );
+       
+       // Set the label for the text and start marqueeing.
+       iLocationLabel->SetLabelTextL( *timeZoneAndCountryString );
+       TGulAlignment alignment;
+       alignment.SetHAlignment( EHCenter );
+       iLocationLabel->SetAlignment( alignment );
+       iLocationLabel->StartMarquee();
+       iLocationLabel->RedrawRect( iLocationLabel->Rect() );
+       */
+       CleanupStack::PopAndDestroy( timeZoneAndCountryString );
+       timeZoneAndCountryString  = NULL;
+        }
+    else
+        {
+        // Get the layout for the day string.
+        layoutText.LayoutText( mainClockPane, AknLayoutScalable_Apps::main_clock2_pane_t1( displayOrientation ).LayoutLine() );
     
-    // Get the layout for the datestring.
-    layoutText.LayoutText( mainClockPane, AknLayoutScalable_Apps::main_clock2_pane_t2( displayOrientation ).LayoutLine() );
-
-    TPtr dateStringPtr = iDateString->Des();
-    // For mirrored languages.
-    AknTextUtils::DisplayTextLanguageSpecificNumberConversion( dateStringPtr );
-    // Date long format
-    layoutText.DrawText( aWindowGc, *iDateString, ETrue, cachedColor );
+        TPtr dayStringPtr = iDayNameString->Des();
+        // Day long format.
+        layoutText.DrawText( aWindowGc, *iDayNameString, ETrue, cachedColor );
+        
+        // Get the layout for the datestring.
+        layoutText.LayoutText( mainClockPane, AknLayoutScalable_Apps::main_clock2_pane_t2( displayOrientation ).LayoutLine() );
     
-    // Get the layout for the timezone string.
-    layoutText.LayoutText( mainClockPane, AknLayoutScalable_Apps::main_clock2_pane_t3( Layout_Meta_Data::IsLandscapeOrientation() ).LayoutLine() );
-
-    TPtr timeZonePtr = iTimeZoneString->Des();
-    // This is for mirrored languages.
-    AknTextUtils::DisplayTextLanguageSpecificNumberConversion( timeZonePtr );
-    // The timezone string.
-    layoutText.DrawText( aWindowGc, *iTimeZoneString, ETrue, cachedColor );
+        TPtr dateStringPtr = iDateString->Des();
+        // For mirrored languages.
+        AknTextUtils::DisplayTextLanguageSpecificNumberConversion( dateStringPtr );
+        // Date long format
+        layoutText.DrawText( aWindowGc, *iDateString, ETrue, cachedColor );
+        
+        // Get the layout for the timezone string.
+        layoutText.LayoutText( mainClockPane, AknLayoutScalable_Apps::main_clock2_pane_t3( Layout_Meta_Data::IsLandscapeOrientation() ).LayoutLine() );
     
-    // Get the layout for the country string.
-    TAknTextComponentLayout labelLayout;
-    labelLayout = AknLayoutScalable_Apps::main_clock2_pane_t4( Layout_Meta_Data::IsLandscapeOrientation() );
-    AknLayoutUtils::LayoutLabel( iLocationLabel, parentRect.Rect(), labelLayout.LayoutLine() );
-    
-    // Set the label for the text and start marqueeing.
-    iLocationLabel->SetLabelTextL( *iLocationString );
-    iLocationLabel->StartMarquee();
-    iLocationLabel->RedrawRect( iLocationLabel->Rect() );
-
-	// We display empty text only if there are no alarms set.
-	// if( !iAlarmArray->MdcaCount() )
-		// {
-		// Set the listbox layout.
-		// TAknLayoutRect listRect;
-		// Get the main clock rect.
-		// listRect.LayoutRect( mainClockPane, AknLayoutScalable_Apps::listscroll_gen_pane_cp06( Layout_Meta_Data::IsLandscapeOrientation() ).LayoutLine() );
-		
-		// Get the rect for the empty text.
-		// layoutText.LayoutText( listRect.Rect(), AknLayoutScalable_Apps::listscroll_gen_pane_cp06_t1( Layout_Meta_Data::IsLandscapeOrientation() ).LayoutLine() );
-		// Draw the text.
-		// layoutText.DrawText( aWindowGc, *iNoAlarmsText, ETrue, cachedColor );
-		//}
-    
+        TPtr timeZonePtr = iTimeZoneString->Des();
+        // This is for mirrored languages.
+        AknTextUtils::DisplayTextLanguageSpecificNumberConversion( timeZonePtr );
+        // The timezone string.
+        layoutText.DrawText( aWindowGc, *iTimeZoneString, ETrue, cachedColor );
+        
+        // Get the layout for the country string.
+        TAknTextComponentLayout labelLayout;
+        labelLayout = AknLayoutScalable_Apps::main_clock2_pane_t4( Layout_Meta_Data::IsLandscapeOrientation() );
+        AknLayoutUtils::LayoutLabel( iLocationLabel, parentRect.Rect(), labelLayout.LayoutLine() );
+        
+        // Set the label for the text and start marqueeing.
+        iLocationLabel->SetLabelTextL( *iLocationString );
+        iLocationLabel->StartMarquee();
+        iLocationLabel->RedrawRect( iLocationLabel->Rect() );
+        }
 	__PRINTS( "CClockMainContainer::DrawMainViewText - Exit" );
     }
 
@@ -1597,7 +1635,8 @@ TBool CClockMainContainer::GetAutoTimeUpdateState() const
 void CClockMainContainer::HandleControlEventL( CCoeControl* aControl,
             TCoeEvent aEventType )
     {
-    if ( aControl == iNewAlarmButton && aEventType == MCoeControlObserver::EEventStateChanged )
+    if ( aControl == iNewAlarmButton && aEventType == MCoeControlObserver::EEventStateChanged 
+            && iView && !iView->IsAlarmEditorOpen() )
         {
         iView->HandleCommandL( EClockNewAlarm );
         }

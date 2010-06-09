@@ -385,6 +385,7 @@ class CCalenViewManager : public CBase,
         TBool iViewsActivated; 
         TVwsViewId  iPreviousViewId;
         TVwsViewId  iPreviousToDayView;
+        TVwsViewId iPreviousToWeekView;
         TBool iAvoidRepopulation;
         TBool iStartupComplete;
     };

@@ -424,6 +424,21 @@ void CCalenEventView::HandleCommandL(TInt aCommand)
             // nothing to do
             }
             break;
+       case ECalenCmdFindPhoneNum:
+            {
+            cnt->OnCmdFindPhoneNumL();
+            }
+            break;
+       case ECalenCmdFindEmail:
+            {
+            cnt->OnCmdFindEmailL();
+            }
+            break;
+       case ECalenCmdFindURL:
+           {
+           cnt->OnCmdFindUrlL();
+           }
+           break;
         default:
             if(cnt->GetFindItemMenu()->CommandIsValidL(aCommand))
                 {
@@ -484,7 +499,6 @@ void CCalenEventView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMenuPane
 	    case R_CALEN_EVENT_VIEW_LONGTAP_MENUPANE:
 	    	{
 	    	CCalenEntryUtil* eventViewData = cnt->GetEventViewData();
-	    	
 	    	if(eventViewData)
 	    	    {
 	    	    if(eventViewData->EntryType() == CCalEntry::ETodo)
@@ -511,7 +525,7 @@ void CCalenEventView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMenuPane
 	    	        aMenuPane->DeleteMenuItem(ECalenViewAttachmentList);
 	    	        }
 	    	    }
-		  	 cnt->GetFindItemMenu()->AddItemFindMenuL(cnt->GetItemFinder(),aMenuPane,EFindItemMenuPlaceHolder,KNullDesC);
+	
 		  	 
 		  	 if(CCalenLocationUtil::IsMapProviderAvailableL())
             	{

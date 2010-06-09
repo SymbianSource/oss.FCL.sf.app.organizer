@@ -193,6 +193,13 @@ class CNotepadDialogBase : public CAknDialog
         * @return ETrue if this is for for Notepad application ListDialog, otherwize EFalse.
         */
         inline TBool IsNoteListDialog() const;
+        
+        /**
+        * Check whether this dialog is for Template List.
+        *
+        * @return ETrue if this is for for Template List, otherwize EFalse.
+        */
+        inline TBool IsTemplateListDialog() const;
 
         /**
         * Set iTitle text to title pane.
