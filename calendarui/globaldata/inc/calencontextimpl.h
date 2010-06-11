@@ -50,7 +50,7 @@ class CalenContextImpl : public MCalenContext
         CALENCONTEXTIMPL_EXPORT CalenContextImpl( MCalenContextChangeObserver* observer );
         CALENCONTEXTIMPL_EXPORT CalenContextImpl();
         CALENCONTEXTIMPL_EXPORT CalenContextImpl( const CalenContextImpl& context );
-        ~CalenContextImpl();
+        CALENCONTEXTIMPL_EXPORT ~CalenContextImpl();
 
     public:  // from MCalenContext
     // Utils

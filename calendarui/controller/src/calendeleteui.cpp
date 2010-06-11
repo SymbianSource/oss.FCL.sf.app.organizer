@@ -483,7 +483,6 @@ void CalenDeleteUi::getSelectedDateAndDelete()
 			dateTime = ( dateTime > AgendaUtil::minTime()? dateTime :  AgendaUtil::minTime());
 
 			HandleDeleteMultipleEventsL( AgendaUtil::minTime(), dateTime,1 );
-			iController.BroadcastNotification(ECalenNotifyEntryDeleted);
 		}else {
 			iController.BroadcastNotification(ECalenNotifyDeleteFailed);
 		}

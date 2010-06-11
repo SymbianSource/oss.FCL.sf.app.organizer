@@ -78,6 +78,8 @@ ClockMainView::~ClockMainView()
 			":/style/clockalarmlistitemprototype.css");
 	HbStyleLoader::unregisterFilePath(
 			":/style/clockalarmlistitemprototype.widgetml");
+	HbStyleLoader::unregisterFilePath(
+			":/style/clockalarmlistitemprototype_color.css");
 
 }
 
@@ -144,6 +146,8 @@ void ClockMainView::setupView(
 	HbStyleLoader::registerFilePath(":/style/clockalarmlistitemprototype.css");
 	HbStyleLoader::registerFilePath(
 			":/style/clockalarmlistitemprototype.widgetml");
+	HbStyleLoader::registerFilePath(
+			":/style/clockalarmlistitemprototype_color.css");
 	setmodel();
 
 	// Load the correct section based on orientation.

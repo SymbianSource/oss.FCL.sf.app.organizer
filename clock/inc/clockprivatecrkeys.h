@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:   The file contains the uid of keys used by application.
+* Description: The file contains the uid of keys used by application.
 *
 */
 
@@ -25,10 +25,8 @@ const long int KCRUidNitz =  { 0x101F8876 };
 const long int KActiveProtocol = 0x00000000;
 /** Previous alarm time high */
 const long int KPreviousAlarmTime = 0x00000001;
-/** Valid Nitz Info key */
-const long int KValidNitz = 0x00000002;
 
-#endif  	// CLOCKPRIVATECRKEYS_H
+#endif	// CLOCKPRIVATECRKEYS_H
 
 // End of file	--Don't remove this.
 

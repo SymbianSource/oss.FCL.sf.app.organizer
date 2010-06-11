@@ -532,18 +532,7 @@ void AgendaEventView::addMapTileImage()
         mMaptilePath = MapTileService::getMapTileImage(eventId, addressType);
         if (!mMaptilePath.isNull())
         {                        
-            QIcon mapTileIcon(mMaptilePath);
-            QPainter painter;
-            QPixmap baloon(HbIcon("qtg_small_location").pixmap());
-            QPixmap map (mapTileIcon.pixmap(width,height));
-            //Display pin image in the center of maptile image
-            painter.begin( &map );
-            painter.drawPixmap( (width/2)-(baloon.width()/2), 
-                          (height/2)-baloon.height(), baloon );
-            painter.end();
-            mapTileIcon.addPixmap( map );          
-            
-            HbIcon maptile(mapTileIcon);
+            HbIcon maptile(mMaptilePath);
             mMaptileLabel->setIcon(maptile);        
 
             mMaptileLabel->setPreferredSize(QSizeF(width, height));

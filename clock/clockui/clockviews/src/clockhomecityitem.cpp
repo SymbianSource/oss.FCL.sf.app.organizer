@@ -44,6 +44,7 @@ HbWidget(parent)
 	// Path for widgetml and css files.
 	HbStyleLoader::registerFilePath(":/style/clockhomecityitem.css");
 	HbStyleLoader::registerFilePath(":/style/clockhomecityitem.widgetml");
+	HbStyleLoader::registerFilePath(":/style/clockhomecityitem_color.css");
 	
 	// Set the frame to the homecity widget.
 	HbFrameItem *frame = new HbFrameItem();
@@ -60,6 +61,7 @@ ClockHomeCityItem::~ClockHomeCityItem()
 {
 	HbStyleLoader::unregisterFilePath(":/style/clockhomecityitem.css");
 	HbStyleLoader::unregisterFilePath(":/style/clockhomecityitem.widgetml");
+	HbStyleLoader::unregisterFilePath(":/style/clockhomecityitem_color.css");
 }
 
 /*!

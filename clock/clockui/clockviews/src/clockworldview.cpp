@@ -72,8 +72,8 @@ ClockWorldView::~ClockWorldView()
 		mDocLoader = 0;
 	}
 	HbStyleLoader::unregisterFilePath(":/style/hblistviewitem.css");
-	HbStyleLoader::unregisterFilePath(
-			":/style/hblistviewitem.widgetml");
+	HbStyleLoader::unregisterFilePath(":/style/hblistviewitem.widgetml");
+	HbStyleLoader::unregisterFilePath(":/style/hblistviewitem_color.css");
 }
 
 /*!
@@ -125,8 +125,8 @@ void ClockWorldView::setupView(
 	mCityListView = qobject_cast<HbListView *> (
 			mDocLoader->findWidget(CLOCK_WORLD_CITYLIST));
 	HbStyleLoader::registerFilePath(":/style/hblistviewitem.css");
-	HbStyleLoader::registerFilePath(
-			":/style/hblistviewitem.widgetml");
+	HbStyleLoader::registerFilePath(":/style/hblistviewitem.widgetml");
+	HbStyleLoader::registerFilePath(":/style/hblistviewitem_color.css");
 	mCityListView->setLayoutName("citylist-portrait");
 	mCityListView->setModel(mCityListModel);
 	

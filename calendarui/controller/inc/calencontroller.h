@@ -25,6 +25,7 @@
 #include <apadef.h>                     // TApaCommand
 #include <qglobal.h>					// Q_DECL_EXPORT macro
 #include <agendautil.h>
+#include <qobject>
 #include "hb_calencommands.hrh"            // Calendar commands
 #include "calennotificationhandler.h"   // TCalenNotification
 #include "calenservices.h"
@@ -58,9 +59,10 @@ class HbMenu;
  * The controller handles events from the rest of Calendar and delegates
  * them to the appropriate place (i.e. the action ui classes).
  */
-class CALENCONTROLLER_EXPORT CCalenController : public MCalenServicesFactory
+class CALENCONTROLLER_EXPORT CCalenController : public QObject, public MCalenServicesFactory
     {
-  
+	Q_OBJECT
+	
     public:  // Construction and destruction
 		/**
 		 * C++ constructor

@@ -945,6 +945,29 @@ void CalenMonthGrid::orientationChanged(Qt::Orientation newOrientation)
     Q_UNUSED(newOrientation)
 	// We are overriding this function to avoid the default behavior of
 	// hbgridview on orientation change as it swaps the row and column counts
+	// Calculate the proper index to be scrolled to
+	int rowsInPrevMonth;
+    int itemToBeScrolled;
+    QModelIndex indexToBeScrolled;
+	if (newOrientation == Qt::Horizontal) {
+		rowsInPrevMonth = mView->rowsInPrevMonth();
+		itemToBeScrolled = rowsInPrevMonth * KCalenDaysInWeek;
+		indexToBeScrolled = mModel->index(itemToBeScrolled, 0);
+		mIsAtomicScroll = true;
+		scrollTo(indexToBeScrolled);
+	} else {
+		rowsInPrevMonth = mView->rowsInPrevMonth();
+		itemToBeScrolled = rowsInPrevMonth * KCalenDaysInWeek;
+		indexToBeScrolled = mModel->index(itemToBeScrolled, 0);
+		mIsAtomicScroll = true;
+		scrollTo(indexToBeScrolled);
+		
+		itemToBeScrolled = ((rowsInPrevMonth + KNumOfVisibleRows) * 
+				KCalenDaysInWeek) - 1;
+		indexToBeScrolled = mModel->index(itemToBeScrolled, 0);
+		mIsAtomicScroll = true;
+		scrollTo(indexToBeScrolled);
+	}
 }
 
 /*!

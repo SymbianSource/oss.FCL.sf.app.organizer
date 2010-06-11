@@ -71,7 +71,7 @@ EXPORT_C CalenContextImpl::CalenContextImpl( const CalenContextImpl& aContext )
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CalenContextImpl::~CalenContextImpl()
+EXPORT_C CalenContextImpl::~CalenContextImpl()
     {
     }
 

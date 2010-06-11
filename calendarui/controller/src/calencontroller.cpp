@@ -57,9 +57,9 @@ CCalenController::CCalenController(bool isFromServiceFrmwrk)
     checkMultipleCreation();
     
     // Get an instance of AgendaUtil interface class
-    // This will take care of 
-    mAgendaUtil = new AgendaUtil();
-    
+    // This will take care of
+    mAgendaUtil = new AgendaUtil(this);
+
     iStateMachine = CCalenStateMachine::NewL( *this );
     
     // Create the notifier.
@@ -222,7 +222,12 @@ void CCalenController::Release()
 CCalenController::~CCalenController()
     {
     TRACE_ENTRY_POINT;
-    
+
+    if(iStateMachine) {
+    	delete iStateMachine;
+    	iStateMachine = NULL;
+    }
+
     if ( iServices )
         {
         iServices->Release();
@@ -233,7 +238,12 @@ CCalenController::~CCalenController()
     	delete iNotifier;
     	iNotifier = NULL;
 		}
-    
+
+    if(mContext) {
+    	delete mContext;
+    	mContext = NULL;
+    }
+	
    if( iActionUi )
 	   {
 	   delete iActionUi;

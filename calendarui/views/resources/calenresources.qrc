@@ -4,6 +4,7 @@
 		<file>calengriditemprototype.css</file>
         	<file>caleneventlistviewitem.widgetml</file>
 		<file>caleneventlistviewitem.css</file>
+		<file>caleneventlistviewitem_color.css</file>
 		<file>qgn_indi_cdr_meeting_layer0.svg</file>
 		<file>qtg_mono_exception.png</file>
     </qresource>

@@ -7,6 +7,7 @@
 	</qresource>
 	<qresource>
 		<file alias="agendaeventvieweritem.css">agendaeventvieweritem.css</file>
+		<file alias="agendaeventvieweritem_color.css">agendaeventvieweritem_color.css</file>
 		<file alias="agendaeventvieweritem.widgetml">agendaeventvieweritem.widgetml</file>
 	</qresource>
 </RCC>

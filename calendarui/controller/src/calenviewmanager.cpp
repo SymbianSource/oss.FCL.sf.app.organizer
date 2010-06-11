@@ -56,6 +56,7 @@ CalenViewManager::CalenViewManager( CCalenController& aController,
 	mCalenDayView = NULL;
 	mCalenMonthView = NULL;
 	mCalenDayViewAlt = NULL;
+	mSettingsView = NULL;
 	
 	// Connect to instance view and entry view creation signals from agenda
 	// interface
@@ -96,12 +97,22 @@ CalenViewManager::~CalenViewManager()
 {
 	TRACE_ENTRY_POINT;
 
-	delete mCalenMonthView;
-	delete mCalenDayView;
-	delete mSettingsView;
-	delete mDayViewDocLoader;
-	delete mDayViewAltDocLoader;
-	delete mMonthViewDocLoader;
+	if (mSettingsView) {
+		delete mSettingsView;
+		mSettingsView = 0;
+	}
+	if (mDayViewDocLoader) {
+		delete mDayViewDocLoader;
+		mDayViewDocLoader = 0;
+	}
+	if (mDayViewAltDocLoader) {
+		delete mDayViewAltDocLoader;
+		mDayViewAltDocLoader = 0;
+	}
+	if (mMonthViewDocLoader) {
+		delete mMonthViewDocLoader;
+		mMonthViewDocLoader = 0;
+	}
 	TRACE_EXIT_POINT;
 }
 
@@ -663,7 +674,9 @@ void CalenViewManager::handleDeletingCompleted()
 void CalenViewManager::handleInstanceViewCreation(int status)
 {
 	Q_UNUSED(status);
-	mCalenMonthView->fetchEntriesAndUpdateModel();
+	if (mCalenMonthView) {
+		mCalenMonthView->fetchEntriesAndUpdateModel();
+	}
 }
 
 // ----------------------------------------------------------------------------

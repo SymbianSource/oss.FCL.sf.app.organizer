@@ -4,6 +4,7 @@
 	</qresource>
 	<qresource prefix= "/style">
 		<file alias="clockcityselectionlistprototype.css">style/clockcityselectionlistprototype.css</file>
+		<file alias="clockcityselectionlistprototype_color.css">style/clockcityselectionlistprototype_color.css</file>
 		<file alias="clockcityselectionlistprototype.widgetml">style/clockcityselectionlistprototype.widgetml</file>
 	</qresource>
 	<qresource prefix="/translations">

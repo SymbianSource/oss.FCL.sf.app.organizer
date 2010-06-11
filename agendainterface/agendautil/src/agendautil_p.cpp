@@ -1717,6 +1717,11 @@ void AgendaUtilPrivate::markDatesWithEvents(QDateTime rangeStart,
             }
         }
     }
+	int count = instanceList.Count();
+	for (int i = count - 1; i >= 0; --i) {
+	            CCalInstance *instance = instanceList[i];
+	            delete instance;
+	        }
     CleanupStack::PopAndDestroy();
 }
 
@@ -2470,6 +2475,11 @@ bool AgendaUtilPrivate::areNoEntriesInCalendar()
 	} else {
 		isEmpty = true;
 	}
+	int count = instanceList.Count();
+	for (int i = count - 1; i >= 0; --i) {
+	            CCalInstance *instance = instanceList[i];
+	            delete instance;
+	        }
 	CleanupStack::PopAndDestroy();
 	return isEmpty;
 }
