@@ -26,7 +26,7 @@ const TInt KMaxLogLength = 0x100;
 
 EXPORT_C void AgmDebug::DebugLog(const char* aFmt,...)
 	{
-	VA_LIST list = {NULL};
+	VA_LIST list;
 	VA_START(list,aFmt);
 
 	TPtrC8 fmt8((const TText8*)aFmt);
@@ -49,7 +49,7 @@ EXPORT_C void AgmDebug::DebugLog(const char* aFmt,...)
 
 EXPORT_C void AgmDebug::DebugLogTimeStampL(const char* aFmt,...)
 	{
-	VA_LIST list = {NULL};
+	VA_LIST list;
 	VA_START(list,aFmt);
 
 	TPtrC8 fmt8((const TText8*)aFmt);
