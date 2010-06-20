@@ -75,4 +75,4 @@ LIBRARY         caldavclient.lib
 LIBRARY         commdb.lib
 LIBRARY         cmmanager.lib
 LIBRARY			charconv.lib
-LIBRARY			esock.lib
+LIBRARY			esock.lib calenglobaldata.lib
