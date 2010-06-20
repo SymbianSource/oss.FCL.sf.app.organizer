@@ -37,6 +37,8 @@
 #include "calennotifier.h"
 #include "calenmultipledbui.h"
 #include "calenattachmentui.h"
+#include "CalenUid.h"
+#include "calenviewmanager.h"
 
 // ----------------------------------------------------------------------------
 // CCalenActionUi::NewL
@@ -304,8 +306,9 @@ void CCalenActionUi::ShowCalendarsL()
         PIM_TRAPD_HANDLE( retValue = dlg->ExecuteLD( R_CALEN_MULTIPLEDB_DIALOG ) );
         notifier.ResumeSettingsNotifications();
         
-        // Unhide the toolbar when settings is closed
-        if(toolbar)
+        // Unhide the toolbar when manage calendar view is closed
+        TUid activeViewUid = iController.ViewManager().CurrentView();
+        if(toolbar && (activeViewUid != KUidCalenMissedAlarmsView ) &&(activeViewUid != KUidCalenMissedEventView ) )
             {
             toolbar->SetToolbarVisibilityL(ETrue); 
             }
@@ -414,7 +417,8 @@ void CCalenActionUi::ShowSettingsL()
     notifier.ResumeSettingsNotifications();
     
     // Unhide the toolbar when settings is closed
-    if(toolbar)
+    TUid activeViewUid = iController.ViewManager().CurrentView();
+    if(toolbar && (activeViewUid != KUidCalenMissedAlarmsView ) &&(activeViewUid != KUidCalenMissedEventView ) )
         {
         toolbar->SetToolbarVisibilityL(ETrue); 
         }

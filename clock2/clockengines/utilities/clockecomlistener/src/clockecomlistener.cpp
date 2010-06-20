@@ -179,12 +179,16 @@ void CClockEComListener::Start()
     {
     __PRINTS( "CClockEComListener::Start - Entry" );
     
-    // Start the active object and listen for changes in the ECOM registry.
-    if( iEComSession )
+    if (!IsActive())
         {
-        iEComSession->NotifyOnChange( iStatus );
+       // Start the active object and listen for changes in the ECOM registry.
+        if( iEComSession )
+            {
+            iEComSession->NotifyOnChange( iStatus );
+            SetActive();
+            }
         }
-    SetActive();
+ 
     
     __PRINTS( "CClockEComListener::Start - Exit" );
     }

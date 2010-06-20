@@ -85,6 +85,10 @@ void CAgnEntryModel::ConstructL(CAgnServFile* aAgnServerFile)
 		iAttachmentIndex = new (ELeave) CAgnAttachmentIndex;
 		CreateAlarmForServerL();
 		}
+	
+	User::LeaveIfError(iFs.Connect());
+    User::LeaveIfError( iFs.ShareProtected() );
+    
 	iIndexFileIsDirty = ETrue; 	// for safety assume that the index
 					// file is out of date. We can correct this
 					// when we read the file
@@ -113,6 +117,7 @@ CAgnEntryModel::~CAgnEntryModel()
 	delete iModelStreamIdSet;
 	delete iEntryManager;
 	delete iCalConverter;
+	iFs.Close();
 	}
 
 const CAgnServFile& CAgnEntryModel::AgnServFile()
@@ -1415,12 +1420,8 @@ void CAgnEntryModel::MarkIndexFileAsDirtyL()
             if (!GenerateIndexFileName(idxfilename))
                 {
                 User::Leave(KErrBadName);
-                }
-            
-            TInt connectErr = iFs.Connect();
-            User::LeaveIfError(connectErr);
-            
-            iFs.Delete(idxfilename); // ignore return as there is nothing we can do with it
+                }           
+            iFs.Delete(idxfilename); // ignore return as there is nothing we can do with it           
         }        
 	iIndexFileIsDirty = ETrue;
 	}
@@ -1454,9 +1455,6 @@ TBool CAgnEntryModel::LoadIndexFileL()
 		{
 		User::Leave(KErrBadName);
 		}
-	
-	TInt connectErr = iFs.Connect();
-	User::LeaveIfError(connectErr);
 	
 	RFile idxFile;
 	TInt errReadIdx = idxFile.Open(iFs, idxfilename, EFileRead);
@@ -1531,10 +1529,7 @@ TBool CAgnEntryModel::IsIndexFileAvailableL()
         {
         User::Leave(KErrBadName);
         }
-    
-    TInt connectErr = iFs.Connect();
-    User::LeaveIfError(connectErr);
-    
+   
     RFile idxFile;
     TInt errReadIdx = idxFile.Open(iFs, idxfilename, EFileRead);
     CleanupClosePushL(idxFile);
@@ -1558,9 +1553,7 @@ void CAgnEntryModel::SaveIndexFileL()
 		{
 		User::Leave(KErrBadName);
 		}
-	TInt connectErr = iFs.Connect();
-	User::LeaveIfError(connectErr);
-
+	
 	RFile idxFile;
 	TInt errWriteIdx = idxFile.Replace(iFs, idxfilename, EFileWrite);
 	User::LeaveIfError(errWriteIdx);
@@ -2711,6 +2704,15 @@ void CAgnEntryModel::UpdateEntryL(CAgnEntry& aEntry, TAgnChangeFilter* aChangeFi
 		}
 
 	NotifyingL(MCalChangeCallBack2::EChangeModify, aEntry, instanceInfoBefore);
+	
+	if(iChangeFilter && iTzRuleIndex)
+        {
+        //Remove the tz rule from tz rule index
+        //we have to do it after CAgnEntryModel::NotifyingL that is indirectly using the
+        //tz rule in oldEntry.
+        iTzRuleIndex->RemoveTzRuleL(*oldEntry);
+        }
+  
 	
 	CleanupStack::PopAndDestroy(instanceInfoBefore);
 	CleanupStack::PopAndDestroy(oldEntry);

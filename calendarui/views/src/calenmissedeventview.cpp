@@ -151,6 +151,13 @@ CCalenView::TNextPopulationStep CCalenMissedEventView::ActiveStepL()
         	{
         	cnt->CompletePopulationL();
         	RedrawStatusPaneL();
+        	
+        	//no tool bar in missed event view
+        	MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
+        	    if(toolbar && toolbar->IsVisible())
+        	      {
+        	      toolbar->SetToolbarVisibilityL(EFalse);  
+        	      } 
         	nextStep = CCalenView::EDone;
         	}
         	break;
@@ -235,9 +242,7 @@ void CCalenMissedEventView::DoActivateImplL( const TVwsViewId& aPrevViewId,
     
     UpdateCbaL();
     
-    // Draw even viewer toolbar by adding Edit, Delete and Send buttons
-	AddToolbarButtonsL();
-	
+   
     TRACE_EXIT_POINT;
     }
 
@@ -251,10 +256,13 @@ void CCalenMissedEventView::DoDeactivateImpl()
     TRACE_ENTRY_POINT;
     
     iPreviousViewId.iViewUid = KNullUid;
+    MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
+    if(toolbar)
+        {
+        toolbar->SetToolbarVisibilityL(ETrue);  
+        }
 
-    // Remove the toolbar buttons for event viewer before exiting from event view
-    TRAP_IGNORE(RemoveToolbarButtonsL());
-    
+        
     TRACE_EXIT_POINT;
     }
 
@@ -315,9 +323,30 @@ void CCalenMissedEventView::HandleCommandL(TInt aCommand)
         case EAknSoftkeyClose:   
         case EAknSoftkeyBack:
 			{
+		
 	        iServices.IssueNotificationL(ECalenNotifyMissedEventViewClosed);
 			break;
 			}
+        case EAknSoftkeyExit: 
+            {
+                      
+            CCalenNativeView::HandleCommandL(aCommand);
+            }
+            break;
+        case ECalenCmdFindPhoneNum:
+            {
+            cnt->OnCmdFindPhoneNumL();
+             }
+             break;
+        case ECalenCmdFindEmail:
+            {
+            cnt->OnCmdFindEmailL();
+            }
+            break;
+        case ECalenCmdFindURL:
+            {
+            cnt->OnCmdFindUrlL();
+            }
         default:
             if(cnt->GetFindItemMenu()->CommandIsValidL(aCommand))
                 {
@@ -366,13 +395,13 @@ void CCalenMissedEventView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMe
                       }
                 }
             
-		  	cnt->GetFindItemMenu()->AddItemFindMenuL(cnt->GetItemFinder(),aMenuPane,EFindItemMenuPlaceHolder,KNullDesC);
+		  
 		  	 
 		  	 if(CCalenLocationUtil::IsMapProviderAvailableL())
             	{
 	            if(cnt->IsEventHasMapLocationL() || cnt->IsEventHasNoLocationTextL())
 		            {
-		            aMenuPane->DeleteMenuItem( ECalenGetLocationAndSave );
+		            aMenuPane->DeleteMenuItem( ECalenGetLocationAndReplace );
 		            }
 		        if(!cnt->IsEventHasMapLocationL())
 			        {
@@ -384,6 +413,10 @@ void CCalenMissedEventView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMe
 	            aMenuPane->DeleteMenuItem( ECalenGetLocationAndReplace );
 	            aMenuPane->DeleteMenuItem( ECalenShowLocation );	
 	            }
+			//as no toolbar in missedeventview no need to handle thees commands
+		  	aMenuPane->DeleteMenuItem( ECalenCmdPromptThenEdit );
+		  	aMenuPane->DeleteMenuItem( ECalenDeleteCurrentEntry ); 
+		  	aMenuPane->DeleteMenuItem( ECalenSend );
 		    break;
 		  	}
 		 default:
@@ -434,6 +467,10 @@ void CCalenMissedEventView::UpdateCbaL()
     if(iShowCloseButtonOnCba)
         {
         cba->SetCommandL( KSK2CBAPosition, R_CALEN_CLOSE_CBA_BUTTON );
+        }
+    else
+        {
+        cba->SetCommandL( KSK2CBAPosition, R_CALEN_BACK_CBA_BUTTON);
         }
     
     cba->DrawNow();

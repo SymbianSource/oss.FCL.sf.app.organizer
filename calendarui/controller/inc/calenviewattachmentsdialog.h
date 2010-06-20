@@ -370,6 +370,7 @@ class CCalenViewAttachmentsDialog : public CAknDialog,
         CCalenController&               iController;
         CDocumentHandler*               iDocHandler; 
         const TDesC&                    iNewTitle;
+        TBool                           iEmbeddedFileOpened;
         
         
         // Internal status flags

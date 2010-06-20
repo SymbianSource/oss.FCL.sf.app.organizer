@@ -177,17 +177,17 @@ void CClockWorldItemProcessor::DoAsyncCallback()
     {
     __PRINTS( "CClockWorldItemProcessor::DoAsyncCallback - Entry" );
     
-    if( !IsActive() )
+    if( IsAdded() )
         {
-        if( IsAdded() )
+        if( !IsActive() )
             {
             // Make sure this is the last Active Object in the list
             Deque();
             CActiveScheduler::Add( this );
+            TRequestStatus* status = &iStatus;
+            User::RequestComplete( status, KErrNone );
+            SetActive();       
             }
-        TRequestStatus* status = &iStatus;
-        User::RequestComplete( status, KErrNone );
-        SetActive();       
         }
     
     __PRINTS( "CClockWorldItemProcessor::DoAsyncCallback - Exit" );

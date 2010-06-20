@@ -21,9 +21,14 @@
 #include "calendarui_debug.h"
 
 // INCLUDE FILES
+#include "CleanupResetAndDestroy.h"
 #include "calendbchangenotifier.h"    // CCalenDbChangeNotifier
 #include "calenglobaldata.h"            // Calendar global data
 #include <calsession.h>                 // CalSession
+#include <missedalarm.h>
+#include <missedalarmstore.h>
+#include <missedalarmstorecrkeys.h>
+#include <calcalendarinfo.h>
 
 // -----------------------------------------------------------------------------
 // KTimerResolution limits the number of notifications sent to registered
@@ -42,9 +47,9 @@ const TInt KTimerResolution = 1000000;  // 1 Second
 // C++ default constructor can NOT contain any code, that might leave.
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
-CCalenDbChangeNotifier::CCalenDbChangeNotifier( CCalenGlobalData& aGlobalData ) 
+CCalenDbChangeNotifier::CCalenDbChangeNotifier( CCalSession& aSession ) 
     : CActive( EPriorityNormal ),
-      iGlobalData( aGlobalData )
+      iSession( aSession )
     {
     TRACE_ENTRY_POINT;
 
@@ -58,11 +63,11 @@ CCalenDbChangeNotifier::CCalenDbChangeNotifier( CCalenGlobalData& aGlobalData )
 // Two-phased constructor.
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
-CCalenDbChangeNotifier* CCalenDbChangeNotifier::NewL( CCalenGlobalData& aGlobalData )
+CCalenDbChangeNotifier* CCalenDbChangeNotifier::NewL( CCalSession& aSession )
     {
     TRACE_ENTRY_POINT;
 
-    CCalenDbChangeNotifier* self = new( ELeave ) CCalenDbChangeNotifier( aGlobalData );
+    CCalenDbChangeNotifier* self = new( ELeave ) CCalenDbChangeNotifier( aSession );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -93,7 +98,7 @@ void CCalenDbChangeNotifier::ConstructL()
                                                         range );
 
     // Enable database change notifications on current global data session
-    iGlobalData.CalSessionL().StartChangeNotification( *this, *iCalChangeFilter );
+    iSession.StartChangeNotification( *this, *iCalChangeFilter );
 
     // Create a timer to limit the number of notifications broadcast
     iNotificationTimer.CreateLocal();
@@ -120,7 +125,7 @@ CCalenDbChangeNotifier::~CCalenDbChangeNotifier()
     iNotificationTimer.Close();
 
     // Disable database change notifications on current global data session   
-    PIM_TRAPD_HANDLE( iGlobalData.CalSessionL().StopChangeNotification() );
+    PIM_TRAPD_HANDLE( iSession.StopChangeNotification() );
 
     // Destroy the notification filter
     delete iCalChangeFilter;
@@ -148,10 +153,11 @@ TTime CCalenDbChangeNotifier::LastDBModificationTime() const
 // to the one we are currently using.
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
-void CCalenDbChangeNotifier::CalChangeNotification( RArray<TCalChangeEntry>& /*aChangeItems*/ )
+void CCalenDbChangeNotifier::CalChangeNotification( RArray<TCalChangeEntry>& aChangeItems )
     {
     TRACE_ENTRY_POINT;
 
+    TRAP_IGNORE(HandleMissedAlarmsL(aChangeItems));
     // Always update the last notification time, even if we don't notify 
     // our observers
     iLastDbChangeNotification.UniversalTime();
@@ -167,6 +173,52 @@ void CCalenDbChangeNotifier::CalChangeNotification( RArray<TCalChangeEntry>& /*a
         }
 
     TRACE_EXIT_POINT;
+    }
+void CCalenDbChangeNotifier::HandleMissedAlarmsL(const RArray<TCalChangeEntry>& aChangeItems)
+    {
+    TRACE_ENTRY_POINT
+    CRepository* missedAlarmStoreRepository = CRepository::NewL(
+            KCRUidMissedAlarmStore);
+    // Create missed alarm store
+    CMissedAlarmStore* missedAlarmStore = CMissedAlarmStore::NewL(
+            *missedAlarmStoreRepository);
+    CleanupStack::PushL(missedAlarmStore);
+    RPointerArray<CMissedAlarm> missedAlarmStorelist;
+    CleanupResetAndDestroyPushL(missedAlarmStorelist);
+    missedAlarmStore->GetL(missedAlarmStorelist);
+    CCalCalendarInfo* calendarInfo = iSession.CalendarInfoL();
+    CleanupStack::PushL(calendarInfo);
+    CCalenDbChangeNotifier::TCalLuidFilename calLuidFilename;
+    calLuidFilename.iFilename = calendarInfo->FileNameL();
+    if (missedAlarmStorelist.Count())
+        {
+        for (TInt idx = 0; idx < aChangeItems.Count(); idx++)
+            {
+            if (aChangeItems[idx].iChangeType == EChangeDelete)
+                {
+                calLuidFilename.iLuid = aChangeItems[idx].iEntryId;
+                TInt index = missedAlarmStorelist.Find(
+                        calLuidFilename,CCalenDbChangeNotifier::DoFindEntryByLuid);
+                if(index != KErrNotFound)
+                    {
+                    CMissedAlarm* missedAlarm = missedAlarmStorelist[index];
+                    missedAlarmStore->RemoveL(*missedAlarm);
+                    }
+                }
+            }
+        }
+    CleanupStack::PopAndDestroy(calendarInfo);
+    CleanupStack::PopAndDestroy(&missedAlarmStorelist);
+    CleanupStack::PopAndDestroy(missedAlarmStore);
+    TRACE_EXIT_POINT    
+    }
+TBool CCalenDbChangeNotifier::DoFindEntryByLuid(
+                const TCalLuidFilename* aLuidFilename,const CMissedAlarm& aMissedAlarm)
+    {
+    TRACE_ENTRY_POINT
+    TRACE_EXIT_POINT
+    return (aLuidFilename->iLuid == aMissedAlarm.iLuid 
+            && !aLuidFilename->iFilename.CompareF(aMissedAlarm.iCalFileName));
     }
 
 // -----------------------------------------------------------------------------

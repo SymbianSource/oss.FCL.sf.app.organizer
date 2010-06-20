@@ -790,7 +790,22 @@ TBool CCalenEditorDataHandler::DurationGreaterThanRepeatIntervalError()
         case ERepeatDaily:
         case ERepeatWorkdays:
             {
-            TTimeIntervalDays durDays = Edited().EndDateTime().DaysFrom( Edited().StartDateTime() );
+            TTime startDate = Edited().StartDateTime();
+            TTime endDate = Edited().EndDateTime();
+            // In case AllDay event end at "12:00am" 24/06/2009. 
+            // editor should display EndDate as 23/06/2009.
+            if(Edited().IsAllDayEvent())
+                {
+                if( endDate > startDate )
+                    {
+                    endDate -= TTimeIntervalDays( 1 );
+                    if( endDate < startDate )
+                        {
+                        endDate = startDate;
+                        }
+                    }
+                }
+            TTimeIntervalDays durDays = endDate.DaysFrom( startDate);
             isError = durDays >= TTimeIntervalDays(1);
             break;
             }

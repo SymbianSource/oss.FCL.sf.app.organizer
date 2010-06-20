@@ -163,7 +163,7 @@ void CCalenController::ConstructL()
     iNotifier = new( ELeave )CCalenNotifier( *this );
 
     // Get an instance of the global data
-    iGlobalData = CCalenGlobalData::NewL( *iNotifier, iNotifier );
+    iGlobalData = CCalenGlobalData::NewL( *iNotifier, iNotifier, iNotifier );
     iGlobalData->InitializeGlobalDataL();
     
     RArray<TCalenNotification> notificationArray;
@@ -212,6 +212,7 @@ void CCalenController::ConstructL()
     notificationArray.Append(ECalenNotifySystemTimeChanged);
     notificationArray.Append(ECalenNotifyAppForegrounded);
     notificationArray.Append(ECalenNotifyDayViewClosed);
+    notificationArray.Append(ECalenNotifyWeekViewClosed);
     notificationArray.Append(ECalenNotifyAppBackgrounded);
     notificationArray.Append(ECalenNotifyViewPopulationComplete);
     notificationArray.Append(ECalenNotifyCalendarFieldChanged);
@@ -982,7 +983,7 @@ CCalenSetting& CCalenController::Settings()
 // Get icon of specific type
 // ----------------------------------------------------------------------------
 //
-CGulIcon* CCalenController::GetIconL( MCalenServices::TCalenIcons aIndex )
+CGulIcon* CCalenController::GetIconL( MCalenServices::TCalenIcons aIndex, const TInt aViewId ) 
     {
     TRACE_ENTRY_POINT;
     
@@ -993,7 +994,7 @@ CGulIcon* CCalenController::GetIconL( MCalenServices::TCalenIcons aIndex )
         }
     
     TRACE_EXIT_POINT;
-    return iViewManager->IconsL().GetIconL(aIndex);
+    return iViewManager->IconsL().GetIconL(aIndex,aViewId);
     }
 
 // ----------------------------------------------------------------------------
@@ -1132,6 +1133,34 @@ void CCalenController::GetAllCalendarInfoL(
     TRACE_ENTRY_POINT;
     iGlobalData->GetAllCalendarInfoL(aCalendarInfoList);
     TRACE_EXIT_POINT;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenController::SetLaunchFromExternalApp
+//
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+void CCalenController::SetLaunchFromExternalApp( TBool aFlag )
+    {
+    TRACE_ENTRY_POINT;
+    
+    iLaunchFromExternalApp = aFlag;
+    TRACE_EXIT_POINT;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenController::SetLaunchFromExternalApp
+//
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+TBool CCalenController::IsLaunchFromExternalApp()
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    
+    return iLaunchFromExternalApp;
     }
 // End of file
 

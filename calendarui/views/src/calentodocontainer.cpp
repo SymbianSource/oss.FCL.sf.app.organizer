@@ -21,6 +21,8 @@
 #include <aknlists.h>
 #include <AknsUtils.h>
 #include <avkon.mbg>
+#include <aknbutton.h>
+#include <akntoolbar.h>
 #include <calalarm.h>
 #include <calentry.h>
 #include <calinstance.h>
@@ -149,11 +151,9 @@ void CCalenTodoListBoxItemDrawer::DrawItem(TInt aItemIndex,
                                              aViewIsDimmed);
     
     
-    
 
-    TAknWindowComponentLayout tempLayout = 
-            AknLayoutScalable_Apps::list_cale_time_pane_g6( aItemIndex - static_cast<CCalenTodoListBox*>(iListBox)->TopItemIndex()) ;     
     
+    TAknWindowComponentLayout tempLayout = AknLayoutScalable_Apps::list_cale_time_pane_g6(0);    
     TAknLayoutRect colourstrips;
     colourstrips.LayoutRect( actualItemRect, tempLayout.LayoutLine() );
       
@@ -278,7 +278,7 @@ CCalenTodoContainer::~CCalenTodoContainer()
     delete iController;
     delete iDesArray;
     delete iListBox;
-    delete iEmptyListText;
+    //delete iEmptyListText;
     
     iColorUidArray.Close();
     TRACE_EXIT_POINT;
@@ -385,15 +385,21 @@ void CCalenTodoContainer::ConstructImplL()
     model->SetItemTextArray(iDesArray);
     model->SetOwnershipType(ELbmDoesNotOwnItemArray);
 
-    CAknIconArray* iconList = CreateIconsL( iIconIndices );
+    CAknIconArray* iconList = CreateIconsL( iIconIndices, KCalenTodoViewUidValue ); 
 
     // Transfer iconlist ownership to the listbox
     iListBox->ItemDrawer()->ColumnData()->SetIconArray( iconList );
 
-    // Save empty text and set null for list box.
+    /*// Save empty text and set null for list box.
     // It is made not to display "No data".
     iEmptyListText = iListBox->View()->EmptyListText()->AllocL();
-    iListBox->View()->SetListEmptyTextL( KNullDesC );
+    //iListBox->View()->SetListEmptyTextL( KNullDesC );*/
+    
+    // Set text for empty listbox
+    HBufC* emptyText = StringLoader::LoadLC(R_CALEN_QTN_CALE_NO_EVENTS,
+                                            iEikonEnv);
+    iListBox->View()->SetListEmptyTextL( *emptyText ); //Whenever listbox is empty, it will set with this empty text.
+    CleanupStack::PopAndDestroy(emptyText);
 
     TRACE_EXIT_POINT;
     }
@@ -476,11 +482,13 @@ void CCalenTodoContainer::SetHighlightingL()
     TRACE_ENTRY_POINT;
 
     TInt focusIx = KErrNotFound;
-
+    TInt topIx = KErrNotFound;
+    
+    topIx = iListBox->TopItemIndex();
     // If top item is specified, set it
-    if ( iFirstEntryOnScreenIndex != KErrNotFound )
+    if ( topIx != KErrNotFound )
         {
-        iListBox->SetTopItemIndex( iFirstEntryOnScreenIndex );
+        iListBox->SetTopItemIndex( topIx );
         }
 
     if ( iHighlightedRowNumber != KErrNotFound )
@@ -591,7 +599,7 @@ void CCalenTodoContainer::CreateEntryItertorL()
     CleanupStack::PopAndDestroy( listDes );
     CleanupStack::PopAndDestroy( &calendarInfoList ); 
     iListBox->HandleItemAdditionL();
-    iListBox->View()->SetListEmptyTextL( *iEmptyListText );
+    //iListBox->View()->SetListEmptyTextL( *iEmptyListText );
 
     TRACE_EXIT_POINT;
     }
@@ -892,7 +900,10 @@ void CCalenTodoContainer::HandleResourceChange(TInt aType)
     if ( aType == KAknsMessageSkinChange || aType == KEikDynamicLayoutVariantSwitch )
         {
         SizeChanged();
+        CAknIconArray* iconList = CreateIconsL( iIconIndices, KCalenTodoViewUidValue ); 
 
+            // Transfer iconlist ownership to the listbox
+            iListBox->ItemDrawer()->ColumnData()->SetIconArray( iconList );
         // refresh
         TRAPD(error,iView->BeginRepopulationL());
 	    if(error!=KErrNone)
@@ -944,6 +955,29 @@ void CCalenTodoContainer::MarkCurrentL(TBool aMark)
     // set marked todo items info
     static_cast<CCalenTodoView*>( iView )->SetMarkedToDoItems(newArray);
     
+    MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
+    if( MarkedCount() )
+        {
+        if(toolbarImpl) 
+          {
+            CAknToolbar& toolbar = toolbarImpl->Toolbar();
+
+            // dim clear and clear all toolbar buttons
+            toolbar.SetItemDimmed(ECalenNewMeeting,ETrue,ETrue);
+          }
+
+        }
+    else
+        {
+        if(toolbarImpl) 
+             {
+               CAknToolbar& toolbar = toolbarImpl->Toolbar();
+
+               // dim clear and clear all toolbar buttons
+               toolbar.SetItemDimmed(ECalenNewMeeting,EFalse,ETrue);
+             }
+        }
+    
     CleanupStack::Pop( newArray );
 
     TRACE_EXIT_POINT;
@@ -982,6 +1016,29 @@ void CCalenTodoContainer::MarkAllL(TBool aMark)
         // when all the todo items are unmarked,clear all marked todo items info from View
         static_cast<CCalenTodoView*>( iView )->ClearMarkedToDoItems();
         }
+    
+    MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
+    if( MarkedCount() )
+           {
+           if(toolbarImpl) 
+             {
+               CAknToolbar& toolbar = toolbarImpl->Toolbar();
+
+               // dim clear and clear all toolbar buttons
+               toolbar.SetItemDimmed(ECalenNewMeeting,ETrue,ETrue);
+             }
+
+           }
+       else
+           {
+           if(toolbarImpl) 
+                {
+                  CAknToolbar& toolbar = toolbarImpl->Toolbar();
+
+                  // dim clear and clear all toolbar buttons
+                  toolbar.SetItemDimmed(ECalenNewMeeting,EFalse,ETrue);
+                }
+           }
 
     TRACE_EXIT_POINT;
     }
@@ -1137,7 +1194,12 @@ void CCalenTodoContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent
         {
         TInt pointerIndex(-1);
         TBool isItem (iListBox->View()->XYPosToItemIndex(aPointerEvent.iPosition, pointerIndex));
-
+        
+        if(aPointerEvent.iType == TPointerEvent::EButton1Down)
+		{
+                this->GenerateTactileFeedback(); //Tactile feedback.
+		}	
+        
         if(isItem == EFalse && IsEmptyView())
             {
             iListBox->HandlePointerEventL(aPointerEvent);

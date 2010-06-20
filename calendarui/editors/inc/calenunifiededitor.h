@@ -297,8 +297,9 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
 
         /**
          * @brief Handles "Exit" command.
+         * @param aCmd Holds the command issued.
          */
-        void OnCmdExitL();
+        void OnCmdExitL(TInt aCmd);
         
         /**
          * @brief Delete note from Calendar.
@@ -353,6 +354,11 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
         void DoHandleLocaleChangeL( TInt aChange );
         
     public:
+        
+        /**
+         * @brief Gets the iServices reference.
+         */
+        MCalenServices& GetServices();
         
         /**
          * @brief Inserts dialog line (form field) defined by aResourceId 
@@ -501,6 +507,7 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
          */
         void GetAttachmentNamesL(RPointerArray<HBufC>& aAttachmentNames);
         
+        TBool iCheck;
     protected:
         /**
          * From CEikDialog

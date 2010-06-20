@@ -126,6 +126,8 @@ class CClockAlarmArray : public CBase, public MDesCArray
         * @param aAlarmInfo The information of the alarm at aIndex in the list.
         */
         void GetInActiveAlarmInfo(TInt aIndex, TAlarmId& aAlarmId, SClkAlarmInfo& aAlarmInfo  ) const;
+
+        HBufC* NewAlarmText() const;
         
     private:            // New functions
         

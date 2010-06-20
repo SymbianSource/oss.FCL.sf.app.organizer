@@ -287,7 +287,13 @@ class CAdtUpdaterContainer : public CCoeControl
          * @param  aTimeZoneId Carry the timezoneid of which DST status is required
          * @return TBool
          */
-         TBool IsDstOnL( TInt aTimeZoneId );         
+         TBool IsDstOnL( TInt aTimeZoneId );
+         
+         /**
+          * @brief  Checks whether predictiveapplcation enable key is on/off.
+          * @return TBool
+          */
+         TBool PredictiveTimeEnabled();
   
 	private:       //Data members
 		

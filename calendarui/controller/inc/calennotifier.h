@@ -34,7 +34,6 @@
 // FORWARD DECLARATIONS
 class CCalenGlobalData;                 // Calendar global data singleton
 class CEnvironmentChangeNotifier;       // Receive system event notifications
-class CCalenDbChangeNotifier;           // Receive database change notifications
 class CCalenEComWatcher;                // Receives Ecom registry change notifications
 class CCalenSetting;                    // Calendar settings
 class CCalenController;
@@ -251,7 +250,6 @@ class CCalenNotifier :  public CBase,
         RArray<TCalenNotification> iBroadcastQueue;
         TBool iBroadcastActive;
 
-        CCalenDbChangeNotifier* iDbChangeNotifier;
         CCalenSetting* iSetting;
         TBool iIsSettingsBroadcastDeferred;
         TBool iSettingsNeedsBroadcast;

@@ -79,6 +79,10 @@ EXPORT_C CNotepadModel::~CNotepadModel()
     delete iItemArray;
     delete iTimeFormat;
     delete iDateFormat;
+    if ( iFixedFirstNote )
+    	{
+        delete iFixedFirstNote;
+    	}    
     }
 
 // -----------------------------------------------------------------------------
@@ -348,6 +352,7 @@ void CNotepadModel::ConstructL(TInt aResId)
         = rr.ReadInt16(); // WORD  listing_style;
     TInt dateResId(rr.ReadInt32());               // LLINK date_format
     TInt timeResId(rr.ReadInt32());               // LLINK time_format
+    TInt firstNoteResId(rr.ReadInt32());          // LLINK first_note;
     CleanupStack::PopAndDestroy(); // rr
     if (dateResId)
         {
@@ -357,6 +362,10 @@ void CNotepadModel::ConstructL(TInt aResId)
         {
         iTimeFormat = iEnv->AllocReadResourceL(timeResId);
         }
+    if ( firstNoteResId )
+    	{
+    iFixedFirstNote = iEnv->AllocReadResourceL( firstNoteResId );
+    	}
     iItemArray = new(ELeave) CDesCArrayFlat(KNotepadItemArrayGranularity);
     iDatabaseChangeNotifier = 
         CNotepadModel::CDatabaseChangeNotifier::NewL(iDatabase, *this);
@@ -385,6 +394,7 @@ void CNotepadModel::PrepareToDeleteByKeysL(const RArray<TInt>& aKeys)
         {
         User::LeaveIfError(iSavedDeleteKeys.Append(aKeys[i]));
         }
+    iProgressCount = 0;
     ExecuteDeleteStepL();
     iRetval = iFileSession.ReleaseReserveAccess( KDefaultDrive );
     iFileSession.Close();
@@ -397,7 +407,7 @@ void CNotepadModel::PrepareToDeleteByKeysL(const RArray<TInt>& aKeys)
 //
 void CNotepadModel::ExecuteDeleteStepL()
     {
-    iProgressCount = 0;
+    
     iStepCount = iSavedDeleteKeys.Count();
     if ( iStepCount > KNotepadMaxDeleteCountInStep )
         {
@@ -411,12 +421,6 @@ void CNotepadModel::ExecuteDeleteStepL()
     if ( IsTemplates() )
         {
         iSavedDeleteKeys.Remove(0);
-        for (TInt i(0); i < iStepCount - 1; i++)
-            {
-            sql.Append(KNotepadSqlDeleteByKeysAppend);
-            sql.AppendNum(iSavedDeleteKeys[0]);
-            iSavedDeleteKeys.Remove(0);
-            }
         }
     else // If Notepad, Remove is postponed until remove link phase
         {
@@ -512,6 +516,15 @@ TInt CNotepadModel::DoDeleteCallBackL()
             else // do next step
                 {
                 increment = iStepCount - iProgressCount;
+
+                iProgressCount += increment;
+                if ( iModelObserver )
+                    {
+                    iModelObserver->HandleNotepadModelEventL(
+                            MNotepadModelObserver::EProgressDeletion,
+                            1 );
+                    }
+
                 ExecuteDeleteStepL();
                 }
             }
@@ -530,15 +543,7 @@ TInt CNotepadModel::DoDeleteCallBackL()
         {
         increment = iDbUpdate.RowCount() - iProgressCount;
         }            
-    if ( increment > 0 )
-        {
-        iProgressCount += increment;
-        if ( iModelObserver )
-            {
-            iModelObserver->HandleNotepadModelEventL(
-                MNotepadModelObserver::EProgressDeletion, increment);
-            }
-        }
+    
     if ( deleteFinished || ( stat == 0 && 
         SysUtil::FFSSpaceBelowCriticalLevelL(&(iEnv->FsSession())) ) )
         {
@@ -618,6 +623,20 @@ void CNotepadModel::BuildItemArrayL( const TBool aForceSync )
         }
     iItemArray->Reset();
     iKeyArray.Reset();
+    //insert the New note as the firt note
+    if ( iFixedFirstNote != NULL )
+		{
+		TBuf<256> buf;
+		_LIT( KBlankSpace, "   " );
+		buf.Append( KBlankSpace );	
+		buf.Append( KColumnListSeparator );
+		buf.Append( *iFixedFirstNote );
+		iItemArray->AppendL( buf );
+		//default key for New note, -2 is never used for normal keys.
+		iKeyArray.Append( -2 );
+		}
+    
+  
     TRAPD( err, DoBuildItemArrayL() );
     if ( err != KErrNone)
         {
@@ -716,13 +735,14 @@ void CNotepadModel::DoBuildNotepadItemArrayL(
 
         TPtrC thisText = 
             aBuf.Mid(textOffset).Left(KNotepadMaxCharactersForSort);
-        if ( iItemArray->Count() == 0 || 
+        if ( (iItemArray->Count() == 0 && iFixedFirstNote == NULL) || (iItemArray->Count() == 1 && iFixedFirstNote != NULL) || 
              dateTime.Day() != prevDateTime.Day() ||
              dateTime.Month() != prevDateTime.Month() ||
              dateTime.Year() != prevDateTime.Year() )
             {
             // first entry or date of the item has changed
             firstIndexOfTheDay = iItemArray->Count();
+
             textArrayOfTheDay.Reset();
             if ( isToday )
                 {

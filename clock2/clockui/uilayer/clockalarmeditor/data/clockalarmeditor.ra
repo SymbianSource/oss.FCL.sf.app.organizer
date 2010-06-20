@@ -94,7 +94,6 @@ RESOURCE ARRAY r_clock_alarm_editor_occu_array
     items =
         {
         LBUF { txt = qtn_clk_alarm_occ_once; },
-        LBUF { txt = qtn_clk_alarm_24h; },
         LBUF { txt = text_calendar_every_day; },
         LBUF { txt = qtn_clk_alarm_occ_workd; },
         LBUF { txt = text_calendar_every_week; }

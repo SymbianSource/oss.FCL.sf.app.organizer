@@ -54,7 +54,6 @@ SOURCE          calenactionui.cpp
 SOURCE          calencmdlineparser.cpp
 SOURCE          calencmdlinelauncher.cpp
 SOURCE          calencontroller.cpp
-SOURCE          calendbchangenotifier.cpp
 SOURCE          calendebug.cpp
 SOURCE          calendeleteui.cpp
 SOURCE          caleneditui.cpp
@@ -97,6 +96,7 @@ SOURCE          calenattachmentlistbox.cpp
 SOURCE          calenattalistitemarray.cpp
 SOURCE          calenattachmentitemdrawer.cpp
 SOURCE          calenattachmentui.cpp
+SOURCE          calendialogshutter.cpp
 
 
 LIBRARY         calencustomisationmanager.lib

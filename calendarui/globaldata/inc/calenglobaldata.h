@@ -30,6 +30,8 @@
 #include <calentryview.h>           // Calendar Entry view
 #include <e32hashtab.h>                 //RHashSet
 
+#include "calendbchangenotifier.h"      // MCalenDBChangeObserver
+
 #include <calenmulticaluids.hrh>
 
 
@@ -76,7 +78,8 @@ NONSHARABLE_CLASS(CCalenGlobalData) : public CBase,
          */
         IMPORT_C static CCalenGlobalData*
                             NewL( MCalProgressCallBack& aCalCallBack,
-                                  MCalenContextChangeObserver* aNotifier=NULL );
+                                  MCalenContextChangeObserver* aNotifier=NULL,
+                                  MCalenDBChangeObserver* aDBNotifier=NULL);
 
         /**
         * Constructor.  Returns a new instance of CCalenGlobalData if
@@ -315,7 +318,8 @@ NONSHARABLE_CLASS(CCalenGlobalData) : public CBase,
         * By default Symbian 2nd phase constructor is private. 
         * Doesn't take ownership of aNotifier.
         */
-        void ConstructL( MCalenContextChangeObserver* aNotifier );
+        void ConstructL( MCalenContextChangeObserver* aNotifier,
+                                MCalenDBChangeObserver* aDBNotifier);
 
         /**
         * Private Destructor.  Users of this class should call Release() instead
@@ -485,6 +489,7 @@ NONSHARABLE_CLASS(CCalenGlobalData) : public CBase,
         TBool iCalendarForcedExit;
         CCalSession* iCalendarsSession;
         RPointerArray<CCalCalendarInfo> iCalendarInfoList;
+        MCalenDBChangeObserver* iDBChangeNotifier;
     };
 
 #endif  // CALENGLOBALDATA_H

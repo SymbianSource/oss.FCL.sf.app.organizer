@@ -288,7 +288,11 @@ void CCalAsyncDelete::TidyEntryL(const CAgnSimpleEntry& aSimpleEntry)
 			for (TInt i = 0; i < KCount && todelete; ++i)
 				{
 				const CAgnSimpleEntry* KChildEntry = iModel.GetSimpleEntryFromIndexes(KChildIds[i].ChildId());
-				todelete = FallInTimeRangeL(*KChildEntry);
+				if(KChildEntry != NULL)
+				    {
+                    todelete = FallInTimeRangeL(*KChildEntry);
+				    }
+				
 				}
 			}
 

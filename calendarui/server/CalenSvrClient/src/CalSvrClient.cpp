@@ -182,8 +182,8 @@ EXPORT_C void RCalSvrSession::Initialize(MCalSvrAgendaUpdateListener& aListener)
     {
     TRACE_ENTRY_POINT;
     
-    __ASSERT_ALWAYS(!iInitializer->IsActive(), User::Invariant());
-    if(!iInitializer->IsActive())
+    //__ASSERT_ALWAYS(!iInitializer->IsActive(), User::Invariant());
+    if(!(iInitializer->IsActive()) && (KRequestPending != iInitializer->iStatus.Int()))
         {
         iInitializer->Initialize(&aListener);
         }

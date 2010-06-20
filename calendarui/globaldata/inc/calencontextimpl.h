@@ -214,6 +214,32 @@ public:	// Multiple Context support
 	* @brief Resets calendar file name in context
 	*/
     void ResetCalendarFileName();
+    /**
+    * @brief Set calendar file name of Alarm entry in context
+    */    
+    void SetCalAlarmEntryFileNameL(const TDesC& aName);
+    
+    /**
+    * @brief Get calendar filename 
+    * 
+    * @return HBufC pointer to calendar filename of Alarm entry
+    */
+    HBufC* GetCalAlarmEntryFileNameL() const;
+    
+    /**
+    * @brief Resets Alarm Entry calendar file name in context
+    */ 
+    void ResetCalAlarmEntryFileName();
+    
+    /**
+    * @brief set Alarm Entry LocalUid in context
+    */ 
+    void SetCalAlarmEntryLocalUid(TCalLocalUid aLocalId);
+    
+    /**
+    * @brief Get Alarm Entry LocalUid from context
+    */ 
+    TCalLocalUid CalAlarmLocalUidL() const;
 
 private:  // Data
     MCalenContextChangeObserver* iObserver;
@@ -227,6 +253,8 @@ private:  // Data
     // Multiple context ids
     RArray<TCalenInstanceId> iMutlipleContextIds;
     HBufC* iCalenFileName;
+    HBufC* iCalAlarmEntryFileName;
+    TCalLocalUid iCalAlarmLocalUid;
     };
 
 #endif // CALENCONTEXTIMPL_H

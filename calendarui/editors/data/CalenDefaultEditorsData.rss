@@ -202,7 +202,7 @@ RESOURCE MENU_PANE r_calen_noteview_default_menu_pane
             },
         MENU_ITEM
             {
-            command = EAknCmdExit;
+            command = EAknSoftkeyExit;
             txt = qtn_options_exit;
             }
         };
@@ -273,7 +273,7 @@ RESOURCE MENU_PANE r_calen_noteview_location_menu_pane
             },
         MENU_ITEM
             {
-            command = EAknCmdExit;
+            command = EAknSoftkeyExit;
             txt = qtn_options_exit;
             }
         };
@@ -365,6 +365,25 @@ RESOURCE DIALOG r_calen_cancel_changes_query
             }
         };
     }
+    RESOURCE DIALOG r_calen_db_change_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items = 
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                label = qtn_calen_db_change_del_exeptions;
+                };
+            }
+        };
+    }
+
 
 RESOURCE TBUF r_qtn_cale_inote_desc_del_memo
     {
@@ -1015,7 +1034,7 @@ RESOURCE TBUF r_qtn_calen_editor_due_date
 //
 RESOURCE TBUF r_qtn_calen_editor_date_of_birth
     {
-    buf = qtn_cale_label_date;
+    buf = qtn_cale_viewer_date; 
     }
 
 // ---------------------------------------------------------
@@ -1624,7 +1643,7 @@ RESOURCE MENU_PANE r_calen_unified_editor_default_menupane
             },
         MENU_ITEM
             {
-            command = EAknCmdExit;
+            command = EAknSoftkeyExit;
             txt = qtn_options_exit;
             }
         };

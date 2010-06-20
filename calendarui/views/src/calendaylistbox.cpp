@@ -388,6 +388,8 @@ void CCalenDayListBox::Draw(const TRect& aRect) const
     }
 
 
+
+
 TKeyResponse CCalenDayListBox::HandleDownwardLoopingL(const TKeyEvent& aKeyEvent)
     {
     TRACE_ENTRY_POINT;

@@ -45,7 +45,7 @@ CClkUiMdlAlarmListener::CClkUiMdlAlarmListener( RASCliSession& aAlarmSrvSes,
 //
 CClkUiMdlAlarmListener::~CClkUiMdlAlarmListener()
     {
-    // No implementation yet.
+    Cancel();
     }
 
 // ---------------------------------------------------------

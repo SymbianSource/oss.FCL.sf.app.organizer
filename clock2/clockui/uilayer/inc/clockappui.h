@@ -36,6 +36,8 @@ class CAknTabGroup;
 class CAknNavigationDecorator;
 class CIAUpdate;
 class CIAUpdateParameters;
+class CTransitionEffectManager;
+class MTouchFeedback;
 
 // Class declaration
 /**
@@ -47,6 +49,16 @@ class CClockAppUi : public CAknViewAppUi,
                     public MAknTabObserver,
                     public MIAUpdateObserver
 	{
+    
+    public: // enums
+    
+        enum TTransitionDirection 
+            {
+            ETransitionUndefined = 0,
+            ETransitionLeft,
+            ETransitionRight
+            };    
+    
 	public:            // Constructor and destructor
 
 		/**
@@ -145,6 +157,23 @@ class CClockAppUi : public CAknViewAppUi,
         */
         TBool IsAppExitHidden();
         
+        TBool TransitionOngoing() const;
+        
+        void SetTransitionOngoing( TBool aTransitionOngoing );
+        
+        TInt TransitionGroupId() const;
+        
+        void SetTransitionGroupId( TInt aId ); 
+        
+        TTransitionDirection TransitionDirection() const;
+        
+        void  SetTransitionDirection( TTransitionDirection aId );  
+        
+        void DoDisappearTransition( CCoeControl* aControl );
+        
+        void DoAppearTransition( CCoeControl* aControl );
+        
+        
         /**
         * @brief Hides or Un-hides the navigation pane.
         * @param aVisible ETrue, pane will be visible. EFalse will be hidden.
@@ -156,6 +185,14 @@ class CClockAppUi : public CAknViewAppUi,
         * @brief Handles IAD related updates.
         */
         void HandleIADUpdateL();
+
+        
+        //papercut Ana/Digital No24Rpeat Start- rajender
+		/**
+        * @brief returns handle to tactile feedback.
+        */
+        MTouchFeedback* GetFeedback();
+		//papercut Ana/Digital No24Rpeat End- rajender
 		
 	private:           // New functions
 	
@@ -237,6 +274,13 @@ class CClockAppUi : public CAknViewAppUi,
         * @brief Object of CIAUpdateParameters class.
         */
         CIAUpdateParameters*                iParameters;
+        
+        TBool iTransitionOngoing;
+        TInt  iTransitionGroupId;
+        TBool   iTactileFeedbackSupported;
+        TTransitionDirection iTransitionDirection;
+        
+        MTouchFeedback*  iFeedback;
 	};
 
 #endif 		// __CLOCK_APPUI_H__

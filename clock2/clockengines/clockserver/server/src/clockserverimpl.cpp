@@ -506,6 +506,13 @@ void CClkSrvImpl::NotifyTimeChangeL( CClockTimeSourceInterface& aPluginImpl )
 		    }
 		}
 	
+	// Initialise the attributes to null.
+	TTime invalidTime( 0 );
+	iTimeAttributes->iDstOffset = TTimeIntervalMinutes( 0 );
+	iTimeAttributes->iTimeZoneOffset =  TTimeIntervalMinutes( 0 );
+	iTimeAttributes->iUtcDateTime = invalidTime.DateTime();
+		
+	
 	// Get all the information related to the plugin.
 	// The UTC time.
 	TRAP_IGNORE( aPluginImpl.GetTimeInformationL( EUTCTime, iTimeAttributes ) );	
@@ -697,9 +704,47 @@ void CClkSrvImpl::NotifyMccChangeL()
 		// Lets see if we can narrow down to a single timezone with the MCC recieved.
 		RArray< CTzId > tzIdArray;
 		
-		// Try and fetch the timezone ID using the MCC recieved.
-		TRAP_IGNORE( iTzResolver->TzIdFromMccL( iMcc, tzIdArray, KInvalidTimeZoneId ) );
-		
+		// This parte of code introduced due to error ID EASH-82DPPC(3G Tests for NITZ and GPRS Interaction)
+		// Fix is bascially to narrowing down to single timezone id if NITZ packet is received prior to MCC.
+		// In first IF state we are trying to narrowdown to single timezone ID, if not possible try to use MCC to get timezone
+		// In second IF , we are using MCC to narrow down to single timezone ID directly as dont have NITZ info.
+		if( iTimeAttributes )
+		{
+			TTime invalidTime(0);
+			if( iTimeAttributes->iDstOffset != TTimeIntervalMinutes( 0 ) &&
+			iTimeAttributes->iTimeZoneOffset != TTimeIntervalMinutes( 0 ) &&
+			iTimeAttributes->iUtcDateTime.Year() != invalidTime.DateTime().Year() )
+			{
+				// Try to resolve the timezone id with the data that we have recieved.
+				TInt timezoneId;
+				TRAP_IGNORE( TInt errorVal = iTzResolver->GetTimeZoneL( *iTimeAttributes, iMcc, timezoneId ) );
+				
+				__PRINT("TIMEZONE ID %d", timezoneId );
+
+				// Append the timezone id to array.
+
+				CTzId* matchingDSTZoneId = CTzId::NewL( timezoneId );
+				CleanupStack::PushL( matchingDSTZoneId );
+
+				tzIdArray.AppendL( *matchingDSTZoneId );
+
+				CleanupStack::PopAndDestroy( matchingDSTZoneId );
+
+				matchingDSTZoneId = NULL;
+			}
+			else
+			{
+				__PRINTS("NOT ABLE TO NARROW DOWN TO TIMEZONE ID WITH RECEIVED NITZ HENCE TRY WITH MCC");
+				// Not able to narrow down to single timezone id with received NITZ packet hence try with MCC.
+				TRAP_IGNORE( iTzResolver->TzIdFromMccL( iMcc, tzIdArray, KInvalidTimeZoneId ) );	
+			}
+		}
+		else
+		{
+			__PRINTS("NO NITZ INFO HENCE TRY WITH MCC");
+			// No NITZ info hecne try with MCC to get the time zone Id.
+			TRAP_IGNORE( iTzResolver->TzIdFromMccL( iMcc, tzIdArray, KInvalidTimeZoneId ) );
+		}
 		// Code to check if its the first boot.
 		// Get the first boot status from cenrep. If it is the first boot, clockserver will not update the time.
 		TBool staleBoot( EFalse );
@@ -755,6 +800,20 @@ void CClkSrvImpl::NotifyMccChangeL()
 				}
 			CleanupStack::PopAndDestroy( currentCTzId );
 			CleanupStack::PopAndDestroy( &tz );
+			
+			// Setting the attributes to null again as we dont trust on
+			// previous NITZ data recevied by device.If device receive
+			// NITZ data again attributes would get filled with actual value.
+			// Has been kept outside because this statement is valid for
+			// first boot also.
+			if( iTimeAttributes && staleBoot )
+			{
+				iTimeAttributes->iDstOffset = TTimeIntervalMinutes( 0 );
+				iTimeAttributes->iTimeZoneOffset =  TTimeIntervalMinutes( 0 );
+				TTime invalidTime( 0 );
+				iTimeAttributes->iUtcDateTime = invalidTime.DateTime();	
+			}
+			
 			}
 		}
 	

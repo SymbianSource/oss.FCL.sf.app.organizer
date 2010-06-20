@@ -143,8 +143,6 @@ CClockMCCTzIdMapper::~CClockMCCTzIdMapper()
 //
 TInt CClockMCCTzIdMapper::UTCOffSetWithoutDSTChangesL( RTz& aTz, const CTzId& aTzId ) const
 	{
-	__PRINTS( "CClockMCCTzIdMapper::UTCOffSetWithoutDSTChangesL - Entry" );
-	
 	TInt timeOffset( KErrNotFound );
 
 	TTime universalTime;
@@ -158,8 +156,6 @@ TInt CClockMCCTzIdMapper::UTCOffSetWithoutDSTChangesL( RTz& aTz, const CTzId& aT
 	    delete currentRules;
 	    }
 	
-	__PRINTS( "CClockMCCTzIdMapper::UTCOffSetWithoutDSTChangesL - Exit" );
-
 	return timeOffset;
 	}
 

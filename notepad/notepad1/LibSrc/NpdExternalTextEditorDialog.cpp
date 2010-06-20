@@ -310,9 +310,13 @@ void CNotepadExternalTextDialog::ProcessCommandL(TInt aCommandId)
         {
            TInt ret = DoSearchL( iFindItemMenu->SearchCase(aCommandId) );
 		   if ( ret == EAknSoftkeyExit )
-			{
-				aCommandId = ret;
-			}
+		       {
+               aCommandId = ret;
+		       }
+		   else
+               {
+               return;
+               }
         }
 
     switch (aCommandId)
@@ -411,6 +415,7 @@ void CNotepadExternalTextDialog::DynInitMenuBarL(TInt aResourceId, CEikMenuBar* 
 TInt CNotepadExternalTextDialog::DoSearchL(CFindItemEngine::TFindItemSearchCase aCase)
 	{
 		CFindItemDialog* dialog = CFindItemDialog::NewL( iEditor->Text()->Read(0), aCase );
+	    dialog->EnableSingleClick( ETrue );
 	    TInt ret = dialog->ExecuteLD();
 	    TBuf<128> test = _L("FI returned: ");
 	    test.AppendNum(ret);

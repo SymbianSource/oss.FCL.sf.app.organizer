@@ -750,7 +750,15 @@ TInt CNotepadCoreModel::GetInsertionIndex(const TDesC& aDes,
     TInt insertIndex=0;
     TInt offset = KErrNotFound;
     TInt cmpOffsetListItem = KErrNotFound;
-    for(insertIndex= 0;insertIndex<aItemArray.MdcaCount();insertIndex++)
+    if ( IsTemplates() )
+    	{
+        insertIndex = 0;
+    	}
+    else
+    	{
+        insertIndex = 1;
+    	}
+    for(;insertIndex<aItemArray.MdcaCount();insertIndex++)
     	{
     	actualBuf.Copy(aItemArray.MdcaPoint(insertIndex));
 		actualTimeBuf.Copy(actualBuf.Left( actualBuf.Match(KCmpColumnListSeparator) ));

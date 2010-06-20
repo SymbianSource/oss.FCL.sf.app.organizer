@@ -22,11 +22,14 @@
 #include <CalenInterimUtils2.h>
 #include <calcalendarinfo.h>
 #include <calcalendariterator.h>
+#include <calenmulticaluids.hrh>
+
 // user include.
 #include "multicaluidialogmodel.h"
 #include "calendarui_debug.h"
+#include "cleanupresetanddestroy.h"
 
-_LIT( KCalendarDatabaseFilePath, "c:calendar" );
+const TInt KBuffLength = 24;
 
 // ----------------------------------------------------------------------------
 // CMultiCalUiDialogModel::CMultiCalUiDialogModel
@@ -150,7 +153,7 @@ void CMultiCalUiDialogModel::ConstructL()
         {
         iCalendarStatus.Append(0);
 
-       /* if (!index) //First create the default session
+        if (!index) //First create the default session
             {
             const TPtrC name = iCalendarInfoList[index]->FileNameL();
             defaultSession->OpenL(name);
@@ -160,7 +163,7 @@ void CMultiCalUiDialogModel::ConstructL()
             iCalEntryViewArray.Append(entryView);
             CleanupStack::Pop(entryView);
             }
-        else*/
+        else
             {
             CCalSession* session = CCalSession::NewL(*defaultSession);
             CleanupStack::PushL(session);
@@ -262,6 +265,7 @@ void CMultiCalUiDialogModel::CreateCopyL(
     {
     TRACE_ENTRY_POINT;
 
+    CleanupResetAndDestroyPushL(aCalCopyEntries);
     for (TInt i = 0; i < iCalEntries.Count(); i++)
         {
         const CCalEntry* sourceEntry = iCalEntries[i];
@@ -283,7 +287,7 @@ void CMultiCalUiDialogModel::CreateCopyL(
 
         CleanupStack::Pop(copyEntry);
         }
-
+    CleanupStack::Pop(&aCalCopyEntries);
     TRACE_EXIT_POINT;;
     }
 
@@ -304,19 +308,29 @@ void CMultiCalUiDialogModel::GetAllCalendarInfoL(RPointerArray<
     CCalCalendarIterator* calIter = CCalCalendarIterator::NewL(
             *iCalendarsSession);
     CleanupStack::PushL(calIter);
-    CCalCalendarInfo* calendarInfo = calIter->FirstL();
-    while (calendarInfo)
+
+    for( CCalCalendarInfo* calendarInfo = calIter->FirstL();
+            calendarInfo!=NULL;calendarInfo = calIter->NextL())
         {
-        TPtrC fileNamePtr = calendarInfo->FileNameL();
-        if(fileNamePtr.CompareF(KCalendarDatabaseFilePath))
-           {
-           aCalendarInfoList.AppendL(calendarInfo);
-           }
-        else
-           {
-           delete calendarInfo;
-           }
-        calendarInfo = calIter->NextL();
+            TBuf8<KBuffLength> keyBuff;
+            // Mark the meta property as SoftDeleted
+            keyBuff.Zero();
+            keyBuff.AppendNum(EMarkAsDelete);
+            TBool softDelete = EFalse;
+            TPckgC<TBool> pkgSoftDelete( softDelete );
+            TRAPD(err,pkgSoftDelete.Set(calendarInfo->PropertyValueL(keyBuff)));
+            if( KErrNone == err )
+                {
+                softDelete = pkgSoftDelete();
+                }
+            if(!softDelete)
+                {
+                aCalendarInfoList.Append(calendarInfo);
+                }
+            else
+                {
+                delete calendarInfo;
+                }
         }
     CleanupStack::PopAndDestroy(calIter);
 

@@ -140,6 +140,11 @@ public MCoeControlObserver
          */
         void ResetToolbarExtensionCommandsL();
         
+        inline TBool IsICalenToolBar()
+            {
+            return iCalenToolbar ? ETrue : EFalse;
+            }
+        
     private:
 
         /**

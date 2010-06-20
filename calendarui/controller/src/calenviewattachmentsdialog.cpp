@@ -105,7 +105,8 @@ CCalenViewAttachmentsDialog::CCalenViewAttachmentsDialog(TDesC& aTitle,
       CCalenAttachmentModel& aAttachmentModel,CCalenController& aController )
     : iAttachmentModel( aAttachmentModel ),
       iController(aController),
-      iNewTitle( aTitle )  
+      iNewTitle( aTitle ),
+      iEmbeddedFileOpened(EFalse)  
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
@@ -392,6 +393,7 @@ void CCalenViewAttachmentsDialog::HandleServerAppExit( TInt aReason)
     {
     TRACE_ENTRY_POINT;
     
+    iEmbeddedFileOpened = EFalse;
     if (aReason == EAknCmdExit)
         {
         //issue this notification, which will be handled by attachmentui.
@@ -798,7 +800,7 @@ void CCalenViewAttachmentsDialog::HandlePointerEventL(const TPointerEvent& aPoin
     {
     TRACE_ENTRY_POINT;
      //Single click integration
-    if ( iListBox )
+    if ( iListBox && !iEmbeddedFileOpened)
         {
         iListBox->HandlePointerEventL( aPointerEvent );
         }
@@ -1098,18 +1100,27 @@ void CCalenViewAttachmentsDialog::OpenAttachmentViewerL(RFile& aFile, MAknServer
     
     if(datatype == KNotePadTextDataType())
         {
+        if(iEmbeddedFileOpened)
+            {
+            return;
+            }
+        iEmbeddedFileOpened = ETrue;   
         const TDesC& notepadTitle = _L("NotePad");
         ret = CNotepadApi::ExecFileViewerL( aFile, 
                                            &notepadTitle,
                                            ETrue,
                                            ETrue,
                                            KCharacterSetIdentifierIso88591 );
-        
+        iEmbeddedFileOpened = EFalse;        
         }
     else
         {
         //doc handler will open the other files (other than text file).
         TRAP( ret, iDocHandler->OpenFileEmbeddedL( aFile, datatype ) );
+        if(ret == KErrNone)
+            {
+            iEmbeddedFileOpened = ETrue;
+            }
         }
 
     switch(ret)

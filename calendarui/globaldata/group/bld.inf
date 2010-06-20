@@ -27,6 +27,7 @@ PRJ_EXPORTS
 //organizer/calendarui/inc
 ../inc/calensend.h                           |../../inc/calensend.h
 ../inc/calencontextchangeobserver.h          |../../inc/calencontextchangeobserver.h
+../inc/calendbchangenotifier.h               |../../inc/calendbchangenotifier.h
 
 //organizer/inc
 ../inc/calenglobaldata.h                     |../../../inc/calenglobaldata.h

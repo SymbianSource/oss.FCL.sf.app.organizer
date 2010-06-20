@@ -22,6 +22,7 @@
 // INCLUDES
 #include <e32base.h>
 #include <e32cmn.h>
+#include <calcommon.h>
 
 // FORWARD DECLARATIONS
 class TVwsViewId;
@@ -214,6 +215,32 @@ class MCalenContext
 		* @brief Resets calendar file name in context
 		*/
 		virtual void ResetCalendarFileName() = 0;
+		/**
+	    * @brief Set calendar file name of Alarm entry in context
+	    */		
+		virtual void SetCalAlarmEntryFileNameL(const TDesC& aName) = 0;
+		
+	 	/**
+	   	* @brief Get calendar filename 
+	   	* 
+	   	* @return HBufC pointer to calendar filename of Alarm entry
+	   	*/
+		virtual HBufC* GetCalAlarmEntryFileNameL() const = 0;
+		
+		/**
+	   	* @brief Resets Alarm Entry calendar file name in context
+	   	*/ 
+		virtual void ResetCalAlarmEntryFileName() = 0;
+		
+		/**
+	   	* @brief set Alarm Entry LocalUid in context
+	   	*/ 
+		virtual void SetCalAlarmEntryLocalUid(TCalLocalUid aLocalId) = 0;
+    
+	    /**
+	   	* @brief Get Alarm Entry LocalUid from context
+	   	*/ 
+	    virtual TCalLocalUid CalAlarmLocalUidL() const = 0;
     };
 
 #endif // CALENCONTEXT_H

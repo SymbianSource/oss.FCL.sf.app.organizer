@@ -166,35 +166,6 @@ NONSHARABLE_CLASS( CCalenMissedAlarmsView ) : public CCalenNativeView
 	 	 */
 	 	void UpdateCbaL();
      	
-private: 
- 	    /**
- 	     * Create missed alarms view toolbar buttons
- 	     * @ aIcon Icon of the toolbar button
- 	     * @ aText Text to be displayed on toolbar item
- 	     * @ aTooltipID Tool tip Id of the toolbar button
- 	     * @ aToolbar refrence to the calendar toolbar
- 	     */
- 	    CAknButton* CreateButtonL( CGulIcon* aIcon, 
- 	                               const TDesC& aText,
- 	                               TInt aTooltipID,
- 	                               CAknToolbar& aToolbar );
- 	    
- 	    /**
- 	     * Remove missed alarms view's toolbar buttons 
- 	     */                           
- 	    void RemoveToolbarButtonsL();
- 	    
- 	    /**
- 	     * Adds missed alarms view's toolbar buttons 
- 	     */
- 	    void AddToolbarButtonsL();
- 	    
- 	    /**
- 	     * Dim clear and clear all toolbar buttons when there are no
- 	     * missed alarm entries to clear 
- 	     */
- 	    void DimClearAndClearAllButtons();
- 	    
      private: //data members
         TInt iMissedAlarmsCount;
         

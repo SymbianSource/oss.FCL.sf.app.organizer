@@ -31,7 +31,7 @@ EXPORTS
 	_ZN16CCalenGlobalData21InitializeGlobalDataLEv @ 30 NONAME
 	_ZN16CCalenGlobalData29GetCalFileNameForCollectionIdEh @ 31 NONAME
 	_ZN16CCalenGlobalData32AttemptToRetrieveDefaultMailboxLERN15CMRMailboxUtils12TMailboxInfoE @ 32 NONAME
-	_ZN16CCalenGlobalData4NewLER20MCalProgressCallBackP27MCalenContextChangeObserver @ 33 NONAME
+	_ZN16CCalenGlobalData4NewLER20MCalProgressCallBackP27MCalenContextChangeObserverP22MCalenDBChangeObserver @ 33 NONAME
 	_ZN16CCalenGlobalData7ContextEv @ 34 NONAME
 	_ZN16CCalenGlobalData7ReleaseEv @ 35 NONAME
 	_ZN16CCalenGlobalData8InstanceEv @ 36 NONAME

@@ -254,7 +254,7 @@ class CCalenController : public CBase,
          * Get calendar icon of specific type
          * @return CGulIcon*
          */
-        CGulIcon* GetIconL(MCalenServices::TCalenIcons aIndex);
+		CGulIcon* GetIconL(MCalenServices::TCalenIcons aIndex, const TInt aViewId = 0 ); 
 
         /* Get multipledb manager
         * @return reference to CCalenMultipleDbManager
@@ -329,6 +329,23 @@ class CCalenController : public CBase,
          */
         void GetAllCalendarInfoL( 
                     RPointerArray<CCalCalendarInfo>& aCalendarInfoList );
+        
+        /**
+         * @brief sets the flag if the calendar application is launched
+         *  from external application.
+         * 
+         * @param aFlag The flag to be set.
+         */
+        void SetLaunchFromExternalApp( TBool aFlag );
+        
+        /**
+         * @brief Checks whether the calendar application is launched
+         * from external application.
+         * 
+         * @return ETrue If the calendar application is launched from
+         * external application else EFalse.
+         */
+        TBool IsLaunchFromExternalApp();
         
     private:  // Construction and destruction
         /**
@@ -416,6 +433,7 @@ class CCalenController : public CBase,
         TInt iResourceFileOffset;
         CAsyncCallBack* iSystemTimeChangedMsgDelayer;   
         TBool iFasterApp;
+        TBool iLaunchFromExternalApp;
     };
 
 #endif // CALENCONTROLLER_H

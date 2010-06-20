@@ -332,7 +332,7 @@ TInt CCalenDayContainer::FindItemIndexForRow( TInt aListIndex ) const
     for ( TInt i(0); i < iLayoutTable->Count(); ++i )
         {
         SItemInfo& item = (*iLayoutTable)[i];
-        if ( item.iTopLine == aListIndex )
+        if ( aListIndex >= item.iTopLine && aListIndex <= item.iBottomLine )
             {
             TRACE_EXIT_POINT;
             return i;
@@ -1440,6 +1440,7 @@ void CCalenDayContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent
         
     if(aPointerEvent.iType == TPointerEvent::EButton1Down)
         {
+        this->GenerateTactileFeedback(); //Tactile feedback.
         control = iLayoutManager->ControlOrNull();
         if(control)
             {

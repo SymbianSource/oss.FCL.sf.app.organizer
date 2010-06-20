@@ -25,6 +25,8 @@
 #include <calencommands.hrh>            // Calendar commands
 #include <calencontext.h>
 #include <CalenStatusPaneUtils.h>
+#include <calcalendarinfo.h>
+#include <caleninstanceid.h>
 
 // user includes
 #include "caleneventview.h"
@@ -157,6 +159,7 @@ CCalenView::TNextPopulationStep CCalenEventView::ActiveStepL()
         	{
         	cnt->CompletePopulationL();
         	RedrawStatusPaneL();
+        	UpdateToolbarButtonsL();
         	nextStep = CCalenView::EDone;
         	}
         	break;
@@ -421,6 +424,21 @@ void CCalenEventView::HandleCommandL(TInt aCommand)
             // nothing to do
             }
             break;
+       case ECalenCmdFindPhoneNum:
+            {
+            cnt->OnCmdFindPhoneNumL();
+            }
+            break;
+       case ECalenCmdFindEmail:
+            {
+            cnt->OnCmdFindEmailL();
+            }
+            break;
+       case ECalenCmdFindURL:
+           {
+           cnt->OnCmdFindUrlL();
+           }
+           break;
         default:
             if(cnt->GetFindItemMenu()->CommandIsValidL(aCommand))
                 {
@@ -465,6 +483,16 @@ void CCalenEventView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMenuPane
 	{
     TRACE_ENTRY_POINT;
     CCalenEventViewContainer* cnt = static_cast<CCalenEventViewContainer*>( iContainer );
+    TCalCollectionId colId = iServices.Context().InstanceId().iColId;
+    // get multiple db data from services
+    RPointerArray<CCalCalendarInfo> calendarInfoList;
+    iServices.GetAllCalendarInfoL(calendarInfoList);
+    CleanupClosePushL(calendarInfoList);
+    
+    HBufC* calendarFileName = iServices.GetCalFileNameForCollectionId(colId).AllocLC();
+    TInt index = calendarInfoList.Find( *calendarFileName, 
+            CCalenEventViewContainer::CalendarInfoIdentifierL);
+   CleanupStack::PopAndDestroy(calendarFileName);
     switch(aResourceId)
     	{
 	    case R_CALEN_EVENT_VIEW_MENUPANE:
@@ -497,7 +525,7 @@ void CCalenEventView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMenuPane
 	    	        aMenuPane->DeleteMenuItem(ECalenViewAttachmentList);
 	    	        }
 	    	    }
-		  	 cnt->GetFindItemMenu()->AddItemFindMenuL(cnt->GetItemFinder(),aMenuPane,EFindItemMenuPlaceHolder,KNullDesC);
+	
 		  	 
 		  	 if(CCalenLocationUtil::IsMapProviderAvailableL())
             	{
@@ -515,6 +543,14 @@ void CCalenEventView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMenuPane
 	            aMenuPane->DeleteMenuItem( ECalenGetLocationAndReplace );
 	            aMenuPane->DeleteMenuItem( ECalenShowLocation );	
 	            }
+		  	if(!(calendarInfoList[index]->Enabled()))
+		  	    {
+                aMenuPane->DeleteMenuItem(ECalenSend);
+                aMenuPane->DeleteMenuItem(ECalenCmdPromptThenEdit);
+                aMenuPane->DeleteMenuItem(ECalenDeleteCurrentEntry);
+		  	    }
+		  	
+		  	 
 		    break;
 		  	}
 		 default:
@@ -523,7 +559,7 @@ void CCalenEventView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMenuPane
 		    }
 			break;
 		}
-    
+    CleanupStack::PopAndDestroy(&calendarInfoList);
     TRACE_EXIT_POINT;	
 	}
 	
@@ -762,5 +798,44 @@ CAknButton* CCalenEventView::CreateButtonL( CGulIcon* aIcon,
 
     TRACE_EXIT_POINT;
     return button;
-    }    
+    } 
+    
+// ----------------------------------------------------------------------------
+// CCalenEventView::UpdateToolbarButtonsL
+// Updates the toolbar buttons on the existing toolbar for event viewer
+// ----------------------------------------------------------------------------
+//  
+
+void CCalenEventView::UpdateToolbarButtonsL()
+    {
+    // Get the existing toolbar from MCalenservices
+    MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
+    CAknToolbar& toolbar = toolbarImpl->Toolbar();
+    TCalCollectionId colId = iServices.Context().InstanceId().iColId;
+      
+    // get multiple db data from services
+    RPointerArray<CCalCalendarInfo> calendarInfoList;
+    iServices.GetAllCalendarInfoL(calendarInfoList);
+    CleanupClosePushL(calendarInfoList);
+    
+    HBufC* calendarFileName = iServices.GetCalFileNameForCollectionId(colId).AllocLC();
+    TInt index = calendarInfoList.Find( *calendarFileName, 
+    CCalenEventViewContainer::CalendarInfoIdentifierL);
+    CleanupStack::PopAndDestroy(calendarFileName);
+    
+    
+    if(!(calendarInfoList[index]->Enabled()))
+        {
+        toolbar.SetItemDimmed( ECalenSend, ETrue, ETrue );
+        toolbar.SetItemDimmed( ECalenDeleteCurrentEntry, ETrue, ETrue );
+        toolbar.SetItemDimmed( ECalenEditCurrentEntry, ETrue, ETrue );
+        }
+    else
+        {
+        toolbar.SetItemDimmed( ECalenSend, EFalse, ETrue );
+        toolbar.SetItemDimmed( ECalenDeleteCurrentEntry, EFalse, ETrue );
+        toolbar.SetItemDimmed( ECalenEditCurrentEntry, EFalse, ETrue );
+        }
+    CleanupStack::PopAndDestroy(&calendarInfoList);
+    }
 //end of file

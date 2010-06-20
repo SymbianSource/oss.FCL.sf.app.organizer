@@ -23,6 +23,7 @@
 #include<coecntrl.h>
 #include<missedalarm.h>
 #include<missedalarmstore.h>
+#include <eiklbo.h>
 #include <caleninstanceid.h>            // TCalenInstanceId
 
 #include "calencontainer.h"
@@ -38,6 +39,7 @@ class CCalEntry;
  * Class declaration for Missed alarms container
  */
 NONSHARABLE_CLASS(CCalenMissedAlarmsContainer) : public CCalenContainer
+									, public MEikListBoxObserver
     {
     public:
         
@@ -139,6 +141,13 @@ NONSHARABLE_CLASS(CCalenMissedAlarmsContainer) : public CCalenContainer
          * Create icon index
          */
         void CreateIconIndicesL( RArray<MCalenServices::TCalenIcons>& aIndexArray );
+        
+        /**
+          * Handles list box events.
+          * @param aListBox   The originating list box.
+          * @param aEventType A code for the event.
+          */
+         void HandleListBoxEventL(CEikListBox* aListBox, TListBoxEvent aEventType);
         
         /**
          * This method is called after pointer event in Navi

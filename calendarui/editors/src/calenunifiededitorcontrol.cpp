@@ -237,7 +237,10 @@ void CCalenUnifiedEditorControl::SetDataToEditorL()
         iRepeatField->SetDataToEditorL();
         }
     
-    iDbField->SetDataToEditorL();
+    if(!iDbField->IsCalendarEdited())
+        {
+        iDbField->SetDataToEditorL();
+        }
 
     if( CCalEntry::ETodo != iUnifiedEditor.GetEntryType() )
         {
@@ -326,7 +329,15 @@ void CCalenUnifiedEditorControl::InitDefaultEditorsL()
         iRepeatField->InitRepetFieldLayoutL();
         }
 
-    iDbField->InitDbFieldLayoutL();
+    RPointerArray<CCalCalendarInfo> calendarInfoList; 
+    iUnifiedEditor.GetServices().GetAllCalendarInfoL(calendarInfoList);
+    CleanupClosePushL( calendarInfoList );
+    if( calendarInfoList.Count() > 1 )
+      {
+        iDbField->InitDbFieldLayoutL();
+      }
+    CleanupStack::PopAndDestroy( &calendarInfoList );
+    
     iDescription->InitDescritpionFieldLayoutL();
     
     TRACE_EXIT_POINT;
@@ -341,10 +352,27 @@ void CCalenUnifiedEditorControl::AddDefaultBirthDayEditorL()
     {
     TRACE_ENTRY_POINT;
     // event type, subject, date & year,more details
-     
-    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
-                  ECalenEditorStartDate, ECalenEditorSubject ); 
+    
+    RPointerArray<CCalCalendarInfo> calendarInfoList; 
+    iUnifiedEditor.GetServices().GetAllCalendarInfoL(calendarInfoList);
+    CleanupClosePushL( calendarInfoList );
 
+    if( calendarInfoList.Count() > 1 )
+        {
+        iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
+            ECalenEditorDBName, ECalenEditorSubject );
+
+        iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
+            ECalenEditorStartDate, ECalenEditorDBName );
+        }
+    else
+        {
+        iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
+            ECalenEditorStartDate, ECalenEditorSubject );
+        }
+
+    CleanupStack::PopAndDestroy( &calendarInfoList );
+    
     // "Start Date" Label should be "Date of Birth" for Birthday
     iUnifiedEditor.SetControlCaptionL( ECalenEditorStartDate,
                     R_QTN_CALEN_EDITOR_DATE_OF_BIRTH );
@@ -356,13 +384,13 @@ void CCalenUnifiedEditorControl::AddDefaultBirthDayEditorL()
                     ECalenEditorPlace, ECalenEditorReminder );
 /*    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_PEOPLE_ITEM,
                     ECalenEditorPeople, ECalenEditorPlace );
-*/    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
-                    ECalenEditorDBName, ECalenEditorPlace );
+*/   /* iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
+                    ECalenEditorDBName, ECalenEditorPlace );*/
 
     // TODO: Uncomment this when enabling attachment support
     // Replace ECalenEditorDBName with ECalenEditorAttachment in the next statement
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_ATTACHMENT_ITEM,
-                    ECalenEditorAttachment, ECalenEditorDBName );
+                    ECalenEditorAttachment, ECalenEditorPlace );
 
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DESCRIPTION_ITEM,
                     ECalenEditorDescription, ECalenEditorAttachment );
@@ -385,10 +413,26 @@ void CCalenUnifiedEditorControl::AddDefaultMeetingEditorL()
     // all day event 
     // subject,event type,all day,start date,end date,place,more details 
     
-  
-    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_ALL_DAY_ITEM,
-            ECalenEditorAllDayItem, ECalenEditorSubject );
+    RPointerArray<CCalCalendarInfo> calendarInfoList; 
+    iUnifiedEditor.GetServices().GetAllCalendarInfoL(calendarInfoList);
+    CleanupClosePushL( calendarInfoList );
 
+    if( calendarInfoList.Count() > 1 )
+        {
+    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
+            ECalenEditorDBName, ECalenEditorSubject );
+
+    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_ALL_DAY_ITEM,
+            ECalenEditorAllDayItem, ECalenEditorDBName );
+        }
+    else
+        {
+    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_ALL_DAY_ITEM, 
+            ECalenEditorAllDayItem, ECalenEditorSubject );
+        }
+
+    CleanupStack::PopAndDestroy( &calendarInfoList );
+    
     if( !iUnifiedEditor.Edited().IsAllDayEvent() )
         {
         iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_TIME_ITEM, 
@@ -415,13 +459,13 @@ void CCalenUnifiedEditorControl::AddDefaultMeetingEditorL()
     /*iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_PEOPLE_ITEM,
                     ECalenEditorPeople, ECalenEditorRepeat );
     */
-    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
+   /* iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
                     ECalenEditorDBName, ECalenEditorRepeat );
-    
+    */
     // TODO: Uncomment this when enabling attachment support
     // Replace ECalenEditorDBName with ECalenEditorAttachment in the next statement
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_ATTACHMENT_ITEM,
-                    ECalenEditorAttachment, ECalenEditorDBName );
+                    ECalenEditorAttachment, ECalenEditorRepeat );
     
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DESCRIPTION_ITEM,
                     ECalenEditorDescription, ECalenEditorAttachment );
@@ -438,9 +482,25 @@ void CCalenUnifiedEditorControl::AddDefaultTodoEditorL()
     {
     TRACE_ENTRY_POINT;
     // event type,subject,due date,more details
+   RPointerArray<CCalCalendarInfo> calendarInfoList; 
+   iUnifiedEditor.GetServices().GetAllCalendarInfoL(calendarInfoList);
+   CleanupClosePushL( calendarInfoList );
+   
+    if( calendarInfoList.Count() > 1 )
+        {
+        iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
+                        ECalenEditorDBName, ECalenEditorSubject );
+        
+        iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
+                            ECalenEditorStartDate, ECalenEditorDBName );
+        }
+    else
+        {
+        iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
+                               ECalenEditorStartDate, ECalenEditorSubject );
+        }
     
-    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
-                    ECalenEditorStartDate, ECalenEditorSubject );
+    CleanupStack::PopAndDestroy( &calendarInfoList );
 
     // "Start Date" Label should be "Due date" for To-Do
     iUnifiedEditor.SetControlCaptionL( ECalenEditorStartDate,
@@ -452,13 +512,13 @@ void CCalenUnifiedEditorControl::AddDefaultTodoEditorL()
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_PRIORITY_ITEM, 
                     ECalenEditorPriority, ECalenEditorReminder );
 
-    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
-                    ECalenEditorDBName, ECalenEditorPriority );
+    /*iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
+                    ECalenEditorDBName, ECalenEditorPriority );*/
     
     // TODO: Uncomment this when enabling attachment support
     // Replace ECalenEditorDBName with ECalenEditorAttachment in the next statement
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_ATTACHMENT_ITEM,
-                    ECalenEditorAttachment, ECalenEditorDBName );
+                    ECalenEditorAttachment, ECalenEditorPriority );
     
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DESCRIPTION_ITEM,
                     ECalenEditorDescription, ECalenEditorAttachment );
@@ -751,21 +811,24 @@ void CCalenUnifiedEditorControl::OnEventTypeChangedL( CCalEntry::TType aNewEvent
     {
     TRACE_ENTRY_POINT;
     
-    // update Entry type of Edited entry
-    iUnifiedEditor.Edited().SetEntryType( aNewEventType );
-
-    // Delete, previous entry type fields from editor
-    DeletePreviousEntryTypeFieldsL();
-    
-    // Add new fiedls to editor
-    AddNewEntryTypeFieldsL( aNewEventType );
-    iUnifiedEditor.SetEntryType( aNewEventType );
-
-    // after changing the event type, update the fields with default values
-    InitDefaultEditorsL();
-    SetDataToEditorL();
-    
-    iUnifiedEditor.UpdateFormL();
+    if(iUnifiedEditor.GetEntryType() != aNewEventType)
+    	{
+	    // update Entry type of Edited entry
+	    iUnifiedEditor.Edited().SetEntryType( aNewEventType );
+	
+	    // Delete, previous entry type fields from editor
+	    DeletePreviousEntryTypeFieldsL();
+	    
+	    // Add new fiedls to editor
+	    AddNewEntryTypeFieldsL( aNewEventType );
+	    iUnifiedEditor.SetEntryType( aNewEventType );
+	
+	    // after changing the event type, update the fields with default values
+	    InitDefaultEditorsL();
+	    SetDataToEditorL();
+	    
+	    iUnifiedEditor.UpdateFormL();
+	  	}
     
     TRACE_EXIT_POINT;
     }
@@ -865,8 +928,11 @@ void CCalenUnifiedEditorControl::DeleteExtendedEntryFields( CCalEntry::TType aPr
         iUnifiedEditor.DeleteLine( ECalenEditorPeople );
         }
     */
-    iUnifiedEditor.DeleteLine( ECalenEditorDBName );
-    
+    CCoeControl* dbNameCtrl = iUnifiedEditor.ControlOrNull( ECalenEditorDBName );
+    if( dbNameCtrl )
+        {
+        iUnifiedEditor.DeleteLine( ECalenEditorDBName );
+        }
     // TODO: Uncomment this when enabling attachment support
     iUnifiedEditor.DeleteLine( ECalenEditorAttachment );
     
@@ -1096,6 +1162,13 @@ TTime CCalenUnifiedEditorControl::GetStartDateTimeL()
         result = CalenDateUtils::BeginningOfDay( result );
         }
     
+    if( iAllDayField->IsAllDayEvent() )
+        {
+        TTime endDate = iUnifiedEditor.Edited().EndDateTime();
+        endDate = CalenDateUtils::BeginningOfDay( endDate );
+        iUnifiedEditor.Edited().SetEndDateTimeL(endDate);
+        }
+    
     resDT = result.DateTime();
     TRACE_EXIT_POINT;
     return result;
@@ -1139,7 +1212,10 @@ TTime CCalenUnifiedEditorControl::GetEndDateTimeL()
             // In Editor it should be displayed as "StartDate: 15-08-2010 & EndDate:15-08-2010" 
             // But, while saving EndDate is saved as 12:00am, 16-08-2010. 
             TTime startDate = iUnifiedEditor.Edited().StartDateTime();
-            if( result >= startDate )
+            startDate = CalenDateUtils::BeginningOfDay( startDate );
+            iUnifiedEditor.Edited().SetStartDateTimeL(startDate);
+
+            if( result >= startDate && (!iUnifiedEditor.iCheck ) || iUnifiedEditor.Edited().EntryType() == CCalEntry::EEvent)
                 {
                 result += TTimeIntervalDays( KOneDay );
                 }
@@ -1270,8 +1346,12 @@ void CCalenUnifiedEditorControl::UpdateLinesOnLocaleChangeL()
         case CCalEntry::EAnniv:
             {
             iUnifiedEditor.DeleteLine( ECalenEditorStartDate, EFalse );
-            iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_BIRTHDAY_YEAR_ITEM, 
+            iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
                     ECalenEditorStartDate, ECalenEditorEventType );
+            
+            // "Start Date" Label should be "Date of Birth" for Birthday
+            iUnifiedEditor.SetControlCaptionL( ECalenEditorStartDate,
+                            R_QTN_CALEN_EDITOR_DATE_OF_BIRTH );
             
             }
             break;
@@ -1417,19 +1497,10 @@ void CCalenUnifiedEditorControl::UpdateEndTimeL()
         // For allday (1 day) event Eg. "Start:- 12:00am, 15-08-2010 &  End:-12:00am, 16-08-2010"
         // In Editor it should be displayed as "StartDate: 15-08-2010 & EndDate:15-08-2010" 
         // No time filed is displayed.
-        if ( end > start )                         
+        end -= TTimeIntervalDays( KOneDay );
+        if ( end < start )                         
             {
-            //end -= TTimeIntervalDays( KOneDay );
-            //end contains the time component also, even for same day end would be greater then start
-            //subtracting 1 from end will give end as one day before start.
-            //For All day event Start date and End Date are same so assigning start to end.
             end = start;
-            }
-        else if( end == start )
-            {
-            // For allday event minimum duration is 1day.
-            TTime endDate = start + TTimeIntervalDays( KOneDay );
-            iUnifiedEditor.Edited().SetEndDateTimeL( endDate );
             }
         }
     

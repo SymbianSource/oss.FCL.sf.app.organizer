@@ -1051,6 +1051,7 @@ void CCalenMonthContainer::ConstructImplL()
     TRACE_ENTRY_POINT;
 
     iChangeMonth = EFalse;
+    iChangeDay = EFalse;
     iDayFormat = KMonthCellFormat;
 
     iMonthDataArray = new(ELeave) CMonthDataArray(KCalenDaysInWeek * KNumberOfRows);
@@ -1624,7 +1625,8 @@ void CCalenMonthContainer::HandleWeekNumberTapL(const TPoint &aPosition)
         		                                 TVwsViewId( KUidCalendar, KUidCalenMonthView ) );
             
             SetActiveDayL( newActiveDay );
-            iServices.IssueCommandL( ECalenWeekView );
+            //iServices.IssueCommandL( ECalenWeekView );
+            iServices.IssueCommandL( ECalenForwardsToWeekView );
             }
         }
 
@@ -1661,6 +1663,7 @@ void CCalenMonthContainer::HandlePointerEventL(const TPointerEvent& aPointerEven
         CCoeControl* control( NULL );
         if(aPointerEvent.iType == TPointerEvent::EButton1Down)
             {
+            this->GenerateTactileFeedback(); //Tactile feedback.
             control = iLayoutManager->ControlOrNull();
             if(control)
                 {
@@ -1673,6 +1676,10 @@ void CCalenMonthContainer::HandlePointerEventL(const TPointerEvent& aPointerEven
             }
         TInt pointerIndex(-1);
         TBool isItem (iGrid->View()->XYPosToItemIndex(aPointerEvent.iPosition, pointerIndex));
+        if( isItem )
+            {
+            pointerIndex = static_cast<CAknGridView*>(iGrid->View())->ActualDataIndex( pointerIndex );
+            }
         CAknGridM* gridModel = static_cast<CAknGridM*>(iGrid->Model());
 
         if(gridModel->NumberOfData() <= 0)
@@ -1705,7 +1712,7 @@ void CCalenMonthContainer::HandlePointerEventL(const TPointerEvent& aPointerEven
             TPointerEvent pointerEvent( aPointerEvent );
             pointerEvent.iModifiers =
                 ( aPointerEvent.iModifiers & ( ~EAllModifiers ) );
-            TInt index( iGrid->CurrentItemIndex() );
+            TInt index( iGrid->CurrentDataIndex() );
             TTime isValidDay;
             if( TPointerEvent::EButton1Up == aPointerEvent.iType )
                 {
@@ -1735,15 +1742,15 @@ void CCalenMonthContainer::HandlePointerEventL(const TPointerEvent& aPointerEven
                         iDate + TTimeIntervalDays( pointerIndex - index ) );
                 TDateTime newActiveDayTime = newActiveDay.DateTime();
                 
-                // set the context
-                TCalTime time;
-                time.SetTimeLocalL( newActiveDay );
-                iServices.Context().SetFocusDateL( time,
-                        TVwsViewId( KUidCalendar, KUidCalenMonthView ) );
                 TMonth activeMonth( iDate.DateTime().Month() );
                 TMonth newMonth( newActiveDay.DateTime().Month() );
                 if ( aPointerEvent.iType == TPointerEvent::EButton1Down )
                     {
+                    // set the context
+                    TCalTime time;
+                    time.SetTimeLocalL( newActiveDay );
+                    iServices.Context().SetFocusDateL( time,
+                    TVwsViewId( KUidCalendar, KUidCalenMonthView ) );
                     iGrid->HandlePointerEventL( pointerEvent );
                     if (iPreview)
                         {
@@ -1757,6 +1764,7 @@ void CCalenMonthContainer::HandlePointerEventL(const TPointerEvent& aPointerEven
                             iChangeMonth = ETrue;   
                             iGrid->View()->SetDisableRedraw(ETrue);
                             iView->BeginRepopulationL();
+                            iDate = newActiveDay;
                             }
                         HandleDayChangeL( newActiveDay );
                         }
@@ -1764,19 +1772,22 @@ void CCalenMonthContainer::HandlePointerEventL(const TPointerEvent& aPointerEven
                 else if ( activeMonth == newMonth
                         && newActiveDay != iDate  && !iChangeMonth )
                     {
-                    iGrid->HandlePointerEventL( pointerEvent );
+                    iChangeDay = ETrue;
                     // use grid index to make sure that correct grid 
                     // element is focused when dragged
                     TInt gridIndex = GridIndex();
                     newActiveDay =
                         ( iFirstDayOfGrid + TTimeIntervalDays( gridIndex ) );
-                    HandleDayChangeL( newActiveDay );
-                    iChangeMonth = EFalse;
                     }
                 }
             else if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
                 {
-                iGrid->HandlePointerEventL( pointerEvent );
+                if( !iChangeDay && !iChangeMonth )
+                    {
+                    iGrid->HandlePointerEventL( pointerEvent );
+                    }
+                    iChangeDay = EFalse;
+                    iChangeMonth = EFalse;
                 }
             }
         }

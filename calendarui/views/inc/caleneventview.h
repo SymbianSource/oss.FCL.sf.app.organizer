@@ -152,6 +152,11 @@ private:  // From CAknView
 	*/
     void AddToolbarButtonsL();
     
+    /**
+     * Updates the toolbar buttons on the existing toolbar for event viewer
+     */
+    void UpdateToolbarButtonsL();
+    
 private:
     TVwsViewId iPreviousViewId;  
 

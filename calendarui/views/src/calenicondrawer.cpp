@@ -24,6 +24,7 @@
 #include "calenicondrawer.h"
 
 #include <calenservices.h>
+#include <CalenUid.h> 
 
 // System includes
 #include <fbs.h>
@@ -347,7 +348,7 @@ CAknIconArray* CCalenIconDrawer::CreateIconsL( const RArray<MCalenServices::TCal
 
     for( TInt i=0; i<iconCount; ++i )
         {
-        icons->AppendL( iServices.GetIconL( static_cast<MCalenServices::TCalenIcons>(aIndexArray[i] ) ));
+        icons->AppendL( iServices.GetIconL( static_cast<MCalenServices::TCalenIcons>(aIndexArray[i] ), KCalenMissedEventViewUidValue )); 
         }
     CleanupStack::Pop( icons );
 

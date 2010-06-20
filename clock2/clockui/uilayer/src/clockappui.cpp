@@ -27,6 +27,10 @@
 #include <clockapp_tab.mbg>
 #include <AknsConstants.h>
 #include <featmgr.h>  
+#include <e32property.h>
+#include <startupdomainpskeys.h>
+#include <touchfeedback.h>
+#include <gfxtranseffect/gfxtranseffect.h> 
 
 // User includes
 #include "clock.h"
@@ -50,6 +54,13 @@ const TInt KInitialEvent( EChangesLocale |
                           EChangesSystemTime |
                           EChangesFreeMemory |
                           EChangesOutOfMemory );
+
+// constants for control effects
+const TInt KGfxControlPageSwitchDisappear = 4;
+const TInt KGfxControlPageSwitchAppear = 3;
+
+const TUid KControlUid1 = {0x2000B47C};  
+const TUid KControlUid2 = {0x2000B47D};
 
 // Literals
 _LIT( KIconFileName, "\\resource\\apps\\clockapp_tab.mif" );
@@ -131,7 +142,9 @@ void CClockAppUi::ConstructL()
     CClkDateTimeView* dateTimeView = CClkDateTimeView::NewLC( KClockAppMainViewId, ETrue );
     AddViewL( dateTimeView );
     CleanupStack::Pop( dateTimeView );
-	
+
+    iTactileFeedbackSupported = FeatureManager::FeatureSupported( KFeatureIdTactileFeedback );
+    
 	// Start the model.
 	alarmModel->Start();
 	
@@ -223,14 +236,26 @@ void CClockAppUi::HandleCommandL( TInt aCommandId )
     	case EClockAlarmExit:
     	case EAknSoftkeyExit:
     	    {
-    	    if( ExitHidesInBackground() )
+    	    TInt deviceState;
+    	    RProperty::Get( KPSUidStartup, KPSGlobalSystemState , deviceState );
+
+    	    if(  deviceState == ESwStateCharging || deviceState == ESwStateAlarm  ) 
     	        {
-    	        HandleCommandL( EAknCmdHideInBackground );
+
+                Exit();
+
     	        }
     	    else
-    	        {
-    	        Exit();
-    	        }
+                {
+                if( ExitHidesInBackground() )
+                    {
+                    HandleCommandL( EAknCmdHideInBackground );
+                    }
+                else
+                    {
+                    Exit();
+                    }
+                }
     	    }
     	    break;
     	    
@@ -282,6 +307,8 @@ void CClockAppUi::TabChangedL( TInt aTabIndex )
         case EClockAppMainViewId:
             {
             // The main view.
+            iTransitionOngoing = ETrue;
+            iTransitionDirection = ETransitionLeft;
             ActivateLocalViewL( KClockAppMainViewId );
             }
             break;
@@ -289,6 +316,8 @@ void CClockAppUi::TabChangedL( TInt aTabIndex )
         case EClockAppWorldViewId:
             {
             // The clockworld view.
+            iTransitionOngoing = ETrue;
+            iTransitionDirection = ETransitionRight;
             ActivateLocalViewL( KClockAppWorldViewId );
             }
             break;
@@ -336,7 +365,8 @@ void CClockAppUi::HandleForegroundEventL( TBool aForeground )
     {
     __PRINTS( "CClockAppUi::HandleForegroundEventL - Entry" );
     
-    if( aForeground )
+    // commented as a part of the error ESLM-83LG82.
+    /*if( aForeground )
         {
         __PRINTS( "CClockAppUi::HandleForegroundEventL - aForeground ETrue" );
         
@@ -352,7 +382,7 @@ void CClockAppUi::HandleForegroundEventL( TBool aForeground )
             iIADUpdateFlag = EFalse;
             __PRINTS( "CClockAppUi::HandleForegroundEventL - iIADUpdateFlag EFalse" );
             }
-        }
+        }*/
 
     // Inform the world clock view about the change
     CClockWorldView* clockWorldView = static_cast< CClockWorldView* > ( View( KClockAppWorldViewId ) );
@@ -489,7 +519,10 @@ void CClockAppUi::OpenSettingsViewL()
     {
     // Set the title pane text first
     SetTitlePaneTextL( R_CLOCK_TITLE_SETTINGS );
-
+    
+    // Activate the date and time settings view
+    ActivateLocalViewL( KClkDateTimeViewId );
+    
     // Don't display the navigation pane when switching to settings view.
     if( iNavigationDecorator )
         {
@@ -531,9 +564,16 @@ void CClockAppUi::ResetToInitialStateL()
     viewId.iViewUid = KClockAppMainViewId;
                         
     // Switch to the main view
-    // ActivateLocalViewL( KClockAppMainViewId, KClockAppMainViewId, KNullDesC8() );
-    TRAP_IGNORE( CAknViewAppUi::CreateActivateViewEventL( viewId, TUid::Uid(KClockHideInBackground), KNullDesC8 ) ) ;
-
+    if( iTabGroup->ActiveTabId() == EClockAppWorldViewId )
+        {
+        ActivateLocalViewL( KClockAppMainViewId, TUid::Uid(KClockHideInBackground), KNullDesC8() );
+        //TRAP_IGNORE( CAknViewAppUi::CreateActivateViewEventL( viewId, TUid::Uid(KClockHideInBackground), KNullDesC8 ) ) ;
+        }
+    else
+        {
+        // ActivateLocalViewL( KClockAppMainViewId, KClockAppMainViewId, KNullDesC8() );
+        TRAP_IGNORE( CAknViewAppUi::CreateActivateViewEventL( viewId, TUid::Uid(KClockHideInBackground), KNullDesC8 ) ) ;
+        }
 	// Update the tab.
 	iTabGroup->SetActiveTabById( EClockAppMainViewId );
     }
@@ -681,5 +721,85 @@ void CClockAppUi::HandleIADUpdateL()
             }
         }
     __PRINTS( "CClockAppUi::HandleIADUpdateL - Exit" );
+    }
+	
+TBool CClockAppUi::TransitionOngoing() const
+    {
+    return iTransitionOngoing;
+    }
+
+void CClockAppUi::SetTransitionOngoing( TBool aTransitionOngoing )
+    {
+    iTransitionOngoing = aTransitionOngoing;
+    }
+
+void CClockAppUi::SetTransitionGroupId( TInt aId )
+    {
+    iTransitionGroupId = aId;
+    }
+
+TInt CClockAppUi::TransitionGroupId() const
+    {
+    return iTransitionGroupId;
+    }
+
+CClockAppUi::TTransitionDirection CClockAppUi::TransitionDirection() const
+    {
+    return iTransitionDirection;
+    }
+
+void  CClockAppUi::SetTransitionDirection( CClockAppUi::TTransitionDirection aDirection )
+    {
+    iTransitionDirection = aDirection;
+    }
+
+void  CClockAppUi::DoDisappearTransition( CCoeControl* aControl )
+    {
+    if( aControl && iTransitionOngoing )
+        {
+        if( iTransitionDirection == ETransitionLeft )
+            {
+            GfxTransEffect::Register( aControl, KControlUid2 );      
+            }
+        else
+            {
+            GfxTransEffect::Register( aControl, KControlUid1 );   
+            }
+        GfxTransEffect::Begin( aControl, KGfxControlPageSwitchDisappear );
+        aControl->MakeVisible( EFalse );
+        GfxTransEffect::SetDemarcation( aControl, aControl->Rect() );
+        GfxTransEffect::End( aControl );
+        GfxTransEffect::EndGroup( iTransitionGroupId );
+        iTransitionOngoing = EFalse;
+        }
+    }
+
+void  CClockAppUi::DoAppearTransition( CCoeControl* aControl )
+    {
+    if( aControl && iTransitionOngoing )
+        {
+        if( iTransitionDirection == ETransitionLeft )
+            {
+            GfxTransEffect::Register( aControl, KControlUid2 );      
+            }
+        else
+            {
+            GfxTransEffect::Register( aControl, KControlUid1 );   
+            }
+        iTransitionGroupId = GfxTransEffect::BeginGroup();
+        GfxTransEffect::Begin( aControl, KGfxControlPageSwitchAppear );
+        aControl->MakeVisible( ETrue );
+        GfxTransEffect::SetDemarcation( aControl, aControl->Rect() );
+        GfxTransEffect::End( aControl );
+        }
+    }
+
+MTouchFeedback* CClockAppUi::GetFeedback()
+	{
+    if( !iFeedback && iTactileFeedbackSupported )
+    	{
+        iFeedback = MTouchFeedback::Instance();
+        }
+    return iFeedback;
     }
 // End of file

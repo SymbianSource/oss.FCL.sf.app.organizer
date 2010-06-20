@@ -402,7 +402,7 @@ void CCalenWeekContainer::SelectHighlightedCellAndVisibleRangeL()
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenWeekContainer::SetActiveContextFromHighlightL()
+void CCalenWeekContainer::SetActiveContextFromHighlightL(TBool aInstAvailable)
     {
     TRACE_ENTRY_POINT;
 
@@ -424,7 +424,7 @@ void CCalenWeekContainer::SetActiveContextFromHighlightL()
         //    * Focus on instanceId and datetime
         // 2. Timed item, 1-n for each cell, on same/ different day
         //    * Focus on datetime
-        if( itemInfo.HasInstance() )
+        if( itemInfo.HasInstance() && aInstAvailable)
             {
             TCalenInstanceId instId = TCalenInstanceId::CreateL( *itemInfo.iInstance );
             if( !itemInfo.IsTimed() )       // todo/anniv/memo
@@ -438,13 +438,8 @@ void CCalenWeekContainer::SetActiveContextFromHighlightL()
                 {
                 TTime focusTime = CalenDateUtils::BeginningOfDay( iTime ) + itemInfo.iStartTime;
                 currentDayCalTime.SetTimeLocalL( focusTime );
- //               context.SetFocusDateAndTimeL( currentDayCalTime,
-  //                                              TVwsViewId( KUidCalendar, KUidCalenWeekView ) );
                 context.SetFocusDateAndTimeAndInstanceL( currentDayCalTime, instId, 
-                                                TVwsViewId( KUidCalendar, KUidCalenWeekView ) );
-                                                
-                TDateTime focusTimeTemp = focusTime.DateTime();
-                
+                                            TVwsViewId( KUidCalendar, KUidCalenWeekView ) );
                 }
             }
         else if( itemInfo.iStartTime.Int() == KErrNotFound )    // empty non-timed cell
@@ -909,6 +904,8 @@ void CCalenWeekContainer::SetListBoxDataL()
     iListBox->View()->SetDisableRedraw(EFalse);
     DrawDeferred();
 
+//Changing RSK to back / exit
+    WeekView().UpdateCbaL();
     TRACE_EXIT_POINT;
     }
 
@@ -2067,32 +2064,32 @@ void CCalenWeekContainer::HandleNaviDecoratorEventL(TInt aEventID)
         {
         TInt direction(0);
         if(aEventID == EAknNaviDecoratorEventLeftTabArrow)
-                    {
-                    if(AknLayoutUtils::LayoutMirrored())
-						{
-                        direction = 1;
-						}
-                    else
-						{
-                        direction = -1;
-						}
-                    }
-                    
-                else if(aEventID == EAknNaviDecoratorEventRightTabArrow)
-                    { 
-                    if(AknLayoutUtils::LayoutMirrored())
-						{
-                        direction = -1;
-						}
-                    else
-						{
-                        direction = 1;
-						}
-                    }
+            {
+            if(AknLayoutUtils::LayoutMirrored())
+                {
+                direction = 1;
+                }
+            else
+                {
+                direction = -1;
+                }
+            }            
+        else if(aEventID == EAknNaviDecoratorEventRightTabArrow)
+            { 
+            if(AknLayoutUtils::LayoutMirrored())
+                {
+                direction = -1;
+                }
+            else
+                {
+                direction = 1;
+                }
+            }
         else
             return;
+        
         HorizontalWeekMoveL(direction);
-        SetActiveContextFromHighlightL();
+        SetActiveContextFromHighlightL(EFalse);
         WeekView().SetStatusPaneFromActiveContextL();
         iView->BeginRepopulationL();
         }
@@ -2193,6 +2190,7 @@ void CCalenWeekContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent
             {
             case TPointerEvent::EButton1Down:
                 {
+                this->GenerateTactileFeedback(); //Tactile feedback.
                 if(isItem)
                     {
                     oldRow = iListBox->View()->CurrentItemIndex();
@@ -2226,26 +2224,21 @@ void CCalenWeekContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent
                 // for themable support - clear Pressed Down State when dragging
                 oldRow = iListBox->View()->CurrentItemIndex();
                 oldColumn = iColumn;
-                iListBox->HandlePointerEventL(aPointerEvent);
-                newRow = iListBox->View()->CurrentItemIndex();
-                newColumn = iColumn;
+                newColumn = iListBox->PointerEventColumn(aPointerEvent.iPosition);
+                newRow = pointerIndex;
                 if (newRow != oldRow || newColumn != oldColumn)
                     {
-                    CalcDayFromColumn();
-                    SetActiveContextFromHighlightL();
-                    if (newColumn != oldColumn)
-                        {
-                        WeekView().SetStatusPaneFromActiveContextL();
-                        }                    
+                    iHourChange = ETrue;
                     }
                 break;
                 }
             case TPointerEvent::EButton1Up:
                 if(isItem &&
-                   iView->MenuBar()->IsDisplayed() == EFalse)
+                   iView->MenuBar()->IsDisplayed() == EFalse && !iHourChange)
                     {
                     iServices.IssueCommandL( ECalenForwardsToDayView );
                     }
+                iHourChange = EFalse;
                 break;
             default:
                 break;

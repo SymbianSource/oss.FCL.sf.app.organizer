@@ -47,6 +47,11 @@ class CClkUiClkSrvListener : public CClkUiMdlListenerBase
         */
         CClkUiClkSrvListener( RClkSrvInterface& aClkSrvSes, CClkUiClkSrvModel& aClkSrvModel, TInt& aWhatChanged, TInt& aWhoChanged, TInt aListenerPriority );
         
+        /**
+         * Destructor
+         */
+        ~CClkUiClkSrvListener();
+        
     public:         // Functions from base classes.
         
         /**

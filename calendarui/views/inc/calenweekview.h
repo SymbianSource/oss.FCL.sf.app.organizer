@@ -48,6 +48,8 @@ public:  // New function
      * @param aTime Set a time to StatusPane
      */
     void SetStatusPaneFromActiveContextL();
+    
+    void UpdateCbaL();
 
 public:  // From CCalenView
     virtual TNextPopulationStep ActiveStepL();
@@ -148,6 +150,7 @@ private:    // Data
     TTime iTime;
     TInt iSelectedRowNumber;      // The row number of the highlighted cell.
     TTimeIntervalMinutes iFirstRowTime;           // The time of the first row on the screen.
+    TBool iShowBackButtonOnCba; 
     };
 
 #endif //CALENWEEKVIEW_H

@@ -701,7 +701,8 @@ void CCalenPluginLabel::HandlePointerEventL(const TPointerEvent&
 	{
 	TRACE_ENTRY_POINT;
 	
-	if ( aPointerEvent.iType == TPointerEvent::EButton1Up )
+	if( AknLayoutUtils::PenEnabled() &&
+	     aPointerEvent.iType == TPointerEvent::EButton1Down )
 	        {
 	        iPlugin.ShowDetailsL();
 	        }

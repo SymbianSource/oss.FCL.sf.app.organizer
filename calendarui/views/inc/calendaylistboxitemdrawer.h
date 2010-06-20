@@ -64,6 +64,9 @@ private:   // from CTextListItemDrawer
 private:    // data
     CEikListBox* iListBox;
     mutable TUint32 iColor;
+    mutable TInt iColorStripHeight; //color strip height  
+    mutable TRect iColorStripRect; // color strip rect 
+    
     };
 
 #endif // CALENDAYLISTBOXITEMDRAWER_H

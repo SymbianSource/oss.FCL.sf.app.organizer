@@ -331,7 +331,7 @@ CCoeControl* CCalenDummyServices::PreviewPane(  TRect& /*aRect*/ )
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CGulIcon* CCalenDummyServices::GetIconL( MCalenServices::TCalenIcons /*aIndex*/ )
+CGulIcon* CCalenDummyServices::GetIconL( MCalenServices::TCalenIcons /*aIndex*/, const TInt /*aViewId*/  )
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;

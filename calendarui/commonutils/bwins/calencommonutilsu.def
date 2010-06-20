@@ -135,4 +135,5 @@ EXPORTS
 	?SynchType@CCalenEntryUtil@@QBE?AW4TSynchType@1@XZ @ 134 NONAME ; enum CCalenEntryUtil::TSynchType CCalenEntryUtil::SynchType(void) const
 	?GetNextAvailableOffsetL@CCalenMultiCalUtil@@SAIXZ @ 135 NONAME ; unsigned int CCalenMultiCalUtil::GetNextAvailableOffsetL(void)
 	?GetNextAvailableCalFileL@CCalenMultiCalUtil@@SAPAVHBufC16@@XZ @ 136 NONAME ; class HBufC16 * CCalenMultiCalUtil::GetNextAvailableCalFileL(void)
-
+	?AttachmentOpen@CCalenAttachmentModel@@QAEXAAH@Z @ 137 NONAME ; void CCalenAttachmentModel::AttachmentOpen(int &)
+	?IsAttachmentOpen@CCalenAttachmentModel@@QAEHXZ @ 138 NONAME ; int CCalenAttachmentModel::IsAttachmentOpen(void)

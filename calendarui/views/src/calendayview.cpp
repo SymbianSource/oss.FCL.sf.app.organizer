@@ -185,7 +185,6 @@ void CCalenDayView::DoActivateImplL( const TVwsViewId& aPrevViewId,
         {
         iShowBackButtonOnCba = EFalse;
         }
-    iDayContainer->UpdateContainerL();
     //UpdateCbaL();
 
     iEventViewCommandHandled = EFalse;

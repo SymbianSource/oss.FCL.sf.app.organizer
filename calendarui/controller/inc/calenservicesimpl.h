@@ -117,7 +117,7 @@ public:  // Functions from base classes.
 	 * Get calendar icon of specific type
 	 * @return CGulIcon*
 	 */
-	CGulIcon* GetIconL( MCalenServices::TCalenIcons aIndex );
+	CGulIcon* GetIconL( MCalenServices::TCalenIcons aIndex, const TInt aViewId = 0 ); 
 
 	/**
 	 * Register for notifications of Calendar events

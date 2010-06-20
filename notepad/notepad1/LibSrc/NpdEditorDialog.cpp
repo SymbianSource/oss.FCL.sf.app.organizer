@@ -215,7 +215,7 @@ TInt CNotepadEditorDialog::SaveOnExitL(
     if ( aNeedListRefresh )
         {
         iListDialog->HandleEditorExitL( statOfSave, returnKey,
-            statOfSave == CNotepadModel::ENotepadModelRowNop || 
+            statOfSave != CNotepadModel::ENotepadModelRowNop || 
             iFlags & ENotepadCatchSaveOnExitCallback );
         }
     return statOfSave;
@@ -388,7 +388,7 @@ void CNotepadEditorDialog::DynInitMenuPaneL(
 				}
             else
                 {
-                if ( IsSequenceAtLast() )
+                if ( IsSequenceAtLast() || iSequence->Count() == 1 )
                     {
                     aMenuPane->DeleteMenuItem(ENotepadCmdNextMemo);
                     }
@@ -531,10 +531,6 @@ void CNotepadEditorDialog::ProcessCommandL(TInt aCommandId)
         {
 		case EAknSoftkeyExit:
 		case EAknCmdExit:
-            if ( iListDialog )
-                {
-                iListDialog->MakeVisible( EFalse );
-                } 
             TryExitL(EAknSoftkeyExit);
             iAvkonAppUi->ProcessCommandL(EAknCmdExit);
             break;
@@ -877,7 +873,15 @@ TInt CNotepadEditorDialog::SaveL()
         if ( wasModeAdding && 
             rowResult == CNotepadModel::ENotepadModelRowAdded )
             {
-            iSequence->InsertL(0, iKey); // *never leave* because reserved
+            if ( IsNotepad() )
+            	{
+                iSequence->InsertL(1, iKey); // *never leave* because reserved
+            	}
+            else
+            	{
+                iSequence->InsertL(0, iKey); // *never leave* because reserved
+            	}
+            
             }
         else if ( savedCurrentSequence != KNotepadInvalidSequenceIndex &&
             ( rowResult == CNotepadModel::ENotepadModelRowAdded ||
@@ -924,7 +928,7 @@ void CNotepadEditorDialog::OnCmdAddL()
 //
 void CNotepadEditorDialog::OnCmdNextMemoL()
     {
-    TInt nextIndex(0);
+    TInt nextIndex(1);
     const TBool wasModeAdding( IsModeAdding() );
     if ( !wasModeAdding )
         {
@@ -1089,11 +1093,11 @@ void CNotepadEditorDialog::SyncSequenceL( const TBool aForceSync )
     //
     TInt index( 0 );
     TKeyArrayFix cmpKeyArray(0, ECmpTInt);
-    for (i = keyArray.Count() - 1; i >= 0; --i)
+    for (i = keyArray.Count() - 1; i >= 1; --i)
         {
         if (iSequence->Find(keyArray[i], cmpKeyArray, index) != 0)
             {
-            iSequence->InsertL(0, keyArray[i]);
+            iSequence->InsertL(1, keyArray[i]);
             }
         }
     if (iKey != KNotepadPseudoKeyIdForNewNote 
@@ -1112,7 +1116,7 @@ TBool CNotepadEditorDialog::IsSequenceAtLast() const
     {
     __ASSERT_DEBUG( iSequence, 
         Panic(ENotepadLibraryPanicNullSequenceInEditor) );
-    return ( IsModeAdding() ? iSequence->Count() == 0 :
+    return ( IsModeAdding() ? iSequence->Count() == 1 :
         CurrentSequence() == iSequence->Count() - 1 );
     }
 
@@ -1124,7 +1128,7 @@ TBool CNotepadEditorDialog::IsSequenceAtFirst() const
     {
     __ASSERT_DEBUG( iSequence, 
         Panic(ENotepadLibraryPanicNullSequenceInEditor) );
-    return ( IsModeAdding() || CurrentSequence() == 0);
+    return ( IsModeAdding() ||  CurrentSequence() == 1);
     }
 
 // -----------------------------------------------------------------------------
@@ -1152,10 +1156,14 @@ TInt CNotepadEditorDialog::NextKeyInSequence() const
     TInt nextKey(iKey);
     if ( iKey == KNotepadPseudoKeyIdForNewNote ) // IsModeAdding
         {
-        if ( iSequence->Count() > 0 )
+        if ( iSequence->Count() > 1 )
             {
-            nextKey = (*iSequence)[0];
+            nextKey = (*iSequence)[1];
             }
+        else if ( iSequence->Count() == 1 )
+        	{
+            nextKey = (*iSequence)[0];
+        	}
         }
     else
         {
@@ -1197,6 +1205,7 @@ TInt CNotepadEditorDialog::PreviousKeyInSequence() const
 TInt CNotepadEditorDialog::DoSearchL(CFindItemEngine::TFindItemSearchCase aCase)
     {
     CFindItemDialog* dialog = CFindItemDialog::NewL( iEditor->Text()->Read( 0 ), aCase );
+    dialog->EnableSingleClick( ETrue );
     TInt ret = dialog->ExecuteLD();
     return ret;
     }

@@ -85,6 +85,11 @@ CCalenContextImpl::CCalenContextImpl( const CCalenContextImpl& aContext )
 CCalenContextImpl::~CCalenContextImpl()
     {
     TRACE_ENTRY_POINT;
+    if(iCalAlarmEntryFileName)
+        {
+        delete iCalAlarmEntryFileName;
+        iCalAlarmEntryFileName = NULL;
+        }
     TRACE_EXIT_POINT;
     }
 
@@ -506,4 +511,69 @@ void CCalenContextImpl::ResetCalendarFileName()
     TRACE_EXIT_POINT;
     }
 
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::SetCalAlarmEntryFileNameL
+// Set calendar file name of Alarm entry
+// ----------------------------------------------------------------------------- 
+void CCalenContextImpl::SetCalAlarmEntryFileNameL(const TDesC& aName)
+    {
+    TRACE_ENTRY_POINT
+    if (iCalAlarmEntryFileName)
+        {
+        delete iCalAlarmEntryFileName;
+        iCalAlarmEntryFileName = NULL;
+        }
+    iCalAlarmEntryFileName = aName.AllocL();
+    TRACE_EXIT_POINT   
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::GetCalAlarmEntryFileNameL
+// Get calendar file name of Alarm entry
+// ----------------------------------------------------------------------------- 
+HBufC* CCalenContextImpl::GetCalAlarmEntryFileNameL() const
+    {
+    TRACE_ENTRY_POINT     
+    TRACE_EXIT_POINT 
+    
+    return iCalAlarmEntryFileName;   
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::ResetCalAlarmEntryFileName
+// Resets Alarm Entry file name in context
+// ----------------------------------------------------------------------------- 
+void CCalenContextImpl::ResetCalAlarmEntryFileName()
+    {
+    TRACE_ENTRY_POINT    
+    if(iCalAlarmEntryFileName)
+        {
+        delete iCalAlarmEntryFileName;
+        iCalAlarmEntryFileName = NULL;
+        }
+        
+    TRACE_EXIT_POINT 
+    }
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::ResetCalAlarmEntryFileName
+// set Alarm Entry LocalUid in context
+// ----------------------------------------------------------------------------- 
+void  CCalenContextImpl::SetCalAlarmEntryLocalUid(TCalLocalUid aLocalId)
+    {
+    TRACE_ENTRY_POINT   
+    iCalAlarmLocalUid = aLocalId;
+    TRACE_EXIT_POINT 
+    }
+    
+ 
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::ResetCalAlarmEntryFileName
+// Get Alarm Entry LocalUid from context
+// ----------------------------------------------------------------------------- 
+TCalLocalUid CCalenContextImpl::CalAlarmLocalUidL() const
+    {
+    TRACE_ENTRY_POINT  
+    TRACE_EXIT_POINT 
+    return iCalAlarmLocalUid;
+    }
 // End of file

@@ -51,7 +51,9 @@ const TInt KBuffLength = 128;
 
 
 const TInt KComma( ',' );
-_LIT(KPhoneCalendarName,"PhoneCalendar");
+
+_LIT(KPersonal,"Personal");
+
 
 // ================= MEMBER FUNCTIONS =======================
 //
@@ -338,7 +340,6 @@ TInt CCalenServer::CreateCalendarFilesL()
             {
             TBuf<KMaxFileName> calendarFileName;
             calendarFileName.Append(KCalendarDatabaseFilePath);
-            calendarInfo->SetEnabled(EFalse);
             TRAPD(error,session->CreateCalFileL(calendarFileName,*calendarInfo));
 			User::LeaveIfError(error);
             }
@@ -370,49 +371,18 @@ void CCalenServer::ReadCalendarNamesFromResourceL(CDesC16ArrayFlat& aCalendarNam
     {
     TRACE_ENTRY_POINT;
     
-    RFs fsSession;
-    CleanupClosePushL( fsSession );
-    RResourceFile resourceFile;
-    CleanupClosePushL( resourceFile );
-    User::LeaveIfError( fsSession.Connect() );
-    TFileName resourceFileName( KMissedAlarmResourceFile );
     
-    BaflUtils::NearestLanguageFile( fsSession, resourceFileName );
     
-    resourceFile.OpenL(fsSession, resourceFileName );
-    resourceFile.ConfirmSignatureL( 0 );
     
-    //Phone calendar 
-       HBufC* phoneCalendarBuffer = KPhoneCalendarName().AllocLC();
-       aCalendarNames.AppendL(phoneCalendarBuffer->Des());
-       CleanupStack::PopAndDestroy( phoneCalendarBuffer );
+    
         
     // personal
-        HBufC8* personalBuffer = resourceFile.AllocReadLC( R_CALE_DB_PERSONAL );    
-       const TPtrC16 ptrPBuffer(( TText16*) personalBuffer->Ptr(),
-                                         ( personalBuffer->Length()+1 )>>1 );    
-       HBufC *personalCalendar = ptrPBuffer.AllocL();    
-       aCalendarNames.AppendL( personalCalendar->Des() );    
+         HBufC* personalBuffer = KPersonal().AllocLC();    
+        aCalendarNames.AppendL( personalBuffer->Des() );    
        CleanupStack::PopAndDestroy( personalBuffer );
        
-    // famliy
-       HBufC8* familyBuffer=resourceFile.AllocReadLC( R_CALE_DB_FAMILY );
-       const TPtrC16 ptrFBuffer(( TText16*) familyBuffer->Ptr(),
-               ( familyBuffer->Length()+1 )>>1 );
-       HBufC *familyCalendar = ptrFBuffer.AllocL();
-       aCalendarNames.AppendL( familyCalendar->Des() );
-       CleanupStack::PopAndDestroy( familyBuffer );
-       
-    //friends
-       HBufC8* friendsBuffer = resourceFile.AllocReadLC( R_CALE_DB_FRIENDS );
-       const TPtrC16 ptrFrBuffer(( TText16*) friendsBuffer->Ptr(),
-               ( friendsBuffer->Length()+1 )>>1 );
-       HBufC *friendsCalendar = ptrFrBuffer.AllocL();
-       aCalendarNames.AppendL( friendsCalendar->Des() );
-       CleanupStack::PopAndDestroy( friendsBuffer );
    
-    CleanupStack::PopAndDestroy(&resourceFile);
-    CleanupStack::PopAndDestroy(&fsSession);
+   
     
     TRACE_EXIT_POINT;
     }
@@ -472,8 +442,7 @@ void CCalenServer::PopulateCalendarColorListL( const TDesC& aRepositoryBuffer,
     TPtrC marker = aRepositoryBuffer;
     TInt calendarColorOffset;
     
-    //For phone calendar 
-    aCalendarColors.Append(KRgbRed.Value());
+  
     
     while ((calendarColorOffset = marker.Locate(TChar(KComma)))
             != KErrNotFound)
@@ -545,7 +514,7 @@ void CCalenServer::SetCalendarAddPropertiesL(CCalCalendarInfo& aCalendarInfo)
     keyBuff.Zero();
     keyBuff.AppendNum(ESyncStatus);
 
-    TBool status = EFalse;
+    TBool status = ETrue;
     TPckgC<TBool> pkgSyncStatus(status);
     aCalendarInfo.SetPropertyL(keyBuff, pkgSyncStatus);
     

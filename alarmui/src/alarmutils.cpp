@@ -32,6 +32,7 @@
 #include "alarmcontextfwsupport.h"
 #endif // RD_ALMALERT__SENSOR_SUPPORT
 
+#include <w32std.h>
 #include <almconst.h>
 #include <eikenv.h>
 #include <AknCapServer.h>
@@ -48,6 +49,7 @@
 #include <wakeupalarm.h>
 #include <calalarm.h> // KUidAgendaModelAlarmCategory - the alarm category id for calendar alarms
 #include <AknUtils.h>
+#include <hwrmpowerstatesdkpskeys.h>
 
 #ifndef SYMBIAN_CALENDAR_V2
 #include <agmalarm.h> // deprecated, use CalAlarm.h when SYMBIAN_CALENDAR_V2 flag is enabled
@@ -960,12 +962,20 @@ void CAlarmUtils::SetDeviceState(TPSGlobalSystemState aDeviceState)
 void CAlarmUtils::DeviceShutdown()
     {
     TRACE_ENTRY_POINT;
-    iShutdownTimer->Cancel();
-    if( StarterConnect() )
-        {
-        iStarter.Shutdown();
-        iStarter.Close();
-        }    
+    
+    // charging state added for the err EMDN-835CW2.
+    TInt chargingState;
+    RProperty::Get( KPSUidHWRMPowerState, KHWRMChargingStatus , chargingState );
+    
+    if( IsDeviceInAlarmState() && ( chargingState != EChargingStatusCharging ) )
+        {       
+            iShutdownTimer->Cancel();
+            if( StarterConnect() )
+                {
+                iStarter.Shutdown();
+                iStarter.Close();
+                }    
+        }
     TRACE_EXIT_POINT;
     }
 
@@ -1657,6 +1667,53 @@ void CAlarmUtils::SetCalendarAlarmViewer(TBool aCalendarAlarmViewer)
 TBool CAlarmUtils::IsCalendarAlarmViewer()
     {
     return iCalendarAlarmViewer;
+    }
+
+// ---------------------------------------------------------
+// Silence the notifying alarm 
+// ---------------------------------------------------------
+//
+void CAlarmUtils::DoSilence()
+    {
+    TRACE_ENTRY_POINT;
+    
+    // silence only if snoozing is possible
+    // this way user must hear the last "call"
+    if( CanSnooze() )
+        {
+        delete iAlarmPlayer;
+        iAlarmPlayer = NULL;
+        SetBackLight( EFalse );
+        
+        if( IsCalendarAlarm() )
+            {
+    
+            // calendar alarm needs extra handling due to having stop - silence
+            //simulate right softkey pressing
+            RWsSession wsSession=CCoeEnv::Static()->WsSession();
+            TKeyEvent keyEvent;
+            keyEvent.iCode = EKeyCBA2;  
+            keyEvent.iScanCode = EStdKeyDevice1;
+            keyEvent.iModifiers = 0;
+            keyEvent.iRepeats = 0;
+            wsSession.SimulateKeyEvent( keyEvent );
+            wsSession.Flush();
+            }
+        // clockalarm
+        else
+            {
+            StartAutoSnoozeTimer();
+            }
+    
+        #if defined( RD_ALMALERT__SENSOR_SUPPORT )
+        // notify the result through the context framework
+        if( iCFSupport )
+            {
+            PIM_TRAPD_ASSERT( iCFSupport->PublishAlarmResultL( EResultAlarmSilenced ); )
+            }
+        #endif // RD_ALMALERT__SENSOR_SUPPORT
+        }
+    TRACE_EXIT_POINT;     
     }
 
 // End of File

@@ -707,6 +707,7 @@ void CCalenNativeView::CommonConstructL( TInt aViewResource )
     notificationArray.Append(ECalenNotifyStopAlarm);
 	notificationArray.Append(ECalenNotifyDeleteFailed);
 	notificationArray.Append(ECalenNotifyEntryDeleted);
+	notificationArray.Append(ECalenNotifyResourceChanged);
 	
     iServices.RegisterForNotificationsL( this,notificationArray);
     
@@ -797,17 +798,7 @@ void CCalenNativeView::DoActivateL( const TVwsViewId& aPrevViewId,
 	    DoDeactivate();	
 	    }
 
-    if (!iNaviContainer)
-        {
-        CEikStatusPane* sp = StatusPane();
-        iNaviContainer =
-            static_cast<CAknNavigationControlContainer*>(
-                        sp->ControlL(TUid::Uid(EEikStatusPaneUidNavi)));
-        }
-
-    iNaviContainer->Pop();
-
-    if( AknLayoutUtils::PenEnabled() )
+     if( AknLayoutUtils::PenEnabled() )
         {
         MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
         if(toolbarImpl)
@@ -1174,6 +1165,19 @@ void CCalenNativeView::HandleNotification(const TCalenNotification aNotification
                 }
             }
             break;
+		case ECalenNotifyResourceChanged:
+		    {
+		    if(iContainer )
+		        {
+                CAknAppUi* Appui = (CAknAppUi*)CEikonEnv::Static()->EikAppUi();
+                //handle this event when the app is in background
+                if(!Appui->IsForeground())
+                    {
+                    iContainer->HandleResourceChange(KEikDynamicLayoutVariantSwitch);
+                    }
+		        }
+		    }
+		    break;
         default:
             ASSERT( 0 ); // should never get here
             break;

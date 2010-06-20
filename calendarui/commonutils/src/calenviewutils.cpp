@@ -215,7 +215,7 @@ EXPORT_C TBool CalenViewUtils::IsAlldayEventL( const CCalInstance& aInstance )
         if( startLocalTime != stopLocalTime && 
                 startLocalTime == CalenDateUtils::BeginningOfDay( startLocalTime ) && 
                 stopLocalTime == CalenDateUtils::BeginningOfDay( stopLocalTime ) && 
-                startLocalTime != stopLocalTime && differenceInTime.Int() == 1 ) // fix for AllDayEntry issue
+                startLocalTime != stopLocalTime && differenceInTime.Int() >= 1 ) // fix for AllDayEntry issue
             {
             allDayEvent = ETrue;
             }

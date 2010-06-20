@@ -260,7 +260,11 @@ public:
     * @since S60 3.2
     **/
     void DoSnooze();
-
+    /**
+    * Silence the active alarm.
+    * @since tb9.2
+    **/
+    void DoSilence();    
     /**
     * Checks if this alarm can be shown in "alarm" or in "charging" state.
     * @since S60 3.2

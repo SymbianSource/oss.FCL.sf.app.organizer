@@ -16,6 +16,7 @@
  */
 #include "calendarui_debug.h"
 #include "calenfilemapping.h"
+#include "calendbchangenotifier.h"      // MCalenDBChangeObserver
 
 #include <calsession.h>
 #include <calentryview.h>           // Calendar Entry view
@@ -67,6 +68,12 @@ void CCalenFileMapping::ConstructL() // second-phase constructor
 CCalenFileMapping::~CCalenFileMapping()
     {
     TRACE_ENTRY_POINT
+    
+    if( iDBChangeNotifier )
+        {
+        delete iDBChangeNotifier;
+        iDBChangeNotifier = NULL;
+        }
     
     if(iEntryView)
         {
@@ -193,6 +200,29 @@ CCalSession* CCalenFileMapping::GetSessionPtr()
     TRACE_ENTRY_POINT
     TRACE_EXIT_POINT
     return iSessionPtr;
+    }
+
+/*
+ * Set the dbchangenotifier observer
+ * @param CCalSession pointer to a session 
+ */
+void CCalenFileMapping::SetDBChangeNotifier(CCalenDbChangeNotifier* aDBChangeNotifier )
+    {
+    TRACE_ENTRY_POINT;
+    
+    iDBChangeNotifier = aDBChangeNotifier;
+    TRACE_EXIT_POINT;
+    }
+
+/*
+ * Get the dbchangenotifier observer.
+ * @return CCalSession pointer to session.
+ */
+CCalenDbChangeNotifier *CCalenFileMapping::GetDBChangeNotifier()
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    return iDBChangeNotifier;
     }
 
 //End

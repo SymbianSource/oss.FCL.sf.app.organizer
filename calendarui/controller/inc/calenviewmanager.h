@@ -205,6 +205,12 @@ class CCalenViewManager : public CBase,
          */
         void ActivateViewOnFakeExitL(TUid aDefView);
         
+        /**
+         * Activate the local view if application already in back ground
+         * @param   aDefView    current default view which needs to be activated.
+         */
+        void ActivateLocalViewL(TUid aDefView);
+        
     private:  // New functions
 
         /**
@@ -379,6 +385,7 @@ class CCalenViewManager : public CBase,
         TBool iViewsActivated; 
         TVwsViewId  iPreviousViewId;
         TVwsViewId  iPreviousToDayView;
+        TVwsViewId iPreviousToWeekView;
         TBool iAvoidRepopulation;
         TBool iStartupComplete;
     };

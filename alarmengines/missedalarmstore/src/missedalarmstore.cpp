@@ -243,8 +243,8 @@ EXPORT_C void CMissedAlarmStore::RemoveL( CMissedAlarm& aMissedAlarm )
 				    {
 	                DeleteEntryAndReArrangeL( key );
 	                foundIds.Reset();
-				    }
-				return;
+	                return;
+				    }				
 				}
 			}
 	    }

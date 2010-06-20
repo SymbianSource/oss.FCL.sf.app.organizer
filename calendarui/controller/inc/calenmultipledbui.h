@@ -245,10 +245,23 @@ private: //Internal
                 CCalCalendarInfo& aCalendarInfoModified);
     
     /*
-     * Async exit for the dialog
+     * Callback for CAsyncCallBack class
+     * @param aThisPtr* this pointer.
+     * @return TInt status.
      */
-    static TInt DoAsyncExit(TAny* aPtr);
+    static TInt AsyncCallBackL(TAny* aThisPtr);
+    
+    /*
+     * Async method to handle all async commnds
+     * @param aCommand Async command
+     */
+    void HandleAsyncCommandL(const TInt aCommand);
 
+    /*
+     * Async method to handle all async commnds
+     * @param aCommand Async command
+     */
+    void DoAsyncActionL(const TInt aCommand);
 
     /*
      * @brief Creates button for the toolbar.
@@ -275,6 +288,12 @@ private: //Internal
      * Refocus the items in list when delete action happened. 
      */
     void ReAdjustListItemFocusL(const TInt aCurrentIndex);
+    
+    /**
+     * From CCoeControl Gets help context
+     * @param aContext Help context
+     */
+    void GetHelpContext(TCoeHelpContext& aContext) const;
 
 public:  // from MCalenNotificationHandler
 	/** 
@@ -292,7 +311,21 @@ public:   // from MEikListBoxObserver
     *                   may be obtained by accessing the list box itself.
     */
     void HandleListBoxEventL(CEikListBox* aListBox, TListBoxEvent aEventType);
-
+    
+public:
+    
+    /*
+     * Updates after add/edit had been performed.
+     * Called from editor before exiting the dialog.
+     * @param aItemAdded ETure if add else edit.
+     */
+    void UpdateOnAddOrEditL(TBool aItemAdded);
+    
+    /*
+     * Exit the dialog;
+     */
+    void ExitDialogL();
+    
 private:
     CCalenMultipleDbListbox* iListBox;
     CAknsBasicBackgroundControlContext* iBgContext; //Owns
@@ -300,16 +333,20 @@ private:
     CCalenController& iController;
     CDesCArrayFlat* iDesArray; //Owns
     TRect iRect;
-    TBool iFirstTap;
-    TBool iDialogLaunched;
     RArray<MCalenServices::TCalenIcons> iIconIndices;
     CAknIconArray* iIconList;
     RArray<TInt32> iColorUidArray;
-    CAsyncCallBack* iAsyncExit;
-    TInt iAsyncExitCmd;
     CCalenMultiDBEditor* iDbEditor;//Not not owned
     TBool iConflictOccured;
     TBool iIsDbEditorOpen ; 
+    
+    CCalCalendarInfo* iCalendarInfoNew;
+    CCalCalendarInfo* iCalendarInfoOriginal;
+    CCalCalendarInfo* iCalendarInfoEdited;
+    
+    CAsyncCallBack*  iAsyncAction;
+    TInt             iAsyncActionCmd;
+    TInt             iCurrentIndex;
     };
 
 

@@ -48,13 +48,18 @@
 #include <CalendarInternalCRKeys.h>
 #include <calenmulticalutil.h>
 
+#include <bautils.h>
+#include <calensvrmissedalarmmanagerresource.rsg>
 // Default Calendar database path
 _LIT( KCalendarDatabaseFilePath, "c:calendar" );
 _LIT( KPhoneCalendar,"Personal" );
 _LIT( KExtCalendar,"Ext calendar" );
 const TInt KBuffLength = 24;
 
-_LIT(KPhoneCalendarName,"PhoneCalendar");
+
+_LIT(KPersonal,"Personal");
+
+_LIT( KMissedAlarmResourceFile, "z:\\resource\\CalenSvrMissedAlarmManagerResource.rsc"); // changes done
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -87,7 +92,8 @@ CCalenGlobalData::CCalenGlobalData( MCalProgressCallBack& aCalCallBack )
 // ----------------------------------------------------------------------------
 //
 EXPORT_C CCalenGlobalData* CCalenGlobalData::NewL( MCalProgressCallBack& aCalCallBack,
-                                                   MCalenContextChangeObserver* aNotifier )
+                                                   MCalenContextChangeObserver* aNotifier,
+                                                   MCalenDBChangeObserver* aDBNotifier)
     {
     TRACE_ENTRY_POINT;
 
@@ -106,7 +112,7 @@ EXPORT_C CCalenGlobalData* CCalenGlobalData::NewL( MCalProgressCallBack& aCalCal
         // calls CCalenGlobalData::InstanceL in ConstructL and then ConstructL
         // leaves, we will double delete the global data.
         ++self->iRefCount;
-        self->ConstructL( aNotifier );
+        self->ConstructL( aNotifier, aDBNotifier );
         CleanupStack::Pop( self );
         }
     else
@@ -206,13 +212,16 @@ EXPORT_C CCalenGlobalData* CCalenGlobalData::Instance()
 // Symbian 2nd phase constructor can leave.
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
-void CCalenGlobalData::ConstructL( MCalenContextChangeObserver* aNotifier )
+void CCalenGlobalData::ConstructL( MCalenContextChangeObserver* aNotifier,
+                                    MCalenDBChangeObserver* aDBNotifier)
     {
     TRACE_ENTRY_POINT;
 
     iContext = new (ELeave ) CCalenContextImpl( aNotifier );  
     
     iNewInstanceViewCreation = NULL;
+    
+    iDBChangeNotifier = aDBNotifier;
     
     TRACE_EXIT_POINT;
     }
@@ -829,7 +838,8 @@ EXPORT_C TBool CCalenGlobalData::ConstructFileMappingL()
         filemap->SetCalendarFileNameL(calendarFileName);
         
         iNewEntryView  = NULL;
-        iNewEntryViewCreation  = NULL;  
+        iNewEntryViewCreation  = NULL;
+        CCalenDbChangeNotifier* dbChangeNotifier = NULL;
         if(iCalSession)
             {
             iNewCalSession = NULL;
@@ -841,6 +851,9 @@ EXPORT_C TBool CCalenGlobalData::ConstructFileMappingL()
             filemap->SetCollectionId(tempSession.CollectionIdL());
             CreateEntryViewL(tempSession);
             filemap->SetEntryView( iNewEntryView );
+            dbChangeNotifier = CCalenDbChangeNotifier::NewL( tempSession );
+            dbChangeNotifier->RegisterObserverL(*iDBChangeNotifier);
+            filemap->SetDBChangeNotifier(dbChangeNotifier);
             }            
          else
             {
@@ -851,6 +864,9 @@ EXPORT_C TBool CCalenGlobalData::ConstructFileMappingL()
             filemap->SetEntryView( iNewEntryView );
             iGlobalDataOwnsEntryView = EFalse;
             iGlobalDataOwnsCalSession = EFalse;
+            dbChangeNotifier = CCalenDbChangeNotifier::NewL( tempSession );
+            dbChangeNotifier->RegisterObserverL(*iDBChangeNotifier);
+            filemap->SetDBChangeNotifier(dbChangeNotifier);
             }
         iFileMappingArray.Append(filemap);        
         CleanupStack::Pop(filemap);
@@ -1278,6 +1294,9 @@ EXPORT_C void CCalenGlobalData::AddCalendarL(CCalCalendarInfo* aCalendarInfo)
 			CreateEntryViewL(tempSession);
 			}
 		fileMapping->SetEntryView( iNewEntryView );
+		CCalenDbChangeNotifier* dbChangeNotifier = CCalenDbChangeNotifier::NewL( tempSession );
+		dbChangeNotifier->RegisterObserverL(*iDBChangeNotifier);
+		fileMapping->SetDBChangeNotifier(dbChangeNotifier);
 		CleanupStack::PopAndDestroy(aCalendarInfo);
 		iCalendarInfoList.Append(tempSession.CalendarInfoL());
 		}
@@ -1369,8 +1388,18 @@ EXPORT_C void CCalenGlobalData::RemoveCalendarL(const TDesC& aCalendarFileName)
                 // Mark the CalFile as Hidden
                 caleninfo->SetEnabled( EFalse );
                             
-                // Set the SyncStatus to False
+                
                 TBuf8<KBuffLength> keyBuff;
+                
+                // Set the modification time as home time.
+                keyBuff.Zero();
+                keyBuff.AppendNum(EModificationTime);
+                TTime modificationTime;
+                modificationTime.HomeTime();
+                TPckgC<TTime> pkgModificationTime(modificationTime);
+                caleninfo->SetPropertyL(keyBuff, pkgModificationTime);
+                
+                // Set the SyncStatus to False
                 keyBuff.Zero();
                 keyBuff.AppendNum( ESyncStatus );
                 TBool syncstatus( EFalse );
@@ -1470,20 +1499,38 @@ EXPORT_C void CCalenGlobalData::GetAllCalendarInfoL(
                     RPointerArray<CCalCalendarInfo>& aCalendarInfoList )
 	{
 	TRACE_ENTRY_POINT;
+	CleanupClosePushL(aCalendarInfoList);
+    RFs fsSession;
+    CleanupClosePushL( fsSession );
+    RResourceFile resourceFile;
+    CleanupClosePushL( resourceFile );
+    User::LeaveIfError( fsSession.Connect() );
+    TFileName resourceFileName( KMissedAlarmResourceFile );
 		
+    BaflUtils::NearestLanguageFile( fsSession, resourceFileName );
+    resourceFile.OpenL(fsSession, resourceFileName );
+    resourceFile.ConfirmSignatureL( 0 );   
 	for(TInt index=0;index < iCalendarInfoList.Count();index++)
 	    {
-        TPtrC fileNamePtr = iCalendarInfoList[index]->FileNameL();
+        
 	    TPtrC calendarNamePtr = iCalendarInfoList[index]->NameL();
+        if(calendarNamePtr.Compare(KPersonal) == 0)
+            {  
+            HBufC8* personalBuffer = resourceFile.AllocReadLC( R_CALE_DB_PERSONAL );    
+            const TPtrC16 ptrPBuffer(( TText16*) personalBuffer->Ptr(),
+                                             ( personalBuffer->Length()+1 )>>1 );    
+            HBufC *personalCalendar = ptrPBuffer.AllocL();    
+            CleanupStack::PushL(personalCalendar);
+            iCalendarInfoList[index]->SetNameL(*personalCalendar);
+            CleanupStack::PopAndDestroy( 2,personalBuffer );
+            }
+       
+	   
+            aCalendarInfoList.AppendL(iCalendarInfoList[index]);
 	        
-	    //We dont want default calendar PhoneCalendar tobe shown in calendarui.
-	    if(fileNamePtr.CompareF(KCalendarDatabaseFilePath) 
-	                && calendarNamePtr.CompareF(KPhoneCalendarName))
-	            {
-                aCalendarInfoList.AppendL(iCalendarInfoList[index]);
-	            }
 	    }
-	
+	 CleanupStack::PopAndDestroy(2);
+	 CleanupStack::Pop(&aCalendarInfoList);
 	TRACE_EXIT_POINT;
 	}
 
@@ -1651,6 +1698,9 @@ void CCalenGlobalData::HandleCalendarInfoCreatedL()
 			fileMapper->SetEntryView( iNewEntryView );
 			
 			iCalendarInfoList.AppendL(newSession->CalendarInfoL());
+		    CCalenDbChangeNotifier* dbChangeNotifier = CCalenDbChangeNotifier::NewL( *newSession );
+		    dbChangeNotifier->RegisterObserverL(*iDBChangeNotifier);
+		    fileMapper->SetDBChangeNotifier(dbChangeNotifier);
 			}
 		else
 			{
@@ -1669,6 +1719,9 @@ void CCalenGlobalData::HandleCalendarInfoCreatedL()
 				}
 			
 			fileMapper->SetEntryView(iNewEntryView);
+	        CCalenDbChangeNotifier* dbChangeNotifier = CCalenDbChangeNotifier::NewL( *iCalSession );
+	        fileMapper->SetDBChangeNotifier(dbChangeNotifier);
+	        dbChangeNotifier->RegisterObserverL(*iDBChangeNotifier);
 			iGlobalDataOwnsEntryView = EFalse;
 			iGlobalDataOwnsCalSession = EFalse;
 			iCalendarInfoList.AppendL(iCalSession->CalendarInfoL());

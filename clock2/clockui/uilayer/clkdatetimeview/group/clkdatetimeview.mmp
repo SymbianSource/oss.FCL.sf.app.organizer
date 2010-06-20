@@ -81,5 +81,6 @@ LIBRARY			aknnotify.lib
 LIBRARY			eiksrv.lib
 LIBRARY			ecom.lib
 LIBRARY			clockecomlistener.lib
+LIBRARY     		mediafilelist.lib
 
 // End of file

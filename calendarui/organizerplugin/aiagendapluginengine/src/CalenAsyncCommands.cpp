@@ -95,11 +95,13 @@ void CMultistepCommandBase::CompleteSelf()
     TRACE_ENTRY_POINT;
     
     TRequestStatus* pStat = &iStatus;
-    User::RequestComplete( pStat, KErrNone );
-
     if( IsAdded() )
         {
-        SetActive();
+        if (!IsActive())
+            {
+            SetActive();
+            }
+        User::RequestComplete( pStat, KErrNone );
         }
     
     TRACE_EXIT_POINT;
@@ -164,6 +166,11 @@ void COpenCommand::Panic(TInt aReason)
 void COpenCommand::RunL()
     {
     TRACE_ENTRY_POINT;
+    
+    if (iStatus.Int())
+        {
+        return;
+        }
     
     switch( iState )
         {
@@ -365,6 +372,11 @@ void CGetEntriesCommand::RunL(void)
     {
     TRACE_ENTRY_POINT;
 
+    if (iStatus.Int())
+        {
+        return;
+        }
+    
     switch( iState )
         {
         case EFetch:
@@ -552,6 +564,11 @@ void CGetNextEventCommand::RunL(void)
     {
     TRACE_ENTRY_POINT;
     
+    if (iStatus.Int())
+        {
+        return;
+        }
+    
     switch( iState )
         {
         case EFetch:
@@ -729,6 +746,11 @@ void CGetTodosCommand::RunL(void)
     {
     TRACE_ENTRY_POINT;
 
+    if (iStatus.Int())
+        {
+        return;
+        }
+    
     switch( iState )
         {
         case EFetchInstances:
@@ -887,6 +909,11 @@ CGetEntriesForDaysCommand::~CGetEntriesForDaysCommand()
 void CGetEntriesForDaysCommand::RunL(void)
     {
     TRACE_ENTRY_POINT;
+    
+    if (iStatus.Int())
+        {
+        return;
+        }
     
     switch( iState )
         {

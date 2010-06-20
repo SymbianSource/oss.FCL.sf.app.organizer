@@ -20,7 +20,7 @@ EXPORTS
 	_ZNK11CCalenIcons22CreateOutOfRangeIconsLEv @ 19 NONAME
 	_ZNK11CCalenIcons23CreateItemNotShownIconLEv @ 20 NONAME
 	_ZNK11CCalenIcons27CreateDayWeekToDoViewIconsLEv @ 21 NONAME
-	_ZNK11CCalenIcons8GetIconLEN14MCalenServices11TCalenIconsE @ 22 NONAME
+	_ZNK11CCalenIcons8GetIconLEN14MCalenServices11TCalenIconsEi @ 22 NONAME
 	_ZTI11CCalenState @ 23 NONAME
 	_ZTI14CCalenActionUi @ 24 NONAME
 	_ZTI14CCalenMapState @ 25 NONAME

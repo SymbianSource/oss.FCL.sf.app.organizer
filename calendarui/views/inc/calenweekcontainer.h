@@ -127,8 +127,9 @@ public:  // New Function
 
     /**
      * Set Active context based on currently focused cell.
+     * @param aInstAvailable Flag to find instance available
      */
-    void SetActiveContextFromHighlightL();
+    void SetActiveContextFromHighlightL(TBool aInstAvailable = ETrue);
 
     /**
      * Step 1 of construction of grid data.
@@ -438,7 +439,8 @@ private:  // New variables
     
     TBool iTopRowDefault;
     TBool iRow;
-    TBool iValidDay;   
+    TBool iValidDay;
+    TBool iHourChange;
     };
 
 #endif //CALENWEEKCONT_H

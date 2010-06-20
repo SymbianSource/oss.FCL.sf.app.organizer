@@ -128,6 +128,12 @@ RESOURCE MENU_PANE r_clock_main_view_menupane
             txt = qtn_clk_activate_alarm;
             flags = EEikMenuItemSpecific; 
             },
+        MENU_ITEM
+            {
+            command = EClockRemoveSnooze;
+            txt = qtn_clk_remove_snooze;
+            flags = EEikMenuItemSpecific;             
+            },
         MENU_ITEM 
             { 
             command = EClockRemoveAlarm;
@@ -476,7 +482,8 @@ RESOURCE MENU_PANE r_clock_world_view_menupane
             { 
             command = EClockWorldMyRegion;
             txt = qtn_clk_opt_region_my_region; 
-            flags = EEikMenuItemAction; 
+//            flags = EEikMenuItemAction; 
+            flags = EEikMenuItemSpecific;
             },
         MENU_ITEM 
             { 
@@ -589,5 +596,15 @@ RESOURCE DIALOG r_clock_dialog_query_region_af_time
 #include "clkdatetimeview.ra"
 #include "clockalarmeditor.ra"
 #include "clockcityselectionlist.ra"
+// Resource definitions
+// ---------------------------------------------------------
+// r_qtn_clock_alarm_note_deleted
+// Resource for string "Alarm deleted from Alarm view"
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_clock_snooze_note_removed
+    {
+    buf = qtn_clk_snooze_note_removed;
+    }
 
 // End of file

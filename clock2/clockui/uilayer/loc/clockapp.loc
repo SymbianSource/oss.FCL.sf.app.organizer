@@ -340,5 +340,17 @@
 //r: 5.1
 //
 #define qtn_clk_note_location_max               "Unable to add more.Remove some locations."     
+//d: Used in Alarm Clock view. Used in confirmation note of deleting a snooze.
+//l: popup_note_window
+//w:
+//r: tb9.2
+//
+#define qtn_clk_remove_snooze                   "Remove Snooze"
 
+//d: In Alarm's view while removing the snooze.
+//l: popup_note_window
+//w:
+//r: tb9.2
+//
+#define qtn_clk_snooze_note_removed						"Snooze removed"
 // End of file

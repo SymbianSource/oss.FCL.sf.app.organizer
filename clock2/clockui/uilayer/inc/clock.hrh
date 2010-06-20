@@ -29,8 +29,11 @@ enum TClockCommands
 	EClockSettings,
 	EClockMainViewHelp,
 	EClockMainViewExit,
+	EClockSwitchClockType,
 //single click integration
-    	EClockSelect
+    	EClockSelect,
+//remove snooze
+    	EClockRemoveSnooze
 	};
 
 /** Menu item command ids for world view */

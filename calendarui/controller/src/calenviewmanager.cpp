@@ -540,6 +540,10 @@ TBool  CCalenViewManager::HandleCommandL( const TCalenCommand& aCommand )
                 iPreviousToDayView.iViewUid = KNullUid;
                 }
             RequestActivationL( KUidCalenDayView, KCalenDummyUid, KNullDesC8() );
+            if(iController.IsLaunchFromExternalApp())
+                {
+                iAvoidRepopulation = ETrue;
+                }
             }
             break;
         case ECalenTodoView:
@@ -572,6 +576,14 @@ TBool  CCalenViewManager::HandleCommandL( const TCalenCommand& aCommand )
             // From month/week view -> day view -> event view -> day view
             iPreviousToDayView = iCurrentViewId;
             RequestActivationL( KUidCalenDayView, KUidCalenShowBackCba );
+            }
+            break;
+        case ECalenForwardsToWeekView:
+            {
+            // set the view iPreviousToWeekView to handle the week view's cba
+            // From month view -> week view 
+            iPreviousToWeekView = iCurrentViewId;
+            RequestActivationL( KUidCalenWeekView, KUidCalenShowBackCba );
             }
             break;
         case ECalenNextView:
@@ -702,7 +714,7 @@ void CCalenViewManager::HandleViewActivation( const TVwsViewId& aNewlyActivatedV
     // check for iAvoidRepopulation to avoid repopulation whenever
     // 1) Application comes to foreground
     // 2) Applictaion is opened after fake exit
-    if(!iAvoidRepopulation)
+    if(!iAvoidRepopulation || iController.IsLaunchFromExternalApp() )
         {
         TRAPD(error,StartActiveStepL());
         if(error!=KErrNone)
@@ -891,8 +903,10 @@ void CCalenViewManager::RequestActivationL( const TUid& aViewUid,
 		}
 	
 	// set the previous view id
-	iPreviousViewId.iViewUid = cachePreviousViewId;
-	
+	if(cachePreviousViewId != KUidCalenEventView) 
+	    {
+        iPreviousViewId.iViewUid = cachePreviousViewId; 
+	    }	
 	TRACE_EXIT_POINT;
     }
 
@@ -1096,6 +1110,10 @@ void CCalenViewManager::HandleNotificationL( TCalenNotification aNotification )
 			    
 			    ReloadAllPluginsL();
 			    }
+            else
+                {
+                iAvoidRepopulation = EFalse;
+                }
         	}
         	break;
         case ECalenNotifyDayViewClosed:
@@ -1105,6 +1123,16 @@ void CCalenViewManager::HandleNotificationL( TCalenNotification aNotification )
                 // activate the previous view from where day view is launched
                 // From month/week view -> day view
                 RequestActivationL(iPreviousToDayView.iViewUid);
+                }
+            }
+            break;
+        case ECalenNotifyWeekViewClosed:
+            {
+            if(iPreviousToWeekView.iViewUid!= KNullUid)
+                {
+                // activate the previous view from where day view is launched
+                // From month/week view -> day view
+                RequestActivationL(iPreviousToWeekView.iViewUid);
                 }
             }
             break;
@@ -1338,7 +1366,14 @@ MCalenToolbar* CCalenViewManager::ToolbarOrNull()
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
-    return iToolbar;
+    if (iToolbar)
+        {
+        if (iToolbar->IsICalenToolBar())
+            {
+            return iToolbar;
+            }
+        }
+    return NULL;
     }        
     
 // ----------------------------------------------------------------------------
@@ -1514,7 +1549,14 @@ void CCalenViewManager::HandleEntryDeleteNotificationL()
         // the event view 
         if(iPreviousViewId.iViewUid != KNullUid)
             {
-            RequestActivationL(iPreviousViewId.iViewUid);   
+            if(iPreviousToDayView.iViewUid != KNullUid)
+                {
+                RequestActivationL(iPreviousViewId.iViewUid, KUidCalenShowBackCba);
+                }
+            else
+                {
+                RequestActivationL(iPreviousViewId.iViewUid);
+                }
             }
         }
     else
@@ -1718,25 +1760,6 @@ void CCalenViewManager::ReloadAllPluginsL()
             CleanupStack::PopAndDestroy(repository);  
             }
         }
-    else // If default view is native view, then activate it
-        {
-        iAvoidRepopulation = EFalse;
-        // In case of launching missed event view or missed alarms view, there
-        // is no need to activate default view.
-        if( ( iCurrentViewId.iViewUid.iUid != KCalenMissedEventViewUidValue ) && 
-                          ( iCurrentViewId.iViewUid.iUid != KCalenMissedAlarmsViewUidValue ) )
-            {
-            // Find the default view in the view cycle list
-            TInt position = iViewInfoArray.Find(
-                    defaultViewUid, CCalenViewInfo::ViewInfoIdentifier );
-            if( position != KErrNotFound )
-                {
-                TVwsViewId targetViewId( KUidCalendar, defaultViewUid);
-                RequestActivationL(targetViewId);
-                iViewCycleIndex = position;
-                }
-            }
-        }
     
     TRACE_EXIT_POINT;
     }
@@ -1799,5 +1822,14 @@ void CCalenViewManager::ActivateViewOnFakeExitL(TUid aDefView)
                                   TVwsViewId( KUidCalendar, aDefView) );
     
     TRACE_EXIT_POINT;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenViewManager::ActivateLocalViewL
+// Activate the local view if application already in back ground
+// -----------------------------------------------------------------------------
+void CCalenViewManager::ActivateLocalViewL(TUid aDefView)
+    {
+    iAppUi.ActivateLocalViewL( aDefView );      
     }
 // End of file

@@ -51,8 +51,6 @@ void CAIAgendaPluginEngineImpl::ConstructL(void)
 {
     TRACE_ENTRY_POINT;
     
-    iSession.ConnectL();
-
     if( iObserverType == ECalendarObserver || iObserverType == ECalendarAndTodoObserver )
     {
         TCallBack environmentChangeCallBack( EnvironmentChangeCallBack, this );
@@ -150,14 +148,12 @@ CAIAgendaPluginEngineImpl::~CAIAgendaPluginEngineImpl(void)
     {
         iEnvironmentChangeNotifier->Cancel();
         delete iEnvironmentChangeNotifier;
-    }
-
-    delete iCalendarEngine;  // Close() called in destructor
+    }    
 
     iInstanceArray.ResetAndDestroy();
     iInstanceArray.Close();
 
-    iSession.Close();
+		delete iCalendarEngine;  // Close() called in destructor
     
     TRACE_EXIT_POINT;
 }
@@ -182,9 +178,9 @@ void CAIAgendaPluginEngineImpl::StateMachine(void)
     {
         case EDBOffline:
         {
-            iDBState = EDBInitializing;
-            iSession.Initialize( *this );
-        }
+            iDBState = EDBInitialized;
+            StateMachine();
+         }
         break;
 
         case EDBInitialized:
@@ -556,7 +552,6 @@ void CAIAgendaPluginEngineImpl::CloseCalendarEngine(void)
     delete iCalendarEngine;
     iCalendarEngine = NULL;
 
-    iSession.Uninitialize();
     
     TRACE_EXIT_POINT;
 }
@@ -875,22 +870,6 @@ void CAIAgendaPluginEngineImpl::SafeRefresh(void)
     // There will be only a single refresh call (RefreshTimerCallBack) when the timer expires.
     iRefreshTimer->Cancel();
     iRefreshTimer->After( waitBeforeRefresh );
-    
-    TRACE_EXIT_POINT;
-}
-
-// ---------------------------------------------------------
-// CAIAgendaPluginEngineImpl::CalendarServerInitialized
-// ?implementation_description
-// (other items were commented in a header).
-// ---------------------------------------------------------
-//
-void CAIAgendaPluginEngineImpl::CalendarServerInitialized(void)
-{
-    TRACE_ENTRY_POINT;
-    
-    iDBState = EDBInitialized;  // EDBInitializing -> EDBInitialized
-    StateMachine();
     
     TRACE_EXIT_POINT;
 }

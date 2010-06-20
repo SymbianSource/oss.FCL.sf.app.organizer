@@ -23,8 +23,6 @@
 
 file=ABI_DIR\BUILD_DIR\missedalarmstore.dll SHARED_LIB_DIR\missedalarmstore.dll
 
-data = DATAZ_\private\10202be9\2001111B.txt   Private\10202be9\2001111B.txt
-
 #endif  // MISSEDALARMSTORE_IBY
 
 

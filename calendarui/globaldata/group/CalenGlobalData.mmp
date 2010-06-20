@@ -37,7 +37,8 @@ SOURCE          calensend.cpp
 SOURCE          calenvcalexport.cpp
 
 SOURCE          calencontextimpl.cpp
-SOURCE          calenfilemapping.cpp
+SOURCE          calenfilemapping.cpp 
+SOURCE          calendbchangenotifier.cpp
 
 USERINCLUDE     ../inc
 USERINCLUDE     ../../inc
@@ -45,6 +46,7 @@ USERINCLUDE     ../../inc
 APP_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE   ../../../inc   //organizer include
 SYSTEMINCLUDE   /epoc32/include/ecom
+SYSTEMINCLUDE   ../../../alarmengines/inc
 
 LIBRARY         euser.lib
 LIBRARY         ecom.lib
@@ -68,6 +70,7 @@ LIBRARY         featmgr.lib
 LIBRARY			lbs.lib
 LIBRARY			calencommonutils.lib
 LIBRARY         centralrepository.lib
+LIBRARY			missedalarmstore.lib  flogger.lib
 
 CAPABILITY      CAP_GENERAL_DLL
 

@@ -34,6 +34,9 @@
 // debug
 #include "calendarui_debug.h"
 
+//Feb 29th will be read as 28 as indexing of days starts from 0,1,2....
+const TInt KLastDayInFebLeapYear = 28;
+
 // CONSTRUCTION AND DESTRUCTION METHODS
 
 // -----------------------------------------------------------------------------
@@ -263,8 +266,22 @@ void CCalenRepeatField::NotifyChangeRepeatChoiceL()
             }
         else
             {
-            TDateTime repUntilDateTime( ECalenMaxYear, TMonth(ECalenMaxMonth), ECalenMaxDay, 0, 0, 0, 0 );
-            TTime aTime( repUntilDateTime );
+			//Fix for repeated event date change:
+            TDateTime startDate = start.DateTime();
+            
+            //Checking for leap year feb.29th, next year it should be 28.
+            TInt untilDay;
+            if(startDate.Month() == EFebruary && startDate.Day() == KLastDayInFebLeapYear)
+                {
+                untilDay = KLastDayInFebLeapYear - 1;
+                }
+            else
+                {
+                untilDay = startDate.Day();
+                }
+            
+            TDateTime repOneYear(startDate.Year()+1,startDate.Month(), untilDay, 0, 0, 0, 0);
+            TTime aTime( repOneYear );
             until = aTime;
             }
 

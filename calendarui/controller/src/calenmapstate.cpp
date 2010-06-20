@@ -95,24 +95,8 @@ TBool CCalenMapState::HandleCommandL( const TCalenCommand& aCommand,
     switch( cmd )
     {
     case ECalenFasterAppExit:
-		{
-		// Issue map launch cancel notification
-		iController.BroadcastNotification(ECalenNotifyCancelMapLaunch);
-        SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
-        ActivateCurrentStateL(aStateMachine);
-        cmdUsed = ETrue;
-        break;
-   		}
-    case ECalenMissedEventViewFromIdle:
-        {
-        // Issue map launch cancel notification
-        iController.BroadcastNotification(ECalenNotifyCancelMapLaunch);
-        SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
-        ActivateCurrentStateL(aStateMachine);
-        cmdUsed = ETrue;
-        break;
-        }
-        
+    case ECalenDayView:    
+    case ECalenMissedEventViewFromIdle: 
     case ECalenEventViewFromAlarm:
     case ECalenEventViewFromAlarmStopOnly:
         {

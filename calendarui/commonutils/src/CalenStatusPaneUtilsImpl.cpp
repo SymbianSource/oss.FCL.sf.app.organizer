@@ -69,7 +69,7 @@ void CCalenStatusPaneUtilsImpl::HideNaviPane()
     {
     TRACE_ENTRY_POINT;
     
-    if( iNaviLabel != NULL )
+    if( ( iNaviLabel != NULL ) && ( iNaviContainer->Top() == iNaviLabel ) )
         {
         iNaviContainer->Pop( iNaviLabel );
         delete iNaviLabel;

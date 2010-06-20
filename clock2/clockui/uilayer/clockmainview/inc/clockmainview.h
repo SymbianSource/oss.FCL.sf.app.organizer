@@ -121,7 +121,12 @@ class CClockMainView : public CAknView,
         * @return CClockAppUi The pointer to the clock application ui.
         */
         CClockAppUi* ClockApplicationUi();
-	    
+
+        /**
+        * @brief Gives tactile feedback on user touch action
+        */        
+        void GiveVibes();
+
 	protected:     // From base classes
 	
 		/**
@@ -154,12 +159,23 @@ class CClockMainView : public CAknView,
 		* @brief Displays the alarm editor for the user to set the alarm.
 		*/
         void SetNewAlarmL();
-        
+
+        /**
+        * @brief Deletes the selected alarm.
+        * @param aAlarmId the id of the alarm to be deleted
+        */
+        void RemoveAlarmL( TAlarmId aAlarmId  );        
+
 		/**
 		* @brief Deletes the selected alarm.
 		*/
         void RemoveAlarmL();
-        
+
+        /**
+         * @brief Remove the snooze on an expired alarm put on snooze
+         */
+        void RemoveSnoozeL();
+
 		/**
 		* @brief Activates the focused alarm item in the list.
 		*/
@@ -174,6 +190,23 @@ class CClockMainView : public CAknView,
 		* @brief Resets the focused alarm item in the list.
 		*/
         void ResetAlarmL();
+        
+		/**
+        * @brief Switches clock type between analog and digital
+        */
+        void SwitchClockTypeL();     
+
+        /**
+         * @brief Checks if DST changes will be applied in the next 24 hours.
+         * @return TBool ETrue if remaining time note has to be displayed.
+         */
+        TBool CheckForDstChangesL();
+        
+        /**
+        * @brief Displays the remaining time for the alarm to expire.
+        */
+        void DisplayRemainingTimeL();
+
         
 	private:		// Data
 	

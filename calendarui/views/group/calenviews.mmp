@@ -154,13 +154,14 @@ LIBRARY			calencommonutils.lib
 LIBRARY			missedalarmstore.lib  
 LIBRARY			apmime.lib
 LIBRARY         multicaluidialog.lib
+LIBRARY			touchfeedback.lib //MTouchFeedBack
 
 // File logging
 LIBRARY flogger.lib
 LIBRARY aknnotify.lib
 
 
-CAPABILITY      CAP_GENERAL_DLL
+CAPABILITY      CAP_GENERAL_DLL NetworkControl
 
 VENDORID        VID_DEFAULT
 

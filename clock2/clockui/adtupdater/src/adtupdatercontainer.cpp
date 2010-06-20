@@ -294,7 +294,7 @@ void CAdtUpdaterContainer::InformAboutNwUpdateL()
 	{
 	__PRINTS( "CAdtUpdaterContainer::InformAboutNwUpdate - Entry" );
 
-	if( IsFirstBoot() &&  IsSimPresent() && IsNitzPluginActive() )
+	if( IsFirstBoot() &&  IsSimPresent() && IsNitzPluginActive() && PredictiveTimeEnabled())
 		{
 		__PRINTS( "First boot, sim is present and auto time update is ON" );
 		
@@ -315,7 +315,7 @@ void CAdtUpdaterContainer::InformAboutNwUpdateL()
 		// Start the timer	
 		iPeriodic->Start( KTimeout, KInterval, timerCallBack );
 		}
-	else if( IsFirstBoot() )
+	else if( IsFirstBoot()&& PredictiveTimeEnabled() )
 		{	
 		__PRINTS( "First boot, normal boot sequence" );
 		
@@ -327,7 +327,7 @@ void CAdtUpdaterContainer::InformAboutNwUpdateL()
 		// Exit the application.
 		iAdtUpdaterAppUi->Exit();
 		}
-	else if( !RTCStatus() && !HiddenReset() )
+	else if( !RTCStatus() && !HiddenReset() && PredictiveTimeEnabled())
 		{
 		__PRINTS( "RTC invalid or Hidden Reset" );
 		
@@ -648,8 +648,11 @@ void CAdtUpdaterContainer::ShowCountryAndCityListsL()
 	if( currentMcc )
 	    {	
 		CTzLocalizedCity* localizedCity( GetLocalizedCityL( currentMcc ) );
+        if( localizedCity ) // added
+            {
 		TInt cityGroupId = localizedCity->GroupId();
 		citySelected = ShowCityListL( cityGroupId );
+		    }
 		delete localizedCity;			
 		}
 		
@@ -1535,4 +1538,25 @@ TBool CAdtUpdaterContainer::DisplayStartupQueriesL()
     
     return TBool( showQueries ); 
     }
+
+// ---------------------------------------------------------------------------
+// CAdtUpdaterContainer::PredictiveTimeEnabled()
+// Rest of the details are commented in headers.
+// ---------------------------------------------------------------------------
+TBool CAdtUpdaterContainer::PredictiveTimeEnabled()
+     {
+     TInt value( EPredictiveTimeEnabled );
+     CRepository* repository(NULL);
+     
+     TRAPD( err, repository = CRepository::NewL( KCRUidStartupConf ) );
+
+     if ( err == KErrNone )
+         {
+         err = repository->Get( KPredictiveTimeAndCountrySelection, value );
+         }
+     delete repository;
+ 
+     return value;
+     } 
+
 // End of file

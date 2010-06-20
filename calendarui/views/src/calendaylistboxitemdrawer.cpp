@@ -124,30 +124,46 @@ void CCalenDayListBoxItemDrawer::DrawItemText
 
     FormattedCellData()->Draw(Properties(aItemIndex), *iGc, &target, 
                               aItemTextRect, aItemIsCurrent&&highlightShown, 
-                              colors);
-    
-    
-    
-    if(CHECK_IF_FIRSTLINE(aItemIndex))
-        {
-        CCalenDayContainer::SItemInfo& itemInfo = 
-                           static_cast<CCalenDayListBox*>(iListBox)->iDayContainer->FindItem(aItemIndex);
-        iColor = itemInfo.iColor;
-        }
-    
-
-    TAknWindowComponentLayout tempLayout =
-                    AknLayoutScalable_Apps::list_cale_time_pane_g6(
-                            aItemIndex - static_cast<CCalenDayListBox*> (iListBox)->TopItemIndex());
+                              colors);   
+  
+    TInt variantIndex = static_cast<CCalenDayListBox*>(iListBox)->iDayContainer->LayoutVariantIndex(CCalenDayContainer::EListScrollCaleDayPane);
+    // get the listbox rect.
+    TRect listBoxRect = iListBox->View()->ViewRect();
+    TAknWindowComponentLayout tempLayout = AknLayoutScalable_Apps::list_cale_time_pane_g6(variantIndex);
 
     TAknLayoutRect colourstrips;
-    colourstrips.LayoutRect( aItemTextRect, tempLayout.LayoutLine() );
-    TRect finalRect(colourstrips.Rect());
-    finalRect.SetHeight(aItemTextRect.Height());
-    iGc->DrawRect( colourstrips.Rect() );
+    colourstrips.LayoutRect( aItemTextRect, tempLayout.LayoutLine() );    
+    if(CHECK_IF_FIRSTLINE(aItemIndex))
+       {
+	     iColorStripHeight = 0;
+       iColorStripRect.SetRect(colourstrips.Rect().iTl,colourstrips.Rect().iBr);
+       }
+    // get itemInfo for each line to set the color
+    CCalenDayContainer::SItemInfo& itemInfo = 
+                             static_cast<CCalenDayListBox*>(iListBox)->iDayContainer->FindItem(aItemIndex);
+    iColor = itemInfo.iColor;    
+
+    if (aItemTextRect.iBr.iY > listBoxRect.iBr.iY)
+        {
+        iColorStripRect.SetRect(iColorStripRect.iTl.iX, iColorStripRect.iTl.iY,
+            iColorStripRect.iBr.iX, listBoxRect.iBr.iY);
+        }
+    else if (aItemTextRect.iTl.iY < listBoxRect.iTl.iY)
+        {
+        iColorStripRect.SetRect(colourstrips.Rect().iTl.iX, listBoxRect.iTl.iY,
+                colourstrips.Rect().iBr.iX, colourstrips.Rect().iBr.iY);
+        iColorStripHeight += iColorStripRect.Height();
+        iColorStripRect.SetHeight(iColorStripHeight);
+        }         
+    else
+        {
+        iColorStripHeight += aItemTextRect.Height();   
+        iColorStripRect.SetHeight(iColorStripHeight);
+        }   
+        
     iGc->SetBrushStyle( CGraphicsContext::ESolidBrush );
     iGc->SetBrushColor( TRgb(iColor) );
-    iGc->DrawRect( finalRect );
+    iGc->DrawRect( iColorStripRect );
     
     iGc->Reset();
     

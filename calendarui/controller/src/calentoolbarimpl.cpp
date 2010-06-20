@@ -390,7 +390,7 @@ void CCalenToolbarImpl::PopulateChangeViewToolbarExtensionL()
     
     ResetToolbarExtensionCommandsL();
     // add toolbar items for native views
-    for(TInt index = viewPositionArray.Count()-1;index >= KPositionZero ;index--)
+    for(TInt index = KPositionZero ;index < viewPositionArray.Count()  ;index++)
         {
         viewPosition = viewInfoArray.Find( viewPositionArray[index],
                                 CCalenViewInfo::ViewInfoIdentifier );
@@ -449,12 +449,13 @@ void CCalenToolbarImpl::GetViewPositionList( TUid aCurrentViewUid,
     TInt currViewInfoPos = aViewInfoArray.Find( aCurrentViewUid , 
                                          CCalenViewInfo::ViewInfoIdentifier );
     
-    TInt index = currViewInfoPos + 1;
-    while( index!= currViewInfoPos )
+    TInt index = aViewInfoArray.Find( KUidCalenMonthView ,  CCalenViewInfo::ViewInfoIdentifier );
+    
+    while( index!= aViewInfoArray.Count() )
         {
-        if( index == aViewInfoArray.Count()) // If last item,
+        if( index == currViewInfoPos) // If last item,
             {
-            index = 0;
+            index ++;
             continue;
             }
         if(( aViewInfoArray[index]->CyclePosition() != CCalenView::ENoCyclePosition ) )

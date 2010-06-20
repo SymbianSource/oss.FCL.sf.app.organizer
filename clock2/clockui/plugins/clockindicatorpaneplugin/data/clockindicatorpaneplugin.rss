@@ -46,7 +46,7 @@ RESOURCE EIK_APP_INFO
 //
 RESOURCE TBUF r_qtn_clk_stylus_popup_alarms_set
 	{
-	buf = "%0U at %1U";		// TODO: Replace with logical string once CR is approved.
+	buf = qtn_clk_stylus_popup_alarms_set;		
 	}
 
 // End of file

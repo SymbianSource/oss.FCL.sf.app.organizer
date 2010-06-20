@@ -95,6 +95,7 @@ CCalenAttachmentModel::CCalenAttachmentModel()
     {
     TRACE_ENTRY_POINT;
     isAttachmentModelCleared = ETrue;
+    iEmbeddedFileOpened = EFalse;
     TRACE_EXIT_POINT;
     }
 
@@ -612,8 +613,29 @@ EXPORT_C void CCalenAttachmentModel::CheckForExistingAttachmentsL( CCalEntry* aE
 			}
 		}
 
-	TRACE_EXIT_POINT;
-	
+	TRACE_EXIT_POINT;	
 	}
 
+// ----------------------------------------------------------------------------
+// CCalenAttachmentModel::AttachmentOpen
+// Set the flag if the attachment(Photo, audio and vedio files) is open.
+// ----------------------------------------------------------------------------
+//
+EXPORT_C void CCalenAttachmentModel::AttachmentOpen(TBool& aEmbeddedFileOpened)
+    {
+    TRACE_ENTRY_POINT
+    iEmbeddedFileOpened = aEmbeddedFileOpened;
+    TRACE_EXIT_POINT
+    }
+// ----------------------------------------------------------------------------
+// CCalenAttachmentModel::IsAttachmentOpen
+// return True if the atacchment is opened.
+// ----------------------------------------------------------------------------
+//
+EXPORT_C TBool CCalenAttachmentModel::IsAttachmentOpen()
+    {
+    TRACE_ENTRY_POINT
+    TRACE_EXIT_POINT
+    return iEmbeddedFileOpened;    
+    }
 // End of file	--Don't remove this.

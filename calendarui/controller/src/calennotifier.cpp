@@ -101,13 +101,6 @@ CCalenNotifier::~CCalenNotifier()
         iEComWatcher = NULL;
         }
 
-    // Stop database change notifications.
-    if( iDbChangeNotifier )
-        {
-        delete iDbChangeNotifier;
-        iDbChangeNotifier = NULL;
-        }
-    
     // Stop settings change notifications
     if( iCenRepChangeNotifier )
         {
@@ -170,10 +163,6 @@ void CCalenNotifier::ConstructL()
     iCenRepChangeNotifier = CCenRepNotifyHandler::NewL( *this, *iRepository );
     iCenRepChangeNotifier->StartListeningL();
     
-    // Register for changes to our database session
-    iDbChangeNotifier = CCalenDbChangeNotifier::NewL( *iGlobalData );
-    iDbChangeNotifier->RegisterObserverL( *this );
-  
     // Register for changes to the ECom registry
     iEComWatcher = CCalenEComWatcher::NewL( *this );
      
@@ -650,7 +639,10 @@ void CCalenNotifier::Completed( TInt aStatus )
         );
 
         // Exit application
-        iAvkonAppUi->Exit();
+        if (iAvkonAppUi)
+            {
+            iAvkonAppUi->Exit();
+            }
         }
 
     TRACE_EXIT_POINT;
@@ -771,6 +763,7 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
 			case MCalFileChangeObserver::ECalendarFileCreated:
 			case MCalFileChangeObserver::ECalendarInfoCreated:
 				{
+				BroadcastNotification(ECalenNotifyDeleteInstanceView);
 				BroadcastNotification(ECalenNotifyCalendarInfoCreated);
 				}
 				break;
@@ -800,9 +793,6 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
 
                 if (err == KErrNone && markAsdelete)
                     {
-                    //BroadcastNotification(ECalenNotifyCloseDialog);
-                    BroadcastNotification(ECalenNotifyDeleteInstanceView);
-                    BroadcastNotification(ECalenNotifyCalendarFileDeleted);
                     iFilnameDeleted = aCalendarInfoChangeEntries[index]->FileNameL().AllocL();
                     iAsyncCallback->CallBack();
                     }
@@ -815,6 +805,7 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
 			default:
 				break;
 			}
+		context.ResetCalendarFileName();
 		}
 
 	TRACE_EXIT_POINT;
@@ -837,7 +828,10 @@ TInt CCalenNotifier::AsyncRemoveCalendarL(TAny* aThisPtr)
 void CCalenNotifier::AsyncRemoveCalendarL()
     {
     TRACE_ENTRY_POINT
+    BroadcastNotification(ECalenNotifyDeleteInstanceView);
     iGlobalData->RemoveCalendarL(iFilnameDeleted->Des());
+    BroadcastNotification(ECalenNotifyCalendarFileDeleted);
+                       
     delete iFilnameDeleted;
     iFilnameDeleted = NULL;
     TRACE_EXIT_POINT

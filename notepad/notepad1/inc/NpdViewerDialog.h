@@ -24,6 +24,7 @@
 #include "NpdDialogBase.h"
 #include <centralrepository.h>
 #include <cenrepnotifyhandler.h>
+#include <itemfinderobserver.h>
 
 // FORWARD DECLARATIONS
 class CNotepadRichTextEditor;
@@ -41,7 +42,9 @@ class CPlainText;
 * @see CNotepadDialogBase
 */
 class CNotepadViewerDialog : public CNotepadDialogBase,
-                             public MCenRepNotifyHandlerCallback
+                             public MCenRepNotifyHandlerCallback,
+                             public MAknItemFinderObserver
+
     {
     public: // Constructor and destructor
 
@@ -214,6 +217,12 @@ class CNotepadViewerDialog : public CNotepadDialogBase,
         void SizeChanged();
     public:
         void HandleDialogPointerEventL( const TPointerEvent& aPointerEvent );
+        
+        void HandleFindItemEventL(
+                const CItemFinder::CFindItemExt& aItem,
+                MAknItemFinderObserver::TEventFlag aEvent,
+                TUint aFlags );
+
 
     private: // New function
 
@@ -307,7 +316,8 @@ class CNotepadViewerDialog : public CNotepadDialogBase,
 
         enum TNotepadViewerFlags
             {
-            ENotepadMenuByOkKey = 0x02
+            ENotepadMenuByOkKey = 0x02,
+            EMenuByItemActication = 0x04
             };
         CNotepadRichTextEditor* iEditor; // not own (dialog own)
         HBufC* iFilename;  // own

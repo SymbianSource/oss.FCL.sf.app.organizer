@@ -288,7 +288,7 @@ void CCalenUnifiedEditor::ConstructL()
     
     isReplaceLocation = EFalse;
     
-   
+    iCheck = EFalse;
     TCallBack callback(CCalenUnifiedEditor::AsyncProcessCommandL,this);
     iAsyncCallback = new(ELeave) CAsyncCallBack(callback,CActive::EPriorityStandard);
     
@@ -569,11 +569,21 @@ TBool CCalenUnifiedEditor::OkToExitL( TInt aButtonId )
              // Intentional fall through to EEikBidCancel below
              iEntryUiOutParams.iAction = ENoAction;
              iEntryUiOutParams.iSpare = 0;
+             MCalenContext& context = iServices->Context();
+             HBufC* fileNamePtr = context.GetCalAlarmEntryFileNameL();             
+             TCalLocalUid localUid = context.CalAlarmLocalUidL();           
+             if (fileNamePtr != NULL && !fileNamePtr->CompareF(iGlobalData->GetCalFileNameForCollectionId(context.InstanceId().iColId)) 
+                     && localUid == context.InstanceId().iEntryLocalUid)
+                 {
+                 context.ResetCalAlarmEntryFileName();
+                 break;
+                 }
              // Fall through...
              }
          case ECalenEditSeries:
          case ECalenEditOccurrence:
          case EAknCmdExit:
+         case EAknSoftkeyExit:
          case EEikBidCancel:
              {
              // EEikBidCancel is called when Red End key is pressed or
@@ -591,7 +601,11 @@ TBool CCalenUnifiedEditor::OkToExitL( TInt aButtonId )
              if( iServices->EntryViewL(colId) )
                  {
                  PIM_TRAPD_HANDLE( TryToSaveNoteOnForcedExitL() );
+                 iCheck = EFalse;
                  }
+             if(EAknSoftkeyExit == aButtonId)
+                 iServices->IssueCommandL(aButtonId);
+             
              break;
              }
          case EAknSoftkeyDone:
@@ -658,8 +672,8 @@ TBool CCalenUnifiedEditor::OkToExitL( TInt aButtonId )
 TKeyResponse CCalenUnifiedEditor::OfferKeyEventL( const TKeyEvent& aKeyEvent,
                                                   TEventCode aType )
     {
-    TRACE_ENTRY_POINT;
-    TBool isMapIconHandled = EFalse;
+    
+     TRACE_ENTRY_POINT;
     TKeyResponse keyResponse( EKeyWasNotConsumed );
     TInt ctrlid=IdOfFocusControl();
    
@@ -696,102 +710,18 @@ TKeyResponse CCalenUnifiedEditor::OfferKeyEventL( const TKeyEvent& aKeyEvent,
                 keyResponse = EKeyWasConsumed;
                 break;
             case EKeyEnter: // For Enter key
+            case EKeyDelete: // For Delete key
 				{
 				keyResponse = CAknForm::OfferKeyEventL(aKeyEvent,aType); // Let framework handle the key event
-				// when enter key is pressed on subject line or on location line, call AddPictureL to recalculate the map icon position properly
-				// as location field could habe moved up or down
-				if(ctrlid == ECalenEditorPlace || ctrlid == ECalenEditorSubject)
-					{
-					CCalGeoValue* geoValue = iEditorDataHandler->Entry().GeoValueL();
-					if(geoValue)
-						{
-						isMapIconHandled = ETrue;
-						AddPictureL();
-						delete geoValue;
-						}
-					}
-				}
-				break;
-			case EKeyDelete:
-				{
-				if(ctrlid == ECalenEditorPlace)
-					{
-					CCalGeoValue* geoValue = iEditorDataHandler->Entry().GeoValueL();
-					if(geoValue)
-						{
-						CEikRichTextEditor* locationControl = static_cast<CEikRichTextEditor*>(Control(ECalenEditorPlace));
-						CRichText* text = locationControl->RichText();
-						TPtrC ptr = text->Read(0,text->DocumentLength());
-						TInt pos = ptr.Locate(TChar(CEditableText::EPictureCharacter));
-						if(locationControl->CursorPos() == pos)
-							{
-							isMapIconHandled = ETrue;
-							keyResponse = EKeyWasConsumed;
-							delete geoValue;
-							break;
-							}
-						delete geoValue;
-						}
-					}
-					keyResponse = CAknForm::OfferKeyEventL(aKeyEvent,aType); // Let framework handle the key event
 				}
 				break;
 			case EKeyBackspace:  // For back space character
 				{
-				if(ctrlid == ECalenEditorPlace)
-					{
-					CCalGeoValue* geoValue = iEditorDataHandler->Entry().GeoValueL();
-					if(geoValue)
-						{
-						CEikRichTextEditor* locationControl = static_cast<CEikRichTextEditor*>(Control(ECalenEditorPlace));
-						CRichText* text = locationControl->RichText();
-						TPtrC ptr = text->Read(0,text->DocumentLength());
-						TInt pos = ptr.Locate(TChar(CEditableText::EPictureCharacter));
-						TInt curpos = locationControl->CursorPos();
-						
-						// When only one visible character is there and picture byte is there at second position, then
-						// empty the location field and redraw the map icon
-						if(text->DocumentLength() <= 2) 
-							{
-							TBuf<1> newLocation;
-							SetEdwinTextL(ECalenEditorPlace, &newLocation);
-							keyResponse = EKeyWasConsumed;
-							delete geoValue;
-							isMapIconHandled = ETrue;
-							AddPictureL();
-							break;
-							}
-						//  when cursor position is at the end, then since, picture byte is at the end
-						// delete last but one character (for user, it looks as if last visible character is being deleted)
-						// and redraw the icon
-						 else if( curpos == pos + 1)
-							{
-							text->DeleteL(text->DocumentLength() - 2,1);
-							
-							AddPictureL();
-							locationControl->SetCursorPosL(curpos - 1, EFalse);
-							isMapIconHandled = ETrue;
-							keyResponse = EKeyWasConsumed;
-							delete geoValue;
-							break;
-							}
-						delete geoValue;
-						}
-					}
-				// This is to handle backspaces in subject field when there nore that one lines,
-				// location field will move up, hence, need to redraw the map icon
-				else if(ctrlid == ECalenEditorSubject)
+				if(ctrlid == ECalenEditorPlace || ECalenEditorSubject)
 					{
 					keyResponse = CAknForm::OfferKeyEventL(aKeyEvent,aType);
-					CCalGeoValue* geoValue = iEditorDataHandler->Entry().GeoValueL();
-					if(geoValue)
-						{
-						AddPictureL();
-						isMapIconHandled = ETrue;
-						delete geoValue;
-						}
-					break;
 					}
+				break;
 				}
             case EKeyLeftArrow:
             case EKeyRightArrow:
@@ -810,19 +740,6 @@ TKeyResponse CCalenUnifiedEditor::OfferKeyEventL( const TKeyEvent& aKeyEvent,
             default:
                 {
                 keyResponse = CAknForm::OfferKeyEventL(aKeyEvent,aType); 
-                if(!isMapIconHandled)
-                    {
-                    if((ctrlid == ECalenEditorPlace) || (ctrlid == ECalenEditorSubject))
-                        {
-                        CCalGeoValue* geoValue = iEditorDataHandler->Entry().GeoValueL();
-                        if(geoValue)
-                            {
-                            isMapIconHandled = ETrue;
-                            AddPictureL();
-                            delete geoValue;
-                            }
-                        }
-                    }
                 }
                 break;
             }
@@ -1065,12 +982,7 @@ void CCalenUnifiedEditor::PostLayoutDynInitL()
     TRACE_ENTRY_POINT;
     
     SetEditableL(ETrue);
-    CCalGeoValue* geoValue = iEditorDataHandler->Entry().GeoValueL();
-	if(geoValue)
-		{
-		AddPictureL();	
-		delete geoValue;	
-		}
+
     TCallBack callback( LocaleCallback, this );
     iLocaleChangeNotifier =
         CEnvironmentChangeNotifier::NewL( EActivePriorityLogonA, callback );
@@ -1144,7 +1056,8 @@ void CCalenUnifiedEditor::ProcessCommandL( TInt aCommandId )
             OnCmdDeleteNoteL();
             break;
         case EAknCmdExit:
-            OnCmdExitL();
+        case EAknSoftkeyExit:            
+            OnCmdExitL(aCommandId);
             break;
         case EAknCmdHelp:
             OnCmdHelpL();
@@ -1302,7 +1215,9 @@ void CCalenUnifiedEditor::HandleDialogPageEventL( TInt aEventID )
 TInt CCalenUnifiedEditor::AsyncProcessCommandL( TAny* aThisPtr )
     {
     TInt focusControl( static_cast<CCalenUnifiedEditor*>(aThisPtr)->IdOfFocusControl() );
-    CEikEdwin* edwin = static_cast<CEikEdwin*>( static_cast<CCalenUnifiedEditor*>(aThisPtr)->Control( focusControl ) );  
+    if(focusControl == ECalenEditorDescription)
+        {
+        CEikEdwin* edwin = static_cast<CEikEdwin*>( static_cast<CCalenUnifiedEditor*>(aThisPtr)->Control( focusControl ) );  
         if ( edwin && edwin->Text()->DocumentLength() == 0 )
             {
             static_cast<CCalenUnifiedEditor*>(aThisPtr)->ProcessCommandL(ECalenCmdAddDescription);
@@ -1311,7 +1226,7 @@ TInt CCalenUnifiedEditor::AsyncProcessCommandL( TAny* aThisPtr )
             {
             static_cast<CCalenUnifiedEditor*>(aThisPtr)->ProcessCommandL(ECalenCmdShowDescription);
             }
-    
+        }
     return 0;
     }
 
@@ -1332,14 +1247,6 @@ void CCalenUnifiedEditor::HandleResourceChange( TInt aType )
 
     CCoeControl::HandleResourceChange( aType );
     
-    CCalGeoValue* geoValue = NULL;
-	TRAP_IGNORE(geoValue = iEditorDataHandler->Entry().GeoValueL());	
-	if(geoValue)
-		{
-		TRAP_IGNORE(AddPictureL());	
-		delete geoValue;	
-		}
-		
     TRACE_EXIT_POINT;
     }
 
@@ -1380,8 +1287,7 @@ void CCalenUnifiedEditor::DynInitMenuPaneL(
             
             aMenuPane->AddMenuItemsL( R_CALEN_UNIFIED_EDITOR_DEFAULT_MENUPANE );
 
-            if( ( ctrlid != ECalenEditorPlace ) || 
-                    ( !CCalenLocationUtil::IsMapProviderAvailableL() ) )
+            if(  !CCalenLocationUtil::IsMapProviderAvailableL() )   
                 {
                 aMenuPane->DeleteMenuItem( ECalenGetLocation );
                 }
@@ -1521,12 +1427,12 @@ void CCalenUnifiedEditor::OnCmdHelpL()
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void CCalenUnifiedEditor::OnCmdExitL()
+void CCalenUnifiedEditor::OnCmdExitL(TInt aCmd)
     {
-    TRACE_ENTRY_POINT;
-
-    TryExitL( EAknCmdExit );
-
+    TRACE_ENTRY_POINT;   
+    
+            TryExitL( aCmd );
+       
     TRACE_EXIT_POINT;
     }
 
@@ -1538,7 +1444,13 @@ void CCalenUnifiedEditor::OnCmdExitL()
 //
 void CCalenUnifiedEditor::TryToDeleteNoteL( TBool /* aIsViaDeleteMenu */ )
     {
-    TRACE_ENTRY_POINT;    
+    TRACE_ENTRY_POINT;
+	
+	TInt attachmentCount = iServices->GetAttachmentData()->NumberOfItems(); 		   
+	 if(Edited().AttachmentCount() || attachmentCount)
+		 {
+		 iServices->GetAttachmentData()->Reset();
+		 }
     if (IsCreatingNewEntry())
         {
         iEntryUpdater->TryDeleteInstanceWithUiL( EditorDataHandler().Entry() ,
@@ -1561,7 +1473,7 @@ void CCalenUnifiedEditor::TryToDeleteNoteL( TBool /* aIsViaDeleteMenu */ )
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void CCalenUnifiedEditor::TryInsertSendMenuL( TInt aResourceId, CEikMenuPane* aMenuPane )
+void CCalenUnifiedEditor::TryInsertSendMenuL( TInt /*aResourceId*/, CEikMenuPane* aMenuPane )
     {
     TRACE_ENTRY_POINT;
 
@@ -2002,7 +1914,17 @@ TBool CCalenUnifiedEditor::HandleDoneL()
     const TBool continueOnError = EFalse;
     iUnifiedEditorControl->ReadDataFromEditorL( continueOnError );
     
-    TEntryExistenceStatus status = EntryStillExistsL();
+    TEntryExistenceStatus status;
+    
+	if(!IsCreatingNewEntry())
+		{
+        status = EntryStillExistsL();
+		}
+    else
+		{
+		status = EEntryOk;
+		}
+	 
     TTimeIntervalDays aDay(0);
     if( iCurrentDurationDay<aDay )
         {
@@ -2015,15 +1937,19 @@ TBool CCalenUnifiedEditor::HandleDoneL()
         
         TTime startDate = Edited().StartDateTime();
         TTime endDate = Edited().EndDateTime();
+        TTimeIntervalDays differenceInTime = endDate.DaysFrom(startDate); // fix for AllDayEntry issue
         
         if( startDate == CalenDateUtils::BeginningOfDay( startDate ) &&
                 endDate == CalenDateUtils::BeginningOfDay( endDate ) )
             {
-            TTimeIntervalDays differenceInTime = endDate.DaysFrom(startDate); // fix for AllDayEntry issue
-            if( CCalEntry::EAppt == Edited().EntryType() && startDate != endDate && differenceInTime.Int() == 1 )
+            if( CCalEntry::EAppt == Edited().EntryType() && startDate != endDate && differenceInTime.Int() >= 1 )
                 {
                 Edited().SetEntryType( CCalEntry::EEvent );
                 }
+            }
+        if(differenceInTime.Int() == 0 && (CCalEntry::EAppt == Edited().EntryType() || CCalEntry::EEvent == Edited().EntryType()))
+            {
+            Edited().SetEntryType( CCalEntry::EAppt ); //changed
             }
         
         switch ( EditorDataHandler().ShouldSaveOrDeleteOrDoNothingL() ) 
@@ -2335,7 +2261,7 @@ TInt CCalenUnifiedEditor::TryToSaveEntryWithEntryChangeL( TBool aForcedExit)
 void CCalenUnifiedEditor::TryToSaveNoteOnForcedExitL()
     {
     TRACE_ENTRY_POINT;
-    
+    iCheck = ETrue;
     if( EntryStillExistsL() == EEntryOk )
         {
         if( CheckSpaceBelowCriticalLevelL() )
@@ -2684,7 +2610,8 @@ CCalenUnifiedEditor::TEntryExistenceStatus CCalenUnifiedEditor::EntryStillExists
 void CCalenUnifiedEditor::UpdateLocationInfoToFormL()
     {
     TRACE_ENTRY_POINT;
-	
+    // set the focus to location field as the address is inserted/updated to location field.
+    TryChangeFocusToL(ECalenEditorPlace);
 	// Get location details from context
 	MCalenContext& context = iServices->Context();
 	CPosLandmark* landmark = context.GetLandMark();
@@ -2709,7 +2636,6 @@ void CCalenUnifiedEditor::UpdateLocationInfoToFormL()
 			{
 			isReplaceLocation = EFalse;
 			StoreLocationDetailsToEntryL(landmark);
-			AddPictureL(0);
 			}
 		}
 		
@@ -2733,7 +2659,6 @@ void CCalenUnifiedEditor::HandleEntryWithGeoValueEditionL(CPosLandmark* landmark
 	if(userResponse)
 		{
 		StoreLocationDetailsToEntryL(landmark);
-		AddPictureL();
 		}
 		
 	TRACE_EXIT_POINT;	
@@ -2797,7 +2722,6 @@ void CCalenUnifiedEditor::HandleEntryWithLocationEditionL(CPosLandmark* landmark
             break;
         }
         StoreLocationDetailsToEntryL(landmark);
-        AddPictureL(0);
         
     TRACE_EXIT_POINT;   
     }
@@ -2848,7 +2772,6 @@ void CCalenUnifiedEditor::StoreLocationDetailsToEntryL(CPosLandmark* landmark)
         ShowAddressUpdatedNoticeL();
         }
 	 
-	PreLayoutDynInitL();
 	
 	TRACE_EXIT_POINT;	
 	}
@@ -3096,6 +3019,7 @@ void CCalenUnifiedEditor::SetAttachmentNamesToEditorL()
     if( attachmentCount )
         {
         RPointerArray<HBufC> attachmentNames;
+        CleanupResetAndDestroyPushL(attachmentNames);
         GetAttachmentNamesL(attachmentNames);
         attachmentCount = attachmentNames.Count();            
         TInt attachmentLength(0);        
@@ -3120,7 +3044,7 @@ void CCalenUnifiedEditor::SetAttachmentNamesToEditorL()
         
         // Cleanup
         delete attachmentNamesString;
-        attachmentNames.ResetAndDestroy();
+        CleanupStack::PopAndDestroy(&attachmentNames);
         }
     
     TRACE_EXIT_POINT;
@@ -3174,14 +3098,7 @@ void CCalenUnifiedEditor::GetAllCollectionidsL(
 void CCalenUnifiedEditor::LineChangedL( TInt /* aControlId */ )
     {
     TRACE_ENTRY_POINT;
-    
-    CCalGeoValue* geoValue = iEditorDataHandler->Entry().GeoValueL();
-	if(geoValue)
-		{
-		AddPictureL();	
-		delete geoValue;	
-		}
-		
+
     SetMskFromResourceL();
     TRACE_EXIT_POINT;
     }
@@ -3342,51 +3259,6 @@ void CCalenUnifiedEditor::HideFieldsForEditSingleInstance()
     TRACE_EXIT_POINT;
     }
 
-// -----------------------------------------------------------------------------
-// CCalenUnifiedEditor::AddPictureL
-// Adds Map icon onto the editors
-// -----------------------------------------------------------------------------
-//      
-void CCalenUnifiedEditor::AddPictureL(TInt isNotFirstTime)
-    {
-    TRACE_ENTRY_POINT;
-    return;
-    
-    // Instantiate CMapIconPicture object 300x300 twips in size
-    CEikRichTextEditor* locationControl = static_cast<CEikRichTextEditor*>(Control(ECalenEditorPlace));
-    
-    CRichText* text = locationControl->RichText();
-    if(isNotFirstTime)
-        {
-        TPtrC ptr = text->Read(0,text->DocumentLength());
-        TInt pos = ptr.Locate(TChar(CEditableText::EPictureCharacter));
-        if(pos != -1) // If picture found, delete it so that it cna be drawn at new place
-            {
-            TRAP_IGNORE(text->DeleteL(pos,1));
-            }
-        }
-    
-    // Get the rect of the caption of ECalenEditorPlace control
-    CEikLabel* label = this->ControlCaption(ECalenEditorPlace);
-    TRect rect = label->Rect();
-    
-    CMapsIconPicture* picture = new( ELeave )CMapsIconPicture(/* TSize( 300, 300 )*/ *iServices, rect );
-    CleanupStack::PushL(picture);
-    //Prepare the picture header, which will be inserted into the rich text
-    TPictureHeader header;
-    header.iPicture = TSwizzle<CPicture>(picture);
-    
-    // Position where we insert picture is not valid as it always draws icon depending the rect we provide
-    
-        text->InsertL(text->DocumentLength(), header);
-        
-    locationControl->HandleTextChangedL();
-    CleanupStack::Pop(); // picture
-    
-    Control(ECalenEditorPlace)->DrawNow();
-    
-    TRACE_EXIT_POINT;   
-    }
 
 // -----------------------------------------------------------------------------
 // CCalenUnifiedEditor::AttachmentNamesL
@@ -3398,7 +3270,8 @@ void CCalenUnifiedEditor::GetAttachmentNamesL(RPointerArray<HBufC>& aAttachmentN
     TInt attachCount = iServices->GetAttachmentData()->NumberOfItems();
     if( attachCount )
         {    
-        RPointerArray<CCalenAttachmentInfo> attachmentInfoList;      
+        RPointerArray<CCalenAttachmentInfo> attachmentInfoList;  
+		CleanupClosePushL( attachmentInfoList );
         iServices->GetAttachmentData()->GetAttachmentListL(attachmentInfoList);
         for( TInt index =0; index<attachCount; index++ )
             {
@@ -3408,11 +3281,22 @@ void CCalenUnifiedEditor::GetAttachmentNamesL(RPointerArray<HBufC>& aAttachmentN
             attachmentName->Des().Copy(fileNameParser.NameAndExt());
             aAttachmentNames.Append(attachmentName);
             }
+		CleanupStack::PopAndDestroy( &attachmentInfoList );		
         }
     else
         {
         Edited().AttachmentNamesL(aAttachmentNames);
         }
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenUnifiedEditor::GetServices
+// Gets services reference
+// -----------------------------------------------------------------------------
+//
+MCalenServices& CCalenUnifiedEditor::GetServices()
+    {
+    return *iServices;
     }
 	
 // -----------------------------------------------------------------------------

@@ -284,6 +284,14 @@ class CNotepadListDialog : public CNotepadDialogBase,
         * @param aEvent view event type.
         */
         void DoHandleViewEventL(const TVwsViewEvent& aEvent);
+        
+        /**
+        * handle the mark/unmark/markall/unmarkall command
+        * @param aResourceId the resouce id
+        * @param aMenu the pane to be processed.
+        * @param aListBox the refered list box for the pane.  
+        */
+        void HandleMarkListDynInitMenuPane( TInt aResourceId, CEikMenuPane *aMenu, CEikListBox *aListBox );
 
     private:  // Functions from base classes
 
@@ -396,7 +404,7 @@ class CNotepadListDialog : public CNotepadDialogBase,
         *
         * @param aType event type.
         */
-		void HandleResourceChange(TInt aType);
+		void HandleResourceChange(TInt aType);		
 
     private:  // Reserved
 

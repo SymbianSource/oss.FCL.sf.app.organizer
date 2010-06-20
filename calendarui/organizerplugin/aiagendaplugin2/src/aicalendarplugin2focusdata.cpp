@@ -44,7 +44,6 @@ void TAiCalendarFocusData::LaunchCalendarApplicationL()
         {
         const TUid dummyUID = { 0x0 };
         task.SendMessage( dummyUID, tailBuf );
-        task.BringToForeground();
         }
     else  // Launch Calendar into day view
         {

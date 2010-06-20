@@ -66,6 +66,8 @@ LIBRARY      eikcdlg.lib
 LIBRARY      eikctl.lib
 LIBRARY      cone.lib
 LIBRARY      bafl.lib 
+LIBRARY      eikcoctl.lib 
+LIBRARY      eikcore.lib
 
 // End of file.
 

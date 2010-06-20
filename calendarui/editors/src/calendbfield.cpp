@@ -18,6 +18,7 @@
 // system includes
 #include <AknPopupField.h>
 #include <AknQueryValueText.h>
+#include <AknQueryDialog.h>
 #include <badesca.h>
 #include <calentry.h>
 #include <centralrepository.h>
@@ -111,6 +112,13 @@ CCalenDbField::~CCalenDbField()
     {
     TRACE_ENTRY_POINT;
 
+    if( iAsyncDBquery )
+        {
+        iAsyncDBquery->Cancel();
+        delete iAsyncDBquery;
+        iAsyncDBquery = NULL;
+        }
+    
     delete iDbNamesArrayText;
     delete iDbNamesArray;
     delete iDbNamesTextValues;
@@ -203,6 +211,41 @@ void CCalenDbField::SetDataToEditorL()
     }
 
 // -----------------------------------------------------------------------------
+// CCalenDbField::SetDataToEditorL
+// update data in form
+// -----------------------------------------------------------------------------
+//
+void CCalenDbField::SetDataToEditorL(const TCalCollectionId& aColId)
+    {
+    TRACE_ENTRY_POINT;
+    //Get MultipleDbInfo array
+    RPointerArray<CCalCalendarInfo> calendarInfoList;
+    iServices->GetAllCalendarInfoL(calendarInfoList);
+    CleanupClosePushL(calendarInfoList);
+
+    TInt index = KErrNotFound;   
+    
+    HBufC* calendarFileName= iServices->GetCalFileNameForCollectionId(aColId).AllocLC();
+    index = calendarInfoList.Find(*calendarFileName, CCalenDbField::CalendarInfoNameIdentifierL);
+    CleanupStack::PopAndDestroy(calendarFileName);        
+    
+    if (KErrNotFound == index)
+        {
+        iDbNamesTextValues->SetCurrentValueIndex(0);
+        }
+    else
+        {
+        iDbNamesTextValues->SetCurrentValueIndex(index);
+        }
+    iUnifiedEditor.EditorDataHandler().SetCalendarFieldEditedL(
+            IsCalendarEdited(), iPreviousColId, iCurrentColId);
+
+    CleanupStack::PopAndDestroy(&calendarInfoList);
+   
+    TRACE_EXIT_POINT;
+    }
+
+// -----------------------------------------------------------------------------
 // CCalenDbField::HandleControlStateChangeL
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
@@ -219,6 +262,10 @@ void CCalenDbField::HandleControlStateChangeL( TInt aControlId )
             ReadDataFromFormL( continueOnError );
             iUnifiedEditor.EditorDataHandler().SetCalendarFieldEditedL(IsCalendarEdited()
                                                             ,iPreviousColId,iCurrentColId);
+            
+            TCallBack callback(DoAsyncShowChangeDBQueryL,this);
+            iAsyncDBquery = new(ELeave) CAsyncCallBack(callback,CActive::EPriorityStandard);
+            iAsyncDBquery->CallBack();
             break;
             }
         default: 
@@ -226,6 +273,23 @@ void CCalenDbField::HandleControlStateChangeL( TInt aControlId )
         }               
     
     TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CallBackForShowinginfonote
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+TInt CCalenDbField::DoAsyncShowChangeDBQueryL(TAny* aThisPtr)
+    {
+    TRACE_ENTRY_POINT
+    CCalenDbField* self = static_cast<CCalenDbField*>(aThisPtr);
+    if(self)
+        {
+        self->ShowChangeDBQueryL();
+        }
+    TRACE_EXIT_POINT
+    return 0;
     }
 
 // -----------------------------------------------------------------------------
@@ -240,7 +304,16 @@ void CCalenDbField::ReadDataFromFormL( TBool /*aContinueOnError*/ )
     RPointerArray<CCalCalendarInfo> calendarInfoList; 
     iServices->GetAllCalendarInfoL(calendarInfoList);
     CleanupClosePushL( calendarInfoList );
-    TInt pos = iDbNamesTextValues->CurrentValueIndex();
+    TInt pos;
+    if( calendarInfoList.Count() == 1 )
+        {
+         pos = 0;
+        }
+    else
+        {
+        pos = iDbNamesTextValues->CurrentValueIndex();
+        }
+    
     HBufC* calendarFileName = calendarInfoList[pos]->FileNameL().AllocLC();
     iCurrentColId = iServices->SessionL(*calendarFileName).CollectionIdL();
     CleanupStack::PopAndDestroy(calendarFileName);
@@ -334,5 +407,35 @@ TBool CCalenDbField::CalendarInfoNameIdentifierL( const HBufC* aName,
     TPtrC calendarFileName = aInfoItem.FileNameL();
     TRACE_EXIT_POINT;
     return (!calendarFileName.CompareF(*aName));
+    }
+// -----------------------------------------------------------------------------
+// CCalenDbField::ShowChangeDBQueryL
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//  
+void CCalenDbField::ShowChangeDBQueryL()
+    {
+    
+    //Check the child entries for the repeated entry
+    //The entry which is changing the calendar having any childs 
+    //show this information note to the user.
+    CCalEntry& originalEntry = iUnifiedEditor.EditorDataHandler().Entry();
+    RPointerArray<CCalEntry> childEntries;
+    CleanupClosePushL(childEntries);
+    iServices->EntryViewL(iPreviousColId)->FetchL(originalEntry.UidL(), childEntries);            
+    if(IsCalendarEdited() && (childEntries.Count() > 1))
+        {
+        TCalCollectionId  currentId = iCurrentColId;
+        SetDataToEditorL();                    
+        iUnifiedEditor.UpdateFormL();
+        CAknQueryDialog* dlg = CAknQueryDialog::NewL();
+        if( dlg->ExecuteLD( R_CALEN_DB_CHANGE_QUERY ) )
+            {
+            iCurrentColId = currentId;
+            SetDataToEditorL(iCurrentColId);
+            iUnifiedEditor.UpdateFormL();
+            }
+        }            
+    CleanupStack::PopAndDestroy( &childEntries );                
     }
 // End of File

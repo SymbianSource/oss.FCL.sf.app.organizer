@@ -71,6 +71,13 @@ class CClkUiAlarmModel : public CClkUiModelBase
         IMPORT_C TInt DeleteClockAlarm( TAlarmId aAlarmId );
 
         /**
+        * @brief Deletes a clock alarm with 
+        * @param aAlarmId The id of the alarm to be deleted.
+        * @return TInt Symbian OS error code.
+        */
+        IMPORT_C TInt AlarmRemoveSnooze ( TAlarmId aAlarmId );
+
+        /**
         * @brief Enable or disable a clock alarm.
         * @param aAlarmId The id of the clock alarm.
         * @param aState The status to which the alarm has to be changed.

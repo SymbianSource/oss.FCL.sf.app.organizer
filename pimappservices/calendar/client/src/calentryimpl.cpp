@@ -615,11 +615,11 @@ TBool CCalEntryImpl::GetRRuleL(TCalRRule& aRule)
 	const TAgnRpt* KRpt = KRptDef->RRule();
 
 	// get the DTSTART property
-	if (SimpleEntry()->Type() == CCalEntry::ETodo)
-		{
-		aRule.SetDtStart(EndTimeL());
-		}
-	else
+//	if (SimpleEntry()->Type() == CCalEntry::ETodo)
+//		{
+//		aRule.SetDtStart(EndTimeL());
+//		}
+//	else
 		{
 		aRule.SetDtStart(StartTimeL());
 		}

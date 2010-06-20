@@ -150,11 +150,20 @@ void CClockWorldView::HandleCommandL( TInt aCommand )
 			//Single click integration
             // If current item is other than home location set it as new home
 		    // location
-		    if ( iContainer->ListBox()->CurrentItemIndex() > KZerothIndex )
+		    RClkSrvInterface clkSrvInterface;
+            User::LeaveIfError( clkSrvInterface.Connect() );
+
+            TBool timeUpdateOn( EFalse );
+          
+            // Get the state of the plugin.
+            clkSrvInterface.IsAutoTimeUpdateOn( timeUpdateOn );
+		    if ( iContainer->ListBox()->CurrentItemIndex() > KZerothIndex || timeUpdateOn)
                 {
                 SetHomeLocationL();
                 }
 
+		    // Cleanup.
+		    clkSrvInterface.Close();
 		    }
 		    break;
 		    
@@ -294,7 +303,7 @@ void CClockWorldView::DynInitMenuBarL( TInt /*aResourceId*/, CEikMenuBar* aMenuB
     __PRINTS( "CClockWorldView::DynInitMenuBarL - Entry" );
     
 	//single click integration
-    if( aMenuBar && ( IsSelectionListOpen() || IsGalleryOpen() ) )
+    if( aMenuBar && ( /*IsSelectionListOpen() || */IsGalleryOpen() ) )
         {
         // If the selection list open, we should not display the menupane.
         aMenuBar->StopDisplayingMenuBar();
@@ -583,7 +592,15 @@ void CClockWorldView::DoActivateL( const TVwsViewId& /*aPrevViewId*/,
         }
 
     // Activate the container.
-    iContainer->ActivateL();
+    if( ClockApplicationUi()->TransitionOngoing() )
+        {
+        //ClockApplicationUi()->DoAppearTransition( iContainer );
+        iContainer->ActivateL();
+        }
+    else
+        {
+        iContainer->ActivateL();
+        }
     iContainer->SetRect( ClientRect() );
     
     
@@ -624,7 +641,10 @@ void CClockWorldView::HandleForegroundEventL( TBool aForeground )
     
     if( aForeground  && iContainer )
         {
-        RestartTimerL();
+        if( iTimer )
+            {
+            RestartTimerL();
+            }
 
         RClkSrvInterface clockServerClt;
         // Connect to clockserver
@@ -925,7 +945,6 @@ void CClockWorldView::RemoveLocationL()
         return;
         }
         
-	HBufC* queryText( NULL );
     TInt currentListItem( iContainer->ListBox()->CurrentItemIndex() );
     
     // Get information about the city selected.

@@ -128,9 +128,11 @@ void CCalenState::HandleNotificationL(const TCalenNotification& aNotification,
         case ECalenNotifyAppBackgrounded:
         	{
         	CCalenStateMachine::TCalenStateIndex cachedState = aStateMachine.GetCurrentState();
-        	if(cachedState != CCalenStateMachine::ECalenMapState) // Never send calendar to background state in MapState as maps will 
-        	                                                        // launched in cahin mode not in stand alone mode
-        	    {
+        	// Never send calendar to background state in MapState as maps will
+        	// launched in cahin mode not in stand alone mode
+        	if((cachedState != CCalenStateMachine::ECalenMapState) &&
+        		(cachedState != CCalenStateMachine::ECalenPopulationState))
+        		{
                 aStateMachine.SetCurrentState(CCalenStateMachine::ECalenBackgroundState);
                 aStateMachine.SetCurrentPreviousState(cachedState);
                 iOutstandingNotifications.InsertL(aNotification);

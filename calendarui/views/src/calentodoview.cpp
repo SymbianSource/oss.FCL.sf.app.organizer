@@ -424,6 +424,11 @@ void CCalenTodoView::HandleCommandL( TInt aCommand ) // command ID
             iServices.IssueCommandL( aCommand );
             }
             break;
+        case ECalenShowCalendars:            
+			SaveCurrentItemIndexL();
+            Container()->MarkAllL( EFalse ); 
+			CCalenNativeView::HandleCommandL( aCommand );
+			break;
         default:
             SaveCurrentItemIndexL();
             CCalenNativeView::HandleCommandL( aCommand );
@@ -681,7 +686,7 @@ void CCalenTodoView::DynInitMenuPaneL(TInt aResourceId,          // Resource Id
             // setup edit/mark menu
             case R_CALENDAR_DONE_UNDONE:
                 {
-                if( Container()->MarkedCount() == 1)
+                if( Container()->MarkedCount() )
                     {
                     TBool crossout( EFalse );
                     crossout = CheckMarkedItemCompletedL();
@@ -928,6 +933,7 @@ CCalenView::TNextPopulationStep CCalenTodoView::ActiveStepL()
             
             if(colIdArray.Count() > 0)
                 {
+                colIdArray.Close();
                 if( !iServices.InstanceViewL(colIdArray) )
                     {
                     TRACE_EXIT_POINT;
@@ -941,6 +947,7 @@ CCalenView::TNextPopulationStep CCalenTodoView::ActiveStepL()
                 }
             else
                 {
+                colIdArray.Close();
                 if( !iServices.InstanceViewL() )
                     {
                     TRACE_EXIT_POINT;
@@ -952,7 +959,6 @@ CCalenView::TNextPopulationStep CCalenTodoView::ActiveStepL()
                     return CCalenView::EKeepGoing;
                     }
                 }
-            colIdArray.Reset();
             }
             // else fall through...
         case ERequestedInstanceView:

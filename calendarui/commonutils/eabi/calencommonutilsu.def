@@ -148,4 +148,6 @@ EXPORTS
 	_ZTV21CCalenAttachmentModel @ 147 NONAME
 	_ZN18CCalenMultiCalUtil23GetNextAvailableOffsetLEv @ 148 NONAME
 	_ZN18CCalenMultiCalUtil24GetNextAvailableCalFileLEv @ 149 NONAME
+	_ZN21CCalenAttachmentModel14AttachmentOpenERi @ 150 NONAME
+	_ZN21CCalenAttachmentModel16IsAttachmentOpenEv @ 151 NONAME
 

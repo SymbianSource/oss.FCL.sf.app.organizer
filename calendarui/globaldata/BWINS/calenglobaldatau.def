@@ -23,7 +23,7 @@ EXPORTS
 	?ResetKeyEventQueue@CCalenGlobalData@@QAEXXZ @ 22 NONAME ; void CCalenGlobalData::ResetKeyEventQueue(void)
 	?GetQueuedKeyEvent@CCalenGlobalData@@QAEHAAUTKeyEvent@@AAW4TEventCode@@@Z @ 23 NONAME ; int CCalenGlobalData::GetQueuedKeyEvent(struct TKeyEvent &, enum TEventCode &)
 	?CalenSendL@CCalenGlobalData@@QAEAAVCCalenSend@@XZ @ 24 NONAME ; class CCalenSend & CCalenGlobalData::CalenSendL(void)
-	?NewL@CCalenGlobalData@@SAPAV1@AAVMCalProgressCallBack@@PAVMCalenContextChangeObserver@@@Z @ 25 NONAME ; class CCalenGlobalData * CCalenGlobalData::NewL(class MCalProgressCallBack &, class MCalenContextChangeObserver *)
+	?NewL@CCalenGlobalData@@SAPAV1@AAVMCalProgressCallBack@@PAVMCalenContextChangeObserver@@PAVMCalenDBChangeObserver@@@Z @ 25 NONAME ; class CCalenGlobalData * CCalenGlobalData::NewL(class MCalProgressCallBack &, class MCalenContextChangeObserver *, class MCalenDBChangeObserver *)
 	?EntryViewExists@CCalenGlobalData@@QAEHXZ @ 26 NONAME ; int CCalenGlobalData::EntryViewExists(void)
 	?AttemptToRetrieveDefaultMailboxL@CCalenGlobalData@@QAEHAAUTMailboxInfo@CMRMailboxUtils@@@Z @ 27 NONAME ; int CCalenGlobalData::AttemptToRetrieveDefaultMailboxL(struct CMRMailboxUtils::TMailboxInfo &)
 	?GetAllCalendarInfoL@CCalenGlobalData@@QAEXAAV?$RPointerArray@VCCalCalendarInfo@@@@@Z @ 28 NONAME ; void CCalenGlobalData::GetAllCalendarInfoL(class RPointerArray<class CCalCalendarInfo> &)

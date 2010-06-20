@@ -30,6 +30,7 @@
 #include <layoutmetadata.cdl.h>
 #include <calentoolbar.h>
 #include <akntoolbar.h>
+#include <touchfeedback.h>
 
 // user includes
 #include "calendarui_debug.h"
@@ -517,7 +518,7 @@ void CCalenContainer::NotifyLongTapDetectorL(const TPointerEvent& aPointerEvent)
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CAknIconArray* CCalenContainer::CreateIconsL( const RArray<MCalenServices::TCalenIcons>& aIndexArray )
+CAknIconArray* CCalenContainer::CreateIconsL( const RArray<MCalenServices::TCalenIcons>& aIndexArray, const TInt aViewId ) 
     {
     TRACE_ENTRY_POINT;
     const TInt iconCount( aIndexArray.Count() );
@@ -527,8 +528,8 @@ CAknIconArray* CCalenContainer::CreateIconsL( const RArray<MCalenServices::TCale
 
     for( TInt i=0; i<iconCount; ++i )
         {
-        icons->AppendL( iServices.GetIconL( static_cast<MCalenServices::TCalenIcons>(aIndexArray[i] ) ));
-        }
+        icons->AppendL( iServices.GetIconL( static_cast<MCalenServices::TCalenIcons>(aIndexArray[i] ), aViewId ));
+        } 
     CleanupStack::Pop( icons );
     TRACE_EXIT_POINT;
     return icons;
@@ -876,4 +877,25 @@ void CCalenContainer::UpdateTodayToolbarItemL()
     TRACE_EXIT_POINT;
     }
 
+
+// ----------------------------------------------------------------------------
+// CCalenContainer::GenerateTactileFeedback()
+// Generates tactile feedback on user touch action
+// ----------------------------------------------------------------------------
+void CCalenContainer::GenerateTactileFeedback()
+    {
+    TRACE_ENTRY_POINT;
+    
+    if(!iFeedBack)
+        {
+        iFeedBack = MTouchFeedback::Instance();
+        }
+    
+    if ( iFeedBack && iFeedBack->TouchFeedbackSupported() )
+        {
+        iFeedBack->InstantFeedback( ETouchFeedbackBasic );
+        }
+    
+    TRACE_EXIT_POINT;
+    }
 // End of File

@@ -46,6 +46,7 @@
 #include "calensetting.h"
 #include "calencontextfwlistener.h"
 #include "CleanupResetAndDestroy.h"
+#include "calenattachmentmodel.h"
 
 static const TUint32 KMaxMissedAlarms = 10;
 
@@ -178,6 +179,7 @@ TBool CCalenAlarmManager::HandleCommandL( const TCalenCommand& aCommand )
             break;
         case ECalenMissedAlarmsViewFromIdle:
             {
+            RemoveAllViewedEventsL();
             iViewManager.StartActiveStepL();
             }
             break;
@@ -189,9 +191,13 @@ TBool CCalenAlarmManager::HandleCommandL( const TCalenCommand& aCommand )
             break;
         case ECalenEventViewFromAlarm:
             {
-            LaunchEventViewerL();
-            iViewManager.SetRepopulation(EFalse);
-            iController.ViewManager().RequestActivationL( KUidCalenEventView, KUidCalenShowAlarmCba );
+            TBool attachmentOpened = iController.Services().GetAttachmentData()->IsAttachmentOpen();
+            if(!attachmentOpened)
+                {
+                LaunchEventViewerL();
+                iViewManager.SetRepopulation(EFalse);
+                iController.ViewManager().RequestActivationL( KUidCalenEventView, KUidCalenShowAlarmCba );
+                }
             }
             break;
         case ECalenEventViewFromAlarmStopOnly:
@@ -572,11 +578,8 @@ void CCalenAlarmManager::OnCmdClearMissedAlarmL()
     TInt missedAlarmEntryUid = context.InstanceId().iEntryLocalUid;
     TCalCollectionId colid = context.InstanceId().iColId;
     // clear missed alarm from cenrep
-    if( EFalse == ClearOneMissedAlarmL( missedAlarmEntryUid, colid ) )
-        {
-        TRACE_EXIT_POINT;
-        return;
-        }
+    
+    ClearOneMissedAlarmL( missedAlarmEntryUid, colid );
     for(TInt index = 0;index < iMissedAlarmList.Count();index++)
         {
         if( ( missedAlarmEntryUid == iMissedAlarmList[index].iEntryLocalUid ) &&
@@ -677,8 +680,9 @@ void CCalenAlarmManager::OnCmdLaunchFromIdleL()
     TCalenInstanceId id = TCalenInstanceId::CreateL( *entry, inscaltime );
     id.iColId = session.CollectionIdL();
     context.SetInstanceIdL( id, context.ViewId() ); 
-		CleanupStack::PopAndDestroy( entry );
-    iMissedAlarmStore->RemoveL(*aMissedAlarmArray[0]);
+	CleanupStack::PopAndDestroy( entry );
+	iMissedAlarmList.Remove(0); //Clear the alarm list
+	iMissedAlarmStore->RemoveL(*aMissedAlarmArray[0]);
     CleanupStack::PopAndDestroy(); // aMissedAlarmArray
     
     iViewManager.StartActiveStepL();
@@ -862,10 +866,12 @@ void CCalenAlarmManager::SetMissedAlarmEventAsViewed()
     // get the context
     MCalenContext &context = iController.Services().Context();
     TInt missedAlarmEntryUid = context.InstanceId().iEntryLocalUid;
+    TCalCollectionId colid = context.InstanceId().iColId;
     
     for(TInt index = 0;index < iMissedAlarmList.Count();index++)
         {
-        if(missedAlarmEntryUid == iMissedAlarmList[index].iEntryLocalUid )
+        if((missedAlarmEntryUid == iMissedAlarmList[index].iEntryLocalUid ) && 
+            (colid == iMissedAlarmList[index].iColId))
             {
             // mark the missed alarm event as viewed 
             iMissedAlarmList[index].iInstanceViewed = 1;
@@ -889,6 +895,7 @@ void CCalenAlarmManager::RemoveAllViewedEventsL()
         {
         if(iMissedAlarmList[index].iInstanceViewed)
             {
+            ClearOneMissedAlarmL( iMissedAlarmList[index].iEntryLocalUid, iMissedAlarmList[index].iColId );
             iMissedAlarmList.Remove(index);
             }
         else
@@ -987,8 +994,7 @@ void CCalenAlarmManager::UpdateMissedAlarmsListOnDeleteL()
     TRACE_ENTRY_POINT;
     // get the context
     MCalenContext &context = iController.Services().Context();
-    TInt deletedEntryUid = context.InstanceId().iEntryLocalUid;
-    
+    TInt deletedEntryUid = context.InstanceId().iEntryLocalUid;    
     TCalCollectionId colidFromContext = context.InstanceId().iColId;
     
     if( EFalse == ClearOneMissedAlarmL( deletedEntryUid, colidFromContext ) )
@@ -1161,9 +1167,11 @@ void CCalenAlarmManager::HandleBackEventL()
     else if( iPreviousToEventViewUid!=KNullUid && 
             ( iPreviousToEventViewUid!= KUidCalenEventView || iPreviousToEventViewUid != KUidCalenMissedEventView ) )
         {
+        iViewManager.SetRepopulation(EFalse);
         TVwsViewId previousViewId(KUidCalendar, iPreviousToEventViewUid) ;
         iController.ViewManager().RequestActivationL(previousViewId);
         iPreviousToEventViewUid = KNullUid;
+        iViewManager.SetRepopulation(ETrue);
         }
 	else
 		{
