@@ -2499,31 +2499,7 @@ RESOURCE FORM r_calen_multidb_form
 		        // It's based on layout.
 		        max_view_height_in_lines = 0;
 		        };
-		    },
-		    DLG_LINE
-		        {
-		        type = EEikCtEdwin;
-	                prompt = qtn_cale_multidb_synchronization;
-	                id = ECalenMultiDbSyncStatus;
-		        itemflags = EEikDlgItemTakesEnterKey;
-		        control = EDWIN
-		            {
-		            flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable |
-		            EEikEdwinNoAutoSelection | EEikEdwinReadOnly|
-		            EEikEdwinAvkonDisableCursor|EEikEdwinAvkonNotEditable |EEikEdwinDisplayOnly ;
-		            maxlength = 160;
-		            default_case = EAknEditorTextCase;
-		            allowed_case_modes = EAknEditorAllCaseModes;
-		            numeric_keymap = EAknEditorStandardNumberModeKeymap;
-		            special_character_table = R_AVKON_SPECIAL_CHARACTER_TABLE_DIALOG;
-		            avkon_flags = EAknEditorFlagUseSCTNumericCharmap |
-		            EAknEditorFlagDefault | 
-		            EAknEditorFlagEnablePictographInput;
-		            // let Avkon decide which is maximum number of lines
-		            // It's based on layout.
-		            max_view_height_in_lines = 0;
-		            };
-		        }
+		    }
         };
     }
 
@@ -3108,7 +3084,5 @@ RESOURCE TBUF64 r_qtn_calen_size_exceeded
     { 
     buf = qtn_cale_max_attachment_size;
     }
-
-
 
 // End of File

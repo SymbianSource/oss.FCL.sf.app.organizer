@@ -25,7 +25,7 @@ TARGETPATH			/sys/bin
 
 // Uid and Capability information
 UID					0x1000008d 0x10005904
-CAPABILITY			ALL -TCB
+CAPABILITY			CAP_GENERAL_DLL
 
 // Source information
 SOURCEPATH			../src

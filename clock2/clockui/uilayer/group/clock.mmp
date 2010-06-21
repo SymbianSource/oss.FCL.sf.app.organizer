@@ -26,7 +26,7 @@ TARGETPATH			/sys/bin
 
 // Uid and Capability information
 UID				0x100039CE 0x10005903
-CAPABILITY			ALL -TCB
+CAPABILITY			CAP_APPLICATION PowerMgmt  
 
 // Stack and heap options
 EPOCSTACKSIZE   	0x5000

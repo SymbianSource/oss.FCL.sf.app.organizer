@@ -1287,7 +1287,7 @@ void CCalenUnifiedEditor::DynInitMenuPaneL(
             
             aMenuPane->AddMenuItemsL( R_CALEN_UNIFIED_EDITOR_DEFAULT_MENUPANE );
 
-            if(  !CCalenLocationUtil::IsMapProviderAvailableL() )   
+            if( (iEntryType == CCalEntry::ETodo) || !(CCalenLocationUtil::IsMapProviderAvailableL()) )   
                 {
                 aMenuPane->DeleteMenuItem( ECalenGetLocation );
                 }

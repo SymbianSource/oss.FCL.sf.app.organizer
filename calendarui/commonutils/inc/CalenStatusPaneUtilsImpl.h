@@ -25,6 +25,7 @@ class CAknNavigationControlContainer;
 class CEikStatusPane;
 class CAknNavigationDecorator;
 class CCalenTitlePane;
+class TRgb;
 
 NONSHARABLE_CLASS( CCalenStatusPaneUtilsImpl ) : public CBase
     {
@@ -40,6 +41,7 @@ NONSHARABLE_CLASS( CCalenStatusPaneUtilsImpl ) : public CBase
         void UnderLineTitleText( TBool aUnderline );
         
         CAknNavigationDecorator* ShowNaviPaneL( const TTime& aActiveDay );
+        CAknNavigationDecorator* ShowNaviPaneL( const TDesC& aName, const TRgb aColor );
 
         void HideNaviPane();
         

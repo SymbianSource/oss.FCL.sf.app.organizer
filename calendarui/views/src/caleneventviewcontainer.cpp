@@ -18,7 +18,6 @@
 // system includes
 #include <AknLayoutFont.h>
 #include <aknnavide.h>      // CAknNavigationDecorator
-#include <aknnavilabel.h>   // CAknNaviLabel
 #include <AknsBasicBackgroundControlContext.h>
 #include <AknBidiTextUtils.h>
 #include <AknsDrawUtils.h>
@@ -158,8 +157,6 @@ CCalenEventViewContainer::~CCalenEventViewContainer()
         };
         
     delete iCenRepSession;	
-    if(iLabel)
-    delete iLabel;
     
     //Reset the attachment posiitons array
     iAttachmentPosInfoArray.Reset();
@@ -200,10 +197,6 @@ void CCalenEventViewContainer::ConstructImplL()
     iTextEditor->SetMopParent(this);
     iTextEditor->SetRect( Rect() );
 	
-    iLabel = new (ELeave) CEikLabel;
-    iLabel->SetContainerWindowL(*this);
-    iLabel->SetTextL(_L(""));
-    iLabel->SetRect(Rect());
         
     iDocHandler->SetExitObserver( this );
     iTextEditor->EnableKineticScrollingL(ETrue);
@@ -342,7 +335,7 @@ TInt CCalenEventViewContainer::CountComponentControls() const
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
-    return 2;
+    return 1;
     }
 
 // ----------------------------------------------------------------------------
@@ -359,10 +352,6 @@ CCoeControl* CCalenEventViewContainer::ComponentControl(TInt aIndex) const     /
         {
         case 0:
             control = iTextEditor;
-            break;
-            
-        case 1:
-            control = iLabel;
             break;
             
         default:
@@ -783,7 +772,6 @@ void CCalenEventViewContainer::AddFieldsL()
 	// Initialize icon drawer
 	CCalenIconDrawer* iconDrawer = CreateAndInitializeIconsDrawerL();
 	
-	SetLabelContentL(*iLabel);
 	// add subject field
 	AddSubjectFieldL();	
 	
@@ -1007,7 +995,6 @@ void CCalenEventViewContainer::SetLayoutFromLookAndFeelL()
      listscroll_cale_day_pane.LayoutRect( main_cale_day_pane.Rect(), 
              AknLayoutScalable_Apps::listscroll_cale_day_pane( 0 ).LayoutLine() );
 
-     iLabel->SetRect(GetLabelRectL());
    
       // Listbox layout
       TAknLayoutRect list_cale_pane;
@@ -2458,82 +2445,6 @@ TBool CCalenEventViewContainer::CalendarInfoIdentifierL( const HBufC* aName,
     }
 
 // ----------------------------------------------------------------------------
-// CCalenEventViewContainer::LabelRectL
-// Returns the available label rect for this container
-// ----------------------------------------------------------------------------
-TRect CCalenEventViewContainer::GetLabelRectL()
-    {
-    TRACE_ENTRY_POINT;
-   
-    // Get the main pane
-    TAknLayoutRect main_cale_day_pane;
-    main_cale_day_pane.LayoutRect( Rect(), 
-                    AknLayoutScalable_Apps::main_cale_day_pane().LayoutLine() );
-        
-    TAknLayoutRect listscroll_cale_day_pane;
-    listscroll_cale_day_pane.LayoutRect( main_cale_day_pane.Rect(), 
-            AknLayoutScalable_Apps::listscroll_cale_day_pane(1).LayoutLine() );
-
-    // Create a dummy label to find the layout rect
-    CEikLabel* dummyLabel = new( ELeave ) CEikLabel;
-    CleanupStack::PushL( dummyLabel );
-
-           
-    AknLayoutUtils::LayoutLabel( dummyLabel, listscroll_cale_day_pane.Rect(),
-        AknLayoutScalable_Apps::listscroll_cale_day_pane_t1( 0 ).LayoutLine() );        
-              
-    TRect labelRect = dummyLabel->Rect();
-
-    // Discard the label
-    CleanupStack::PopAndDestroy( dummyLabel );
-    
-    TRACE_EXIT_POINT;
-    return labelRect;
-    }
-// ----------------------------------------------------------------------------
-// CCalenEventViewContainer::SetLabelContentL
-// ----------------------------------------------------------------------------
-//
-void CCalenEventViewContainer::SetLabelContentL( CEikLabel& aLabel ) 
-    {
-    TRACE_ENTRY_POINT;
-    const CFont*  labelFont = NULL;
-    labelFont = AknLayoutUtils::FontFromId(EAknLogicalFontPrimarySmallFont,NULL);
-    aLabel.SetFont( labelFont );
-    aLabel.SetLabelAlignment(ELayoutAlignLeft);
-    aLabel.OverrideColorL( EColorLabelTextEmphasis, KRgbBlack );
-    
-    // get the multiple db data from services
-    RPointerArray<CCalCalendarInfo> calendarInfoList;
-    iServices.GetAllCalendarInfoL(calendarInfoList);
-    CleanupClosePushL(calendarInfoList);
-
-    TCalCollectionId colId; 
-        colId = iServices.Context().InstanceId().iColId;
-  
-    HBufC* calendarFileName = iServices.GetCalFileNameForCollectionId(colId).AllocLC();
-    TInt calIndex = calendarInfoList.Find( *calendarFileName, 
-            CCalenEventViewContainer::CalendarInfoIdentifierL);
-    CleanupStack::PopAndDestroy(calendarFileName);
-    
-    if(calIndex != KErrNotFound)
-        {
-        // add the calendar info's text field
-        aLabel.SetTextL(calendarInfoList[calIndex]->NameL());
-        
-        TInt calendarColor = calendarInfoList[calIndex]->Color().Value();
-        aLabel.OverrideColorL( EColorLabelHighlightFullEmphasis, calendarColor );
-        
-        // Increment the iNumOfLinesBeforeLocField so that map icon is drwan at proper place
-        iNumOfLinesBeforeLocField = 1;
-        }
-    CleanupStack::PopAndDestroy(&calendarInfoList);
-
-    aLabel.CropText();
-    aLabel.SetEmphasis( CEikLabel::EFullEmphasis );  
-    TRACE_EXIT_POINT;
-    }
-
 // ----------------------------------------------------------------------------
 // CCalenEventViewContainer::AddAttachmentFieldL
 // Adds attachment field

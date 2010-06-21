@@ -47,7 +47,8 @@ SOURCE		../LibSrc/NpdRichTextEditor.cpp
 SOURCE		../LibSrc/NpdEdwinBase.cpp
 SOURCE		../LibSrc/NpdEditorLaf.cpp
 SOURCE		../LibSrc/NpdViewerLaf.cpp
-SOURCE      ../LibSrc/NpdTemplateListBox.cpp
+SOURCE          ../LibSrc/NpdTemplateListBox.cpp
+SOURCE          ../LibSrc/NpdLoadFileAO.cpp
 
 // Include paths
 USERINCLUDE     ../inc

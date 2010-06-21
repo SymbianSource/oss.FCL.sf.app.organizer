@@ -150,4 +150,5 @@ EXPORTS
 	_ZN18CCalenMultiCalUtil24GetNextAvailableCalFileLEv @ 149 NONAME
 	_ZN21CCalenAttachmentModel14AttachmentOpenERi @ 150 NONAME
 	_ZN21CCalenAttachmentModel16IsAttachmentOpenEv @ 151 NONAME
+	_ZN21CCalenStatusPaneUtils13ShowNaviPaneLERK7TDesC164TRgb @ 152 NONAME
 

@@ -79,6 +79,7 @@ TInt CCalenInterimUtils2Test::RunMethodL(
 //
 TInt CCalenInterimUtils2Test::TestGlobalUUIDL( CStifItemParser& aItem )
     {
+    CDesC8ArrayFlat* uidArray = new ( ELeave ) CDesC8ArrayFlat( KTestMax );
     TInt retValue = KErrNone;
     // Print to UI
     _LIT( KCalenInterimUtils2Test, "CalenInterimUtils2Test" );
@@ -95,33 +96,31 @@ TInt CCalenInterimUtils2Test::TestGlobalUUIDL( CStifItemParser& aItem )
     callBack = CCalProgressCallBackListener::NewL();
     CCalenGlobalData* globalData = CCalenGlobalData::NewL( *callBack );
     // Make the call to the API.
-    // Create unique ID.
-    RPointerArray<HBufC8> guids;
-
+    // Create unique ID.   
+    TBuf8<100> outputBuffer;
     TInt i = 0;
     
-    for( ; i<20; i++ )
+    for( ; i<2000; i++ )
         {
         HBufC8* guid = globalData->InterimUtilsL().GlobalUidL();
-        iLog->Log( *guid );
-        guids.AppendL(guid);
-        }
-    
-    for(i=1; i < 20; i++)
-        {
-        for(TInt j = 0; j < i; j++)
+        CleanupStack::PushL(guid);
+        iLog->Log( *guid );       
+        TRAPD( err, uidArray->InsertIsqL( *guid ) );
+        
+        if ( err == KErrAlreadyExists )
             {
-            if( guids[j] == guids[i] )
-                {
-                iLog->Log( KDuplicateUids );
-                retValue = KErrNotFound;
-                break;
-                }
+            outputBuffer.Zero();
+            outputBuffer.Append( _L8( "\n err == KErrAlreadyExists\n" ) );
+            iLog->Log( outputBuffer );
+            RDebug::Print(_L("failed %d"),i);
+            retValue = KErrNotFound;            
             }
-        }
-    guids.ResetAndDestroy();
-    globalData->Release();
 
+        CleanupStack::PopAndDestroy( guid );
+        }
+   
+    globalData->Release();
+    delete uidArray; //cleanup uid array
     // Validate the result.
 
     return retValue;

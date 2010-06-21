@@ -673,6 +673,7 @@ void CAICalendarPlugin2::PublishDataArraysL()
         Clean( EAICalendarPlugin2EventTimeStart, lineUsage + 1 );
         Clean( EAICalendarPlugin2EventTimeEnd, lineUsage + 1 );
         Clean( EAICalendarPlugin2EventTextSecondLine, lineUsage + 1 );
+		Clean( EAICalendarPlugin2TimeStartAndSubject, lineUsage + 1 );
 
         if( ( iEventData->TomorrowEventArray().Count() > 0 ) &&
             ( iConstantData->iDaysToHandleAsNotToday == KAIRangeTomorrowOnly ) )
@@ -804,8 +805,11 @@ void CAICalendarPlugin2::PublishDataArraysL()
                 // some languages needs two rows for publishing
                 cleanInfo = EFalse;
                 // display "Next event on: [day of the week] [date]"
-                PublishIconL( EAICalendarPlugin2NoMoreEventsForToday, 0, EAICalendarPlugin2InfoIcon );
-                iCurrentObserver->Publish( *this, EAICalendarPlugin2InfoText, nextOn, 0 );
+                
+				PublishIconL( EAICalendarPlugin2NoEventsForToday, publishIndex);
+				
+				iCurrentObserver->Publish( *this, EAICalendarPlugin2TimeStartAndSubject, nextOn, publishIndex);
+                
                 }
             ++lineUsage;
             ++publishIndex;
@@ -814,9 +818,22 @@ void CAICalendarPlugin2::PublishDataArraysL()
             focusItem.iType = EAI2CalOpenOnEventDay;
             focusItem.iEntryTime = eventTime;
             focusDataArray.Append( focusItem );
-            /**
-             * 5) Clean the rest
-             */
+            
+            PublishFutureItemsForArrayL(
+                    iEventData->TomorrowEventArray(),
+                    publishIndex, // reference passed and updated inside
+                    lineUsage, // reference passed and updated inside
+                    iActualLinesInUse);
+                    
+            
+            PublishFutureItemsForArrayL(
+                            iEventData->FutureItemArray(),
+                            publishIndex, // reference passed and updated inside
+                            lineUsage, // reference passed and updated inside
+                            iActualLinesInUse);
+            
+           // 5) Clean the rest
+             
             for( ; publishIndex <= iActualLinesInUse; ++publishIndex )
                 {
                 CleanAll( publishIndex );

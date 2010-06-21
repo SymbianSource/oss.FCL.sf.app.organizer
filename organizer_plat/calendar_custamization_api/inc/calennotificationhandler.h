@@ -66,6 +66,7 @@ enum TCalenNotification
 	ECalenNotifyCancelMapLaunch,
     ECalenNotifyMissedAlarmViewClosed,
     ECalenNotifyMissedEventViewClosed,
+    ECalenNotifyClearMissedAlarms,
     ECalenNotifyCalendarFieldChanged,
     ECalenNotifyCancelStatusUpdation,
     ECalenNotifyMarkedEntryCompleted,

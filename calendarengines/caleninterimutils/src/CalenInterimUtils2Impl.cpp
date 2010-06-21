@@ -45,6 +45,13 @@
 #include "CalenEcomWatcher.h"       // Watches for ECOM registry changes
 
 // CONSTANTS
+
+/* set the following to the number of 100ns ticks of the actual
+   resolution of your system's clock.
+   800MHZ means 1s->800*(10^6) clock cycles
+   100ns->80 clock cycles*/
+const TUint16 UUIDS_PER_TICK = 80;
+
 /// Unnamed namespace for local definitions
 namespace {
 
@@ -53,8 +60,7 @@ namespace {
 #endif
 
     const TInt KImeiLength = 15; // 15 chars from left of imei
-
-    const TInt KAsciiFirstNumber = 48;             // ASCII character 48 = '0'.
+    const TInt KAsciiFirstNumber = 48;             // ASCII character 48 = '0'.  
     const TInt KAsciiFirstLowercaseLetter = 97;    // ASCII character 97 = 'a'.
 
 }  // namespace
@@ -91,8 +97,8 @@ CCalenInterimUtils2Impl::CCalenInterimUtils2Impl()
     TRACE_ENTRY_POINT;
 
     iMrEnabledCheck = ETrue;
-    iMrEnabled = EFalse;
-    
+    iMrEnabled = EFalse;    
+    iInited = EFalse;
     TRACE_EXIT_POINT;
     }
 
@@ -279,15 +285,17 @@ HBufC8* CCalenInterimUtils2Impl::GlobalUidL()
     // http://www.webdav.org/specs/draft-leach-uuids-guids-01.txt
 
     // Number of 100ns ticks since Oct 15 1582.
-    TInt64 timeStamp = GetTicksFromGregorianCalendarStartL();
-
+    TInt64 timeStamp;
+    GetSystemTime(timeStamp);
+    
     // This differs slightly from the spec in that the clock sequence is just a pseudo-random number.
-       TUint32 clockSeq = Math::Random();
-       // IMEI is read the first time this is called, and stored for subsequent calls.
-       if(!iImeiNode)
-           {
-           iImeiNode = GetImeiAsNodeValueL();
-           }
+    TUint32 clockSeq = Math::Random();
+    
+    // IMEI is read the first time this is called, and stored for subsequent calls.
+    if(!iImeiNode)
+       {
+       iImeiNode = GetImeiAsNodeValueL();
+       }
 
     HBufC8* resultBuf = DoCreateUidLC(clockSeq, timeStamp, iImeiNode);
     CleanupStack::Pop(resultBuf);
@@ -313,7 +321,46 @@ TInt64 CCalenInterimUtils2Impl::GetTicksFromGregorianCalendarStartL()
     TTimeIntervalMicroSeconds msDifference = timeNow.MicroSecondsFrom(gregorianStart);
     
     TRACE_EXIT_POINT;
-    return msDifference.Int64() * 10; // * 10 to convert from micro sec (==1000 ns) count to 100ns count.
+    return ( timeNow.Int64() + msDifference.Int64() ) * 10; // * 10 to convert from micro sec (==1000 ns) count to 100ns count.
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenInterimUtils2Impl::GetSystemTime()
+// This function returns the system time.
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+void CCalenInterimUtils2Impl::GetSystemTime(TInt64& aTimeStamp)
+    {  
+    TRACE_ENTRY_POINT;
+    
+    if (!iInited)
+        {
+        aTimeStamp = GetTicksFromGregorianCalendarStartL();
+        iThisTick = UUIDS_PER_TICK; 
+        iInited = ETrue;
+        }
+    for( ; ; )
+        {
+        aTimeStamp = GetTicksFromGregorianCalendarStartL();
+        //if clock reading changed since last UUID generated...
+        if( iTimeLast != aTimeStamp )
+            {
+            //reset count of uuids gen'd with this clock reading             
+            iThisTick = 0;
+            iTimeLast = aTimeStamp;
+            break;
+            }
+        if( iThisTick < UUIDS_PER_TICK )
+            {
+            iThisTick++;
+            break;
+            }        
+        }
+        //add the count of uuids to low order bits of the clock reading 
+        aTimeStamp += iThisTick;
+        
+    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
@@ -370,104 +417,58 @@ HBufC8* CCalenInterimUtils2Impl::DoCreateUidLC( const TUint32& aClockSeq,
     TRACE_ENTRY_POINT;
     
     // The roast beef of the algorithm. Does all the shifting about as described in the web draft.
-    TUint32 time_low = aTimeStamp & 0xFFFFFFFF;
-    TUint16 time_mid = (aTimeStamp >> 32) & 0xFFFF;
-    TUint16 time_high = (aTimeStamp >> 48) & 0x0FFF;
-    time_high |= (1 << 12);
-    TUint8 clock_seq_low = aClockSeq & 0xFF;
-    TUint8 clock_seq_high = (aClockSeq & 0x3F00) >> 8;
-    clock_seq_high |= 0x80;
-
-    // Can't use RArray as that's set up for minimum 4 bytes per item.
-    CArrayFixFlat<TUint8> *node = new (ELeave) CArrayFixFlat<TUint8>(6);
-    CleanupStack::PushL(node);
-
-    // The rest of the function is mapping the 64, 32 and 16 bit numbers to 8 bit numbers
-    // while losing as little data as possible.
-
+    SUuid uuid;   
+    TUint8 hash[16];
+    
+    uuid.time_low = aTimeStamp & 0xFFFFFFFF;
+    uuid.time_mid = (aTimeStamp >> 32) & 0xFFFF;
+    uuid.time_high_and_version = (aTimeStamp >> 48) & 0x0FFF;
+    uuid.time_high_and_version |= (1 << 12);  
+    uuid.clock_seq_low = aClockSeq & 0xFF;
+    uuid.clock_seq_hi_and_reserved = (aClockSeq & 0x3F00) >> 8;
+    uuid.clock_seq_hi_and_reserved |= 0x80;
+   
     TUint64 mask = 0xFF0000000000;
     for(TInt i=0; i<=6; ++i)
         {
         TInt64 temp = aNodeValue & mask;
         temp >>= ((5-i)*8);
-        node->AppendL(temp);
+        uuid.node[i] = temp;
         mask = mask >> 8;
         }
 
-    TBuf8<16> rawOutput;
-
-    rawOutput.Append( (time_low  & 0xFF000000) >> 24 );
-    rawOutput.Append( (time_low  & 0x00FF0000) >> 16 );
-    rawOutput.Append( (time_low  & 0x0000FF00) >> 8 );
-    rawOutput.Append( (time_low  & 0x000000FF) );
-
-    rawOutput.Append( (time_mid  & 0xFF00) >> 8 );
-    rawOutput.Append( (time_mid  & 0x00FF) );
-
-    rawOutput.Append( (time_high & 0xFF00) >> 8 );
-    rawOutput.Append( (time_high & 0x00FF) );
-
-    rawOutput.Append( clock_seq_low );
-    rawOutput.Append( clock_seq_high );
-
-    for(TInt i=0; i<6; ++i)
-        {
-        rawOutput.Append( node->At(i) );
-        }
-    CleanupStack::PopAndDestroy(); // node
-    
-    TUint8 digest[16];
-    HBufC8* resultBuf = rawOutput.AllocLC();
-    TPtr8 resultBufPtr = resultBuf->Des();
-    TUint length = resultBufPtr.Length();
-    
-    // Create a new buffer to provide space for '\0'
-    HBufC8* newBuf = HBufC8::NewLC( length + 1 );//+1 space for '\0'
-    TPtr8 newBufPtr = newBuf->Des();
-    newBufPtr.Copy(resultBufPtr);
-    
-    // Appends a zero terminator onto the end of this descriptor's data
-    // and returns a pointer to the data.
-    char* chPtrTemp = ( char*)newBufPtr.PtrZ();
-    char* chPtr = ( char*) User::AllocL( length + 1 );
-    strcpy( chPtr , chPtrTemp );
-    
-    //md5 context
-    MD5_CTX* context = new MD5_CTX();
+    //md5 context   
+    MD5_CTX context;
     //initialize the context
-    MD5_Init(context);
+    MD5_Init(&context);
     //Append a string to the message
-    MD5_Update(context, chPtr, length );
+    MD5_Update(&context, &uuid, sizeof(uuid) );
     //Finish the message and return the digest.
-    MD5_Final(digest, context );
-    
+    MD5_Final(hash, &context );
     // Add the version field in the msb 4 bits. The value of version is 3.
-    digest[6] = digest[6] & 0x0F;
-    digest[6] |= (3 << 4);
+    hash[6] = hash[6] & 0x0F;
+    hash[6] |= (3 << 4);
     
     //Add the variant field in the msb 2 bits. The value of variant is 2.
-    digest[9] = digest[9] & 0x3F;
-    digest[9] |= 0x80;
-    
-    delete chPtr;
-    delete context;
-    CleanupStack::PopAndDestroy( newBuf );
-    CleanupStack::PopAndDestroy( resultBuf );
+    hash[8] = hash[8] & 0x3F;
+    hash[8] |= 0x80;
+           
     TBuf8<36> output;
     TInt i;
     for(i=0; i<16; ++i)
-        {
-        output.Append( ConvertToCharacterL( FirstFourBits( digest[i] ) ) ); 
-        output.Append( ConvertToCharacterL( LastFourBits( digest[i] ) ) );
-        if(i == 3 || i == 5 || i == 7 ||i == 9)
-            {
-            output.Append( '-' );
-            }
-        }
-    HBufC8* md5ResultBuf = output.AllocLC();
+      {
+      output.Append( ConvertToCharacterL( FirstFourBits( hash[i] ) ) ); 
+      output.Append( ConvertToCharacterL( LastFourBits( hash[i] ) ) );
+      if(i == 3 || i == 5 || i == 7 ||i == 9)
+          {
+          output.Append( '-' );
+          }
+      }
+    HBufC8* retBuf = output.AllocLC();
     
     TRACE_EXIT_POINT;
-    return md5ResultBuf;
+    return retBuf;
+    
     }
 
 // -----------------------------------------------------------------------------

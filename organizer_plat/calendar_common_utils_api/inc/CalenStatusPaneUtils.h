@@ -25,6 +25,7 @@
 class CCalenStatusPaneUtilsImpl;
 class CEikStatusPane;
 class CAknNavigationDecorator;
+class TRgb;
 
 /**
  * @class CCalenStatusPaneUtils 
@@ -78,6 +79,15 @@ NONSHARABLE_CLASS( CCalenStatusPaneUtils ) : public CBase
 		 * @return CAknNavigationDecorator* The navi pane decorator
 		 */
         IMPORT_C CAknNavigationDecorator* ShowNaviPaneL( const TTime& aActiveDay );
+        /**
+         * @brief Sets the calendar name and icon in the navi pane 
+         * and returns the decorator that can be set to the navi pane control
+         *
+         * @param aName The calendar name to be displayed in the navi pane
+         * @param aColor The color of the icon to be displayed.
+         * @return CAknNavigationDecorator* The navi pane decorator
+         */
+        IMPORT_C CAknNavigationDecorator* ShowNaviPaneL( const TDesC& aName, const TRgb aColor );
 
 		/**
 		 * @brief Hides the navi pane

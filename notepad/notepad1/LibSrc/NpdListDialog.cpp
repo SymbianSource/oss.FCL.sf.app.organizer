@@ -873,9 +873,18 @@ void CNotepadListDialog::DynInitMenuPaneL(
 		{
 		return;
 		}
+	
+    ClearSavedCurrentAndSelections();
+    SaveCurrentAndSelectionsL();
     iModel->SyncL(EFalse);
     CNotepadDialogBase::DynInitMenuPaneL( aResourceId, aMenuPane );
-    const TInt memoCount( iModel->MdcaCount() - KNumberOfFixedItem );
+    
+    TInt memoCount = iModel->MdcaCount();
+    if ( IsNoteListDialog() )
+        {
+        memoCount = memoCount - KNumberOfFixedItem;
+        }
+    
    	const TInt markCount(iListBox->SelectionIndexes()->Count());
 	TInt index;
 	switch (aResourceId )

@@ -20,6 +20,7 @@
  #include "calencontext.h"
  #include "CalenStatusPaneUtilsImpl.h"
  #include "calentitlepane.h"
+ #include "calencustomnavilabel.h"
  #include <Calendar.rsg>
  
  #include <aknnavi.h>
@@ -102,7 +103,13 @@ void CCalenStatusPaneUtilsImpl::HideNaviPane()
     AknTextUtils::DisplayTextLanguageSpecificNumberConversion(naviDes);
 
     iNaviLabel = iNaviContainer->Top();
-    if(iNaviLabel != NULL)
+    if(iNaviLabel != NULL && iNaviLabel->ControlType() != CAknNavigationDecorator::ENaviLabel)
+        {
+        HideNaviPane();
+        }
+    // iNaviLabel should be of type CAknNavigationDecorator::ENaviLabel for
+    // displaying date in navi pane.
+    if(iNaviLabel != NULL && iNaviLabel->ControlType() == CAknNavigationDecorator::ENaviLabel)
         {
         CCoeControl* coeRes = iNaviLabel->DecoratedControl();
         CAknNaviLabel *actualLabel = static_cast<CAknNaviLabel*>(coeRes);
@@ -127,6 +134,48 @@ void CCalenStatusPaneUtilsImpl::HideNaviPane()
         }
     
 
+    TRACE_EXIT_POINT;
+    return iNaviLabel;
+    }
+ // -----------------------------------------------------------------------------
+ // ?classname::?member_function
+ // ?implementation_description
+ // (other items were commented in a header).
+ // -----------------------------------------------------------------------------
+ //
+  CAknNavigationDecorator* CCalenStatusPaneUtilsImpl::ShowNaviPaneL( const TDesC& aName, const TRgb aColor )
+     {
+     TRACE_ENTRY_POINT;
+     
+     iNaviLabel = iNaviContainer->Top();
+     if(iNaviLabel != NULL && iNaviLabel->ControlType() != CAknNavigationDecorator::ENotSpecified)
+         {
+         HideNaviPane();
+         }
+     // iNaviLabel should be of type CAknNavigationDecorator::ENotSpecified for
+     // displaying calendar name and icon in navi pane.
+     if(iNaviLabel != NULL && iNaviLabel->ControlType() == CAknNavigationDecorator::ENotSpecified)
+         {
+         CCoeControl* coeRes = iNaviLabel->DecoratedControl();
+         CCustomNaviControl *actualLabel = static_cast<CCustomNaviControl*>(coeRes);
+         actualLabel->SetCalendarNameAndColor(aName, aColor);
+         actualLabel->DrawDeferred();
+         iNaviContainer->ReplaceL(*iNaviLabel, *iNaviLabel);
+         }
+     else
+         {
+         CCustomNaviControl *customControl = CCustomNaviControl::NewL(aName, aColor);
+         CleanupStack::PushL(customControl);
+         customControl->SetContainerWindowL(*iNaviContainer);
+         CleanupStack::Pop( customControl ); // customControl
+         
+         iNaviLabel = CAknNavigationDecorator::NewL(iNaviContainer, customControl, CAknNavigationDecorator::ENotSpecified);
+         
+         iNaviLabel->SetContainerWindowL( *iNaviContainer );
+         iNaviLabel->SetControlContext( iNaviContainer );
+         iNaviLabel->MakeScrollButtonVisible(EFalse);
+         iNaviContainer->PushL(*iNaviLabel);
+         }
     TRACE_EXIT_POINT;
     return iNaviLabel;
     }

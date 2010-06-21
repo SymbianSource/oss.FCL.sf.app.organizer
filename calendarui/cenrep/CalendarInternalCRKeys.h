@@ -139,5 +139,10 @@ const TUint32 KCalendarDefaultColors = 0x0000000F;
 */
 const TUint32 KCalendarAvailableValue = 0x00000010;
 
+/**
+* Boolean value containing week Number ON/OFF 
+* Default value:"0"
+*/
+const TUint32 KCalendarWeekViewNumber = 0x000000011;
 
 #endif  // CALENDARINTERNALCRKEYS_H

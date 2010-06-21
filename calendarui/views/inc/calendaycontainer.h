@@ -23,7 +23,7 @@
 //  INCLUDES
 #include <eiklbo.h>
 #include <caleninstanceid.h>            // TCalenInstanceId
-
+#include <gestureobserver.h>
 
 #include "calencontainer.h"
 #include "CalendarVariant.hrh"
@@ -39,12 +39,19 @@ class CCalenDayView;
 class CCalInstance;
 class CAknsFrameBackgroundControlContext;
 class TCalenInstanceId;
+
+namespace GestureHelper
+    {
+    class CGestureHelper;
+    }
+
 //  CLASS DEFINITIONS
 /**
  * CCalenDayContainer container control class for DayView.
  */
 NONSHARABLE_CLASS(  CCalenDayContainer ) : public CCalenContainer,
-                                                   public MEikListBoxObserver
+                                                   public MEikListBoxObserver,
+                                                   public GestureHelper::MGestureObserver
     {
 public: // Data
 
@@ -177,7 +184,13 @@ public:     // New function
      */
     void HandleLongTapEventL( const TPoint& aPenEventLocation, 
                               const TPoint& aPenEventScreenLocation );
-
+    
+    /**From MGestureObserver
+     * Handle the gesture event
+     * @param aEvent event describing the gesture 
+     */
+    virtual void HandleGestureL( const GestureHelper::MGestureEvent& aEvent );
+    
     /**
      * Check whether entry exists or not
      */
@@ -386,6 +399,14 @@ private:    // Data
     TTime& iDate;                   // Current day
     TInt& iHighlightedRowNumber;
     TInt& iFirstEntryOnScreenIndex;
+    
+    /**
+     * Gesture helper provides functionality to convert a stream of pointer 
+     * events into a logical gesture.
+     * Own.
+     */
+    GestureHelper::CGestureHelper* iGestureHelper;
+    TBool iGestureHandled;
     };
 
 #endif // CALENDAYCONTAINER_H

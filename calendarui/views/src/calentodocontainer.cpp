@@ -304,10 +304,10 @@ void CCalenTodoContainer::HandleListBoxEventL( CEikListBox* /*aListBox*/,
                 if( MarkedCount() )
                     {
                     // display the context sensitive menu
-                    /*CEikMenuBar* menuBar = iView->MenuBar();
+                    CEikMenuBar* menuBar = iView->MenuBar();
                     menuBar->SetContextMenuTitleResourceId(
                             R_TODO_LIST_SELECTION_CONTEXT_MENUBAR );
-                    menuBar->TryDisplayContextMenuBarL();*/
+                    menuBar->TryDisplayContextMenuBarL();
                     }
                 else
                     {

@@ -32,3 +32,4 @@
 -c8,8  qgn_stat_sync.svg
 -c8,8  qgn_indi_cale_tb_today.svg
 -c8,8  qgn_indi_cale_tb_changeview.svg
+-c8,8  qgn_indi_navi_color.svg

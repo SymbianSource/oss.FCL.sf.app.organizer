@@ -49,6 +49,8 @@
 #include "calenattachmentmodel.h"
 
 static const TUint32 KMaxMissedAlarms = 10;
+// Order of calendar window(at front) after Stop/Snooze of alarm from event viewer.
+static const TInt KCalendarWindowOnFront(0);
 
 // ----------------------------------------------------------------------------
 // CCalenAlarmManager::NewL
@@ -103,10 +105,9 @@ CCalenAlarmManager::~CCalenAlarmManager()
         }
     delete iMissedAlarmStore;
     
-    if(iMissedAlarmList.Count())
-        {
-        iMissedAlarmList.Close();
-        }
+      
+	iMissedAlarmList.Close();
+     
  
     TRACE_EXIT_POINT;
     }
@@ -288,6 +289,16 @@ void CCalenAlarmManager::HandleNotificationL( TCalenNotification aNotification )
             HandleMissedAlarmViewClosedL();
             }
             break;
+        case ECalenNotifyClearMissedAlarms:
+            {
+            TVwsViewId activeView;
+            iController.AppUi().GetActiveViewId(activeView);
+            if(activeView.iViewUid == KUidCalenMissedAlarmsView)
+                {
+                OnCmdClearAllMissedAlarmsL();
+                }
+            }
+            break;
         case ECalenNotifyMissedEventViewClosed:
             {
             HandleMissedEventViewClosedL();
@@ -448,7 +459,7 @@ void CCalenAlarmManager::StopAlarmContextListener(TBool aCloseEventView)
     
     // restore window group priority
     RWindowGroup& windowGroup = CCoeEnv::Static()->RootWin();
-    PIM_ASSERT( windowGroup.SetOrdinalPositionErr( iOrigWGPos, iOrigWGPrio ) );  
+	PIM_ASSERT( windowGroup.SetOrdinalPositionErr( KCalendarWindowOnFront, iOrigWGPrio ) );  
 
     //Close Event View
     if(aCloseEventView)
@@ -480,7 +491,7 @@ void CCalenAlarmManager::StopContextListenerForAutoSnooze()
     
     // restore window group priority
     RWindowGroup& windowGroup = CCoeEnv::Static()->RootWin();
-    PIM_ASSERT( windowGroup.SetOrdinalPositionErr( iOrigWGPos, iOrigWGPrio ) );  
+	PIM_ASSERT( windowGroup.SetOrdinalPositionErr( KCalendarWindowOnFront, iOrigWGPrio ) );  
     
     // After auto snooze, stop the alarm and open the event viewer in normal mode.
     iController.BroadcastNotification( ECalenNotifyStopAlarm );    
@@ -607,8 +618,18 @@ void CCalenAlarmManager::OnCmdClearAllMissedAlarmsL()
     TRACE_ENTRY_POINT;
     
     // Clear all the missed alarm events from cenrep
-    iMissedAlarmStore->RemoveAllL();
-   
+    
+    RPointerArray<CMissedAlarm> missedAlarmArray;      
+    CleanupResetAndDestroyPushL( missedAlarmArray );   
+    iMissedAlarmStore->GetL(missedAlarmArray);
+    for(TInt index = 0;index < missedAlarmArray.Count();index++)
+        {
+        // remove from cenrep
+        iMissedAlarmStore->RemoveL(*missedAlarmArray[index]);
+        }
+    
+    CleanupStack::PopAndDestroy(); // aMissedAlarmArray
+    
     if(iMissedAlarmList.Count())
         {
         iMissedAlarmList.Close();
@@ -731,8 +752,8 @@ void CCalenAlarmManager::HandleMissedAlarmViewClosedL()
     {
     TRACE_ENTRY_POINT;
     
-    // remove all the viewed events
-    RemoveAllViewedEventsL();
+    // remove all the missed alarms
+   OnCmdClearAllMissedAlarmsL();
     
     if(iPreviousToMissedAlarmView.iViewUid!=KNullUid)
         {
@@ -916,20 +937,20 @@ TBool CCalenAlarmManager::ClearOneMissedAlarmL( TInt aEntryLocalUid, TCalCollect
     {
     TRACE_ENTRY_POINT;
     
-    RPointerArray<CMissedAlarm> aMissedAlarmArray;      
-    CleanupResetAndDestroyPushL( aMissedAlarmArray );   
-    iMissedAlarmStore->GetL(aMissedAlarmArray);
+    RPointerArray<CMissedAlarm> missedAlarmArray;      
+    CleanupResetAndDestroyPushL( missedAlarmArray );   
+    iMissedAlarmStore->GetL(missedAlarmArray);
     TBool retValue = EFalse;
-    for(TInt index = 0;index < aMissedAlarmArray.Count();index++)
+    for(TInt index = 0;index < missedAlarmArray.Count();index++)
         {
-        if( aEntryLocalUid == aMissedAlarmArray[index]->iLuid )
+        if( aEntryLocalUid == missedAlarmArray[index]->iLuid )
             {
-            CCalSession &session = iController.Services().SessionL( aMissedAlarmArray[index]->iCalFileName );
+            CCalSession &session = iController.Services().SessionL( missedAlarmArray[index]->iCalFileName );
            TCalCollectionId colid = session.CollectionIdL();
             if( colid == aColid)
                 {
                 // remove from cenrep
-                iMissedAlarmStore->RemoveL(*aMissedAlarmArray[index]);
+                iMissedAlarmStore->RemoveL(*missedAlarmArray[index]);
                 retValue = ETrue;
                 break;
                 }

@@ -43,6 +43,7 @@
 
 // Constants
 const TInt KZerothDay( 0 );
+const TInt KNextDayIndex( 1 );
 const TInt KDaysInWeek( 7 );
 const TInt KFirstLine( 1 );
 const TInt KRepeatOnceIndex( 0 );
@@ -410,8 +411,7 @@ void CClockAlarmEditorImpl::PreLayoutDynInitL()
     
     // We don't display the alarm day selection item for repeated alarms of type daily, next 24 hours and
     // workdays. So when this functions is called, we check for the type and update the form accordingly.
-    if( KDailyIndex == iOccuranceIndex ||
-        KWorkdaysIndex == iOccuranceIndex )
+    if( KWeeklyIndex != iOccuranceIndex )
         {
         DeleteAlmDayCtrlL();
         }
@@ -666,8 +666,7 @@ void CClockAlarmEditorImpl::HandleOccuranceCmdL()
     
     // We don't display the alarm day selection item for repeated alarms of type daily, next 24 hours and
     // workdays. So when this functions is called, we check for the type and update the form accordingly.
-    if( KDailyIndex == iOccuranceIndex ||
-        KWorkdaysIndex == iOccuranceIndex )
+    if( KWeeklyIndex != iOccuranceIndex )
         {
         DeleteAlmDayCtrlL();
         }
@@ -952,8 +951,7 @@ void CClockAlarmEditorImpl::GetActualAlarmTime( const TTime& aHomeTime, TTime& a
     // Get the current day of the week.
     TInt currentDay( aHomeTime.DayNoInWeek() );
         
-    if( ( KRepeatOnceIndex == iOccuranceIndex ) ||
-        ( KWeeklyIndex == iOccuranceIndex ) )
+    if( KWeeklyIndex == iOccuranceIndex )
         {
         TInt dateOffset( KZerothDay );
 
@@ -980,6 +978,13 @@ void CClockAlarmEditorImpl::GetActualAlarmTime( const TTime& aHomeTime, TTime& a
             }
         aTimeFromForm += TTimeIntervalDays( dateOffset );
         }
+        else if( KRepeatOnceIndex == iOccuranceIndex )  
+            {            
+            if( aTimeFromForm < aHomeTime )
+                {                  
+                aTimeFromForm += TTimeIntervalDays( KNextDayIndex );
+                }            
+            }
     __PRINTS( "CClockAlarmEditorImpl::GetActualAlarmTime - Exit" );
     }
 

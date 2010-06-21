@@ -41,6 +41,7 @@
 #include <finditemmenu.h>
 #include "calenattachmentmodel.h" 
 
+#include <aknappui.h>
 // Button position of the MSK CBA button
 const TInt KSK2CBAPosition = 2;
 
@@ -158,8 +159,11 @@ CCalenView::TNextPopulationStep CCalenEventView::ActiveStepL()
         default:    
         	{
         	cnt->CompletePopulationL();
-        	RedrawStatusPaneL();
-        	UpdateToolbarButtonsL();
+        	if(!iAvkonAppUi->IsDisplayingMenuOrDialog())
+        	    {
+                RedrawStatusPaneL();
+                UpdateToolbarButtonsL();
+        	    }
         	nextStep = CCalenView::EDone;
         	}
         	break;
@@ -291,7 +295,10 @@ void CCalenEventView::DoDeactivateImpl()
         iServices.GetAttachmentData()->Reset();
         }
     iPreviousViewId.iViewUid = KNullUid;
-
+    if (!iAvkonAppUi->IsDisplayingMenuOrDialog())
+        {
+        iSPUtils->HideNaviPane();
+        }
     // Remove the toolbar buttons for event viewer before exiting from event view
     TRAP_IGNORE(RemoveToolbarButtonsL());
     
@@ -340,6 +347,7 @@ void CCalenEventView::RedrawStatusPaneL()
     iSPUtils->UnderLineTitleText( EFalse );
     iSPUtils->SetTitleText( titleText );    // ownership passed
     CleanupStack::Pop( titleText );
+    SetStatusPaneFromActiveContextL();
     iSPUtils->RefreshStatusPane();
 
     TRACE_EXIT_POINT;
@@ -407,7 +415,7 @@ void CCalenEventView::HandleCommandL(TInt aCommand)
                 }
             else
                 {
-                if(cnt->GetFindItemMenu()->CommandIsValidL(aCommand))
+                if(cnt->GetFindItemMenu()->CommandIsValidL(aCommand) && toolbarImpl)
                     {
                     CAknToolbar& toolbar = toolbarImpl->Toolbar();
                     toolbar.SetToolbarVisibility( EFalse );
@@ -440,7 +448,7 @@ void CCalenEventView::HandleCommandL(TInt aCommand)
            }
            break;
         default:
-            if(cnt->GetFindItemMenu()->CommandIsValidL(aCommand))
+            if(cnt->GetFindItemMenu()->CommandIsValidL(aCommand) && toolbarImpl)
                 {
                 CAknToolbar& toolbar = toolbarImpl->Toolbar();
                 toolbar.SetToolbarVisibility( EFalse );
@@ -810,7 +818,7 @@ void CCalenEventView::UpdateToolbarButtonsL()
     {
     // Get the existing toolbar from MCalenservices
     MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
-    CAknToolbar& toolbar = toolbarImpl->Toolbar();
+    
     TCalCollectionId colId = iServices.Context().InstanceId().iColId;
       
     // get multiple db data from services
@@ -822,20 +830,57 @@ void CCalenEventView::UpdateToolbarButtonsL()
     TInt index = calendarInfoList.Find( *calendarFileName, 
     CCalenEventViewContainer::CalendarInfoIdentifierL);
     CleanupStack::PopAndDestroy(calendarFileName);
-    
-    
-    if(!(calendarInfoList[index]->Enabled()))
+    if(toolbarImpl)
         {
-        toolbar.SetItemDimmed( ECalenSend, ETrue, ETrue );
-        toolbar.SetItemDimmed( ECalenDeleteCurrentEntry, ETrue, ETrue );
-        toolbar.SetItemDimmed( ECalenEditCurrentEntry, ETrue, ETrue );
-        }
-    else
-        {
-        toolbar.SetItemDimmed( ECalenSend, EFalse, ETrue );
-        toolbar.SetItemDimmed( ECalenDeleteCurrentEntry, EFalse, ETrue );
-        toolbar.SetItemDimmed( ECalenEditCurrentEntry, EFalse, ETrue );
+        CAknToolbar& toolbar = toolbarImpl->Toolbar();
+        if(!(calendarInfoList[index]->Enabled()))
+            {
+            toolbar.SetItemDimmed( ECalenSend, ETrue, ETrue );
+            toolbar.SetItemDimmed( ECalenDeleteCurrentEntry, ETrue, ETrue );
+            toolbar.SetItemDimmed( ECalenEditCurrentEntry, ETrue, ETrue );
+            }
+        else
+            {
+            toolbar.SetItemDimmed( ECalenSend, EFalse, ETrue );
+            toolbar.SetItemDimmed( ECalenDeleteCurrentEntry, EFalse, ETrue );
+            toolbar.SetItemDimmed( ECalenEditCurrentEntry, EFalse, ETrue );
+            }
         }
     CleanupStack::PopAndDestroy(&calendarInfoList);
+    }
+// ----------------------------------------------------------------------------
+// CCalenEventView::SetStatusPaneFromActiveContextL
+// Set the calendar name to status pane
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenEventView::SetStatusPaneFromActiveContextL()
+    {
+    TRACE_ENTRY_POINT;
+    
+    RPointerArray<CCalCalendarInfo> calendarInfoList;
+    iServices.GetAllCalendarInfoL(calendarInfoList);
+    CleanupClosePushL(calendarInfoList);
+
+    TCalCollectionId colId; 
+    colId = iServices.Context().InstanceId().iColId;
+
+    HBufC* calendarFileName = iServices.GetCalFileNameForCollectionId(colId).AllocLC();
+    TInt calIndex = calendarInfoList.Find( *calendarFileName, 
+            CCalenEventViewContainer::CalendarInfoIdentifierL);
+    CleanupStack::PopAndDestroy(calendarFileName);
+    if(calIndex != KErrNotFound)
+        {
+        HBufC* calendarName = calendarInfoList[calIndex]->NameL().AllocLC();
+        TRgb calendarColor = calendarInfoList[calIndex]->Color();
+        // navi pane
+        CAknNavigationDecorator* naviLabel = iSPUtils->ShowNaviPaneL( *calendarName, calendarColor );
+        CleanupStack::PopAndDestroy(calendarName);
+        }
+    CleanupStack::PopAndDestroy(&calendarInfoList);
+    
+
+    iSPUtils->RefreshStatusPane();
+    TRACE_EXIT_POINT;
     }
 //end of file

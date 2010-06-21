@@ -254,6 +254,7 @@ void CCalenController::ConstructL()
     
     notificationArray.Append(ECalenNotifyLostAlarms);
     notificationArray.Append(ECalenNotifyMissedAlarmViewClosed);
+    notificationArray.Append(ECalenNotifyClearMissedAlarms);
     notificationArray.Append(ECalenNotifyMissedEventViewClosed);
     notificationArray.Append(ECalenNotifyEntryDeleted);
     notificationArray.Append(ECalenNotifyInstanceDeleted);

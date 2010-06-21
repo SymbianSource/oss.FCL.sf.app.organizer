@@ -1636,6 +1636,35 @@ RESOURCE DIALOG r_notepad_delete_query
   {
      buf = qtn_nmake_no_memos_secondary_text_nontouch ;
   } 
+ 
+ // -----------------------------------------------------------------------------
+ //
+ // r_notepad_loadfile_progress_dialog
+ // progress dialog for load file
+ //
+ // -----------------------------------------------------------------------------
+ //
+
+ RESOURCE DIALOG r_notepad_loadfile_progress_dialog
+     {
+     flags = EAknWaitNoteFlags;
+     buttons = R_AVKON_SOFTKEYS_CANCEL;
+     items=
+         {
+         DLG_LINE
+             {
+             type = EAknCtNote;
+             id = EGeneralQuery;
+             control= AVKON_NOTE 
+                 { 
+                 layout = EWaitLayout;
+                 singular_label = qtn_nmake_om_open_memo;
+                 animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                 };
+             }
+         };
+     }
+ 
 // Default templates
 //
 #include "NpdDefaultTemplates.ra"

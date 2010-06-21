@@ -676,6 +676,12 @@ void CCalenUnifiedEditorControl::SetAllDayEvent( TBool aActive )
     TRACE_ENTRY_POINT;
     
     iAllDayField->SetAllDayEvent( aActive );
+    //set defalut alarmtime when allday field is activated/deactivated
+    if(iUnifiedEditor.EditorFields().IsAlarmActiveInForm())
+        {
+        iUnifiedEditor.EditorDataHandler().SetDefaultAlarmDateTimeL();
+        iReminderField->SetDataToEditorL();
+        }
     
     TRACE_EXIT_POINT
     }

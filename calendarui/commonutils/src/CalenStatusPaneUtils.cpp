@@ -18,6 +18,7 @@
  //debug
  #include "calendarui_debug.h"
  #include <CalenStatusPaneUtils.h>
+ #include <gdi.h>
  #include "CalenStatusPaneUtilsImpl.h"
  
  
@@ -49,6 +50,19 @@ EXPORT_C void CCalenStatusPaneUtils::HideNaviPane()
     TRACE_EXIT_POINT;
     return iStatusPaneUtils->ShowNaviPaneL( aActiveDay );
     }
+ // -----------------------------------------------------------------------------
+ // CCalenStatusPaneUtils::ShowNaviPaneL
+ // Sets the calendar name and icon in the navi pane
+ // (other items were commented in a header).
+ // -----------------------------------------------------------------------------
+ //
+ EXPORT_C CAknNavigationDecorator* CCalenStatusPaneUtils::ShowNaviPaneL( const TDesC& aName, const TRgb aColor )
+     {
+     TRACE_ENTRY_POINT;
+
+     TRACE_EXIT_POINT;
+     return iStatusPaneUtils->ShowNaviPaneL( aName, aColor );
+     }
 
 // -----------------------------------------------------------------------------
 // ?classname::?member_function

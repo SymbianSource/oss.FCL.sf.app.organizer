@@ -19,17 +19,19 @@
 #ifndef CALENWEEKCONT_H
 #define CALENWEEKCONT_H
 
-//  INCLUDES
-#include "calencontainer.h"
-#include "calenweekcallback.h"
-#include "calenweekdata.h"
 
-#include "calenglobaldata.h"
 #include <calsession.h>
 #include <calenconstants.h>
 #include <AknUtils.h>
 #include <calcommon.h>  // CalCommon::TCalViewFilter
 #include <caleninstanceid.h>            // TCalenInstanceId
+#include <gestureobserver.h>  //MGestureObserver
+
+//  INCLUDES
+#include "calencontainer.h"
+#include "calenweekcallback.h"
+#include "calenweekdata.h"
+#include "calenglobaldata.h"
 
 // FORWARD DECLARATIONS
 class CAknsFrameBackgroundControlContext;
@@ -42,6 +44,11 @@ class TAknWindowLineLayout;
 class TCalenInstanceId;
 class CCalInstanceView;
 class MCalenPreview;
+
+namespace GestureHelper
+    {
+    class CGestureHelper;
+    }
 
 typedef CArrayFixFlat<CCalHourItem*>* CWeekSlotArrayPtr;
 
@@ -79,7 +86,8 @@ public:
  *  Container control for Week View.
  */
 NONSHARABLE_CLASS( CCalenWeekContainer ) : public CCalenContainer,
-                                           public MCalenWeekCursorObserver
+                                           public MCalenWeekCursorObserver,
+                                           public GestureHelper::MGestureObserver
     {
 public:
     enum TLocaleChangeRedraw
@@ -108,6 +116,7 @@ public:
      * Create icon indices
      */
     void CreateIconIndicesL( RArray<MCalenServices::TCalenIcons>& aIndexArray );
+    
 public:  // New Function
     /**
      * Check with the layoutmanager for any layout chnanges
@@ -193,6 +202,12 @@ public:
     void HandleNaviDecoratorEventL(TInt aDirection);
     void HandleLongTapEventL( const TPoint& aPenEventLocation, 
                               const TPoint& aPenEventScreenLocation );
+    
+    /**
+     * Handle the gesture event
+     * @param aEvent event describing the gesture 
+     */
+    virtual void HandleGestureL( const GestureHelper::MGestureEvent& aEvent );
     
 private:    // New Function
     TInt HighlightRowFromActiveContextL(TInt aColumn);
@@ -441,6 +456,15 @@ private:  // New variables
     TBool iRow;
     TBool iValidDay;
     TBool iHourChange;
+    
+    /**
+     * Gesture helper provides functionality to convert a stream of pointer 
+     * events into a logical gesture.
+     * Own.
+     */
+    // Own: Gesture helper
+    GestureHelper::CGestureHelper* iGestureControl;
+    TBool iGestureHandled;
     };
 
 #endif //CALENWEEKCONT_H

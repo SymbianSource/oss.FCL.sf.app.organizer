@@ -2639,5 +2639,23 @@
 //w:
 //r:9.2
 #define qtn_todo_all_task_updated  "All to-do notes updated"
+
+//d:Confirmation note shown, when tasks are updated
+//l:list_setting_pane_t1/opt1
+//w:
+//r:9.2
+#define qtn_cale_set_show_wk_number  "Show week number"
+
+//d:Confirmation note shown, when tasks are updated
+//l:list_set_graphic_pane_t1
+//w:
+//r:9.2
+#define qtn_cale_set_show_wk_number_yes  "Yes"
+
+//d:Confirmation note shown, when tasks are updated
+//l:list_set_graphic_pane_t1
+//w:
+//r:9.2
+#define qtn_cale_set_show_wk_number_no  "No"
         
 // End of File

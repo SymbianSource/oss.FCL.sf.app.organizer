@@ -27,7 +27,6 @@
 #include "calencontainer.h"
 #include <eikmenup.h>
 #include <cenrepnotifyhandler.h>
-#include <eiklabel.h>
 #include <AknServerApp.h>
 // forward declarations
 class CEikRichTextEditor;
@@ -465,14 +464,6 @@ public: // New methods
      * viewer/editor.
      */
     RPointerArray<CCalEntry>& AllInstancesL();
-    /**
-      * Get the available label rect for this container
-      */
-     TRect GetLabelRectL( );    
-	 
-	 
-     void SetLabelContentL( CEikLabel& aLabel );
-
 
     /**
     * From MCenRepNotifyHandlerCallback

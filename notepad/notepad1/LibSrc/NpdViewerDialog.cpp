@@ -50,8 +50,16 @@
 #include "NpdUtil.h"
 #include "NpdRichTextEditor.h"
 #include "NpdLibPanic.h"
-
 #include <csxhelp/nmake.hlp.hrh>
+
+// CONSTANTS
+
+// when the file length is larger than this value, that need to load by steps 
+static const TInt KFileLengthNeedLoadBySteps = 1024 * 100;
+// the time value for interval to start the timer for close the notepad dialog 
+static const TUint KCloseNotepadDialogInterval = 500000; //microseconds
+// the time value for delay to start the timer for close the notepad dialog 
+static const TUint KCloseNotepadDialogDelay = 1; // microseconds
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -117,6 +125,8 @@ EXPORT_C CNotepadViewerDialog::~CNotepadViewerDialog()
         }
     delete iCenRepSession;
     iCenRepSession = NULL;
+    delete iLoadFileAO;
+    iLoadFileAO = NULL;
     }
 
 // -----------------------------------------------------------------------------
@@ -230,7 +240,7 @@ EXPORT_C void CNotepadViewerDialog::LoadFileL()
     {
     __ASSERT_DEBUG( iEditor, Panic(ENotepadLibraryPanicNoEdwin) );
     __ASSERT_DEBUG( iFilename, Panic(ENotepadLibraryPanicNoFileSpecified) );
-    iEditor->SetTextL(NULL);
+    iEditor->SetTextL(NULL); 
     NotepadUtil::LoadFileL( *iCoeEnv, *iFilename, iGuessEncoding,
         iEncoding, *(iEditor->Text()) );
     iEditor->SetAmountToFormat(iEditor->Text()->DocumentLength());
@@ -248,8 +258,17 @@ EXPORT_C void CNotepadViewerDialog::LoadFileL(RFile& aFile)
     {
     __ASSERT_DEBUG( iEditor, Panic(ENotepadLibraryPanicNoEdwin) );
     //__ASSERT_DEBUG( iFilename, Panic(ENotepadLibraryPanicNoFileSpecified) );
+   
+    TInt fileSize(0);
+    User::LeaveIfError( aFile.Size( fileSize ) );  
+    if ( fileSize >= KFileLengthNeedLoadBySteps )
+       {
+       LoadFileByStepsL( aFile );
+       return;
+       }
+    
     iEditor->SetTextL(NULL);
-   TBool error = NotepadUtil::LoadFileL( *iCoeEnv, aFile, iGuessEncoding,
+    TBool error = NotepadUtil::LoadFileL( *iCoeEnv, aFile, iGuessEncoding,
         iEncoding, *(iEditor->Text()) );
     iEditor->SetAmountToFormat(iEditor->Text()->DocumentLength()); 
     iEditor->HandleTextChangedL();
@@ -257,8 +276,7 @@ EXPORT_C void CNotepadViewerDialog::LoadFileL(RFile& aFile)
     iAutoFinder->SetItemFinderObserverL( this );
     RefreshTitleL();
     if( error != KErrNone)
-        {
-        
+        {     
         HBufC* text = StringLoader::LoadLC(R_NOTEPAD_QTN_FILE_CORRUPTED);
         CAknErrorNote* mErrorNote;
         mErrorNote = new (ELeave) CAknErrorNote( ETrue );
@@ -268,11 +286,12 @@ EXPORT_C void CNotepadViewerDialog::LoadFileL(RFile& aFile)
         iPeriodicTimer = CPeriodic::NewL( CActive::EPriorityStandard );    
         if( !iPeriodicTimer->IsActive() )
             {
-              iPeriodicTimer->Start( 1, 1000000/2, 
-                               TCallBack( CNotepadViewerDialog::TimerCallbackL, this ) );
-	        }
+            iPeriodicTimer->Start( KCloseNotepadDialogDelay, KCloseNotepadDialogInterval, 
+                           TCallBack( CNotepadViewerDialog::TimerCallbackL, this ) );
+            }
         }
     }
+
 
 // -----------------------------------------------------------------------------
 // CNotepadViewerDialog::OpenFileL
@@ -831,11 +850,9 @@ void CNotepadViewerDialog::DynInitMenuPaneL(
                 	    aMenuPane->AddMenuItemL(item, EFindItemMenuPlaceHolder);
                         }
                     }
-
                 }
-
             iFindMenu->AddItemFindMenuL(iAutoFinder,aMenuPane,EFindItemMenuPlaceHolder,KNullDesC);
-
+            
    			if(!FeatureManager::FeatureSupported(KFeatureIdHelp))
 				{
 				aMenuPane->DeleteMenuItem(EAknCmdHelp);
@@ -900,5 +917,112 @@ TInt CNotepadViewerDialog::TimerCallbackL(TAny* aPtr)
 EXPORT_C void CNotepadViewerDialog::CNotepadViewerDialog_Reserved()
     {
     }
+
+// -----------------------------------------------------------------------------
+// CNotepadViewerDialog::LoadFileByStepsL 
+// -----------------------------------------------------------------------------
+//
+void CNotepadViewerDialog::LoadFileByStepsL(RFile& aFile)
+    {
+    __ASSERT_DEBUG( iEditor, Panic(ENotepadLibraryPanicNoEdwin) );
+    //__ASSERT_DEBUG( iFilename, Panic(ENotepadLibraryPanicNoFileSpecified) );
+    iEditor->SetTextL(NULL); 
+    
+    // lanuch the progress bar
+    CleanProgressDialogL();  
+    iProgressDialogLoadfile = new( ELeave ) CAknProgressDialog(
+      reinterpret_cast< CEikDialog** >( &iProgressDialogLoadfile ),
+      EFalse );
+    iProgressDialogLoadfile->SetCallback( this );
+    iProgressDialogLoadfile->ExecuteLD( R_NOTEPAD_LOADFILE_PROGRESS_DIALOG );
+    
+    // start a active object to load file
+    if ( iLoadFileAO ) 
+        {
+        delete iLoadFileAO;
+        iLoadFileAO = NULL;
+        }
+    iLoadFileAO = CNotepadLoadFileAO::NewL( this,  *iCoeEnv, aFile, iGuessEncoding,
+            iEncoding, *(iEditor->Text()) );
+    
+    if ( KErrNone != iLoadFileAO->StartLoadFile() )
+        {
+        ExitDialogOnTimerExpireL();
+        }
+    }
+
+
+// -----------------------------------------------------------------------------
+// CNotepadViewerDialog::CleanProgressDialogL()
+// -----------------------------------------------------------------------------
+//
+void CNotepadViewerDialog::CleanProgressDialogL()
+    {
+    if ( iProgressDialogLoadfile )
+        {
+        iProgressDialogLoadfile->ProcessFinishedL();
+        iProgressDialogLoadfile = NULL;
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CNotepadViewerDialog::DialogDismissedL
+// -----------------------------------------------------------------------------
+//
+void CNotepadViewerDialog::DialogDismissedL( TInt aButtonId )
+    {
+    if ( ( EAknSoftkeyCancel == aButtonId ) && iLoadFileAO )
+        {
+        iLoadFileAO->CancelLoadFile();
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CNotepadViewerDialog::NotifyCompletedL
+// -----------------------------------------------------------------------------
+//
+void CNotepadViewerDialog::NotifyCompletedL( TInt aErrCode )
+    {  
+ 
+    // load file is completed for one step
+    if ( KErrStep == aErrCode )
+        {
+        iEditor->SetAmountToFormat(iEditor->Text()->DocumentLength());
+        iEditor->HandleTextChangedL();
+        }
+    // load file is completed 
+    else if ( KErrNone == aErrCode ) 
+        {
+        CleanProgressDialogL(); 
+        iEditor->SetAmountToFormat(iEditor->Text()->DocumentLength());
+        iEditor->HandleTextChangedL();
+        iAutoFinder->SetEditor((CEikRichTextEditor**)&iEditor);
+        iAutoFinder->SetItemFinderObserverL( this );
+        RefreshTitleL();
+        }
+    // load file cancel
+    else if ( KErrCancel == aErrCode )
+        {
+        ExitDialogOnTimerExpireL();
+        }
+    // that occur error during load file
+    else
+        {
+        CleanProgressDialogL(); 
+        HBufC* text = StringLoader::LoadLC(R_NOTEPAD_QTN_FILE_CORRUPTED);
+        CAknErrorNote* mErrorNote;
+        mErrorNote = new (ELeave) CAknErrorNote( ETrue );
+        mErrorNote->ExecuteLD(*text);
+        CleanupStack::PopAndDestroy( text );
+        iPeriodicTimer = CPeriodic::NewL( CActive::EPriorityStandard );        
+        if ( !iPeriodicTimer->IsActive() )
+            {
+            iPeriodicTimer->Start( KCloseNotepadDialogDelay, KCloseNotepadDialogInterval, 
+                               TCallBack( CNotepadViewerDialog::TimerCallbackL, this ) );
+            }
+        }
+  
+    }
+        
 
 // End of File  

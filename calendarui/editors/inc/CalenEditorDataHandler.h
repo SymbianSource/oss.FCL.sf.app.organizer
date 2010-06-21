@@ -340,11 +340,6 @@ private:
      */
     TBool LocationEnabledInUiL();
 
-    /**
-     * @brief Returns ETrue if the user is creating a new entry, EFalse if the user
-     *        is editing an existing entry.
-     */
-    TBool IsCreatingNew() const;
 
     /**
      * @brief Sets the default values when creating a new entry.
@@ -485,6 +480,11 @@ private:
     
     
 public:
+    /**
+     * @brief Returns ETrue if the user is creating a new entry, EFalse if the user
+     *        is editing an existing entry.
+     */
+    TBool IsCreatingNew() const;
 
     /**
      * @brief Set if calendar is been edited or not with previous and current collection id

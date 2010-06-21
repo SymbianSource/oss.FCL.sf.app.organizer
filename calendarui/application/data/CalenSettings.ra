@@ -345,6 +345,64 @@ RESOURCE AVKON_POPUP_SETTING_TEXTS r_calen_weekformat_texts
 
 
 // -------------------------
+// Week Number setting
+// -------------------------
+
+RESOURCE TBUF r_calen_setting_weeknumber_title
+    {
+    buf = qtn_cale_set_show_wk_number;
+    }
+
+RESOURCE AVKON_SETTING_PAGE r_calen_setting_weeknumber
+    {
+    label =  qtn_cale_set_show_wk_number;
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    type =  EAknCtPopupSettingList;
+    editor_resource_id= r_calen_setting_listbox;
+    }
+
+RESOURCE ARRAY r_calendar_weeknumber_choicelist
+    {
+    items =
+        {
+        LBUF
+            {
+            txt = qtn_cale_set_show_wk_number_no; 
+            },
+        LBUF
+            {
+            txt = qtn_cale_set_show_wk_number_yes;
+            }
+        };
+    }
+
+
+//    Defines list for setting page
+RESOURCE ARRAY r_calendar_weeknumber_array
+    {
+    items =
+        {
+        AVKON_ENUMERATED_TEXT
+            {
+            value = 0;
+            text = qtn_cale_set_show_wk_number_no;
+            },
+        AVKON_ENUMERATED_TEXT
+            {
+            value = 1;
+            text = qtn_cale_set_show_wk_number_yes;
+            }
+        };
+    }
+
+//    Defines list for setting page
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_calen_weeknumber_texts
+    {
+    setting_texts_resource = r_calendar_weeknumber_array;
+    popped_up_texts_resource = r_calendar_weeknumber_choicelist;
+    }
+
+// -------------------------
 // Week title setting
 // -------------------------
 

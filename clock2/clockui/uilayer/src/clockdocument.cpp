@@ -205,7 +205,7 @@ CClkUiAlarmModel* CClockDocument::AlarmModel()
     return iAlarmModel;
     }
 
-// ---------------------------------------------------------
+/*// ---------------------------------------------------------
 // CClockDocument::GetPrevAlarmTime
 // rest of the details are commented in the header
 // ---------------------------------------------------------
@@ -223,7 +223,7 @@ TTime CClockDocument::GetPrevAlarmTime()
 void CClockDocument::SetPrevAlarmTime( TTime aPrevAlarmTime )
     {
     iPrevAlarmTime = aPrevAlarmTime.Int64();
-    }
+    }*/
 
 // ---------------------------------------------------------
 // CClockDocument::GetWorldClockList

@@ -74,7 +74,12 @@ public:  // New functions
      * @return Week title - EWeekTitleNumber | EWeekTitleDuration
      */
     IMPORT_C TCalenWeekTitle WeekTitle() const;
-
+ 	
+	/**
+     * Return week number   
+	 * @return TCalenWeekNumber 
+     */
+    IMPORT_C TCalenWeekNumber WeekNumberEnable() const;
     /**
      * Return setting for calendar alarm snooze time.
      * @return Minutes to snooze.
@@ -132,7 +137,12 @@ public:  // New functions
      * @param aTitle EWeekTitleNumber | EWeekTitleDuration
      */
     IMPORT_C void SetWeekTitle( TCalenWeekTitle aTitle );
-
+	
+ 	/**
+     * Set week number
+     * @param TCalenWeekNumber
+     */
+   IMPORT_C void SetWeekNumber( TCalenWeekNumber aNumber );
     /**
      * Set snooze time.
      * @param aSnoozeTime Snooze time in minutes.
@@ -215,6 +225,7 @@ private:    // Data
     TUid                      iDefaultView;
     TDay                      iWeekFormat;
     TCalenWeekTitle           iWeekTitle;
+    TCalenWeekNumber          iWeekNumber;
     TInt                      iSnoozeTime;
     CCalenCustomisationManager::CCalenPluginStatusArray  iPluginAvailability;
 #ifdef RD_CALEN_EXTERNAL_CAL

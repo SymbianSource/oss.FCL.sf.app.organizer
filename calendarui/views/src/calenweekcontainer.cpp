@@ -43,6 +43,7 @@
 #include <mcalenpreview.h>
 #include <Calendar.rsg>
 #include <csxhelp/cale.hlp.hrh>
+#include <gesturehelper.h> //CGestureHelper
 
 #include "calendarui_debug.h"
 #include "calenweekcontainer.h"
@@ -218,6 +219,7 @@ CCalenWeekContainer::~CCalenWeekContainer()
 
     ResetSlotTable();
     delete iBackgroundSkinContext;
+    delete iGestureControl;
 
     TRACE_EXIT_POINT;
     }
@@ -424,7 +426,7 @@ void CCalenWeekContainer::SetActiveContextFromHighlightL(TBool aInstAvailable)
         //    * Focus on instanceId and datetime
         // 2. Timed item, 1-n for each cell, on same/ different day
         //    * Focus on datetime
-        if( itemInfo.HasInstance() && aInstAvailable)
+        if( itemInfo.HasInstance() && aInstAvailable && iViewPopulationComplete)
             {
             TCalenInstanceId instId = TCalenInstanceId::CreateL( *itemInfo.iInstance );
             if( !itemInfo.IsTimed() )       // todo/anniv/memo
@@ -1285,6 +1287,10 @@ void CCalenWeekContainer::ConstructImplL()
     iRow = EFalse;
     iTopRowDefault =  EFalse;
 
+    iGestureControl = GestureHelper::CGestureHelper::NewL( *this );
+    iGestureControl->SetDoubleTapEnabled( EFalse );
+    iGestureControl->SetHoldingEnabled( EFalse );
+
     TRACE_EXIT_POINT;
     }
 
@@ -2014,6 +2020,39 @@ TBool CCalHourItem::IsTimed() const
     return iTimedNote;
     }
 
+// ----------------------------------------------------------------------------
+// CCalenMonthContainer::HandleGestureL
+// 
+// ----------------------------------------------------------------------------
+void CCalenWeekContainer::HandleGestureL( const GestureHelper::MGestureEvent& aEvent )
+    {
+    GestureHelper::TGestureCode code = aEvent.Code( GestureHelper::MGestureEvent::EAxisBoth ); 
+    
+    switch ( code )
+        {
+        case GestureHelper::EGestureStart:
+            {
+            iGestureHandled = EFalse;
+            break;
+            }
+        case GestureHelper::EGestureSwipeRight:
+            {
+            HandleNaviDecoratorEventL( EAknNaviDecoratorEventLeftTabArrow );
+            }
+            iGestureHandled = ETrue;
+            break;
+            
+        case GestureHelper::EGestureSwipeLeft:
+            {
+            HandleNaviDecoratorEventL( EAknNaviDecoratorEventRightTabArrow );
+            }
+            iGestureHandled = ETrue;
+            break;
+         default:
+            // Other gestures are not handled here
+            break;
+        }
+    }
 
 // ----------------------------------------------------------------------------
 // CCalenWeekContainer::HorizontalWeekMoveL
@@ -2184,6 +2223,16 @@ void CCalenWeekContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent
                     }
                 }
             return;
+            }
+        
+        if ( iGestureControl )
+            {
+            iGestureControl->HandlePointerEventL( aPointerEvent );
+            if ( iGestureHandled )
+                {
+                TRACE_EXIT_POINT;
+                return;
+                }
             }
         
         switch(aPointerEvent.iType)

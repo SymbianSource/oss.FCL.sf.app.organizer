@@ -33,6 +33,7 @@
 #include <calencontext.h>
 #include <CalenStatusPaneUtils.h>
 #include <caleninstanceid.h>            // TCalenInstanceId
+#include <aknappui.h>
 
 // user includes
 #include "calenmissedeventview.h"
@@ -150,7 +151,10 @@ CCalenView::TNextPopulationStep CCalenMissedEventView::ActiveStepL()
         default:    
         	{
         	cnt->CompletePopulationL();
-        	RedrawStatusPaneL();
+        	if(!iAvkonAppUi->IsDisplayingMenuOrDialog())
+        	    {
+                RedrawStatusPaneL();
+        	    }
         	
         	//no tool bar in missed event view
         	MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 

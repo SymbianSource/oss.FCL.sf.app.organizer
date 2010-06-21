@@ -788,6 +788,12 @@ void CCalenSettingsUiContainer::CreateListBoxItemsL()
                          R_CALEN_WEEKFORMAT_TEXTS,
                          ordinal++ );
 
+    AddEnumerationItemL( iWeekNumberEnable,
+                         ECalenWeekNumberItemId,
+                         R_CALEN_SETTING_WEEKNUMBER_TITLE,
+                         R_CALEN_SETTING_WEEKNUMBER,
+                         R_CALEN_WEEKNUMBER_TEXTS,
+                         ordinal++ );
 
     // Always add this in. We will set it hidden when it's not needed (i.e. when the
     // week start is set to anything other than "Monday") at the bottom of this function.
@@ -839,6 +845,7 @@ void CCalenSettingsUiContainer::CreateListBoxItemsL()
 
     // Hide the week title setting if the week start is anything other than Monday.
     Item( ECalenWeekTitleItemId )->SetHidden( !ShouldShowWeekTitleItem() );
+    Item( ECalenWeekNumberItemId )->SetHidden( !ShouldShowWeekTitleItem() );
 
     TRACE_EXIT_POINT;
     }
@@ -935,10 +942,12 @@ void CCalenSettingsUiContainer::ValidateWeekTitleItemL( CAknSettingItem *aItem )
     if ( wasShown != doShow )
         {
         Item( ECalenWeekTitleItemId )->SetHidden( !doShow );
+        Item( ECalenWeekNumberItemId )->SetHidden( !doShow );
 
         if ( !doShow )
             {
             Item( ECalenWeekTitleItemId )->LoadL();
+            Item( ECalenWeekNumberItemId )->LoadL();            
             }
 
         iSettingItemArray->RecalculateVisibleIndicesL();
@@ -1012,7 +1021,7 @@ EXPORT_C void CCalenSettingsUiContainer::HandleListBoxSelectionL( TInt aCommand 
         iPageStatus = aPageStatus;
         // for week title only two options available
         // so let's toggle instead of opening setting page
-        if( item->Identifier() != ECalenWeekTitleItemId )
+        if( (item->Identifier() != ECalenWeekTitleItemId) && (item->Identifier() != ECalenWeekNumberItemId))
             {
             item->EditItemL( aCommand == EAknCmdOpen );
             }
@@ -1049,6 +1058,14 @@ EXPORT_C void CCalenSettingsUiContainer::HandleListBoxSelectionL( TInt aCommand 
                     iSetting->SetWeekTitle( static_cast<TCalenWeekTitle>( iWeekTitle ) == EWeekTitleNumber ?
                             EWeekTitleDuration  : EWeekTitleNumber );
                     iWeekTitle = iSetting->WeekTitle();
+                    item->LoadL();
+                    item->UpdateListBoxTextL();
+                    break;
+                case ECalenWeekNumberItemId:
+                    // toggling option done here
+                    iSetting->SetWeekNumber( static_cast<TCalenWeekNumber>( iWeekNumberEnable ) == EWeekNumberOn ?
+                        EWeekNumberOff : EWeekNumberOn );
+                    iWeekNumberEnable = iSetting->WeekNumberEnable();
                     item->LoadL();
                     item->UpdateListBoxTextL();
                     break;
@@ -1267,6 +1284,7 @@ void CCalenSettingsUiContainer::LoadCurrentValuesL()
     iDefView = iSetting->DefaultView().iUid;
     iWeekFormat = iSetting->WeekFormat();
     iWeekTitle = iSetting->WeekTitle();
+    iWeekNumberEnable = iSetting->WeekNumberEnable();
     iSnoozeTime = iSetting->SnoozeTime();
 #ifdef RD_SCALABLE_UI_V2_NO_TOOLBAR_SETTING
     iToolbar = iSetting->Toolbar();

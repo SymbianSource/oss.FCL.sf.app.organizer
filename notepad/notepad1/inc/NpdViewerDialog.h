@@ -21,10 +21,11 @@
 
 // INCLUDES
 #include <charconv.h>
-#include "NpdDialogBase.h"
 #include <centralrepository.h>
 #include <cenrepnotifyhandler.h>
 #include <itemfinderobserver.h>
+#include "NpdDialogBase.h"
+#include "NpdLoadFileAO.h"
 
 // FORWARD DECLARATIONS
 class CNotepadRichTextEditor;
@@ -43,7 +44,9 @@ class CPlainText;
 */
 class CNotepadViewerDialog : public CNotepadDialogBase,
                              public MCenRepNotifyHandlerCallback,
-                             public MAknItemFinderObserver
+                             public MAknItemFinderObserver,
+                             public MProgressDialogCallback,
+                             public MNotepadLoadFileObserver
 
     {
     public: // Constructor and destructor
@@ -222,7 +225,17 @@ class CNotepadViewerDialog : public CNotepadDialogBase,
                 const CItemFinder::CFindItemExt& aItem,
                 MAknItemFinderObserver::TEventFlag aEvent,
                 TUint aFlags );
-
+    
+    public: // From MProgressDialogCallback       
+        void DialogDismissedL( TInt aButtonId );
+        
+    public: // From MNotepadLoadFileObserver   
+        /**
+        * Notify the observer that load file completed.
+        * @param aErrCode the result of load file completed.
+        * @since 5.2
+        */
+        void NotifyCompletedL( TInt aErrCode );
 
     private: // New function
 
@@ -311,6 +324,19 @@ class CNotepadViewerDialog : public CNotepadDialogBase,
         * Called in callback function to exit the dialog
         */
         void ExitDialogOnTimerExpireL();
+        
+        /**
+        * Clean the progress dialog
+        * @since 5.2
+        */
+        void CleanProgressDialogL(); 
+        
+        /**
+        * load the file step by step
+        * @param aFile  the file object to load
+        * @since 5.2
+        */
+        void LoadFileByStepsL(RFile& aFile);
 
     private: // Data
 
@@ -356,6 +382,13 @@ class CNotepadViewerDialog : public CNotepadDialogBase,
         // Notifier to listen changes of offline state
         CCenRepNotifyHandler* iNotifier;
         CPeriodic*  iPeriodicTimer;
+        
+        // Own: Active object for load file asynchronous
+        CNotepadLoadFileAO* iLoadFileAO;
+               
+        // Own: Progress dialog for load file
+        CAknProgressDialog* iProgressDialogLoadfile;
+        
     };
 
 #endif // NPDVIEWERDIALOG_H

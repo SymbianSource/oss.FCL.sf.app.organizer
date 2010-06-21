@@ -66,4 +66,4 @@ LIBRARY         cone.lib
 LIBRARY         eikcore.lib 
 LIBRARY         avkon.lib 
 LIBRARY         npdlib.lib
-
+LIBRARY         efsrv.lib

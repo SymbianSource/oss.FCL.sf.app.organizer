@@ -153,8 +153,7 @@ void CCalenSettingsState::HandleNotificationL(const TCalenNotification& aNotific
             ActivateCurrentStateL(aStateMachine);
             }
             break;
-        case ECalenNotifySettingsChanged:
-            break;
+
         default:
             // default is defer all other notifications when we are in setting state
             iOutstandingNotifications.InsertL(aNotification);

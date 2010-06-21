@@ -85,6 +85,7 @@ void CCalenReminderField::ConstructL()
     TRACE_ENTRY_POINT;
     
     iIsAlarmOnOff = CCalenReminderField::EAlarmNoAlarm;
+    isAllDayInitialOffsetSet = EFalse;
     
     TRACE_EXIT_POINT;
     }
@@ -233,11 +234,23 @@ void CCalenReminderField::UpdateAlarmTimeWhenStartChangedL()
     {
     TRACE_ENTRY_POINT;
 
-    // Updating operation is executed only if alarm date/time field exists.
-    if( iUnifiedEditor.Edited().IsAlarmActivated() )
-        {
-        TTime start = iUnifiedEditor.Edited().EventDateTime();
-        TTime alarm = start + iAlarmOffset;
+        // Updating operation is executed only if alarm date/time field exists.
+       if( iUnifiedEditor.Edited().IsAlarmActivated() )
+            {
+            TTime start = iUnifiedEditor.Edited().EventDateTime();
+            TTime alarm;
+		//For a new allday event when the start time is changed for the first time
+		//alarm time must be updated correctly 
+            if(iUnifiedEditor.Edited().IsAllDayEvent() && !isAllDayInitialOffsetSet 
+                    && iUnifiedEditor.EditorDataHandler().IsCreatingNew())
+                {
+                alarm = CalenDateUtils::DefaultTime(start)+iAlarmOffset;
+                isAllDayInitialOffsetSet = ETrue;
+                }
+            else
+                {
+                alarm = start + iAlarmOffset;
+                }
         alarm = CalenDateUtils::LimitToValidTime( alarm );
         iUnifiedEditor.Edited().SetAlarmDateTimeL( alarm );
         SetDataToEditorL();

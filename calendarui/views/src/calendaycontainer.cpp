@@ -16,30 +16,12 @@
  *
 */
 
-
-//debug
-#include "calendarui_debug.h"
-
-// INCLUDE FILES
-#include "calendaycontainer.h"
-#include "calencontainerlayoutmanager.h"
-#include "calencontroller.h"
-
+#include <Calendar.rsg>
 #include <calenconstants.h>
 #include <calendateutils.h>
-#include "calendaylistboxmodel.h"
-#include "calendaylistboxview.h"
-#include "calendaylistbox.h"
-#include "calendayview.h"
-#include "CalenUid.h"
 #include <calenagendautils.h>
 #include <calenservices.h>
-#include "calenlocationutil.h"
-
-#include "calendar.hrh"
-#include <Calendar.rsg>
 #include <csxhelp/cale.hlp.hrh>
-
 #include <AknsDrawUtils.h>
 #include <AknsFrameBackgroundControlContext.h>
 #include <AknUtils.h>
@@ -50,17 +32,30 @@
 #include <StringLoader.h>
 #include <calenviewutils.h>
 #include <aknlayoutscalable_apps.cdl.h>
-
 #include <calinstance.h>
 #include <calentry.h>
 #include <calinstanceview.h>
 #include <caltime.h>
-
 #include <AknDef.h>
 #include <calencontext.h>
 #include <akntoolbar.h>
 #include <aknstyluspopupmenu.h>
 #include <barsread.h>
+#include <gesturehelper.h> //CGestureHelper
+
+// INCLUDE FILES
+#include "calendaycontainer.h"
+#include "calencontainerlayoutmanager.h"
+#include "calencontroller.h"
+#include "calenlocationutil.h"
+#include "calendaylistboxmodel.h"
+#include "calendaylistboxview.h"
+#include "calendaylistbox.h"
+#include "calendayview.h"
+#include "CalenUid.h"
+#include "calendar.hrh"
+//debug
+#include "calendarui_debug.h"
 
 //  LOCAL CONSTANTS AND MACROS
 const TInt KLayoutTableGranularity(10);
@@ -105,6 +100,7 @@ CCalenDayContainer::~CCalenDayContainer()
     delete iLayoutTable;
     // Skin contexts
     delete iBackgroundSkinContext;
+    delete iGestureHelper;
 
     TRACE_EXIT_POINT;
     }
@@ -123,13 +119,36 @@ void CCalenDayContainer::HandleListBoxEventL(CEikListBox* /*aListBox*/,
         // Single click integration
         case EEventItemSingleClicked:
             {
-            //Handle listbox item selection event
-            //iListBox->HandlePointerEventL(aPointerEvent);
-            if(iView->MenuBar()->IsDisplayed() == EFalse)
+            // left/right gestures (touch down, drag, touch release) are treated
+             // by CEikListBox as single click, probably this should be fixed by AVKON team
+             if ( !iGestureHandled )
+                 {
+                 if(iView->MenuBar()->IsDisplayed() == EFalse)
+                     {
+                     iView->HandleCommandL( ECalenViewCurrentEntry );
+                     }
+                 }
+            break;
+            }
+        case EEventEmptyListClicked:
+            {
+            // left/right gestures (touch down, drag, touch release) are treated
+            // by CEikListBox as single click, probably this should be fixed by AVKON team
+            if ( !iGestureHandled )
                 {
-                iView->HandleCommandL( ECalenViewCurrentEntry );
+                if (iListBox->Model()->NumberOfItems() <= 0)
+                    {
+                    iView->HandleCommandL(ECalenCmdOpenMskDialog);
+                    }
                 }
             break;
+            }
+            
+        case EEventEmptyAreaClicked:
+            {
+            // left/right gestures (touch down, drag, touch release) are treated
+            // by CEikListBox as single click, probably this should be fixed by AVKON team
+			break;
             }
 			
         // Single click integration
@@ -1228,6 +1247,10 @@ void CCalenDayContainer::ConstructImplL()
     CAknIconArray* iconList = CreateIconsL( iIconIndices );
     iListBox->ItemDrawer()->ColumnData()->SetIconArray( iconList );
     
+    iGestureHelper = GestureHelper::CGestureHelper::NewL( *this );
+    iGestureHelper->SetHoldingEnabled( EFalse );
+    iGestureHelper->SetDoubleTapEnabled( EFalse );
+    
     TRACE_EXIT_POINT;
     }
 
@@ -1450,12 +1473,17 @@ void CCalenDayContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent
                 return;
                 }
             }
-        if (iListBox->Model()->NumberOfItems() <= 0)
+        }
+		if(iGestureHelper)
+        {
+        iGestureHelper->HandlePointerEventL( aPointerEvent );
+        if (  iGestureHandled )
             {
-            iView->HandleCommandL(ECalenCmdOpenMskDialog);
+            TRACE_EXIT_POINT;
             return;
             }
         }
+	        	
 	        	
     TInt pointerIndex(-1);    
      // Single click integration
@@ -1479,6 +1507,42 @@ void CCalenDayContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent
     TRACE_EXIT_POINT;
     }
 
+// ---------------------------------------------------------------------------
+// CCalenDayContainer::HandleGestureL
+// Handle the gesture event
+// ---------------------------------------------------------------------------
+//
+void CCalenDayContainer::HandleGestureL( const GestureHelper::MGestureEvent& aEvent )
+    {
+    TRACE_ENTRY_POINT;
+    GestureHelper::TGestureCode code = aEvent.Code( GestureHelper::MGestureEvent::EAxisBoth );
+    
+    switch ( code )
+        {
+        case GestureHelper::EGestureStart:
+            {
+            iGestureHandled = EFalse;
+            break;
+            }
+        case GestureHelper::EGestureSwipeRight:
+            {
+            HandleNaviDecoratorEventL( EAknNaviDecoratorEventLeftTabArrow );
+            iGestureHandled = ETrue;
+            break;
+            }
+        case GestureHelper::EGestureSwipeLeft:
+            {
+            HandleNaviDecoratorEventL( EAknNaviDecoratorEventRightTabArrow );
+            iGestureHandled = ETrue;
+            break;
+            }
+        default:
+            // Other gestures are not handled here
+            break;
+        }
+    
+    TRACE_EXIT_POINT;
+    }
 // ----------------------------------------------------------------------------
 // CCalenDayContainer::HandleNaviDecoratorEventL
 // ?implementation_description

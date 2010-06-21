@@ -246,8 +246,9 @@ void CCalenMissedAlarmsView::HandleCommandL(TInt aCommand)
         case ECalenCmdGotoCalendar:            
             {
             iHighlightedRowNumber = 0;
+            iServices.IssueNotificationL(ECalenNotifyClearMissedAlarms);
 			iServices.IssueCommandL(aCommand);
-            }
+			}
             break;
         case EAknSoftkeyBack:
         case EAknSoftkeyClose:
@@ -258,7 +259,7 @@ void CCalenMissedAlarmsView::HandleCommandL(TInt aCommand)
             break;
         case EAknSoftkeyExit:
             {
-         
+            iServices.IssueNotificationL(ECalenNotifyClearMissedAlarms);
             CCalenNativeView::HandleCommandL(aCommand);
             }
             break;

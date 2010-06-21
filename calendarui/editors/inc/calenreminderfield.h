@@ -192,6 +192,12 @@ private:
      *        before start time
      */
     TTimeIntervalMinutes iAlarmOffset;
+    /**
+     * @var isAllDayInitialOffsetSet
+     * @brief To check if initial offset
+     * 		for all day event is set correctly
+     */
+    TBool isAllDayInitialOffsetSet;
     };
 
 #endif // CALENALARMFIELDS_H

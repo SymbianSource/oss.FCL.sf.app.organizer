@@ -21,4 +21,6 @@ EXPORTS
 	?SetSnoozeTime@CCalenSetting@@QAEXH@Z @ 20 NONAME ; void CCalenSetting::SetSnoozeTime(int)
 	?SnoozeTime@CCalenSetting@@QBEHXZ @ 21 NONAME ; int CCalenSetting::SnoozeTime(void) const
 	?WeekTitle@CCalenSetting@@QBE?AW4TCalenWeekTitle@@XZ @ 22 NONAME ; enum TCalenWeekTitle CCalenSetting::WeekTitle(void) const
+	?SetWeekNumber@CCalenSetting@@QAEXW4TCalenWeekNumber@@@Z @ 23 NONAME ; void CCalenSetting::SetWeekNumber(enum TCalenWeekNumber)
+	?WeekNumberEnable@CCalenSetting@@QBE?AW4TCalenWeekNumber@@XZ @ 24 NONAME ; enum TCalenWeekNumber CCalenSetting::WeekNumberEnable(void) const
 

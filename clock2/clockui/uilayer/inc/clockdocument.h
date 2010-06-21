@@ -78,13 +78,13 @@ class CClockDocument : public CAknDocument
         * @brief Returns the previous alarm time.
         * @return TTime The previous alarm time.
         */
-	    TTime GetPrevAlarmTime();
+	    //TTime GetPrevAlarmTime();
 	    
 	    /**
 	    * @brief Sets the new alarm time value as the previous alarm time.
 	    * @param aPrevAlarmTime The new alarm time.
 	    */
-	    void SetPrevAlarmTime( TTime aPrevAlarmTime );
+	    //void SetPrevAlarmTime( TTime aPrevAlarmTime );
 	    
 	    /**
 	    * @brief Retrieves list of cities shown in world clock view.

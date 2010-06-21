@@ -766,12 +766,7 @@ TInt CCalenMultipleDbUi::EditItemL()
     iCalendarInfoOriginal->SetColor(iCalendarInfoEdited->Color());
     iCalendarInfoOriginal->SetEnabled(iCalendarInfoEdited->Enabled());
     TBuf8<KBuffLength> keyBuff;
-    TBool syncstatus = EFalse;
-    keyBuff.Zero();
-    keyBuff.AppendNum( ESyncStatus ); 
-    TPckgC<TBool> pckgSyncStatusValue(syncstatus);
-    TRAP_IGNORE(pckgSyncStatusValue.Set(iCalendarInfoEdited->PropertyValueL( keyBuff ))); 
-    iCalendarInfoOriginal->SetPropertyL( keyBuff, pckgSyncStatusValue );                
+          
 
     iDbEditor = CCalenMultiDBEditor::NewL(*this,*iCalendarInfoEdited, iController,
             ETrue);
@@ -867,21 +862,10 @@ TBool CCalenMultipleDbUi::CheckForChangesL( CCalCalendarInfo& aCalendarInfoOrigi
     TBool changed = EFalse;
     
     HBufC* editedName = aCalendarInfoModified.NameL().AllocLC();
-    TBool syncstatusOriginal;
-    TBool syncstatusModified;
-    TBuf8<KBuffLength> keyBuff;
-    keyBuff.Zero();
-    keyBuff.AppendNum( ESyncStatus ); 
-    TPckgC<TBool> pckgSyncStatusValueOriginal(syncstatusOriginal);
-    pckgSyncStatusValueOriginal.Set(aCalendarInfoOriginal.PropertyValueL( keyBuff ));
-    TPckgC<TBool> pckgSyncStatusValueModified(syncstatusModified);
-    TRAP_IGNORE(pckgSyncStatusValueModified.Set(aCalendarInfoModified.PropertyValueL( keyBuff )));
-    syncstatusOriginal = pckgSyncStatusValueOriginal();
-    syncstatusModified = pckgSyncStatusValueModified();
+
     if (editedName->Compare(aCalendarInfoOriginal.NameL())
             || aCalendarInfoModified.Color() != aCalendarInfoOriginal.Color()
-            || aCalendarInfoModified.Enabled()!= aCalendarInfoOriginal.Enabled()
-            || syncstatusOriginal != syncstatusModified) 
+            || aCalendarInfoModified.Enabled()!= aCalendarInfoOriginal.Enabled())
         {
         changed = ETrue;
         }
@@ -925,16 +909,16 @@ TKeyResponse CCalenMultipleDbUi::OfferKeyEventL(const TKeyEvent& aKeyEvent,
             CleanupClosePushL(calendarInfoList);
             if(calendarInfoList.Count())
                 {
-                TInt currentIndex =  iListBox->CurrentItemIndex();
+                TInt currentIndex =  iCurrentIndex = iListBox->CurrentItemIndex();
                 HBufC* calendarFileName = 
                         calendarInfoList[currentIndex]->FileNameL().AllocLC();
-                if (calendarFileName->CompareF(
-                        _L("c:Calendar1")))
+                if ((calendarFileName->CompareF(
+                                        iController.Services().SessionL().DefaultFileNameL())))
                     {
                     DeleteItemL();
                     }
                 CleanupStack::PopAndDestroy(calendarFileName);
-                }
+				}
             CleanupStack::PopAndDestroy(&calendarInfoList);
             exitCode =  EKeyWasConsumed;
             } 
@@ -1349,8 +1333,13 @@ void CCalenMultipleDbUi::SetCalendarAddPropertiesL(CCalCalendarInfo& aCalendarIn
         _LIT8( KCalendarOwnerName, "myself" );
         aCalendarInfo.SetPropertyL(keyBuff, KCalendarOwnerName);
         }
-
-
+    
+    TBool syncstatus = ETrue;
+    keyBuff.Zero();
+    keyBuff.AppendNum( ESyncStatus ); 
+    TPckgC<TBool> pckgSyncStatusValue(syncstatus); 
+    aCalendarInfo.SetPropertyL( keyBuff, pckgSyncStatusValue );
+        
     TRACE_EXIT_POINT    
     }
 

@@ -31,4 +31,6 @@ EXPORTS
 	_ZTV25CCalenCheckboxSettingItem @ 30 NONAME
 	_ZTV25CCalenNestedSettingDialog @ 31 NONAME
 	_ZTV25CCalenSettingsUiContainer @ 32 NONAME
+	_ZN13CCalenSetting13SetWeekNumberE16TCalenWeekNumber @ 33 NONAME
+	_ZNK13CCalenSetting16WeekNumberEnableEv @ 34 NONAME
 

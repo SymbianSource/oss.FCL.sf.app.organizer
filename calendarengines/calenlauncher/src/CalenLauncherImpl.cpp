@@ -448,7 +448,7 @@ void CCalenLauncherImpl::LaunchAppL()
         {
         const TUid dummyUID = { 0x0 };
         calenTask.SendMessage(dummyUID, *iLaunchParams);
-        calenTask.BringToForeground();
+        //calenTask.BringToForeground();
         }
 
     // If Calendar is not running we launch from the command line

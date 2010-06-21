@@ -157,6 +157,11 @@ private:  // From CAknView
      */
     void UpdateToolbarButtonsL();
     
+    /**
+     * Set date to Status pane. Default implementation does nothing.
+     * @param aTime it will be refrect to StatusPane
+     */
+    void SetStatusPaneFromActiveContextL();
 private:
     TVwsViewId iPreviousViewId;  
 

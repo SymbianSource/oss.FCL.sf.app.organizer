@@ -88,6 +88,7 @@ EXPORT_C CCalenSetting* CCalenSetting::InstanceL()
 CCalenSetting::CCalenSetting()
     : iWeekFormat( EMonday ),
       iWeekTitle( EWeekTitleNumber ),
+      iWeekNumber( EWeekNumberOff ),
       iSnoozeTime( KDefaultSnoozeTime ),
       iToolbar(1)
 
@@ -186,6 +187,18 @@ EXPORT_C TCalenWeekTitle CCalenSetting::WeekTitle() const
     return iWeekTitle;
     }
 
+// ---------------------------------------------------------
+// CCalenSetting::WeekTitle
+// Return setting type of week title
+// (other items were commented in a header).
+// ---------------------------------------------------------
+//
+EXPORT_C TCalenWeekNumber CCalenSetting::WeekNumberEnable() const
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    return iWeekNumber;
+    }
 // ---------------------------------------------------------
 // CCalenSetting::SnoozeTime
 // Return the snooze time setting.
@@ -553,6 +566,21 @@ EXPORT_C void CCalenSetting::SetWeekTitle( TCalenWeekTitle aTitle )
     }
 
 // ---------------------------------------------------------
+// CCalenSetting::SetWeekNumber
+// Set week title
+// (other items were commented in a header).
+// ---------------------------------------------------------
+//
+EXPORT_C void CCalenSetting::SetWeekNumber( TCalenWeekNumber aNumber )
+    {
+    TRACE_ENTRY_POINT;
+
+    iWeekNumber = aNumber;
+
+    TRACE_EXIT_POINT;
+    }
+
+// ---------------------------------------------------------
 // CCalenSetting::SetSnoozeTime
 // Return the snooze time setting.
 // (other items were commented in a header).
@@ -649,6 +677,9 @@ EXPORT_C void CCalenSetting::LoadL()
     // Central Repository data matches.
     User::LeaveIfError( repository->Get( KCalendarWeekViewTitle, tmp ) );
     iWeekTitle = static_cast<TCalenWeekTitle>( tmp );
+    
+    User::LeaveIfError( repository->Get( KCalendarWeekViewNumber, tmp ) );
+    iWeekNumber = static_cast<TCalenWeekNumber>( tmp );
 
     User::LeaveIfError( repository->Get( KCalendarSnoozeTime, tmp ) );
     iSnoozeTime = tmp;
@@ -697,6 +728,9 @@ EXPORT_C void CCalenSetting::SaveL() const
     // Central Repository data matches.
     tmp = static_cast<TCalenWeekTitle>( iWeekTitle );
     User::LeaveIfError( repository->Set( KCalendarWeekViewTitle, tmp ) );
+    
+    tmp = static_cast<TCalenWeekNumber>( iWeekNumber );
+    User::LeaveIfError( repository->Set( KCalendarWeekViewNumber, tmp ) );
 
     tmp = iSnoozeTime;
     User::LeaveIfError( repository->Set( KCalendarSnoozeTime, tmp ) );

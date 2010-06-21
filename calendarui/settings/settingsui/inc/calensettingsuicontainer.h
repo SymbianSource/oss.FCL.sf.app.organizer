@@ -241,6 +241,8 @@ class CCalenSettingsUiContainer : public CBase,
         TInt iDefView;
         // week format enumeration
         TInt iWeekFormat;
+		// week number enumeration
+        TInt iWeekNumberEnable;
         // week title enumeration
         TInt iWeekTitle;
         // Default mailbox enumeration

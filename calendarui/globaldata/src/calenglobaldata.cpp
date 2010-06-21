@@ -330,6 +330,11 @@ CCalenGlobalData::~CCalenGlobalData()
         delete iCalSession;
         }
     
+   if (iCalendarInfoList.Count())
+       {
+       iCalendarInfoList.ResetAndDestroy();
+       }
+   
     if( iFileMappingArray.Count() )
         {
         iFileMappingArray.ResetAndDestroy();
@@ -340,11 +345,6 @@ CCalenGlobalData::~CCalenGlobalData()
     iHashDbidIndexMap.Close();
 
     Dll::SetTls(NULL);
-
-    if (iCalendarInfoList.Count())
-        {
-        iCalendarInfoList.ResetAndDestroy();
-        }
 
     if (iCalendarsSession)
         {

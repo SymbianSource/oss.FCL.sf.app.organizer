@@ -77,6 +77,17 @@ enum TCalenWeekTitle
     EWeekTitleDuration
     };
 
+/**
+* TCalenWeekNumber
+* The week Number
+*/
+enum TCalenWeekNumber
+{
+EWeekNumberOn,
+EWeekNumberOff
+};
+
+
 #endif // CALENCONSTANTS_H
 
 // End of File

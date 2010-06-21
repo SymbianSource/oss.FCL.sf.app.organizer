@@ -23,10 +23,11 @@
 //  INCLUDES
 
 #include <eiklbo.h>
+#include <e32std.h>
+#include <gestureobserver.h>  //MGestureObserver
+
 #include "calencontainer.h"
 #include "calenmonthdata.h" // CMonthDataArray is typedef
-
-#include <e32std.h>
 
 // FORWARD DECLARATIONS
 class CAknGrid;
@@ -39,6 +40,10 @@ class CEikLabel;
 class TAknLayoutRect;
 class CCalenPreview;
 
+namespace GestureHelper
+    {
+    class CGestureHelper;
+    }
 
 //  CLASS DEFINITIONS
 
@@ -47,7 +52,8 @@ class CCalenPreview;
  */
 
 NONSHARABLE_CLASS( CCalenMonthContainer ) : public CCalenContainer,
-                                            public MEikListBoxObserver
+                                            public MEikListBoxObserver,
+                                            public GestureHelper::MGestureObserver
     {
 public:  // Constructors and destructor
     /**
@@ -124,6 +130,13 @@ public:     // New Function
     
     void HandleLongTapEventL( const TPoint& aPenEventLocation, 
                               const TPoint& aPenEventScreenLocation );
+
+    /**From MGestureObserver
+     * Handle the gesture event
+     * @param aEvent event describing the gesture 
+     */
+    virtual void HandleGestureL( const GestureHelper::MGestureEvent& aEvent );
+    
     void HidePopup();
     
     void RedrawPreviewPane();
@@ -371,6 +384,11 @@ private:  // New variables
     TTime iOldFirstDayOfGrid;
 	TBool iChangeMonth;
 	TBool iChangeDay;
+	
+    // Own: Gesture helper
+    GestureHelper::CGestureHelper* iGestureControl;
+    // Own: this variable indicates that gesture event was handled.
+    TBool iGestureHandled;
     };
 
 #endif //CALENMONTHCONT_H

@@ -246,7 +246,7 @@ void CClockWorldContainer::HandlePointerEventL( const TPointerEvent& aPointerEve
 // rest of the details are commented in the header
 // ---------------------------------------------------------
 //
-void CClockWorldContainer::HandleListBoxEventL( CEikListBox* aListBox, TListBoxEvent aEventType )
+void CClockWorldContainer::HandleListBoxEventL( CEikListBox* /*aListBox*/, TListBoxEvent/* aEventType*/ )
     {
     __PRINTS( "CClockWorldContainer::HandleListBoxEventL - Entry" );
 

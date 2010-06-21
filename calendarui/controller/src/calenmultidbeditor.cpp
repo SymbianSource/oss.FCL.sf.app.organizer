@@ -164,16 +164,7 @@ void CCalenMultiDBEditor::ConstructL()
     iPicture = new( ELeave )CDbColorPicture( TSize( 0, 0 ) );
     iPicture->SetRgbColorsL(iChoosenColor);
     
-    //set sync value
-    // ESyncStatus
-    TBuf8<KBuffLength> keyBuff;    
-    keyBuff.AppendNum(ESyncStatus);
-    TPckgC<TBool> pkgSyncStatus(iSyncStatus);
-    TRAPD(err,pkgSyncStatus.Set(iCalendarInfo.PropertyValueL(keyBuff)));
-    if( KErrNone == err )
-        {
-        iSyncStatus = pkgSyncStatus();
-        }
+    
     
     LoadColorsL();
     
@@ -247,12 +238,7 @@ void CCalenMultiDBEditor::ProcessCommandL( TInt aCommandId )
 			
 		case EAknSoftkeyChange:
 		    {
-	        if( ECalenMultiDbSyncStatus == IdOfFocusControl() )
-                  {
-                  SetSyncFieldL( !iSyncStatus ); 
-                  iSyncStatus = !iSyncStatus;
-                  }
-		    else if( ECalenMultiDbHiddenVisible == IdOfFocusControl() )
+			if( ECalenMultiDbHiddenVisible == IdOfFocusControl() )
 		        {
 		        iCalendarStatus = iCalendarInfo.Enabled();
 
@@ -375,13 +361,8 @@ TBool CCalenMultiDBEditor::OkToExitL(TInt aButtonId)
         case EAknSoftkeyChange:
             {
             isExitForm=EFalse;
-	        if( ECalenMultiDbSyncStatus == IdOfFocusControl() )
-                  {
-                  SetSyncFieldL( !iSyncStatus ); 
-                  iSyncStatus = !iSyncStatus;
-                  }
-			else if( ECalenMultiDbHiddenVisible == IdOfFocusControl() )
-                {
+			if( ECalenMultiDbHiddenVisible == IdOfFocusControl() )
+				{
                 iCalendarStatus = iCalendarInfo.Enabled();
 
                 if( ECalenMultiDbHidden == iCalendarStatus )
@@ -483,25 +464,7 @@ void CCalenMultiDBEditor::PreLayoutDynInitL()
     {
     TRACE_ENTRY_POINT;
     
-    if(iEditFlag)
-        {
-        TBuf8<KBuffLength> keyBuff;    
-        keyBuff.AppendNum(ESyncConfigEnabled);
-        TBool syncConfigEnabled = EFalse;
-        TPckgC<TBool> pkgSyncConfigEnabled(syncConfigEnabled);
-        
-        TRAPD(err,pkgSyncConfigEnabled.Set(iCalendarInfo.PropertyValueL(keyBuff)));
-        syncConfigEnabled = pkgSyncConfigEnabled();
-        
-        //If this sync property(ESyncConfigEnabled) is set and enabled , 
-        //then sync on/off should not be shown be to the user.
-        //This behaviour is only for certain calendars created 
-        //from device sync with this property set.
-        if(err == KErrNone && syncConfigEnabled)
-            {
-            DeleteLine(ECalenMultiDbSyncStatus);
-            }
-        }
+    
     
     // Set data to controls in the editor.
     SetDataToFormL();
@@ -581,8 +544,7 @@ void CCalenMultiDBEditor::SetDataToFormL()
 
     iCalendarStatus = iCalendarInfo.Enabled();
     
-    //Set the the sync status
-    SetSyncFieldL(iSyncStatus);
+  
         
     if( ECalenMultiDbHidden == iCalendarStatus )
         {
@@ -797,16 +759,7 @@ TBool CCalenMultiDBEditor::SaveNoteL( TInt aButtonId )
     		iCalendarInfo.SetColor(iColVal);
     		}
 
-        //Filling the sync value into metadata
-       	if(ControlOrNull(ECalenMultiDbSyncStatus))
-       	    {
-            TBuf8<KBuffLength> keyBuff;
-            keyBuff.Zero();
-            keyBuff.AppendNum(ESyncStatus);
-
-            TPckgC<TBool> pkgSyncStatus(iSyncStatus);
-            iCalendarInfo.SetPropertyL(keyBuff, pkgSyncStatus);
-       	    }
+        
 
         if( IsVisiblityFieldEditedL( iCalendarStatus ) )
             {
@@ -1007,12 +960,7 @@ void CCalenMultiDBEditor::HandleDialogPageEventL( TInt aEventID )
                 }
                 break;
                     
-            case ECalenMultiDbSyncStatus:
-                {
-                SetSyncFieldL( !iSyncStatus ); 
-                iSyncStatus = !iSyncStatus;
-                }
-                break;
+
                 
             case ECalenMultiDbHiddenVisible:
                 {
@@ -1069,7 +1017,6 @@ void CCalenMultiDBEditor::LineChangedL( TInt aControlId )
 
         case ECalenMultiDbColor:
         case ECalenMultiDbHiddenVisible: 
-        case ECalenMultiDbSyncStatus:
             {
             resId = R_CALEN_MULTIDB_MSK_CHANGE_CBA;
             }

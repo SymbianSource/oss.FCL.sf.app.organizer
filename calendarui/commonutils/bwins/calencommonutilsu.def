@@ -137,3 +137,4 @@ EXPORTS
 	?GetNextAvailableCalFileL@CCalenMultiCalUtil@@SAPAVHBufC16@@XZ @ 136 NONAME ; class HBufC16 * CCalenMultiCalUtil::GetNextAvailableCalFileL(void)
 	?AttachmentOpen@CCalenAttachmentModel@@QAEXAAH@Z @ 137 NONAME ; void CCalenAttachmentModel::AttachmentOpen(int &)
 	?IsAttachmentOpen@CCalenAttachmentModel@@QAEHXZ @ 138 NONAME ; int CCalenAttachmentModel::IsAttachmentOpen(void)
+	?ShowNaviPaneL@CCalenStatusPaneUtils@@QAEPAVCAknNavigationDecorator@@ABVTDesC16@@VTRgb@@@Z @ 139 NONAME ; class CAknNavigationDecorator * CCalenStatusPaneUtils::ShowNaviPaneL(class TDesC16 const &, class TRgb)

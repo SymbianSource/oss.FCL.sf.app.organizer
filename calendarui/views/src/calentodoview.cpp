@@ -584,7 +584,7 @@ void CCalenTodoView::DynInitMenuPaneL(TInt aResourceId,          // Resource Id
                 {
                 if( Container()->MarkedCount() )
                     {
-                    aMenuPane->SetItemSpecific( ECalenDeleteCurrentEntry, EFalse );
+                    aMenuPane->SetItemSpecific( ECalenDeleteCurrentEntry, ETrue );
                     if(Container()->IsCurrentItemSelected()) // If focused list item is marked
                         {
                         aMenuPane->DeleteMenuItem( ECalenViewCurrentEntry );
@@ -593,25 +593,23 @@ void CCalenTodoView::DynInitMenuPaneL(TInt aResourceId,          // Resource Id
                     aMenuPane->DeleteMenuItem( ECalenCompleteTodo );
                     aMenuPane->DeleteMenuItem( ECalenRestoreTodo );
                     aMenuPane->DeleteMenuItem( ECalenSend );
-
-                    if(Container()->MarkedCount() == 1)
+                    aMenuPane->DeleteMenuItem(ECalenCopyToCalendars);
+                    
+                    TBool crossout( EFalse );
+                    //When mark as done, crossout is ETrue.
+                    crossout = CheckMarkedItemCompletedL();
+                    if( crossout )
                         {
-                        aMenuPane->DeleteMenuItem( ECalenCmdComplete );
-                        TBool crossout( EFalse );
-                        crossout = CheckMarkedItemCompletedL();
-                        if( crossout )
-                            {
-                            aMenuPane->DeleteMenuItem( ECalenMarkDone );
-                            }
-                        else
-                            {
-                            aMenuPane->DeleteMenuItem( ECalenMarkUnDone );
-                            }
+                        aMenuPane->SetItemSpecific(ECalenMarkUnDone, ETrue);
                         }
                     else
                         {
-                        aMenuPane->DeleteMenuItem( ECalenMarkDone );
-                        aMenuPane->DeleteMenuItem( ECalenMarkUnDone );
+                        aMenuPane->SetItemSpecific(ECalenMarkDone, ETrue);
+                        }
+                    
+                    if(Container()->MarkedCount() == 1)
+                        {
+                        aMenuPane->DeleteMenuItem( ECalenCmdComplete );
                         }
                     }
                 else

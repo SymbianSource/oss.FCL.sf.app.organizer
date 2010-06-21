@@ -656,7 +656,7 @@ void CClockMainView::DoDeactivate()
 	
 	// Ask the document to save the user data in the document file.
 	CClockDocument* clockDocument = static_cast< CClockDocument* > ( AppUi()->Document() );
-	TRAP_IGNORE( clockDocument->StoreDataL() );
+
 	
 	if( iContainer )
 		{

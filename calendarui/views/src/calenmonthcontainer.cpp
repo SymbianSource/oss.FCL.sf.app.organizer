@@ -16,28 +16,13 @@
 */
 
 
-//debug
-#include "calendarui_debug.h"
 
-// INCLUDE FILES
-#include "calenmonthcontainer.h"
-#include "calencontroller.h"
-#include "calencontainerlayoutmanager.h"
 
+#include <Calendar.rsg>
 #include <calenconstants.h>
 #include <calendateutils.h>
-#include "calendrawutils.h"
-#include "calenmonthconst.h"
-#include "calenmonthgrid.h"
-#include "calenmonthview.h"
-#include "calenpreview.h"
 #include <calenagendautils.h>
-#include "CalenUid.h"
-#include "CleanupResetAndDestroy.h"
-#include "CalenUid.h"
-#include "calendar.hrh"
 #include <calendar.mbg>
-#include <Calendar.rsg>
 #include <csxhelp/cale.hlp.hrh>
 #include <calencontext.h>
 #include <aknlists.h>
@@ -49,11 +34,25 @@
 #include <calinstanceview.h>
 #include <calenservices.h>
 #include <calenviewutils.h>
-
-
 // Layouts
 #include <aknlayoutscalable_apps.cdl.h>
+#include <gesturehelper.h> //CGestureHelper
 
+// INCLUDE FILES
+#include "calenmonthcontainer.h"
+#include "calencontroller.h"
+#include "calencontainerlayoutmanager.h"
+#include "calendrawutils.h"
+#include "calenmonthconst.h"
+#include "calenmonthgrid.h"
+#include "calenmonthview.h"
+#include "calenpreview.h"
+#include "CalenUid.h"
+#include "CleanupResetAndDestroy.h"
+#include "CalenUid.h"
+#include "calendar.hrh"
+//debug
+#include "calendarui_debug.h"
 
 // LOCAL CONSTANTS AND MACROS
 _LIT(KMonthCellFormat, "%F%*D\t");
@@ -116,7 +115,8 @@ CCalenMonthContainer::~CCalenMonthContainer()
 
     delete iGrid;
     delete iMonthDataArray;
-    delete iBackgroundSkinContext;    
+    delete iBackgroundSkinContext;  
+    delete iGestureControl;  
 
     TRACE_EXIT_POINT;
     }
@@ -1094,6 +1094,12 @@ void CCalenMonthContainer::ConstructImplL()
 
     iGrid->ItemDrawer()->FormattedCellData()->SetIconArray( CreateIconsL( iIconIndices ));
     iGrid->View()->SetDisableRedraw(ETrue);
+    
+
+    iGestureControl = GestureHelper::CGestureHelper::NewL( *this );
+    iGestureControl->SetDoubleTapEnabled( EFalse );
+    iGestureControl->SetHoldingEnabled( EFalse );
+
 
     PIM_TRAPD_HANDLE( ConstructBackgroundContextL() );
 
@@ -1222,7 +1228,7 @@ TBool CCalenMonthContainer::UseWeeksL() const
  
         CleanupReleasePushL( *setting ) ;
 
-        if( setting->WeekFormat() == EMonday )
+        if( setting->WeekFormat() == EMonday && setting->WeekNumberEnable() )
             {
             useWeeks = ETrue;
             }
@@ -1684,6 +1690,16 @@ void CCalenMonthContainer::HandlePointerEventL(const TPointerEvent& aPointerEven
 
         if(gridModel->NumberOfData() <= 0)
             return;
+       
+        if ( iGestureControl )
+            {
+            iGestureControl->HandlePointerEventL( aPointerEvent );
+            if (  iGestureHandled )
+                {
+                TRACE_EXIT_POINT;
+                return;
+                }
+            }
 
         if(isItem == EFalse)
             /* Handle pointer event in week number area */
@@ -1808,7 +1824,7 @@ void CCalenMonthContainer::HandleListBoxEventL(
         {
         case ( MEikListBoxObserver::EEventItemClicked ): 
             {
-            if ( !iView->MenuBar()->IsDisplayed() )
+            if ( !iView->MenuBar()->IsDisplayed() && !iGestureHandled )
                 {
                 iServices.IssueCommandL( ECalenForwardsToDayView );
                 }
@@ -1817,6 +1833,45 @@ void CCalenMonthContainer::HandleListBoxEventL(
         }
     }
 
+// ----------------------------------------------------------------------------
+// CCalenMonthContainer::HandleGestureL
+// 
+// ----------------------------------------------------------------------------
+void CCalenMonthContainer::HandleGestureL( const GestureHelper::MGestureEvent& aEvent )
+    {
+    GestureHelper::TGestureCode code = aEvent.Code( GestureHelper::MGestureEvent::EAxisBoth );  
+    
+    switch ( code )
+        {
+        case GestureHelper::EGestureStart:
+            {
+            iGestureHandled = EFalse;
+            break;
+            }
+        case GestureHelper::EGestureSwipeRight:
+            {
+            if(!iChangeMonth)
+                {
+                HandleNaviDecoratorEventL( EAknNaviDecoratorEventLeftTabArrow );
+                }
+            
+            iGestureHandled = ETrue;
+            break;
+            }
+        case GestureHelper::EGestureSwipeLeft:
+            {
+            if(!iChangeMonth)
+                {
+                HandleNaviDecoratorEventL( EAknNaviDecoratorEventRightTabArrow );
+                }
+            iGestureHandled = ETrue;
+            break;
+            }
+        default:
+            // Other gestures are not handled here
+            break;
+        }
+    }
 
 // ----------------------------------------------------------------------------
 // CCalenMonthContainer::HidePopup

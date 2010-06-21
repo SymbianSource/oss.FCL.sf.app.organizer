@@ -155,7 +155,7 @@ LIBRARY			missedalarmstore.lib
 LIBRARY			apmime.lib
 LIBRARY         multicaluidialog.lib
 LIBRARY			touchfeedback.lib //MTouchFeedBack
-
+LIBRARY         gesturehelper.lib
 // File logging
 LIBRARY flogger.lib
 LIBRARY aknnotify.lib
