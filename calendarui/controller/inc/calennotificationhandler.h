@@ -32,6 +32,7 @@ enum TCalenNotification
     ECalenNotifyInstanceDeleted,
     ECalenNotifySystemTimeChanged,
     ECalenNotifySystemLocaleChanged,
+    ECalenNotifySystemLanguageChanged,
     ECalenNotifyLostAlarms,
     ECalenNotifyCmdLineLaunch,
     ECalenNotifyAvkonViewSwitchLaunch,

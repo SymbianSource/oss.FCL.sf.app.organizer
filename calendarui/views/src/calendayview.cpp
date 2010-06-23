@@ -21,6 +21,8 @@
 #include <hbaction.h>
 #include <hbpangesture.h>
 #include <hbswipegesture.h>
+#include <hbapplication.h> // hbapplication
+#include <hbactivitymanager.h> // Activity Manager
 
 // User includes
 #include "calendayview.h"
@@ -30,6 +32,7 @@
 #include "calencommon.h"
 #include "calencontext.h"
 #include "calendateutils.h"
+#include "calenconstants.h"
 
 // ----------------------------------------------------------------------------
 // CalenDayView::CalenDayView
@@ -40,7 +43,8 @@ CalenDayView::CalenDayView(MCalenServices &services):
 CalenNativeView(services),
 mSoftKeyAction(NULL),
 mGoToTodayAction(NULL),
-mActionTaken(false)
+mActionTaken(false),
+mIsAboutToQuitEventConnected(false)
 {
     // No implementation yet
     grabGesture(Qt::SwipeGesture);
@@ -83,6 +87,14 @@ void CalenDayView::setupView(CalenDocLoader *docLoader)
 	
 	// Initialize all the menu and toolbar actions
 	setupActions();
+	// get a poitner to activity manager
+	HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+
+	// clean up any previous versions of this activity, if any, i.e. activityName, from the activity manager. 
+	// Ignore return value, first boot would always return False. bool declared 
+	// only for debugging purpose.
+	bool ok = activityManager->removeActivity(activityName);
+	
 }
 
 // ----------------------------------------------------------------------------
@@ -123,6 +135,18 @@ void CalenDayView::doPopulation()
     // Initialize the content widget
     mDayViewWidget->showWidget();
     
+	//set Current Activity as day view
+    mActivityId = ECalenDayView;
+
+	// connect to receive a call back on Day View exit. Call back would result in saveActivity 
+	// to be called in Native View
+    if (!mIsAboutToQuitEventConnected) // check if already not connected
+        {
+        connect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()), this, SLOT(saveActivity()));
+		mIsAboutToQuitEventConnected = true;
+        }
+
+
     // Population is complete, issue a notification
     populationComplete();
     }
@@ -265,6 +289,9 @@ void CalenDayView::launchMonthView()
 {
     // Issue the command to launch the month view
     mServices.IssueCommandL(ECalenMonthView);
+	// month view launched now, disconnect to get the call backs for saveActivity 
+	// on aboutToQuit signal
+    disconnectAboutToQuitEvent();
 }
 
 // ----------------------------------------------------------------------------
@@ -274,7 +301,22 @@ void CalenDayView::launchMonthView()
 // 
 void CalenDayView::clearListModel()
     {
+	// day view is removed from the list disconnect for aboutToQuit events
+    disconnectAboutToQuitEvent();
     mDayViewWidget->clearListModel();
+    }
+
+// ----------------------------------------------------------------------------
+// disconnectAboutToQuitEvent disconnects for the aboutToQuit events
+// ----------------------------------------------------------------------------
+// 
+void CalenDayView::disconnectAboutToQuitEvent()
+    {
+    if (mIsAboutToQuitEventConnected)
+        {
+        disconnect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()), this, SLOT(saveActivity()));
+        mIsAboutToQuitEventConnected = false;
+        }
     }
 
 // End of file	--Don't remove this.

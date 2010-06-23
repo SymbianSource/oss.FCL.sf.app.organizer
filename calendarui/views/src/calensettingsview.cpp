@@ -40,9 +40,8 @@ CalenSettingsView::CalenSettingsView(MCalenServices& services, QGraphicsItem *pa
 	setTitle(hbTrId("txt_calendar_title_calendar"));
 
 	// Construct the settings utility.
-	mCalenSettings = new CalenSettings(mCalenSettingsForm);
+	mCalenSettings = new CalenSettings(mServices, mCalenSettingsForm);
 	mCalenSettings->createModel();
-
 
 	setWidget(mCalenSettingsForm);
 	
@@ -85,6 +84,12 @@ void CalenSettingsView::initializeForm()
 	setNavigationAction(mSoftKeyAction);
 	connect(mSoftKeyAction, SIGNAL(triggered()), 
 											this, SLOT(launchPreviousView()));
+    }
+
+void CalenSettingsView::refreshView()
+    {
+    //populate the new items 
+    mCalenSettings->populateSettingList();
     }
 
 // End of file

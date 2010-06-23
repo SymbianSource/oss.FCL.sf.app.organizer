@@ -47,7 +47,7 @@ HbWidget(parent)
 	HbStyleLoader::registerFilePath(":/style/clockhomecityitem_color.css");
 	
 	// Set the frame to the homecity widget.
-	HbFrameItem *frame = new HbFrameItem();
+	HbFrameItem *frame = new HbFrameItem(this);
 	frame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
 	frame->frameDrawer().setFrameGraphicsName("qtg_fr_groupbox");
 	setBackgroundItem(frame->graphicsItem(), -2);

@@ -42,6 +42,10 @@ symbian: {
 	
 	LIBS += -lagendainterface \
 			-lcaleneditor
+	
+	BLD_INF_RULES.prj_exports += \
+		"./inc/noteseditor.h  |../../inc/noteseditor.h" \
+		"./inc/noteseditordefines.h  |../../inc/noteseditordefines.h
 }
 
 SOURCES += \
@@ -53,8 +57,8 @@ SOURCES += \
 		notestodoeditorcustomitem.cpp
 
 HEADERS += \
-		../../../inc/noteseditor.h \
-		../../../inc/noteseditordefines.h \
+		noteseditor.h \
+		noteseditordefines.h \
 		noteseditor_p.h \
 		noteseditordocloader.h \
 		noteseditorcommon.h \

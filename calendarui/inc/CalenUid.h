@@ -38,6 +38,7 @@ const TUid KUidCalenEventView        = { KCalenEventViewUidValue };
 const TUid KUidCalenLandscapeDayView = { KCalenLandscapeDayViewUidValue };
 const TUid KUidCalenSettingsView = { KCalenSettingsViewUidValue };
 
+const TUid KCalenChineseImplUid = {0x2002EA3D};
 
 #endif // CALENUID_H
 

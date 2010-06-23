@@ -53,6 +53,7 @@ public:
 	CLOCKVIEWS_EXPORT void setupView(
 			ClockAppControllerIf &controllerIf, ClockDocLoader *docLoader);
 	CLOCKVIEWS_EXPORT void setupAfterViewReady();
+	CLOCKVIEWS_EXPORT void captureScreenShot(bool captureScreenShot = false);
 
 private slots:
 	void handleAlarmStatusChanged(int row);
@@ -69,6 +70,7 @@ private slots:
 	void checkOrientationAndLoadSection(Qt::Orientation orientation);
 	void selectedMenuAction(HbAction *action);
 	void handleMenuClosed();
+    void saveActivity();
 
 private:
 	void setmodel();
@@ -99,9 +101,11 @@ private:
 	ClockAppControllerIf *mAppControllerIf;
 	ClockAlarmListModel *mAlarmListModel;
 
-	int mSelectedItem;
-	bool mHideAlarmList;
-	bool mIsLongTop;
+	int            mSelectedItem;
+	bool           mHideAlarmList;
+	bool           mIsLongTop;
+	bool           mIsScreenShotCapruted; // check if the screenshot captured is valid
+	QVariantHash   mScreenShot; // screenshot
 };
 
 #endif // CLOCKMAINVIEW_H

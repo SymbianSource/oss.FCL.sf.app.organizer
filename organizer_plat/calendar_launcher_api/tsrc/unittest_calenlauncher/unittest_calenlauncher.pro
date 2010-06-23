@@ -24,13 +24,17 @@ DEPENDPATH += . \
 			  ../../../../calendarui/calenlauncher/src \
 			  ../../../../calendarui/calenlauncher/inc
 INCLUDEPATH += .
-INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
+
 
 symbian: {
 	TARGET.CAPABILITY = ALL -TCB
 	TARGET.EPOCALLOWDLLDATA = 1
+	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE	
 	
 	LIBS += -lcalenlauncher
+	
+	BLD_INF_RULES.prj_testexports += \
+	"../rom/unit_calenlauncher.iby		CORE_APP_LAYER_IBY_EXPORT_PATH(unit_calenlauncher.iby)"
 }
 
 SOURCES += unittest_calenlauncher.cpp

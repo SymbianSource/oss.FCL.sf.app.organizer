@@ -21,12 +21,12 @@
 #include <HbAction>
 #include <HbDataForm>
 #include <HbDataFormModel>
+#include <HbExtendedLocale>
 #include <HbDataFormModelItem>
 #include <HbDataFormViewItem>
 #include <HbMainWindow>
 #include <HbInstance>
 #include <HbPushButton>
-#include <HbExtendedLocale>
 #include <HbListWidget>
 #include <HbComboBox>
 #include <HbListWidgetItem>
@@ -49,16 +49,16 @@
 /*!
 	Default constructor.
  */
-ClockRegionalSettingsView::ClockRegionalSettingsView(
-		SettingsUtility &utility, QObject *parent)
+ClockRegionalSettingsView::ClockRegionalSettingsView(QObject *parent)
 :QObject(parent),
  mView(0),
- mBackAction(0),
- mLoader(0),
- mSettingsUtility(utility)
+ mLoader(0)
 {
 	// Construct the document loader.
 	mLoader = new ClockSettingsDocLoader;
+	
+	// Construct the settignsutility.
+	mSettingsUtility = new SettingsUtility();
 	
 	// Load the translation file and install the editor specific translator
     mTranslator = new QTranslator;
@@ -80,6 +80,14 @@ ClockRegionalSettingsView::~ClockRegionalSettingsView()
 	if (mLoader) {
 		delete mLoader;
 		mLoader = 0;
+	}
+	
+	if (mSettingsUtility) {
+        delete mSettingsUtility;
+        mSettingsUtility = 0;
+	}
+	if(mFormModel){
+		delete mFormModel;
 	}
 // Remove the translator
     HbApplication::instance()->removeTranslator(mTranslator);
@@ -134,10 +142,10 @@ void ClockRegionalSettingsView::showView()
 	window->setCurrentView(mView);
 
 	// Add the back softkey.
-	mBackAction = new HbAction(Hb::BackNaviAction);
-	mView->setNavigationAction(mBackAction);
+	HbAction *backAction = new HbAction(Hb::BackNaviAction);
+	mView->setNavigationAction(backAction);
 	connect(
-			mBackAction, SIGNAL(triggered()),
+			backAction, SIGNAL(triggered()),
 			this, SLOT(handleBackAction()));
 }
 
@@ -233,8 +241,8 @@ void ClockRegionalSettingsView::handleItemDisplayed(const QModelIndex &index)
  */
 void ClockRegionalSettingsView::handleTimeFormatChange()
 {
-//	mSettingsUtility.setTimeFormat(mTimeFormatItem->text());
-	mSettingsUtility.setTimeFormat(
+//	mSettingsUtility->setTimeFormat(mTimeFormatItem->text());
+	mSettingsUtility->setTimeFormat(
 			mTimeFormatItem->contentWidgetData("text").toString());
 }
 
@@ -244,8 +252,8 @@ void ClockRegionalSettingsView::handleTimeFormatChange()
  */
 void ClockRegionalSettingsView::handleTimeSeparatorChange()
 {
-//	mSettingsUtility.setTimeSeparator(mTimeSeparatorItem->text());
-	mSettingsUtility.setTimeSeparator(
+//	mSettingsUtility->setTimeSeparator(mTimeSeparatorItem->text());
+	mSettingsUtility->setTimeSeparator(
 			mTimeSeparatorItem->contentWidgetData("text").toString());
 }
 
@@ -253,7 +261,7 @@ void ClockRegionalSettingsView::handleTimeSeparatorChange()
  */
 void ClockRegionalSettingsView::handleDateFormatChange(QString text)
 {
-	mSettingsUtility.setDateFormat(text);
+	mSettingsUtility->setDateFormat(text);
 }
 
 /*!
@@ -262,7 +270,7 @@ void ClockRegionalSettingsView::handleDateFormatChange(QString text)
  */
 void ClockRegionalSettingsView::handleDateSeparatorChange(QString text)
 {
-	mSettingsUtility.setDateSeparator(text);
+	mSettingsUtility->setDateSeparator(text);
 }
 
 /*!
@@ -278,34 +286,13 @@ void ClockRegionalSettingsView::handleDataChanged(
 		case 5:
 		{
 		// The Start of week item.
-		if (mStartOfWeekItem != 0) {
+		if (mStartOfWeekItem != 0)
+		    {
 			int index = mStartOfWeekItem->currentIndex();
-			mSettingsUtility.setStartOfWeek(index);
-			
-			QStringList weekdays = weekdayList();
-			QString workdays = mCustomPrototype->workdaysSetting();
-			QItemSelectionModel *model = 0;
-			model = mWorkdaysItem->selectionModel();
-			
-			for (int i = 0, index = workdays.size() - 1;
-					i < mWorkdaysItem->count(); ++i, index--) {
-				QString str = weekdays[i];
-				mWorkdaysItem->item(i)->setText(str);
-				
-				QChar ch = workdays.at(index);
-				if ( ch == QChar('0')) {
-					// Not a workday.
-					model->select(
-							model->model()->index(i,0),
-							QItemSelectionModel::Deselect);
-				} else {
-					// Workday.
-					model->select(
-							model->model()->index(i,0),
-							QItemSelectionModel::Select);
-				}
-			}
-		}
+			mSettingsUtility->setStartOfWeek(index);
+			//update the week days
+			updateWeekDays();
+		    }
 		}
 		break;
 
@@ -348,13 +335,13 @@ void ClockRegionalSettingsView::populateFormModel()
 	}
 
 	// Get the locale.
-	 HbExtendedLocale locale = HbExtendedLocale::system();
+	HbExtendedLocale locale  = HbExtendedLocale::system();
 
 	// Time format item.
 	 mTimeFormatItem = mFormModel->appendDataFormItem(
 			HbDataFormModelItem::ToggleValueItem,
 			hbTrId("txt_clock_setlabel_time_format"));
-	int index = mSettingsUtility.timeFormat(mTimeFormatStringList);
+	int index = mSettingsUtility->timeFormat(mTimeFormatStringList);
 	if (0 == index) {
 		mTimeFormatItem->setContentWidgetData("text", mTimeFormatStringList[0]);
 		mTimeFormatItem->setContentWidgetData("additionalText", mTimeFormatStringList[1]);
@@ -370,7 +357,7 @@ void ClockRegionalSettingsView::populateFormModel()
 	mTimeSeparatorItem = mFormModel->appendDataFormItem(
 			HbDataFormModelItem::ToggleValueItem,
 			hbTrId("txt_clock_setlabel_time_separator"));
-	index = mSettingsUtility.timeSeparator(mTimeSeparatorStringList);
+	index = mSettingsUtility->timeSeparator(mTimeSeparatorStringList);
 	if (0 == index) {
 		mTimeSeparatorItem->setContentWidgetData("text", mTimeSeparatorStringList[0]);
 		mTimeSeparatorItem->setContentWidgetData(
@@ -388,7 +375,7 @@ void ClockRegionalSettingsView::populateFormModel()
 	mDateFormatItem = mFormModel->appendDataFormItem(
 			HbDataFormModelItem::ComboBoxItem,
 			hbTrId("txt_clock_setlabel_date_format"));
-	index = mSettingsUtility.dateFormat(mDateFormatStringList);
+	index = mSettingsUtility->dateFormat(mDateFormatStringList);
 
 	mDateFormatItem->setContentWidgetData("items", mDateFormatStringList);
 	mDateFormatItem->setContentWidgetData("currentIndex",index);
@@ -400,7 +387,7 @@ void ClockRegionalSettingsView::populateFormModel()
 	mDateSeparatorItem = mFormModel->appendDataFormItem(
 			HbDataFormModelItem::ComboBoxItem,
 			hbTrId("txt_clock_setlabel_date_separator"));
-	index = mSettingsUtility.dateSeparator(mDateSeparatorStringList);
+	index = mSettingsUtility->dateSeparator(mDateSeparatorStringList);
 
 	mDateSeparatorItem->setContentWidgetData("items", mDateSeparatorStringList);
 	mDateSeparatorItem->setContentWidgetData("currentIndex",index);
@@ -469,4 +456,60 @@ QStringList ClockRegionalSettingsView::weekdayList()
 	return weekDays;
 }
 
+
+/*!
+    update the start week on .
+ */
+
+void ClockRegionalSettingsView::updateWeekStartOn()
+{
+if (mStartOfWeekItem != 0)
+    {
+    HbExtendedLocale locale;
+    HbExtendedLocale::WeekDay weekdDayStart = locale.startOfWeek();
+    int currentDay = mStartOfWeekItem->currentIndex();
+    if(currentDay == weekdDayStart )
+        {
+        return;
+        }
+    else
+        {
+        mStartOfWeekItem->setCurrentIndex(weekdDayStart);
+        updateWeekDays();
+        }
+    }
+}
+
+/*!
+    update the  week days .
+ */
+void ClockRegionalSettingsView::updateWeekDays()
+{
+QStringList weekdays = weekdayList();
+QString workdays = mCustomPrototype->workdaysSetting();
+QItemSelectionModel *model = 0;
+model = mWorkdaysItem->selectionModel();
+
+for (int i = 0, index = workdays.size() - 1;
+        i < mWorkdaysItem->count(); ++i, index--)
+    {
+    QString str = weekdays[i];
+    mWorkdaysItem->item(i)->setText(str);
+
+    QChar ch = workdays.at(index);
+    if ( ch == QChar('0')) 
+        {
+        // Not a workday.
+        model->select(
+        model->model()->index(i,0),
+        QItemSelectionModel::Deselect);
+        }
+    else
+        {
+        // Workday.
+        model->select(
+        model->model()->index(i,0),
+        QItemSelectionModel::Select);}
+        }
+}
 // End of file	--Don't remove this.

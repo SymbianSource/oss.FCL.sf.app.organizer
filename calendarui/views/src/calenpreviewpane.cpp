@@ -247,9 +247,6 @@ void CalenPreviewPane::startAutoScroll()
 {
 	if (mIsNoEntriesAdded) {
 		scrollContentsTo(QPointF(0.0,0.0));
-				
-		// Call pan gesture with zero delta just to stop the scfrolling 
-		HbScrollArea::panGesture(QPointF(0.0,0.0));
 		return;
 	}
 

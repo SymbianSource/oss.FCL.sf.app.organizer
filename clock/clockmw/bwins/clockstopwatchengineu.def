@@ -1,9 +1,0 @@
-EXPORTS
-	?startTimer@StopwatchEngine@@QAEXXZ @ 1 NONAME ; void StopwatchEngine::startTimer(void)
-	?stopTimer@StopwatchEngine@@QAEXXZ @ 2 NONAME ; void StopwatchEngine::stopTimer(void)
-	??_EStopwatchEngine@@UAE@I@Z @ 3 NONAME ; StopwatchEngine::~StopwatchEngine(unsigned int)
-	??0StopwatchEngine@@QAE@PAVStopwatchObserver@@@Z @ 4 NONAME ; StopwatchEngine::StopwatchEngine(class StopwatchObserver *)
-	?RunL@StopwatchEngine@@MAEXXZ @ 5 NONAME ; void StopwatchEngine::RunL(void)
-	?DoCancel@StopwatchEngine@@MAEXXZ @ 6 NONAME ; void StopwatchEngine::DoCancel(void)
-	??1StopwatchEngine@@UAE@XZ @ 7 NONAME ; StopwatchEngine::~StopwatchEngine(void)
-

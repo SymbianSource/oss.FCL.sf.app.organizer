@@ -20,6 +20,8 @@
 #include <hbmainwindow.h>
 #include <hbwidget.h>
 #include <hbinstance.h>
+#include <hbapplication.h> //Activity Manager
+#include <xqserviceutil.h> // service utils
 
 // User includes
 #include "calencontroller.h"            // CCalenController
@@ -46,10 +48,21 @@ const TInt KNumberOfCommandsPerServices = 100;
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CCalenController::CCalenController(bool isFromServiceFrmwrk)
+CCalenController::CCalenController()
 {
     TRACE_ENTRY_POINT;
-    iIsFromServiceFrmWrk = isFromServiceFrmwrk;
+	// Check the Application Startup reason, set iIsFromServiceFrmWrk if application
+	// is started by service framework, false otherwise
+    /*Hb::ActivationReasonService == qobject_cast<HbApplication*>(qApp)->activateReason() ? 
+        iIsFromServiceFrmWrk = true:
+        iIsFromServiceFrmWrk = false; */
+    
+    // Check if calendar is launched thru XQService framework
+    iIsFromServiceFrmWrk = XQServiceUtil::isService(); // Since activateReason 
+    //of hbapplication is not returning right value if the activity is started 
+    //as services so using the above line temporarily untill a fix is available in 
+    // hbappliacation. Need to remove this line after the fix is available for hbapplcation
+    
     iNextServicesCommandBase = KCustomCommandRangeStart;
     iRefCount = 0;
     
@@ -57,9 +70,9 @@ CCalenController::CCalenController(bool isFromServiceFrmwrk)
     checkMultipleCreation();
     
     // Get an instance of AgendaUtil interface class
-    // This will take care of
-    mAgendaUtil = new AgendaUtil(this);
-
+    // This will take care of 
+    mAgendaUtil = new AgendaUtil();
+    
     iStateMachine = CCalenStateMachine::NewL( *this );
     
     // Create the notifier.
@@ -84,7 +97,9 @@ CCalenController::CCalenController(bool isFromServiceFrmwrk)
     iCustomisationManager = CCalenCustomisationManager::NewL( *this,
                                                                   *iServices );
     // Create the view manager, and register for notifications
-	iViewManager = new CalenViewManager(*this, isFromServiceFrmwrk );
+	iViewManager = new CalenViewManager(*this);
+	
+	iViewManager->SecondPhaseConstruction();
 	
 	hbInstance->allMainWindows().first()->show();
     
@@ -94,6 +109,7 @@ CCalenController::CCalenController(bool isFromServiceFrmwrk)
     notificationArray.Append(ECalenNotifySettingsChanged);
     notificationArray.Append(ECalenNotifyCheckPluginUnloading);
     notificationArray.Append(ECalenNotifyEComRegistryChanged);
+    notificationArray.Append(ECalenNotifySystemLanguageChanged);
     
     RegisterForNotificationsL( iCustomisationManager,notificationArray);
     notificationArray.Reset();
@@ -106,6 +122,7 @@ CCalenController::CCalenController(bool isFromServiceFrmwrk)
     notificationArray.Append(ECalenNotifyEntryDeleted);
     notificationArray.Append(ECalenNotifyInstanceDeleted);
     notificationArray.Append(ECalenNotifySystemLocaleChanged);
+    notificationArray.Append(ECalenNotifySystemLanguageChanged);
     notificationArray.Append(ECalenNotifySystemTimeChanged);
     notificationArray.Append(ECalenNotifyEntryClosed);
     notificationArray.Append(ECalenNotifySettingsClosed);
@@ -611,4 +628,26 @@ int CCalenController::getFirstView()
 	
 }
 
+// ----------------------------------------------------------------------------
+// CCalenController::eventFilter
+// Filters and handles the changes in events
+// (other items were commented in a header).
+// ---------------------------------------------------------------------------
+//
+bool CCalenController::eventFilter(QObject *object, QEvent *event)
+{
+    switch (event->type())
+        {
+        case QEvent::LanguageChange:
+        	//TODO: Unload the translator and install the locale specific translator
+        	iNotifier->BroadcastNotification( ECalenNotifySystemLanguageChanged );
+            break;
+        case QEvent::LocaleChange:
+        	// TODO: handle the locale changes
+            break;
+        default:
+            break;
+        }
+    return QObject::eventFilter(object, event);
+}
 // End of file

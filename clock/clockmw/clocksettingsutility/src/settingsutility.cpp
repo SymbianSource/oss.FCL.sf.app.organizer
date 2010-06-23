@@ -320,9 +320,9 @@ QString SettingsUtility::timeFormatString()
 	QStringList dummyList;
 
 	if (ETime24 == locale.TimeFormat()) {
-		format = QString("h:mm");
+		format = QString("hh:mm");
 	} else if (ETime12 == locale.TimeFormat()) {
-		format = QString("h:mm ap");
+		format = QString("hh:mm ap");
 	}
 
 	QString separator = mTimeSeparatorList.at(timeSeparator(dummyList));

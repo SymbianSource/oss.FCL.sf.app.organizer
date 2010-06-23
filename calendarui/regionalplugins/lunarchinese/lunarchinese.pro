@@ -50,13 +50,11 @@ LIBS +=    -lcalinterimapi \
 	    -laknicon \
 	    -legul \
 	    -lflogger \	 
-		-lavkon \
             -lcalenregionalutil
 
 symbian: {
 
-INCLUDEPATH += /epoc32/include/ecom \
-				../loc
+INCLUDEPATH += /epoc32/include/ecom 
 
 TARGET.UID2 = 0x10009D8D #SYMBIAN_ECOM_PLUGIN_UID 
 TARGET.UID3 = 0x2002EA3C #CALENLUNARCHINESEPLUGIN_DLL_UID 
@@ -81,12 +79,6 @@ mmpRules = \
 "TARGETPATH ECOM_RESOURCE_DIR" \
 "LANGUAGE_IDS" \
 "END" \
-\
-"START RESOURCE  calenlunarchineseplugindata.rss" \
-"HEADER" \
-"TARGETPATH      RESOURCE_FILES_DIR" \
-"LANGUAGE_IDS" \
-"END"  \
 \
 "TARGETTYPE plugin"
 

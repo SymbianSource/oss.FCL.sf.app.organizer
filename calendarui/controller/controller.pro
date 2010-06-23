@@ -43,7 +43,8 @@ symbian : {
 					-lcaleneditor \
 					-lbafl \
 					-lagendainterface \
-					-lagendaeventviewer
+					-lagendaeventviewer \
+					-lxqserviceutil
 						
  	TARGET.UID3 = 0x10282F25					  
   TARGET.CAPABILITY = CAP_GENERAL_DLL

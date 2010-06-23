@@ -34,6 +34,8 @@ symbian: {
 	
 	LIBS += \
 		-lclockappcontroller
+		
+	SKINICON = qtg_large_clock
 }
 
 SOURCES += main.cpp

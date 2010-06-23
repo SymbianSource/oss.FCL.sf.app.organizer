@@ -16,18 +16,19 @@
 */
 
 
-#include <eikenv.h>
-#include <StringLoader.h>
-#include <data_caging_path_literals.hrh>
-#include <bautils.h>
-#include <CalenLunarChinesePluginData.rsg>
-
 #include <QString>
+#include <QStringList>
+#include <QTranslator>
 #include <HbAction>
 #include <HbView>
 #include <HbMenu>
 #include <HbMessageBox>
 #include <HbLabel>
+#include <HbApplication>
+
+#include <eikenv.h>
+#include <data_caging_path_literals.hrh>
+#include <bautils.h>
 
 #include "calendarui_debug.h" 
 #include "CalenLunarChinesePlugin.h"
@@ -35,13 +36,12 @@
 #include "CalenLunarLocalizedInfo.h"
 #include "CalenLunarLocalizer.h"
 #include "CalenLunarInfoProvider.h"
+#include "CalendarPrivateCRKeys.h"
 #include "hb_calencommands.hrh"
 
 //CONSTANTS
-_LIT( KFieldSeparator, "\n" );
-_LIT( KHeaderSeparator, "\n  ");
-_LIT( KResourceChinesePluginFile, "calenlunarchineseplugindata.rsc" );
-#define KResourcePath KDC_RESOURCE_FILES_DIR
+static const QString fieldSeparator("\n");
+static const QString headerSeparator("\n  ");
 
 const TInt KFieldCount = 5;
 
@@ -56,8 +56,7 @@ CCalenLunarChinesePlugin::CCalenLunarChinesePlugin(MCalenServices* aServices)
 	:iLocalizer(NULL),
 	 iLocInfo(NULL),
 	 iServices(aServices),
-	 iInfoBarText(NULL),
-	 iResourceFileOffset( NULL )
+	 iInfoBarText(NULL)
 	{
 	TRACE_ENTRY_POINT;
 	
@@ -106,10 +105,12 @@ CCalenLunarChinesePlugin::~CCalenLunarChinesePlugin()
 	delete iLocalizer;
 	delete iLocInfo;
 	
-	if( iResourceFileOffset )
-        {
-        CCoeEnv::Static()->DeleteResourceFile( iResourceFileOffset );
-        }
+	// Remove the translator for plugin
+	HbApplication::instance()->removeTranslator(iTranslator);
+	if (iTranslator) {
+		delete iTranslator;
+		iTranslator = 0;
+	}
 	TRACE_EXIT_POINT;
 	}
 	
@@ -120,28 +121,23 @@ CCalenLunarChinesePlugin::~CCalenLunarChinesePlugin()
 void CCalenLunarChinesePlugin::ConstructL()
 	{
 	TRACE_ENTRY_POINT;
-	
-	TFileName dllName;
-	// Get the complate path of the DLL from where it is currently loaded
-	Dll::FileName( dllName );
-	
-    TFileName resourceFilename;
-    resourceFilename.Append(dllName.Mid(0,2));
-    resourceFilename.Append(KResourcePath);
-    resourceFilename.Append(KResourceChinesePluginFile);
-    BaflUtils::NearestLanguageFile( CEikonEnv::Static()->FsSession(), 
-															resourceFilename );
-    // Add the resource file.
-    iResourceFileOffset = CEikonEnv::Static()->AddResourceFileL( 
-															resourceFilename );
-	
     iServices->RegisterForNotificationsL( this, ECalenNotifyContextChanged );
 	iServices->GetCommandRange( iStart, iEnd );
+	
+	// Install the translator before the CCalenLunarLocalizer is constructed
+	iTranslator = new QTranslator;
+	QString lang = QLocale::system().name();
+	QString path = "Z:/resource/qt/translations/";
+	bool loaded = iTranslator->load("calenregional_en_GB", ":/translations");
+	// TODO: Load the appropriate .qm file based on locale
+	//bool loaded = iTranslator->load("calenregional_" + lang, path);
+	HbApplication::instance()->installTranslator(iTranslator);
 	
 	iLocalizer = CCalenLunarLocalizer::NewL();
 	
 	iInfoProvider = CCalenLunarInfoProvider::NewL( 
 											CEikonEnv::Static()->FsSession() );
+	
 	
     TRACE_EXIT_POINT;	
 	}
@@ -311,69 +307,52 @@ void CCalenLunarChinesePlugin::HandleNotification(
 // -----------------------------------------------------------------------------
 //	
 void CCalenLunarChinesePlugin::ShowDetailsL( )
-    {
-    TRACE_ENTRY_POINT;
-    HBufC* msgText = HBufC::NewLC( 1000 );
-    if ( iLocInfo )
-        {
-        TInt headerIds[KFieldCount] = {
-            R_CALENDAR_LUNAR_INFO_FESTIVAL,
-            R_CALENDAR_LUNAR_INFO_SOLAR,
-            R_CALENDAR_LUNAR_INFO_DATE,
-            R_CALENDAR_LUNAR_INFO_ANIMAL_YEAR,
-            R_CALENDAR_LUNAR_INFO_WESTERN_DATE
-            };
-        
-        RPointerArray<HBufC> headersArray;
-        
-        for ( TInt i=0; i < KFieldCount; i++) 
-            {
-            headersArray.Append( StringLoader::LoadL( headerIds[i] ) );
-            }
-        
-        CPtrCArray* fieldsArray = new (ELeave) CPtrCArray(5);
-        CleanupStack::PushL( fieldsArray );
-        fieldsArray->AppendL( iLocInfo->Festival() );
-        fieldsArray->AppendL( iLocInfo->SolarTerm() );
-        fieldsArray->AppendL( iLocInfo->FullLunarDate() );
-        fieldsArray->AppendL( iLocInfo->AnimalYear() );
-        fieldsArray->AppendL( iLocInfo->GregorianDate() );
-        
-        for (TInt i=0; i < KFieldCount; i++)
-            {
-            TPtrC fieldPtrC = fieldsArray->At(i);
-            if ( fieldPtrC != KNullDesC )
-                {
-                msgText->Des().Append( *(headersArray[i]) );
-                msgText->Des().Append( KHeaderSeparator );
-                msgText->Des().Append( fieldPtrC );
-                if ( i < KFieldCount - 1 ) // not last
-                    {
-                    msgText->Des().Append( KFieldSeparator );
-                    }
-                }
-            }
-        CleanupStack::PopAndDestroy( fieldsArray );
-        headersArray.ResetAndDestroy();
-        }
-    
-    
-    ExecuteMessageDialogL(*msgText);
-   
-    CleanupStack::PopAndDestroy( msgText );
-    
-    TRACE_EXIT_POINT;
-    }
+{
+	QString msgText;
+	if(iLocInfo) {
+		QStringList headerIds;
+		headerIds.append(hbTrId("txt_calendar_info_festival"));
+		headerIds.append(hbTrId("txt_calendar_solar_term"));
+		headerIds.append(hbTrId("txt_calendar_lunar_date"));
+		headerIds.append(hbTrId("txt_calendar_animal_year"));
+		headerIds.append(hbTrId("txt_calendar_gregorian_date"));
+
+		QStringList fieldInfo;
+		QString data;
+
+		data = QString::fromUtf16(iLocInfo->Festival().Ptr(),iLocInfo->Festival().Length());
+		fieldInfo.append(data);
+		data = QString::fromUtf16(iLocInfo->SolarTerm().Ptr(),iLocInfo->SolarTerm().Length());
+		fieldInfo.append(data);
+		data = QString::fromUtf16(iLocInfo->FullLunarDate().Ptr(),iLocInfo->FullLunarDate().Length());
+		fieldInfo.append(data);
+		data = QString::fromUtf16(iLocInfo->AnimalYear().Ptr(),iLocInfo->AnimalYear().Length());
+		fieldInfo.append(data);
+		data = QString::fromUtf16(iLocInfo->GregorianDate().Ptr(),iLocInfo->GregorianDate().Length());
+		fieldInfo.append(data);
+		// Append the data in the proper order
+		for (TInt i=0; i < KFieldCount; i++) {
+			if(!fieldInfo.at(i).isEmpty()) {
+				msgText.append(headerIds[i]);
+				msgText.append(headerSeparator);
+				msgText.append(fieldInfo[i]);
+				if ( i < KFieldCount - 1 ) { 
+					// not last item
+					msgText.append(fieldSeparator);
+				}
+			}
+		}
+	}
+	ExecuteMessageDialogL(msgText);
+}
 
 // -----------------------------------------------------------------------------
-// CCalenLunarChinesePlugin::ShowMessageDialogL
+// CCalenLunarChinesePlugin::ExecuteMessageDialogL
 // -----------------------------------------------------------------------------
-//    
-void CCalenLunarChinesePlugin::ExecuteMessageDialogL(TDesC& aMsgText)
+//
+void CCalenLunarChinesePlugin::ExecuteMessageDialogL(QString aMsgText)
 	{
 	TRACE_ENTRY_POINT;	
-	QString text = QString::fromUtf16(aMsgText.Ptr(),aMsgText.Length());
-	
 	// Instantiate a popup
 	HbMessageBox *popup = new HbMessageBox();
 	popup->setDismissPolicy(HbDialog::NoDismiss);
@@ -381,8 +360,8 @@ void CCalenLunarChinesePlugin::ExecuteMessageDialogL(TDesC& aMsgText)
 	popup->setIconVisible(false);
 	popup->setAttribute( Qt::WA_DeleteOnClose, true );
 	
-	popup->setHeadingWidget(new HbLabel("Lunar Calendar"));
-	popup->setText(text);
+	popup->setHeadingWidget(new HbLabel(hbTrId("txt_calendar_title_lunar_calendar")));
+	popup->setText(aMsgText);
 	
 	// Remove the default actions
 	QList<QAction*> list = popup->actions();
@@ -391,13 +370,12 @@ void CCalenLunarChinesePlugin::ExecuteMessageDialogL(TDesC& aMsgText)
 		popup->removeAction(list[i]);
 	}
 	// Sets the primary action
-	popup->addAction(new HbAction(hbTrId("txt_calendar_button_cancel"), popup));
+	popup->addAction(new HbAction(hbTrId("txt_calendar_button_close"), popup));
 
 	// Launch popup
 	popup->open();
    	TRACE_EXIT_POINT;
 	}
-
 //EOF
 
 

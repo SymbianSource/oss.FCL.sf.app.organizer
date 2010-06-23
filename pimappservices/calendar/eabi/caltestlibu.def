@@ -52,4 +52,5 @@ EXPORTS
 	_ZTV15CCalTestLibrary @ 51 NONAME
 	_ZN15CCalTestLibrary24WaitForAgendaServerCloseEv @ 52 NONAME
 	_ZN15CCalTestLibrary17WaitForAlarmEventEi17TAlarmChangeEvent11TAlarmStatei @ 53 NONAME
+	_ZN15CCalTestLibrary20CreateCalSubSessionLERK7TDesC16 @ 54 NONAME
 

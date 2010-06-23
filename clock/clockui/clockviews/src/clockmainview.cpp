@@ -26,6 +26,8 @@
 #include <HbListView>
 #include <HbNotificationDialog>
 #include <HbStyleLoader>
+#include <hbapplication> // hbapplication
+#include <hbactivitymanager> // activity manager
 
 // User includes
 #include "clockmainview.h"
@@ -56,7 +58,8 @@ ClockMainView::ClockMainView(QGraphicsItem *parent)
 :HbView(parent),
  mAlarmList(0),
  mSelectedItem(-1),
- mIsLongTop(false)
+ mIsLongTop(false),
+ mIsScreenShotCapruted(false)
 {
 	// Nothing yet.
 }
@@ -193,6 +196,18 @@ void ClockMainView::setupView(
 	connect(
 			window, SIGNAL(orientationChanged(Qt::Orientation)),
 			this, SLOT(checkOrientationAndLoadSection(Qt::Orientation)));
+	
+    // Get a pointer to activity Manager
+    HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+  
+    // clean up any previous versions of this activity from the activity manager.
+    // ignore return value as the first boot would always return a false
+    // bool declared on for debugging purpose
+    bool ok = activityManager->removeActivity(clockMainView);
+
+	// connect for the aboutToQuit events on application Exit as to call saveActivity
+    connect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()), this, SLOT(saveActivity()));
+
 }
 
 /*!
@@ -311,6 +326,7 @@ void ClockMainView::refreshMainView()
 void ClockMainView::displayWorldClockView()
 {
 	mAppControllerIf->switchToView(WorldClock);
+	// no need to capture the screenshot here as it's done in ClockViewManager::showView
 
 }
 
@@ -322,6 +338,9 @@ void ClockMainView::addNewAlarm()
 {
 	ClockAlarmEditor *alarmEditor = new ClockAlarmEditor(*mAlarmClient);
 	alarmEditor->showAlarmEditor();
+	// capture screenshot for future use, if application
+	// is exited/Quit from alarmEditor
+	captureScreenShot(true);
 }
 
 /*!
@@ -333,6 +352,9 @@ void ClockMainView::openSettings()
 	// Create the settings view.
 	ClockSettingsView *settingsView = new ClockSettingsView(this);
 	settingsView->loadSettingsView();
+	// capture screenshot for future use, if application
+	// is exited/Quit from alarmEditor
+	captureScreenShot(true);
 }
 
 /*!
@@ -353,6 +375,9 @@ void ClockMainView::handleActivated(const QModelIndex &index)
 		ClockAlarmEditor *alarmEditor = new ClockAlarmEditor(
 				*mAlarmClient, alarmId);
 		alarmEditor->showAlarmEditor();
+		// capture screenshot for future use, if application 
+		// is exited/Quit from alarmEditor
+		captureScreenShot(true);
 	}
 }
 
@@ -393,6 +418,8 @@ void ClockMainView::handleLongPress(
 	// Show the menu.
 	itemContextMenu->open(this, SLOT(selectedMenuAction(HbAction*)));
 	itemContextMenu->setPreferredPos(coords);
+	itemContextMenu->setAttribute(Qt::WA_DeleteOnClose, true );
+	
 }
 
 /*!
@@ -516,6 +543,8 @@ void ClockMainView::updatePlaceLabel(int autoTimeUpdate)
  */
 void ClockMainView::handleAlarmListDisplay()
 {
+    // alarmEditor closed reset the captured screenshot, current view is main view now
+    captureScreenShot(false);
 	// Get the list of pending clock alarms from server.
 	QList<AlarmInfo> alarmInfoList;
 	QList<AlarmInfo> displayInfoList;
@@ -661,4 +690,42 @@ void ClockMainView::updateClockWidget()
 	mClockWidget->updateTime();
 }
 
+/*!
+	CaptureScreenShot captures screen shot 
+	\param captureScreenShot bool to indicate if screenshot needs to be captured
+*/ 
+void ClockMainView::captureScreenShot(bool captureScreenShot)
+{
+	// check if screen shot needs to be captured
+    if (captureScreenShot) {
+        mScreenShot.clear();
+        mScreenShot.insert("screenshot", QPixmap::grabWidget(mainWindow(), mainWindow()->rect()));
+    }
+    mIsScreenShotCapruted = captureScreenShot; // set mIsScreenShotCapruted set validity of screenshot
+}
+
+/*!    
+	saveActivity saves main view as an activity 
+*/ 
+void ClockMainView::saveActivity()
+{
+   // Get a pointer to activity Manager
+   HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+ 	// check if a valid screenshot is already captured
+   if (!mIsScreenShotCapruted)  {
+       mScreenShot.clear();
+       mScreenShot.insert("screenshot", QPixmap::grabWidget(mainWindow(), mainWindow()->rect()));
+   }
+ 
+   // save any data necessary to save the state
+   QByteArray serializedActivity;
+   QDataStream stream(&serializedActivity, QIODevice::WriteOnly | QIODevice::Append);
+   stream << MainView;
+ 
+   // add the activity to the activity manager
+   bool ok = activityManager->addActivity(clockMainView, serializedActivity, mScreenShot);
+   if ( !ok ) {
+       qFatal("Add failed" );
+   }
+}
 // End of file	--Don't remove.

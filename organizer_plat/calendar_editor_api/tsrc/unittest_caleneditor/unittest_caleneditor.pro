@@ -20,6 +20,7 @@ TEMPLATE = app
 TARGET = ut_caleneditor
 CONFIG += qtestlib \
 			hb
+CONFIG += symbian_test
 DEPENDPATH += . \
 				./src/ \
 				../../../../calendarui/caleneditor/inc \
@@ -46,7 +47,10 @@ symbian: {
     TARGET.EPOCHEAPSIZE = 0x200000 0x4000000
     TARGET.CAPABILITY = CAP_GENERAL_DLL
 	
-	INCLUDEPATH +=  $$APP_LAYER_SYSTEMINCLUDE
+		INCLUDEPATH +=  $$APP_LAYER_SYSTEMINCLUDE
+	
+		BLD_INF_RULES.prj_testexports += \
+	"../rom/unit_caleneditor.iby		CORE_APP_LAYER_IBY_EXPORT_PATH(unit_caleneditor.iby)"
 }
 
 SOURCES +=  unittest_caleneditor.cpp \

@@ -433,6 +433,9 @@ QDate CalenEditorRepeatField::repeatUntilDate()
 */
 void CalenEditorRepeatField::updateRepeatChoices()
 {
+    if (!mRepeatComboBox) {
+        return;
+    }
 	// Clear all the choices and add it again. If we dont do it 
 	// as user would have changed the end times many times and we would have
 	// deleted repeat options depending upon that

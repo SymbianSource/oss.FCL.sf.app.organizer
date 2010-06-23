@@ -24,6 +24,8 @@
 #include <hbmainwindow.h>
 #include <hbdatetimepicker.h>
 #include <vwsdef.h>
+#include <hbactivitymanager.h> //Activity Manager
+#include <hbapplication.h> //hbapplication
 
 //user includes
 #include <CalenUid.h>
@@ -32,6 +34,7 @@
 #include "calencontext.h"
 #include "calensettingsview.h"
 #include "calendateutils.h"
+#include "calenconstants.h"
 
 /*!
  \class CalenNativeView
@@ -42,7 +45,7 @@
  Default constructor.
  */
 CalenNativeView::CalenNativeView(MCalenServices &services) :
-	mServices(services)
+	mServices(services), mIsCapturedScreenShotValid(false)
 {
 	setTitle(hbTrId("txt_calendar_title_calendar"));
 
@@ -206,4 +209,49 @@ QString *CalenNativeView::pluginText()
 	return mServices.InfobarTextL();
 }
 
+// ----------------------------------------------------------------------------
+// captureScreenshot caltures screen shot for the given viewId
+// @param viewId view for which screenshot needs to be captured
+// ----------------------------------------------------------------------------
+// 
+void CalenNativeView::captureScreenshot(bool captureScreenShot)
+    {
+    // get a screenshot for saving to the activity manager. It's done for once
+    // to optimize the performance
+    if (captureScreenShot) {
+        mScreenShotMetadata.clear(); // remove any screenshot captured earlier
+        mScreenShotMetadata.insert("screenshot", QPixmap::grabWidget(mainWindow(), mainWindow()->rect()));
+        }
+    mIsCapturedScreenShotValid = captureScreenShot; // set the validity of the screenshot captured
+    }
+
+// ----------------------------------------------------------------------------
+// saveActivity saves the activity for current view
+// ----------------------------------------------------------------------------
+// 
+void CalenNativeView::saveActivity()
+ {
+   // Get a pointer to activity manager 
+   HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+ 
+   // check if alerady a valid screen shot is captured
+   if (!mIsCapturedScreenShotValid) {
+       mScreenShotMetadata.clear(); // remove any screenshot captured earlier
+       mScreenShotMetadata.insert("screenshot", QPixmap::grabWidget(mainWindow(), mainWindow()->rect()));
+       }
+   
+   // Save any data necessary to save the state
+   QByteArray serializedActivity;
+   QDataStream stream(&serializedActivity, QIODevice::WriteOnly | QIODevice::Append);
+   stream << mActivityId;
+ 
+   bool ok(false);
+   // Save activity
+   ok = activityManager->addActivity(activityName, serializedActivity, mScreenShotMetadata);
+
+   // Check is activity saved sucessfully
+   if ( !ok )  {
+       qFatal("Add failed" ); // Panic is activity is not saved successfully
+       }
+ }
 //End Of File

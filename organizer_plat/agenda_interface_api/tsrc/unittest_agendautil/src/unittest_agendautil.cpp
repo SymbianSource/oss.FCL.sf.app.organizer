@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies). 
+ * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
  * under the terms of "Eclipse Public License v1.0"
@@ -9,7 +9,7 @@
  * Initial Contributors:
  * Nokia Corporation - initial contribution.
  *
- * Contributors: 
+ * Contributors:
  *
  * Description: AgendaUtil unit test class.
  *
@@ -26,20 +26,18 @@
 class TestAgendaUtil : public QObject
 {
 	Q_OBJECT
-	
+
 public slots:
 	void handleEntriesDeletion(int error);
+	void handleEntryViewCreationCompleted(int status);
 
-private:
-	int createMultipleEntries();
-	
 private slots:
 	// Test case setup.
 	void init();
 	void cleanup();
 	void initTestCase();
 	void cleanupTestCase();
-	
+
 	// Test cases.
 	void test_addEntry();
 	void test_deleteEntry();
@@ -51,6 +49,19 @@ private slots:
 	void test_fetchAllEntries();
 	void test_deleteEntries();
 	void test_fetchEntriesInRange();
+	void test_cloneEntry();
+	void test_todoCompleted();
+
+private:
+	int createMultipleEntries();
+	void cloneNoteToTodo();
+	void cloneNoteToMeeting();
+	void cloneTodoToNote();
+	void cloneTodoToMeeting();
+	void cloneMeetingToNote();
+	void cloneMeetingToTodo();
+	void completeTodo();
+	void unCompletedTodo();
 
 private:
 	AgendaUtil *mAgendaUtil;
@@ -59,7 +70,7 @@ private:
 
 /*!
 	\class TestAgendaUtil
-	
+
 	This is unittest class for AgendaUtil apis.
  */
 
@@ -71,7 +82,7 @@ void TestAgendaUtil::init()
 	/*QT_TRAP_THROWING(mAgendaUtil = new AgendaUtil);
 
 	Q_ASSERT_X(mAgendaUtil, "TestAgendaUtil::test_addEntry", "No agendautil");
-	
+
 	// Connect to the required signals
 	connect(
 			mAgendaUtil, SIGNAL(entriesDeleted(int)), this,
@@ -85,7 +96,7 @@ void TestAgendaUtil::init()
  */
 void TestAgendaUtil::cleanup()
 {
-		
+
 	//User::Exit(0);
     if (mWait && mWait->IsStarted()) {
                 mWait->AsyncStop();
@@ -99,24 +110,34 @@ void TestAgendaUtil::cleanup()
 void TestAgendaUtil::initTestCase()
 {
 	QT_TRAP_THROWING(mAgendaUtil = new AgendaUtil);
-	
+
+	connect(
+			mAgendaUtil, SIGNAL(entryViewCreationCompleted(int)),
+			this, SLOT(handleEntryViewCreationCompleted(int)));
+
+	// Start the timer as the instanceview/entryview creation
+	// operation is asynchronous
+	QT_TRAP_THROWING(mWait = new (ELeave) CActiveSchedulerWait;);
+		if (!mWait->IsStarted()) {
+			mWait->Start();
+	}
+
 	Q_ASSERT_X(mAgendaUtil, "TestAgendaUtil::test_addEntry", "No agendautil");
-	
+
 	// Connect to the required signals
 	connect(
 			mAgendaUtil, SIGNAL(entriesDeleted(int)), this,
 			SLOT(handleEntriesDeletion(int)));
-	
+
 	mWait = NULL;
 }
 
 void TestAgendaUtil::cleanupTestCase()
 {
-    //User::Exit(0);
-    QCoreApplication::processEvents();
-    if (mAgendaUtil) {
-            delete mAgendaUtil;
-    }
+	QCoreApplication::processEvents();
+	if (mAgendaUtil) {
+		delete mAgendaUtil;
+	}
 }
 /*
 	Tests the AgendaUtil::addEntry.
@@ -131,10 +152,10 @@ void TestAgendaUtil::test_addEntry()
 	entry.setType(AgendaEntry::TypeEvent);
 	entry.setSummary("Test case");
 	entry.setStartAndEndTime(dateTimeSet, dateTimeSet);
-	
+
 	// Run the case.
 	ulong id = mAgendaUtil->addEntry(entry);
-	
+
 	// Verify.
 	AgendaEntry newEntry = mAgendaUtil->fetchById(id);
 	QDateTime dateTimeRetrieved = newEntry.startTime();
@@ -157,13 +178,13 @@ void TestAgendaUtil::test_deleteEntry()
 	entry.setType(AgendaEntry::TypeEvent);
 	entry.setSummary("Test case");
 	entry.setStartAndEndTime(
-			QDateTime::currentDateTime(), 
+			QDateTime::currentDateTime(),
 			QDateTime::currentDateTime());
 	ulong id = mAgendaUtil->addEntry(entry);
-	
+
 	// Run the case.
 	QVERIFY(mAgendaUtil->deleteEntry(id));
-	
+
 	// Verify.
 	QVERIFY(mAgendaUtil->fetchById(id).isNull());
 }
@@ -178,7 +199,7 @@ void TestAgendaUtil::test_deleteRepeatedEntry()
 	entry.setType(AgendaEntry::TypeAppoinment);
 	entry.setSummary("Test case");
 	entry.setStartAndEndTime(
-			QDateTime::currentDateTime(), 
+			QDateTime::currentDateTime(),
 			QDateTime::currentDateTime());
 	AgendaRepeatRule repeatRule;
 	repeatRule.setType(AgendaRepeatRule::DailyRule);
@@ -188,15 +209,15 @@ void TestAgendaUtil::test_deleteRepeatedEntry()
 	repeatRule.setUntil(until);
 	repeatRule.setInterval(1);
 	entry.setRepeatRule(repeatRule);
-	
+
 	ulong id = mAgendaUtil->addEntry(entry);
 	AgendaEntry savedEntry = mAgendaUtil->fetchById(id);
 	QVERIFY(!savedEntry.isNull());
 	QVERIFY(savedEntry.isRepeating());
-	
+
 	// Run the case.
 	mAgendaUtil->deleteRepeatedEntry(savedEntry, AgendaUtil::ThisAndAll);
-	
+
 	// Verify.
 	QVERIFY(mAgendaUtil->fetchById(id).isNull());
 }
@@ -220,7 +241,7 @@ void TestAgendaUtil::test_fetchById()
 
 	// Verify.
 	AgendaEntry retrievedEntry = mAgendaUtil->fetchById(id);
-	
+
 	// Check if the fetched entry is same st the added entry
 	QDateTime dateTimeRetrieved = retrievedEntry.startTime();
 	QDate dateRetrieved = dateTimeRetrieved.date();
@@ -229,7 +250,7 @@ void TestAgendaUtil::test_fetchById()
 	QVERIFY(entry.type() == retrievedEntry.type());
 	QVERIFY(entry.summary() == retrievedEntry.summary());
 	mAgendaUtil->deleteEntry(id);
-	
+
 	// Fetch the same again and check if its null.
 	AgendaEntry checkEntryIsNull = mAgendaUtil->fetchById(id);
 	QVERIFY(checkEntryIsNull.isNull());
@@ -247,19 +268,19 @@ void TestAgendaUtil::test_updateEntry()
 	entry.setDescription("Entry to test the updateEntry API");
 	entry.setLocation("Nokia");
 	entry.setStartAndEndTime(
-			QDateTime::currentDateTime(), 
+			QDateTime::currentDateTime(),
 			QDateTime::currentDateTime());
 
 	// Save the entry
 	ulong id = mAgendaUtil->addEntry(entry);
 
-	// Fetch the same entry 
+	// Fetch the same entry
 	AgendaEntry savedEntry = mAgendaUtil->fetchById(id);
 	QVERIFY(!savedEntry.isNull());
 	savedEntry.setSummary("Fetced Entry");
 	savedEntry.setLocation("India");
 	savedEntry.setStartAndEndTime(
-			QDateTime::currentDateTime().addDays(1), 
+			QDateTime::currentDateTime().addDays(1),
 			QDateTime::currentDateTime().addDays(1));
 
 	// Update the entry
@@ -267,7 +288,7 @@ void TestAgendaUtil::test_updateEntry()
 	QVERIFY(success);
 
 	// Fetch the updated entry again
-	AgendaEntry updatedEntry = mAgendaUtil->fetchById(id); 
+	AgendaEntry updatedEntry = mAgendaUtil->fetchById(id);
 
 	// Verify
 	QVERIFY(savedEntry.summary() == updatedEntry.summary());
@@ -286,7 +307,7 @@ void TestAgendaUtil::test_createEntryIdListForDay()
 	QDateTime startRange(QDate(1900, 01, 1), QTime(0, 0, 0, 0));
 	QDateTime endRange(QDate(2100, 01, 01), QTime(23, 59, 59, 0));
 	mAgendaUtil->deleteEntries(startRange, endRange);
-	// Start the timer as the above operation is asynchronous   
+	// Start the timer as the above operation is asynchronous
 	if (!mWait) {
 		QT_TRAP_THROWING(mWait = new (ELeave) CActiveSchedulerWait;);
 		if (!mWait->IsStarted()) {
@@ -328,7 +349,7 @@ void TestAgendaUtil::test_entryIds()
 
 	qDebug("Request for deletion made.");
 
-	// Start the timer as the above operation is asynchronous   
+	// Start the timer as the above operation is asynchronous
 	if (!mWait) {
 		QT_TRAP_THROWING(mWait = new (ELeave) CActiveSchedulerWait;);
 		if (!mWait->IsStarted()) {
@@ -392,7 +413,7 @@ void TestAgendaUtil::test_fetchAllEntries()
 
 	qDebug("Request for deletion made.");
 
-	// Start the timer as the above operation is asynchronous   
+	// Start the timer as the above operation is asynchronous
 	if (!mWait) {
 		QT_TRAP_THROWING(mWait = new (ELeave) CActiveSchedulerWait;);
 		if (!mWait->IsStarted()) {
@@ -413,7 +434,7 @@ void TestAgendaUtil::test_fetchAllEntries()
 
 		qDebug("Request for deletion made.");
 
-		// Start the timer as the above operation is asynchronous   
+		// Start the timer as the above operation is asynchronous
 		if (!mWait) {
 			QT_TRAP_THROWING(mWait = new (ELeave) CActiveSchedulerWait;);
 			if (!mWait->IsStarted()) {
@@ -453,7 +474,7 @@ void TestAgendaUtil::test_fetchAllEntries()
 
 	// Verfiy
 	numOfEntriesRetrieved = entries.count();
-	QVERIFY(numOfEntries == numOfEntriesRetrieved);
+	QCOMPARE(numOfEntries,numOfEntriesRetrieved);
 }
 
 /*!
@@ -471,32 +492,32 @@ void TestAgendaUtil::test_deleteEntries()
 	int numOfEntriesRetrieved = entriesRetrieved.count();
 	QList<ulong> checkList = mAgendaUtil->entryIds();
 	int checkNum = checkList.count();
-		
+
 	// Create the required entries.
 	int numOfEntries = createMultipleEntries();
-	
+
 	entriesRetrieved = mAgendaUtil->fetchEntriesInRange(startRange, endRange);
 	numOfEntriesRetrieved = entriesRetrieved.count();
 	checkList = mAgendaUtil->entryIds();
 	checkNum = checkList.count();
 
 	Q_ASSERT(numOfEntries);
-	
+
 	qDebug("Entries have been created");
 
 	// Execute the case.
 	mAgendaUtil->deleteEntries(startRange, endRange);
-	
+
 	qDebug("Request for deletion made.");
 
-	// Start the timer as the above operation is asynchronous   
+	// Start the timer as the above operation is asynchronous
 	if (!mWait) {
 		QT_TRAP_THROWING(mWait = new (ELeave) CActiveSchedulerWait;);
 		if (!mWait->IsStarted()) {
 			mWait->Start();
 		}
 	}
-	
+
 	qDebug("Waiting for confirmation.");
 	entriesRetrieved = mAgendaUtil->fetchEntriesInRange(startRange, endRange);
 	numOfEntriesRetrieved = entriesRetrieved.count();
@@ -514,10 +535,10 @@ void TestAgendaUtil::test_fetchEntriesInRange()
 	QDateTime startRange(QDate(1900, 01, 1), QTime(0, 0, 0, 0));
 	QDateTime endRange(QDate(2100, 12, 30), QTime(23, 59, 59, 0));
 	mAgendaUtil->deleteEntries(startRange,endRange);
-	
+
 	//qDebug("Request for deletion made.");
 
-	// Start the timer as the above operation is asynchronous   
+	// Start the timer as the above operation is asynchronous
 	if (!mWait) {
 		QT_TRAP_THROWING(mWait = new (ELeave) CActiveSchedulerWait;);
 		if (!mWait->IsStarted()) {
@@ -526,13 +547,13 @@ void TestAgendaUtil::test_fetchEntriesInRange()
 	}
 
 	//qDebug("Waiting for confirmation.");
-	
+
 	QList<AgendaEntry> entriesRetrieved =
 			mAgendaUtil->fetchEntriesInRange(startRange, endRange);
 	int numOfEntriesRetrieved = entriesRetrieved.count();
 	QList<ulong> checkList = mAgendaUtil->entryIds();
 	int checkNum = checkList.count();
-		
+
 	// Appointment.
 	AgendaEntry firstEntry;
 	firstEntry.setType(AgendaEntry::TypeAppoinment);
@@ -543,7 +564,7 @@ void TestAgendaUtil::test_fetchEntriesInRange()
 			QDate(2020, 05, 01), QTime(10, 0, 0, 0));
 	firstEntry.setStartAndEndTime(firstEntryStart, firstEntryEnd);
 	ulong id = mAgendaUtil->addEntry(firstEntry);
-	
+
 	// Create the range for which entries are needed
 	QDateTime fromRange(
 			QDate(2020, 01, 01), QTime(0, 0, 0, 0));
@@ -554,12 +575,34 @@ void TestAgendaUtil::test_fetchEntriesInRange()
 			fromRange, toRange);
 
 	// Verify
-	int num = entries.count();                             
+	int num = entries.count();
 	QVERIFY( 1 == entries.count());
-	
+
 	//cleanup();
-	
+
 	//User::Exit(0);
+}
+
+/*!
+	Test the api AgendaUtil::cloneEntry
+ */
+void TestAgendaUtil::test_cloneEntry()
+{
+	cloneNoteToTodo();
+	cloneNoteToMeeting();
+	cloneTodoToNote();
+	cloneTodoToMeeting();
+	cloneMeetingToNote();
+	cloneMeetingToTodo();
+}
+
+/*
+	Test the api AgendaUtil::setCompleted
+ */
+void TestAgendaUtil::test_todoCompleted()
+{
+	completeTodo();
+	unCompletedTodo();
 }
 
 /*!
@@ -572,6 +615,18 @@ void TestAgendaUtil::handleEntriesDeletion(int error)
 		mWait->AsyncStop();
 	}
 	QVERIFY(!error);
+}
+
+/*!
+	Slot to handle the entry view creation.
+ */
+void TestAgendaUtil::handleEntryViewCreationCompleted(int status)
+{
+	// Stop the wait timer.
+	if (mWait && mWait->IsStarted()) {
+		mWait->AsyncStop();
+	}
+	QVERIFY(!status);
 }
 
 /*!
@@ -621,7 +676,248 @@ int TestAgendaUtil::createMultipleEntries()
 	return numOfEntries;
 }
 
-QTEST_MAIN(TestAgendaUtil)
+/*!
+	Test Cloning of Note to To-do
+ */
+void TestAgendaUtil::cloneNoteToTodo()
+{
+	// Create an agenda entry(TypeNote) and save it.
+	AgendaEntry noteEntry(AgendaEntry::TypeNote);
+	noteEntry.setDescription(QString("test cloning of note to todo"));
+
+	// Clone the entry type TypeNote to TypeTodo
+	long notSavedEntryId = mAgendaUtil->cloneEntry(
+			noteEntry, AgendaEntry::TypeTodo);
+	// Shouldn't clone the entry as AgendaEntry is not yet saved.
+	QVERIFY(!notSavedEntryId);
+
+	long noteId = mAgendaUtil->addEntry(noteEntry);
+	QVERIFY(noteId);
+
+	// Fetch the saved note entry for cloning
+	AgendaEntry fetchedNoteEntry = mAgendaUtil->fetchById(noteId);
+
+	// Clone the entry type ENote to ETodo
+	long clonedTodoEntryId = mAgendaUtil->cloneEntry(
+			fetchedNoteEntry, AgendaEntry::TypeTodo);
+	QVERIFY(clonedTodoEntryId);
+
+	AgendaEntry clonedTodoEntry = mAgendaUtil->fetchById(clonedTodoEntryId);
+	// Compare the attributes.
+	QCOMPARE(AgendaEntry::TypeTodo,clonedTodoEntry.type());
+	QCOMPARE(fetchedNoteEntry.description(),clonedTodoEntry.description());
+}
+
+/*!
+	Test Cloning of Note to Meeting
+ */
+
+void TestAgendaUtil::cloneNoteToMeeting()
+{
+	// Create an agenda entry(TypeNote) and save it.
+	AgendaEntry noteEntry(AgendaEntry::TypeNote);
+	noteEntry.setDescription(QString("test cloning of note to meeting"));
+
+	long noteId = mAgendaUtil->addEntry(noteEntry);
+	QVERIFY(noteId);
+
+	// Fetch the saved note entry for cloning
+	AgendaEntry fetchedNoteEntry = mAgendaUtil->fetchById(noteId);
+
+	// Clone the entry type TypeNote to TypeTodo
+	long clonedMeetingEntryId = mAgendaUtil->cloneEntry(
+			fetchedNoteEntry, AgendaEntry::TypeAppoinment);
+	QVERIFY(clonedMeetingEntryId);
+
+	AgendaEntry clonedMeetingEntry = mAgendaUtil->fetchById(clonedMeetingEntryId);
+	// Compare the attributes.
+	QCOMPARE(AgendaEntry::TypeAppoinment,clonedMeetingEntry.type());
+	QCOMPARE(fetchedNoteEntry.description(),clonedMeetingEntry.description());
+}
+
+/*!
+	Test Cloning of To-do to Note
+ */
+void TestAgendaUtil::cloneTodoToNote()
+{
+	// Create an agenda entry(TypeTodo) and save it.
+	AgendaEntry todoEntry(AgendaEntry::TypeTodo);
+	todoEntry.setDescription(QString("test cloning of todo to note"));
+	QDateTime dueDate(QDate(2011, 06, 01), QTime(10, 0, 0, 0));
+	todoEntry.setStartAndEndTime(dueDate, dueDate);
+	long todoId = mAgendaUtil->addEntry(todoEntry);
+	QVERIFY(todoId);
+
+	// Fetch the saved note entry for cloning
+	AgendaEntry fetchedTodoEntry = mAgendaUtil->fetchById(todoId);
+
+	// Clone the entry type ETodo to EANote
+	ulong clonedNoteId = mAgendaUtil->cloneEntry(
+			fetchedTodoEntry, AgendaEntry::TypeNote);
+	QVERIFY(clonedNoteId);
+	AgendaEntry clonedNoteEntry =
+			mAgendaUtil->fetchById(clonedNoteId);
+
+	// Compare the attributes.
+	QCOMPARE(AgendaEntry::TypeNote,clonedNoteEntry.type());
+	QCOMPARE(fetchedTodoEntry.description(),clonedNoteEntry.description());
+	QCOMPARE(fetchedTodoEntry.favourite(),clonedNoteEntry.favourite());
+}
+
+/*!
+	Test Cloning of To-do to Meeting
+ */
+void TestAgendaUtil::cloneTodoToMeeting()
+{
+	// Create an agenda entry(TypeTodo) and save it.
+	AgendaEntry todoEntry(AgendaEntry::TypeTodo);
+	todoEntry.setSummary(QString("test cloning of todo to meeting"));
+	QDateTime dueDate(QDate(2011, 06, 01), QTime(10, 0, 0, 0));
+	todoEntry.setStartAndEndTime(dueDate, dueDate);
+	long todoId = mAgendaUtil->addEntry(todoEntry);
+	QVERIFY(todoId);
+
+	// Fetch the saved note entry for cloning
+	AgendaEntry fetchedTodoEntry = mAgendaUtil->fetchById(todoId);
+
+	// Clone the entry type TypeTodo to TypeAppointment
+	ulong clonedAppointmentId = mAgendaUtil->cloneEntry(
+			fetchedTodoEntry, AgendaEntry::TypeAppoinment);
+	QVERIFY(clonedAppointmentId);
+	AgendaEntry clonedAppointmentEntry =
+			mAgendaUtil->fetchById(clonedAppointmentId);
+
+	// Compare the attributes.
+	QCOMPARE(AgendaEntry::TypeAppoinment,clonedAppointmentEntry.type());
+	QCOMPARE(fetchedTodoEntry.summary(),clonedAppointmentEntry.summary());
+	QCOMPARE(fetchedTodoEntry.startTime(),clonedAppointmentEntry.startTime());
+	QCOMPARE(fetchedTodoEntry.endTime(),clonedAppointmentEntry.endTime());
+}
+
+/*!
+	Test Cloning of Meeting to Note
+ */
+void TestAgendaUtil::cloneMeetingToNote()
+{
+	// Create an agenda entry(TypeAppointment) and save it.
+	AgendaEntry appointment(AgendaEntry::TypeAppoinment);
+	appointment.setSummary(QString("test cloning of meeting to note"));
+	QDateTime startDate(QDate(2011, 06, 01), QTime(10, 0, 0, 0));
+	QDateTime endDate(QDate(2011, 06, 01), QTime(12, 0, 0, 0));
+	appointment.setStartAndEndTime(startDate, endDate);
+	long appointmentId = mAgendaUtil->addEntry(appointment);
+	QVERIFY(appointmentId);
+
+	// Fetch the saved note entry for cloning
+	AgendaEntry fetchedAppointment = mAgendaUtil->fetchById(appointmentId);
+
+	// Clone the entry type TypeAppointment to TypeNote
+	ulong clonedNoteId = mAgendaUtil->cloneEntry(
+			fetchedAppointment, AgendaEntry::TypeNote);
+	QVERIFY(clonedNoteId);
+
+	AgendaEntry clonedNote = mAgendaUtil->fetchById(clonedNoteId);
+	// Compare the attributes.
+	QCOMPARE(AgendaEntry::TypeNote,clonedNote.type());
+	QCOMPARE(fetchedAppointment.description(),clonedNote.description());
+	QCOMPARE(fetchedAppointment.favourite(),clonedNote.favourite());
+}
+
+/*!
+	Test Cloning of Meeting to To-do
+ */
+void TestAgendaUtil::cloneMeetingToTodo()
+{
+	// Create an agenda entry(TypeAppointment) and save it.
+	AgendaEntry appointment(AgendaEntry::TypeAppoinment);
+	appointment.setSummary(QString("test cloning of meeting to todo"));
+	QDateTime startDate(QDate(2011, 06, 01), QTime(10, 0, 0, 0));
+	QDateTime endDate(QDate(2011, 06, 01), QTime(12, 0, 0, 0));
+	appointment.setStartAndEndTime(startDate, endDate);
+	long appointmentId = mAgendaUtil->addEntry(appointment);
+	QVERIFY(appointmentId);
+
+	// Fetch the saved note entry for cloning
+	AgendaEntry fetchedAppointment = mAgendaUtil->fetchById(appointmentId);
+
+	// Clone the entry type EAppointment to TypeNote
+	ulong clonedTodoId = mAgendaUtil->cloneEntry(
+			fetchedAppointment, AgendaEntry::TypeTodo);
+	QVERIFY(clonedTodoId);
+
+	AgendaEntry clonedTodo = mAgendaUtil->fetchById(clonedTodoId);
+	// Compare the attributes.
+	QCOMPARE(AgendaEntry::TypeTodo,clonedTodo.type());
+	QCOMPARE(fetchedAppointment.summary(),clonedTodo.summary());
+	QCOMPARE(fetchedAppointment.startTime(),clonedTodo.startTime());
+	QCOMPARE(fetchedAppointment.endTime(),clonedTodo.endTime());
+}
+
+/*!
+	test making To-do as completed
+ */
+void TestAgendaUtil::completeTodo()
+{
+	// Create and Save a To-do event.
+	AgendaEntry todoEntry(AgendaEntry::TypeTodo);
+	todoEntry.setSummary(QString("Test making To-do event as Completed"));
+	QDateTime dueDate(QDate(2011, 06, 01), QTime(0, 0, 0, 0));
+	todoEntry.setStartAndEndTime(dueDate, dueDate);
+
+	ulong todoId = mAgendaUtil->addEntry(todoEntry);
+	QVERIFY(todoId);
+
+	// Complete the to-do.
+	AgendaEntry fetchedTodoEntry = mAgendaUtil->fetchById(todoId);
+	QDateTime completedTime(QDate(2011, 07, 01),QTime(0, 0, 0, 0));
+	mAgendaUtil->setCompleted(fetchedTodoEntry, true, completedTime);
+
+	// Compare the completed time.
+	AgendaEntry completedTodo = mAgendaUtil->fetchById(todoId);
+	QCOMPARE(completedTime,completedTodo.completedDateTime());
+}
+
+/*!
+	test making To-do as uncompleted
+ */
+void TestAgendaUtil::unCompletedTodo()
+{
+	// Create and Save a To-do event.
+	AgendaEntry todoEntry(AgendaEntry::TypeTodo);
+	todoEntry.setSummary(QString("Test making To-do event as Completed"));
+	QDateTime dueDate(QDate(2011, 06, 01), QTime(0, 0, 0, 0));
+	todoEntry.setStartAndEndTime(dueDate, dueDate);
+
+	ulong todoId = mAgendaUtil->addEntry(todoEntry);
+	QVERIFY(todoId);
+
+	// Complete the to-do.
+	AgendaEntry fetchedTodoEntry = mAgendaUtil->fetchById(todoId);
+	QDateTime completedTime(QDate(2011, 07, 01),QTime(0, 0, 0, 0));
+	mAgendaUtil->setCompleted(fetchedTodoEntry, true, completedTime);
+
+	// Compare the completed time.
+	AgendaEntry unCompletedTodo = mAgendaUtil->fetchById(todoId);
+	// make to-do as uncompleted.
+	mAgendaUtil->setCompleted(fetchedTodoEntry, false, completedTime);
+
+	QCOMPARE(completedTime, unCompletedTodo.completedDateTime());
+}
+
+int main(int argc, char *argv[])
+{
+	QApplication app(argc, argv);
+	TestAgendaUtil tc;
+
+	char *pass[3];
+	pass[0] = argv[0];
+	pass[1] = "-o";
+	pass[2] = "c:\\data\\TestAgendaUtil.txt";
+
+	int res = QTest::qExec(&tc, 3, pass);
+	return res;
+}
+
 #include "unittest_agendautil.moc"
 
 // End of file	--Don't remove this.

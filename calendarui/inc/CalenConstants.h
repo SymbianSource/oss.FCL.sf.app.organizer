@@ -63,6 +63,9 @@ const TInt KMonthNames[] =
     };
 
 const TInt KWeekTitleSize(64);
+
+const QString activityName = "Calendar"; //Activity Name to be stored in Activity Manager DB
+
 // FIXME: can be here now, but later on move to some other header.
 enum TCalenWeekTitle
     {

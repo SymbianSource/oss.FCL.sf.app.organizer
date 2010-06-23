@@ -133,7 +133,7 @@ _LIT8(KGUID,            "A_Global_UID");
 _LIT(KSUMMARY,          "First Entry");
 _LIT(KAttachmentFile, "tcal_datax_attachment.vcs");
 _LIT(KAttachmentCidFile, "c:\\calendar_attachments\\tcal_attach.jpg");
-
+_LIT(KCalendarAttachmentsDir, "c:\\private\\10003a5b\\attachments");
 
 _LIT8(KTzEuropeHelsinki, "Europe/Helsinki");
 _LIT8(KTzAmericaVancouver, "America/Vancouver");

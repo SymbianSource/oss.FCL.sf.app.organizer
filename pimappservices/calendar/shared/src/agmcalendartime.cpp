@@ -101,6 +101,14 @@ void TAgnCalendarTime::SetDateTimeL(const TTime& aTime, TBool aFloating, MAgnCal
 			iTime = AgnDateTime::MaxDate();
 			}
  		iLocalOffsetInMinutes = KOffsetUnspecified;
+ 		if ( ! aFloating)
+            { 
+            SetFloatingFlag(EFalse);
+            }
+ 		else
+            {
+            SetFloatingFlag(ETrue);
+            }
 		}
 	else
 		{

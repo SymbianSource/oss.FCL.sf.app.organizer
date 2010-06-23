@@ -15,12 +15,11 @@
  *
 */
 
+#include <qstringlist.h>
+#include <hbglobal.h>
 
-
-#include <calenregionalutil.rsg>
 #include <badesca.h> 
 #include <eikenv.h>
-#include <StringLoader.h>
 
 #include "calendarui_debug.h"
 #include "CalenExtraRowFormatter.h"
@@ -159,45 +158,44 @@ void CCalenExtraRowFormatter::ConstructL()
 EXPORT_C TPtrC CCalenExtraRowFormatter::FormatExtraRowInformationL( 
     CCalenLunarLocalizedInfo& aLocInfo, 
     RArray<CCalenLunarLocalizedInfo::TField>& aPrioritizedFields )
-    {
-    TRACE_ENTRY_POINT;
-    
-    
-    if ( aPrioritizedFields.Count() == 0)
-        {
-        iText = KNullDesC;
-        
-        TRACE_EXIT_POINT;
-        return iText;
-        }
+{
+	TRACE_ENTRY_POINT;
 
-    // Initialize substring labels
-    RArray<CCalenLunarLocalizedInfo::TField> subLabels;
-    CleanupClosePushL( subLabels );
-    subLabels.AppendL( CCalenLunarLocalizedInfo::EAnimalYear );
-    subLabels.AppendL( CCalenLunarLocalizedInfo::ELunarYear );
-    subLabels.AppendL( CCalenLunarLocalizedInfo::ELunarMonthAndDay );
-    subLabels.AppendL( CCalenLunarLocalizedInfo::EFestival );
-    subLabels.AppendL( CCalenLunarLocalizedInfo::ESolarTerm );
-    
-    // ASSERT that all prioritized fields can be found from subLabels
-    for ( TInt i=0; i < aPrioritizedFields.Count(); i++)
-        {
-        ASSERT( subLabels.Find( aPrioritizedFields[i] ) >= 0 ); 
-        }
+
+	if ( aPrioritizedFields.Count() == 0)
+	{
+		iText = KNullDesC;
+
+		TRACE_EXIT_POINT;
+		return iText;
+	}
+
+	// Initialize substring labels
+	RArray<CCalenLunarLocalizedInfo::TField> subLabels;
+	CleanupClosePushL( subLabels );
+	subLabels.AppendL( CCalenLunarLocalizedInfo::EAnimalYear );
+	subLabels.AppendL( CCalenLunarLocalizedInfo::ELunarYear );
+	subLabels.AppendL( CCalenLunarLocalizedInfo::ELunarMonthAndDay );
+	subLabels.AppendL( CCalenLunarLocalizedInfo::EFestival );
+	subLabels.AppendL( CCalenLunarLocalizedInfo::ESolarTerm );
+
+	// ASSERT that all prioritized fields can be found from subLabels
+	for ( TInt i=0; i < aPrioritizedFields.Count(); i++)
+	{
+		ASSERT( subLabels.Find( aPrioritizedFields[i] ) >= 0 ); 
+	}
 
 	// Initialize substring array 
 	CPtrCArray* subs = new (ELeave) CPtrCArray(10);
 	CleanupStack::PushL( subs );
 	for ( TInt i = 0; i < subLabels.Count(); i++) 
-		{
+	{
 		subs->AppendL( TPtrC( KNullDesC ) );
-		}
-	// subs->InsertL( 0, TPtrC( KNullDesC ), 5 );
-	
+	}
+
 	// Set wanted fields to substring array
 	for ( TInt i = 0; i < aPrioritizedFields.Count(); i++)
-		{
+	{
 		CCalenLunarLocalizedInfo::TField field = aPrioritizedFields[i];
 		TInt subIx = subLabels.Find( field );
 		// Replace 
@@ -206,71 +204,50 @@ EXPORT_C TPtrC CCalenExtraRowFormatter::FormatExtraRowInformationL(
 		subs->InsertL(subIx, TPtrC( aLocInfo.GetField( field ) ) );
 		RDebug::Print( _L("B sub count %d"), subs->Count() );
 		RDebug::Print( _L("B field %S"), &(subs->At(subIx)) );
-		
-		}
-	
-	// Format all fields to extra row     
-	HBufC* extraRowFmt = StringLoader::LoadLC( R_CALE_EXTRA_ROW_LUNAR );
-	
-	RDebug::RawPrint( *extraRowFmt );
-	
-	TBuf<1000> fmt = *extraRowFmt;
-	for (TInt i=0; i < subLabels.Count(); i++)
-		{
-		RDebug::Print( _L("Before Format") );
-		RDebug::RawPrint( fmt );
-		StringLoader::Format( iText, 
-							  fmt,
-							  i + 1, // %0U is a separator 
-							  subs->At( i ) );
-		fmt = iText;
-		RDebug::Print( _L("After Format") );
-		RDebug::RawPrint( fmt );
-		}
-	
-	// Now we have something like "Year of Dog%0U%0U6/11%0U%0U" 
-	// First We need to remove multiple occurences of %0U
-	_LIT(KSeparatorFmt, "%0U");
-	
-	CollapseDuplicatesL( iText, 0, KSeparatorFmt );
-	RDebug::Print( _L("After collapse") );
-	RDebug::RawPrint( iText );
 
-	// Remove leading and trailing %0U
-	// By now, we are sure that there is max 1 %0U in the beginning
-	// and in the end of string.
-	RemoveLeadingAndTrailingL( iText, KSeparatorFmt );
-	RDebug::Print( _L("After leading and trailing removal") );
-	RDebug::RawPrint( iText );
+	}
+	TBuf<100> textBuf;
+	QStringList textDataStringList;
+	for (TInt i=0; i < subLabels.Count(); i++) {
+		textBuf = subs->At( i );
+		textDataStringList.append(
+							QString((QChar*)textBuf.Ptr(),textBuf.Length()));
+	}
+	// Get the locale specific separator
+	QString separator = hbTrId("txt_calendar_preview_title_cale_separator");
 	
+	// Format all fields to single row 
+	QString textDataString;
+	textDataString = hbTrId(
+						"txt_calendar_preview_title_123242526").arg(
+							textDataStringList.at(0)).arg(
+								separator).arg(
+									textDataStringList.at(1)).arg(
+										textDataStringList.at(2)).arg(
+											textDataStringList.at(3)).arg(
+												textDataStringList.at(4));
 
-	// If there are now separators anymore, then do not fill them
-	TBool hasSeparators = iText.Find( KSeparatorFmt ) >= 0;
-	
-	if ( hasSeparators ) 
-		{
-	
-		// fill in separators
-		HBufC* separator = StringLoader::LoadLC( R_CALE_LUNAR_SEPARATOR );
-		fmt = iText;
-		StringLoader::Format( iText, 
-							  fmt,
-							  0, // %0U is a separator 
-							  *separator );
-	
-		RDebug::Print( _L("After separator insert") );
-		RDebug::RawPrint( iText );
-		CleanupStack::PopAndDestroy( separator );
-		}
+	iText = static_cast<const TUint16*> (
+							textDataString.utf16()), textDataString.length();
 
-
-	CleanupStack::PopAndDestroy( extraRowFmt );
+	// Now we have something like "Year of Dog%2GengYin%2%2"
+	// where %2 is the separator txt_calendar_preview_title_cale_separator
+	// First We need to remove multiple occurences of separator
+	textBuf = static_cast<const TUint16*> (
+										separator.utf16()), separator.length();
+	CollapseDuplicatesL( iText, 0, textBuf);
+	
+	// Remove leading and trailing separators
+	// Leading separator won't be there but trailing one is there for sure
+	RemoveLeadingAndTrailingL( iText, textBuf );
+	
+	// CleanUp
 	CleanupStack::PopAndDestroy( subs );
-    CleanupStack::PopAndDestroy( &subLabels );
-    
-    TRACE_EXIT_POINT;
-    return iText;
-    }
+	CleanupStack::PopAndDestroy( &subLabels );
+	TRACE_EXIT_POINT;
+	
+	return iText;
+}
 
 //EOF
 

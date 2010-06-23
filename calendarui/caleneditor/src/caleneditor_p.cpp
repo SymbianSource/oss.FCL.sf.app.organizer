@@ -855,6 +855,18 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 			mAgendaUtil->getNextInstanceTimes(*mEditedEntry,
 			                                  nextInstanceStartTime,
 			                                  nextInstanceEndTime);
+			
+			// If no instances earlier then set it to 01/01/1900.
+			if (prevInstanceStartTime.isNull()) {
+				prevInstanceStartTime.setDate(QDate(1900, 01, 01));
+				prevInstanceStartTime.setTime(QTime(0, 0, 0));
+			}
+			
+			// If no instances later then set it to 30/01/2100.
+			if (nextInstanceEndTime.isNull()) {
+				nextInstanceEndTime.setDate(QDate(2100, 12, 30));
+				nextInstanceEndTime.setTime(QTime(0, 0, 0));
+			}
 			mViewFromItem->setDateRange(
 									prevInstanceStartTime.addDays(1).date(),
 									nextInstanceStartTime.addDays(-1).date());
@@ -863,7 +875,10 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 			
 			// If repeating daily then disable the date fields as 
 			// date cannot be changed
- 			if (mEditedEntry->repeatRule().type() == AgendaRepeatRule::DailyRule) {
+ 			if ((prevInstanceEndTime.date().daysTo(
+				mEditedEntry->startTime().date()) == 1) && 
+				(mEditedEntry->endTime().date().daysTo(
+				nextInstanceStartTime.date()) == 1)) {
 				mViewFromItem->disableFromToDateField();
 			}
 		}
@@ -881,10 +896,16 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 	if ((mAllDayCheckBoxItem && 
 		(mAllDayCheckBoxItem->contentWidgetData("checkState") == Qt::Checked))
 		|| (!mNewEntry && mEditedEntry->type() == AgendaEntry::TypeEvent)) {
+        
+        // For all-day, we need to substratc 1 minute to get the actual end time
+        // as we store all-day as 12.00AM to 12.00 AM next day
+        QDateTime actualEndTime = mEditedEntry->endTime().addSecs(-60);
+        mViewToItem->populateDateTime(actualEndTime, false);
+        
 		// If the all day option is checked, we need to
 		// disable the time fields
 		enableFromTotimeFileds(false, mEditedEntry->startTime(),
-		                       mEditedEntry->endTime());
+                                actualEndTime);
 	}
 }
 /*!
@@ -1181,6 +1202,12 @@ void CalenEditorPrivate::handleAllDayChange(int state)
 		// Update Start/End Times with Edited entry values
 		enableFromTotimeFileds(true, mEditedEntry->startTime(),
 		                       mEditedEntry->endTime());
+		// If original entry was an All-day, then we need to save the date that
+		// is shown on the "To" date push button
+		if (mOriginalEntry->type() == AgendaEntry::TypeEvent) {
+            mEditedEntry->setStartAndEndTime(mViewFromItem->getDateTime(),
+                                    mViewToItem->getDateTime());
+		}
 		int index;
 		if (mIsAllDayItemAdded) {
 			index = ReminderTimeForAllDayItem;
@@ -1402,11 +1429,12 @@ bool CalenEditorPrivate::saveEntry()
 		if (!handleAllDayToSave()) {
 			if (mNewEntry) {
 				mAgendaUtil->addEntry(*mEditedEntry);
-			} else if (mEditRange == ThisAndAll) {
+			} else if (mEditRange == ThisAndAll && mOriginalEntry->isRepeating()) {
 				mAgendaUtil->storeRepeatingEntry(*mEditedEntry, true);
 			} else if (!mIsChild && (mEditRange == ThisOnly)) {
 				// Create the new exception
-				mAgendaUtil->createException(*mEditedEntry);
+				mAgendaUtil->createException(*mEditedEntry, 
+												mOriginalEntry->startTime());
 			} else {
 				// Normal entry updation
 				mAgendaUtil->updateEntry(*mEditedEntry, false);
@@ -1471,10 +1499,10 @@ bool CalenEditorPrivate::handleAllDayToSave()
 	QDateTime tempSartTime =
 	        CalenDateUtils::beginningOfDay(mEditedEntry->startTime());
 
-	// Set EndTime of AllDay event to 23:59:59
-	QDateTime tempEndTime = mEditedEntry->endTime();
+	// Set EndTime of AllDay event to 00:00:00 of next day
+	QDateTime tempEndTime = mEditedEntry->endTime().addDays(1);
 	QTime tempEndQTime = tempEndTime.time();
-	tempEndQTime.setHMS(23, 59, 59);
+	tempEndQTime.setHMS(0, 0, 0);
 	tempEndTime.setTime(tempEndQTime);
 
 	if (mNewEntry && (mAllDayCheckBoxItem->contentWidgetData("checkState")
@@ -1495,16 +1523,38 @@ bool CalenEditorPrivate::handleAllDayToSave()
 		mAgendaUtil->deleteEntry(mEditedEntry->id());
 
 		return true;
-	} else if ((mAllDayCheckBoxItem->contentWidgetData("checkState")
-	        != Qt::Checked) && (mEditedEntry->type()
-	        != AgendaEntry::TypeAppoinment)) {
-		// Editing exissting AllDayentry, and Alldat Box is Not-Checked
-		// Clone the entry to MeetingEntry, Delete old entry from Database
-		mAgendaUtil->cloneEntry(*mEditedEntry, AgendaEntry::TypeAppoinment);
-		mAgendaUtil->deleteEntry(mEditedEntry->id());
-
-		return true;
-	}
+	} else if (mAllDayCheckBoxItem->contentWidgetData("checkState")
+	        != Qt::Checked) {
+             if (mEditedEntry->type() != AgendaEntry::TypeAppoinment) {
+	            // Editing existing AllDayentry, and Alldat Box is Not-Checked
+	            // Clone the entry to MeetingEntry, Delete old entry from Database
+	            mAgendaUtil->cloneEntry(*mEditedEntry, AgendaEntry::TypeAppoinment);
+	            mAgendaUtil->deleteEntry(mEditedEntry->id());
+	            return true;
+	        }
+            // Check if the duration of the meeting is matching the all-day criteria
+            // if yes, then we need to store it as all-day instead of normal meeting
+             else if (mEditedEntry->startTime() == CalenDateUtils::beginningOfDay(mEditedEntry->startTime())) {
+            // Get the end time and see if it is at the beginning of the end date day
+            if (mEditedEntry->endTime() == CalenDateUtils::beginningOfDay(mEditedEntry->endTime())) {
+                // Store it as all-day
+                mEditedEntry->setType(AgendaEntry::TypeEvent);
+                // Check if this was an all-day earlier and now user has changed it like that
+                // or it is a new entry
+                if (mOriginalEntry->type() == AgendaEntry::TypeEvent ||
+                        mNewEntry) {
+                    return false;
+                } else {
+                    // It was a meeting
+                    // Clone the entry to AllDayEntry, Delete old entry from Database
+                    mEditedEntry->setStartAndEndTime(tempSartTime, tempEndTime);
+                    mAgendaUtil->cloneEntry(*mEditedEntry, AgendaEntry::TypeEvent);
+                    mAgendaUtil->deleteEntry(mEditedEntry->id());
+                    return true;
+                }
+            }
+        } 
+	} 
 	return false;
 }
 

@@ -29,6 +29,8 @@
 #include <hbcolorscheme.h>
 #include <agendautil.h>
 #include <agendaentry.h>
+#include <hbapplication.h> // hbapplication
+#include <hbactivitymanager.h> //Activity Manager
 
 //user includes
 #include "calenmonthview.h"
@@ -48,6 +50,7 @@
 #include "calencommon.h"
 #include "calendarprivatecrkeys.h"
 #include "calenpluginlabel.h"
+#include "calenconstants.h"
 /*!
  \class CalenMonthView
 
@@ -62,7 +65,8 @@ CalenMonthView::CalenMonthView(MCalenServices &services) :
 	mGoToTodayAction(0),
 	mPrevRegionalInfo(0),
 	mCurrRegionalInfo(0),
-	mNextRegionalInfo(0)
+	mNextRegionalInfo(0),
+	mIsAboutToQuitEventConnected(false)
 {
 	mIsWeekNumbersShown = 0;
 	mOrientation = mServices.MainWindow().orientation();
@@ -133,18 +137,6 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 	mSeventhDayLabel
 	        = qobject_cast<HbLabel *> (
 					mDocLoader->findWidget(CALEN_MONTVIEW_SEVENTH_DAY_LABEL));
-
-	// Set the short day names to these labels
-	// TODO: Need to read start of the week from the locale
-	// and update the labels accortdingly
-	int startOfDay = mLocale.startOfWeek();
-	mFirstDayLabel->setPlainText(hbTrId("txt_calendar_grid_day_mo"));
-	mSecondDayLabel->setPlainText(hbTrId("txt_calendar_grid_day_tu"));
-	mThirdDayLabel->setPlainText(hbTrId("txt_calendar_grid_day_we"));
-	mFourthDayLabel->setPlainText(hbTrId("txt_calendar_grid_day_th"));
-	mFifthDayLabel->setPlainText(hbTrId("txt_calendar_grid_day_fr"));
-	mSixthDayLabel->setPlainText(hbTrId("txt_calendar_grid_day_sa"));
-	mSeventhDayLabel->setPlainText(hbTrId("txt_calendar_grid_day_su"));
 	
 	// Get the weeknumber widget
 	mWeekNumberWidget
@@ -214,7 +206,14 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 	
 	
 	mIsFirstTimeLoad = true;
-	
+	// get a pointner to activity manager
+	HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+
+	// clean up any previous versions of this activity, if any, i.e. activityName, from the activity manager. 
+	// Ignore return value, first boot would always return False. bool declared 
+	// only for debugging purpose.
+	bool ok = activityManager->removeActivity(activityName);
+
 }
 
 /*!
@@ -453,70 +452,79 @@ void CalenMonthView::addBackgroundFrame()
 
 void CalenMonthView::showHideRegionalInformation()
 {
-    XQSettingsKey regionalInfo(XQSettingsKey::TargetCentralRepository,
-                               KCRUidCalendar, KCalendarShowRegionalInfo);
-    
-    int showRegionalInfo = mSettingsManager->readItemValue(regionalInfo).toUInt();
-    if (showRegionalInfo) {
-		
-        // Add the regional information to the preview panes
-        if (!mPrevRegionalInfo) {
-            mPrevRegionalInfo = qobject_cast<CalenPluginLabel *> 
-							(mDocLoader->findWidget(CALEN_PREVREGIONALINFO));
-            mPrevRegionalInfo->show();
-            mPrevPaneLayout->insertItem(0, mPrevRegionalInfo);
+	if (pluginEnabled()) {
+		XQSettingsKey regionalInfo(XQSettingsKey::TargetCentralRepository,
+									KCRUidCalendar, KCalendarShowRegionalInfo);
 
-            HbFrameItem *frameCurr = new HbFrameItem(this);
-            frameCurr->frameDrawer().setFrameType(HbFrameDrawer::ThreePiecesHorizontal);
-            frameCurr->frameDrawer().setFrameGraphicsName("qtg_fr_cal_preview_title_bg");
-            mPrevRegionalInfo->setBackgroundItem(frameCurr->graphicsItem(), -2);
-        }
-        if (!mCurrRegionalInfo) {
-            mCurrRegionalInfo = qobject_cast<CalenPluginLabel *> 
-							(mDocLoader->findWidget(CALEN_CURRREGIONALINFO));
-            mCurrRegionalInfo->show();
-            mCurrPaneLayout->insertItem(0, mCurrRegionalInfo);
-            
-            HbFrameItem *frameCurr = new HbFrameItem(this);
-            frameCurr->frameDrawer().setFrameType(HbFrameDrawer::ThreePiecesHorizontal);
-            frameCurr->frameDrawer().setFrameGraphicsName("qtg_fr_cal_preview_title_bg");
-            mCurrRegionalInfo->setBackgroundItem(frameCurr->graphicsItem(), -2);
-        }
-        if (!mNextRegionalInfo) {
-            mNextRegionalInfo = qobject_cast<CalenPluginLabel *> 
-							(mDocLoader->findWidget(CALEN_NEXTREGIONALINFO));
-            mNextRegionalInfo->show();
-            mNextPaneLayout->insertItem(0, mNextRegionalInfo);
+		int showRegionalInfo = 
+						mSettingsManager->readItemValue(regionalInfo).toUInt();
+		if (showRegionalInfo) {
 
-            HbFrameItem *frameCurr = new HbFrameItem(this);
-            frameCurr->frameDrawer().setFrameType(HbFrameDrawer::ThreePiecesHorizontal);
-            frameCurr->frameDrawer().setFrameGraphicsName("qtg_fr_cal_preview_title_bg");
-            mNextRegionalInfo->setBackgroundItem(frameCurr->graphicsItem(), -2);
-        }
-        
-        if (pluginEnabled()) {
+			// Add the regional information to the preview panes
+			if (!mPrevRegionalInfo) {
+				mPrevRegionalInfo = qobject_cast<CalenPluginLabel *> 
+				(mDocLoader->findWidget(CALEN_PREVREGIONALINFO));
+				mPrevRegionalInfo->show();
+				mPrevPaneLayout->insertItem(0, mPrevRegionalInfo);
+
+				HbFrameItem *frameCurr = new HbFrameItem(this);
+				frameCurr->frameDrawer().setFrameType(
+										HbFrameDrawer::ThreePiecesHorizontal);
+				frameCurr->frameDrawer().setFrameGraphicsName(
+										"qtg_fr_cal_preview_title_bg");
+				mPrevRegionalInfo->setBackgroundItem(
+										frameCurr->graphicsItem(), -2);
+			}
+			if (!mCurrRegionalInfo) {
+				mCurrRegionalInfo = qobject_cast<CalenPluginLabel *> 
+				(mDocLoader->findWidget(CALEN_CURRREGIONALINFO));
+				mCurrRegionalInfo->show();
+				mCurrPaneLayout->insertItem(0, mCurrRegionalInfo);
+
+				HbFrameItem *frameCurr = new HbFrameItem(this);
+				frameCurr->frameDrawer().setFrameType(
+										HbFrameDrawer::ThreePiecesHorizontal);
+				frameCurr->frameDrawer().setFrameGraphicsName(
+										"qtg_fr_cal_preview_title_bg");
+				mCurrRegionalInfo->setBackgroundItem(
+										frameCurr->graphicsItem(), -2);
+			}
+			if (!mNextRegionalInfo) {
+				mNextRegionalInfo = qobject_cast<CalenPluginLabel *> 
+				(mDocLoader->findWidget(CALEN_NEXTREGIONALINFO));
+				mNextRegionalInfo->show();
+				mNextPaneLayout->insertItem(0, mNextRegionalInfo);
+
+				HbFrameItem *frameCurr = new HbFrameItem(this);
+				frameCurr->frameDrawer().setFrameType(
+										HbFrameDrawer::ThreePiecesHorizontal);
+				frameCurr->frameDrawer().setFrameGraphicsName(
+										"qtg_fr_cal_preview_title_bg");
+				mNextRegionalInfo->setBackgroundItem(
+										frameCurr->graphicsItem(), -2);
+			}
 			QString *pluginString = pluginText();
 			mPrevRegionalInfo->setPlainText(*pluginString);
 			mCurrRegionalInfo->setPlainText(*pluginString);
 			mNextRegionalInfo->setPlainText(*pluginString);
+		} else {
+			if (mPrevRegionalInfo) {
+				mPrevPaneLayout->removeItem(mPrevRegionalInfo);
+				mPrevRegionalInfo->hide();
+				mPrevRegionalInfo = NULL;
+			}
+			if (mCurrRegionalInfo) {
+				mPrevPaneLayout->removeItem(mCurrRegionalInfo);
+				mCurrRegionalInfo->hide();
+				mCurrRegionalInfo = NULL;
+			}
+			if (mNextRegionalInfo) {
+				mPrevPaneLayout->removeItem(mNextRegionalInfo);
+				mNextRegionalInfo->hide();
+				mNextRegionalInfo = NULL;
+			}
 		}
-    } else {
-        if (mPrevRegionalInfo) {
-            mPrevPaneLayout->removeItem(mPrevRegionalInfo);
-            mPrevRegionalInfo->hide();
-            mPrevRegionalInfo = NULL;
-        }
-        if (mCurrRegionalInfo) {
-            mPrevPaneLayout->removeItem(mCurrRegionalInfo);
-            mCurrRegionalInfo->hide();
-            mCurrRegionalInfo = NULL;
-        }
-        if (mNextRegionalInfo) {
-            mPrevPaneLayout->removeItem(mNextRegionalInfo);
-            mNextRegionalInfo->hide();
-            mNextRegionalInfo = NULL;
-        }
-    }
+	}
 }
 
 /*!
@@ -625,7 +633,8 @@ void CalenMonthView::addRemoveActionsInMenu()
  */
 void CalenMonthView::doPopulation()
 {
-	// Get the layout and add the preview pane layout.
+
+ 	// Get the layout and add the preview pane layout.
 	QGraphicsLinearLayout* viewLayout = static_cast<QGraphicsLinearLayout *>
 														(widget()->layout());
 	if (viewLayout->count() == 1) {
@@ -646,13 +655,30 @@ void CalenMonthView::doPopulation()
 		populatePreviewPane(mDate);
 	}
 	
-	// Create the grid items with proper dates
+	
+    //update the day label 
+    //if changes in locale setting
+	updateDayLabel();
+	
+	  // Create the grid items with proper dates
 	createGrid();
 	
 
 	// Complete the population
 	completePopulation();
 
+	//set Currect Activity to month view
+	mActivityId = ECalenMonthView;
+	
+	// connect to receive a call back on Month View exit. Call back would result in saveActivity 
+	// to be called in Native View.
+	if (!mIsAboutToQuitEventConnected) // check if not already connected
+	    {
+        connect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()), this, SLOT(saveActivity()));
+        mIsAboutToQuitEventConnected = true;
+	    }
+	
+		
 	// Population is complete, inform it
 	populationComplete();
 	
@@ -831,10 +857,20 @@ void CalenMonthView::createGrid()
 	// Update the month grid
 	mMonthGrid->updateMonthGridModel(mMonthDataArray, mIndexToBeScrolled, 
 	                                 mIsFirstTimeLoad);
-
-	// Read the week number setting from cenrep
-	QVariant value = mSettingsManager->readItemValue(*mWeekNumberCenrepKey);
-	mIsWeekNumbersShown = value.toUInt();
+    // Get start of week from the locale.
+    HbExtendedLocale locale = HbExtendedLocale::system();
+    int startOfWeek = locale.startOfWeek();
+    if(startOfWeek != HbExtendedLocale::Monday)
+        {
+        //if the start of week is other than Monday, don't show the week number
+        mIsWeekNumbersShown = 0;
+        }
+    else
+        {
+        // Read the week number setting from cenrep
+        QVariant value = mSettingsManager->readItemValue(*mWeekNumberCenrepKey);
+        mIsWeekNumbersShown = value.toUInt();
+        }
 	if (mIsWeekNumbersShown) {
 		// Add week numbers to week grid
 		addWeekNumbers();
@@ -1211,6 +1247,13 @@ void CalenMonthView::createEditor()
 void CalenMonthView::launchDayView()
 {
 	mServices.IssueCommandL(ECalenDayView);
+	// day view launched now, disconnect to get the call backs for saveActivity 
+	// on aboutToQuit signal
+	if (mIsAboutToQuitEventConnected)
+	    {
+        disconnect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()), this, SLOT(saveActivity()));
+        mIsAboutToQuitEventConnected = false;
+	    }
 }
 
 /*!
@@ -1421,5 +1464,44 @@ void CalenMonthView::handleRightEffectCompleted(
 	// Start the auto scroll on current preview pane
 	mCurrPreviewPane->startAutoScroll();
 	mPrevPreviewPane->populateLabel(mDate.addDays(-1));
+}
+/*!
+ update the Day labels 
+ */
+void CalenMonthView::updateDayLabel()
+{
+    // Set the short day names to these labels  
+    int startOfWeek = mLocale.startOfWeek();
+    int weekDayIndex = startOfWeek;
+    QStringList  weekDayArray ;
+    weekDayArray <<hbTrId("txt_calendar_grid_day_mo")
+                           <<hbTrId("txt_calendar_grid_day_tu")
+                           <<hbTrId("txt_calendar_grid_day_we")
+                           <<hbTrId("txt_calendar_grid_day_th")
+                           <<hbTrId("txt_calendar_grid_day_fr")
+                           <<hbTrId("txt_calendar_grid_day_sa")
+                           <<hbTrId("txt_calendar_grid_day_su");
+            
+    QList<HbLabel*> labels;
+    // append seven day labels 
+    labels.append(mFirstDayLabel);
+    labels.append(mSecondDayLabel);
+    labels.append(mThirdDayLabel);
+    labels.append(mFourthDayLabel);
+    labels.append(mFifthDayLabel);
+    labels.append(mSixthDayLabel);
+    labels.append(mSeventhDayLabel);
+    for(int i=0;i < KCalenDaysInWeek; i++ )
+        {
+        labels.at(i)->setPlainText(weekDayArray[weekDayIndex]);
+        if(weekDayIndex == KCalenDaysInWeek - 1 )//Sunday
+            {
+            weekDayIndex = 0;//reset to monday
+            continue;
+            }
+        weekDayIndex++;//increase the index for next value
+        }
+    labels.clear();
+    weekDayArray.clear();
 }
 // End of file  --Don't remove this.

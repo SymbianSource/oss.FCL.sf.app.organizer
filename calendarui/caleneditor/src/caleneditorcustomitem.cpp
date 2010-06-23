@@ -397,6 +397,9 @@ void CalenEditorCustomItem::enableFromTimeFieldAndSetTime(bool enableTimeFiles, 
 	
 	// Set FromTime in Editor
 	mPushButtonTime->setText(mLocale.format(fromDateTime.time(),r_qtn_time_usual_with_zero));
+	
+	// Store the time
+    mTime = fromDateTime.time();
 }
 
 /*!
@@ -419,6 +422,9 @@ void CalenEditorCustomItem::enableToTimeFieldAndSetTime(bool enableTimeFiles, QD
 	// Set ToTime in Editor
 	mPushButtonTime->setText(mLocale.format(
 							toDateTime.time(),r_qtn_time_usual_with_zero));
+	
+	// Store the time
+	mTime = toDateTime.time();
 }
 
 /*!
@@ -461,6 +467,11 @@ void CalenEditorCustomItem::restore()
     	}
     	break;
     }
+}
+
+QDateTime CalenEditorCustomItem::getDateTime()
+{
+    return QDateTime(mDate, mTime);
 }
 
 Q_IMPLEMENT_USER_METATYPE(QLocationPickerItem)

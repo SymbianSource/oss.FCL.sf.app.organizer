@@ -44,6 +44,7 @@ public:
 
 public:
     void initializeForm();
+    void refreshView();
     
 private slots:
 	void launchPreviousView();

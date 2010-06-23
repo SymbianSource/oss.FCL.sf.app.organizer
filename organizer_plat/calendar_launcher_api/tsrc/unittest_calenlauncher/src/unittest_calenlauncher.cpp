@@ -83,7 +83,8 @@ void TestCalenLauncher::test_launchCalendarApp()
 	This slot is called on failure of calendar launch.
  */
 void TestCalenLauncher::launcherFailed(int error)
-{
+{	
+	Q_UNUSED(error)
 	// Indicate launching failed.
 	QVERIFY(true == false);
 }

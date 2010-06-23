@@ -42,9 +42,7 @@
 
     //Backup and restore code  need to write here.
 	
-    // Check if calendar is launched thru XQService framework
-    bool isFromServiceFrmwrk = XQServiceUtil::isService();
-    CCalenController *controller = new CCalenController(isFromServiceFrmwrk);
+    CCalenController *controller = new CCalenController();
     
     // Create the Calendar service provider
     CalenServiceProvider service(controller);

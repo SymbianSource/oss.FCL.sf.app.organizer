@@ -26,6 +26,7 @@ include(notes_editor_api/notes_editor_api.pri)
 include(eventviewer_plugin_api/eventviewer_plugin_api.pri)
 include(clock_settings_keys_api/clock_settings_keys_api.pri)
 include(calendar_settings_keys_api/calendar_settings_keys_api.pri)
+include(clock_settingsview_plugin_api/clock_settingsview_plugin_api.pri)
 
 symbian {
     headers.sources = $$PUBLIC_HEADERS

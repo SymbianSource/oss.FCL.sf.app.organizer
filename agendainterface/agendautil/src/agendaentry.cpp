@@ -1984,7 +1984,17 @@ AgendaGeoValue AgendaEntry::geoValue() const
 {
 	return d->m_geoValue;
 }
-	
+
+/*!
+     Clears the geo value if it has any
+ */
+void AgendaEntry::clearGeoValue() const
+{
+    if (d) {
+        d->m_geoValue = AgendaGeoValue();
+    }
+}
+
 /*!
 	Returns
 	duration of the meeting in seconds

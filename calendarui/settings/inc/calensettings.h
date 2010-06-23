@@ -31,6 +31,8 @@ class HbAbstractButton;
 class HbLineEdit;
 class XQSettingsManager;
 class XQSettingsKey;
+class MCalenServices;
+
 
 #ifdef  CALENSETTINGS_DLL
 #define CALENSETTINGS_EXPORT Q_DECL_EXPORT
@@ -43,24 +45,36 @@ class CALENSETTINGS_EXPORT CalenSettings : public QObject
 	Q_OBJECT
 
 public:
-    CalenSettings(HbDataForm *form, QObject *parent = 0);
+    CalenSettings(MCalenServices& services, HbDataForm *form, QObject *parent = 0);
     ~CalenSettings();
 
     void createModel();
     void populateSettingList();
+    void addWeekNumberItem();
+    bool isPluginEnabled();
+    
+private:
+    void updateShowWeekItem();
+    void addRegionalInfoItem();
+    void removeRegionalInfoItem();
+    void populateRegionalInfo();
 
 public slots:
     void handleAlarmSnoozeTimeChange(int index);
     void handleWeekNumberChange();
     void handleRegionalInfoChange();
+    //set the start day of the week to the locale 
+    void setStartDayOfWeek(const int index);
 
 private:
+    MCalenServices  &mServices;
 	HbDataForm *mSettingsForm;
 	HbDataFormModel *mSettingsModel;
 	HbDataFormModelItem *mAlarmSnoozeTimeItem;
 	HbDataFormModelItem* mShowWeekNumberItem;
 	HbDataFormModelItem* mShowRegionalInfoItem;
-		
+	HbDataFormModelItem* mShowWeekStartOnInfoItem;
+	HbComboBox* mStartOfWeekItem;
 	XQSettingsManager *mSettingsManager;
 	XQSettingsKey *mAlarmSnoozeCenrepKey;
 	XQSettingsKey *mWeekNumberCenrepKey;
@@ -68,6 +82,9 @@ private:
 	uint mAlarmSnoozeTime;
 	uint mShowWeekNumber;
 	uint mShowRegionalInfo;
+	int mStartOfWeek;
+	bool mWeekNumberItemAdded;
+	bool mRegionalpluginActive;
 };
 
 #endif // CALENSETTINGS_H

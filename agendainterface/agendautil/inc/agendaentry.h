@@ -380,6 +380,7 @@ public:
 	
 	void setGeoValue(const AgendaGeoValue& geoValue);
 	AgendaGeoValue geoValue() const;
+	void clearGeoValue() const;
 	
 	int durationInSecs() const;
 	AgendaEntry& operator=(const AgendaEntry& other);

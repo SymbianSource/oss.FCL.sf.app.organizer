@@ -92,6 +92,12 @@ public:
      */
     CALENDAYVIEW_EXPORT void clearListModel();
 
+    /**
+     * disconnectAboutToQuitEvent disconnects for the aboutToQuit events
+     * 
+     */
+    CALENDAYVIEW_EXPORT void disconnectAboutToQuitEvent();
+    
 	/*
 	 * @brief Refreshes the view with the date set in the context
 	 */
@@ -162,7 +168,8 @@ private:
 	
     // TODO: Remove these after gestures are available
     QPointF mTapPoint;
-    bool mActionTaken;
+    bool    mActionTaken;
+    bool    mIsAboutToQuitEventConnected; // bool to check if day view is registered to get aboutToQuit signals
 
 };
 

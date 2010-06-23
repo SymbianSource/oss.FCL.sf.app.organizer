@@ -18,6 +18,8 @@
 // System includes
 #include <QStandardItemModel>
 #include <QGraphicsSceneEvent>
+#include <QDir>
+#include <QPluginLoader>
 #include <hbi18ndef.h>
 #include <hbextendedlocale.h>
 #include <hbgroupbox.h>
@@ -29,7 +31,7 @@
 #include <hbdialog.h>
 #include <xqsettingsmanager.h>
 #include <agendautil.h>
-#include <noteseditor.h>
+#include <NotesEditorInterface>
 
 // User includes
 #include "calendayviewwidget.h"
@@ -68,7 +70,8 @@ EXPORT_C CalenDayViewWidget::CalenDayViewWidget(MCalenServices &services,
 mServices(services),
 mDocLoader(docLoader),
 mRegionalInfoGroupBox(NULL),
-mLongTapEventFlag(false)
+mLongTapEventFlag(false),
+mNotesPluginLoaded(false)
 {
     // Construct the list view prototype
     mListViewPrototype = new CalenEventListViewItem(this);
@@ -90,6 +93,13 @@ mLongTapEventFlag(false)
 //    
 EXPORT_C CalenDayViewWidget::~CalenDayViewWidget()
 {
+	// Unload notes editor if loaded.
+	if (mNotesEditorPluginLoader) {
+		mNotesEditorPluginLoader->unload();
+		delete mNotesEditorPluginLoader;
+		mNotesEditorPluginLoader = 0;
+	}
+
     if (mListViewPrototype) {
         delete mListViewPrototype;
         mListViewPrototype = NULL;
@@ -509,8 +519,6 @@ void CalenDayViewWidget::addTimedEventToList(int index, AgendaEntry entry)
         // Raise the flag to indicate that the list item
         // would wrap to two lines
         twoLines = true;
-        // Append space
-        eventTime.append(" ");
         // Append '-' to indicate an end time is present
         eventTime.append("-");
     } else {
@@ -565,13 +573,10 @@ void CalenDayViewWidget::addTimedEventToList(int index, AgendaEntry entry)
     // Add the end time to the list item	
     if (eventStartTime < eventEndTime) {
     	QString endtime = locale.format(eventEndTime, r_qtn_time_usual_with_zero);
+    	endtime.append(" ");
     	textData << endtime;
     }else {
-    	if (entry.location().isEmpty()) {
-    		textData << QVariant();
-    	}else {
-    		textData << singleSpace;
-    	}
+    	textData<<QString("              ");
     }
     // Get the list model index and set the text and icon data
     QModelIndex listIndex = mListModel->index(index, 0);
@@ -827,22 +832,22 @@ int CalenDayViewWidget::getIndexToScrollTo()
 //
 void CalenDayViewWidget::showHideRegionalInformation()
 {
-    XQSettingsKey regionalInfo(XQSettingsKey::TargetCentralRepository,
-                               KCRUidCalendar, KCalendarShowRegionalInfo);
-    
-    int showRegionalInfo = mSettingsManager->readItemValue(regionalInfo).toUInt();
-    if (showRegionalInfo) {
-		
-        if (!mRegionalInfoGroupBox) {
-        	mRegionalInfoGroupBox = new HbGroupBox();
-        	CalenPluginLabel *regionalInfo = new CalenPluginLabel(
-															mServices, this);
-            regionalInfo->setFontSpec(HbFontSpec(HbFontSpec::Primary));
-            mRegionalInfoGroupBox->setContentWidget(regionalInfo);
-            mRegionalPluginLayout->insertItem(1, mRegionalInfoGroupBox);
-        }
-        
-        if (mView->pluginEnabled()) {
+	if (mView->pluginEnabled()) {
+		XQSettingsKey regionalInfo(XQSettingsKey::TargetCentralRepository,
+		                           KCRUidCalendar, KCalendarShowRegionalInfo);
+
+		int showRegionalInfo = 
+						mSettingsManager->readItemValue(regionalInfo).toUInt();
+		if (showRegionalInfo) {
+
+			if (!mRegionalInfoGroupBox) {
+				mRegionalInfoGroupBox = new HbGroupBox();
+				CalenPluginLabel *regionalInfo = new CalenPluginLabel(
+						mServices, this);
+				regionalInfo->setFontSpec(HbFontSpec(HbFontSpec::Primary));
+				mRegionalInfoGroupBox->setContentWidget(regionalInfo);
+				mRegionalPluginLayout->insertItem(1, mRegionalInfoGroupBox);
+			}
 			QString *pluginString = mView->pluginText();
 			HbLabel *pluginInfoLabel = qobject_cast <HbLabel *> 
 									(mRegionalInfoGroupBox->contentWidget());
@@ -880,20 +885,40 @@ void CalenDayViewWidget::editEntry()
     if (mSelectedIndex < 0 || mSelectedIndex > mInstanceArray.count()) {
         return;
     }
-    
-    // Get the entry details first
-    AgendaEntry entry = mInstanceArray[mSelectedIndex];
-    if (AgendaEntry::TypeTodo == entry.type()) {
-        // Launch the to-do editor
-        mNotesEditor = new NotesEditor(mView);
-        mNotesEditor->edit(entry);
-        connect(mNotesEditor, SIGNAL(editingCompleted(bool)), this, SLOT(noteEditingCompleted(bool)));
-    } else {
-        // Set the context
-        setContextFromHighlight(entry);
-        // Issue a command to launch the editor to edit this entry
-        mServices.IssueCommandL(ECalenEditCurrentEntry);
-    }
+
+	// Get the entry details first
+	AgendaEntry entry = mInstanceArray[mSelectedIndex];
+	if (AgendaEntry::TypeTodo == entry.type()) {
+		// Load the notes editor plugin if not loaded.
+		if (!mNotesPluginLoaded) {
+			// Launch the to-do editor using notes editor plugin api
+			QDir dir(NOTES_EDITOR_PLUGIN_PATH);
+			QString pluginName = dir.absoluteFilePath(NOTES_EDITOR_PLUGIN_NAME);
+
+			// Create NotesEditor plugin loader object.
+			mNotesEditorPluginLoader = new QPluginLoader(pluginName);
+
+			// Load the plugin
+			mNotesPluginLoaded = mNotesEditorPluginLoader->load();
+		}
+
+		QObject *plugin = qobject_cast<QObject*> (
+				mNotesEditorPluginLoader->instance());
+
+		NotesEditorInterface* interface =
+				qobject_cast<NotesEditorInterface*>(plugin);
+
+		interface->edit(entry, mServices.agendaInterface());
+
+		connect(
+				interface, SIGNAL(editingCompleted(bool)),
+				this, SLOT(noteEditingCompleted(bool)));
+	} else {
+		// Set the context
+		setContextFromHighlight(entry);
+		// Issue a command to launch the editor to edit this entry
+		mServices.IssueCommandL(ECalenEditCurrentEntry);
+	}
 }
 
 // ----------------------------------------------------------------------------
@@ -1042,17 +1067,13 @@ void CalenDayViewWidget::itemActivated(const QModelIndex &index)
 // 
 void CalenDayViewWidget::noteEditingCompleted(bool status)
 {
-    Q_UNUSED(status);
-    // Delete the notes editor instance
-    mNotesEditor->deleteLater();
-    
-    // We need to refresh the list since user
-    // might have marked the to-do as complete or
-    // edited it or deleted it. So get the instance
-    // list again
-    if (status) {
-        mServices.IssueCommandL(ECalenStartActiveStep);
-    }
+	// We need to refresh the list since user
+	// might have marked the to-do as complete or
+	// edited it or deleted it. So get the instance
+	// list again
+	if (status) {
+		mServices.IssueCommandL(ECalenStartActiveStep);
+	}
 }
 
 // ----------------------------------------------------------------------------

@@ -13,5 +13,5 @@
 # Description: Project specification file for notes_editor_api
 #
 
-PUBLIC_HEADERS += notes_editor_api/inc/noteseditor.h
-PUBLIC_HEADERS += notes_editor_api/inc/NotesEditor
+PUBLIC_HEADERS += notes_editor_api/inc/noteseditorinterface.h
+PUBLIC_HEADERS += notes_editor_api/inc/NotesEditorInterface

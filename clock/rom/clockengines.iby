@@ -34,7 +34,7 @@ file=ABI_DIR\BUILD_DIR\clockecomlistener.dll				SHARED_LIB_DIR\clockecomlistener
 // ECOM plugins
 ECOM_PLUGIN( clocknitzplugin.dll, clocknitzplugin.rsc )
 
-// TODO : the following will be uncommented when implemented.
+// TODO : The following will be uncommented once implemented.
 // Backup registration files
 // data=DATAZ_\private\10005906\backup_registration.xml		private\10005906\backup_registration.xml
 // data=DATAZ_\private\10005903\backup_registration.xml		private\10005903\backup_registration.xml

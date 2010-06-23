@@ -45,4 +45,5 @@ EXPORTS
 	?RegisterCalFileL@CCalTestLibrary@@QAEXABVTDesC16@@@Z @ 44 NONAME ; void CCalTestLibrary::RegisterCalFileL(class TDesC16 const &)
 	?WaitForAgendaServerClose@CCalTestLibrary@@SAXXZ @ 45 NONAME ; void CCalTestLibrary::WaitForAgendaServerClose(void)
 	?WaitForAlarmEvent@CCalTestLibrary@@QAEHHW4TAlarmChangeEvent@@W4TAlarmState@@H@Z @ 46 NONAME ; int CCalTestLibrary::WaitForAlarmEvent(int, enum TAlarmChangeEvent, enum TAlarmState, int)
+	?CreateCalSubSessionL@CCalTestLibrary@@QAEAAV?$RPointerArray@VCCalSession@@@@ABVTDesC16@@@Z @ 47 NONAME ; class RPointerArray<class CCalSession> & CCalTestLibrary::CreateCalSubSessionL(class TDesC16 const &)
 

@@ -244,6 +244,7 @@ void ClockCitySelectionListPrivate::handleAddOwnCityAction()
 	mAddOwnCityDialog = new HbDialog;
 	mAddOwnCityDialog->setTimeout(HbDialog::NoTimeout);
 	mAddOwnCityDialog->setDismissPolicy(HbDialog::NoDismiss);
+	mAddOwnCityDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 
 	// Set the heading text
 	HbLabel *titlelabel = new HbLabel(hbTrId("txt_clk_opt_add_own_city"));

@@ -67,7 +67,7 @@ class CALENCONTROLLER_EXPORT CCalenController : public QObject, public MCalenSer
 		/**
 		 * C++ constructor
 		 */
-		CCalenController(bool isFromServiceFrmwrk);
+		CCalenController();
 		
 		/**
 		 * Constructs CCalenController with existing CAknViewAppUi. If the
@@ -213,6 +213,12 @@ class CALENCONTROLLER_EXPORT CCalenController : public QObject, public MCalenSer
          * @return reference to CCalenCustomisationManager
          */
         CCalenCustomisationManager& CustomisationManager();
+        
+	    /**
+         * Filters the events eg. Locale/language change events
+         * @param event
+         */
+        bool eventFilter(QObject *object, QEvent *event);
         
     private:  // Construction and destruction
         

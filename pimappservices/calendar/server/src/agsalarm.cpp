@@ -680,8 +680,15 @@ void CAgnAlarmActive::GetAlarmInfoL(const TAgnInstanceId& aInstanceId, TAgnAlarm
 	else
 		{
 		aAlarmInfo.iRecurrenceId = entry->RecurrenceId().UtcL();
-		}
-	aAlarmInfo.iGlobalIdentifier = iModel->GetEntryGuidL(*entry);
+		}	
+	
+	// Check the length of the Uid from the entry if it is less than the 
+	// the supported length assign it to the aAlarmInfo.
+	// as per the RFC we are supporting 256 chars most of  app UID is within this range
+	// in future if anyone supports more than this length we need to handle this here .
+	if (iModel->GetEntryGuidL(*entry).Length() <= KAgnEntryMaxGuidLength)	    
+	    aAlarmInfo.iGlobalIdentifier = iModel->GetEntryGuidL(*entry);
+	
 	CleanupStack::PopAndDestroy(entry);
 	}
 	

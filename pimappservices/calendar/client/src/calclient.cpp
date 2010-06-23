@@ -35,8 +35,6 @@
 #include "calcalendarinfoimpl.h"
 #include "agmfilechangenotification.h"
 
-const TUint KDefaultMessageSlots = 3;
-
 _LIT(KAgendaMutex, "AgnMutex");
 
 //
@@ -205,7 +203,7 @@ This function must be called before the server can be used.
 	
 TInt RAgendaServ::DoConnect()
 	{
-	return CreateSession(KAgendaServerName,Version(), KDefaultMessageSlots);
+	return CreateSession(KAgendaServerName,Version());
 	}
 
 

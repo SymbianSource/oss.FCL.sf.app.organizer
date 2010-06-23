@@ -22,13 +22,6 @@
 
 #ifdef RD_CALENDAR_PLUGIN_FW
 ECOM_PLUGIN( calenlunarchineseplugin.dll , calenlunarchineseplugin.rsc )
-
-data=DATAZ_\RESOURCE_FILES_DIR\calenlunarchineseplugindata.rsc    	RESOURCE_FILES_DIR\calenlunarchineseplugindata.rsc
-
-//TODO: once we have USER_RESOURCE_FILES_LOCALIZED defined
-//#define USER_RESOURCE_FILES_LOCALIZED calenlunarchineseplugindata
-//#include <Variant/localized_resources.iby>
-
 #endif
 
 #endif // __SERIES60_LUNAR_CALENDAR

@@ -36,7 +36,6 @@
 const TInt KZeroIndex( 0 );
 const TInt KSingleZone( 1 );
 const TInt KSinglePlugin( 1 );
-const TInt KSetValidNitz( 1 );
 const TUid KTimeSourceInterfaceUID = { 0x200159A7 };
 const TInt KNitzPlugin( 0x200159A5 );
 

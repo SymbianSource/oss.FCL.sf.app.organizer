@@ -65,7 +65,7 @@ public:
 	ulong cloneEntry(const AgendaEntry& entry, AgendaEntry::Type type);
 	bool updateEntry(const AgendaEntry& entry, bool isChild = false);
 	bool storeRepeatingEntry(const AgendaEntry& entry, bool copyToChildren);
-	bool createException(const AgendaEntry& entry);
+	bool createException(const AgendaEntry& entry, QDateTime instanceOriginalDateTime);
 	
 	bool deleteEntry(ulong id);
 	void deleteRepeatedEntry(

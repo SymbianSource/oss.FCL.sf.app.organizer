@@ -30,14 +30,16 @@
 // Forward declarations
 class QGraphicsLinearLayout;
 class QTranslator;
+class QTimer;
+class QPluginLoader;
 class HbView;
 class HbAction;
 class HbLabel;
 class HbMainWindow;
+class MapTileService;
 class AgendaEventViewerItem;
 class AgendaEventViewerPrivate;
 class AgendaEventViewerDocLoader;
-class NotesEditor;
 class CalenEditor;
 
 class AgendaEventView: public QObject
@@ -73,7 +75,7 @@ private:
 	void showDeleteOccurencePopup();
 	void showDeleteConfirmationQuery();
 	void getSubjectIcon(AgendaEntry::Type type, QString &subjectIcon);
-
+    void getProgressIndicatorstatus(QString &progressIcon);
 private slots:
 	void markTodoStatus();
 	void edit();
@@ -86,8 +88,10 @@ private slots:
 	void handleCalendarEditorClosed();
 	void handleDeleteOccurence(int index);
 	void handleDeleteAction();
+	void updateProgressIndicator();
+	void receiveMapTileStatus(int entryid,int addressType, int status); 
 private:
-	
+
 	HbView *mViewer;
 	QPointer<AgendaEventViewerItem> mSubjectWidget;
 	QPointer<AgendaEventViewerItem> mDateTimeWidget;
@@ -103,16 +107,22 @@ private:
 	AgendaEventViewerDocLoader *mDocLoader;
 	AgendaEntry mOriginalAgendaEntry;
 	AgendaEntry mAgendaEntry;
-	NotesEditor *mNoteEditor;
+	QPointer<QPluginLoader> mNotesEditorPluginLoader;
 	CalenEditor *mCalenEditor;
 	QGraphicsLinearLayout *mLinearLayout;
-	
+
 	QTranslator *mTranslator;
 	bool mReminderWidgetAdded;
 	HbAction *mBackAction;
 	HbMainWindow* mMainWindow;
 	bool mLocationFeatureEnabled;
-    QString mMaptilePath;
+	QString mMaptilePath;
+    MapTileService *mMaptileService;
+    QTimer *mProgressTimer;
+    int     mProgressIconCount;  
+    bool    mMaptileStatusReceived;
+    int     mMaptileStatus; 
+	bool mNotesPluginLoaded;
 
 private:
 	friend class AgendaEventViewerPrivate;

@@ -52,8 +52,12 @@ class  CalenViewManager :	public QObject,
 		/**
 		 * Constructor
 		 */
-		CalenViewManager ( CCalenController& aController, 
-		                   bool isFromServiceFrmwrk);
+		CalenViewManager ( CCalenController& aController);
+		
+		/**
+		 * Second Phase Constructor
+		 */
+		void SecondPhaseConstruction();
 		
         /**
          * Destructor
@@ -96,6 +100,9 @@ class  CalenViewManager :	public QObject,
 		void removeDayViews();
 		
 		void constructOtherViews();
+		
+		void launchSettingsView();
+		
 		
 	public: // from MCalenNotificationHandler
    
@@ -159,7 +166,7 @@ class  CalenViewManager :	public QObject,
 		CalenDocLoader          *mDayViewAltDocLoader;
         
 		int  mCurrentViewId;
-		int  mPreviousViewId;
+		int  mPreviousViewsId;
 		int  mFirstView;
         };
 

@@ -32,6 +32,7 @@
 // User includes
 #include "calengriditemprototype.h"
 #include "calencommon.h"
+#include "calentodayindicatorlinedrawer.h"
 
 /*!
  \class CalenGridItemPrototype
@@ -71,15 +72,25 @@ void CalenGridItemPrototype::createPrimitives()
 		
 	if (!mFocusIndicatorItem) {
 		mFocusIndicatorItem = new HbFrameItem(this);
-		mFocusIndicatorItem->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
+		mFocusIndicatorItem->frameDrawer().setFrameType(
+				HbFrameDrawer::NinePieces);
 		mFocusIndicatorItem->setZValue(-1);
-		HbStyle::setItemName(mFocusIndicatorItem, QLatin1String("focusIconItem"));
+		HbStyle::setItemName(
+				mFocusIndicatorItem, QLatin1String("focusIconItem"));
 	}
 	
 	if (!mEventIndicatorItem) {
 		mEventIndicatorItem = new HbIconItem(this);
-		HbStyle::setItemName(mEventIndicatorItem, QLatin1String("eventIconItem"));
+		HbStyle::setItemName(
+				mEventIndicatorItem, QLatin1String("eventIconItem"));
 	}
+	
+	if (!mTodayIndicatorItem) {
+		mTodayIndicatorItem = new CalenTodayIndicatorLineDrawer(this);
+		HbStyle::setItemName(
+				mTodayIndicatorItem, QLatin1String("todayIndicatorItem"));
+	}
+
 }
 
 /*!
@@ -136,8 +147,14 @@ void CalenGridItemPrototype::updateChildItems()
 			}
 			
 			// Get the today indicator role
-			underlineEnabled = itemList.at(CalendarNamespace::CalendarMonthUnderlineRole).value<bool>();
-			drawUnderline(underlineEnabled);
+			underlineEnabled = itemList.at(
+					CalendarNamespace::CalendarMonthUnderlineRole).
+					value<bool>();
+			if(underlineEnabled) {
+				mTodayIndicatorItem->show();
+			} else {
+				mTodayIndicatorItem->hide();
+			}
 			
 			// Get the event indicator data
 			monthEventRole = itemList.at(CalendarNamespace::CalendarMonthEventRole).value<bool>();
@@ -164,29 +181,6 @@ void CalenGridItemPrototype::updateChildItems()
 	// base class implementation
 	HbGridViewItem::updateChildItems();
 }
-
-/*!
- Function to create the underline icon item
- */
-void CalenGridItemPrototype::drawUnderline(bool underlineEnabled)
-{
-	if (underlineEnabled) {
-		if (!mTodayIndicatorItem) {
-			mTodayIndicatorItem = new HbIconItem(this);
-			HbStyle::setItemName(mTodayIndicatorItem,
-								 QLatin1String("todayIndicatorItem"));
-			if (mTodayUnderLineColor.isValid()) {
-				mTodayIndicatorItem->setColor(mTodayUnderLineColor);
-			}
-		}
-	} else {
-		if (mTodayIndicatorItem) {
-			delete mTodayIndicatorItem;
-			mTodayIndicatorItem = NULL;
-		}
-	}
-}
-
 
 /*!
  Function overwritten to avoid default behavior

@@ -21,6 +21,11 @@
 #include <QDateTime>
 #include <qtranslator.h>
 #include <QGraphicsLinearLayout>
+#include <QFile>
+#include <QString>
+#include <QTimer>
+#include <QPluginLoader>
+#include <QDir>
 #include <HbInstance>
 #include <hbapplication.h>
 #include <HbMainWindow>
@@ -37,14 +42,10 @@
 #include <HbMessageBox>
 #include <HbDialog>
 #include <HbLabel>
-#include <QFile>
-#include <QString>
-#include <QIcon>
-#include <QPainter>
-#include <QPixmap>
 // User includes
+#include <maptileservice.h>//maptile service
 #include <agendautil.h>
-#include <noteseditor.h>
+#include <NotesEditorInterface>
 #include <caleneditor.h>
 #include "agendaeventview.h"
 #include "agendaeventviewerdocloader.h"
@@ -52,9 +53,6 @@
 #include "agendaeventviewer_p.h"
 #include "agendaeventvieweritem.h"
 #include "calendateutils.h"
-
-//maptile service 
-#include <maptileservice.h>
 // Constants
 #define CHARACTER_HYPHEN    "-"
 #define CHARACTER_SPACE     " "
@@ -88,7 +86,13 @@ AgendaEventView::AgendaEventView(
 		mOwner(owner),
 		mReminderWidgetAdded(true),
 		mMainWindow(NULL),
-		mMaptilePath(NULL)
+		mMaptilePath(NULL),
+		mMaptileService(NULL),
+		mProgressTimer(NULL),
+		mProgressIconCount(0),
+		mMaptileStatusReceived(false),
+		mMaptileStatus(-1),
+		mNotesPluginLoaded(false)
 {
 	qDebug() << "AgendaEventViewer: AgendaEventView::AgendaEventView -->";
 
@@ -146,11 +150,17 @@ AgendaEventView::AgendaEventView(
     mLinearLayout = 
     		static_cast<QGraphicsLinearLayout *> (scrollAreaWidget->layout());
 	
-    MapTileService::AppType appType;
-    appType = MapTileService::AppTypeCalendar;
-    mLocationFeatureEnabled = MapTileService::isLocationFeatureEnabled(appType);
-    
-        
+
+    //maptile service object , to retrive maptile path from database.
+    mMaptileService= new MapTileService();   
+    mLocationFeatureEnabled = mMaptileService->isLocationFeatureEnabled(
+        MapTileService::AppTypeCalendar);
+    if (mLocationFeatureEnabled) {
+        //timer to run progress indicator icon.
+        mProgressTimer = new QTimer(this);
+        mProgressTimer->setSingleShot(true);
+        connect(mProgressTimer, SIGNAL(timeout()), this, SLOT(updateProgressIndicator()));
+    }
     qDebug() << "AgendaEventViewer: AgendaEventView::AgendaEventView <--";
 	
 }
@@ -171,12 +181,29 @@ AgendaEventView::~AgendaEventView()
 	
 	mDocLoader->reset();
 	delete mDocLoader;
-	
+
+	// Unload notes editor if loaded.
+	if (mNotesEditorPluginLoader) {
+		mNotesEditorPluginLoader->unload();
+		delete mNotesEditorPluginLoader;
+		mNotesEditorPluginLoader = 0;
+	}
+
 	// Delete the mainwindow if we have created any
 	if (mMainWindow) {
 		delete mMainWindow;
 		mMainWindow = NULL;
 	}
+	
+	if (mMaptileService) {
+        delete mMaptileService;
+        mMaptileService = NULL;
+    }
+    
+	if (mProgressTimer) {
+        delete mProgressTimer;
+        mProgressTimer = NULL;
+    }
 	
 	qDebug() << "AgendaEventViewer: AgendaEventView::~AgendaEventView <--";
 }
@@ -475,14 +502,13 @@ void AgendaEventView::addDateTimeData()
 
     		dateTimeText.append(systemLocale.format(startDateTime.date(),
 												r_qtn_date_usual_with_zero));
-
-    		if (CalenDateUtils::onSameDay(startDateTime, endDateTime)) {
+    		if (CalenDateUtils::onSameDay(startDateTime, endDateTime.addSecs(-60))) {
     			data.append(hbTrId("txt_calendar_dblist_meeting_date").arg(
 											dateTimeText));
     		} else {
     			QString endDate;
     			endDate.append(
-    					systemLocale.format(endDateTime.date(),
+    					systemLocale.format(endDateTime.addSecs(-60).date(),
 												r_qtn_date_usual_with_zero));
     			data.append(hbTrId("txt_calendar_dblist_start_end_time").arg(
 											dateTimeText).arg(endDate));
@@ -505,10 +531,22 @@ void AgendaEventView::addLocationData()
 {
 	qDebug() << "AgendaEventViewer: AgendaEventView::addLocationData -->";
 	QStringList itemData;
-	itemData.append(QString::null);
-    itemData.append(QString::null);
-    itemData.append("qtg_small_location");
-    mLocationWidget->setProperty(primaryLeftIconItem, false); 
+	QString progressIcon(QString::null);	
+	if ( mLocationFeatureEnabled ) {
+	    getProgressIndicatorstatus(progressIcon);	   
+	}
+	 if( progressIcon.isNull() ) {
+	     itemData.append(QString::null);
+	     itemData.append(QString::null);
+	     itemData.append("qtg_small_location");
+	     mLocationWidget->setProperty(primaryLeftIconItem, false);
+	 }
+	 else {
+	     itemData.append("qtg_small_location");
+	     itemData.append( progressIcon );  
+	     itemData.append(QString::null);
+	     mLocationWidget->setProperty(primaryLeftIconItem, true);
+	 }
 	mLocationWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 	itemData.clear();
 	itemData.append(QString::null);
@@ -522,29 +560,16 @@ void AgendaEventView::addLocationData()
  */
 void AgendaEventView::addMapTileImage()
 {
+    if (mLocationFeatureEnabled && !mAgendaEntry.location().isEmpty() && !mMaptilePath.isEmpty()) {
 
-    qDebug() << "AgendaEventViewer: AgendaEventView::addMapTileImage -->";
-    
-    if (!mAgendaEntry.location().isEmpty() && mLocationFeatureEnabled){
-        MapTileService::AddressType addressType;
-        addressType = MapTileService::AddressPlain;
-        int eventId = mAgendaEntry.id();
-        mMaptilePath = MapTileService::getMapTileImage(eventId, addressType);
-        if (!mMaptilePath.isNull())
-        {                        
-            HbIcon maptile(mMaptilePath);
-            mMaptileLabel->setIcon(maptile);        
+        HbIcon maptile(mMaptilePath);
+        mMaptileLabel->setIcon(maptile);
+        mMaptileLabel->setPreferredSize(QSizeF(width, height));
+        mMaptileLabel->setMinimumSize(QSizeF(width, height));
+        mMaptileLabel->setMaximumSize(QSizeF(width, height));
+        mMaptileLabel->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
-            mMaptileLabel->setPreferredSize(QSizeF(width, height));
-            mMaptileLabel->setMinimumSize(QSizeF(width, height));
-            mMaptileLabel->setMaximumSize(QSizeF(width, height));
-            mMaptileLabel->setSizePolicy(QSizePolicy(QSizePolicy::Fixed,
-                    QSizePolicy::Fixed));            
-
-        }
     }
-
-    qDebug() << "AgendaEventViewer: AgendaEventView::addMapTileImage <--";
 }
 /*!
 	Add reminder data to Event viewer
@@ -754,6 +779,7 @@ void AgendaEventView::removeWidget()
         mMaptileLabel->hide();
         mLinearLayout->removeItem(mMaptileLabel);
     }
+    file.close();
         
 	if (mAgendaEntry.alarm().isNull()) { 
 		if (mAgendaEntry.type() == AgendaEntry::TypeTodo ) {
@@ -1022,13 +1048,28 @@ void AgendaEventView::edit()
 	mOwner->editingStarted();
 	
 	if (AgendaEntry::TypeTodo == mAgendaEntry.type()) {
-		// Launch the to-do editor using notes editor api
-		// Construct Note editor for launching the to-do editor
-		mNoteEditor = new NotesEditor(mOwner->mAgendaUtil, this);
-		mNoteEditor->edit(mAgendaEntry);
+		// Load notes editor plugin if not loaded.
+		if(!mNotesPluginLoaded) {
+			// Launch the to-do editor using notes editor plugin api
+			QDir dir(NOTES_EDITOR_PLUGIN_PATH);
+			QString pluginName = dir.absoluteFilePath(NOTES_EDITOR_PLUGIN_NAME);
+
+			// Create NotesEditor plugin loader object.
+			mNotesEditorPluginLoader = new QPluginLoader(pluginName);
+
+			// Load the plugin
+			mNotesPluginLoaded = mNotesEditorPluginLoader->load();
+		}
+		QObject *plugin = qobject_cast<QObject*> (
+				mNotesEditorPluginLoader->instance());
+
+		NotesEditorInterface* interface =
+				qobject_cast<NotesEditorInterface*>(plugin);
+
+		interface->edit(mAgendaEntry, mOwner->mAgendaUtil);
 
 		connect(
-				mNoteEditor, SIGNAL(editingCompleted(bool)),
+				interface, SIGNAL(editingCompleted(bool)),
 				this, SLOT(handleNoteEditorClosed(bool)));
 		
 
@@ -1180,8 +1221,9 @@ void AgendaEventView::handleNoteEditorClosed(bool status)
 	Q_UNUSED(status);
 	qDebug() <<"AgendaEventViewer: AgendaEventView::handleNoteEditorClosed -->";
 
-	// Cleanup.
-	mNoteEditor->deleteLater();
+	// To avoid loading the plugin again for editing,
+	// Unload the plug-in while destruction.
+
 	mOwner->editingCompleted();
 
 	qDebug() <<"AgendaEventViewer: AgendaEventView::handleNoteEditorClosed <--";
@@ -1265,4 +1307,109 @@ void AgendaEventView::getSubjectIcon(AgendaEntry::Type type, QString &subjectIco
     qDebug() << "AgendaEventViewer: AgendaEventView::getSubjectIcon <--";
     }
 
+/*!
+    According to maptile fetching status , update the viewer screen.
+ */
+void AgendaEventView::updateProgressIndicator()
+{   
+    if (!mMaptileStatusReceived) {
+        QString iconName("qtg_anim_small_loading_");
+        mProgressIconCount = mProgressIconCount % 10 + 1;
+        iconName.append(QVariant(mProgressIconCount).toString());
+        QStringList itemData;
+        itemData.append("qtg_small_location");
+        itemData.append(iconName);
+        itemData.append(QString::null);
+        mLocationWidget->setProperty(primaryLeftIconItem, true);
+        mLocationWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
+        mProgressTimer->start(100);
+    }
+    else {
+        if (mProgressTimer->isActive()) {
+            mProgressTimer->stop();
+        }
+        if (mMaptileStatus == MapTileService::MapTileFetchingCompleted) {
+            QStringList itemData;
+            itemData.append(QString::null);
+            itemData.append(QString::null);
+            itemData.append("qtg_small_location");
+            mLocationWidget->setProperty(primaryLeftIconItem, false);
+            mLocationWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
+            MapTileService::AddressType addressType;
+            addressType = MapTileService::AddressPlain;
+            int eventId = mAgendaEntry.id();
+            mMaptileService->getMapTileImage(eventId, addressType, mMaptilePath);
+            addMapTileImage();
+            QFile file(mMaptilePath);
+            if (file.exists()) {
+                //add to linear layout  
+                int indexMaptileLabel = 3;
+                mLinearLayout->insertItem(indexMaptileLabel, mMaptileLabel);
+                mMaptileLabel->show();
+            }
+            file.close();
+
+        }
+        else {
+            QStringList itemData;
+            itemData.append("qtg_small_location");
+            QString stopIcon;
+            stopIcon.append(QString("qtg_mono_search_stop"));
+            itemData.append(stopIcon);
+            itemData.append(QString::null);
+            mLocationWidget->setProperty(primaryLeftIconItem, true);
+            mLocationWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
+
+        }
+    }
+}
+
+/*!
+    Maptile status received from maptile service 
+ */
+void AgendaEventView::receiveMapTileStatus(int entryid,int addressType, int status)
+{
+    if (mAgendaEntry.id() == entryid && addressType == MapTileService::AddressPlain) {
+        mMaptileStatusReceived = true;
+        mMaptileStatus = status;
+        updateProgressIndicator();
+    }
+}
+
+/*!
+    Returns progress indication icon as per status of entry in database.
+ */
+void AgendaEventView::getProgressIndicatorstatus(QString &progressIcon)
+{
+    MapTileService::AddressType addressType;
+    addressType = MapTileService::AddressPlain;
+    int eventId = mAgendaEntry.id();
+    mMaptilePath.clear();
+    int status = 0;
+    connect(mMaptileService, SIGNAL(maptileFetchingStatusUpdate(int,
+            int ,int)), this, SLOT(receiveMapTileStatus(int,int,int)));
+    status = mMaptileService->getMapTileImage(eventId, addressType, mMaptilePath);
+    if (status == MapTileService::MapTileFetchingNetworkError || status
+        == MapTileService::MapTileFetchingInProgress) {
+        mMaptilePath.clear();
+        mMaptileStatusReceived = false; //reseting receiving status value
+        mMaptileStatus = -1;// reseting status value;
+        progressIcon.append(QString("qtg_anim_small_loading_1"));
+        mProgressTimer->start(100);
+    }
+    else if (status == MapTileService::MapTileFetchingInvalidAddress || status
+        == MapTileService::MapTileFetchingUnknownError) {
+        mMaptilePath.clear();
+        //no further need of this coonnection 
+        disconnect(mMaptileService, SIGNAL(maptileFetchingStatusUpdate(int,
+                int ,int)), this, SLOT(receiveMapTileStatus(int,int,int)));
+        progressIcon.append(QString("qtg_mono_search_stop"));
+    }
+    else {
+        //no further need of this coonnection
+        disconnect(mMaptileService, SIGNAL(maptileFetchingStatusUpdate(int,
+                int ,int)), this, SLOT(receiveMapTileStatus(int,int,int)));
+        progressIcon.append(QString::null);
+    }
+}
 // End of file

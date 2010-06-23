@@ -238,7 +238,7 @@ public:
 	void setUntil(const QDateTime& date);
 	QDateTime until() const;
 
-	void setRepeatRuleStart(const QDateTime& date);
+	void setRepeatRuleStart(const QDateTime& dateTime);
 	QDateTime repeatRuleStart() const;
 
 	void setWeekStart(Day day);
@@ -380,6 +380,7 @@ public:
 	
 	void setGeoValue(const AgendaGeoValue& geoValue);
 	AgendaGeoValue geoValue() const;
+	void clearGeoValue() const;
 	
 	int durationInSecs() const;
 	AgendaEntry& operator=(const AgendaEntry& other);

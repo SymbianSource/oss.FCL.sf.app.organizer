@@ -71,6 +71,10 @@ ClockWorldView::~ClockWorldView()
 		delete mDocLoader;
 		mDocLoader = 0;
 	}
+	if(mCityListModel){
+		delete mCityListModel;
+	}
+	
 	HbStyleLoader::unregisterFilePath(":/style/hblistviewitem.css");
 	HbStyleLoader::unregisterFilePath(":/style/hblistviewitem.widgetml");
 	HbStyleLoader::unregisterFilePath(":/style/hblistviewitem_color.css");
@@ -244,7 +248,7 @@ void ClockWorldView::updateCurrentLocationInfo(int networkTime)
 				mSettingsUtility->timeFormatString());
 		itemList.insert(value.setNum(ClockHomeCityItem::Time), timeInfo);
 
-		// Use the home city specific icons.
+		//Use the home city specific icons.
 		// Display day/night indicators.
 		QString dayNightIconPath = "";
 		if (isDay(dateTime)) {
@@ -289,6 +293,7 @@ void ClockWorldView::handleItemLongPressed(
 	// Show the menu.
 	itemContextMenu->open(this, SLOT(selectedMenuAction(HbAction*)));
 	itemContextMenu->setPreferredPos(coords);
+	itemContextMenu->setAttribute( Qt::WA_DeleteOnClose,true);
 }
 
 /*!

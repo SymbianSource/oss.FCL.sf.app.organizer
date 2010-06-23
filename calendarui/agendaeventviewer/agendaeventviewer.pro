@@ -36,7 +36,7 @@ DEPENDPATH += \
 
 symbian: {
 
-BLD_INF_RULES.prj_exports += \
+	BLD_INF_RULES.prj_exports += \
 				"./inc/agendaeventviewer.h  |../inc/agendaeventviewer.h" \
 				"./inc/agendaeventviewer.h  |../../inc/agendaeventviewer.h"
 				
@@ -46,12 +46,10 @@ BLD_INF_RULES.prj_exports += \
 	
 	
 	LIBS += -lagendainterface \
-			-lnoteseditor \
 			-lcaleneditor \
 			-lcalencommonutils \
 			-lmaptileservice
-
-INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
+	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 }
 
 SOURCES += \

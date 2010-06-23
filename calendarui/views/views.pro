@@ -37,8 +37,8 @@ symbian: {
 			-lcalencommonutils \
 			-lcalensettings \
 			-lagendainterface \
-			-lxqsettingsmanager \
-			-lnoteseditor
+			-lxqsettingsmanager
+
     TARGET.UID3 = 0x10282F26
     TARGET.CAPABILITY = CAP_GENERAL_DLL
 
@@ -58,7 +58,8 @@ HEADERS += calenmonthview.h \
 		   calenpreviewpane.h \
 		   calensettingsview.h \
 		   calenthicklinesdrawer.h \
-		   calenpluginlabel.h
+		   calenpluginlabel.h \
+		   calentodayindicatorlinedrawer.h
 	
 SOURCES += calenmonthview.cpp \
            calenmonthdata.cpp \
@@ -71,7 +72,8 @@ SOURCES += calenmonthview.cpp \
            calenpreviewpane.cpp \
            calensettingsview.cpp \
            calenthicklinesdrawer.cpp \
-		   calenpluginlabel.cpp
+		   calenpluginlabel.cpp \
+		   calentodayindicatorlinedrawer.cpp
 
 RESOURCES += calenresources.qrc
 

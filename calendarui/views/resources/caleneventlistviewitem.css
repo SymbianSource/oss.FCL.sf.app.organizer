@@ -7,11 +7,10 @@ CalenEventListViewItem[layoutName="custom"][modelItemType="StandardItem"][stretc
 }
 
 CalenEventListViewItem::icon-1[layoutName="custom"]{
-    top: -var(hb-param-margin-gene-top);
     left: -var(hb-param-margin-gene-left);
     right: var(hb-param-margin-gene-middle-horizontal);
-    fixed-width: var(hb-param-graphic-size-secondary);
-    fixed-height: var(hb-param-graphic-size-secondary);
+    fixed-width: var(hb-param-graphic-size-primary-small);
+    fixed-height: var(hb-param-graphic-size-primary-small);
 }
 
 CalenEventListViewItem::icon-2{
@@ -29,48 +28,45 @@ CalenEventListViewItem::icon-3{
 }
 
 CalenEventListViewItem::icon-4{
-    top: -var(hb-param-margin-gene-middle-vertical);
     right: var(hb-param-margin-gene-right);
-    bottom: var(hb-param-margin-gene-bottom);
     fixed-width: var(hb-param-graphic-size-secondary);
     fixed-height: var(hb-param-graphic-size-secondary);
 }
 
 CalenEventListViewItem::text-1{
-		left: -var(hb-param-margin-gene-left);
-		top: -var(hb-param-margin-gene-top);
+	left: -var(hb-param-margin-gene-left);
+	top: -var(hb-param-margin-gene-top);
     right: var(hb-param-margin-gene-middle-horizontal);
     font-variant: secondary;
-		text-height: var(hb-param-text-height-secondary);
-    text-align: right;
+	text-height: var(hb-param-text-height-secondary);
+
 }
 
 CalenEventListViewItem::text-2{
     top: -var(hb-param-margin-gene-top);
-    right: var(hb-param-margin-gene-middle-horizontal);
-    bottom: var(hb-param-margin-gene-middle-vertical);
     font-variant: primary;
     text-height: var(hb-param-text-height-secondary);
     text-align: left;
     fixed-width: 29un;
 }
 
-
 CalenEventListViewItem::text-3{
-    text-height: var(hb-param-text-height-primary);
     top: -var(hb-param-margin-gene-middle-vertical);
-    right: var(hb-param-margin-gene-right);
     bottom: var(hb-param-margin-gene-bottom);
     font-variant: secondary;
     text-height: var(hb-param-text-height-secondary);
     text-align: left;
-    fixed-width: 29un;
+    fixed-width: 35un;
+}
+
+CalenEventListViewItem::text-4{
+    font-variant: secondary;
+    text-height: var(hb-param-text-height-secondary);
 }
 
 CalenEventListViewItem::text-2:landscape[stretchItem="false"]{
     fixed-width: 70un;
 }
-
 
 CalenEventListViewItem::text-3:landscape[stretchItem="false"]{
     fixed-width: 70un;
@@ -78,18 +74,10 @@ CalenEventListViewItem::text-3:landscape[stretchItem="false"]{
 
 CalenEventListViewItem::text-2:landscape[stretchItem="true"]{
     fixed-width: 35un;
+    bottom: var(hb-param-margin-gene-bottom);
 }
 
 CalenEventListViewItem::text-3:landscape[stretchItem="true"]{
     fixed-width: 40un;
-}
-
-CalenEventListViewItem::text-4{
-    font-variant: secondary;
-    text-height: var(hb-param-text-height-secondary);
-    left: -var(hb-param-margin-gene-left);
-    top: -var(hb-param-margin-gene-middle-vertical);
-    bottom: var(hb-param-margin-gene-bottom);
-    right: var(hb-param-margin-gene-middle-horizontal);
-    text-align: right;
+    top: -var(hb-param-margin-gene-top);
 }

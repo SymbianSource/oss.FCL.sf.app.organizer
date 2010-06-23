@@ -22,6 +22,7 @@
 #include <hbcolorscheme.h>
 #include <hbpangesture.h>
 #include <hbswipegesture.h>
+#include <hbdeviceprofile.h>
 
 // User includes
 #include "calenmonthgrid.h"
@@ -30,6 +31,7 @@
 #include "calenmonthview.h"
 #include "calendateutils.h"
 #include "calencommon.h"
+#include "calenconstants.h"
 
 // Constants
 #define SCROLL_SPEEED 3000 
@@ -67,6 +69,7 @@ CalenMonthGrid::CalenMonthGrid(QGraphicsItem *parent):
 	setClampingStyle(HbScrollArea::StrictClamping);
 	setEnabledAnimations(HbAbstractItemView::None);
 	setFrictionEnabled(false);
+	setFlag(QGraphicsItem::ItemHasNoContents, false);
 	resetTransform();
 	
 	// Get the content widget of the scroll area to draw the grid lines
@@ -983,8 +986,11 @@ void CalenMonthGrid::paint(QPainter* painter,
 	
 	// Set the required attributes to the pen
 	QPen pen;
+	HbDeviceProfile deviceProf;
+	qreal unitValue = deviceProf.unitValue();
+	qreal widthInPixels = GRIDLINE_WIDTH * unitValue;
 	pen.setStyle(Qt::SolidLine);
-	pen.setWidth(GRIDLINE_WIDTH);
+	pen.setWidth(widthInPixels);
 	if (mGridLineColor.isValid()) {
 		pen.setBrush(mGridLineColor);
 	} else {

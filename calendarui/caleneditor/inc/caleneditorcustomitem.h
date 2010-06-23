@@ -48,6 +48,7 @@ public:
 	void enableDateButton(bool value);
 	bool canSetModelIndex(const QModelIndex &index) const;
 	void restore();
+	QDateTime getDateTime();
 	
 protected:
 	virtual HbWidget* createCustomWidget();

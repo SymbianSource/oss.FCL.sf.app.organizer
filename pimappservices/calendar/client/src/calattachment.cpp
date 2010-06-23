@@ -554,12 +554,23 @@ Otherwise any of the system-wide error codes.
 */
 EXPORT_C void CCalAttachmentFile::FetchFileHandleL(RFile& aFileHandle) const
 	{
-	if (iAttachmentImpl->IsFileHandleSet() || ! iCalSessionImpl)
-		{
-		User::Leave(KErrArgument);
-		}
-
-	iCalSessionImpl->Server().FetchFileHandleL(aFileHandle, iAttachmentImpl->Uid(), iCalSessionImpl->FileId());
+    if ( iAttachmentImpl->IsFileHandleSet() )
+        {
+        aFileHandle.Close();
+        User::LeaveIfError(
+                aFileHandle.Duplicate( iAttachmentImpl->FileHandle() ) );
+        }
+    else if ( iCalSessionImpl )
+        {
+        iCalSessionImpl->Server().FetchFileHandleL(
+                aFileHandle, 
+                iAttachmentImpl->Uid(), 
+                iCalSessionImpl->FileId() );            
+        }
+    else
+        {
+        User::Leave( KErrArgument );
+        }
 	}
 
 /** Load the binary data into the attachment object to be accessed through the CCalAttachment::Value function.

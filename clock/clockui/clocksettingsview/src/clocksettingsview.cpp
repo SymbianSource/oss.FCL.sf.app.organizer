@@ -126,10 +126,17 @@ ClockSettingsView::~ClockSettingsView()
         delete mTranslator;
         mTranslator = 0;
     }
-
+    if(mSettingsUtility){
+    	delete mSettingsUtility;
+    }
+	
 	if (!mTimezoneClient->isNull()) {
 	    mTimezoneClient->deleteInstance();
     }
+	if(mSettingsModel){
+		delete mSettingsModel;
+	}
+		
 
 }
 

@@ -18,6 +18,8 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
 		notesmodel \
+		noteseditor \
+		notesplugins \
 		notesviews \
 		notesviewmanager \
 		notesmodelhandler \

@@ -19,6 +19,12 @@
 #ifndef CALENNATIVEVIEW_H
 #define CALENNATIVEVIEW_H
 
+#ifdef  CALENVIEWS_DLL
+#define CALENNATIVEVIEW_EXPORT Q_DECL_EXPORT
+#else
+#define CALENNATIVEVIEW_EXPORT Q_DECL_IMPORT
+#endif
+
 //  System includes
 #include <hblabel.h>
 #include <hblistwidget.h>
@@ -47,6 +53,11 @@ class  CalenNativeView : public CalenView,
 		TBool pluginEnabled();
 		virtual void refreshViewOnGoToDate();
 		QString *pluginText();
+	    /**
+	     * captureScreenshot captures the current screenshot
+	     * \param viewId of the view for which screenshot is to be taken
+	     */
+		CALENNATIVEVIEW_EXPORT void captureScreenshot(bool captureScreenShot = false);
 		
 	protected:  // New functions
 	    CalenNativeView( MCalenServices& services );
@@ -63,13 +74,21 @@ class  CalenNativeView : public CalenView,
         void deleteAllEntries();
         void launchSettingsView();
 	    virtual void changeOrientation(Qt::Orientation orientation);
+	    /**
+	     * saveActivity saves the current view as an activity
+	     * \params viewId view Id to be saved as an activity
+	     * 
+	     */
+	    void saveActivity();
 	    
     protected:
     
         MCalenServices	&mServices; // not owned.
-	
+        int             mActivityId; // Recent Activity ID, currently it holdes wither of ECalenMonthView or ECalenDayView
+        QVariantHash    mScreenShotMetadata; // Screenshot
     private:
         HbDateTimePicker	*mDatePicker;
+        bool                mIsCapturedScreenShotValid; // to check if the captured screenshot is valid
 	};
 
 #endif  // CALENNATIVEVIEW_H

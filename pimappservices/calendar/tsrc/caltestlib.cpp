@@ -21,6 +21,7 @@
 #include <caldataexchange.h>
 #include <caldataformat.h>
 #include <calsession.h>
+#include <calcalendarinfo.h>
 #include <calprogresscallback.h>
 #include <e32test.h>
 #include <consolealarmalertservermain.h>
@@ -120,6 +121,7 @@ void CCalTestLibrary::OpenCalendarSessionL(TBool aRefCountExists)
 void CCalTestLibrary::CloseCalendarSession(TBool aWaitForAgendaToClose)
 	{
 	iChunkMutex.Wait();
+	iSubCalSessions.ResetAndDestroy();
 	delete iSession;
 	iSession = NULL;	
 	if (iRefCount && (--*iRefCount <= 0) && aWaitForAgendaToClose)
@@ -399,6 +401,16 @@ EXPORT_C void CCalTestLibrary::DeleteFileL(const TDesC& aFileName, TBool aIsCalF
 	
 	if (aIsCalFile)
 		{
+		
+		for(TInt i = 0; i < iSubCalSessions.Count();i++)
+		    {
+		    CCalCalendarInfo* info = iSubCalSessions[i]->CalendarInfoL();
+		    HBufC* fileName = info->FileNameL().AllocLC();
+		    delete info;
+		    iSubCalSessions[i]->DeleteCalFileL(*fileName);
+		    CleanupStack::PopAndDestroy(fileName);
+		    }
+		
 		iSession->DeleteCalFileL(aFileName);
 		TInt indx=-1;
 		if(iDelFileFlag)
@@ -948,4 +960,24 @@ EXPORT_C TTimeIntervalMicroSeconds32 TPerformanceTimer::ElapsedTime() const
 	return tickPeriod * durationInTicks;	
 	}
 
+EXPORT_C RPointerArray<CCalSession>& CCalTestLibrary::CreateCalSubSessionL(const TDesC& aFileName)
+    {
+    CCalSession* session = CCalSession::NewL(*iSession);
+    CCalCalendarInfo* calendarInfo = CCalCalendarInfo::NewL();
+    calendarInfo->SetColor(KRgbRed);
+    calendarInfo->SetNameL(_L("test"));
+    calendarInfo->SetEnabled(ETrue);
+    
+    TRAPD(err,session->CreateCalFileL(aFileName,*calendarInfo));
+    if(err == KErrAlreadyExists)
+        {
+        session->DeleteCalFileL(aFileName);
+        session->CreateCalFileL(aFileName,*calendarInfo);
+        }
+    session->OpenL(aFileName);
+    iSubCalSessions.Append(session);
+    
+    delete calendarInfo;
+    return iSubCalSessions;
+    }
 

@@ -47,7 +47,6 @@ class CalenMonthGrid;
 class CalenPluginLabel;
 
 // Constants
-const int KCalenDaysInWeek = 7;
 const int KNumOfVisibleRows = 6;
 
 #ifdef  CALENVIEWS_DLL
@@ -106,6 +105,7 @@ private:
 	void refreshViewOnGoToDate();
 	void showHideRegionalInformation();
 	void onContextChanged();
+	void updateDayLabel();
 	
 private slots:
 	void createEditor();
@@ -176,6 +176,7 @@ private:
 	CalenPluginLabel *mNextRegionalInfo;
 	HbMenu *mDeleteSubMenu;
 	QColor mWeekDaysColor;
+	bool   mIsAboutToQuitEventConnected; // bool to check if month view is registered to get aboutToQuit signals
 };
 
 #endif //CALENMONTHVIEW_H

@@ -126,6 +126,8 @@ void AgendaEventViewerPrivate::view(const QFile &fileHandle,
 	if (!entry.isNull()) {
 		mAgendaEventView = new AgendaEventView(this);
 		mAgendaEventView->execute(entry, action);
+	} else {
+	    q_ptr->viewingCompleted(QDateTime::currentDateTime().date());
 	}
 	qDebug() <<"AgendaEventViewerPrivate::view(fileHandle) <--";
 }

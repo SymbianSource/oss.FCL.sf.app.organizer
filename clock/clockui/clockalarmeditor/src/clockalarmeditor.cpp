@@ -398,7 +398,7 @@ void ClockAlarmEditor::launchTimePicker()
 	mTimePickerDialog = new HbDialog;
 	mTimePickerDialog->setTimeout(HbDialog::NoTimeout);
 	mTimePickerDialog->setDismissPolicy(HbDialog::NoDismiss);
-
+	mTimePickerDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 	// Set the heading for the dialog.
 	HbLabel * timeLabel =
 		new HbLabel(hbTrId("txt_tumbler_title_alarm_time"),

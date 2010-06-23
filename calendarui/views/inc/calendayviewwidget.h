@@ -21,6 +21,7 @@
 // System includes
 #include <QGraphicsLinearLayout>
 #include <QDateTime>
+#include <QPointer>
 #include <hbwidget.h>
 
 // User includes
@@ -31,6 +32,7 @@ class QGraphicsSceneMouseEvent; // TODO: Remove this after gestures are supporte
 class HbAbstractViewItem;
 class HbGroupBox;
 class HbListView;
+class QPluginLoader;
 class HbLabel;
 class HbAction;
 class HbDateTimePicker;
@@ -309,11 +311,11 @@ private:
 	int mSelectedIndex;
 	
 	/**
-	 * @var NotesEditor
-	 * @brief Pointer to the notes editor
+	 * @var NotesEditorPluginLoader
+	 * @brief Pointer to the notes editor plugin loader
 	 */
-	NotesEditor *mNotesEditor;
-	
+	QPointer<QPluginLoader> mNotesEditorPluginLoader;
+
 	/**
 	 * @var mDatePicker
 	 * @brief The date picker component
@@ -344,7 +346,13 @@ private:
 	 * @brief Set flag true if contextmenu is opened
 	 */
 	bool mLongTapEventFlag;
-	
+
+	/**
+	 * @var mNotesPluginLoaded
+	 * @brief Holds notes editor plugin load info.
+	 */
+	bool mNotesPluginLoaded;
+
 };
 
 #endif //CALENDAYVIEWWIDGET_H

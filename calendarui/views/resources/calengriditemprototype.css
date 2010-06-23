@@ -36,5 +36,4 @@ CalenGridItemPrototype::todayIndicatorItem[layoutName="calendarCustomGridItem"] 
 	left: -0.75un;
 	right: 0.75un;
 	fixed-height: 0.75un;
-	background-color: red;
 }

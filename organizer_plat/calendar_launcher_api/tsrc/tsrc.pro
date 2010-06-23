@@ -19,9 +19,4 @@ TEMPLATE = subdirs
 SUBDIRS += unittest_calenlauncher
 CONFIG += ordered
 
-symbian: {
-	BLD_INF_RULES.prj_exports += \
-	"./rom/unit_calenlauncher.iby		CORE_APP_LAYER_IBY_EXPORT_PATH(unit_calenlauncher.iby)"
-}
-
 # End of file	--Don't remove this

@@ -28,6 +28,7 @@ class QGraphicsLinearLayout;
 class HbIconItem;
 class HbTextItem;
 class HbFrameItem;
+class CalenTodayIndicatorLineDrawer;
 
 // CONSTANTS
 const QString focusIconName = "qtg_fr_cal_focused_day_ind";
@@ -54,8 +55,6 @@ public:
 	void createPrimitives();
 
 private:
-	void drawUnderline(bool underlineEnabled);
-private:
 	QColor mTodayUnderLineColor;
 	QColor mActiveTextColor;
 	QColor mInActiveTextColor;
@@ -64,7 +63,7 @@ private:
 	HbIconItem *mEventIndicatorItem;
 	HbTextItem *mMonthDayInfoItem;
 	HbFrameItem *mFocusIndicatorItem;
-	HbIconItem *mTodayIndicatorItem;
+	CalenTodayIndicatorLineDrawer *mTodayIndicatorItem;
 };
 
 #endif // CALENGRIDITEMPROTOTYPE_H

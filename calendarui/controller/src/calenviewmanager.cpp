@@ -19,6 +19,9 @@
 //system includes
 #include <QDebug>
 #include <hbmainwindow.h>
+#include <hbinstance.h>
+#include <hbapplication.h> // hbapplication
+#include <xqserviceutil.h> // service utils
 
 //user includes
 #include "calenviewmanager.h"
@@ -43,12 +46,12 @@
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CalenViewManager::CalenViewManager( CCalenController& aController,
-                                         bool isFromServiceFrmwrk)
+CalenViewManager::CalenViewManager( CCalenController& aController)
 : mController(aController)
 {
 	TRACE_ENTRY_POINT;
 	
+	// Following block intializes member variables
 	mCalenEventViewer = NULL;
 	mMonthViewDocLoader = NULL;
 	mDayViewDocLoader = NULL;	
@@ -65,26 +68,83 @@ CalenViewManager::CalenViewManager( CCalenController& aController,
 	connect(mController.agendaInterface(), SIGNAL(entryViewCreationCompleted(int)),
 		        this, SLOT(handleEntryViewCreation(int)));
 	
-	if (isFromServiceFrmwrk) {
-		// Dont load any views until our remote slot gets called in
-		// calenserviceprovider.cpp
-		// Just have an empty mainwindow
-	} else {
-		// Do the normal startup
-		// Load the month view and active it and add it to main window
-		mFirstView = ECalenMonthView;
-		loadMonthView();
-		ActivateDefaultViewL(ECalenMonthView);
-		// Connect to the view ready signal so that we construct other view 
-		// once this view is shown
-		connect(&mController.MainWindow(), SIGNAL(viewReady()), 
-						this, SLOT(handleMainViewReady()));
-		
-		mController.MainWindow().addView(mCalenMonthView);
-		mController.MainWindow().setCurrentView(mCalenMonthView);
-	}
-	
 	TRACE_EXIT_POINT;
+}
+
+void CalenViewManager::SecondPhaseConstruction()
+{
+
+    TRACE_ENTRY_POINT;
+    
+    // Check the Application Startup reason from Activity Manager
+    int activityReason = qobject_cast<HbApplication*>(qApp)->activateReason();
+    
+    // Check if calendar is launched thru XQService framework
+    bool isFromServiceFrmWrk = XQServiceUtil::isService(); // Since activateReason 
+    //of hbapplication is not returning right value if the activity is started 
+    //as services so using the above line temporarily untill a fix is available in 
+    // hbappliacation. Need to remove this line after the fix is available for hbapplcation
+
+    
+    if (Hb::ActivationReasonActivity == activityReason) // Check if application is started 
+    // as an activity
+        {
+        // Application is started from an activity
+        // Extract activity data
+        QVariant data = qobject_cast<HbApplication*>(qApp)->activateData();
+        // Restore state from activity data
+        QByteArray serializedModel = data.toByteArray();
+        QDataStream stream(&serializedModel, QIODevice::ReadOnly);
+        int viewId; // int declared for debugging purpose
+        stream >> viewId; // read stream into an int
+        
+        mFirstView = viewId;
+        if (ECalenMonthView == viewId) // Check if Activity was stored for month view
+            {
+            loadMonthView(); // Load month view
+            }
+        else if (ECalenDayView == viewId) // Check if Activity was stored for day view
+            {
+            loadDayView(); // Load day view
+            }
+        
+        ActivateDefaultViewL(viewId);
+        // Connect to the view ready signal so that we can construct other views 
+        // once this view is ready
+        connect(&mController.MainWindow(), SIGNAL(viewReady()), 
+                this, SLOT(handleMainViewReady()));
+
+        if (ECalenMonthView == viewId) // Check if Activity was stored for month view
+            {
+            mController.MainWindow().addView(mCalenMonthView); // Add month view to main window
+            mController.MainWindow().setCurrentView(mCalenMonthView); // Set month view as current view
+            } 
+        else if (ECalenDayView == viewId) // Check if Activity was stored for day view
+            {
+            mController.MainWindow().addView(mCalenDayView); // Add day view to main window
+            mController.MainWindow().setCurrentView(mCalenDayView); // Set day view as current view
+            }
+        } else if (isFromServiceFrmWrk/*Hb::ActivationReasonService == activityReason*/) {
+        // Dont load any views until our remote slot gets called in
+        // calenserviceprovider.cpp
+        // Just have an empty mainwindow
+    } else {
+        // Do the normal startup
+        // Load the month view and active it and add it to main window
+        mFirstView = ECalenMonthView;
+        loadMonthView();
+        ActivateDefaultViewL(ECalenMonthView);
+        // Connect to the view ready signal so that we construct other view 
+        // once this view is shown
+        connect(&mController.MainWindow(), SIGNAL(viewReady()), 
+                        this, SLOT(handleMainViewReady()));
+        
+        mController.MainWindow().addView(mCalenMonthView);
+        mController.MainWindow().setCurrentView(mCalenMonthView);
+    }
+    
+    TRACE_EXIT_POINT;
+
 }
 
 // ----------------------------------------------------------------------------
@@ -257,13 +317,20 @@ void CalenViewManager::constructOtherViews()
 	// come after day view, then we need to construct those views if they are
 	// native views. Right now, there is a event viewer but its not a native
 	// view. Hence, if day view is launched, dont construct month view
-	if (mFirstView == ECalenDayView) {
-		// Construct other views as mentioned above
-		return;
-	} else {
+	if (mFirstView != ECalenDayView) // check if day view is not already loaded
+		{
 		// Load all other views 
 		loadDayView();
 	}
+	else //day view was launched as first view
+	    {
+		// No implementation yet. UI specs not clear
+		// to be commented in with some more code once UI specs is frozen
+		// for day view launching as first view after it was saved as activity
+		// when it was launched from month view
+        // loadMonthView();
+        // mCalenMonthView->doLazyLoading();
+	    }
 
 	// Setup the settings view
 	mSettingsView = new CalenSettingsView(mController.Services());
@@ -294,6 +361,7 @@ void CalenViewManager::showNextDay()
     mCurrentViewId = ECalenDayView;
     // Check which is the currently activated view
     if (mController.MainWindow().currentView() == mCalenDayView) {
+        mCalenDayView->disconnectAboutToQuitEvent(); // disconnect mCalenDayView to get aboutToQuit Events
         HbEffect::add(mCalenDayView,
                       ":/fxml/view_hide",
                       "hide");
@@ -302,15 +370,18 @@ void CalenViewManager::showNextDay()
                       "show");
         // Set the other day view as the current view
         // and animate to provide illusion of swipe
+		// It would also connect for aboutToQuit events
         mCalenDayViewAlt->doPopulation();
         mController.MainWindow().setCurrentView(mCalenDayViewAlt, true, Hb::ViewSwitchUseNormalAnim);
     } else {
+        mCalenDayViewAlt->disconnectAboutToQuitEvent(); // disconnect mCalenDayViewAlt to get aboutToQuit Events
         HbEffect::add(mCalenDayViewAlt,
                       ":/fxml/view_hide",
                       "hide");
         HbEffect::add(mCalenDayView,
                       ":/fxml/view_show",
                       "show");
+		// It would also connect for aboutToQuit events
         mCalenDayView->doPopulation();
         mController.MainWindow().setCurrentView(mCalenDayView, true, Hb::ViewSwitchUseNormalAnim);
     }
@@ -328,21 +399,25 @@ void CalenViewManager::showPrevDay()
     mController.Services().Context().setFocusDateL(currentDay, ECalenDayView);
     mCurrentViewId = ECalenDayView;
     if (mController.MainWindow().currentView() == mCalenDayView) {
+        mCalenDayView->disconnectAboutToQuitEvent(); // disconnect mCalenDayView to get aboutToQuit Events
         HbEffect::add(mCalenDayView,
                       ":/fxml/view_hide_back",
                       "hide");
         HbEffect::add(mCalenDayViewAlt,
                       ":/fxml/view_show_back",
                       "show");
+		// It would also connect for aboutToQuit events
         mCalenDayViewAlt->doPopulation();
         mController.MainWindow().setCurrentView(mCalenDayViewAlt, true, Hb::ViewSwitchUseNormalAnim);
     } else {
+        mCalenDayViewAlt->disconnectAboutToQuitEvent(); // disconnect mCalenDayViewAlt to get aboutToQuit Events
         HbEffect::add(mCalenDayViewAlt,
                       ":/fxml/view_hide_back",
                       "hide");
         HbEffect::add(mCalenDayView,
                       ":/fxml/view_show_back",
                       "show");
+		// It would also connect for aboutToQuit events
         mCalenDayView->doPopulation();
         mController.MainWindow().setCurrentView(mCalenDayView, true, Hb::ViewSwitchUseNormalAnim);
     }
@@ -408,7 +483,7 @@ void CalenViewManager::activateCurrentView()
 		        // from the agenda view. Simply repopulate the view
 		    	if (mCalenDayView) {
 		    		// Remove month view from mainwindow.
-		    		mController.MainWindow().removeView(mCalenMonthView);
+		    		mController.MainWindow().removeView(mCalenMonthView); // what if month view is never loaded
 					mCalenDayView->doPopulation();
 					mController.MainWindow().setCurrentView(mCalenDayView);
 		    	} 
@@ -432,6 +507,11 @@ void CalenViewManager::activateCurrentView()
 		    	}
 		    }
 			break;
+		case ECalenShowSettings:
+		    {
+		    mSettingsView->refreshView();
+		    }
+			break;
 		case ECalenLandscapeDayView:
 			// For later implementation
 			break;
@@ -447,6 +527,13 @@ void CalenViewManager::activateCurrentView()
 //
 void CalenViewManager::launchEventView()
 {
+    // capture cureent view in case app closed/quits from AgendaEventViewer
+    if (mCalenMonthView) {
+    mCalenMonthView->captureScreenshot(true);
+    }
+    else if (mCalenDayView) {
+    mCalenDayView->captureScreenshot(true);
+    }
 	MCalenContext& context = mController.Services().Context();
 	AgendaEntry viewEntry= mController.Services().agendaInterface()->fetchById(
 			context.instanceId().mEntryLocalUid );
@@ -556,7 +643,6 @@ void CalenViewManager::HandleNotification(
 {
 	TRACE_ENTRY_POINT;
 	switch (notification) {
-		case ECalenNotifySystemLocaleChanged:
 		case ECalenNotifyExternalDatabaseChanged:
 		case ECalenNotifyDialogClosed:
 		case ECalenNotifyMultipleEntriesDeleted:
@@ -564,8 +650,26 @@ void CalenViewManager::HandleNotification(
 		case ECalenNotifyEntryDeleted:
 		case ECalenNotifyInstanceDeleted:
 		case ECalenNotifyEntryClosed:
+		case ECalenNotifySystemLocaleChanged:
+		case ECalenNotifySystemLanguageChanged:
+		    {
+		    activateCurrentView(); 
+		    }
+		    break;
 		case ECalenNotifySettingsClosed:
+		    {
+		    //when setting view closed , switch to the previous view
+		    mCurrentViewId = mPreviousViewsId ;
 			mController.Services().IssueCommandL(ECalenStartActiveStep);
+			
+			 // invalidate captured screenshots as either day view is activated now
+			if (mCalenMonthView) {
+			mCalenMonthView->captureScreenshot();
+			} else if (mCalenDayView) {
+			mCalenDayView->captureScreenshot();
+			}
+
+		    }
 			break;
 		default:
 			break;
@@ -602,6 +706,12 @@ void CalenViewManager::handleViewingCompleted(const QDate date)
 	}
 	mController.Services().IssueNotificationL(ECalenNotifyEntryClosed);
 	
+	// invalidate captured screenshots as either day view is activated now
+	if (mCalenMonthView) {
+	mCalenMonthView->captureScreenshot();
+	} else if (mCalenDayView) {
+	mCalenDayView->captureScreenshot();
+	}
 	qDebug() <<"calendar: CalenViewManager::handleEditingCompleted <--";
 }
 
@@ -661,6 +771,14 @@ void CalenViewManager::handleDeletingCompleted()
 	qDebug() <<"calendar: CalenViewManager::handleEditingStarted -->";
 	
 	mController.Services().IssueNotificationL(ECalenNotifyEntryDeleted);
+
+	// invalidate captured screenshots as either month view or day view is activated now
+    if (mCalenMonthView) {
+    mCalenMonthView->captureScreenshot();
+    } else if (mCalenDayView) {
+    mCalenDayView->captureScreenshot();
+    }
+
 	
 	qDebug() <<"calendar: CalenViewManager::handleEditingStarted <--";
 }
@@ -674,8 +792,18 @@ void CalenViewManager::handleDeletingCompleted()
 void CalenViewManager::handleInstanceViewCreation(int status)
 {
 	Q_UNUSED(status);
+	// handleInstanceViewCreation function is called only once. Now that the instance
+	// view creation is successfull. Events need to be populated on screen
+	// Ideal colution should be to call a uniform function, e.g. PopulateEvents
+	// where PopulateEvents should be implemeted by all views. Since the current
+	// solution for the month view implements the construction in two phases so 
+	// it needs to be refactored and a common solution needs to be put here. So 
+	// that code doesn't break if another view is added tomorow
 	if (mCalenMonthView) {
 		mCalenMonthView->fetchEntriesAndUpdateModel();
+	}
+	else if (mCalenDayView) {
+	mCalenDayView->doPopulation();
 	}
 }
 
@@ -690,4 +818,25 @@ void CalenViewManager::handleEntryViewCreation(int status)
 	// Nothing Yet
 	Q_UNUSED(status);
 }
+// ----------------------------------------------------------------------------
+// CalenViewManager::launchSettingsView
+// Launches settings view
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CalenViewManager::launchSettingsView()
+    {
+    mPreviousViewsId = mCurrentViewId ;  
+    mCurrentViewId = ECalenShowSettings;
+    mSettingsView->initializeForm();
+    mController.Services().MainWindow().setCurrentView(mSettingsView);
+    
+    // capture cureent view in case app closed/quits from settings view
+    if (mCalenMonthView){
+    mCalenMonthView->captureScreenshot(true);
+    } else if(mCalenDayView){
+    mCalenDayView->captureScreenshot(true);
+    }
+  	}
+
 // End of file	--Don't remove this.
