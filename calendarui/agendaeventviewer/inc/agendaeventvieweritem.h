@@ -43,6 +43,8 @@ private:
 	HbTextItem *mSecondaryText;
 	HbIconItem *mPrimaryIcon;
 	HbIconItem *mSecondaryIcon;
+	HbIconItem *mPrimaryRightIcon;
+	HbIconItem *mPrimaryLeftIcon;
 
 };
 

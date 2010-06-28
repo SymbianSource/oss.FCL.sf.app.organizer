@@ -17,12 +17,8 @@
 TEMPLATE = subdirs
 CONFIG += ordered
 SUBDIRS += organizer_pub \
-		   organizer_plat \
+           organizer_plat \
            agendainterface \
-           calendarui/commonutils \
-		   calendarui/calenlauncher \
-           calendarui/caleneditor \
-           notes/notesui/noteseditor \
            calendarui \
            clock \
            notes \

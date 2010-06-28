@@ -38,7 +38,7 @@ NotesAppController::NotesAppController(QObject *parent)
  mIfImpl(0)
 {
 	// Construct the interface implementation.
-	mIfImpl = new NotesAppControllerIfImpl(this, this);
+	mIfImpl = new NotesAppControllerIfImpl(this);
 
 	// Construct the model handler.
 	mNotesModelHandler = new NotesModelHandler(this);

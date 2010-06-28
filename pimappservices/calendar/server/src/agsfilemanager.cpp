@@ -1243,7 +1243,7 @@ TBool CAgnServFile::SetCalendarInfoL(const CAgnCalendarInfo& aCalendarInfo)
         }
     else
         {
-        iAgnServer.AlarmServer().SetAlarmStatusForCalendarFile(fileName, EAlarmStatusEnabled); 
+        QueueAlarmsImmediately();
         }
     
     User::LeaveIfError(iStore->Commit());

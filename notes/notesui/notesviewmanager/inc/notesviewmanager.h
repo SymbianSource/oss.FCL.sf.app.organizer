@@ -27,6 +27,7 @@
 
 // Forward declarations
 class HbMainWindow;
+class HbAction;
 class NotesMainView;
 class NotesModel;
 class AgendaUtil;
@@ -54,11 +55,12 @@ private:
 	void loadTodoView();
 	void loadFavoritesView();
 	void loadNoteView();
-	bool showDeleteConfirmationQuery(ulong entryId);
 
 private slots:
 	void loadOtherViews();
 	void deleteEntryFromView(ulong entryId);
+	void selectedAction(HbAction *action);
+	void handleInstanceViewCreationCompleted(int status);
 
 private:
 	NotesAppControllerIf &mAppControllerIf;
@@ -69,6 +71,10 @@ private:
 	NotesTodoView *mTodoView;
 	NotesFavoriteView *mFavoriteView;
 	NotesNoteView *mNoteView;
+
+	HbAction *mDeleteAction;
+	HbAction *mCancelAction;
+	ulong mEntryId;
 
 private:
 	Q_DISABLE_COPY(NotesViewManager)

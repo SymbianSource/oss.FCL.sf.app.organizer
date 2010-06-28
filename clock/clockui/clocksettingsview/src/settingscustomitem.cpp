@@ -54,6 +54,8 @@ SettingsCustomItem::SettingsCustomItem(QGraphicsItem *parent)
 {
 	// Construct the settignsutility.
 	mSettingsUtility = new SettingsUtility();
+	// Construct the timezone client.
+	mTimezoneClient = TimezoneClient::getInstance();
 }
 
 /*!
@@ -61,7 +63,7 @@ SettingsCustomItem::SettingsCustomItem(QGraphicsItem *parent)
  */
 SettingsCustomItem::~SettingsCustomItem()
 {
-
+    // Nothing yet.
 }
 
 /*!
@@ -74,16 +76,16 @@ HbAbstractViewItem* SettingsCustomItem::createItem()
 }
 
 /*!
-	
+
 	\sa
  */
 bool SettingsCustomItem::canSetModelIndex(const QModelIndex &index) const
 {
-	HbDataFormModelItem::DataItemType itemType = 
+	HbDataFormModelItem::DataItemType itemType =
 			static_cast<HbDataFormModelItem::DataItemType>(
 			index.data(HbDataFormModelItem::ItemTypeRole).toInt());
 
-	if(itemType >= HbDataFormModelItem::CustomItemBase && 
+	if(itemType >= HbDataFormModelItem::CustomItemBase &&
 			itemType <= (HbDataFormModelItem::CustomItemBase + 50)) {
 		return true;
 	} else {
@@ -97,21 +99,21 @@ void SettingsCustomItem::restore()
 	HbDataFormModelItem::DataItemType itemType =
 			static_cast<HbDataFormModelItem::DataItemType>(
 			modelIndex().data(HbDataFormModelItem::ItemTypeRole).toInt());
-	
+
 	HbDataFormModel* model =
 			static_cast<HbDataFormModel*>(
 			static_cast<HbAbstractViewItem*>(this)->itemView()->model());
-	HbDataFormModelItem* modlItem = model->itemFromIndex(modelIndex()); 
-	
+	HbDataFormModelItem* modlItem = model->itemFromIndex(modelIndex());
+
 	switch (itemType) {
 		case (TimeItemOffset + HbDataFormModelItem::CustomItemBase):
 		mTimeWidget->setProperty("text", modlItem->contentWidgetData("text"));
 		break;
-		
+
 		case (DateItemOffset + HbDataFormModelItem::CustomItemBase):
 		mDateWidget->setProperty("text", modlItem->contentWidgetData("text"));
 		break;
-		
+
 		case (PlaceItemOffset + HbDataFormModelItem::CustomItemBase):
 		mPlaceWidget->setProperty("text", modlItem->contentWidgetData("text"));
 		break;
@@ -176,7 +178,7 @@ HbWidget* SettingsCustomItem::createCustomWidget()
 					this, SLOT(launchRegSettingsView()));
 			return regSettingsItem;
 		}
-		
+
 		case (50 + HbDataFormModelItem::CustomItemBase):
 		{
 			HbListWidget *workdaysItem = new HbListWidget();
@@ -186,7 +188,7 @@ HbWidget* SettingsCustomItem::createCustomWidget()
 			for (int index = 0; index < mWeekdaysList.count(); ++index) {
 				workdaysItem->addItem(mWeekdaysList.at(index));
 			}
-			
+
 			QString workdaysString = workdaysSetting();
 			for (int i = 0, index = workdaysString.size() - 1;
 					index >= 0; ++i, index--) {
@@ -202,7 +204,7 @@ HbWidget* SettingsCustomItem::createCustomWidget()
 							QItemSelectionModel::Select);
 				}
 			}
-			
+
 			return workdaysItem;
 		}
 
@@ -224,6 +226,7 @@ void SettingsCustomItem::launchTimePicker()
 	mTimePickerDialog = new HbDialog;
 	mTimePickerDialog->setTimeout(HbDialog::NoTimeout);
 	mTimePickerDialog->setDismissPolicy(HbDialog::NoDismiss);
+	mTimePickerDialog->setAttribute(Qt::WA_DeleteOnClose, true );
 
 	// Set the heading for the dialog.
 	HbLabel * timeLabel =
@@ -242,50 +245,53 @@ void SettingsCustomItem::launchTimePicker()
 	mTimePickerDialog->setContentWidget(timePicker);
 	timePicker->setTime(QTime::currentTime());
 
-	HbAction *okAction =
-		new HbAction(QString(hbTrId("txt_common_button_ok")), mTimePickerDialog);
-	mTimePickerDialog->setPrimaryAction(okAction);
-	connect(
-			okAction, SIGNAL(triggered()),
-			this, SLOT(handleTimeOkAction()));
+	mOkAction = new HbAction(
+			QString(hbTrId("txt_common_button_ok")), mTimePickerDialog);
+	mCancelAction = new HbAction(
+			QString(hbTrId("txt_common_button_cancel")), mTimePickerDialog);
 
-	HbAction *cancelAction =
-		new HbAction(QString(hbTrId("txt_common_button_cancel")),
-		    mTimePickerDialog);
-	mTimePickerDialog->setSecondaryAction( cancelAction );
-	connect(
-			cancelAction, SIGNAL(triggered()),
-			this, SLOT(handleTimeCancelAction()));
+	mTimePickerDialog->addAction(mOkAction);
+	mTimePickerDialog->addAction(mCancelAction);
 
-	mTimePickerDialog->exec();
+	mTimePickerDialog->open(this, SLOT(selectedAction(HbAction*)));
 }
 
 /*!
-	Handles the ok action of time picker dialog.
+	Handles the ok action of time/date picker dialog.
  */
-void SettingsCustomItem::handleTimeOkAction()
+void SettingsCustomItem::handleOkAction()
 {
-	// Get the time from the time picker.
-	QTime newTime = static_cast<HbDateTimePicker *> (
-			mTimePickerDialog->contentWidget())->time();
+	if (mTimePickerDialog) {
+		// Get the time from the time picker.
+		QTime newTime = static_cast<HbDateTimePicker *> (
+				mTimePickerDialog->contentWidget())->time();
 
-	QString timeFormatString = mSettingsUtility->timeFormatString();
-	// Update the display text on form item.
-	mTimeWidget->setText(newTime.toString(timeFormatString));
-	mSettingsUtility->setTime(newTime.toString(timeFormatString));
+		QString timeFormatString = mSettingsUtility->timeFormatString();
 
-	// Close the dialog.
-	handleTimeCancelAction();
-}
+		// If time returned by the picker is valid, then only update.
+		if (newTime.isValid()) {
+			// Update the display text on form item.
+			mTimeWidget->setText(newTime.toString(timeFormatString));
+			// Update the system time.
+			mTimezoneClient->setDateTime(
+					QDateTime(QDate::currentDate(), newTime));
+		}
+	} else if(mDatePickerDialog) {
+		// Get the time from the time picker.
+		QDate newDate = static_cast<HbDateTimePicker *> (
+				mDatePickerDialog->contentWidget())->date();
 
-/*!
-	Handles the cancel action of time picker dialog.
- */
-void SettingsCustomItem::handleTimeCancelAction()
-{
-	// Close the dialog.
-	mTimePickerDialog->close();
-	mTimePickerDialog->deleteLater();
+		QString dateFormatString = mSettingsUtility->dateFormatString();
+
+		// If date returned by the picker is valid, then only update.
+		if (newDate.isValid()) {
+			// Update the display text on form item.
+			mDateWidget->setText(newDate.toString(dateFormatString));
+			// Update the system date.
+			mTimezoneClient->setDateTime(
+					QDateTime(newDate, QTime::currentTime()));
+		}
+	}
 }
 
 /*!
@@ -301,6 +307,7 @@ void SettingsCustomItem::launchDatePicker()
 	mDatePickerDialog = new HbDialog;
 	mDatePickerDialog->setTimeout(HbDialog::NoTimeout);
 	mDatePickerDialog->setDismissPolicy(HbDialog::NoDismiss);
+	mDatePickerDialog->setAttribute(Qt::WA_DeleteOnClose, true );
 
 	// Set the heading for the dialog.
 	HbLabel * timeLabel =
@@ -315,50 +322,16 @@ void SettingsCustomItem::launchDatePicker()
 	mDatePickerDialog->setContentWidget(datePicker);
 	datePicker->setDate(QDate::currentDate());
 
-	HbAction *okAction =
-		new HbAction(QString(hbTrId("txt_common_button_ok")), mDatePickerDialog);
-	mDatePickerDialog->setPrimaryAction(okAction);
-	connect(
-			okAction, SIGNAL(triggered()),
-			this, SLOT(handleDateOkAction()));
+	mOkAction = new HbAction(
+			QString(hbTrId("txt_common_button_ok")), mDatePickerDialog);
 
-	HbAction *cancelAction =
-		new HbAction(QString(hbTrId("txt_common_button_cancel")),
-		    mDatePickerDialog);
-	mDatePickerDialog->setSecondaryAction( cancelAction );
-	connect(
-			cancelAction, SIGNAL(triggered()),
-			this, SLOT(handleDateCancelAction()));
+	mCancelAction = new HbAction(
+			QString(hbTrId("txt_common_button_cancel")),mDatePickerDialog);
 
-	mDatePickerDialog->exec();
-}
+	mDatePickerDialog->addAction(mOkAction);
+	mDatePickerDialog->addAction(mCancelAction);
 
-/*!
-	Handles the ok action of date picker dialog.
- */
-void SettingsCustomItem::handleDateOkAction()
-{
-	// Get the time from the time picker.
-	QDate newDate = static_cast<HbDateTimePicker *> (
-			mDatePickerDialog->contentWidget())->date();
-
-	QString dateFormatString = mSettingsUtility->dateFormatString();
-	// Update the display text on form item.
-	mDateWidget->setText(newDate.toString(dateFormatString));
-	mSettingsUtility->setDate(newDate.toString(dateFormatString));
-
-	// Close the dialog.
-	handleDateCancelAction();
-}
-
-/*!
-	Handles the ok action of date picker dialog.
- */
-void SettingsCustomItem::handleDateCancelAction()
-{
-	// Close the dialog.
-	mDatePickerDialog->close();
-	mDatePickerDialog->deleteLater();
+	mDatePickerDialog->open(this, SLOT(selectedAction(HbAction*)));
 }
 
 /*!
@@ -382,8 +355,6 @@ void SettingsCustomItem::launchCitySelectionList()
 void SettingsCustomItem::updatePlaceItem(LocationInfo info)
 {
 	if (-1 != info.timezoneId) {
-		// Construct the timezone client.
-		mTimezoneClient = new TimezoneClient();
 		mTimezoneClient->setAsCurrentLocationL(info);
 	}
 }
@@ -394,8 +365,21 @@ void SettingsCustomItem::updatePlaceItem(LocationInfo info)
 void SettingsCustomItem::launchRegSettingsView()
 {
 	ClockRegionalSettingsView *view =
-			new ClockRegionalSettingsView(*mSettingsUtility);
+			new ClockRegionalSettingsView();
+	connect(mTimezoneClient, SIGNAL(timechanged()),
+          view, SLOT(updateWeekStartOn()));
 	view->showView();
+	
+}
+
+/*!
+	Slot to handle the selected action.
+ */
+void SettingsCustomItem::selectedAction(HbAction *action)
+{
+	if (action==mOkAction) {
+		handleOkAction();
+	}
 }
 
 /*!

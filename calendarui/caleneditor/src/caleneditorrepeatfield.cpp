@@ -18,6 +18,7 @@
 
 
 // System Includes
+#include <QDate>
 #include <hbdataformmodelitem.h>
 #include <hbdataformviewitem.h>
 #include <hbdataformmodel.h>
@@ -31,6 +32,9 @@
 // User Included
 #include "caleneditorrepeatfield.h"
 #include "caleneditorcustomitem.h"
+
+// Constants
+const int userRole = Qt::UserRole + 100;
 
 /*!
 	\class CalenEditorRepeatField
@@ -70,8 +74,7 @@ CalenEditorRepeatField::CalenEditorRepeatField(CalenEditorPrivate* calenEditor,
 		QStringList repeatChoices;
 		repeatChoices << hbTrId("txt_calendar_setlabel_repeat_val_only_once")
 		        << hbTrId("txt_calendar_setlabel_repeat_val_daily")
-		        // TODO : add text ID for workdays
-		        << hbTrId("Workdays")
+		        << hbTrId("txt_calendar_setlabel_repeat_val_workdays")
 		        << hbTrId("txt_calendar_setlabel_repeat_val_weekly")
 		        << hbTrId("txt_calendar_setlabel_repeat_val_fortnightly")
 		        << hbTrId("txt_calendar_setlabel_repeat_val_monthly")
@@ -125,16 +128,16 @@ void CalenEditorRepeatField::populateRepeatItem(int index)
 	// Set the user roles for the combobox items so that we depend on these
 	// roles to identify the correct repeat type when repeat choices are 
 	// dynamically removed or added
-	mRepeatComboBox->setItemData(RepeatOnce, RepeatOnce, Qt::UserRole+100);
-	mRepeatComboBox->setItemData(RepeatDaily, RepeatDaily, Qt::UserRole+100);
+	mRepeatComboBox->setItemData(RepeatOnce, RepeatOnce, userRole);
+	mRepeatComboBox->setItemData(RepeatDaily, RepeatDaily, userRole);
 	mRepeatComboBox->setItemData(RepeatWorkdays, 
-								 RepeatWorkdays, Qt::UserRole+100);
-	mRepeatComboBox->setItemData(RepeatWeekly, RepeatWeekly, Qt::UserRole+100);
+								 RepeatWorkdays, userRole);
+	mRepeatComboBox->setItemData(RepeatWeekly, RepeatWeekly, userRole);
 	mRepeatComboBox->setItemData(RepeatBiWeekly, 
-								 RepeatBiWeekly, Qt::UserRole+100);
+								 RepeatBiWeekly, userRole);
 	mRepeatComboBox->setItemData(RepeatMonthly, 
-								 RepeatMonthly, Qt::UserRole+100);
-	mRepeatComboBox->setItemData(RepeatYearly, RepeatYearly, Qt::UserRole+100);
+								 RepeatMonthly, userRole);
+	mRepeatComboBox->setItemData(RepeatYearly, RepeatYearly, userRole);
 	
 	if (mCalenEditor->editedEntry()->isRepeating()) {
 		switch (mCalenEditor->editedEntry()->repeatRule().type()) {
@@ -178,11 +181,11 @@ void CalenEditorRepeatField::populateRepeatItem(int index)
 									  AgendaRepeatRule(
 									  AgendaRepeatRule::InvalidRule));
 	}
-	connect(mRepeatComboBox, SIGNAL(currentIndexChanged(int)), this,
-			SLOT(handleRepeatIndexChanged(int)));
 	
 	// Update the repeat choices depending upon the duration
 	updateRepeatChoices();
+	connect(mRepeatComboBox, SIGNAL(currentIndexChanged(int)), this,
+				SLOT(handleRepeatIndexChanged(int)));
 }
 
 /*!
@@ -196,9 +199,9 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 	mIsWorkdays = false;
 
 	HbExtendedLocale locale = HbExtendedLocale::system();
-	// Get the user role w ehave set for this index
-	QVariant userRole = mRepeatComboBox->itemData(index, Qt::UserRole + 100);
-	int value = userRole.toInt();
+	// Get the user role we have set for this index
+	QVariant role = mRepeatComboBox->itemData(index, userRole);
+	int value = role.toInt();
 	switch (value) {
 		case 1: {
 			if (!mRepeatUntilItemAdded) {
@@ -295,7 +298,10 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 		}
 		break;
 	}
-	mCalenEditor->addDiscardAction();
+	if(!mCalenEditor->isNewEntry()) {
+		mCalenEditor->addDiscardAction();
+	}
+	mCalenEditor->updateReminderChoices();
 }
 
 /*!
@@ -314,10 +320,13 @@ void CalenEditorRepeatField::insertRepeatUntilItem()
 {
 	HbDataFormModelItem::DataItemType itemType =
 	        static_cast<HbDataFormModelItem::DataItemType> (RepeatUntilOffset);
-
-	QModelIndex repeatIndex = mCalenEditorModel->indexFromItem(mRepeatItem);
+	
+	int index = CalenEditorPrivate::RepeatUntilItem;
+	if (!mCalenEditor->isReminderTimeForAllDayAdded()) {
+		index -= 1;
+	}
 	mCustomRepeatUntilItem = mCalenEditorModel->insertDataFormItem(
-										CalenEditorPrivate::RepeatUntilItem,
+										index,
 										itemType,
 										QString(
 										hbTrId(
@@ -351,12 +360,19 @@ bool CalenEditorRepeatField::isRepeatUntilItemAdded()
  */
 void CalenEditorRepeatField::launchRepeatUntilDatePicker()
 {
+	HbDialog *popUp = new HbDialog();
+	popUp->setDismissPolicy(HbDialog::NoDismiss);
+	popUp->setTimeout(HbDialog::NoTimeout);
+	popUp->setHeadingWidget( new HbLabel(
+									hbTrId("txt_calendar_title_repeat_until")));
+	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
+	
 	if (mDatePicker) {
 		mDatePicker = NULL;
 	}
 	if (mRepeatRuleType == AgendaRepeatRule::DailyRule) {
 		QDate minDate = mCalenEditor->editedEntry()->endTime().date().addDays(1);
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate);
+		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
 		mDatePicker->setMinimumDate(minDate);
 		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
 		mDatePicker->setDate(mRepeatUntilDate);
@@ -367,36 +383,30 @@ void CalenEditorRepeatField::launchRepeatUntilDatePicker()
 		} else {
 			minDate = mCalenEditor->editedEntry()->endTime().date().addDays(14);
 		}
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate);
+		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
 		mDatePicker->setMinimumDate(minDate);
 		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
 		mDatePicker->setDate(mRepeatUntilDate);
 	} else if (mRepeatRuleType == AgendaRepeatRule::MonthlyRule) {
 		QDate minDate = mCalenEditor->editedEntry()->endTime().date().addMonths(1);
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate);
+		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
 		mDatePicker->setMinimumDate(minDate);
 		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
 		mDatePicker->setDate(mRepeatUntilDate);
 	} else if (mRepeatRuleType == AgendaRepeatRule::YearlyRule) {
 		QDate minDate = mCalenEditor->editedEntry()->endTime().date().addYears(1);
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate);
+		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
 		mDatePicker->setMinimumDate(minDate);
 		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
 		mDatePicker->setDate(mRepeatUntilDate);
 	}
-	HbDialog popUp;
-	popUp.setDismissPolicy(HbDialog::NoDismiss);
-	popUp.setTimeout(HbDialog::NoTimeout);
-	popUp.setContentWidget(mDatePicker);
-	popUp.setHeadingWidget( new HbLabel(
-								hbTrId("txt_calendar_title_repeat_until")));
+	popUp->setContentWidget(mDatePicker);
+	
 	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
-	popUp.setPrimaryAction(okAction);
+	popUp->addAction(okAction);
 	connect(okAction, SIGNAL(triggered()), this, SLOT(setRepeatUntilDate()));
-	connect(okAction, SIGNAL(triggered()), &popUp, SLOT(close()));
-	popUp.setSecondaryAction(new HbAction(hbTrId("txt_common_button_cancel"),
-								&popUp));
-	popUp.exec();
+	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"), popUp));
+	popUp->open();
 }
 
 /*!
@@ -411,6 +421,15 @@ void CalenEditorRepeatField::setRepeatUntilDate()
 									r_qtn_date_usual_with_zero);
 		mCustomRepeatUntilItem->setContentWidgetData("text", dateString);
 	}
+	mCalenEditor->updateReminderChoices();
+}
+
+/*!
+	Returns the repeatuntildate displayed.
+ */
+QDate CalenEditorRepeatField::repeatUntilDate()
+{
+	return mRepeatUntilDate;
 }
 
 /*!
@@ -418,6 +437,9 @@ void CalenEditorRepeatField::setRepeatUntilDate()
 */
 void CalenEditorRepeatField::updateRepeatChoices()
 {
+    if (!mRepeatComboBox) {
+        return;
+    }
 	// Clear all the choices and add it again. If we dont do it 
 	// as user would have changed the end times many times and we would have
 	// deleted repeat options depending upon that
@@ -428,8 +450,7 @@ void CalenEditorRepeatField::updateRepeatChoices()
 	QStringList repeatChoices;
 	repeatChoices << hbTrId("txt_calendar_setlabel_repeat_val_only_once")
 			<< hbTrId("txt_calendar_setlabel_repeat_val_daily")
-			// TODO : add text ID for workdays
-			<< hbTrId("Workdays")
+			<< hbTrId("txt_calendar_setlabel_repeat_val_workdays")
 			<< hbTrId("txt_calendar_setlabel_repeat_val_weekly")
 			<< hbTrId("txt_calendar_setlabel_repeat_val_fortnightly")
 			<< hbTrId("txt_calendar_setlabel_repeat_val_monthly")
@@ -438,19 +459,19 @@ void CalenEditorRepeatField::updateRepeatChoices()
 	// Set the user roles for the combobox items so that we depend on these
 	// roles to identify the correct repeat type when repeat choices are 
 	// dynamically removed or added
-	mRepeatComboBox->setItemData(RepeatOnce, RepeatOnce, Qt::UserRole + 100);
+	mRepeatComboBox->setItemData(RepeatOnce, RepeatOnce, userRole);
 	mRepeatComboBox->setItemData(RepeatDaily, RepeatDaily, 
-								 Qt::UserRole + 100);
+	                             userRole);
 	mRepeatComboBox->setItemData(RepeatWorkdays, 
-								 RepeatWorkdays, Qt::UserRole+100);
+								 RepeatWorkdays, userRole);
 	mRepeatComboBox->setItemData(RepeatWeekly, RepeatWeekly,
-								 Qt::UserRole + 100);
+	                             userRole);
 	mRepeatComboBox->setItemData(RepeatBiWeekly, RepeatBiWeekly,
-								 Qt::UserRole + 100);
+	                             userRole);
 	mRepeatComboBox->setItemData(RepeatMonthly, RepeatMonthly,
-								 Qt::UserRole + 100);
+	                             userRole);
 	mRepeatComboBox->setItemData(RepeatYearly, RepeatYearly, 
-								 Qt::UserRole + 100);
+	                             userRole);
 
 	int totalCount = mRepeatComboBox->count();
 
@@ -526,7 +547,6 @@ void CalenEditorRepeatField::updateRepeatChoices()
 	}
 	// Set the previous user's choice
 	mRepeatComboBox->setCurrentIndex(choice);
-	handleRepeatIndexChanged(choice);
 }
 
 /*!

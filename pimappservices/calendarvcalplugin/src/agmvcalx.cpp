@@ -437,9 +437,10 @@ void CAgendaEntryToVCalConverter::AddEntryPropertiesL(CCalEntry* aEntry, CVersit
 
 	// DTSTAMP
 	TCalTime dTStamp = aEntry->DTStampL();
-		
-   	if ( dTStamp.TimeUtcL() != Time::NullTTime() )
-      	{	
+
+	if ( dTStamp.TimeUtcL() != Time::NullTTime() &&
+		CCalEntry::ENote != aEntry->EntryTypeL() )
+		{
 		AddDateTimePropertyL(aParser, KVersitTokenXDTSTAMP, dTStamp.TimeUtcL(), TVersitDateTime::EIsUTC, iTimeFlag);
       	}
 	

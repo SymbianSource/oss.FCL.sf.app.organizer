@@ -21,14 +21,19 @@ CONFIG += symbian_test
 DEPENDPATH += . \
 			  ./src
 INCLUDEPATH += .
-INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
+
 
 symbian: {
 	TARGET.CAPABILITY = ALL -TCB
 	TARGET.EPOCALLOWDLLDATA = 1
+	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 	
 	LIBS += -lagendainterface
-}
+	
+	BLD_INF_RULES.prj_testexports += \
+	"../rom/unit_agendainterface.iby		CORE_APP_LAYER_IBY_EXPORT_PATH(unit_agendainterface.iby)"
+	}
+
 
 SOURCES += unittest_agendautil.cpp
 

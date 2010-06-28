@@ -2,12 +2,4 @@
 	<qresource prefix="/xml">
 		<file alias="clockcityselectionlist.docml">xml/clockcityselectionlist.docml</file>
 	</qresource>
-	<qresource prefix= "/style">
-		<file alias="clockcityselectionlistprototype.css">style/clockcityselectionlistprototype.css</file>
-		<file alias="clockcityselectionlistprototype.widgetml">style/clockcityselectionlistprototype.widgetml</file>
-	</qresource>
-	<qresource prefix="/translations">
-		<file alias="clockcityselectionlist" >translations/clockcityselectionlist.qm</file>
-	</qresource>
-
 </RCC>

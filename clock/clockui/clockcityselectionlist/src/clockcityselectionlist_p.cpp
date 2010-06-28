@@ -40,7 +40,7 @@
 #include "clockcityselectionlist.h"
 #include "clockcitylistproxymodel.h"
 #include "clockcityselectionlistcommon.h"
-#include "clockcityselectionlistprototype.h"
+
 #include "timezoneclient.h"
 #include "clockdatatypes.h"
 
@@ -67,7 +67,7 @@ ClockCitySelectionListPrivate::ClockCitySelectionListPrivate(
 
 	mClient = client;
 	if (!mClient) {
-		mClient = new TimezoneClient(this);
+		mClient = TimezoneClient::getInstance();
 		mOwnsClient = true;
 	}
 }
@@ -78,7 +78,7 @@ ClockCitySelectionListPrivate::ClockCitySelectionListPrivate(
 ClockCitySelectionListPrivate::~ClockCitySelectionListPrivate()
 {
 	if (mOwnsClient) {
-		delete mClient;
+		mClient->deleteInstance();
 	}
 	if (mLoader) {
 		mLoader->reset();
@@ -103,7 +103,7 @@ ClockCitySelectionListPrivate::~ClockCitySelectionListPrivate()
 void ClockCitySelectionListPrivate::populateListModel()
 {
 	// First get the data from the timezone client.
-	QList<LocationInfo> infoList = mClient->getLocations();
+	QList<LocationInfo> &infoList = mClient->getLocations();
 
 	// Sanity check.
 	if (!mListModel) {
@@ -123,6 +123,7 @@ void ClockCitySelectionListPrivate::populateListModel()
 		displayString += info.cityName;
 		displayString += ", ";
 		displayString += info.countryName;
+		mListModel->setData(index, displayString, Qt::DisplayRole);
 		mListModel->setData(index, displayString, Qt::UserRole + 100);
 
 		// Now save the timezone and city group ids.
@@ -135,6 +136,9 @@ void ClockCitySelectionListPrivate::populateListModel()
 		mListModel->setData(
 				index, info.countryName, Qt::UserRole + 104);
 	}
+
+	// Cleanup.
+	infoList.clear();
 }
 
 /*!
@@ -241,6 +245,7 @@ void ClockCitySelectionListPrivate::handleAddOwnCityAction()
 	mAddOwnCityDialog = new HbDialog;
 	mAddOwnCityDialog->setTimeout(HbDialog::NoTimeout);
 	mAddOwnCityDialog->setDismissPolicy(HbDialog::NoDismiss);
+	mAddOwnCityDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 
 	// Set the heading text
 	HbLabel *titlelabel = new HbLabel(hbTrId("txt_clk_opt_add_own_city"));
@@ -273,20 +278,14 @@ void ClockCitySelectionListPrivate::handleAddOwnCityAction()
 	widget->setLayout(layout);
 
 	// Add actions to the dialog
-	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
-	mAddOwnCityDialog->setPrimaryAction(okAction);
-	connect(
-			okAction, SIGNAL(triggered()),
-			this, SLOT(handleOkAction()));
+	mOkAction = new HbAction(hbTrId("txt_common_button_ok"));
+	mCancelAction = new HbAction(hbTrId("txt_common_button_cancel"));
 
-	HbAction *cancelAction = new HbAction(hbTrId("txt_common_button_cancel"));
-	mAddOwnCityDialog->setSecondaryAction(cancelAction);
-	connect(
-			cancelAction, SIGNAL(triggered()),
-			this, SLOT(handleCancelAction()));
+	mAddOwnCityDialog->addAction(mOkAction);
+	mAddOwnCityDialog->addAction(mCancelAction);
 
 	mAddOwnCityDialog->setContentWidget(widget);
-	mAddOwnCityDialog->exec();
+	mAddOwnCityDialog->open(this, SLOT(selectedAction(HbAction*)));
 }
 
 /*!
@@ -321,21 +320,6 @@ void ClockCitySelectionListPrivate::handleOkAction()
 			populateListModel();
 		}
 	}
-
-	// Close the popup
-	handleCancelAction();
-}
-
-/*!
-	Handles Cancel action of add own city dialog
- */
-void ClockCitySelectionListPrivate::handleCancelAction()
-{
-	// Close the dialog.
-	if (mAddOwnCityDialog) {
-		mAddOwnCityDialog->close();
-		mAddOwnCityDialog->deleteLater();
-	}
 }
 
 /*!
@@ -363,6 +347,15 @@ void ClockCitySelectionListPrivate::handleTimeZoneSelection(int index)
 	}
 }
 
+/*!
+	Slot to handle the selected action
+ */
+void ClockCitySelectionListPrivate::selectedAction(HbAction *action)
+{
+	if (action==mOkAction) {
+		handleOkAction();
+	}
+}
 /*!
 	Displays the city selection list.
  */
@@ -399,7 +392,7 @@ void ClockCitySelectionListPrivate::showCityList()
 	connect(
 			mSearchBox, SIGNAL(criteriaChanged(QString)),
 			this, SLOT(updateSearchCriteria(QString)));
-	
+
 	// Construct the source model.
 	if (!mListModel) {
 		mListModel = new QStandardItemModel(0, 1, this);
@@ -409,15 +402,6 @@ void ClockCitySelectionListPrivate::showCityList()
 	mProxyModel->setDynamicSortFilter(true);
 	mProxyModel->setSourceModel(mListModel);
 	mProxyModel->setFilterRole(Qt::UserRole + 100);
-
-	// Construct the custom list item prototype.
-	ClockCitySelectionListPrototype *prototype =
-			new ClockCitySelectionListPrototype;
-
-	// Loader the custom list view layout.
-	HbStyleLoader::registerFilePath(":/style/");
-	mListView->setLayoutName("cityselectionlist-default");
-	mListView->setItemPrototype(prototype);
 
 	// Construct the model for the list.
 	QTimer::singleShot(1, this, SLOT(populateListModel()));
@@ -441,7 +425,7 @@ void ClockCitySelectionListPrivate::showCityList()
 
 	// Add the view to the main window and show it.
 	HbMainWindow *window = hbInstance->allMainWindows().at(0);
-	mBackAction = new HbAction(Hb::BackAction, this);
+	mBackAction = new HbAction(Hb::BackNaviAction, this);
 	mView->setNavigationAction(mBackAction);
 	connect(
 			mBackAction, SIGNAL(triggered()),

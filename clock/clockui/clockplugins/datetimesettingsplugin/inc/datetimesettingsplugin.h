@@ -10,29 +10,35 @@
 * Nokia Corporation - initial contribution.
 *
 * Contributors:
- *
- * Description: 
- *
+*
+* Description: 
+* Header file for DateTimeSettingsPlugin class.
+*
 */
 
 
 #ifndef DATETIMESETTINGSPLUGIN_H_
 #define DATETIMESETTINGSPLUGIN_H_
 
-#include <cppluginplatinterface.h>
-#include <qobject.h>
+// System includes
+#include <QObject>
 
-class DateTimeSettingsPlugin : public QObject, public CpPluginPlatInterface
+// User includes
+#include <cpplugininterface.h>
+
+class DateTimeSettingsPlugin : public QObject, public CpPluginInterface
 {
 	Q_OBJECT
-    Q_INTERFACES(CpPluginPlatInterface)
+	Q_INTERFACES(CpPluginInterface)
 
 public:
 	DateTimeSettingsPlugin();
-    virtual ~DateTimeSettingsPlugin();
+	virtual ~DateTimeSettingsPlugin();
 
-    virtual int uid() const;
-    virtual CpSettingFormItemData *createSettingFormItemData(CpItemDataHelper &itemDataHelper) const;
+	virtual int uid() const;
+	QList<CpSettingFormItemData*> createSettingFormItemData(CpItemDataHelper &itemDataHelper) const;
 };
 
 #endif /* DATETIMESETTINGSPLUGIN_H_ */
+
+// End of file	--Don't remove this

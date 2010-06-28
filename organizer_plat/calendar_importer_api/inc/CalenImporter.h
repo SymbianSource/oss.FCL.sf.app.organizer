@@ -23,7 +23,7 @@
 //  INCLUDES
 #include <e32base.h>
 #include <f32file.h>
-#include <agnimportobserver.h>
+#include <AgnImportObserver.h>
 
 
 

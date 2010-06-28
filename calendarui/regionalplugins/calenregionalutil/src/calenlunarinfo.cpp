@@ -24,7 +24,7 @@
 // TCalenLunarInfo::HasFestival
 // -----------------------------------------------------------------------------
 //
-TBool TCalenLunarInfo::HasFestival()
+EXPORT_C TBool TCalenLunarInfo::HasFestival()
     {
     TRACE_ENTRY_POINT;
     
@@ -36,7 +36,7 @@ TBool TCalenLunarInfo::HasFestival()
 // TCalenLunarInfo::HasSolarTerm
 // -----------------------------------------------------------------------------
 //
-TBool TCalenLunarInfo::HasSolarTerm()
+EXPORT_C TBool TCalenLunarInfo::HasSolarTerm()
     {
     TRACE_ENTRY_POINT;
     

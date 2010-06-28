@@ -64,7 +64,7 @@ void CCalenImporterTest::SetupimporterL()
 {
 	int error = iFs.Connect();
         
-	TRAPD(error, iCalSession = CCalSession::NewL(););
+	iCalSession = CCalSession::NewL();
     iCalSession->OpenL( iCalSession->DefaultFileNameL()  );
     
     iCalenImporter = CCalenImporter::NewL( *iCalSession );

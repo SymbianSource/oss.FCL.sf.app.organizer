@@ -17,7 +17,8 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-		datetimesettingsplugin
+		datetimesettingsplugin \
+		clocksettingsviewplugin
 		
 CONFIG += ordered
 

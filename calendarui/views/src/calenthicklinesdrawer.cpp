@@ -20,6 +20,7 @@
 #include <QPainter>
 #include <QPen>
 #include <hbdeviceprofile.h>
+#include <hbcolorscheme.h>
 
 // User includes
 #include "calenthicklinesdrawer.h"
@@ -39,10 +40,11 @@
  */
 CalenThickLinesDrawer::CalenThickLinesDrawer( CalendarNamespace::WidgetType type, 
 	QGraphicsItem* parent):
-	HbWidget(parent),
-	mGridBorderColor(Qt::black)
+	HbWidget(parent)
 {
 	typeOfWidget = type;
+	mGridBorderColor = HbColorScheme::color("qtc_cal_grid_line");
+	setFlag(QGraphicsItem::ItemHasNoContents, false);
 }
 
 /*!

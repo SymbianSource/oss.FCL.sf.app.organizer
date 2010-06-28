@@ -7,7 +7,4 @@
 		<file alias="alarmalert_clock_unlocked.docml">xml/alarmalert_clock_unlocked.docml</file>
 		<file alias="alarmalert_todo_unlocked.docml">xml/alarmalert_todo_unlocked.docml</file>
 	</qresource>
-	<qresource prefix="/translations">
-		<file alias="alarmui_en_GB">alarmui_en_GB.qm</file>
-	</qresource>
 </RCC>

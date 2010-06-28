@@ -16,13 +16,9 @@
 *
 */
 
-// System includes.
-#include <QDebug>
-
 // User includes
 #include "clocksettingsdocloader.h"
 #include "clocksettingsdefines.h"
-#include "skinnableclock.h"
 #include "clocksettingsview.h"
 
 /*!
@@ -39,16 +35,6 @@
  */
 QObject *ClockSettingsDocLoader::createObject(const QString &type, const QString &name)
 {
-	qDebug() << "clock: ClockSettingsDocLoader::createObject -->";
-
-	if (CLOCK_WIDGET == name) {
-		QObject *object = new SkinnableClock();
-		object->setObjectName(name);
-		return object;
-	}
-
-	qDebug() << "clock: ClockSettingsDocLoader::createObject <--";
-
 	return HbDocumentLoader::createObject(type, name);
 }
 

@@ -33,14 +33,13 @@ class HbAction;
 class HbDataFormModel;
 class HbDataFormModelItem;
 class HbLabel;
-
 class TimezoneClient;
 class SettingsUtility;
-class SkinnableClock;
 class ClockSettingsDocLoader;
 class ClockSettingsView;
-class SkinnableClock;
-class QTranslator;
+class HbTranslator;
+class XQSettingsManager;
+class XQSettingsKey;
 
 class ClockSettingsView : public QObject
 {
@@ -55,13 +54,15 @@ public:
 
 private slots:
 	void handleBackAction();
-	void updateDateLabel();
-	void updatePlaceInfo();
-	void updateClockWidget();
+	void updatePlaceItem();
 	void updateDateItem();
 	void updateTimeItem();
 	void handleOrientationChanged(Qt::Orientation orientation);
 	void handleNetworkTimeStateChange(int state);
+	void handleAutoTimeUpdateChange(int value);
+	void handleAlarmSnoozeTimeChanged(int index);
+	void handleClockTypeChanged();
+	void eventMonitor(const XQSettingsKey& key, const QVariant& value);
 
 private:
 	void setupView();
@@ -78,20 +79,19 @@ private:
 
 	QPointer<HbDataFormModel> mSettingsModel;
 
-
-	HbLabel *mDayDateLabel;
-	HbLabel *mPlaceLabel;
-
 	HbDataFormModelItem *mNetworkTimeItem;
 	HbDataFormModelItem *mTimeDataFormItem;
 	HbDataFormModelItem *mDateDataFormItem;
 	HbDataFormModelItem *mPlaceDataFormItem;
-
+	HbDataFormModelItem *mClockTypeItem;
+	HbDataFormModelItem *mAlarmSnoozeItem;
 	ClockSettingsDocLoader *mDocLoader;
 	SettingsUtility *mSettingsUtility;
-	TimezoneClient *mTimezoneClient;
-	SkinnableClock *mClockWidget;
-	QTranslator *mTranslator;
+	TimezoneClient *mTimezoneClient;	
+	XQSettingsManager *mSettingsManager;
+	XQSettingsKey *mAlarmSnoozeTimeKey;
+	QHash<int, int> mAlarmSnoozeTimeHash;
+	HbTranslator *mTranslator;
 };
 
 #endif // CLOCKSETTINGSVIEW_H

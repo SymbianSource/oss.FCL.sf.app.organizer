@@ -23,6 +23,7 @@
 #include <qdatetime.h>
 #include <hblabel.h>
 #include <hbextendedlocale.h>
+#include <hbframeitem.h>
 
 // User includes
 #include "calennativeview.h"
@@ -46,7 +47,6 @@ class CalenMonthGrid;
 class CalenPluginLabel;
 
 // Constants
-const int KCalenDaysInWeek = 7;
 const int KNumOfVisibleRows = 6;
 
 #ifdef  CALENVIEWS_DLL
@@ -66,8 +66,8 @@ public:
 public:  // From CCalenView
 	virtual void doPopulation();
 	void setupView(CalenDocLoader *docLoader);
+	void doLazyLoading();
 	void handleGridItemActivated();
-	void handleGridItemLongPressed(int index, QPointF &coords);
 	void setContextForActiveDay(int index);
 	QDateTime getCurrentDay();
 	QDateTime getActiveDay();
@@ -84,6 +84,8 @@ public:  // From CCalenView
 	void populatePreviewPane(QDateTime &dateTime);
 	void handlePreviewPaneGesture(bool rightGesture);
 	QDateTime firstDayOfGrid();
+	void fetchEntriesAndUpdateModel();
+	void launchDayView();
 	
 private:
 	void createGrid();
@@ -93,8 +95,8 @@ private:
 	QDateTime dateFromContext( const MCalenContext &context );
 	void setActiveDay(QDateTime day);
 	void setDate();
-	void getInstanceList(QList<AgendaEntry> &list,
-						QDateTime rangeStart, QDateTime rangeEnd);
+	void getInstanceList(QList<QDate> &list,
+                         QDateTime rangeStart, QDateTime rangeEnd);
 	void handleChangeOrientation();
 	void setDateToLabel();
 	void updateWeekNumGridModel();
@@ -104,6 +106,7 @@ private:
 	void refreshViewOnGoToDate();
 	void showHideRegionalInformation();
 	void onContextChanged();
+	void updateDayLabel();
 	
 private slots:
 	void createEditor();
@@ -112,9 +115,6 @@ private slots:
 	void handleLeftEffectCompleted(const HbEffect::EffectStatus &status);
 	void handleRightEffectCompleted(const HbEffect::EffectStatus &status);
 	void addRemoveActionsInMenu();
-	
-public slots:
-	void launchDayView();
 	void changeOrientation(Qt::Orientation orientation);
 	
 private:
@@ -173,6 +173,8 @@ private:
 	CalenPluginLabel *mCurrRegionalInfo;
 	CalenPluginLabel *mNextRegionalInfo;
 	HbMenu *mDeleteSubMenu;
+	QColor mWeekDaysColor;
+	bool   mIsAboutToQuitEventConnected; // bool to check if month view is registered to get aboutToQuit signals
 };
 
 #endif //CALENMONTHVIEW_H

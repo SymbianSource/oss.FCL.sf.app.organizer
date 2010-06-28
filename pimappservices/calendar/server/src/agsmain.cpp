@@ -260,6 +260,7 @@ void CAgnServer::ConstructL()
 	iProxy = CAgnTlsProxy::CreateL(CAgnTlsProxy::TAgnTlsTzRulesType_Server);
 			
 	User::LeaveIfError(iFs.Connect());
+	User::LeaveIfError( iFs.ShareProtected() );
 	User::LeaveIfError(iAlarmServer.Connect());
 	iFileMgr = CAgnServFileMgr::NewL(iFs, *this);
 	iFileMgr->CreatePermanentDataL();

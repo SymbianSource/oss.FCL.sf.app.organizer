@@ -32,10 +32,9 @@
 #include <HbAction>
 #include <HbComboBox>
 #include <HbExtendedLocale>
-#include <HbDateTimePicker>
 #include <HbLabel>
 #include <HbPushButton>
-#include <HbCheckbox>
+#include <HbCheckBox>
 #include <HbDialog>
 #include <HbGroupBox>
 #include <HbMessageBox>
@@ -296,7 +295,7 @@ void NotesTodoEditor::execute(AgendaEntry entry)
 
 	// Store the current view and set our view as the current view.
 	HbMainWindow *window = hbInstance->allMainWindows().first();
-	HbAction *action = new HbAction(Hb::BackAction);
+	HbAction *action = new HbAction(Hb::BackNaviAction);
 	mEditor->setNavigationAction(action);
 	connect(
 			action, SIGNAL(triggered()),
@@ -636,14 +635,33 @@ void NotesTodoEditor::handleRemoveDescriptionAction()
  */
 void NotesTodoEditor::handleDeleteAction()
 {
-	if (showDeleteConfirmationQuery()) {
-	// Delete the to-do entry.
-	mOwner->deleteNote();
+	HbMessageBox *confirmationQuery = new HbMessageBox(
+			HbMessageBox::MessageTypeQuestion);
+	confirmationQuery->setDismissPolicy(HbDialog::NoDismiss);
+	confirmationQuery->setTimeout(HbDialog::NoTimeout);
+	confirmationQuery->setIconVisible(true);
 
-	// Close the to-do editor.
-	close();
+	QString displayText;
+	displayText = displayText.append(hbTrId("txt_notes_info_delete_todo_note"));
+
+	confirmationQuery->setText(displayText);
+
+	// Remove the default actions.
+	QList<QAction *> defaultActions = confirmationQuery->actions();
+	for (int index=0;index<defaultActions.count();index++) {
+		confirmationQuery->removeAction(defaultActions[index]);
 	}
+	defaultActions.clear();
 
+	// Add delete and cancel actions.
+	mDeleteTodoAction = new HbAction(
+			hbTrId("txt_notes_button_dialog_delete"));
+	mCancelDeleteAction = new HbAction(
+			hbTrId("txt_common_button_cancel"));
+	confirmationQuery->addAction(mDeleteTodoAction);
+	confirmationQuery->addAction((mCancelDeleteAction));
+
+	confirmationQuery->open(this, SLOT(selectedAction(HbAction*)));
 }
 
 /*!
@@ -653,35 +671,20 @@ void NotesTodoEditor::handleDiscardChangesAction()
 {
 	// Close the to-do editor
 	close();
-
 }
 
-/* !
-	Show the delete confirmation query.
+/*!
+	Slot to handle selected action in delete confirmation note.
  */
-bool NotesTodoEditor::showDeleteConfirmationQuery()
+void NotesTodoEditor::selectedAction(HbAction *action)
 {
-	bool retValue(false);
+	if (action==mDeleteTodoAction) {
+		// Delete the to-do entry.
+		mOwner->deleteNote();
 
-	HbMessageBox confirmationQuery(HbMessageBox::MessageTypeQuestion);
-	confirmationQuery.setDismissPolicy(HbDialog::NoDismiss);
-	confirmationQuery.setTimeout(HbDialog::NoTimeout);
-	confirmationQuery.setIconVisible(true);
-
-	QString displayText;
-	displayText = displayText.append(hbTrId("txt_notes_info_delete_todo_note"));
-
-	confirmationQuery.setText(displayText);
-
-	confirmationQuery.setPrimaryAction(new HbAction(
-	    hbTrId("txt_notes_button_dialog_delete"), &confirmationQuery));
-	confirmationQuery.setSecondaryAction(new HbAction(
-	    hbTrId("txt_common_button_cancel"), &confirmationQuery));
-	HbAction *selected = confirmationQuery.exec();
-	if (selected == confirmationQuery.primaryAction()) {
-		retValue = true;
+		// Close the to-do editor.
+		close();
 	}
-
-	return retValue;
 }
+
 // End of file	--Don't remove this.

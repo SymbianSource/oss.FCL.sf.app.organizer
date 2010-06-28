@@ -230,7 +230,7 @@ void NotesNoteEditor::execute(AgendaEntry entry)
 
 	// Set our view as the current view.
 	HbMainWindow *window = hbInstance->allMainWindows().first();
-	HbAction *action = new HbAction(Hb::BackAction);
+	HbAction *action = new HbAction(Hb::BackNaviAction);
 	mEditor->setNavigationAction(action);
 	connect(
 			action, SIGNAL(triggered()),
@@ -295,19 +295,33 @@ void NotesNoteEditor::saveNote()
  */
 void NotesNoteEditor::deleteNote()
 {
-	if (showDeleteConfirmationQuery()) {
-		mOwner->deleteNote();
+	HbMessageBox *confirmationQuery = new HbMessageBox(
+			HbMessageBox::MessageTypeQuestion);
+	confirmationQuery->setDismissPolicy(HbDialog::NoDismiss);
+	confirmationQuery->setTimeout(HbDialog::NoTimeout);
+	confirmationQuery->setIconVisible(true);
 
-		HbMainWindow *window = hbInstance->allMainWindows().first();
-		bool status = false;
+	QString displayText;
+	displayText = displayText.append(hbTrId("txt_notes_info_delete_note"));
 
-		// Now close the editor.
-		window->removeView(mEditor);
+	confirmationQuery->setText(displayText);
 
-		mOwner->editingCompleted(status);
-
+	// Remove the default actions.
+	QList<QAction *> defaultActions = confirmationQuery->actions();
+	for (int index=0;index<defaultActions.count();index++) {
+		confirmationQuery->removeAction(defaultActions[index]);
 	}
+	defaultActions.clear();
 
+	// Add delete and cancel actions.
+	mDeleteNoteAction = new HbAction(
+			hbTrId("txt_notes_button_dialog_delete"));
+	mCancelDeleteAction = new HbAction(
+			hbTrId("txt_common_button_cancel"));
+	confirmationQuery->addAction(mDeleteNoteAction);
+	confirmationQuery->addAction(mCancelDeleteAction);
+
+	confirmationQuery->open(this, SLOT(selectedAction(HbAction*)));
 }
 
 /*!
@@ -526,32 +540,21 @@ void NotesNoteEditor::handleNewNoteAction()
 }
 
 /* !
-	Show the delete confirmation query.
+	Slot to handle the selected action from delete message box.
  */
-bool NotesNoteEditor::showDeleteConfirmationQuery()
+void NotesNoteEditor::selectedAction(HbAction *action)
 {
-	bool retValue(false);
+	if (action == mDeleteNoteAction) {
+		mOwner->deleteNote();
 
-	HbMessageBox confirmationQuery(HbMessageBox::MessageTypeQuestion);
-	confirmationQuery.setDismissPolicy(HbDialog::NoDismiss);
-	confirmationQuery.setTimeout(HbDialog::NoTimeout);
-	confirmationQuery.setIconVisible(true);
+		HbMainWindow *window = hbInstance->allMainWindows().first();
+		bool status = false;
 
-	QString displayText;
-	displayText = displayText.append(hbTrId("txt_notes_info_delete_note"));
+		// Now close the editor.
+		window->removeView(mEditor);
 
-	confirmationQuery.setText(displayText);
-
-	confirmationQuery.setPrimaryAction(new HbAction(
-	    hbTrId("txt_notes_button_dialog_delete"), &confirmationQuery));
-	confirmationQuery.setSecondaryAction(new HbAction(
-	    hbTrId("txt_common_button_cancel"), &confirmationQuery));
-	HbAction *selected = confirmationQuery.exec();
-	if (selected == confirmationQuery.primaryAction()) {
-		retValue = true;
+		mOwner->editingCompleted(status);
 	}
-
-	return retValue;
 }
 
 // End of file	--Don't remove this.

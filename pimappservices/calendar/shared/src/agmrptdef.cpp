@@ -2700,8 +2700,16 @@ its destruction.
 @internalComponent
 */
 	{
-	delete iRRule;
-	delete iTimeZone;
+    if (iRRule)
+        {
+        delete iRRule;
+        iRRule = NULL;
+        }
+    if (iTimeZone)
+        {
+        delete iTimeZone;
+        iTimeZone = NULL;
+        }
 
 	ClearTimeArray(iSporadicDates);
 	ClearTimeArray(iExceptions);
@@ -3885,7 +3893,14 @@ const TAgnCalendarTime& CAgnRptDef::StartTime() const
 @return The start date expressed as Current System Local Time.
 */
 	{
-	return iOwningEntry.EntryTime();
+	if (iOwningEntry.Type() ==  CCalEntry::ETodo)
+		{
+		return iOwningEntry.StartTime();
+		}
+	else
+		{
+		return iOwningEntry.EntryTime();
+		}
 	}
 
 EXPORT_C void CAgnRptDef::SetUntilTime(const TAgnCalendarTime& aUntilTime)

@@ -20,6 +20,7 @@
 
 // System includes
 #include <QObject>
+#include <QPointer>
 #include <hbmainwindow.h>
 #include <QHash>
 #include <QDateTime>
@@ -31,7 +32,6 @@
 #include "caleneditorcommon.h"
 
 //forward declarations
-class QTranslator;
 class QFile;
 class HbDataForm;
 class HbDataFormModel;
@@ -42,6 +42,7 @@ class HbPushButton;
 class HbCheckBox;
 class HbComboBox;
 class HbView;
+class HbTranslator;
 class MCalenServices;
 class AgendaEntry;
 class AgendaUtil;
@@ -92,6 +93,7 @@ public:
 			DateTimeToItem,
 			LocationItem,
 			ReminderItem,
+			ReminderTimeForAllDayItem,
 			RepeatItem,
 			RepeatUntilItem
 			};
@@ -104,7 +106,14 @@ public:
 	AgendaEntry* originalEntry();
 	bool isNewEntry();
 	HbDataFormModelItem* allDayCheckBoxItem();
-
+	bool isReminderTimeForAllDayAdded();
+	bool isAllDayEvent();
+	void updateReminderChoices();
+	int currentIndexOfReminderField();
+	void setCurrentIndexOfReminderField(int index);
+	void setReminderChoices();
+	bool isEditRangeThisOnly();
+	bool isAllDayFieldAdded();
 private:
 	void edit(const QFile &handle, bool launchCalendar);
 	void edit(AgendaEntry entry, bool launchCalendar);
@@ -113,6 +122,7 @@ private:
 	            bool launchCalendar);
 	void create(CalenEditor::CreateType type, AgendaEntry entry, 
 		            bool launchCalendar);
+	void openEditor(AgendaEntry entry);
 	void showEditor(AgendaEntry entry);
 	void showEditOccurencePopup();
 	void setUpView();
@@ -135,7 +145,6 @@ private:
 	void populateRepeatItem();
 	void populateDescriptionItem();
 	void removeDescriptionItem();
-	void closeEditor();
 		
 	bool isChild() const ;
 	
@@ -144,7 +153,6 @@ private:
 	void deleteEntry(bool close = false);
 	bool handleAllDayToSave();
 	void enableFromTotimeFileds(bool, QDateTime, QDateTime);
-	int showDeleteConfirmationQuery();
 	
 private slots:
 	void handleSubjectChange(const QString subject);
@@ -152,8 +160,11 @@ private slots:
 	void saveFromDateTime(QDateTime& fromDateTime);
 	void saveToDateTime(QDateTime& toDateTime);
 	void handleLocationChange(const QString location);
+	void handleLocationChange(const QString location, 
+            const double geoLatitude, const double geoLongitude);
 	void handleDescriptionChange(const QString description);
 	void saveAndCloseEditor();
+	void showDeleteConfirmationQuery(bool closeEditor = false);
 	void handleDeleteAction();
 	void launchSettingsView();
 	void discardChanges();
@@ -161,6 +172,9 @@ private slots:
 	void handleEditOccurence(int index);
 	void handleCancel();
 	void handleCalendarLaunchError(int error);
+	void closeEditor();
+	void handleLocationEditingFinished();
+	void selectEditingFinishedAction(HbAction* action);	
 	
 private:
 	enum EditRange {
@@ -170,7 +184,7 @@ private:
 	};
 	
 	CalenEditor *q_ptr;
-	AgendaUtil *mAgendaUtil;
+	QPointer<AgendaUtil> mAgendaUtil;
 	
 	CalenEditorDocLoader *mEditorDocLoader;
 	HbView *mEditorView;
@@ -191,14 +205,15 @@ private:
 	EditRange mEditRange;
 	
 	QDateTime mNewEntryDateTime;
-		
+	
+	AgendaEntry mEntry;
 	AgendaEntry *mOriginalEntry;
 	AgendaEntry *mEditedEntry;
 
 	HbAction *mSoftKeyAction;
 	HbAction *mDescriptionAction;
 	HbMainWindow *mMainWindow;
-	QTranslator *mTranslator;
+	HbTranslator *mTranslator;
 	
 	bool mNewEntry;
 	bool mDescriptionItemAdded;

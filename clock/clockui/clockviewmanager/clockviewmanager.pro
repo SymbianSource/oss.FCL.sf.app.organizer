@@ -29,7 +29,7 @@ INCLUDEPATH += \
 		./inc \
 		../clockviews/inc \
 		../clockappcontroller/inc \
-		../clockwidget/inc \
+		../clockwidget/clockwidgetimpl/inc \
 		../../inc
 
 symbian: {
@@ -39,7 +39,7 @@ symbian: {
 	
 	LIBS += \
 		-lclockviews \
-		-lclockwidgetproto
+		-lclockwidget
 }
 
 SOURCES += \

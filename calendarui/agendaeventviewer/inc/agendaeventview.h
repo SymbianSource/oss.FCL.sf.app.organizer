@@ -29,15 +29,17 @@
 
 // Forward declarations
 class QGraphicsLinearLayout;
-class QTranslator;
+class QTimer;
+class QPluginLoader;
 class HbView;
 class HbAction;
 class HbLabel;
 class HbMainWindow;
+class HbTranslator;
+class MapTileService;
 class AgendaEventViewerItem;
 class AgendaEventViewerPrivate;
 class AgendaEventViewerDocLoader;
-class NotesEditor;
 class CalenEditor;
 
 class AgendaEventView: public QObject
@@ -71,8 +73,9 @@ private:
 	void removeAllWidgets();
 	void addAllWidgets();
 	void showDeleteOccurencePopup();
-	int showDeleteConfirmationQuery();
-
+	void showDeleteConfirmationQuery();
+	void getSubjectIcon(AgendaEntry::Type type, QString &subjectIcon);
+    void getProgressIndicatorstatus(QString &progressIcon);
 private slots:
 	void markTodoStatus();
 	void edit();
@@ -84,9 +87,13 @@ private slots:
 	void handleNoteEditorClosed(bool status);
 	void handleCalendarEditorClosed();
 	void handleDeleteOccurence(int index);
+	void handleDeleteAction();
+	void updateProgressIndicator();
+	void receiveMapTileStatus(int entryid,int addressType, int status); 
+	void changedOrientation(Qt::Orientation orientation);
 
 private:
-	
+	HbMainWindow* mMainWindow;
 	HbView *mViewer;
 	QPointer<AgendaEventViewerItem> mSubjectWidget;
 	QPointer<AgendaEventViewerItem> mDateTimeWidget;
@@ -102,16 +109,22 @@ private:
 	AgendaEventViewerDocLoader *mDocLoader;
 	AgendaEntry mOriginalAgendaEntry;
 	AgendaEntry mAgendaEntry;
-	NotesEditor *mNoteEditor;
+	QPointer<QPluginLoader> mNotesEditorPluginLoader;
 	CalenEditor *mCalenEditor;
 	QGraphicsLinearLayout *mLinearLayout;
-	
-	QTranslator *mTranslator;
+
+	HbTranslator *mTranslator;
 	bool mReminderWidgetAdded;
 	HbAction *mBackAction;
-	HbMainWindow* mMainWindow;
+	
 	bool mLocationFeatureEnabled;
-    QString mMaptilePath;
+	QString mMaptilePath;
+    MapTileService *mMaptileService;
+    QTimer *mProgressTimer;
+    int     mProgressIconCount;  
+    bool    mMaptileStatusReceived;
+    int     mMaptileStatus; 
+	bool mNotesPluginLoaded;
 
 private:
 	friend class AgendaEventViewerPrivate;

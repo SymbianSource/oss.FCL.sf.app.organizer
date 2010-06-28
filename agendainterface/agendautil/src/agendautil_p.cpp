@@ -20,6 +20,7 @@
 #include <calsession.h>
 #include <calinstance.h>
 #include <CalenImporter>
+#include <CalenInterimUtils2>
 #include <calentry.h>
 #include <calrrule.h>
 #include <e32math.h>
@@ -34,6 +35,7 @@
 #include "agendautil_p.h"
 #include "agendaentry.h"
 #include "agendaentry_p.h"
+#include "CleanupResetAndDestroy.h"
 
 // Constants
 //recognition string for ical
@@ -41,7 +43,6 @@ _LIT8(KVersionICal,		"VERSION:2.0");
 //recognition string for vcal
 _LIT8(KVersionVCal,		"VERSION:1.0");
 const TInt KReadDataAmount = 256;
-const TInt KGuidLength = 30;
 const TInt KNoOfDaysInWeek = 7;
 static const int startDateArray[2] = { 1900, 1};
 static const int endDateArray[2] = { 2100, 1};
@@ -108,70 +109,24 @@ bool AgendaUtilPrivate::prepareSession()
 		delete filter;
 		}
 
-	/*
-	// If view creation is in progress, then wait till it gets completed
-	if((iCalEntryView && !mEntryViewCreated)
-			|| (iCalInstanceView && !mInstanceViewCreated))
-	{
-		if(!iWait)
-		{
-			TRAP(iError, iWait = new (ELeave) CActiveSchedulerWait;);
-			if(!iWait->IsStarted())
-			{
-				iWait->Start();
-			}
-		}
+	// First construct the CCalInstanceView if not already available.
+	// The CCalEntryView is constructed in CompletedL. Instance view
+	// is created before entry view since entry view is required only
+	// when editing/saving any entry. So we will construct it later
+	if (!iCalInstanceView) {
+	    TRAP (iError, iCalInstanceView = CCalInstanceView::NewL(*iCalSession,
+	                                                           *this);)
 	}
-	*/
-
-	// First construct the CCalEntryView if not already available.
-	// The CCalInstanceView is constructed in ::CompletedL. We block the
-	// thread here until everything is setup.
-	if (!iCalEntryView)
-		{
-		TRAP(
-				iError,
-				iCalEntryView = CCalEntryView::NewL(*iCalSession, *this);
-		);
-		if (!iWait)
-			{
-			TRAP(
-					iError,
-					iWait = new (ELeave) CActiveSchedulerWait;
-			)
-			if (!iWait->IsStarted())
-				{
-				iWait->Start();
-				}
-			}
-		}
-
-	// Comes here only when timer is expired, hence one more
-	// check is needed here.
-	if (iCalSession && mEntryViewCreated && mInstanceViewCreated)
-		{
-		// Everything is ready.
-		return true;
-		}
-
-	else
-		{
-		return false;
-		}
+	
+	// All the requests have been made
+	return true;
 }
 
 AgendaUtilPrivate::~AgendaUtilPrivate()
 {
 	delete iCalEntryView;
 	delete iCalInstanceView;
-	if (iWait && iWait->IsStarted())
-	{
-		iWait->AsyncStop();
-	}
-
-	delete iWait;
-	if (iCalSession)
-	{
+	if (iCalSession) {
 		iCalSession->StopChangeNotification();
 	}
 	delete iCalSession;
@@ -180,6 +135,8 @@ AgendaUtilPrivate::~AgendaUtilPrivate()
 void AgendaUtilPrivate::Completed(TInt aError)
 {
 	iError = aError;
+	static bool isInstanceViewDeleted = false;
+	static bool isEntryViewDeleted = false;
 
 	if (mIsDeleting) {
 		// If deletion was in progress, then it is completed now
@@ -188,39 +145,35 @@ void AgendaUtilPrivate::Completed(TInt aError)
 		emit q->entriesDeleted(iError);
 	}
 
-	if(KErrNone != iError)
-	{
+	if (KErrNone != iError) {
 		// Something has gone wrong, return
+		if (iCalEntryView && !isEntryViewDeleted) {
+		isEntryViewDeleted = true;
 		delete iCalEntryView;
 		iCalEntryView = NULL;
+		}
+		if (iCalInstanceView && !isInstanceViewDeleted) {
+		isInstanceViewDeleted = true;
 		delete iCalInstanceView;
 		iCalInstanceView = NULL;
+		}
 		return;
 	}
 
-	if(iCalEntryView && !mEntryViewCreated)
-	{
+	if (iCalInstanceView && !mInstanceViewCreated) {
+	    // Instance view is now created.
+	    mInstanceViewCreated = true;
+	    emit q->instanceViewCreationCompleted(iError);
+	    // Start with the construction of entry view
+		if (!iCalEntryView) {
+		    TRAP (iError,
+		          iCalEntryView = CCalEntryView::NewL(*iCalSession, *this);
+		    );
+		}
+	} else if(iCalEntryView && !mEntryViewCreated) {
+	    // Entry view is now constructed
 		mEntryViewCreated = true;
-
-		// Start creating the instance view.
-		if(!iCalInstanceView)
-		{
-			TRAP(iError, iCalInstanceView = CCalInstanceView::NewL(
-					*iCalSession, *this);)
-		}
-	}
-	else if(iCalInstanceView && !mInstanceViewCreated)
-	{
-		mInstanceViewCreated = true;
-	}
-
-	// Stop the wait timer
-	if( iWait && iWait->IsStarted())
-	{
-		if(mEntryViewCreated &&  mInstanceViewCreated)
-		{
-			iWait->AsyncStop();
-		}
+		emit q->entryViewCreationCompleted(iError);
 	}
 }
 
@@ -248,25 +201,21 @@ ulong AgendaUtilPrivate::addEntry(const AgendaEntry& entry)
 	int success = 0;
 
 	// First check if the session to the calendar database is prepared or not.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Something went wrong
 		return localUid;
 	}
 
+	// Get the global uid.
+	CCalenInterimUtils2* calenInterimUtils2 = CCalenInterimUtils2::NewL();
+	HBufC8* globalUid = calenInterimUtils2->GlobalUidL();
 	if (AgendaEntry::TypeNote == entry.type()) {
 		TRAP(
 				iError,
 
 				RPointerArray<CCalEntry> entryArray;
-				CleanupClosePushL(entryArray);
-
-				// Get the global uid.
-				TTime homeTime;
-				homeTime.HomeTime();
-				TInt64 seed = homeTime.Int64();
-				TInt randumNumber = Math::Rand(seed);
-				HBufC8* globalUid = HBufC8::NewLC(KGuidLength);
-				globalUid->Des().Num(randumNumber);
+                CleanupResetAndDestroyPushL(entryArray);
+				CleanupStack::PushL(globalUid);
 
 				// Construct a CCalEntry object and start filling the details.
 				CCalEntry* newEntry = 0;
@@ -277,7 +226,6 @@ ulong AgendaUtilPrivate::addEntry(const AgendaEntry& entry)
 						0);
 
 				CleanupStack::Pop(globalUid);
-				CleanupStack::PushL(newEntry);
 
 				// Add description.
 				TPtrC description(reinterpret_cast<const TUint16*>(
@@ -309,7 +257,7 @@ ulong AgendaUtilPrivate::addEntry(const AgendaEntry& entry)
 						dtStamp.time().minute(), 0, 0);
 				TTime creationTTime(creationDateTime);
 				creationCalTime.SetTimeLocalL(creationTTime);
-				//newEntry->SetDTStampL(creationCalTime);
+				newEntry->SetDTStampL(creationCalTime);
 
 				// Finally set the entry to the database using the entry view.
 				entryArray.AppendL(newEntry);
@@ -317,7 +265,6 @@ ulong AgendaUtilPrivate::addEntry(const AgendaEntry& entry)
 				localUid = newEntry->LocalUidL();
 
 				// Cleanup.
-				CleanupStack::PopAndDestroy(newEntry);
 				CleanupStack::PopAndDestroy(&entryArray);
 		)
 	} else {
@@ -325,16 +272,8 @@ ulong AgendaUtilPrivate::addEntry(const AgendaEntry& entry)
 				iError,
 
 				RPointerArray<CCalEntry> entryArray;
-				CleanupClosePushL(entryArray);
-
-				// Get the global uid.
-				TTime homeTime;
-				homeTime.HomeTime();
-				TInt64 seed = homeTime.Int64();
-				TInt randumNumber = Math::Rand(seed);
-				HBufC8* globalUid = HBufC8::NewLC(KGuidLength);
-				globalUid->Des().Num(randumNumber);
-
+                CleanupResetAndDestroyPushL(entryArray);
+                CleanupStack::PushL(globalUid);
 				// Construct a CCalEntry object and start filling the details.
 				CCalEntry* newEntry = 0;
 				newEntry = CCalEntry::NewL(
@@ -344,7 +283,6 @@ ulong AgendaUtilPrivate::addEntry(const AgendaEntry& entry)
 						0);
 
 				CleanupStack::Pop(globalUid);
-				CleanupStack::PushL(newEntry);
 
 				// Add the summary.
 				if (!entry.summary().isNull()) {
@@ -443,10 +381,12 @@ ulong AgendaUtilPrivate::addEntry(const AgendaEntry& entry)
 				localUid = newEntry->LocalUidL();
 
 				// Cleanup.
-				CleanupStack::PopAndDestroy(newEntry);
 				CleanupStack::PopAndDestroy(&entryArray);
 		)
 	}
+	
+	delete calenInterimUtils2;
+	
 	// Emit signal upon successful creation of entry.
 	if (0 < localUid && 1 == success) {
 		emit q->entryAdded(localUid);
@@ -467,7 +407,7 @@ ulong AgendaUtilPrivate::cloneEntry(
 		const AgendaEntry &entry, AgendaEntry::Type type)
 {
 	// First prepare the session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Something went wrong.
 		return 0;
 	}
@@ -497,9 +437,7 @@ ulong AgendaUtilPrivate::cloneEntry(
 	// Now save the GUID of the saved entry.
 	TRAP(
 			iError,
-
-			globalUid = HBufC8::NewL(KGuidLength);
-			*globalUid = originalEntry->UidL();
+			globalUid = originalEntry->UidL().AllocL();
 	)
 
 	delete originalEntry;
@@ -519,7 +457,6 @@ ulong AgendaUtilPrivate::cloneEntry(
 						globalUid,
 						static_cast<CCalEntry::TMethod>(entry.method()),
 						0);
-				CleanupStack::PushL(newEntry);
 
 				// Add description.
 				TPtrC description(reinterpret_cast<const TUint16*>(
@@ -535,7 +472,6 @@ ulong AgendaUtilPrivate::cloneEntry(
 				localUid = newEntry->LocalUidL();
 
 				// Cleanup.
-				CleanupStack::PopAndDestroy(newEntry);
 				CleanupStack::PopAndDestroy(&entryArray);
 		)
 	} else {
@@ -552,7 +488,6 @@ ulong AgendaUtilPrivate::cloneEntry(
 						globalUid,
 						static_cast<CCalEntry::TMethod>(entry.method()),
 						0);
-				CleanupStack::PushL(newEntry);
 
 				// Add the summary.
 				if (!entry.summary().isNull()) {
@@ -651,7 +586,6 @@ ulong AgendaUtilPrivate::cloneEntry(
 				localUid = newEntry->LocalUidL();
 
 				// Cleanup.
-				CleanupStack::PopAndDestroy(newEntry);
 				CleanupStack::PopAndDestroy(&entryArray);
 		)
 	}
@@ -671,7 +605,7 @@ ulong AgendaUtilPrivate::cloneEntry(
 bool AgendaUtilPrivate::deleteEntry(ulong id)
 {
 	// First prepare the session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Something went wrong.
 		return false;
 	}
@@ -706,10 +640,9 @@ void AgendaUtilPrivate::deleteRepeatedEntry(
 		AgendaEntry& entry,
 		AgendaUtil::RecurrenceRange range)
 {
-	qDebug("AgendaUtilPrivate::deleteRepeatedEntry");
 
 	// First prepare the session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Something went wrong.
 		return;
 	}
@@ -736,18 +669,12 @@ void AgendaUtilPrivate::deleteRepeatedEntry(
 				// the exceptional entries share the global uid with the parent
 				// entry.
 				RPointerArray<CCalEntry> entries;
-				CleanupClosePushL(entries);
+				CleanupResetAndDestroyPushL(entries);
 				iCalEntryView->FetchL(calEntry->UidL(), entries);
 				if (entries.Count()) {
 				    iCalEntryView->DeleteL(*entries[0]);
 				}
 
-				// Cleanup.
-				int count = entries.Count();
-				for (int i = count - 1; i >= 0; --i) {
-					CCalEntry *entry = entries[i];
-					delete entry;
-				}
 				CleanupStack::PopAndDestroy(&entries);
 				CleanupStack::PopAndDestroy();
 			}
@@ -766,7 +693,7 @@ void AgendaUtilPrivate::deleteRepeatedEntry(
 bool AgendaUtilPrivate::updateEntry(const AgendaEntry& entry, bool isChild)
 {
 	// First prepare the session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Something went wrong.
 		return false;
 	}
@@ -785,7 +712,6 @@ bool AgendaUtilPrivate::updateEntry(const AgendaEntry& entry, bool isChild)
 				// Get the entry corresponding to the id.
 				AgendaEntry storedEntry = fetchById(entry.id());
 				CCalEntry* calEntry = iCalEntryView->FetchL(entry.id());
-				CleanupStack::PushL(calEntry);
 
 				// Update the description.
 				if (storedEntry.description() != entry.description()
@@ -839,12 +765,12 @@ bool AgendaUtilPrivate::updateEntry(const AgendaEntry& entry, bool isChild)
 
 				// Update the entry using the CCalEntryView.
 				RPointerArray<CCalEntry> entryArray;
-				CleanupClosePushL(entryArray);
+				CleanupResetAndDestroyPushL(entryArray);
 				entryArray.AppendL(calEntry);
 				iCalEntryView->UpdateL(entryArray, success);
 
 				// Cleanup.
-				CleanupStack::PopAndDestroy(2, calEntry);
+				CleanupStack::PopAndDestroy( &entryArray );
 		)
 	} else {
 		TRAP(
@@ -853,22 +779,18 @@ bool AgendaUtilPrivate::updateEntry(const AgendaEntry& entry, bool isChild)
 				// Get the entry corresponding to the id.
 				AgendaEntry storedEntry = fetchById(entry.id());
 				CCalEntry* calEntry = iCalEntryView->FetchL(entry.id());
-				CleanupStack::PushL(calEntry);
 
 				// Update the attendees.
 				if (!entry.isNull()
 						&& (entry.d->m_attendees != storedEntry.attendees())) {
 
-					RPointerArray<CCalAttendee> attendeesArray =
+					RPointerArray<CCalAttendee>& attendeesArray =
 							calEntry->AttendeesL();
-					CleanupClosePushL(attendeesArray);
 					int iterator = 0;
 					while (attendeesArray.Count() > iterator) {
 						calEntry->DeleteAttendeeL(iterator);
 						iterator++;
 					}
-					// Cleanup.
-					CleanupStack::PopAndDestroy(&attendeesArray);
 
 					addAttendeesToEntry(entry.d->m_attendees, *calEntry);
 				}
@@ -878,14 +800,11 @@ bool AgendaUtilPrivate::updateEntry(const AgendaEntry& entry, bool isChild)
 
 					RPointerArray<CCalCategory> categories =
 							calEntry->CategoryListL();
-					CleanupClosePushL(categories);
 					int iterator = 0;
 					while (categories.Count() > iterator) {
 						calEntry->DeleteCategoryL(iterator);
 						iterator++;
 					}
-					// Cleanup.
-					CleanupStack::PopAndDestroy(&categories);
 
 					addCategoriesToEntry(entry.d->m_categories, *calEntry);
 				}
@@ -994,7 +913,7 @@ bool AgendaUtilPrivate::updateEntry(const AgendaEntry& entry, bool isChild)
 				
 				// Save the geo value if any
 				AgendaGeoValue entryGeoValue = entry.geoValue();
-				if (!entryGeoValue.isNull()) {
+				if (!entryGeoValue.isNull() && (entryGeoValue != storedEntry.geoValue())) {
 					CCalGeoValue* geoValue = CCalGeoValue::NewL();
 					double latitude;
 					double longitude;
@@ -1006,11 +925,14 @@ bool AgendaUtilPrivate::updateEntry(const AgendaEntry& entry, bool isChild)
 					// set it to CCalentry
 					calEntry->SetGeoValueL(*geoValue);
 					delete geoValue;
+				} else if (entryGeoValue.isNull()) {
+                    // Clear the geo values if any
+                    calEntry->ClearGeoValueL();
 				}
 								
 				// Update the entry using the calen entry view.
 				RPointerArray<CCalEntry> entryArray;
-				CleanupClosePushL(entryArray);
+				CleanupResetAndDestroyPushL(entryArray);
 				entryArray.AppendL(calEntry);
 				if (!isChild) {
 					iCalEntryView->UpdateL(entryArray, success);
@@ -1018,7 +940,7 @@ bool AgendaUtilPrivate::updateEntry(const AgendaEntry& entry, bool isChild)
 					iCalEntryView->StoreL(entryArray, success);
 				}
 				// Cleanup.
-				CleanupStack::PopAndDestroy(2, calEntry);
+				CleanupStack::PopAndDestroy( &entryArray );
 		)
 	}
 
@@ -1033,7 +955,7 @@ bool AgendaUtilPrivate::storeRepeatingEntry(const AgendaEntry& entry,
                                             bool copyToChildren)
 {
 	// First prepare the session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Something went wrong.
 		return false;
 	}
@@ -1054,9 +976,10 @@ bool AgendaUtilPrivate::storeRepeatingEntry(const AgendaEntry& entry,
 	if (instance) {
 		// Get all the entries with same global Uid.
 		RPointerArray<CCalEntry> entries;
-		CleanupClosePushL(entries);
+		CleanupResetAndDestroyPushL(entries);
 		iCalEntryView->FetchL(instance->UidL(), entries);
 		calEntry = entries[0];
+		entries.Remove(0);
 		CleanupStack::PopAndDestroy(&entries);
 	} else {
 		CleanupStack::PopAndDestroy(instance);
@@ -1092,7 +1015,7 @@ bool AgendaUtilPrivate::storeRepeatingEntry(const AgendaEntry& entry,
 	// Entry is not a child, but does it have any children?
 	// Fetch array of entries associated with this UID.
 	RPointerArray<CCalEntry> oldEntries;
-	CleanupClosePushL(oldEntries);
+	CleanupResetAndDestroyPushL(oldEntries);
 	iCalEntryView->FetchL(calEntry->UidL(), oldEntries);
 	bool hasChildren = oldEntries.Count() > 0;
 	
@@ -1122,6 +1045,9 @@ bool AgendaUtilPrivate::storeRepeatingEntry(const AgendaEntry& entry,
 		// set it to CCalentry
 		calEntry->SetGeoValueL(*geoValue);
 		delete geoValue;
+	} else {
+        // Clear the geo values
+        calEntry->ClearGeoValueL();
 	}
 	
 	// set the description
@@ -1199,11 +1125,11 @@ bool AgendaUtilPrivate::storeRepeatingEntry(const AgendaEntry& entry,
 	return success;    
 }
 
-bool AgendaUtilPrivate::createException(const AgendaEntry& entry)
-{
-
+bool AgendaUtilPrivate::createException(const AgendaEntry& entry, 
+										QDateTime instanceOriginalDateTime)
+{ 
 	// First prepare the session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Something went wrong.
 		return false;
 	}
@@ -1226,18 +1152,12 @@ bool AgendaUtilPrivate::createException(const AgendaEntry& entry)
 				HBufC8* guid = calEntry->UidL().AllocLC();
 				// create new (child) entry
 				// Use original instance time for recurrenceID as this entry hasn't got one.
-				TCalTime originalCalTime = calEntry->StartTimeL();
-				TDateTime origDateTime = originalCalTime.TimeLocalL().DateTime();
-				// set the instance date to this
-				QDate date = entry.startTime().date();
-				QTime time =entry.startTime().time();
-				origDateTime.Set(date.year(),
-								 static_cast<TMonth> (date.month() - 1),
-								 date.day() - 1,
-								 time.hour(),
-								 time.minute(),time.second(), 0);
-				TTime originalTime(origDateTime);
-				originalCalTime.SetTimeLocalL(originalTime);
+				TCalTime originalCalTime;
+				TDateTime originalDateTime(instanceOriginalDateTime.date().year(),
+							TMonth(instanceOriginalDateTime.date().month() - 1),
+							instanceOriginalDateTime.date().day() -1, 0, 0, 0, 0);
+				TTime originalDateTimeTTime(originalDateTime);
+				originalCalTime.SetTimeLocalL(originalDateTimeTTime);
 				// create the new child now
 				CCalEntry* newEntry = CCalEntry::NewL( calEntry->EntryTypeL(), 
 													   guid,
@@ -1248,7 +1168,6 @@ bool AgendaUtilPrivate::createException(const AgendaEntry& entry)
 				
 				CleanupStack::Pop(guid);
 				CleanupStack::PopAndDestroy(calEntry);
-				CleanupStack::PushL(newEntry);
 
 				// Update the description.
 				if (!entry.description().isNull()) {
@@ -1285,13 +1204,13 @@ bool AgendaUtilPrivate::createException(const AgendaEntry& entry)
 
 				// Update the entry using the CCalEntryView.
 				RPointerArray<CCalEntry> entryArray;
-				CleanupClosePushL(entryArray);
+				CleanupResetAndDestroyPushL(entryArray);
 				entryArray.AppendL(newEntry);
 				iCalEntryView->StoreL(entryArray, success);
 
 				localUid = newEntry->LocalUidL();
 				// Cleanup.
-				CleanupStack::PopAndDestroy(2, newEntry);
+				CleanupStack::PopAndDestroy(&entryArray);
 		)
 	} else {
 		TRAP(
@@ -1303,20 +1222,12 @@ bool AgendaUtilPrivate::createException(const AgendaEntry& entry)
 				HBufC8* guid = calEntry->UidL().AllocLC();
 				// create new (child) entry
 				// Use original instance time for recurrenceID as this entry hasn't got one.
-				TCalTime originalCalTime = calEntry->StartTimeL();
-				TDateTime origDateTime = originalCalTime.TimeLocalL().DateTime();
-				// set only the instance date but not the time to this
-				QDate date = entry.startTime().date();
-				QTime time =entry.startTime().time();
-				origDateTime.Set(date.year(),
-				                 static_cast<TMonth> (date.month() - 1),
-								 date.day() - 1,
-                                 origDateTime.Hour(),
-                                 origDateTime.Minute(),
-                                 origDateTime.Second(), 
-                                 origDateTime.MicroSecond());
-				TTime originalTime(origDateTime);
-				originalCalTime.SetTimeLocalL(originalTime);
+				TCalTime originalCalTime;
+				TDateTime originalDateTime(instanceOriginalDateTime.date().year(),
+							TMonth(instanceOriginalDateTime.date().month() - 1),
+							instanceOriginalDateTime.date().day() -1, 0, 0, 0, 0);
+				TTime originalDateTimeTTime(originalDateTime);
+				originalCalTime.SetTimeLocalL(originalDateTimeTTime);
 				// create the new child now
 				CCalEntry* newEntry = CCalEntry::NewL( calEntry->EntryTypeL(), 
 													   guid,
@@ -1327,7 +1238,6 @@ bool AgendaUtilPrivate::createException(const AgendaEntry& entry)
 				
 				CleanupStack::Pop(guid);
 				CleanupStack::PopAndDestroy(calEntry);
-				CleanupStack::PushL(newEntry);
 				// Store the attendees.
 				if (!entry.isNull()) {
 					addAttendeesToEntry(entry.d->m_attendees, *newEntry);
@@ -1435,14 +1345,13 @@ bool AgendaUtilPrivate::createException(const AgendaEntry& entry)
 				newEntry->ClearRepeatingPropertiesL();
 				// Update the entry using the calen entry view.
 				RPointerArray<CCalEntry> entryArray;
-				CleanupClosePushL(entryArray);
+				CleanupResetAndDestroyPushL(entryArray);
 				entryArray.AppendL(newEntry);
 				iCalEntryView->StoreL(entryArray, success);
 				
 				localUid = newEntry->LocalUidL();
 				// Cleanup.
 				CleanupStack::PopAndDestroy(&entryArray);
-				CleanupStack::PopAndDestroy(newEntry);
 		)
 	}
 
@@ -1464,7 +1373,7 @@ AgendaEntry AgendaUtilPrivate::fetchById(ulong id)
 	AgendaEntry entry;
 
 	// First check if the session with the calendar exists.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Return empty AgendaEntry.
 		return entry;
 	}
@@ -1500,7 +1409,7 @@ QList<ulong> AgendaUtilPrivate::entryIds(AgendaUtil::FilterFlags filter)
 	QList<ulong> listOfIds;
 
 	// First check if the session with agenda server exists.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Return empty list.
 		return listOfIds;
 	}
@@ -1509,7 +1418,7 @@ QList<ulong> AgendaUtilPrivate::entryIds(AgendaUtil::FilterFlags filter)
 			iError,
 
 			RPointerArray<CCalInstance> instanceList;
-			CleanupClosePushL(instanceList);
+            CleanupResetAndDestroyPushL(instanceList);
 			CalCommon::TCalViewFilter filters = filter;
 			TCalTime startDateForInstanceSearch;
 			TCalTime endDateForInstanceSearch;
@@ -1536,14 +1445,8 @@ QList<ulong> AgendaUtilPrivate::entryIds(AgendaUtil::FilterFlags filter)
 				listOfIds.append(instanceList[iter]->Entry().LocalUidL());
 			}
 
-			int count = instanceList.Count();
-			for (int iter = count - 1; iter >= 0; --iter) {
-				CCalInstance *instance = instanceList[iter];
-				delete instance;
-			}
-
 			// Cleanup.
-			CleanupStack::PopAndDestroy();
+			CleanupStack::PopAndDestroy(&instanceList);
 	)
 
 	return listOfIds;
@@ -1561,7 +1464,7 @@ QList<AgendaEntry> AgendaUtilPrivate::fetchAllEntries(
 	QList<AgendaEntry> entryList;
 
 	// First check if the session with agenda server exists.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Return empty list.
 		return entryList;
 	}
@@ -1570,7 +1473,7 @@ QList<AgendaEntry> AgendaUtilPrivate::fetchAllEntries(
 			iError,
 
 			RPointerArray<CCalInstance> instanceList;
-			CleanupClosePushL(instanceList);
+            CleanupResetAndDestroyPushL(instanceList);
 			CalCommon::TCalViewFilter filters = filter;
 			TCalTime startDateForInstanceSearch;
 			TCalTime endDateForInstanceSearch;
@@ -1601,14 +1504,8 @@ QList<AgendaEntry> AgendaUtilPrivate::fetchAllEntries(
 								instanceList[iter]));
 			}
 
-			int count = instanceList.Count();
-			for (int iter = count - 1; iter >= 0; --iter) {
-				CCalInstance *instance = instanceList[iter];
-				delete instance;
-			}
-
 			// Cleanup.
-			CleanupStack::PopAndDestroy();
+			CleanupStack::PopAndDestroy(&instanceList);
 	)
 
 	return entryList;
@@ -1619,7 +1516,7 @@ QList<AgendaEntry> AgendaUtilPrivate::fetchEntriesInRange(
 		AgendaUtil::FilterFlags filter)
 {
     QList<AgendaEntry> entryList;
-    if(!prepareSession())
+    if(!mInstanceViewCreated)
         {
             // return empty list
             return entryList;
@@ -1628,7 +1525,7 @@ QList<AgendaEntry> AgendaUtilPrivate::fetchEntriesInRange(
     TRAP(iError,
 
         RPointerArray<CCalInstance> instanceList;
-        CleanupClosePushL(instanceList);
+        CleanupResetAndDestroyPushL(instanceList);
         CalCommon::TCalViewFilter filters = filter;
         TCalTime startDateForInstanceSearch;
         TCalTime endDateForInstanceSearch;
@@ -1661,12 +1558,7 @@ QList<AgendaEntry> AgendaUtilPrivate::fetchEntriesInRange(
         {
             entryList.append(createAgendaEntryFromCalEntry(instanceList[i]->Entry(), instanceList[i]));
         }
-        int count = instanceList.Count();
-        for (int i = count - 1; i >= 0; --i) {
-            CCalInstance *instance = instanceList[i];
-            delete instance;
-        }
-        CleanupStack::PopAndDestroy();
+        CleanupStack::PopAndDestroy(&instanceList);
     )
 
     return entryList;
@@ -1676,7 +1568,13 @@ void AgendaUtilPrivate::markDatesWithEvents(QDateTime rangeStart,
 	QDateTime rangeEnd,AgendaUtil::FilterFlags filter, QList<QDate>& dates)
 {
 	RPointerArray<CCalInstance> instanceList;
-	CleanupClosePushL(instanceList);
+	
+	if(!mInstanceViewCreated) {
+	    // return empty list
+	    return;
+	}
+	
+	CleanupResetAndDestroyPushL(instanceList);
 	CalCommon::TCalViewFilter filters = filter;
 	TCalTime startDateForInstanceSearch;
 	TCalTime endDateForInstanceSearch;
@@ -1704,7 +1602,7 @@ void AgendaUtilPrivate::markDatesWithEvents(QDateTime rangeStart,
 			endDateForInstanceSearch);
 
 	iCalInstanceView->FindInstanceL(instanceList, filters, searchTimeRange);
-	
+
 	// Parse thru the list and mark the dates which have events
 	for (int i = 0; i < instanceList.Count(); i++) {
 		CCalEntry::TType type = instanceList[i]->Entry().EntryTypeL();
@@ -1712,52 +1610,106 @@ void AgendaUtilPrivate::markDatesWithEvents(QDateTime rangeStart,
 		TCalTime startCalTime = instanceList[i]->StartTimeL();
 		TCalTime endCalTime = instanceList[i]->EndTimeL();
 		TDateTime startDateTime = startCalTime.TimeLocalL().DateTime();
+		TDateTime endDateTime = endCalTime.TimeLocalL().DateTime();
 		QDate startDate(startDateTime.Year(), startDateTime.Month()+1,
 						startDateTime.Day() + 1);
+        QDate endDate(endDateTime.Year(), endDateTime.Month()+1,
+                        endDateTime.Day() + 1);
 		if (type == CCalEntry::EEvent || type == CCalEntry::EAppt ||
 				type == CCalEntry::EReminder) {
 			if(endsAtStartOfDay(instanceList[i], endCalTime.TimeLocalL())) {
-				// instance ends at start of endtime day, month view doesnt 
-				// want to show event on this day
 				TDateTime endDateTime = endCalTime.TimeLocalL().DateTime();
+				// prevent problems with items ending tomorrow at 00:00
 				endDateTime.SetMinute(endDateTime.Minute() - 1);
 				TTime time(endDateTime);
+				// If it is ending before the start of the grid 
 				if (time <= startDateForInstanceSearch.TimeLocalL()) {
 					continue;
 				}
 			}
-			
-			// Mark the required dates frm start date to end date
-			TTimeIntervalDays days = endCalTime.TimeLocalL().DaysFrom(startCalTime.TimeLocalL());
-			for (int j = -1; j < days.Int(); j++) {
-				QDate date = startDate.addDays(j+1);
-				if (date <= rangeEnd.date()) {
-					dates.append(date);
-				} else {
-					break;
-				}
-			}
-		} else if (type == CCalEntry::EAnniv) {
-			if (startDate <= rangeEnd.date()) {
-				dates.append(startDate);
-			}
-		} else if (type == CCalEntry::ETodo) {
-			// if start time is less that today, then mark it for today
-			if (startDate < QDate::currentDate()) {
-				dates.append(QDate::currentDate());
-			} else {
-				dates.append(startDate);
-			}
-		}
-	}
-	CleanupStack::PopAndDestroy();
+        // Mark the required dates frm start date to end date
+        TTimeIntervalDays days ;
+        int numOfDays = 0;
+        //check if the start date of the entry is before the start day of the grid
+        if(startDate < rangeStart.date()){
+            if(endDate<=rangeEnd.date()){
+                //if the end date of entry is lying in the grid ,
+                //then mark the entry from start day of the grid to the end date of the entry
+                days = endCalTime.TimeLocalL().DaysFrom(startDateForInstanceSearch.TimeLocalL());
+                numOfDays = days.Int();
+            }
+            else{
+                //if end date of the entry is greater then the last date of grid, 
+                //then mark all the date of the grid with the entry 
+                days = endDateForInstanceSearch.TimeLocalL().DaysFrom(startDateForInstanceSearch.TimeLocalL()) ;
+                numOfDays = days.Int();
+            }
+            // Check if the event is all-day
+            if (instanceList[i]->Entry().EntryTypeL() == CCalEntry::EEvent) {
+                // no need to consider the date on which it ends
+                // reduce days count by 1
+                numOfDays--;
+                }
+            //start the entries from the first day of the grid
+            for (int j = 0; j <= numOfDays; j++) {
+                QDate date = rangeStart.date().addDays(j);
+                if (date <= rangeEnd.date()) {
+                    dates.append(date);
+                } else {
+                    break;
+                }
+            }
+        }
+        //if the start date of the entry is lying inside the grid
+        else{
+            if(endDate<=rangeEnd.date()){
+                //if the end date of entry is lying in the grid ,
+                //then mark the entry from start date of the entry to the end date of the entry
+                days = endCalTime.TimeLocalL().DaysFrom(startCalTime.TimeLocalL()) ;
+                numOfDays = days.Int();
+            }
+            else{
+                //if end date of the entry is greater then the last date of grid, 
+                //then mark all the date from start date of the entry to the end date of the grid 
+                days = endDateForInstanceSearch.TimeLocalL().DaysFrom(startCalTime.TimeLocalL()) ;
+                numOfDays = days.Int();
+            }
+            // Check if the event is all-day
+            if (instanceList[i]->Entry().EntryTypeL() == CCalEntry::EEvent) {
+                // no need to consider the date on which it ends
+                // reduce days count by 1
+                numOfDays--;
+                }
+            for (int j = 0; j <= numOfDays; j++) {
+                QDate date = startDate.addDays(j);
+                if (date <= rangeEnd.date()) {
+                    dates.append(date);
+                } else {
+                    break;
+                }
+            }   
+        }
+    } else if (type == CCalEntry::EAnniv) {
+        if (startDate <= rangeEnd.date()) {
+            dates.append(startDate);
+        }
+    } else if (type == CCalEntry::ETodo) {
+            // if start time is less that today, then mark it for today
+            if (startDate < QDate::currentDate()) {
+                dates.append(QDate::currentDate());
+            } else {
+                dates.append(startDate);
+            }
+        }
+    }
+    CleanupStack::PopAndDestroy(&instanceList);
 }
 
 QList<AgendaEntry> AgendaUtilPrivate::createEntryIdListForDay( QDateTime day,
                             AgendaUtil::FilterFlags filter )
 {
     QList<AgendaEntry> entryList;
-    if(!prepareSession()) {
+    if(!mInstanceViewCreated) {
         // return empty list
         return entryList;
     }
@@ -1766,7 +1718,7 @@ QList<AgendaEntry> AgendaUtilPrivate::createEntryIdListForDay( QDateTime day,
     TRAP(iError,
         getDayRange(day, day, dayRange);
         RPointerArray<CCalInstance> instanceList;
-        CleanupClosePushL(instanceList);
+        CleanupResetAndDestroyPushL(instanceList);
         CalCommon::TCalViewFilter filters = filter;
         // Check if the filter has todos also to be included
         if(filter & CalCommon::EIncludeIncompletedTodos)
@@ -1809,6 +1761,26 @@ QList<AgendaEntry> AgendaUtilPrivate::createEntryIdListForDay( QDateTime day,
             {
             iCalInstanceView->FindInstanceL(instanceList, filters, dayRange);
             }
+        
+        // In this list, check if any all day events are there
+        // As all day events end at 12.00AM of next day, we should not show it again on next day
+        TCalTime calTime;
+        TDateTime dateTime(
+                day.date().year(),
+                static_cast<TMonth>(day.date().month() - 1),
+                day.date().day() - 1, day.time().hour(),
+                day.time().minute(), 0, 0);
+        TTime time(dateTime);
+        for (int i(0); i < instanceList.Count(); i++) {
+            if ((endsAtStartOfDay(instanceList[i], time)) &&
+                    instanceList[i]->Entry().EntryTypeL() == CCalEntry::EEvent) {
+                // Previous day all-day event has been found, we are not supposed to
+                // show it on current day, hence remove it from the instance list
+                instanceList.Remove(i);
+                i--;
+            }
+        }
+        
         // Sort the list
         sortInstanceList(instanceList);
         for(TInt i = 0; i<instanceList.Count(); i++)
@@ -1816,12 +1788,7 @@ QList<AgendaEntry> AgendaUtilPrivate::createEntryIdListForDay( QDateTime day,
                 entryList.append(createAgendaEntryFromCalEntry(
                                     instanceList[i]->Entry(), instanceList[i]));
             }
-        int count = instanceList.Count();
-        for (int i = count - 1; i >= 0; --i) {
-            CCalInstance *instance = instanceList[i];
-            delete instance;
-        }
-        CleanupStack::PopAndDestroy();
+        CleanupStack::PopAndDestroy( &instanceList );
         )
 
     return entryList;
@@ -1833,7 +1800,7 @@ int AgendaUtilPrivate::importvCalendar(const QString& fileName,
 	int success = -1 ;
 
 	// First prepare the session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		return success;
 	}
 
@@ -1886,7 +1853,7 @@ bool AgendaUtilPrivate::exportAsvCalendar(
 		const QString& fileName, ulong calendarEntryId)
 {
 	// First prepare session with agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		return false;
 	}
 	TRAP(
@@ -1953,18 +1920,16 @@ void AgendaUtilPrivate::setCompleted(
 
 			// Fetch the calentry
 			CCalEntry* calEntry = iCalEntryView->FetchL(entry.id());
-			CleanupStack::PushL(calEntry);
 			calEntry->SetCompletedL(complete, calTime);
 
 			// Update the entry in the Database
 			RPointerArray<CCalEntry> array;
-			CleanupClosePushL(array);
+			CleanupResetAndDestroyPushL(array);
 			array.AppendL(calEntry);
 			iCalEntryView->UpdateL(array, success);
 
 			// Cleanup.
-			CleanupStack::PopAndDestroy(&array);
-			CleanupStack::PopAndDestroy(calEntry);
+			CleanupStack::PopAndDestroy( &array );
 	)
 
 	if (0 < success) {
@@ -2022,7 +1987,7 @@ AgendaEntry AgendaUtilPrivate::parentEntry(AgendaEntry& entry)
 {
 	AgendaEntry parentEntry;
 	// First check if the session with the calendar exists.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		// Return empty AgendaEntry.
 		return entry;
 	}
@@ -2036,7 +2001,7 @@ AgendaEntry AgendaUtilPrivate::parentEntry(AgendaEntry& entry)
 			if (calEntry) {
 				// Get all the entries with same global Uid.
 				RPointerArray<CCalEntry> entries;
-				CleanupClosePushL(entries);
+				CleanupResetAndDestroyPushL(entries);
 				iCalEntryView->FetchL(calEntry->UidL(), entries);
 				parentEntry = createAgendaEntryFromCalEntry(*entries[0]);
 				CleanupStack::PopAndDestroy(&entries);
@@ -2064,7 +2029,7 @@ void AgendaUtilPrivate::clearRepeatingProperties(AgendaEntry& entry)
 	if (calEntry) {
 		// Get all the entries with same global Uid.
 		RPointerArray<CCalEntry> entries;
-		CleanupClosePushL(entries);
+		CleanupResetAndDestroyPushL(entries);
 		iCalEntryView->FetchL(calEntry->UidL(), entries);
 		entries[0]->ClearRepeatingPropertiesL();
 		CleanupStack::PopAndDestroy(&entries);
@@ -2083,7 +2048,7 @@ void AgendaUtilPrivate::getPreviousInstanceTimes(AgendaEntry& entry,
 												QDateTime& endTime)
 {
 	RPointerArray<CCalEntry> entries;
-	CleanupClosePushL(entries);
+	CleanupResetAndDestroyPushL(entries);
 	TCalTime previousStartTime;
 	TCalTime previousEndTime;
 	TTime zero(TInt64(0));
@@ -2200,6 +2165,16 @@ void AgendaUtilPrivate::getPreviousInstanceTimes(AgendaEntry& entry,
 			// Is currentInstanceDate before parent dt start?
 			if (currentInstanceDate.TimeLocalL() < 
 					entries[0]->StartTimeL().TimeLocalL()) {
+				TBool exceptionEntryBeforeParentStartPresent = EFalse;
+				for (TInt i=0; i<exdates.Count(); ++i) {
+					if( exdates[i].TimeLocalL() < currentInstanceDate.TimeLocalL() ) {
+						exceptionEntryBeforeParentStartPresent = ETrue;
+					}
+				}
+				if (!exceptionEntryBeforeParentStartPresent) {
+					currentInstanceDate.SetTimeLocalL(Time::NullTTime());
+					previousStartTime = currentInstanceDate;
+				}
 				// There are no instances before the exception
 				keepLooking = EFalse;
 			} else {
@@ -2242,22 +2217,23 @@ void AgendaUtilPrivate::getPreviousInstanceTimes(AgendaEntry& entry,
 		}
 		CleanupStack::PopAndDestroy(&exdates);
 	}
-	// Convert TCalTimes to QDateTimes
-	TDateTime prevStart = previousStartTime.TimeLocalL().DateTime();
-	TDateTime prevEnd = previousEndTime.TimeLocalL().DateTime();
-	startTime.setDate(QDate(prevStart.Year(), prevStart.Month()+1,
-					prevStart.Day() + 1));
-	startTime.setTime(QTime(prevStart.Hour(), prevStart.Minute(), 0, 0));
-	endTime.setDate(QDate(prevEnd.Year(), prevEnd.Month()+1,
-	                      prevEnd.Day() + 1));
-	endTime.setTime(QTime(prevEnd.Hour(), prevEnd.Minute(), 0, 0));
 	
-	delete calEntry;
-	int count = entries.Count();
-	for (int i = count - 1; i >= 0; --i) {
-		CCalEntry *instance = entries[i];
-		delete instance;
+	if(previousStartTime.TimeUtcL() != Time::NullTTime()) {
+		// Convert TCalTimes to QDateTimes
+		TDateTime prevStart = previousStartTime.TimeLocalL().DateTime();
+		TDateTime prevEnd = previousEndTime.TimeLocalL().DateTime();
+		startTime.setDate(QDate(prevStart.Year(), prevStart.Month()+1,
+		                        prevStart.Day() + 1));
+		startTime.setTime(QTime(prevStart.Hour(), prevStart.Minute(), 0, 0));
+		endTime.setDate(QDate(prevEnd.Year(), prevEnd.Month()+1,
+		                      prevEnd.Day() + 1));
+		endTime.setTime(QTime(prevEnd.Hour(), prevEnd.Minute(), 0, 0));
+	} else {
+		QDateTime nullDateTime;
+		startTime = nullDateTime;
+		endTime = nullDateTime;
 	}
+	delete calEntry;
 	CleanupStack::PopAndDestroy(&entries);
 }
 
@@ -2273,7 +2249,7 @@ void AgendaUtilPrivate::getNextInstanceTimes(AgendaEntry& entry,
                                           QDateTime& endTime)
 {
 	RPointerArray<CCalEntry> entries;
-	CleanupClosePushL(entries);
+	CleanupResetAndDestroyPushL(entries);
 	TCalTime nextStartTime;
 	TCalTime nextEndTime;
 	TTime zero(TInt64(0));
@@ -2387,9 +2363,19 @@ void AgendaUtilPrivate::getNextInstanceTimes(AgendaEntry& entry,
 					keepLooking = EFalse;
 					break;
 			}
-			// Is currentInstanceDate before parent dt start?
-			if (currentInstanceDate.TimeLocalL() < 
-					entries[0]->StartTimeL().TimeLocalL()) {
+			// Is currentInstanceDate after repeat until date?
+			if (currentInstanceDate.TimeLocalL() >  
+					rrule.Until().TimeLocalL()) {
+				TBool exceptionEntryAfterRepeatUntilPresent = EFalse;
+				for (TInt i=0; i<exdates.Count(); ++i) {
+					if(exdates[i].TimeLocalL() > rrule.Until().TimeLocalL()) {
+						exceptionEntryAfterRepeatUntilPresent = ETrue;
+					}
+				}
+				if (!exceptionEntryAfterRepeatUntilPresent) {
+					currentInstanceDate.SetTimeLocalL(Time::NullTTime());
+					nextStartTime = currentInstanceDate;
+				}
 				// There are no instances before the exception
 				keepLooking = EFalse;
 			} else {
@@ -2432,22 +2418,24 @@ void AgendaUtilPrivate::getNextInstanceTimes(AgendaEntry& entry,
 		CleanupStack::PopAndDestroy( &exdates );
 		}
 	}
-	// Convert TCalTimes to QDateTimes
-	TDateTime nextStart = nextStartTime.TimeLocalL().DateTime();
-	TDateTime nextEnd = nextEndTime.TimeLocalL().DateTime();
-	startTime.setDate(QDate(nextStart.Year(), nextStart.Month()+1,
-	                        nextStart.Day() + 1));
-	startTime.setTime(QTime(nextStart.Hour(), nextStart.Minute(), 0, 0));
-	endTime.setDate(QDate(nextEnd.Year(), nextEnd.Month()+1,
-	                      nextEnd.Day() + 1));
-	endTime.setTime(QTime(nextEnd.Hour(), nextEnd.Minute(), 0, 0));	
 	
+	if (nextStartTime.TimeUtcL() != Time::NullTTime()) {
+		// Convert TCalTimes to QDateTimes
+		TDateTime nextStart = nextStartTime.TimeLocalL().DateTime();
+		TDateTime nextEnd = nextEndTime.TimeLocalL().DateTime();
+		startTime.setDate(QDate(nextStart.Year(), nextStart.Month()+1,
+		                        nextStart.Day() + 1));
+		startTime.setTime(QTime(nextStart.Hour(), nextStart.Minute(), 0, 0));
+		endTime.setDate(QDate(nextEnd.Year(), nextEnd.Month()+1,
+		                      nextEnd.Day() + 1));
+		endTime.setTime(QTime(nextEnd.Hour(), nextEnd.Minute(), 0, 0));	
+	} else {
+		QDateTime nullDateTime;
+		startTime = nullDateTime;
+		endTime = nullDateTime;
+	}
 	delete calEntry;
-	int count = entries.Count();
-		for (int i = count - 1; i >= 0; --i) {
-			CCalEntry *instance = entries[i];
-			delete instance;
-		}
+	
 	CleanupStack::PopAndDestroy(&entries);
 }
 
@@ -2458,10 +2446,15 @@ void AgendaUtilPrivate::getNextInstanceTimes(AgendaEntry& entry,
  */
 bool AgendaUtilPrivate::areNoEntriesInCalendar()
 {
+	// First prepare the session with the agenda server.
+	if (!mInstanceViewCreated) {
+		return false;
+	}
+	
 	bool isEmpty;
 	// Query for the entries for entire range
 	RPointerArray<CCalInstance> instanceList;
-	CleanupClosePushL(instanceList);
+	CleanupResetAndDestroyPushL(instanceList);
 	
 	// Create the filter
 	CalCommon::TCalViewFilter filters = AgendaUtil::IncludeAnniversaries
@@ -2498,7 +2491,9 @@ bool AgendaUtilPrivate::areNoEntriesInCalendar()
 	} else {
 		isEmpty = true;
 	}
-	CleanupStack::PopAndDestroy();
+	
+	// Cleanup
+	CleanupStack::PopAndDestroy( &instanceList );
 	return isEmpty;
 }
 
@@ -2662,8 +2657,7 @@ AgendaEntry AgendaUtilPrivate::createAgendaEntryFromCalEntry(
 	entry.setStartAndEndTime(startDateTime, endDateTime);
 
 	// Attendees.
-	RPointerArray<CCalAttendee> calAttendees = calEntry.AttendeesL();
-	CleanupClosePushL(calAttendees);
+	RPointerArray<CCalAttendee>& calAttendees = calEntry.AttendeesL();
 
 	for (int i = 0; i < calAttendees.Count(); i++) {
 		AgendaAttendee attendee;
@@ -2690,11 +2684,9 @@ AgendaEntry AgendaUtilPrivate::createAgendaEntryFromCalEntry(
 						calAttendees[i]->StatusL()));
 		entry.addAttendee(attendee);
 	}
-	CleanupStack::Pop(&calAttendees);
 
 	// Categories.
-	RPointerArray<CCalCategory> calCategories = calEntry.CategoryListL();
-	CleanupClosePushL(calCategories);
+	const RPointerArray<CCalCategory>& calCategories = calEntry.CategoryListL();
 
 	for (int i = 0; i < calCategories.Count(); i++) {
 		AgendaCategory category;
@@ -2710,7 +2702,6 @@ AgendaEntry AgendaUtilPrivate::createAgendaEntryFromCalEntry(
 				static_cast<AgendaCategory::CategoryType>(categoryType));
 		entry.addCategory(category);
 	}
-	CleanupStack::PopAndDestroy(&calCategories);
 
 	// Id.
 	entry.d->m_id = calEntry.LocalUidL();
@@ -2846,7 +2837,7 @@ bool AgendaUtilPrivate::addAttendeesToEntry(
 		const QList<AgendaAttendee>& attendees, CCalEntry& entry)
 {
 	// First prepare the session with the agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		return false;
 	}
 
@@ -2878,7 +2869,7 @@ bool AgendaUtilPrivate::addCategoriesToEntry(
 		const QList<AgendaCategory>& categories, CCalEntry& entry)
 {
 	// First prepare the session with the agenda server.
-	if (!prepareSession()) {
+	if (!mInstanceViewCreated) {
 		return false;
 	}
 	TRAP(
@@ -2984,7 +2975,7 @@ TTime AgendaUtilPrivate::LimitToValidTime( const TTime& aTime )
 
 CCalInstance* AgendaUtilPrivate::findPossibleInstance(AgendaEntry& entry)
 {
-    if(!prepareSession()) {
+    if(!mInstanceViewCreated) {
         // return empty list
         return NULL;
     }
@@ -2992,7 +2983,7 @@ CCalInstance* AgendaUtilPrivate::findPossibleInstance(AgendaEntry& entry)
 	CalCommon::TCalTimeRange dayRange(dummy, dummy);
 	getDayRange(entry.startTime(), entry.startTime(), dayRange);
 	RPointerArray<CCalInstance> instances;
-	CleanupClosePushL(instances);
+	CleanupResetAndDestroyPushL(instances);
 	iCalInstanceView->FindInstanceL(instances, CalCommon::EIncludeAll, dayRange);
 	TTime entryStartTime(dayRange.StartTime().TimeLocalL());
 
@@ -3412,7 +3403,7 @@ TTime AgendaUtilPrivate::getPreviousInstanceForRepeatOther(CCalEntry& entry,
 									const CalCommon::TCalTimeRange& timeRange)
 {
 	RPointerArray<CCalInstance> allInstances;
-	CleanupClosePushL( allInstances );
+	CleanupResetAndDestroyPushL(allInstances);
 	
 	TInt filter;
 	// Get the entry type to be filtered
@@ -3461,7 +3452,7 @@ TTime AgendaUtilPrivate::getNextInstanceForRepeatOther(CCalEntry& aEntry,
 								   const CalCommon::TCalTimeRange& timeRange)
 {
 	RPointerArray<CCalInstance> allInstances;
-	CleanupClosePushL( allInstances );
+	CleanupResetAndDestroyPushL(allInstances);
     
     TInt filter;
     // Get the entry type to be filtered
@@ -3702,16 +3693,14 @@ void AgendaUtilPrivate::storeEachChildEntry(CCalEntry &entry,
                                                 oldEntries[i]->SequenceNumberL(),
                                                 recId,
                                                 oldEntries[i]->RecurrenceRangeL() );
-            CleanupStack::PushL(exception);
             exception->CopyFromL(*oldEntries[i]);
             exception->SetLastModifiedDateL();
             TInt successCount=0;
 			RPointerArray<CCalEntry> entries;
-			CleanupClosePushL( entries );
+			CleanupResetAndDestroyPushL(entries);
 			entries.Append( exception );
 			iCalEntryView->StoreL( entries, successCount );
 			CleanupStack::PopAndDestroy( &entries );
-            CleanupStack::PopAndDestroy(exception);
             }
         else
             {
@@ -3724,10 +3713,10 @@ void AgendaUtilPrivate::storeEachChildEntry(CCalEntry &entry,
         	oldEntries[i]->SetLastModifiedDateL();
 			TInt successCount=0;
 			RPointerArray<CCalEntry> entries;
-			CleanupClosePushL( entries );
+			CleanupClosePushL(entries);
 			entries.Append( oldEntries[i] );
 			iCalEntryView->StoreL( entries, successCount );
-			CleanupStack::PopAndDestroy( &entries );
+			CleanupStack::Pop( &entries );
             }
         }
     }

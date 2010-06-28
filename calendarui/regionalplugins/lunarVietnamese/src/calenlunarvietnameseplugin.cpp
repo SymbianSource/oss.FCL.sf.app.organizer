@@ -73,6 +73,7 @@ CCalenLunarVietnamesePlugin::CCalenLunarVietnamesePlugin(MCalenServices* aServic
 	{
 	TRACE_ENTRY_POINT;
 	iLabelControl = NULL;
+	setFlag(QGraphicsItem::ItemHasNoContents, false);
 	TRACE_EXIT_POINT;
 	}
 	

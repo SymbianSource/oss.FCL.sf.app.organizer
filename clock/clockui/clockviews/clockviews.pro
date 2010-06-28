@@ -30,7 +30,7 @@ INCLUDEPATH += \
 		../../clockmw/clocksettingsutility/inc \
 		../clocksettingsview/inc \
 		../clockalarmeditor/inc \
-		../clockwidget/inc \
+		../clockwidget/clockwidgetimpl/inc \
 		../clockcityselectionlist/inc \
 		../inc
 
@@ -51,7 +51,8 @@ symbian: {
 		-lclocksettingsutility \
 		-lclocksettingsview \
 		-lclockcityselectionlist \
-		-lclockwidgetproto
+		-lclockwidget \
+                -lclockwidgetplugin
 }
 
 SOURCES += \
@@ -59,14 +60,14 @@ SOURCES += \
 		clockalarmlistmodel.cpp	\	
 		clockalarmlistitemprototype.cpp \		
 		clockworldview.cpp \
-		listitemprototype.cpp
+		clockhomecityitem.cpp
 
 HEADERS += \
 		clockmainview.h \
 		clockalarmlistmodel.h \
 		clockalarmlistitemprototype.h \	
 		clockworldview.h \
-		listitemprototype.h
+		clockhomecityitem.h
 
 RESOURCES += \
 		clockviews.qrc

@@ -47,6 +47,7 @@ public:
 public:
 	NOTESVIEWS_EXPORT void setupView(
 			NotesAppControllerIf &controllerIf, NotesDocLoader *docLoader);
+	NOTESVIEWS_EXPORT void populateListView();
 
 private slots:
 	void displayAllNotesView();
@@ -60,7 +61,7 @@ private slots:
 	void handleActionStateChanged();
 
 private:
-	void populateListView();
+
 	int todosCount();
 	int recentNotesCount();
 

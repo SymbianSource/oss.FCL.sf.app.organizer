@@ -16,9 +16,6 @@
 *
 */
 
-// System includes
-#include <QDebug>
-
 // User includes
 #include "clockappcontrollerifimpl.h"
 #include "clockappcontroller.h"
@@ -46,16 +43,12 @@ ClockAppControllerIfImpl::ClockAppControllerIfImpl(
 :QObject(parent),
  mAppController(controller)
 {
-	qDebug() << "clock: ClockAppControllerIfImpl::ClockAppControllerIfImpl -->";
-
 	// Construct the timezone client.
-	mTimeZoneClient = new TimezoneClient(this);
+	mTimeZoneClient = TimezoneClient::getInstance();
 	// Construct the settings utility object.
 	mSettingsUtility = new SettingsUtility(this);
 	// Construct the alarm client object.
 	mAlarmClient = new AlarmClient(this);
-
-	qDebug() << "clock: ClockAppControllerIfImpl::ClockAppControllerIfImpl <--";
 }
 
 /*!
@@ -63,11 +56,8 @@ ClockAppControllerIfImpl::ClockAppControllerIfImpl(
  */
 ClockAppControllerIfImpl::~ClockAppControllerIfImpl()
 {
-	qDebug() << "clock: ClockAppControllerIfImpl::~ClockAppControllerIfImpl -->";
-
-	if (mTimeZoneClient) {
-		delete mTimeZoneClient;
-		mTimeZoneClient = 0;
+	if (!mTimeZoneClient->isNull()) {
+		mTimeZoneClient->deleteInstance();
 	}
 	if (mSettingsUtility) {
 		delete mSettingsUtility;
@@ -77,8 +67,6 @@ ClockAppControllerIfImpl::~ClockAppControllerIfImpl()
 		delete mAlarmClient;
 		mAlarmClient = 0;
 	}
-
-	qDebug() << "clock: ClockAppControllerIfImpl::~ClockAppControllerIfImpl <--";
 }
 
 
@@ -91,10 +79,6 @@ ClockAppControllerIfImpl::~ClockAppControllerIfImpl()
  */
 TimezoneClient* ClockAppControllerIfImpl::timezoneClient()
 {
-	qDebug() << "clock: ClockAppControllerIfImpl::timezoneClient -->";
-
-	qDebug() << "clock: ClockAppControllerIfImpl::timezoneClient <--";
-
 	return mTimeZoneClient;
 }
 
@@ -107,10 +91,6 @@ TimezoneClient* ClockAppControllerIfImpl::timezoneClient()
  */
 SettingsUtility* ClockAppControllerIfImpl::settingsUtility()
 {
-	qDebug() << "clock: ClockAppControllerIfImpl::settingsUtility -->";
-
-	qDebug() << "clock: ClockAppControllerIfImpl::settingsUtility <--";
-
 	return mSettingsUtility;
 }
 
@@ -123,10 +103,6 @@ SettingsUtility* ClockAppControllerIfImpl::settingsUtility()
  */
 AlarmClient* ClockAppControllerIfImpl::alarmClient()
 {
-	qDebug() << "clock: ClockAppControllerIfImpl::alarmClient -->";
-
-	qDebug() << "clock: ClockAppControllerIfImpl::alarmClient <--";
-
 	return mAlarmClient;
 }
 
@@ -139,11 +115,7 @@ AlarmClient* ClockAppControllerIfImpl::alarmClient()
  */
 void ClockAppControllerIfImpl::switchToView(ClockViews viewId)
 {
-	qDebug() << "clock: ClockAppControllerIfImpl::switchToView -->";
-
 	mAppController->mViewManager->showView(viewId);
-
-	qDebug() << "clock: ClockAppControllerIfImpl::switchToView <--";
 }
 
 // End of file	--Don't remove this.

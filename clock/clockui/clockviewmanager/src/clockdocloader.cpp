@@ -15,15 +15,13 @@
  *
 */
 
-// System includes.
-#include <QDebug>
-
 // User includes
 #include "clockdocloader.h"
 #include "clockcommon.h"
 #include "clockmainview.h"
-#include "skinnableclock.h"
+#include "clockwidget.h"
 #include "clockworldview.h"
+#include "clockhomecityitem.h"
 
 /*!
 	\class ClockDocLoader
@@ -39,23 +37,23 @@
  */
 QObject *ClockDocLoader::createObject(const QString &type, const QString &name)
 {
-	qDebug() << "clock: ClockDocLoader::createObject -->";
-
 	if (CLOCK_MAIN_VIEW == name) {
 		QObject *object = new ClockMainView();
 		object->setObjectName(name);
 		return object;
 	} else if (CLOCK_WIDGET == name) {
-		QObject *object = new SkinnableClock();
+		QObject *object = new ClockWidget();
 		object->setObjectName(name);
 		return object;
-    } else if (WORLD_CLOCK_VIEW == name) {
+	} else if (CLOCK_WORLD_VIEW == name) {
 		QObject *object = new ClockWorldView();
 		object->setObjectName(name);
 		return object;
-    }
-
-	qDebug() << "clock: ClockDocLoader::createObject <--";
+	} else if (CLOCK_WORLD_HOMECITY == name) {
+		QObject *object = new ClockHomeCityItem();
+		object->setObjectName(name);
+		return object;
+	}
 
 	return HbDocumentLoader::createObject(type, name);
 }

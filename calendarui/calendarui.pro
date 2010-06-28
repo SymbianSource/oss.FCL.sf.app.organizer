@@ -17,8 +17,19 @@
 
 TEMPLATE = subdirs
 CONFIG += ordered
-SUBDIRS += agendaeventviewer globaldata settings calenplugins customisationmanager \
-		 views controller application regionalplugins
+SUBDIRS += commonutils \
+		   calenlauncher \
+		   caleneditor \
+		   agendaeventviewer \
+		   globaldata \
+		   settings \
+		   calenplugins \
+		   customisationmanager \
+		   views \
+		   controller \
+		   application \
+		   regionalplugins \
+		   calenviewerservice
 
 # End of file	--Don't remove this.
 

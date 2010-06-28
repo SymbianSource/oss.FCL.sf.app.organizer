@@ -38,8 +38,8 @@ class ClockAppControllerIf;
 class AlarmClient;
 class TimezoneClient;
 class SettingsUtility;
-class SkinnableClock;
 class ClockAlarmListModel;
+class ClockWidget;
 
 class ClockMainView : public HbView
 {
@@ -52,11 +52,11 @@ public:
 public:
 	CLOCKVIEWS_EXPORT void setupView(
 			ClockAppControllerIf &controllerIf, ClockDocLoader *docLoader);
-
-public slots:
-	void handleAlarmStatusChanged(int row);
+	CLOCKVIEWS_EXPORT void setupAfterViewReady();
+	CLOCKVIEWS_EXPORT void captureScreenShot(bool captureScreenShot = false);
 
 private slots:
+	void handleAlarmStatusChanged(int row);
 	void refreshMainView();
 	void displayWorldClockView();
 	void addNewAlarm();
@@ -64,15 +64,20 @@ private slots:
 	void handleActivated(const QModelIndex &index);
 	void handleLongPress(HbAbstractViewItem *item, const QPointF &coords);
 	void deleteAlarm();
-	void updateDateLabel();
-	void updatePlaceLabel();
-	void updateClockWidget();
+	void updateView();
+	void updatePlaceLabel(int autoTimeUpdate = -1);
 	void handleAlarmListDisplay();
 	void checkOrientationAndLoadSection(Qt::Orientation orientation);
+	void selectedMenuAction(HbAction *action);
+	void handleMenuClosed();
+    void saveActivity();
 
 private:
 	void setmodel();
 	void hideAlarmList(bool show);
+	void removeSnoozedAlarm();
+	void updateDateLabel();
+	void updateClockWidget();
 
 private:
 	QTimer *mTickTimer;
@@ -81,10 +86,13 @@ private:
 	HbAction *mDisplayWorldClockView;
 	HbAction *mAddNewAlarm;
 	HbAction *mSettingsAction;
+	HbAction *mDeleteAction;
 
 	HbLabel *mDayLabel;
 	HbLabel *mPlaceLabel;
-	SkinnableClock *mClockWidget;
+	HbLabel *mHorizontalDivider;
+	HbLabel *mVerticalDivider;
+	ClockWidget *mClockWidget;
 	HbLabel *mNoAlarmLabel;
 	HbListView *mAlarmList;
 
@@ -95,8 +103,11 @@ private:
 	ClockAppControllerIf *mAppControllerIf;
 	ClockAlarmListModel *mAlarmListModel;
 
-	int mSelectedItem;
-	bool mHideAlarmList;
+	int            mSelectedItem;
+	bool           mHideAlarmList;
+	bool           mIsLongTop;
+	bool           mIsScreenShotCapruted; // check if the screenshot captured is valid
+	QVariantHash   mScreenShot; // screenshot
 };
 
 #endif // CLOCKMAINVIEW_H

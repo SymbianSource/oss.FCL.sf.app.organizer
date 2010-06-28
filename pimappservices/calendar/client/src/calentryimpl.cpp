@@ -636,11 +636,11 @@ TBool CCalEntryImpl::GetRRuleL(TCalRRule& aRule)
 	const TAgnRpt* KRpt = KRptDef->RRule();
 
 	// get the DTSTART property
-	if (SimpleEntry()->Type() == CCalEntry::ETodo)
-		{
-		aRule.SetDtStart(EndTimeL());
-		}
-	else
+//	if (SimpleEntry()->Type() == CCalEntry::ETodo)
+//		{
+//		aRule.SetDtStart(EndTimeL());
+//		}
+//	else
 		{
 		aRule.SetDtStart(StartTimeL());
 		}
@@ -1510,8 +1510,6 @@ void CCalEntryImpl::SetLastModifiedDateL(const TCalTime& aModifiedTime)
 
 void CCalEntryImpl::SetDTStampL(const TCalTime& aDTStampTime)
 	{
-	__ASSERT_ALWAYS( EntryTypeL() != CCalEntry::ENote,
-					User::Leave(KErrNotSupported));
 	LoadFullEntryL();
 	iFullEntry->SetDTStampUtcL(aDTStampTime.TimeUtcL());
 	}

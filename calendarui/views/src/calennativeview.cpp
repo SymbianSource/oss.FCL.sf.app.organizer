@@ -24,6 +24,8 @@
 #include <hbmainwindow.h>
 #include <hbdatetimepicker.h>
 #include <vwsdef.h>
+#include <hbactivitymanager.h> //Activity Manager
+#include <hbapplication.h> //hbapplication
 
 //user includes
 #include <CalenUid.h>
@@ -32,6 +34,7 @@
 #include "calencontext.h"
 #include "calensettingsview.h"
 #include "calendateutils.h"
+#include "calenconstants.h"
 
 /*!
  \class CalenNativeView
@@ -42,12 +45,13 @@
  Default constructor.
  */
 CalenNativeView::CalenNativeView(MCalenServices &services) :
-	mServices(services)
+	mServices(services), mIsCapturedScreenShotValid(false)
 {
 	setTitle(hbTrId("txt_calendar_title_calendar"));
 
 	// Create services API and register for notifications
 	RArray<TCalenNotification> notificationArray;
+	CleanupClosePushL(notificationArray);
 
 	notificationArray.Append(ECalenNotifySystemTimeChanged);
 	notificationArray.Append(ECalenNotifySystemLocaleChanged);
@@ -55,7 +59,7 @@ CalenNativeView::CalenNativeView(MCalenServices &services) :
 
 	mServices.RegisterForNotificationsL(this, notificationArray);
 
-	notificationArray.Reset();
+	CleanupStack::PopAndDestroy(&notificationArray);
 }
 
 /*!
@@ -95,27 +99,28 @@ void CalenNativeView::deleteAllEntries()
  */
 void CalenNativeView::goToDate()
 {
-	// Get the current date.
-	QDateTime currentDateTime = CalenDateUtils::today();
-	QDate currentDate = currentDateTime.date();
-	mDatePicker = new HbDateTimePicker(currentDate, this);
-
+	// Create a popup with datepicker for the user to select date.
+	HbDialog *popUp = new HbDialog();
+	popUp->setDismissPolicy(HbDialog::NoDismiss);
+	popUp->setTimeout(HbDialog::NoTimeout);
+	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
+	popUp->setHeadingWidget(new HbLabel(hbTrId("txt_calendar_opt_go_to_date")));
+	
+	if(mDatePicker) {
+		mDatePicker = NULL;
+	}
+	mDatePicker = new HbDateTimePicker(QDate::currentDate(), popUp);
 	// Set the date range.
 	mDatePicker->setMinimumDate(CalenDateUtils::minTime().date());
 	mDatePicker->setMaximumDate(CalenDateUtils::maxTime().date());
-
-	// Create a popup with datepicker for the user to select date.
-	HbDialog popUp;
-	popUp.setDismissPolicy(HbDialog::NoDismiss);
-	popUp.setTimeout(HbDialog::NoTimeout);
-	popUp.setHeadingWidget(new HbLabel(hbTrId("txt_calendar_opt_go_to_date")));
-	popUp.setContentWidget(mDatePicker);
+	mDatePicker->setDate(QDate::currentDate());
+	
+	popUp->setContentWidget(mDatePicker);
 	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
-	popUp.setPrimaryAction(okAction);
+	popUp->addAction(okAction);
 	connect(okAction, SIGNAL(triggered()), this, SLOT(goToSelectedDate()));
-	connect(okAction, SIGNAL(triggered()), &popUp, SLOT(close()));
-	popUp.setSecondaryAction(new HbAction(hbTrId("txt_common_button_cancel"), &popUp));
-	popUp.exec();
+	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"), popUp));
+	popUp->open();
 }
 
 /*
@@ -130,11 +135,11 @@ void CalenNativeView::goToSelectedDate()
 	        selectedDate >= CalenDateUtils::minTime().date() &&
 	        selectedDate <= CalenDateUtils::maxTime().date()) {
 		MCalenContext& context = mServices.Context();
-		QDateTime contextDate = context.focusDateAndTimeL();
+		QDateTime contextDate = context.focusDateAndTime();
 
 		//Set the selected date to contextDate.
 		contextDate.setDate(selectedDate);
-		context.setFocusDateAndTimeL(contextDate, KCalenMonthViewUidValue);
+		context.setFocusDateAndTime(contextDate);
 	}
 	refreshViewOnGoToDate();
 }
@@ -202,4 +207,49 @@ QString *CalenNativeView::pluginText()
 	return mServices.InfobarTextL();
 }
 
+// ----------------------------------------------------------------------------
+// captureScreenshot caltures screen shot for the given viewId
+// @param viewId view for which screenshot needs to be captured
+// ----------------------------------------------------------------------------
+// 
+void CalenNativeView::captureScreenshot(bool captureScreenShot)
+    {
+    // get a screenshot for saving to the activity manager. It's done for once
+    // to optimize the performance
+    if (captureScreenShot) {
+        mScreenShotMetadata.clear(); // remove any screenshot captured earlier
+        mScreenShotMetadata.insert("screenshot", QPixmap::grabWidget(mainWindow(), mainWindow()->rect()));
+        }
+    mIsCapturedScreenShotValid = captureScreenShot; // set the validity of the screenshot captured
+    }
+
+// ----------------------------------------------------------------------------
+// saveActivity saves the activity for current view
+// ----------------------------------------------------------------------------
+// 
+void CalenNativeView::saveActivity()
+ {
+   // Get a pointer to activity manager 
+   HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+ 
+   // check if alerady a valid screen shot is captured
+   if (!mIsCapturedScreenShotValid) {
+       mScreenShotMetadata.clear(); // remove any screenshot captured earlier
+       mScreenShotMetadata.insert("screenshot", QPixmap::grabWidget(mainWindow(), mainWindow()->rect()));
+       }
+   
+   // Save any data necessary to save the state
+   QByteArray serializedActivity;
+   QDataStream stream(&serializedActivity, QIODevice::WriteOnly | QIODevice::Append);
+   stream << mActivityId;
+ 
+   bool ok(false);
+   // Save activity
+   ok = activityManager->addActivity(activityName, serializedActivity, mScreenShotMetadata);
+
+   // Check is activity saved sucessfully
+   if ( !ok )  {
+       qFatal("Add failed" ); // Panic is activity is not saved successfully
+       }
+ }
 //End Of File

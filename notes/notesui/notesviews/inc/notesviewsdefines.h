@@ -27,6 +27,7 @@
 #   define NOTESVIEWS_EXPORT Q_DECL_IMPORT
 #endif
 
+const QString notes = "NotesAllList"; // Activity Id to be stored in Activity Manager DB
 #endif // NOTESVIEWSDEFINES_H
 
 // End of file  --Don't remove this.

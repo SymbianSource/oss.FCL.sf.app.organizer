@@ -18,13 +18,12 @@
 
 // System includes
 #include <QDateTime>
-#include <QTranslator>
-#include <HbApplication>
 #include <HbInstance>
 #include <HbMainWindow>
 #include <HbView>
 #include <HbNotificationDialog>
 #include <HbExtendedLocale>
+#include <HbTranslator>
 
 // User includes
 #include "noteseditor.h"
@@ -49,10 +48,14 @@
 NotesEditorPrivate::NotesEditorPrivate(AgendaUtil *agendaUtil, QObject *parent)
 :QObject(parent),
  mSaveEntry(true),
+ mTranslator(0),
  mNoteId(0)
 {
 	// First get the q-pointer.
 	q_ptr = static_cast<NotesEditor *> (parent);
+	
+	mTranslator = new HbTranslator("notes");
+	mTranslator->loadCommon();
 
 	// Here we check if the agendautil passed by the client is 0. If so, then we
 	// construct our own.
@@ -69,11 +72,6 @@ NotesEditorPrivate::NotesEditorPrivate(AgendaUtil *agendaUtil, QObject *parent)
 			mAgendaUtil, SIGNAL(entriesChanged(QList<ulong> )),
 			this, SLOT(handleEntriesChanged(QList<ulong> )));
 
-
-	mTranslator = new QTranslator;
-	int success=mTranslator->load("notes",":/translations");
-
-	HbApplication::instance()->installTranslator(mTranslator);
 }
 
 /*!
@@ -86,7 +84,6 @@ NotesEditorPrivate::~NotesEditorPrivate()
 		mAgendaUtil = 0;
 	}
 
-	HbApplication::instance()->removeTranslator(mTranslator);
 	if (mTranslator) {
 		delete mTranslator;
 		mTranslator = 0;
@@ -565,11 +562,11 @@ bool NotesEditorPrivate::saveTodo()
 			if (isTodoEdited()) {
 				status = mAgendaUtil->updateEntry(mModifiedNote);
 				mNoteId = mModifiedNote.id();
-				if (status) {
-					showNotification(
-							hbTrId("txt_notes_dpopinfo_todo_note_saved"));
-				}
 			}
+		}
+		if (status) {
+			showNotification(
+					hbTrId("txt_notes_dpopinfo_todo_note_saved"));
 		}
 	}
 

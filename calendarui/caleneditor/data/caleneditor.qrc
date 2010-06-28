@@ -3,7 +3,4 @@
 		<file alias="caleneditorview.docml">caleneditorview.docml</file> 	
 		<file alias="caleneditorlocationitem.docml">caleneditorlocationitem.docml</file> 	
 	</qresource>
-	<qresource prefix="/translations">
-		<file alias="caleneditor_en_GB">caleneditor_en_GB.qm</file>
-	</qresource>
 </RCC>

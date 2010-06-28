@@ -26,6 +26,8 @@
 #include <HbGroupBox>
 #include <HbListViewItem>
 #include <HbInstance>
+#include <HbNotificationDialog>
+#include <HbLabel>
 
 // User includes
 #include "notesnoteview.h"
@@ -53,7 +55,8 @@
 NotesNoteView::NotesNoteView(QGraphicsWidget *parent)
 :HbView(parent),
  mSelectedItem(0),
- mDeleteAction(0)
+ mDeleteAction(0),
+ mIsLongTop(false)
  {
 	// Nothing yet.
  }
@@ -97,8 +100,9 @@ void NotesNoteView::setupView(
 	subModel->setSourceModel(mProxyModel);
 
 	// Get the list object from the document and update the model.
-	mListView = static_cast<HbListView *>
-	(mDocLoader->findWidget("noteListView"));
+	mListView = static_cast<HbListView *> (
+			mDocLoader->findWidget("noteListView"));
+	
 	// Update the list view model.
 	mListView->setModel(subModel);
 	// Setup the operations that can be done with a list view.
@@ -110,6 +114,10 @@ void NotesNoteView::setupView(
 			SIGNAL(longPressed(HbAbstractViewItem *, const QPointF &)),
 			this,
 			SLOT(handleItemLongPressed(HbAbstractViewItem *, const QPointF &)));
+
+	// Get the empty list label.
+	mEmptyListLabel = static_cast<HbLabel *> (
+			mDocLoader->findWidget("emptyListLabel"));
 
 	// Get the toolbar/menu actions.
 	mAddNoteAction = static_cast<HbAction *> (
@@ -126,8 +134,7 @@ void NotesNoteView::setupView(
 
 	mViewCollectionAction = static_cast<HbAction *> (
 			mDocLoader->findObject("displayCollectionsAction"));
-	mViewCollectionAction->setCheckable(true);
-	mViewCollectionAction->setChecked(true);
+	
 	connect(
 			mViewCollectionAction, SIGNAL(changed()),
 			this, SLOT(handleActionStateChanged()));
@@ -142,9 +149,29 @@ void NotesNoteView::setupView(
 			window, SIGNAL(orientationChanged(Qt::Orientation)),
 			this, SLOT(handleOrientationChanged(Qt::Orientation)));
 
+
+	connect(
+			mAgendaUtil, SIGNAL(entryAdded(ulong)),
+			this,SLOT(updateView(ulong)));
+	connect(
+			mAgendaUtil, SIGNAL(entryDeleted(ulong)),
+			this,SLOT(updateView(ulong)));
+	connect(
+			mAgendaUtil, SIGNAL(entryUpdated(ulong)),
+			this, SLOT(updateView(ulong)));
+	
+
 	// Set the graphics size for the icons.
 	HbListViewItem *prototype = mListView->listItemPrototype();
 	prototype->setGraphicsSize(HbListViewItem::SmallIcon);
+}
+
+/*
+	Updates the note view either to show notes or emptyListLabel.
+ */
+void NotesNoteView::updateNoteView()
+{
+	updateView();
 }
 
 /*!
@@ -170,34 +197,36 @@ void NotesNoteView::createNewNote()
  */
 void NotesNoteView::handleItemReleased(const QModelIndex &index)
 {
-	// Sanity check.
-	if (!index.isValid()) {
-		return;
+	if(!mIsLongTop) {
+		// Sanity check.
+		if (!index.isValid()) {
+			return;
+		}
+
+		// First get the id of the note and get the corresponding information from
+		// agendautil.
+		ulong noteId = index.data(NotesNamespace::IdRole).value<qulonglong>();
+
+		if (0 >= noteId) {
+			// Something wrong.
+			return;
+		}
+
+		// Get the entry details.
+		AgendaEntry entry = mAgendaUtil->fetchById(noteId);
+
+		if (entry.isNull()) {
+			// Entry invalid.
+			return;
+		}
+
+		// Now launch the editor with the obtained info.
+		mNotesEditor = new NotesEditor(mAgendaUtil, this);
+		connect(
+				mNotesEditor, SIGNAL(editingCompleted(bool)),
+				this, SLOT(handleEditingCompleted(bool)));
+		mNotesEditor->edit(entry);
 	}
-
-	// First get the id of the note and get the corresponding information from
-	// agendautil.
-	ulong noteId = index.data(NotesNamespace::IdRole).value<qulonglong>();
-
-	if (0 >= noteId) {
-		// Something wrong.
-		return;
-	}
-
-	// Get the entry details.
-	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
-
-	if (entry.isNull()) {
-		// Entry invalid.
-		return;
-	}
-
-	// Now launch the editor with the obtained info.
-	mNotesEditor = new NotesEditor(mAgendaUtil, this);
-	connect(
-			mNotesEditor, SIGNAL(editingCompleted(bool)),
-			this, SLOT(handleEditingCompleted(bool)));
-	mNotesEditor->edit(entry);
 }
 
 /*!
@@ -212,6 +241,7 @@ void NotesNoteView::handleItemLongPressed(
 		HbAbstractViewItem *item, const QPointF &coords)
 {
 	mSelectedItem = item;
+	mIsLongTop = true;
 
 	ulong noteId = item->modelIndex().data(
 			NotesNamespace::IdRole).value<qulonglong>();
@@ -219,48 +249,32 @@ void NotesNoteView::handleItemLongPressed(
 
 	// Display a context specific menu.
 	HbMenu *contextMenu = new HbMenu();
+	connect(
+			contextMenu,SIGNAL(aboutToClose()),
+			this, SLOT(handleMenuClosed()));
 
 	// Add actions to the context menu.
 	mOpenAction =
 			contextMenu->addAction(hbTrId("txt_common_menu_open"));
-	connect(
-			mOpenAction, SIGNAL(triggered()),
-			this, SLOT(openNote()));
 
 	mDeleteAction =
 			contextMenu->addAction(hbTrId("txt_common_menu_delete"));
-	connect(
-			mDeleteAction, SIGNAL(triggered()),
-			this, SLOT(deleteNote()));
 
 	if (AgendaEntry::TypeNote == entry.type()) {
 		if (entry.favourite()) {
-			mMakeFavouriteAction =
-					contextMenu->addAction(
+			mMakeFavouriteAction = contextMenu->addAction(
 							hbTrId("txt_notes_menu_remove_from_favorites"));
-
-			connect(
-					mMakeFavouriteAction, SIGNAL(triggered()),
-					this, SLOT(markNoteAsFavourite()));
-
 		} else {
-			mMakeFavouriteAction =
-					contextMenu->addAction(
+			mMakeFavouriteAction = contextMenu->addAction(
 							hbTrId("txt_notes_menu_mark_as_favorite"));
-
-			connect(
-					mMakeFavouriteAction, SIGNAL(triggered()),
-					this, SLOT(markNoteAsFavourite()));
 		}
 		mMarkTodoAction = contextMenu->addAction(
 				hbTrId("txt_notes_menu_make_it_as_todo_note"));
-		connect(
-				mMarkTodoAction, SIGNAL(triggered()),
-				this, SLOT(markNoteAsTodo()));
 	}
 
 	// Show the menu.
-	contextMenu->exec(coords);
+	contextMenu->open(this, SLOT(selectedMenuAction(HbAction*)));
+	contextMenu->setPreferredPos(coords);
 }
 
 /*!
@@ -357,6 +371,13 @@ void NotesNoteView::markNoteAsTodo()
 	// Delete the old entry.
 	mAgendaUtil->deleteEntry(entry.id());
 
+	// Show the soft notification.
+	HbNotificationDialog *notificationDialog = new HbNotificationDialog();
+	notificationDialog->setTimeout(
+			HbNotificationDialog::ConfirmationNoteTimeout);
+	notificationDialog->setTitle(
+			hbTrId("txt_notes_dpopinfo_note_moved_to_todos"));
+	notificationDialog->show();
 }
 
 /*!
@@ -437,5 +458,47 @@ void NotesNoteView::openNote()
 	// Launch the notes editor with the obtained info.
 	mNotesEditor->edit(entry);
 }
+
+/*!
+	Slot to handle context menu actions.
+ */
+void NotesNoteView::selectedMenuAction(HbAction *action)
+{
+	if (action == mOpenAction) {
+		openNote();
+	} else if (action == mDeleteAction) {
+		deleteNote();
+	} else if (action == mMakeFavouriteAction) {
+		markNoteAsFavourite();
+	} else if (action == mMarkTodoAction) {
+		markNoteAsTodo();
+	}
+}
+
+/*!
+	Slot to handle the context menu closed.
+ */
+void NotesNoteView::handleMenuClosed()
+{
+	mIsLongTop = false;
+}
+
+/*!
+	Handles the visibility of empty list label.
+ */
+void NotesNoteView::updateView(ulong id)
+{
+	Q_UNUSED(id)
+
+	// Get the numbers of notes.
+	if (0 >= mListView->model()->rowCount()) {
+		mEmptyListLabel->show();
+		mListView->hide();
+	} else {
+		mEmptyListLabel->hide();
+		mListView->show();
+	}
+}
+
 // End of file	--Don't remove this.
 

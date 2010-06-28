@@ -17,11 +17,7 @@
 
 TEMPLATE = subdirs
 SUBDIRS += unittest_agendautil
+		    	
 CONFIG += ordered
-
-symbian: {
-	BLD_INF_RULES.prj_exports += \
-	"./rom/unit_agendainterface.iby		CORE_APP_LAYER_IBY_EXPORT_PATH(unit_agendainterface.iby)"
-}
 
 # End of file	--Don't remove this

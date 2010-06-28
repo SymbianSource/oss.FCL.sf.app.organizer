@@ -23,11 +23,11 @@ DEFINES += CLOCKSETTINGSVIEW_LIB
 
 INCLUDEPATH += \
 		./inc \
-		../clockwidget/inc \
 		../../clockmw/clocksettingsutility/inc \
 		../../clockmw/clocktimezone/inc \
 		../clockcityselectionlist/inc \
 		../../inc
+
 
 DEPENDPATH += \
 		./inc \
@@ -38,12 +38,13 @@ symbian: {
 	TARGET.CAPABILITY += ALL -TCB
 	TARGET.EPOCALLOWDLLDATA = 1
 	TARGET.UID3 = 0x10005906
+	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 	LIBS += \
 		-ltimezoneclient \
 		-lclocksettingsutility \
 		-lclockcityselectionlist \
-		-lclockwidgetproto
+		-lxqsettingsmanager
 }
 
 SOURCES += \
@@ -61,5 +62,7 @@ HEADERS += \
 		
 RESOURCES += \
 		clocksettingsview.qrc
+		
+TRANSLATIONS += clocksettingsview.ts
 
 # End of file	--Don't remove this.

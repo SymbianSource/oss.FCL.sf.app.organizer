@@ -17,7 +17,6 @@
 */
 
 // System includes
-#include <QDebug>
 #include <HbInstance>
 #include <HbDataForm>
 #include <HbAction>
@@ -26,8 +25,10 @@
 #include <HbLabel>
 #include <HbPushButton>
 #include <HbCheckBox>
-#include <HbApplication>
-#include <QTranslator>
+#include <HbTranslator>
+#include <xqsettingsmanager.h>
+#include <xqsettingskey.h>
+#include <clockdomaincrkeys.h>
 
 // User includes
 #include "clocksettingsview.h"
@@ -35,7 +36,6 @@
 #include "clocksettingsdocloader.h"
 #include "settingsutility.h"
 #include "timezoneclient.h"
-#include "skinnableclock.h"
 #include "settingsdatatypes.h"
 #include "settingscustomitem.h"
 
@@ -54,37 +54,31 @@
 ClockSettingsView::ClockSettingsView(QObject *parent)
 :QObject(parent)
 {
-	qDebug("clock: ClockSettingsView::ClockSettingsView() -->");
 	
 	// Load the translation file and install the editor specific translator
-    mTranslator = new QTranslator;
-    //QString lang = QLocale::system().name();
-    //QString path = "Z:/resource/qt/translations/";
-    mTranslator->load("clocksettingsview",":/translations");
-    // TODO: Load the appropriate .qm file based on locale
-    //bool loaded = mTranslator->load("caleneditor_" + lang, path);
-    HbApplication::instance()->installTranslator(mTranslator);
+    mTranslator = new HbTranslator("clocksettingsview");
+    mTranslator->loadCommon();
 
 	// Construct the settings utility.
 	mSettingsUtility = new SettingsUtility();
 
 	// Construct the timezone client.
-	mTimezoneClient = new TimezoneClient();
+	mTimezoneClient = TimezoneClient::getInstance();
 	connect(
 			mTimezoneClient, SIGNAL(timechanged()),
-			this, SLOT(updatePlaceInfo()));
-	connect(
-			mTimezoneClient, SIGNAL(timechanged()),
-			this, SLOT(updateDateLabel()));
-	connect(
-			mTimezoneClient, SIGNAL(timechanged()),
-			this, SLOT(updateClockWidget()));
+			this, SLOT(updatePlaceItem()));
 	connect(
 			mTimezoneClient, SIGNAL(timechanged()),
 			this, SLOT(updateDateItem()));
 	connect(
 			mTimezoneClient, SIGNAL(timechanged()),
 			this, SLOT(updateTimeItem()));
+	connect(
+			mTimezoneClient, SIGNAL(autoTimeUpdateChanged(int)),
+			this, SLOT(handleAutoTimeUpdateChange(int)));
+	connect(
+			mTimezoneClient, SIGNAL(cityUpdated()),
+			this, SLOT(updatePlaceItem()));
 
 	// Start a timer. For updating the remaining alarm time.
 	mTickTimer = new QTimer(this);
@@ -92,7 +86,22 @@ ClockSettingsView::ClockSettingsView(QObject *parent)
 			mTickTimer, SIGNAL(timeout()),
 			this, SLOT(updateTimeItem()));
 
-	qDebug("clock: ClockSettingsView::ClockSettingsView() <--");
+	// Create the settings manager.
+	mSettingsManager = new XQSettingsManager(this);
+
+	// Create the key for alarm snooze time.
+	mAlarmSnoozeTimeKey = new XQSettingsKey(
+			XQSettingsKey::TargetCentralRepository,
+			KCRUidClockApp,
+			KClockAppSnoozeTime);
+	
+	// Start the monitoring for the alarm snooze time key.
+	mSettingsManager->startMonitoring(*mAlarmSnoozeTimeKey);
+
+	// Listen to the key value changes.
+	connect(
+			mSettingsManager, SIGNAL(valueChanged(XQSettingsKey, QVariant)),
+			this, SLOT(eventMonitor(XQSettingsKey, QVariant)));
 }
 
 /*!
@@ -100,20 +109,24 @@ ClockSettingsView::ClockSettingsView(QObject *parent)
  */
 ClockSettingsView::~ClockSettingsView()
 {
-	qDebug("clock: ClockSettingsView::~ClockSettingsView() -->");
-
 	if (mDocLoader) {
 		delete mDocLoader;
 	}
 	
 	// Remove the translator
-    HbApplication::instance()->removeTranslator(mTranslator);
     if (mTranslator) {
         delete mTranslator;
         mTranslator = 0;
     }
+    if(mSettingsUtility){
+    	delete mSettingsUtility;
+    }
+	
+	if(mSettingsModel){
+		delete mSettingsModel;
+	}
+		
 
-	qDebug("clock: ClockSettingsView::~ClockSettingsView() <--");
 }
 
 /*!
@@ -121,8 +134,6 @@ ClockSettingsView::~ClockSettingsView()
  */
 void ClockSettingsView::loadSettingsView()
 {
-	qDebug() << "clock: ClockViewManager::loadMainView -->";
-
 	bool loadSuccess;
 
 	// Construct the document loader instance
@@ -161,7 +172,6 @@ void ClockSettingsView::loadSettingsView()
 	// Setup the view.
 	setupView();
 
-	qDebug() << "clock: ClockViewManager::loadMainView <--";
 }
 
 /*!
@@ -175,109 +185,21 @@ void ClockSettingsView::handleBackAction()
 }
 
 /*!
-	Updates the day and date in the day label.
+	Updates the zone info in the place item field.
  */
-void ClockSettingsView::updateDateLabel()
+void ClockSettingsView::updatePlaceItem()
 {
-	qDebug() << "clock: ClockSettingsView::updateDateLabel -->";
-
-	// Get the current datetime.
-	QDateTime dateTime = QDateTime::currentDateTime();
-	// Get the day name.
-	QString dayName = dateTime.toString("dddd");
-	// Get the date in correct format.
-	QString currentDate = mSettingsUtility->date();
-	// Construct the day + date string.
-	QString dayDateString;
-	dayDateString+= dayName;
-	dayDateString += " ";
-	dayDateString += currentDate;
-
-	mDayDateLabel->clear();
-	mDayDateLabel->setPlainText(dayDateString);
-
-	qDebug() << "clock: ClockSettingsView::updateDateLabel <--";
-}
-
-/*!
-	Updates the zone info in the place label.
- */
-void ClockSettingsView::updatePlaceInfo()
-{
-	qDebug() << "clock: ClockSettingsView::updateClockZoneInfo -->";
-
 	// Get the current zone info.
 	LocationInfo currentZoneInfo = mTimezoneClient->getCurrentZoneInfoL();
 
-	// Construct the GMT +/- X string.
-	QString gmtOffset;
-
-	int utcOffset = currentZoneInfo.zoneOffset;
-	int offsetInHours (utcOffset/60);
-	int offsetInMinutes (utcOffset%60);
-
-	// Check wether the offset is +ve or -ve.
-	if (0 < utcOffset) {
-		// We have a positive offset. Append the '+' character.
-		gmtOffset += tr(" +");
-	} else if (0 > utcOffset) {
-		// We have a negative offset. Append the '-' character.
-		gmtOffset += tr(" -");
-		offsetInHours = -offsetInHours;
-	} else {
-		// We dont have an offset. We are at GMT zone.
-	}
-
-	// Append the hour component.
-	gmtOffset += QString::number(offsetInHours);
-
-	// Get the time separator from settings and append it.
-	QStringList timeSeparatorList;
-	int index = mSettingsUtility->timeSeparator(timeSeparatorList);
-	gmtOffset += timeSeparatorList.at(index);
-
-	// Append the minute component.
-	// If minute component is less less than 10, append a '00'
-	if (0 <= offsetInMinutes && offsetInMinutes < 10) {
-		gmtOffset += tr("00");
-	} else {
-		gmtOffset += QString::number(offsetInMinutes);
-	}
-
-	gmtOffset += tr(" GMT ");
-
-	// Append DST info.
-	if (currentZoneInfo.dstOn) {
-		gmtOffset += tr(" DST");
-	}
-
-	// Update the labels with the correct info.
-	mPlaceLabel->clear();
 	if (mTimezoneClient->timeUpdateOn()) {
-		mPlaceLabel->setPlainText(
-				currentZoneInfo.countryName + tr(" ") + gmtOffset);
 		mPlaceDataFormItem->setContentWidgetData(
 				"text", currentZoneInfo.countryName);
 	} else {
 		QString placeInfo = currentZoneInfo.cityName
 				+ tr(", ") + currentZoneInfo.countryName;
-		mPlaceLabel->setPlainText(placeInfo + tr(" ") + gmtOffset);
 		mPlaceDataFormItem->setContentWidgetData("text", placeInfo);
 	}
-
-	qDebug() << "clock: ClockSettingsView::updateDayDateInfo <--";
-}
-
-/*!
-	Updates the clock widget display.
- */
-void ClockSettingsView::updateClockWidget()
-{
-	qDebug() << "clock: ClockSettingsView::updateClockWidget -->";
-
-	mClockWidget->updateDisplay(true);
-
-	qDebug() << "clock: ClockSettingsView::updateClockWidget <--";
 }
 
 /*!
@@ -307,8 +229,6 @@ void ClockSettingsView::updateTimeItem()
  */
 void ClockSettingsView::handleOrientationChanged(Qt::Orientation orientation)
 {
-	qDebug() << "clock: ClockSettingsView::handleOrientationChanged -->"; 
-
 	bool success; 
 	// If horizontal, load the landscape section. 
 	if (Qt::Horizontal == orientation) { 
@@ -322,9 +242,6 @@ void ClockSettingsView::handleOrientationChanged(Qt::Orientation orientation)
 				CLOCK_SETTINGS_VIEW_PORTRAIT_SECTION,
 				&success); 
 	} 
-
-	qDebug() << "clock: ClockSettingsView::handleOrientationChanged <--"; 
-
 }
 
 void ClockSettingsView::handleNetworkTimeStateChange(int state)
@@ -333,36 +250,13 @@ void ClockSettingsView::handleNetworkTimeStateChange(int state)
 	if ((Qt::Checked == state && !cenrepValue)
 			|| (Qt::Unchecked == state && cenrepValue)) {
 		if (Qt::Checked == state) {
-			// Disable the time, date and place item.
-			if (mTimeDataFormItem) {
-				mTimeDataFormItem->setEnabled(false);
-			}
-			if (mDateDataFormItem) {
-				mDateDataFormItem->setEnabled(false);
-			}
-			if (mPlaceDataFormItem) {
-				mPlaceDataFormItem->setEnabled(false);
-			}
 			// Update the cenrep value.
 			mTimezoneClient->setTimeUpdateOn(true);
 
 		} else if (Qt::Unchecked == state) {
-			// Enable the time, date and place item.
-			if (mTimeDataFormItem) {
-				mTimeDataFormItem->setEnabled(true);
-			}
-			if (mDateDataFormItem) {
-				mDateDataFormItem->setEnabled(true);
-			}
-			if (mPlaceDataFormItem) {
-				mPlaceDataFormItem->setEnabled(true);
-			}
-
 			// Update the cenrep value.
 			mTimezoneClient->setTimeUpdateOn(false);
 		}
-
-		updatePlaceInfo();
 	}
 }
 
@@ -374,14 +268,12 @@ void ClockSettingsView::handleNetworkTimeStateChange(int state)
  */
 void ClockSettingsView::setupView()
 {
-	qDebug("clock: ClockSettingsView::setupView() -->");
-
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 	window->addView(mSettingsView);
 	window->setCurrentView(mSettingsView);
 
 	// Add the back softkey.
-	mBackAction = new HbAction(Hb::BackAction);
+	mBackAction = new HbAction(Hb::BackNaviAction);
 	mSettingsView->setNavigationAction(mBackAction);
 	connect(
 			mBackAction, SIGNAL(triggered()),
@@ -391,34 +283,17 @@ void ClockSettingsView::setupView()
 	mSettingsForm = static_cast<HbDataForm *> (
 			mDocLoader->findWidget(CLOCK_SETTINGS_DATA_FORM));
 
-	// Get the day-date label.
-	mDayDateLabel = static_cast<HbLabel *> (
-			mDocLoader->findWidget(CLOCK_SETTINGS_DATE_LABEL));
-
-	// Get the place label.
-	mPlaceLabel = static_cast<HbLabel *> (
-			mDocLoader->findWidget(CLOCK_SETTINGS_PLACE_LABEL));
-
-	// Get the clock widget.
-	mClockWidget = static_cast<SkinnableClock *> (
-			mDocLoader->findObject(CLOCK_WIDGET));
-
 	// Create the custom prototype.
 	QList <HbAbstractViewItem*> prototypes = mSettingsForm->itemPrototypes();
-	SettingsCustomItem *customPrototype = new SettingsCustomItem();
+	SettingsCustomItem *customPrototype = new SettingsCustomItem(mSettingsForm);
 	prototypes.append(customPrototype);
 	mSettingsForm->setItemPrototypes(prototypes);
 
 	// Create the model.
 	createModel();
-	// Update the relevant info.
-	updateDateLabel();
-	updateClockWidget();
-	updatePlaceInfo();
+	updatePlaceItem();
 
 	mTickTimer->start(60000 - 1000 * QTime::currentTime().second());
-
-	qDebug("clock: ClockSettingsView::setupView() <--");
 }
 
 /*!
@@ -513,7 +388,147 @@ void ClockSettingsView::populateModel()
 			static_cast<HbDataFormModelItem::DataItemType>
 			(HbDataFormModelItem::CustomItemBase + RegionalSettingsItem);
 	mSettingsModel->appendDataFormItem(regionalSettingsItem);
+    
+	// Add the clock type item.
+    HbDataFormModelItem::DataItemType clockTypeSettingsItem =
+            static_cast<HbDataFormModelItem::DataItemType>
+            (HbDataFormModelItem::ToggleValueItem);
+    mClockTypeItem = mSettingsModel->appendDataFormItem(
+	clockTypeSettingsItem,hbTrId("txt_clock_setlabel_clock_type"));
+    QStringList clockTypeList;
+    int clockType = mSettingsUtility->clockType(clockTypeList);
+	int zeroIndex(0);
+    if( zeroIndex == clockType ){
+	    mClockTypeItem->setContentWidgetData("text", clockTypeList[0]);
+	    mClockTypeItem->setContentWidgetData("additionalText", clockTypeList[1]);
+    } else {
+	    mClockTypeItem->setContentWidgetData("text", clockTypeList[1]);
+	    mClockTypeItem->setContentWidgetData("additionalText", clockTypeList[0]);    
+    }
+    mSettingsForm->addConnection(
+            mClockTypeItem, SIGNAL(clicked()),
+            this, SLOT(handleClockTypeChanged()));
+    
+    // Add the alarm snooze time item.
+	mAlarmSnoozeItem = mSettingsModel->appendDataFormItem(
+			HbDataFormModelItem::ComboBoxItem,
+			hbTrId("txt_clock_setlabel_alarm_snooze_time"));
+	QStringList alramSnoozeTimes;
+	alramSnoozeTimes << hbTrId("txt_clock_set_ln_mins", 5)
+			<< hbTrId("txt_clock_set_ln_mins", 10)
+			<< hbTrId("txt_clock_set_ln_mins", 15)
+			<< hbTrId("txt_clock_set_ln_mins", 30);
+	
+	// Build the hash map for the reminder.
+	mAlarmSnoozeTimeHash[0] = 5;
+	mAlarmSnoozeTimeHash[1] = 10;
+	mAlarmSnoozeTimeHash[2] = 15;
+	mAlarmSnoozeTimeHash[3] = 30;
+	
+	mAlarmSnoozeItem->setContentWidgetData("items", alramSnoozeTimes);
+	QVariant value = mSettingsManager->readItemValue(*mAlarmSnoozeTimeKey);
+	bool success;
+	int index;
+	int alarmSnoozeTime = value.toInt(&success);
+	if (success) {
+		index = mAlarmSnoozeTimeHash.key(alarmSnoozeTime);
+	} else {
+		index = mAlarmSnoozeTimeHash.key(15);
+	}
+	mAlarmSnoozeItem->setContentWidgetData("currentIndex", index);
+	mSettingsForm->addConnection(
+			mAlarmSnoozeItem, SIGNAL(currentIndexChanged(int)),
+			this, SLOT(handleAlarmSnoozeTimeChanged(int)));
 
+}
+
+/*!
+	Slot which handles the auto time update value changes in cenrep.
+	
+	/param value New value of the auto time update.
+ */
+void ClockSettingsView::handleAutoTimeUpdateChange(int value)
+{
+	int state = (mNetworkTimeItem->contentWidgetData("checkState")).toInt();
+	
+	if (value) {
+		// Disable the time, date and place item.
+		if (mTimeDataFormItem) {
+			mTimeDataFormItem->setEnabled(false);
+		}
+		if (mDateDataFormItem) {
+			mDateDataFormItem->setEnabled(false);
+		}
+		if (mPlaceDataFormItem) {
+			mPlaceDataFormItem->setEnabled(false);
+		}
+		if (Qt::Unchecked == state) {
+			mNetworkTimeItem->setContentWidgetData(
+						"checkState", Qt::Checked);
+		}
+	} else {
+		// Enable the time, date and place item.
+		if (mTimeDataFormItem) {
+			mTimeDataFormItem->setEnabled(true);
+		}
+		if (mDateDataFormItem) {
+			mDateDataFormItem->setEnabled(true);
+		}
+		if (mPlaceDataFormItem) {
+			mPlaceDataFormItem->setEnabled(true);
+		}
+		if (Qt::Checked == state) {
+			mNetworkTimeItem->setContentWidgetData(
+						"checkState", Qt::Unchecked);
+		}
+	}
+	updatePlaceItem();
+}
+
+/*!
+	Slot which handles the alarm snooze time changes.
+	
+	/param value New index of the alarm snooze time.
+ */
+void ClockSettingsView::handleAlarmSnoozeTimeChanged(int index)
+{
+	if (mAlarmSnoozeTimeHash.value(index)) {
+		mSettingsManager->writeItemValue(
+				*mAlarmSnoozeTimeKey, mAlarmSnoozeTimeHash.value(index));
+	}
+}
+
+/*!
+    Slot which handles the clock type change..
+ */
+void ClockSettingsView::handleClockTypeChanged()
+{
+    mSettingsUtility->setClockType(
+                mClockTypeItem->contentWidgetData("text").toString());
+}
+
+/*!
+	Slot which is called when the value changes in cenrep.
+
+	\param key The key which got changed in cenrep.
+	\param value The new value of that key.
+ */
+void ClockSettingsView::eventMonitor(
+		const XQSettingsKey& key, const QVariant& value)
+{
+	if (key.uid() == KCRUidClockApp && key.key() == KClockAppSnoozeTime) {
+		if (mSettingsManager->error() == XQSettingsManager::NoError) {
+
+			bool success;
+			int alarmSnoozeTime = value.toInt(&success);
+			
+			if (success) {
+				mAlarmSnoozeItem->setContentWidgetData(
+						"currentIndex", mAlarmSnoozeTimeHash.key(
+								alarmSnoozeTime));
+			}
+		}
+	}
 }
 
 // End of file	--Don't remove this.

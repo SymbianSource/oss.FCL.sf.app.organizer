@@ -24,8 +24,6 @@
 CalenEventListViewItem::CalenEventListViewItem(QGraphicsItem *parent) :
 HbListViewItem(parent)
 {
-	HbExtendedLocale locale = HbExtendedLocale::system();
-    timeFormat12 = (HbExtendedLocale::Time12 == locale.timeStyle()) ? true : false;
 }
 
 CalenEventListViewItem::~CalenEventListViewItem()
@@ -42,16 +40,5 @@ void CalenEventListViewItem::updateChildItems()
 {
     HbListViewItem::updateChildItems();
 }
-
-bool CalenEventListViewItem::timeFormat12Hr()
-{
-    return timeFormat12;
-}
-
-void CalenEventListViewItem::setTimeFormat12Hr(bool format)
-{
-    timeFormat12 = format;
-}
-
 
 // End of file

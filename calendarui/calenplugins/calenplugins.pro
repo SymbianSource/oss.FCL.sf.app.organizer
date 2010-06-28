@@ -17,7 +17,6 @@
 
 TEMPLATE = subdirs
 
-SUBDIRS += calensettingsplugin
 SUBDIRS += agendaeventviewerplugin
 CONFIG += ordered
 

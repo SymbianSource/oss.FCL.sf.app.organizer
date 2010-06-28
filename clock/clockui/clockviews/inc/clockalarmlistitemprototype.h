@@ -21,7 +21,8 @@
 
 // System includes
 #include <QGraphicsWidget>
-#include <HbListViewItem.h>
+#include <QPointer>
+#include <hblistviewitem.h>
 
 // Forward declarations
 class QGraphicsItem;
@@ -48,7 +49,7 @@ private slots:
 private:
 	QGraphicsItem *mParent;
 
-	HbPushButton *malarmIconItem;
+	QPointer<HbPushButton> malarmIconItem;
 };
 
 #endif // CLOCKALARMLISTITEMPROTOTYPE_H

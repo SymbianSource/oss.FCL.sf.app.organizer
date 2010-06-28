@@ -177,7 +177,7 @@ void CAlmAlarmControl::HandleStateChange(TInt aOldState)
                 iAlarmUtils->StartKeyBlocker();
 
                 // reset the key guard
-                iAlarmUtils->SetKeyGuard( ETrue );
+                //iAlarmUtils->SetKeyGuard( ETrue );
             }
 
             break;
@@ -227,26 +227,9 @@ void CAlmAlarmControl::DoAutoSnooze()
     // Allow auto-snooze only while waiting user input
     if( IsState( EStateWaitingInput ) )
         {
-        SetState( EStateAfterInput );
-        if( iAlarmUtils->IsCalendarAlarm() )
-            {    
-            if( iAlarmUtils->IsCalendarAlarmViewer() )
-                {                
-                iAlarmUtils->SetCalendarAlarmViewer(EFalse);           
-                }
-            else
-                {
-                TRAP_IGNORE( StoreMissedAlarmDataL() );
-                }
-            iAlarmUtils->DoStopAlarm();             
-            DoCancelDialog();
-                   	             
-            }
-        else
-            {        
-            iAlarmUtils->TryToSnoozeActiveAlarm();
-            DoCancelDialog();
-            }
+        SetState( EStateAfterInput );       
+        iAlarmUtils->TryToSnoozeActiveAlarm();
+        DoCancelDialog();        
         }
     TRACE_EXIT_POINT;
     }
@@ -529,9 +512,9 @@ void CAlmAlarmControl::ShowAlarm()
                 delete text; // only delete if GetAlarmLabelL call was successfull
                 ASSERT( !err ); */     
                 iAlarmUtils->NotifierDialogController()->showAlarmAlert(alarmInfo);
-                iAlarmUtils->StartAutoSnoozeTimer();
-                iAlarmUtils->PlayAlarmSound();
-                SetState( EStateWaitingInput );
+                //iAlarmUtils->StartAutoSnoozeTimer();
+                //iAlarmUtils->PlayAlarmSound();
+                //SetState( EStateWaitingInput );
 
                 if( err ) // failed to fetch alarm data or show the notification
                 {
@@ -962,7 +945,7 @@ TBool CAlmAlarmControl::DisplayDialogL(TInt aPriority)
         {
             iAlarmUtils->StartAutoSnoozeTimer();
             iAlarmUtils->PlayAlarmSound();
-            iAlarmUtils->SetKeyGuard( EFalse );
+            //iAlarmUtils->SetKeyGuard( EFalse );
             SetState( EStateWaitingInput );
             iAlarmUtils->StartKeyBlocker();  // block all input for 0.5 seconds
         }
@@ -1385,7 +1368,7 @@ void CAlmAlarmControl::HandleAlmInfoCRChangeL(TUint32 /*aCount*/)
          {
              iAlarmUtils->StartAutoSnoozeTimer();
              iAlarmUtils->PlayAlarmSound();
-             iAlarmUtils->SetKeyGuard( EFalse );
+             //iAlarmUtils->SetKeyGuard( EFalse );
              SetState( EStateWaitingInput );
              iAlarmUtils->StartKeyBlocker();  // block all input for 0.5 seconds
          }

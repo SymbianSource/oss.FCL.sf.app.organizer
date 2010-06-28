@@ -37,21 +37,13 @@
 SettingsUtility::SettingsUtility(QObject *parent)
 :QObject(parent)
 {
-	qDebug("clock: SettingsUtility::SettingsUtility -->");
-
 	mTimeSeparatorList << tr(".") << tr(":");
-	mClockTypeList << tr("Analog") << tr("Digital");
+	mClockTypeList << hbTrId("txt_clock_button_digital") << hbTrId("txt_clock_button_analog");
 	mTimeFormatList << hbTrId("txt_clk_setlabel_val_24_hour") << hbTrId("txt_clk_setlabel_val_12_hour");
 	mDateFormatList << hbTrId("txt_clk_setlabel_val_dd_mm_yyyy") << hbTrId("txt_clk_setlabel_val_mm_dd_yyyy") << hbTrId("txt_clk_setlabel_val_yyyy_mm_dd");
 	mDateSeparatorList << tr(".") << tr(":") << tr("/") << tr("-");
 	mAutoUpdateValueList << tr("ON") << tr("OFF");
 	mSnoozeValueList << tr("5 minutes") << tr("15 minutes") << tr(" 30 minutes") << tr("1 hour");
-
-	mTimeZoneClient = new TimezoneClient(this);
-
-	qDebug("clock: SettingsUtility::SettingsUtility <--");
-
-//	mSettingsMamager = new XQSettingsManager(this);
 }
 
 /*!
@@ -59,85 +51,15 @@ SettingsUtility::SettingsUtility(QObject *parent)
  */
 SettingsUtility::~SettingsUtility()
 {
-	// Nothing yet.
+	// Nothing.
 }
 
 /*!
-
- */
-void SettingsUtility::setTime(const QString &time)
-{
-	QTime newTime = QTime::fromString(time, timeFormatString());
-
-	if (newTime.isValid()) {
-		mTimeZoneClient->setDateTime(QDateTime(QDate::currentDate(), newTime));
-	}
-}
-
-/*!
-
+	Returns the current time in the device.
  */
 QString SettingsUtility::time()
 {
 	return QTime::currentTime().toString(timeFormatString());
-}
-
-/*!
-
- */
-void SettingsUtility::setTimeZone(const QString &timezone)
-{
-	Q_UNUSED(timezone)
-}
-
-/*!
-
- */
-QString SettingsUtility::timeZone()
-{
-	QStringList dummyList;
-
-	// Get the current zone info.
-	LocationInfo currentZoneInfo = mTimeZoneClient->getCurrentZoneInfoL();
-
-	// Construct the GMT +/- X string.
-	QString gmtOffset(hbTrId("txt_common_common_gmt"));
-
-	int utcOffset = currentZoneInfo.zoneOffset;
-	int offsetInHours (utcOffset/60);
-	int offsetInMinutes (utcOffset%60);
-
-	// Check wether the offset is +ve or -ve.
-	if (0 < utcOffset) {
-		// We have a positive offset. Append the '+' character.
-		gmtOffset += tr("+ ");
-	} else if (0 > utcOffset) {
-		// We have a negative offset. Append the '-' character.
-		gmtOffset += tr("- ");
-		offsetInHours = -offsetInHours;
-	} else {
-		// We dont have an offset. We are at GMT zone.
-	}
-
-	// Append the hour component.
-	gmtOffset += QString::number(offsetInHours);
-
-	// Append the time separator.
-	gmtOffset += mTimeSeparatorList.at(timeSeparator(dummyList));
-
-	// Append the minute component.
-	// If minute component is less less than 10, append a '00'
-	if (0 <= offsetInMinutes && offsetInMinutes < 10) {
-		gmtOffset += tr("00");
-	} else {
-		gmtOffset += QString::number(offsetInMinutes);
-	}
-
-	gmtOffset += tr(" ");
-	// TODO: append city name when more than one cities else country name.
-	gmtOffset += currentZoneInfo.cityName;
-
-	return gmtOffset;
 }
 
 /*!
@@ -234,8 +156,6 @@ void SettingsUtility::setTimeSeparator(const QString &separator)
  */
 int SettingsUtility::timeSeparator(QStringList &list)
 {
-	qDebug() << "clock: SettingsUtility::timeSeparator -->";
-
 	TLocale locale;
 	TChar separatorChar = locale.TimeSeparator(1);
 	int value = -1;
@@ -249,59 +169,7 @@ int SettingsUtility::timeSeparator(QStringList &list)
 	}
 
 	list = mTimeSeparatorList;
-
-	qDebug() << "clock: SettingsUtility::timeSeparator <--";
-
 	return value;
-}
-
-/*!
-
- */
-void SettingsUtility::setAutoUpdate(const QString &value)
-{
-	// TODO: implement the changes after server is in place.
-	// 1. Inform the server about the setting.
-	// 2. Get the status of the change from server
-	// 3. Emit the signal to inform the clients of the change in the settings item,
-	// pass the enum of settings item changed and the updated value.
-
-	if (0 == value.compare(tr("ON"), Qt::CaseInsensitive)) {
-		mTimeZoneClient->setTimeUpdateOn(true);
-    } else {
-    	mTimeZoneClient->setTimeUpdateOn(false);
-    }
-
-	emit settingsChanged(AutoTimeUpdate, value);
-}
-
-/*!
-
- */
-int SettingsUtility::autoUpdate(QStringList &list)
-{
-	// TODO: implement properly. this is jst a dummy implementation.
-	int value = 1;
-
-	bool autoUpdate = mTimeZoneClient->timeUpdateOn();
-
-	if (autoUpdate) {
-	    value = 0;
-    }
-	list = mAutoUpdateValueList;
-	return value;
-}
-
-/*!
-
- */
-void SettingsUtility::setDate(const QString &date)
-{
-	QDate newDate = QDate::fromString(date, dateFormatString());
-
-	if (newDate.isValid()) {
-		mTimeZoneClient->setDateTime(QDateTime(newDate, QTime::currentTime()));
-    }
 }
 
 /*!
@@ -309,10 +177,6 @@ void SettingsUtility::setDate(const QString &date)
  */
 QString SettingsUtility::date()
 {
-	qDebug() << "clock: SettingsUtility::date -->";
-
-	qDebug() << "clock: SettingsUtility::date <--";
-
 	return QDate::currentDate().toString(dateFormatString());
 }
 
@@ -456,9 +320,9 @@ QString SettingsUtility::timeFormatString()
 	QStringList dummyList;
 
 	if (ETime24 == locale.TimeFormat()) {
-		format = QString("h:mm");
+		format = QString("hh:mm");
 	} else if (ETime12 == locale.TimeFormat()) {
-		format = QString("h:mm ap");
+		format = QString("hh:mm ap");
 	}
 
 	QString separator = mTimeSeparatorList.at(timeSeparator(dummyList));

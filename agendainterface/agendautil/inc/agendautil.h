@@ -79,7 +79,7 @@ public:
 			AgendaEntry& entry, AgendaUtil::RecurrenceRange range);
 	bool updateEntry(const AgendaEntry& entry, bool isChild = false);
 	bool storeRepeatingEntry(const AgendaEntry& entry, bool copyToChildren);
-	bool createException(const AgendaEntry& entry);
+	bool createException(const AgendaEntry& entry,QDateTime instanceOriginalDateTime);
 	QList<ulong> entryIds(
 			AgendaUtil::FilterFlags filter = AgendaUtil::IncludeAll);
 	QList<AgendaEntry> fetchAllEntries(
@@ -120,6 +120,8 @@ Q_SIGNALS:
 	void entryDeleted(ulong id);
 	void entryUpdated(ulong id);
 	void entriesDeleted(int status);
+	void entryViewCreationCompleted(int status);
+	void instanceViewCreationCompleted(int status);
 
 private:
 	friend class AgendaUtilPrivate;

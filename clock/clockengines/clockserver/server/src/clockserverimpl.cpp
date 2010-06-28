@@ -31,13 +31,11 @@
 #include "clockservermccobserver.h"
 #include "clockecomlistener.h"
 #include "clock_debug.h"
-#include "clockprivatecrkeys.h"
 
 // Constants
 const TInt KZeroIndex( 0 );
 const TInt KSingleZone( 1 );
 const TInt KSinglePlugin( 1 );
-const TInt KSetValidNitz( 1 );
 const TUid KTimeSourceInterfaceUID = { 0x200159A7 };
 const TInt KNitzPlugin( 0x200159A5 );
 
@@ -508,6 +506,11 @@ void CClkSrvImpl::NotifyTimeChangeL( CClockTimeSourceInterface& aPluginImpl )
 		    }
 		}
 	
+	// Initialise the attributes to null.
+	TTime invalidTime( 0 );
+	iTimeAttributes->iDstOffset = TTimeIntervalMinutes( 0 );
+	iTimeAttributes->iTimeZoneOffset =  TTimeIntervalMinutes( 0 );
+	iTimeAttributes->iUtcDateTime = invalidTime.DateTime();
 	// Get all the information related to the plugin.
 	// The UTC time.
 	TRAP_IGNORE( aPluginImpl.GetTimeInformationL( EUTCTime, iTimeAttributes ) );	
@@ -519,29 +522,14 @@ void CClkSrvImpl::NotifyTimeChangeL( CClockTimeSourceInterface& aPluginImpl )
 	// Set a flag saying we have plugin data.
 	iPluginData = ETrue;
 	
-	// Get the first boot status from cenrep. If it is the first boot, clockserver will not update the time.
-	TBool staleBoot( EFalse );
-	
-	CRepository* cenRep( NULL );
-
-	TRAPD( errorVal, cenRep = CRepository::NewL( KCRUidStartup ) );
-	
-	if( errorVal == KErrNone )
-		{
-		errorVal = cenRep->Get( KStartupFirstBoot, staleBoot );
-		}
-	
-	// Cleanup.
-	delete cenRep;
-	cenRep = NULL;
-	
 	if( iMccReceived )
 		{
 		__PRINTS( "We have already recieved the MCC" );
 		
 		// Try to resolve the timezone id with the data that we have recieved.
 		TInt timezoneId;
-		TRAP_IGNORE( TInt errorVal = iTzResolver->GetTimeZoneL( *iTimeAttributes, iMcc, timezoneId ) );
+		TInt errorVal = 0;
+		TRAP_IGNORE( errorVal = iTzResolver->GetTimeZoneL( *iTimeAttributes, iMcc, timezoneId ) );
 		
 		__PRINT( "CClkSrvImpl::NotifyTimeChangeL - timeZoneId: %d", timezoneId );
 		
@@ -564,23 +552,6 @@ void CClkSrvImpl::NotifyTimeChangeL( CClockTimeSourceInterface& aPluginImpl )
 			if( KInvalidTimeZoneId != timezoneId ) 
 				{
                 // A valid new zone was found successfully
-			
-                // Update the key for ValidNitz for the first boot
-                if(!staleBoot)
-                    {
-                    TInt validNitz( KSetValidNitz );
-                    CRepository* cenRep( NULL );
-    
-                    TRAPD( errorVal, cenRep = CRepository::NewL( KCRUidNitz ) );
-                    if( errorVal == KErrNone )
-                        {
-                        errorVal = cenRep->Set( KValidNitz, validNitz );
-                        }
-                    // Cleanup.
-                    delete cenRep;
-                    cenRep = NULL;
-                    }
-			    
 				CTzId* newTzId = CTzId::NewL( timezoneId );
 				CleanupStack::PushL( newTzId );
 
@@ -592,12 +563,9 @@ void CClkSrvImpl::NotifyTimeChangeL( CClockTimeSourceInterface& aPluginImpl )
 					{
 					// The new zone is different than the current one
 					// GOAL 3: Set the DST zone of the device
-					//if( staleBoot )
-					//{
-						__PRINTS( "Not the first boot and the timezone ID is different. Setting the zone." );
+					__PRINTS( "Timezone ID is different. Setting the zone." );
 						
-						TRAP_IGNORE( tz.SetTimeZoneL( *newTzId ) );
-					//	}
+					TRAP_IGNORE( tz.SetTimeZoneL( *newTzId ) );
 					}
 
 				CleanupStack::PopAndDestroy( newTzId );
@@ -612,12 +580,9 @@ void CClkSrvImpl::NotifyTimeChangeL( CClockTimeSourceInterface& aPluginImpl )
 			// Set the UTC time only. This is being done because with the UTC time,
 			// before the time is being set, the dst properties for the timezone are being checked.
 			// If its not the first boot, then set the time.
-			//if( staleBoot )
-			//	{
-				__PRINTS( "Not the first boot. Setting the UTC time." );
+			__PRINTS( "Setting the UTC time." );
 				
-				TRAP_IGNORE( User::SetUTCTime( nwUtcTime ) );
-			//	}
+			TRAP_IGNORE( User::SetUTCTime( nwUtcTime ) );
 			}
 		
 		// Reset the flags.
@@ -633,8 +598,9 @@ void CClkSrvImpl::NotifyTimeChangeL( CClockTimeSourceInterface& aPluginImpl )
 		
 		// Try to resolve the timezone id with the data that we have recieved.
 		TInt timezoneId;
+		TInt errorVal = 0;
 		const TBuf< 4 > invalidMCC( KInvalidMCC );
-		TRAP_IGNORE( TInt errorVal = iTzResolver->GetTimeZoneL( *iTimeAttributes, invalidMCC, timezoneId ) );
+		TRAP_IGNORE( errorVal = iTzResolver->GetTimeZoneL( *iTimeAttributes, invalidMCC, timezoneId ) );
 		
 		if( KErrNone == errorVal )
 			{
@@ -649,23 +615,6 @@ void CClkSrvImpl::NotifyTimeChangeL( CClockTimeSourceInterface& aPluginImpl )
 			if( KInvalidTimeZoneId != timezoneId ) 
 				{
                 // A valid new zone was found successfully
-			
-	            // Update the key for ValidNitz for the first boot
-                if(!staleBoot)
-                    {
-                    TInt validNitz( KSetValidNitz );
-                    CRepository* cenRep( NULL );
-    
-                    TRAPD( errorVal, cenRep = CRepository::NewL( KCRUidNitz ) );
-                    if( errorVal == KErrNone )
-                        {
-                        errorVal = cenRep->Set( KValidNitz, validNitz );
-                        }
-                    // Cleanup.
-                    delete cenRep;
-                    cenRep = NULL;
-                    }
-			
 				CTzId* newTzId = CTzId::NewL( timezoneId );
 				CleanupStack::PushL( newTzId );
 
@@ -674,12 +623,9 @@ void CClkSrvImpl::NotifyTimeChangeL( CClockTimeSourceInterface& aPluginImpl )
 					// The new zone is different than the current one
 					// GOAL 3: Set the DST zone of the device
 					// If firstboot then don't set the time.
-					//if( staleBoot )
-					//	{
-						__PRINTS( "Not the first boot and the timezone ID is different. Setting the zone." );
+					__PRINTS( "The timezone ID is different. Setting the zone." );
 						
-						TRAP_IGNORE( tz.SetTimeZoneL( *newTzId ) );
-					//	}
+					TRAP_IGNORE( tz.SetTimeZoneL( *newTzId ) );
 					}
 				CleanupStack::PopAndDestroy( newTzId );
 				}
@@ -693,12 +639,9 @@ void CClkSrvImpl::NotifyTimeChangeL( CClockTimeSourceInterface& aPluginImpl )
 			// Set the UTC time only. This is being done because with the UTC time,
 			// before the time is being set, the dst properties for the timezone are being checked.
 			// Set the time only if its not the first boot.
-			//if( staleBoot )
-			//    {
-			    __PRINTS( "Not the first boot. Setting the UTC time." );
+			__PRINTS( "Setting the UTC time." );
 
-			    TRAP_IGNORE( User::SetUTCTime( nwUtcTime ) );
-			//    }
+			TRAP_IGNORE( User::SetUTCTime( nwUtcTime ) );
 			}
 		}
 	__PRINTS( "Notifying the timechange to client" );
@@ -733,26 +676,50 @@ void CClkSrvImpl::NotifyMccChangeL()
 		// Lets see if we can narrow down to a single timezone with the MCC recieved.
 		RArray< CTzId > tzIdArray;
 		
-		// Try and fetch the timezone ID using the MCC recieved.
-		TRAP_IGNORE( iTzResolver->TzIdFromMccL( iMcc, tzIdArray, KInvalidTimeZoneId ) );
+		// This parte of code introduced due to error ID EASH-82DPPC(3G Tests for NITZ and GPRS Interaction)
+		// Fix is bascially to narrowing down to single timezone id if NITZ packet is received prior to MCC.
+		// In first IF state we are trying to narrowdown to single timezone ID, if not possible try to use MCC to get timezone
+		// In second IF , we are using MCC to narrow down to single timezone ID directly as dont have NITZ info.
+		if( iTimeAttributes )
+		{
+            __PRINTS("timeatrrtibutes has value");
 		
-		// Code to check if its the first boot.
-		// Get the first boot status from cenrep. If it is the first boot, clockserver will not update the time.
-		TBool staleBoot( EFalse );
-		
-		CRepository* cenRep( NULL );
-
-		TRAPD( errorVal, cenRep = CRepository::NewL( KCRUidStartup ) );
-		
-		if( errorVal == KErrNone )
+			TTime invalidTime(0);
+			if( iTimeAttributes->iDstOffset != TTimeIntervalMinutes( 0 ) &&
+			iTimeAttributes->iTimeZoneOffset != TTimeIntervalMinutes( 0 ) &&
+			iTimeAttributes->iUtcDateTime.Year() != invalidTime.DateTime().Year() )
 			{
-			errorVal = cenRep->Get( KStartupFirstBoot, staleBoot );
+				// Try to resolve the timezone id with the data that we have recieved.
+				TInt timezoneId;
+				TRAP_IGNORE( TInt errorVal = iTzResolver->GetTimeZoneL( *iTimeAttributes, iMcc, timezoneId ) );
+				
+				__PRINT("TIMEZONE ID %d", timezoneId );
+
+				// Append the timezone id to array.
+
+				CTzId* matchingDSTZoneId = CTzId::NewL( timezoneId );
+				CleanupStack::PushL( matchingDSTZoneId );
+
+				tzIdArray.AppendL( *matchingDSTZoneId );
+
+				CleanupStack::PopAndDestroy( matchingDSTZoneId );
+
+				matchingDSTZoneId = NULL;
 			}
+			else
+			{
+				__PRINTS("NOT ABLE TO NARROW DOWN TO TIMEZONE ID WITH RECEIVED NITZ HENCE TRY WITH MCC");
+				// Not able to narrow down to single timezone id with received NITZ packet hence try with MCC.
+				TRAP_IGNORE( iTzResolver->TzIdFromMccL( iMcc, tzIdArray, KInvalidTimeZoneId ) );	
+			}
+		}
+		else
+		{
+			__PRINTS("NO NITZ INFO HENCE TRY WITH MCC");
+			// No NITZ info hecne try with MCC to get the time zone Id.
+			TRAP_IGNORE( iTzResolver->TzIdFromMccL( iMcc, tzIdArray, KInvalidTimeZoneId ) );
+		}
 		
-		// Cleanup
-		delete cenRep;
-		cenRep = NULL;
-	
 		// A single matching timezone was found. Set it as the default one.
 		if( KSingleZone == tzIdArray.Count() )
 			{
@@ -780,18 +747,41 @@ void CClkSrvImpl::NotifyMccChangeL()
 					// The new zone is different than the current one
 					// Set the DST zone of the device
 					// Set the zone only for subsequent boots.
-					if( staleBoot )
-						{
-						__PRINTS( "Not the first boot and the timezone ID is different. Setting the zone." );
+					__PRINTS( "The timezone ID is different. Setting the zone." );
 						
-						TRAP_IGNORE( tz.SetTimeZoneL( *newTzId ) );
-						}
+					TRAP_IGNORE( tz.SetTimeZoneL( *newTzId ) );
 					}
 				CleanupStack::PopAndDestroy( newTzId );
 				}
 			CleanupStack::PopAndDestroy( currentCTzId );
-			CleanupStack::PopAndDestroy( &tz );
-			}
+			CleanupStack::PopAndDestroy( &tz );		
+	
+		}
+		
+		// Set the time on device and set the attributes to null so that we avoid setting old value.		
+		if( iTimeAttributes )
+		    {
+            // Time sent by nw is UTC
+            TTime nwUtcTime( iTimeAttributes->iUtcDateTime);
+    
+            // Set the UTC time only. This is being done because with the UTC time,
+            // before the time is being set, the dst properties for the timezone are being checked.
+            // If its not the first boot, then set the time.
+            __PRINTS( "Setting the UTC time." );
+    
+            TRAP_IGNORE( User::SetUTCTime( nwUtcTime ) );
+    
+            // Setting the attributes to null again as we dont trust on
+            // previous NITZ data recevied by device.If device receive
+            // NITZ data again attributes would get filled with actual value.
+            // Has been kept outside because this statement is valid for
+            // first boot also.
+    
+            iTimeAttributes->iDstOffset = TTimeIntervalMinutes( 0 );
+            iTimeAttributes->iTimeZoneOffset =  TTimeIntervalMinutes( 0 );
+            TTime invalidTime( 0 );
+            iTimeAttributes->iUtcDateTime = invalidTime.DateTime(); 
+            }
 		}
 	
 	// Notify the sessions about the change in mcc.

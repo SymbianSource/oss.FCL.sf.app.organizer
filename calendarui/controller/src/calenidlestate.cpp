@@ -96,8 +96,8 @@ TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
     switch( cmd )
         {
         case ECalenMonthView:
-        case ECalenWeekView:
         case ECalenDayView:
+        case ECalenAgendaView:
         case ECalenStartActiveStep:
             {
             // set previous state to idle

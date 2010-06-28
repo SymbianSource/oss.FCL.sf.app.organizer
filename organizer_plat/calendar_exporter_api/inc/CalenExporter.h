@@ -25,7 +25,7 @@
 #include <e32base.h>
 #include <f32file.h>    // for TParse
 #include <s32mem.h>
-#include <agnexportobserver.h>
+#include <AgnExportObserver.h>
 
 
 // FORWARD DECLARATIONS

@@ -113,10 +113,10 @@ const TStateTableEntry KStateTable[] =
     /* ECalenMonthView */
     { EIdle , EIdle, KCalenNoNotification },
 
-    /* ECalenWeekView */
+    /* ECalenDayView */
     { EIdle , EIdle, KCalenNoNotification },
 
-    /* ECalenDayView */
+    /* ECalenAgendaView */
     { EIdle , EIdle, KCalenNoNotification },
 
     /* ECalenForwardsToDayView */

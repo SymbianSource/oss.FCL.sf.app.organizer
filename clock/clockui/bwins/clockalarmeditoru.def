@@ -1,5 +1,0 @@
-EXPORTS
-	??1ClockAlarmEditor@@UAE@XZ @ 1 NONAME ; ClockAlarmEditor::~ClockAlarmEditor(void)
-	??0ClockAlarmEditor@@QAE@HPAVQGraphicsWidget@@@Z @ 2 NONAME ; ClockAlarmEditor::ClockAlarmEditor(int, class QGraphicsWidget *)
-	?showAlarmEditor@ClockAlarmEditor@@QAEXXZ @ 3 NONAME ; void ClockAlarmEditor::showAlarmEditor(void)
-

@@ -24,6 +24,8 @@
 #include <HbListView>
 #include <HbMessageBox>
 #include <HbAction>
+#include <hbapplication> // hbapplication
+#include <hbactivitymanager> // hbactivitymanager
 
 // User includes
 #include "notesviewmanager.h"
@@ -59,8 +61,40 @@ NotesViewManager::NotesViewManager(
 
 	mAgendaUtil = mAppControllerIf.agendaUtil();
 
-	// Load the main view at the start up.
-	loadNotesMainView();
+	// Check the Application Startup reason from Activity Manager
+	int activityReason = qobject_cast<HbApplication*>(qApp)->activateReason();
+
+	if (Hb::ActivationReasonActivity == activityReason) // Check if application is started 
+	    // from an application
+	    {
+        // Application is started from an activity
+		// extract activity data
+        QVariant data = qobject_cast<HbApplication*>(qApp)->activateData();
+        // Restore state from activity data
+        QByteArray serializedModel = data.toByteArray();
+        QDataStream stream(&serializedModel, QIODevice::ReadOnly);
+        int viewId;
+        stream >> viewId; // read stream into an int
+
+        if (NotesNamespace::NotesMainViewId == viewId) // Check if viewId is main view
+            {
+            // Load MainView
+            loadNotesMainView();
+            }
+        else if (NotesNamespace::NotesCollectionViewId == viewId) // Check if the viewId is collective view
+            {
+            //no implementation yet, UI Specs not available
+            }
+	    }
+	else // application started by either service framework or normally
+	    {
+        // Load the main view at the start up.
+        loadNotesMainView();
+	    }
+
+	connect(
+			mAgendaUtil, SIGNAL(instanceViewCreationCompleted(int)),
+			this,SLOT(handleInstanceViewCreationCompleted(int)));
 
 	// Delay loading of other views till main view is loaded.
 	connect(
@@ -90,27 +124,59 @@ void NotesViewManager::switchToView(NotesNamespace::NotesViewIds viewId)
 			window->removeView(window->currentView());
 			window->addView(mMainView);
 			window->setCurrentView(mMainView);
+			mMainView->captureScreenShot(false);
 			break;
 
 		case NotesNamespace::NotesCollectionViewId:
+		    if (mMainView)
+		        {
+                if (mMainView == window->currentView())
+                    {
+                    mMainView->captureScreenShot(true);
+                    }
+		        }
 			window->removeView(window->currentView());
 			window->addView(mCollectionView);
 			window->setCurrentView(mCollectionView);
 			break;
 
 		case NotesNamespace::NotesTodoViewId:
+		    if (mMainView)
+		        {
+                if (mMainView == window->currentView())
+                    {
+                    mMainView->captureScreenShot(true);
+                    }
+		        }
+
 			window->removeView(window->currentView());
 			window->addView(mTodoView);
 			window->setCurrentView(mTodoView);
 			break;
 
 		case NotesNamespace::NotesFavoritesViewId:
+	         if (mMainView)
+	             {
+                 if (mMainView == window->currentView())
+                     {
+	                 mMainView->captureScreenShot(true);
+	                 }
+	             }
+
 			window->removeView(window->currentView());
 			window->addView(mFavoriteView);
 			window->setCurrentView(mFavoriteView);
 			break;
 
 		case NotesNamespace::NotesNoteViewId:
+	         if (mMainView)
+	             {
+	             if (mMainView == window->currentView())
+	                 {
+	                 mMainView->captureScreenShot(true);
+	                 }
+	             }
+
 			window->removeView(window->currentView());
 			window->addView(mNoteView);
 			window->setCurrentView(mNoteView);
@@ -249,21 +315,12 @@ void NotesViewManager::loadNoteView()
 }
 
 /*!
-	 Delete the entry.
- */
-void NotesViewManager::deleteEntryFromView(ulong entryId)
-{
-	if (showDeleteConfirmationQuery(entryId)) {
-		// Delete the given note.
-		mAgendaUtil->deleteEntry(entryId);
-	}
-}
-
-/*!
 	Loads other views from the docml file.
  */
 void NotesViewManager::loadOtherViews()
 {
+	mMainView->setupAfterViewReady();
+
 	// Load the collection view.
 	loadNotesCollectionView();
 	// Load the to-do view.
@@ -280,38 +337,77 @@ void NotesViewManager::loadOtherViews()
 			this, SLOT(loadOtherViews()));
 }
 
-/* !
-	Show the delete confirmation query.
+/*!
+	 Delete the entry.
  */
-bool NotesViewManager::showDeleteConfirmationQuery(ulong noteId)
+void NotesViewManager::deleteEntryFromView(ulong entryId)
 {
-	bool retValue(false);
-
-	HbMessageBox confirmationQuery(HbMessageBox::MessageTypeQuestion);
-	confirmationQuery.setDismissPolicy(HbDialog::NoDismiss);
-	confirmationQuery.setTimeout(HbDialog::NoTimeout);
-	confirmationQuery.setIconVisible(true);
+	mEntryId = entryId;
+	HbMessageBox *confirmationQuery = new HbMessageBox(
+			HbMessageBox::MessageTypeQuestion);
+	confirmationQuery->setDismissPolicy(HbDialog::NoDismiss);
+	confirmationQuery->setTimeout(HbDialog::NoTimeout);
+	confirmationQuery->setIconVisible(true);
 
 	QString displayText;
 	QString x;
-	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
+	AgendaEntry entry = mAgendaUtil->fetchById(entryId);
 	if (AgendaEntry::TypeTodo == entry.type()) {
 		displayText += hbTrId("txt_notes_info_delete_todo_note");
 	} else {
 		displayText += hbTrId("txt_notes_info_delete_note");
 	}
 
-	confirmationQuery.setText(displayText);
+	confirmationQuery->setText(displayText);
 
-	confirmationQuery.setPrimaryAction(new HbAction(
-	    hbTrId("txt_notes_button_dialog_delete"), &confirmationQuery));
-	confirmationQuery.setSecondaryAction(new HbAction(
-	    hbTrId("txt_common_button_cancel"), &confirmationQuery));
-	HbAction *selected = confirmationQuery.exec();
-	if (selected == confirmationQuery.primaryAction()) {
-		retValue = true;
+	// Remove the default actions.
+	QList<QAction *> defaultActions = confirmationQuery->actions();
+	for (int index=0;index<defaultActions.count();index++) {
+		confirmationQuery->removeAction(defaultActions[index]);
 	}
+	defaultActions.clear();
 
-	return retValue;
+	// Add delete and cancel actions
+	mDeleteAction = new HbAction(hbTrId("txt_notes_button_dialog_delete"));
+	mCancelAction = new HbAction(hbTrId("txt_common_button_cancel"));
+
+	confirmationQuery->addAction(mDeleteAction);
+	confirmationQuery->addAction(mCancelAction);
+
+	confirmationQuery->open(this, SLOT(selectedAction(HbAction*)));
+}
+
+/*!
+	Slot to handle the delete action
+ */
+void NotesViewManager::selectedAction(HbAction *action)
+{
+	if (action == mDeleteAction) {
+		// Delete the given note.
+		mAgendaUtil->deleteEntry(mEntryId);
+	}
+}
+
+/*!
+	Slot to handle instance view creation complete.
+ */
+void NotesViewManager::handleInstanceViewCreationCompleted(int status)
+{
+	Q_UNUSED(status)
+
+	// Update the title for main view.
+	mMainView->updateTitle();
+
+	// Populate collections view.
+	mCollectionView->populateListView();
+
+	// Update the title for to-do view.
+	mTodoView->updateTitle();
+	
+	// Update the plain notes view.
+	mNoteView->updateNoteView();
+	
+	// Update the favorites view.
+	mFavoriteView->updateFavoriteView();
 }
 // End of file	--Don't remove this.

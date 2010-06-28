@@ -17,10 +17,9 @@
 
 // System includes
 #include <QScopedPointer>
-#include <QTranslator>
 #include <hbapplication.h>
 #include <hbmainwindow.h>
-
+#include <hbtranslator.h>
 // User includes
 #include "notesappcontroller.h"
 
@@ -42,9 +41,8 @@ int main(int argc, char *argv[])
 	window.setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
 
 	// Load the translation file.
-	QTranslator notesViewsTranslator;
-	notesViewsTranslator.load("notes",":/translations");
-	app.installTranslator(&notesViewsTranslator);
+	HbTranslator notesViewsTranslator("notes");
+	notesViewsTranslator.loadCommon();
 
 	// Construct the application controller.
 	QScopedPointer<NotesAppController> controller(new NotesAppController);

@@ -22,6 +22,8 @@ SOURCEPATH ../../calcontablesrc
 SOURCE calcontable.cpp
 USERINCLUDE ../../calcontablesrc
 USERINCLUDE ../../originalinc
+
+APP_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE /epoc32/include
 LIBRARY	euser.lib efsrv.lib cconoriginal.lib charconv.lib
 

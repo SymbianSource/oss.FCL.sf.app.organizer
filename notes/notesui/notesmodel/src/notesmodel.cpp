@@ -68,8 +68,10 @@ NotesModel::NotesModel(AgendaUtil *agendaUtil, QObject *parent)
 			mAgendaUtil, SIGNAL(entryUpdated(ulong)),
 			this, SLOT(updateSourceModel(ulong)));
 
-	// Populate the model in a different thread.
-	QTimer::singleShot(1, this, SLOT(populateSourceModel()));
+	// Connect for instance view creation completed signal
+	connect(
+			mAgendaUtil, SIGNAL(instanceViewCreationCompleted(int)),
+			this,SLOT(handleInstanceViewCreationCompleted(int)));
 }
 
 /*!
@@ -322,6 +324,15 @@ void NotesModel::removeEntryFromModel(ulong id)
 			break;
 		}
 	}
+}
+
+/*!
+	Populate the model after instance view creation.
+ */
+void NotesModel::handleInstanceViewCreationCompleted(int status)
+{
+	Q_UNUSED(status);
+	populateSourceModel();
 }
 
 /*!

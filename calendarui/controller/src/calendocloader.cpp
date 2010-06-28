@@ -18,14 +18,15 @@
 
 // User includes
 #include "calendocloader.h"
-#include "calendayview.h"
-#include "calendayviewwidget.h"
+#include "calenagendaview.h"
+#include "calenagendaviewwidget.h"
 #include "calenmonthview.h"
 #include "calenmonthgrid.h"
 #include "calenpreviewpane.h"
 #include "calencontroller.h"
 #include "calenthicklinesdrawer.h"
 #include "calencommon.h"
+#include "calenpluginlabel.h"
 
 // ----------------------------------------------------------------------------
 // CalenDocLoader::CalenDocLoader
@@ -62,14 +63,14 @@ QObject *CalenDocLoader::createObject(const QString &type,
                                              const QString &name)
 {
     MCalenServices &services = mController.Services(); 
-	if (name == QString(CALEN_DAYVIEW)) {
-		QObject *calenDayView = new CalenDayView(services);
-		calenDayView->setObjectName(name);
-		return calenDayView;
-	} else if (name == QString(CALEN_DAYVIEW_WIDGET)) {
-	    QObject *calenDayViewWidget = new CalenDayViewWidget(services, this);
-	    calenDayViewWidget->setObjectName(name);
-	    return calenDayViewWidget;
+	if (name == QString(CALEN_AGENDAVIEW)) {
+		QObject *calenAgendaView = new CalenAgendaView(services);
+		calenAgendaView->setObjectName(name);
+		return calenAgendaView;
+	} else if (name == QString(CALEN_AGENDAVIEW_WIDGET)) {
+	    QObject *calenAgendaViewWidget = new CalenAgendaViewWidget(services, this);
+	    calenAgendaViewWidget->setObjectName(name);
+	    return calenAgendaViewWidget;
 	} else if (name == QString(CALEN_MONTHVIEW)) { // For Month View
         QObject *calenMonthView = new CalenMonthView(services);
         calenMonthView->setObjectName(name);
@@ -80,17 +81,17 @@ QObject *CalenDocLoader::createObject(const QString &type,
         return calenMonthGrid;
 	} else if(name == QString(CALEN_PREVPREVIEWPANE)) {
         QObject *prevPreviewPane =
-        new CalenPreviewPane(mController.Services());
+        new CalenPreviewPane(services);
         prevPreviewPane->setObjectName(name);
         return prevPreviewPane;
     } else if(name == QString(CALEN_CURRPREVIEWPANE)) {
         QObject *currPreviewPane =
-        new CalenPreviewPane(mController.Services());
+        new CalenPreviewPane(services);
         currPreviewPane->setObjectName(name);
         return currPreviewPane;
     } else if(name == QString(CALEN_NEXTPREVIEWPANE)) {
         QObject *nextPreviewPane =
-        new CalenPreviewPane(mController.Services());
+        new CalenPreviewPane(services);
         nextPreviewPane->setObjectName(name);
         return nextPreviewPane;
     } else if (name == QString(CALEN_DAYNAMES_WIDGET)) {
@@ -103,7 +104,19 @@ QObject *CalenDocLoader::createObject(const QString &type,
         new CalenThickLinesDrawer(CalendarNamespace::CalenWeekNumWidget);
 	    calenSWeekNumWidget->setObjectName(name);
 	    return calenSWeekNumWidget;
-    } else {
+	} else if (name == QString(CALEN_PREVREGIONALINFO)) {
+		QObject *calenPrevRegionalLabel = new CalenPluginLabel(services);
+		calenPrevRegionalLabel->setObjectName(name);
+		return calenPrevRegionalLabel;
+	} else if (name == QString(CALEN_CURRREGIONALINFO)) {
+		QObject *calencurrRegionalLabel = new CalenPluginLabel(services);
+		calencurrRegionalLabel->setObjectName(name);
+		return calencurrRegionalLabel;
+	} else if (name == QString(CALEN_NEXTREGIONALINFO)) {
+		QObject *calenNextRegionalLabel = new CalenPluginLabel(services);
+		calenNextRegionalLabel->setObjectName(name);
+		return calenNextRegionalLabel;
+	} else {
 		return HbDocumentLoader::createObject(type, name);
 	}
 }

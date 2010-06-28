@@ -1,0 +1,47 @@
+ClockHomeCityItem::dateText{
+    color: var(qtc_list_item_content_normal);
+}
+
+ClockHomeCityItem::dateText[state="pressed"]{
+    color: var(qtc_list_item_pressed);
+}
+
+ClockHomeCityItem::dateText[state="disabled"]{
+    color: var(qtc_list_item_disabled);
+}
+
+ClockHomeCityItem::cityText{
+    color: var(qtc_list_item_title_normal);
+}
+
+ClockHomeCityItem::cityText[state="pressed"]{
+    color: var(qtc_list_item_pressed);
+}
+
+ClockHomeCityItem::cityText[state="disabled"]{
+    color: var(qtc_list_item_disabled);
+}
+
+ClockHomeCityItem::dstIcon{
+    color: var(qtc_list_item_title_normal);
+}
+
+ClockHomeCityItem::dstIcon[state="pressed"]{
+    color: var(qtc_list_item_pressed);
+}
+
+ClockHomeCityItem::dstIcon[state="disabled"]{
+    color: var(qtc_list_item_disabled);
+}
+
+ClockHomeCityItem::timeText{
+    color: var(qtc_list_item_content_normal);
+}
+
+ClockHomeCityItem::timeText[state="pressed"]{
+    color: var(qtc_list_item_pressed);
+}
+
+ClockHomeCityItem::timeText[state="disabled"]{
+    color: var(qtc_list_item_disabled);
+}

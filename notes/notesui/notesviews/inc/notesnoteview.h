@@ -32,6 +32,7 @@ class QGraphicsWidget;
 class HbListView;
 class HbAction;
 class HbAbstractViewItem;
+class HbLabel;
 class NotesModel;
 class NotesDocLoader;
 class AgendaUtil;
@@ -49,7 +50,9 @@ public:
 public:
 	NOTESVIEWS_EXPORT void setupView(
 			NotesAppControllerIf &controllerIf, NotesDocLoader *docLoader);
-	
+	NOTESVIEWS_EXPORT void updateNoteView();
+
+
 signals:
 	void deleteEntry(ulong entryId);
 
@@ -67,6 +70,9 @@ private slots:
 	void handleActionStateChanged();
 	void handleOrientationChanged(Qt::Orientation);
 	void openNote();
+	void selectedMenuAction(HbAction *action);
+	void handleMenuClosed();
+	void updateView(ulong id=0);
 
 private:
 	HbListView *mListView;
@@ -81,6 +87,8 @@ private:
 	HbAction *mMarkTodoAction;
 	HbAction *mOpenAction;
 
+	HbLabel *mEmptyListLabel;
+	
 	AgendaUtil *mAgendaUtil;
 
 	NotesAppControllerIf *mAppControllerIf;
@@ -88,6 +96,7 @@ private:
 	NotesModel *mNotesModel;
 	NotesSortFilterProxyModel *mProxyModel;
 	NotesEditor *mNotesEditor;
+	bool mIsLongTop;
 };
 
 #endif // NOTESNOTEVIEW_H

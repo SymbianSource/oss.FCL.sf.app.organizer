@@ -17,31 +17,35 @@
 
 TEMPLATE = lib
 TARGET = datetimesettingsplugin
+CONFIG += hb plugin
+
 DEPENDPATH += . \
 			  ./inc \
 			  ./src
+			  
 INCLUDEPATH += . \
-               ../../clocksettingsview/inc
+				../../../inc \
+				../../../clockmw/clocktimezone/inc \
+				../../clocksettingsview/inc
 
-CONFIG += hb plugin
+LIBS += \
+		-lcpframework \
+		-ltimezoneclient \
+		-lclocksettingsview \
 
-LIBS += -lcpframework
-
-# Input
-HEADERS += datetimesettingsplugin.h \
-		   datetimesettingsview.h
+HEADERS += \
+			datetimesettingsplugin.h \
+			datetimesettingsview.h
 		   
-SOURCES += datetimesettingsplugin.cpp \
-		   datetimesettingsview.cpp
+SOURCES += \
+			datetimesettingsplugin.cpp \
+			datetimesettingsview.cpp
 
 symbian: {
     TARGET.EPOCALLOWDLLDATA = 1  
     TARGET.UID3 = 0x102818E9
+	TARGET.CAPABILITY = CAP_GENERAL_DLL
 	
-	LIBS += -lclocksettingsview
-}
-
-symbian {
     deploy.path = C:
     headers.sources = qmakepluginstubs/datetimesettingsplugin.qtplugin
     headers.path = /resource/qt/plugins/controlpanel
@@ -49,9 +53,9 @@ symbian {
     # This is for new exporting system coming in garden
     for(header, headers.sources):BLD_INF_RULES.prj_exports += "./$$header $$deploy.path$$headers.path/$$basename(header)"
 }
-			   
-TARGET.CAPABILITY = CAP_GENERAL_DLL
 
 plugin.sources = datetimesettingsplugin.dll
 plugin.path = \resource\qt\plugins\controlpanel
 DEPLOYMENT += plugin
+
+# End of file	--Don't remove this.

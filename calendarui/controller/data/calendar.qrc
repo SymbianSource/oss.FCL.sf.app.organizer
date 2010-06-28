@@ -1,9 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 	<qresource prefix="/xml">
-		<file alias="calendayview.docml">xml/calendayview.docml</file>	
+		<file alias="calenagendaview.docml">xml/calenagendaview.docml</file>	
 		<file alias="calenmonthview.docml">xml/calenmonthview.docml</file>	
-	</qresource>
-	<qresource prefix="/translations" >
-		<file alias="calendar_en_GB">calendar_en_GB.qm</file>
 	</qresource>
 </RCC>

@@ -55,7 +55,13 @@
 	\param parent The parent object.
  */
 CalenEditorCustomItem::CalenEditorCustomItem(QGraphicsItem *parent)
-:HbDataFormViewItem(parent)
+:HbDataFormViewItem(parent),
+ mPushButtonTime(NULL),
+ mPushButtonDate(NULL),
+ mRepeatUntilWidget(NULL),
+ mReminderTimeWidget(NULL),
+ mDatePicker(NULL),
+ mTimePicker(NULL)
 {
 	mMinDate = CalenDateUtils::minTime().date();
 	mMaxDate = CalenDateUtils::maxTime().date();
@@ -113,7 +119,8 @@ HbWidget* CalenEditorCustomItem::createCustomWidget()
 		case CustomWidgetTo:
 		{
 		HbWidget *widgetBottom = new HbWidget();
-		QGraphicsLinearLayout *layoutBottom = new QGraphicsLinearLayout(Qt::Horizontal);
+		QGraphicsLinearLayout *layoutBottom = 
+									new QGraphicsLinearLayout(Qt::Horizontal);
 		widgetBottom->setLayout(layoutBottom);
 
 		mPushButtonTime = new HbPushButton(this);
@@ -133,20 +140,31 @@ HbWidget* CalenEditorCustomItem::createCustomWidget()
 			CalenEditorDocLoader editorLocationDocLoader;
 			bool loadSuccess = false;
 
-			editorLocationDocLoader.load(CALEN_EDITOR_LOCATION_XML_FILE, &loadSuccess);
+			editorLocationDocLoader.load(CALEN_EDITOR_LOCATION_XML_FILE, 
+														&loadSuccess);
 			Q_ASSERT_X(loadSuccess, "caleneditor.cpp", 
-		                                    "Unable to load caleneditor location view XML");
-			HbWidget* widgetLocation = qobject_cast<HbWidget *> (editorLocationDocLoader.findWidget(CALEN_EDITOR_LOCATION));
-		    
-			mLocationLineEdit = qobject_cast<HbLineEdit *>( editorLocationDocLoader.findWidget(CALEN_EDITOR_LOCATION_LINEEDIT));
+								"Unable to load caleneditor location view XML");
+			HbWidget* widgetLocation = qobject_cast<HbWidget *> (
+					editorLocationDocLoader.findWidget(CALEN_EDITOR_LOCATION));
+
+			mLocationLineEdit = qobject_cast<HbLineEdit *>( 
+									editorLocationDocLoader.findWidget(
+											CALEN_EDITOR_LOCATION_LINEEDIT));
 			mLocationLineEdit->setMinRows(1);
 			mLocationLineEdit->setMaxRows(4);
-			mLocationPushButton = qobject_cast<HbPushButton*>(editorLocationDocLoader.findWidget(CALEN_EDITOR_LOCATION_PUSHBUTTON));
+			mLocationPushButton = qobject_cast<HbPushButton*>(
+									editorLocationDocLoader.findWidget(
+											CALEN_EDITOR_LOCATION_PUSHBUTTON));
 			mLocationPushButton->setIcon( HbIcon("qtg_mono_location"));
 			
-			connect(mLocationPushButton, SIGNAL(clicked()), this, SLOT(launchLocationPicker()));
+			connect(mLocationPushButton, SIGNAL(clicked()), this, 
+												SLOT(launchLocationPicker()));
 			connect(mLocationLineEdit, SIGNAL(textChanged(const QString)),
-		                this, SLOT(handleLocationTextChange(const QString)));
+						this, SLOT(handleLocationTextChange(const QString)));
+						
+			connect(mLocationLineEdit, SIGNAL(editingFinished()),
+			            this, SLOT(handleEditingFinished()));
+			
 			return widgetLocation;
 		}
 		
@@ -156,7 +174,12 @@ HbWidget* CalenEditorCustomItem::createCustomWidget()
 		return mRepeatUntilWidget;
 		}
 				
-
+		case ReminderTimeOffset:
+		{
+			mReminderTimeWidget = new HbPushButton(this);
+			return mReminderTimeWidget;
+		}
+		
 		default:
 			return 0;
 	}
@@ -200,10 +223,14 @@ void CalenEditorCustomItem::setSelectedLocation( QVariant &aValue )
 			locationString.append(',');
 		}
 		locationString.append(selectedLocation.mCountry);
-		emit locationTextChanged(locationString);
+		emit locationTextChanged(locationString, selectedLocation.mLatitude, selectedLocation.mLongitude);
 		mLocationLineEdit->setText(locationString );
     }
 }
+
+/*!
+	Populates the date and time in proper formats on the buttons
+ */
 void CalenEditorCustomItem::populateDateTime(QDateTime defaultDateTime, bool isFromItem)
 {
 	// Store the date and time to be shown
@@ -213,17 +240,22 @@ void CalenEditorCustomItem::populateDateTime(QDateTime defaultDateTime, bool isF
 	mIsFromItem = isFromItem;
 	
     mPushButtonDate->setText(mLocale.format(defaultDateTime.date(), 
-	                                           r_qtn_date_usual_with_zero));
+												r_qtn_date_usual_with_zero));
 	mPushButtonTime->setText(mLocale.format(defaultDateTime.time(), 
-	                                           r_qtn_time_usual_with_zero));
+												r_qtn_time_usual_with_zero));
 }
 
+/*!
+	Sets the location on the button
+ */
 void CalenEditorCustomItem::populateLocation(QString location )
 {
 	mLocationLineEdit->setText( location );
-   
 }
 
+/*!
+	Sets the date range
+ */
 void CalenEditorCustomItem::setDateRange(QDate start, QDate end)
 {
 	mMaxDate = end;
@@ -236,82 +268,112 @@ void CalenEditorCustomItem::setDateRange(QDate start, QDate end)
 	}
 }
 
+/*!
+	Sets the time range
+ */
 void CalenEditorCustomItem::setTimeRange(QTime start, QTime end)
 {
 	mMaxTime = start;
 	mMinTime = end;
 }
 
+/*!
+	Enables the date button
+ */
 void CalenEditorCustomItem::enableDateButton(bool value)
 {
 	mPushButtonDate->setEnabled(value);
 }
 
-
+/*!
+	Handles the location change
+ */
 void CalenEditorCustomItem::handleLocationTextChange(QString location)
 {
 	emit locationTextChanged(location);
 }
 
+/*!
+	Handles the location editing finished
+ */
+void CalenEditorCustomItem::handleEditingFinished()
+{
+    emit locationEditingFinished();
+}
 
-
+/*!
+	Launches the date picker
+ */
 void CalenEditorCustomItem::handleDate()
 {
-	// Create a date picker
-	mDatePicker = new HbDateTimePicker(mDate, this);
-	mDatePicker->setMinimumDate(mMinDate);
-	mDatePicker->setMaximumDate(mMaxDate);
-
 	// Create a popup with datepicker for the user to select date.
-	HbDialog popUp;
-	popUp.setDismissPolicy(HbDialog::NoDismiss);
-	popUp.setTimeout(HbDialog::NoTimeout);
+	HbDialog *popUp = new HbDialog();
+	popUp->setDismissPolicy(HbDialog::NoDismiss);
+	popUp->setTimeout(HbDialog::NoTimeout);
+	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
 	
 	// Set the proper heading
 	if (mIsFromItem) {
-        popUp.setHeadingWidget(new HbLabel(hbTrId("txt_calendar_title_start_date")));   
-    }else {
-        popUp.setHeadingWidget(new HbLabel(hbTrId("txt_calendar_title_end_date")));
-    }
-
-	popUp.setContentWidget(mDatePicker);
-	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
-	popUp.setPrimaryAction(okAction);
+		popUp->setHeadingWidget(
+						new HbLabel(hbTrId("txt_calendar_title_start_date")));
+	}else {
+		popUp->setHeadingWidget(
+						new HbLabel(hbTrId("txt_calendar_title_end_date")));
+	}
+	// Create a date picker
+	if(mDatePicker) {
+		mDatePicker = NULL;
+	}
+	mDatePicker = new HbDateTimePicker(mDate, popUp);
+	mDatePicker->setMinimumDate(mMinDate);
+	mDatePicker->setMaximumDate(mMaxDate);
+	mDatePicker->setDate(mDate);
+	popUp->setContentWidget(mDatePicker);
+	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"), popUp);
+	popUp->addAction(okAction);
 	connect(okAction, SIGNAL(triggered()), this, SLOT(saveDate()));
-	connect(okAction, SIGNAL(triggered()), &popUp, SLOT(close()));
-	popUp.setSecondaryAction(new HbAction(hbTrId("txt_common_button_cancel")));
-	popUp.exec();
+	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"), popUp));
+	popUp->open();
 }
 
+/*!
+	Launches the time picker
+ */
 void CalenEditorCustomItem::handleTime()
 {
+	// Create a popup with time picker for the user to select time.
+	HbDialog *popUp = new HbDialog();
+	popUp->setDismissPolicy(HbDialog::NoDismiss);
+	popUp->setTimeout(HbDialog::NoTimeout);
+	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
+	
+	// Set the proper heading
+	if (mIsFromItem) {
+		popUp->setHeadingWidget(
+					new HbLabel(hbTrId("txt_calendar_title_start_time")));
+	}else {
+		popUp->setHeadingWidget(
+					new HbLabel(hbTrId("txt_calendar_title_end_time")));
+	}
 	// Create a time picker.
-	mTimePicker = new HbDateTimePicker(mTime, this);
+	if(mTimePicker) {
+		mTimePicker = NULL;
+	}
+	mTimePicker = new HbDateTimePicker(mTime, popUp);
+	
 	if(mLocale.timeStyle() == HbExtendedLocale::Time12) {
 		mTimePicker->setDisplayFormat("hh:mm ap");	
 	}else {
 		mTimePicker->setDisplayFormat("hh:mm");
 	}
 	mTimePicker->setTime(mTime);
-	// Create a popup with time picker for the user to select time.
-	HbDialog popUp;
-	popUp.setDismissPolicy(HbDialog::NoDismiss);
-	popUp.setTimeout(HbDialog::NoTimeout);
-	
-	// Set the proper heading
-    if (mIsFromItem) {
-        popUp.setHeadingWidget(new HbLabel(hbTrId("txt_calendar_title_start_time")));   
-    }else {
-        popUp.setHeadingWidget(new HbLabel(hbTrId("txt_calendar_title_end_time")));
-    }
-    
-	popUp.setContentWidget(mTimePicker);
-	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
-	popUp.setPrimaryAction(okAction);
+	popUp->setContentWidget(mTimePicker);
+
+	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"), popUp);
+	popUp->addAction(okAction);
 	connect(okAction, SIGNAL(triggered()), this, SLOT(saveTime()));
-	connect(okAction, SIGNAL(triggered()), &popUp, SLOT(close()));
-	popUp.setSecondaryAction(new HbAction(hbTrId("txt_common_button_cancel"), &popUp));
-	popUp.exec();
+	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"), popUp));
+	popUp->open();
 }
 
 /*!
@@ -353,6 +415,18 @@ void CalenEditorCustomItem::enableFromTimeFieldAndSetTime(bool enableTimeFiles, 
 	
 	// Set FromTime in Editor
 	mPushButtonTime->setText(mLocale.format(fromDateTime.time(),r_qtn_time_usual_with_zero));
+	
+	// Store the time
+    mTime = fromDateTime.time();
+}
+
+/*!
+	Disable Date field.
+ */
+void CalenEditorCustomItem::disableFromToDateField()
+{
+	// disable the date field.
+	mPushButtonDate->setEnabled(false);
 }
 
 /*!
@@ -364,7 +438,11 @@ void CalenEditorCustomItem::enableToTimeFieldAndSetTime(bool enableTimeFiles, QD
 	mPushButtonTime->setEnabled(enableTimeFiles);
 	
 	// Set ToTime in Editor
-	mPushButtonTime->setText(mLocale.format(toDateTime.time(),r_qtn_time_usual_with_zero));
+	mPushButtonTime->setText(mLocale.format(
+							toDateTime.time(),r_qtn_time_usual_with_zero));
+	
+	// Store the time
+	mTime = toDateTime.time();
 }
 
 /*!
@@ -377,7 +455,7 @@ bool CalenEditorCustomItem::canSetModelIndex(const QModelIndex &index) const
         index.data(HbDataFormModelItem::ItemTypeRole).toInt());
 
     if(itemType == CustomWidgetFrom || itemType == CustomWidgetTo || itemType == RepeatUntilOffset 
-			|| itemType == CustomWidgetLocation ) {
+			|| itemType == CustomWidgetLocation || itemType == ReminderTimeOffset ) {
         return true;
     } else {
         return false;
@@ -400,7 +478,18 @@ void CalenEditorCustomItem::restore()
     		mRepeatUntilWidget->setText(modelItem->contentWidgetData("text").toString());
     	}
     	break;
+    	
+    	case ReminderTimeOffset:
+    	{
+    		mReminderTimeWidget->setText(modelItem->contentWidgetData("text").toString());
+    	}
+    	break;
     }
+}
+
+QDateTime CalenEditorCustomItem::getDateTime()
+{
+    return QDateTime(mDate, mTime);
 }
 
 Q_IMPLEMENT_USER_METATYPE(QLocationPickerItem)

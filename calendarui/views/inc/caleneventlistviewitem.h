@@ -24,17 +24,12 @@
 class CalenEventListViewItem : public HbListViewItem
 {
     Q_OBJECT
-    Q_PROPERTY(bool timeFormat12 READ timeFormat12Hr WRITE setTimeFormat12Hr)
 public:
     CalenEventListViewItem(QGraphicsItem *parent = 0);
     ~CalenEventListViewItem();
 
     HbAbstractViewItem * createItem();
     void updateChildItems();
-    bool timeFormat12Hr();
-    void setTimeFormat12Hr(bool format);
-private:
-    bool timeFormat12;
 };
 
 #endif      // __CALEN_EVENT_LIST_VIEW_ITEM_H__

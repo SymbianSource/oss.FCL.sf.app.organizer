@@ -27,7 +27,8 @@ INCLUDEPATH += \
 
 DEPENDPATH += \
 		./inc \
-		./src
+		./src \
+		./data
 
 symbian: {
 	TARGET.CAPABILITY += ALL -TCB
@@ -43,13 +44,15 @@ symbian: {
 
 SOURCES += \
 		clockalarmeditor.cpp \
-                clockalarmcustomitem.cpp 
+        	clockalarmcustomitem.cpp 
 		   
 HEADERS += \
 		clockalarmeditor.h \
-            clockalarmcustomitem.h\ 
-	    clockalarmeditordefines.h
+        	clockalarmcustomitem.h \ 
+	    	clockalarmeditordefines.h
+		
+RESOURCES += clockalarmeditor.qrc
+		
+TRANSLATIONS += clockalarmeditor.ts
 
-RESOURCES += \
-		data/clockalarmeditor.qrc
 # End of file	--Don't remove this.

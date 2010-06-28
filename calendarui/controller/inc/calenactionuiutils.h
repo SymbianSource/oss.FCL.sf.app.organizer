@@ -42,13 +42,6 @@ NONSHARABLE_CLASS( CalenActionUiUtils )
     {
     
     public:
-        enum TDeleteConfirmationType
-            {
-            EDeleteEntry = 1,
-            EDeleteToDo,
-            EDeleteToDos,
-            EDeleteAll
-            };
 
         enum TRepeatQueryType
             {
@@ -77,9 +70,6 @@ NONSHARABLE_CLASS( CalenActionUiUtils )
         static void setToDoCompleteStatus(AgendaUtil* agendaUtil,
                                             AgendaEntry& entry,
                                             const bool status );
-        
-        static int showDeleteConfirmationQueryL(const TDeleteConfirmationType type,
-                                                 const TInt count = 0);
         
     private: // Construction and destruction
         // Hiding constructor, because this is static utility class.

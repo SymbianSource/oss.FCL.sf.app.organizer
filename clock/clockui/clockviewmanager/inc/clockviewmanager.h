@@ -44,9 +44,11 @@ public:
 	CLOCKVIEWMANAGER_EXPORT void showView(ClockViews view);
 
 private:
-	void loadViews();
 	void loadMainView();
 	void loadWorldClockView();
+
+private slots:
+	void loadOtherViews();
 
 private:
 	ClockAppControllerIf &mAppControllerIf;

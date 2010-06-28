@@ -1,0 +1,30 @@
+CalenDayItem{
+    layout: noIconLayout;
+}
+
+CalenDayItem[!eventDescription][!backgroundFrame]{
+    layout: noIconNoTextNoBkgLayout;
+}
+
+CalenDayItem[!eventDescription][backgroundFrame]{
+    layout: noIconNoTextLayout;
+}
+
+CalenDayItem::eventDescription {
+    color: var(qtc_cal_meeting_text); 
+    font-variant: secondary;
+    text-height: var(hb-param-text-height-secondary);
+    text-align: center center;
+    text-line-count-min: 1;
+    size-policy-vertical: expanding;
+}
+ 
+CalenDayItem::colorStripe {
+    pref-width: 1.5un;
+    size-policy-horizontal: fixed; 
+}
+
+CalenDayItem::spacerItem{
+    pref-width: 1.5un;
+    size-policy-horizontal: expanding; 
+}

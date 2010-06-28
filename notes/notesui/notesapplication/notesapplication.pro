@@ -47,6 +47,8 @@ symbian: {
 
 	notes.path = /sys/bin
 	DEPLOYMENT += notes
+	
+	SKINICON = qtg_large_notes
 }
 
 SOURCES += main.cpp

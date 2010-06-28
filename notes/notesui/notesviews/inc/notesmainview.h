@@ -53,6 +53,10 @@ public:
 public:
 	NOTESVIEWS_EXPORT void setupView(
 			NotesAppControllerIf &controllerIf, NotesDocLoader *docLoader);
+	NOTESVIEWS_EXPORT void setupAfterViewReady();
+	NOTESVIEWS_EXPORT void updateTitle();
+	NOTESVIEWS_EXPORT void captureScreenShot(bool captureScreenShot = false);
+
 signals:
 	void deleteEntry(ulong entryId);
 
@@ -74,7 +78,10 @@ private slots:
 	void updateSubTitle(ulong id=0);
 	void markNoteAsTodo();
 	void openNote();
-
+	void selectedMenuAction(HbAction *action);
+	void handleMenuClosed();
+	void saveActivity();
+	
 private:
 	HbListView *mListView;
 	HbAbstractViewItem *mSelectedItem;
@@ -93,6 +100,7 @@ private:
 	HbAction *mOpenAction;
 
 	HbGroupBox *mSubTitle;
+	HbLabel *mEmptyListLabel;
 
 	AgendaUtil *mAgendaUtil;
 
@@ -102,6 +110,9 @@ private:
 	NotesSortFilterProxyModel *mProxyModel;
 	NotesEditor *mNotesEditor;
 	AgendaEventViewer *mAgendaEventViewer;
+	bool 			mIsLongTop;
+	bool			mIsScreenShotCapruted; // check if the screenshot captured is valid
+	QVariantHash	mScreenShot; // screenshot
 };
 
 #endif // NOTESMAINVIEW_H

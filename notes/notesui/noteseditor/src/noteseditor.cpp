@@ -44,7 +44,7 @@
 	\param parent QObject pointer.
  */
 NotesEditor::NotesEditor(QObject *parent)
-:QObject(parent),d_ptr(new NotesEditorPrivate(0, parent))
+:QObject(parent),d_ptr(new NotesEditorPrivate(0, this))
 {
 	// Nothing yet.
 }
@@ -57,7 +57,7 @@ NotesEditor::NotesEditor(QObject *parent)
 	\param parent QObject pointer.
  */
 NotesEditor::NotesEditor(AgendaUtil *agendaUtil, QObject *parent)
-:QObject(parent), d_ptr(new NotesEditorPrivate(agendaUtil, parent))
+:QObject(parent), d_ptr(new NotesEditorPrivate(agendaUtil, this))
 {
 	// Nothing yet.
 }

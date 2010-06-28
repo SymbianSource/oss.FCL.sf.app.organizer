@@ -1,36 +1,7 @@
 <!DOCTYPE RCC><RCC version="1.0">
 	<qresource prefix="/clock">
-		<file alias="alarms.svg">toolbar/qtg_test_alarm.svg</file>
-		<file alias="world_clock.svg">toolbar/qtg_test_worldclock.svg</file>
-		<file alias="countdown_timer.svg">toolbar/qtg_test_timer.svg</file>
-		<file alias="stopwatch.svg">toolbar/qtg_test_stopwatch.svg</file>
-		
-		<file alias="alarm_repeat.svg">alarm/qtg_test_repeat.svg</file>
-		<file alias="alarm_active.svg">alarm/qtg_test_alarm.svg</file>
-		<file alias="alarm_inactive.svg">alarm/qtg_test_noalarm.svg</file>
-		<file alias="new_alarm.svg">toolbar/qtg_test_newalarm.svg</file>
-		
-		<file alias="add_new_city.svg">toolbar/qtg_test_addnewcity.svg</file>
 		<file alias="day.svg">worldclock/qtg_test_day.svg</file>
 		<file alias="night.svg">worldclock/qtg_test_night.svg</file>
-		<file alias="home_city.svg">worldclock/qtg_test_homecity.svg</file>
-		<file alias="city_default.svg">worldclock/qgn_test_city_default.svg</file>
-		<file alias="dst_icon.svg">worldclock/qgn_indi_dst_add.svg</file>
-		<file alias="find_icon.svg">worldclock/qgn_indi_find.svg</file>
-		
-		<file alias="start.svg">toolbar/qtg_test_start.svg</file>
-		<file alias="stop.svg">toolbar/qtg_test_stop.svg</file>
-		<file alias="reset.svg">toolbar/qtg_test_reset.svg</file>
-		<file alias="timer_background.svg">timer/qtg_graf_timer2_base.svg</file>
-		<file alias="timer_color_arc.svg">timer/knob_arc_indicator_1min.svg</file>
-		<file alias="timer_grabzone.svg">timer/qtg_graf_timer2_button.svg</file>
-		<file alias="timer_arrow.svg">timer/qtg_graf_timer2_arrow.svg</file>
-		<file alias="timer_hour_dial.svg">timer/qtg_graf_timer2_time24.svg</file>
-		<file alias="timer_min_sec_dial.svg">timer/qtg_graf_timer2_time60.svg</file>
-		
-		<file alias="lap.svg">toolbar/qtg_test_lap.svg</file>
-		<file alias="split.svg">toolbar/qtg_test_split.svg</file>
-		<file alias="analyze.svg">toolbar/qtg_test_analyze.svg</file>
 		
 		<file alias="hide_widget.fxml">effects/hide_widget.fxml</file>
 		<file alias="show_widget.fxml">effects/show_widget.fxml</file>
@@ -40,11 +11,5 @@
 		
 		<file alias="fade_out.fxml">effects/fade_out.fxml</file>
 		<file alias="fade_in.fxml">effects/fade_in.fxml</file>
-		
-		<file alias="timerknob_appear.fxml">effects/timerknob_appear.fxml</file>
-		<file alias="timerknob_disappear.fxml">effects/timerknob_disappear.fxml</file>
-	</qresource>
-	<qresource prefix="/translations">
-		<file alias="clock" >translations/clock.qm</file>
-	</qresource>
+	</qresource>	
 </RCC>

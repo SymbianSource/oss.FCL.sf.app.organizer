@@ -44,22 +44,24 @@ symbian: {
 }
 
 SOURCES += caleneditor.cpp \
-					 caleneditorcustomitem.cpp \
-					  caleneditor_p.cpp \
+					caleneditorcustomitem.cpp \
+					caleneditor_p.cpp \
 					caleneditordocloader.cpp \
 					caleneditorreminderfield.cpp \
 					caleneditorrepeatfield.cpp \
 					caleneditordatahandler.cpp
-		   
+					
 HEADERS += caleneditor.h \
-		   caleneditorcustomitem.h \
- caleneditorcommon.h \
-		   caleneditordocloader.h \
-		    caleneditor_p.h \
-		caleneditorreminderfield.h \
-		caleneditorrepeatfield.h \
-		caleneditordatahandler.h
-		   
-RESOURCES += caleneditor.qrc		   
-		   
+            caleneditorcustomitem.h \
+            caleneditorcommon.h \
+            caleneditordocloader.h \
+            caleneditor_p.h \
+            caleneditorreminderfield.h \
+            caleneditorrepeatfield.h \
+            caleneditordatahandler.h
+            
+RESOURCES += caleneditor.qrc
+
+TRANSLATIONS += caleneditor.ts
+
 # End of file	--Don't remove this.

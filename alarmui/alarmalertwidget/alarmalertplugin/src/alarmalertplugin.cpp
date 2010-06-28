@@ -19,7 +19,6 @@
 // System includes
 #include <QString>
 #include <QVariantMap>
-#include <QDebug>
 #include <hbdevicedialog.h>
 
 // User includes
@@ -80,7 +79,7 @@ bool AlarmAlertPlugin::deviceDialogInfo(const QString &deviceDialogType,
     Q_UNUSED(deviceDialogType);
     Q_UNUSED(parameters);
 
-    info->group = GenericDeviceDialogGroup;
+    info->group = CriticalGroup;
     info->priority = DefaultPriority;
     info->flags = NoDeviceDialogFlags;
     return true;

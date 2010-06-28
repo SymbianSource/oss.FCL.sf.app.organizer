@@ -56,6 +56,8 @@
 #endif // SYMBIAN_CALENDAR_V2
 #include <calsession.h>
 #include <calentryview.h>
+#include <clockdomaincrkeys.h>
+#include <calendardomaincrkeys.h>
 // #include <calenlauncher.h>  // for launching calendar entry view
 
 
@@ -76,14 +78,8 @@ const TUint KInactivityResetInterval( 1000000 ); // 1.0 s
 const TInt KMaxProfileVolume( 10 );
 const TInt KVolumeRampPeriod( 3000000 );  // 3 seconds
 _LIT( KRngMimeType, "application/vnd.nokia.ringing-tone" );
-const TUid KCRUidCalendar = {0x101F874B};
 //const TUint32 KCalendarSoundFile = 0x00000004;
-const TUint32 KCalendarDefaultSoundFile = 0x00000005;
-const TUint32 KCalendarSnoozeTime = 0x00000007;
-const TUid KCRUidClockApp = {0x101F874D};
 //const TUint32 KClockAppSoundFile = 0x00000000;
-const TUint32 KClockAppDefaultSoundFile = 0x00000001;
-const TUint32 KClockAppSnoozeTime = 0x00000002;
 const TUid KAlarmClockOne = { 0x101F793A };
 
 const TUid KCRUidProfileEngine = {0x101F8798};
@@ -440,7 +436,7 @@ void CAlarmUtils::GetAlarmSoundFilenames()
 
 	if( IsClockAlarm() )
 	{
-		PIM_TRAPD_ASSERT( repository = CRepository::NewL( KCRUidClockApp ); ) 
+		PIM_TRAPD_ASSERT( repository = CRepository::NewL( TUid::Uid(KCRUidClockApp) ); ) 
 		PIM_TRAPD_ASSERT( profileRepository = CRepository::NewL( 
 														KCRUidProfileEngine ); )
 
@@ -459,8 +455,10 @@ void CAlarmUtils::GetAlarmSoundFilenames()
 	}
 	else
 	{
-		PIM_TRAPD_ASSERT( repository = CRepository::NewL( KCRUidCalendar ); )
-		PIM_TRAPD_ASSERT( profileRepository = CRepository::NewL( KCRUidProfileEngine ); )
+		PIM_TRAPD_ASSERT( repository =
+				CRepository::NewL( TUid::Uid(KCRUidCalendar) ); )
+		PIM_TRAPD_ASSERT( profileRepository =
+				CRepository::NewL( KCRUidProfileEngine ); )
 
 		if( repository )
 		{
@@ -660,7 +658,7 @@ void CAlarmUtils::GetSnoozeTimeSetting()
         case EAlarmTypeClock:
             {
             CRepository* repository = NULL;
-            PIM_TRAPD_ASSERT( repository = CRepository::NewL( KCRUidClockApp ); )
+            PIM_TRAPD_ASSERT( repository = CRepository::NewL( TUid::Uid(KCRUidClockApp) ); )
 
             if( repository )
                 {
@@ -673,7 +671,8 @@ void CAlarmUtils::GetSnoozeTimeSetting()
         case EAlarmTypeCalendar:
             {
             CRepository* repository = NULL;
-            PIM_TRAPD_ASSERT( repository = CRepository::NewL( KCRUidCalendar ); )
+            PIM_TRAPD_ASSERT( repository =
+            		CRepository::NewL( TUid::Uid(KCRUidCalendar) ); )
 
             if( repository )
                 {

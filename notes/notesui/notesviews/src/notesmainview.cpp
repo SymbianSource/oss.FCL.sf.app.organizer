@@ -30,6 +30,8 @@
 #include <HbAbstractItemView>
 #include <HbGroupBox>
 #include <HbListViewItem>
+#include <hbapplication> // hbapplication
+#include <hbactivitymanager> // hbactivitymanager
 
 // User includes
 #include "agendaeventviewer.h"
@@ -40,6 +42,7 @@
 #include "notesmodel.h"
 #include "notessortfilterproxymodel.h"
 #include "noteseditor.h"
+#include "notescommon.h" // NotesNamespace
 
 /*!
 	\class NotesMainView
@@ -57,7 +60,9 @@
 NotesMainView::NotesMainView(QGraphicsWidget *parent)
 :HbView(parent),
  mSelectedItem(0),
- mDeleteAction(0)
+ mDeleteAction(0),
+ mIsLongTop(false),
+ mIsScreenShotCapruted(false)
 {
 	// Nothing yet.
 }
@@ -121,10 +126,41 @@ void NotesMainView::setupView(
 			mNotesModel, SIGNAL(rowAdded(QModelIndex)),
 			this, SLOT(scrollTo(QModelIndex)));
 
+	// Get the empty list label.
+	mEmptyListLabel = static_cast<HbLabel *> (
+			mDocLoader->findWidget("emptyListLabel"));
+	mEmptyListLabel->hide();
+
 	// Get the view heading label
-	mViewHeading = static_cast<HbLabel *> (
+	mSubTitle = static_cast<HbGroupBox *>(
 			mDocLoader->findWidget("viewHeading"));
 
+	// Handles the orientation change for list items
+	HbMainWindow *window = hbInstance->allMainWindows().first();
+	handleOrientationChanged(window->orientation());
+	connect(
+			window, SIGNAL(orientationChanged(Qt::Orientation)),
+			this, SLOT(handleOrientationChanged(Qt::Orientation)));
+
+	// Set the graphics size for the icons.
+	HbListViewItem *prototype = mListView->listItemPrototype();
+	prototype->setGraphicsSize(HbListViewItem::SmallIcon);
+	
+    // Get a pointer to activity Manager
+    HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+  
+    // clean up any previous versions of this activity from the activity manager.
+    // ignore return value as the first boot would always return a false
+    // bool declared on for debugging purpose
+    bool ok = activityManager->removeActivity(notes);
+	
+	// connect main view for the first time to recieve aboutToQuit signal
+    connect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()), this, SLOT(saveActivity()));
+    
+ }
+
+void NotesMainView::setupAfterViewReady()
+{
 	// Get the toolbar/menu actions.
 	mAddNoteAction = static_cast<HbAction *> (
 			mDocLoader->findObject("newNoteAction"));
@@ -159,19 +195,6 @@ void NotesMainView::setupView(
 			mViewCollectionAction, SIGNAL(triggered()),
 			this, SLOT(displayCollectionView()));
 
-	mSubTitle = static_cast<HbGroupBox *>(
-			mDocLoader->findWidget("viewHeading"));
-
-	// Handles the orientation change for list items
-	HbMainWindow *window = hbInstance->allMainWindows().first();
-	handleOrientationChanged(window->orientation());
-	connect(
-			window, SIGNAL(orientationChanged(Qt::Orientation)),
-			this, SLOT(handleOrientationChanged(Qt::Orientation)));
-
-	// Update sub heading text for main view.
-	updateSubTitle();
-
 	connect(
 			mAgendaUtil, SIGNAL(entryAdded(ulong)),
 			this,SLOT(updateSubTitle(ulong)));
@@ -181,10 +204,14 @@ void NotesMainView::setupView(
 	connect(
 			mAgendaUtil, SIGNAL(entryUpdated(ulong)),
 			this, SLOT(updateSubTitle(ulong)));
+}
 
-	// Set the graphics size for the icons.
-	HbListViewItem *prototype = mListView->listItemPrototype();
-	prototype->setGraphicsSize(HbListViewItem::SmallIcon);
+/*
+	Updates the title text for the first launch
+ */
+void NotesMainView::updateTitle()
+{
+	updateSubTitle();
 }
 
 /*!
@@ -200,6 +227,9 @@ void NotesMainView::createNewNote()
 			mNotesEditor, SIGNAL(editingCompleted(bool)),
 			this, SLOT(handleEditingCompleted(bool)));
 	mNotesEditor->create(NotesEditor::CreateNote);
+	// capture screenshot for future use, if application
+	// is exited/Quit from notesEditor
+	captureScreenShot(true);
 }
 
 /*!
@@ -212,46 +242,51 @@ void NotesMainView::createNewNote()
  */
 void NotesMainView::handleItemReleased(const QModelIndex &index)
 {
-	// Sanity check.
-	if (!index.isValid()) {
-		return;
-	}
+	if(!mIsLongTop) {
+		// Sanity check.
+		if (!index.isValid()) {
+			return;
+		}
 
-	// First get the id of the note and get the corresponding information from
-	// agendautil.
-	ulong noteId = index.data(NotesNamespace::IdRole).value<qulonglong>();
+		// First get the id of the note and get the corresponding information from
+		// agendautil.
+		ulong noteId = index.data(NotesNamespace::IdRole).value<qulonglong>();
 
-	if (0 >= noteId) {
-		// Something wrong.
-		return;
-	}
+		if (0 >= noteId) {
+			// Something wrong.
+			return;
+		}
 
-	// Get the entry details.
-	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
-	if (entry.isNull()) {
-		// Entry invalid.
-		return;
-	}
+		// Get the entry details.
+		AgendaEntry entry = mAgendaUtil->fetchById(noteId);
+		if (entry.isNull()) {
+			// Entry invalid.
+			return;
+		}
 
-	if(AgendaEntry::TypeTodo == entry.type()) {
-		// Construct agenda event viewer.
-		mAgendaEventViewer = new AgendaEventViewer(mAgendaUtil, this);
+		if(AgendaEntry::TypeTodo == entry.type()) {
+			// Construct agenda event viewer.
+			mAgendaEventViewer = new AgendaEventViewer(mAgendaUtil, this);
 
-		connect(
-				mAgendaEventViewer, SIGNAL(viewingCompleted(const QDate)),
-				this, SLOT(handleViewingCompleted()));
-		// Launch agenda event viewer
-		mAgendaEventViewer->view(
-				entry, AgendaEventViewer::ActionEditDelete);
-	}else if(AgendaEntry::TypeNote == entry.type()) {
-		// Construct notes editor.
-		mNotesEditor = new NotesEditor(mAgendaUtil, this);
-		connect(
-				mNotesEditor, SIGNAL(editingCompleted(bool)),
-				this, SLOT(handleEditingCompleted(bool)));
+			connect(
+					mAgendaEventViewer, SIGNAL(viewingCompleted(const QDate)),
+					this, SLOT(handleViewingCompleted()));
+			// Launch agenda event viewer
+			mAgendaEventViewer->view(
+					entry, AgendaEventViewer::ActionEditDelete);
+		}else if(AgendaEntry::TypeNote == entry.type()) {
+			// Construct notes editor.
+			mNotesEditor = new NotesEditor(mAgendaUtil, this);
+			connect(
+					mNotesEditor, SIGNAL(editingCompleted(bool)),
+					this, SLOT(handleEditingCompleted(bool)));
 
-		// Launch the notes editor with the obtained info.
-		mNotesEditor->edit(entry);
+			// Launch the notes editor with the obtained info.
+			mNotesEditor->edit(entry);
+		}
+		// capture screenshot for future use, if application
+		// is exited/Quit from eventViewer/notesEditor
+		captureScreenShot(true);
 	}
 }
 
@@ -266,6 +301,7 @@ void NotesMainView::handleItemReleased(const QModelIndex &index)
 void NotesMainView::handleItemLongPressed(
 		HbAbstractViewItem *item, const QPointF &coords)
 {
+	mIsLongTop = true;
 	mSelectedItem = item;
 
 	ulong noteId = item->modelIndex().data(
@@ -274,74 +310,48 @@ void NotesMainView::handleItemLongPressed(
 
 	// Display a context specific menu.
 	HbMenu *contextMenu = new HbMenu();
+	connect(
+			contextMenu,SIGNAL(aboutToClose()),
+			this, SLOT(handleMenuClosed()));
+
 	mOpenAction =
 			contextMenu->addAction(hbTrId("txt_common_menu_open"));
-	connect(
-			mOpenAction, SIGNAL(triggered()),
-			this, SLOT(openNote()));
 
 	// Add actions to the context menu.
 	if (AgendaEntry::TypeTodo == entry.type()) {
 		mEditTodoAction =
 				contextMenu->addAction(hbTrId("txt_common_menu_edit"));
-		connect(
-				mEditTodoAction, SIGNAL(triggered()),
-				this, SLOT(editTodo()));
 	}
 
 	mDeleteAction =
 			contextMenu->addAction(hbTrId("txt_common_menu_delete"));
-	connect(
-			mDeleteAction, SIGNAL(triggered()),
-			this, SLOT(deleteNote()));
 
 	if (AgendaEntry::TypeNote == entry.type()) {
 		if (entry.favourite()) {
 			mMakeFavouriteAction = contextMenu->addAction(
 					hbTrId("txt_notes_menu_remove_from_favorites"));
-
-			connect(
-					mMakeFavouriteAction, SIGNAL(triggered()),
-					this, SLOT(markNoteAsFavourite()));
-
 		} else {
 			mMakeFavouriteAction = contextMenu->addAction(
 					hbTrId("txt_notes_menu_mark_as_favorite"));
-
-			connect(
-					mMakeFavouriteAction, SIGNAL(triggered()),
-					this, SLOT(markNoteAsFavourite()));
 		}
 
 		mMarkTodoAction =
 				contextMenu->addAction(
 						hbTrId("txt_notes_menu_make_it_as_todo_note"));
-		connect(
-				mMarkTodoAction, SIGNAL(triggered()),
-				this, SLOT(markNoteAsTodo()));
 
 	} else if (AgendaEntry::TypeTodo == entry.type()) {
 		if (AgendaEntry::TodoNeedsAction == entry.status()) {
 			mTodoStatusAction = contextMenu->addAction(
 					hbTrId("txt_notes_menu_mark_as_done"));
-
-			connect(
-					mTodoStatusAction , SIGNAL(triggered()),
-					this, SLOT(markTodoStatus()));
-
 		} else if (AgendaEntry::TodoCompleted == entry.status()) {
 			mTodoStatusAction = contextMenu->addAction(
 					hbTrId("txt_notes_menu_mark_as_not_done"));
-
-			connect(
-					mTodoStatusAction , SIGNAL(triggered()),
-					this, SLOT(markTodoStatus()));
 		}
 	}
 
 	// Show the menu.
-	contextMenu->exec(coords);
-
+	contextMenu->open(this, SLOT(selectedMenuAction(HbAction*)));
+	contextMenu->setPreferredPos(coords);
 }
 
 /*!
@@ -422,7 +432,9 @@ void NotesMainView::handleEditingCompleted(bool status)
 
 	// Cleanup.
 	mNotesEditor->deleteLater();
-
+	// set captured screenshot as invalid as the control is returned back 
+	// to the main view
+	captureScreenShot(false);
 }
 
 /*!
@@ -430,7 +442,8 @@ void NotesMainView::handleEditingCompleted(bool status)
  */
 void NotesMainView::displayCollectionView()
 {
-
+    // no need to capture the screen shot for future use as 
+    // NotesViewManager::switchToView takes care of it
 	// Switch to collections view.
 	mAppControllerIf->switchToView(NotesNamespace::NotesCollectionViewId);
 
@@ -453,10 +466,10 @@ void NotesMainView::scrollTo(QModelIndex index)
  */
 void NotesMainView::handleViewingCompleted()
 {
-
-
 	mAgendaEventViewer->deleteLater();
-
+	// set captured screenshot as invalid as the control is returned back 
+	// to the main view
+	captureScreenShot(false);
 }
 
 /*!
@@ -473,7 +486,6 @@ void NotesMainView::handleActionStateChanged()
 
 void NotesMainView::editTodo()
 {
-
 	// Get the selected list item index
 	QModelIndex index = mSelectedItem->modelIndex();
 	if (!index.isValid()) {
@@ -494,6 +506,9 @@ void NotesMainView::editTodo()
 
 	// Launch the to-do editor with the obtained info.
 	mNotesEditor->edit(todoId);
+	// capture screenshot for future use, if application
+	// is exited/Quit from notesEditor
+	captureScreenShot(true);
 
 }
 
@@ -527,7 +542,15 @@ void NotesMainView::updateSubTitle(ulong id)
 			(AgendaUtil::IncludeNotes
 			| AgendaUtil::IncludeCompletedTodos
 			| AgendaUtil::IncludeIncompletedTodos));
-	int c= entries.count();
+	
+	if (0 >= entries.count()) {
+		mEmptyListLabel->show();
+		mListView->hide();
+	} else {
+		mEmptyListLabel->hide();
+		mListView->show();
+	}
+	
 	mSubTitle->setHeading(
 			hbTrId("txt_notes_subhead_ln_notes",entries.count()));
 }
@@ -618,5 +641,77 @@ void NotesMainView::openNote()
 		mAgendaEventViewer->view(
 				entry, AgendaEventViewer::ActionEditDelete);
 	}
+	// capture screenshot for future use, if application
+	// is exited/Quit from notesEditor/eventViewer
+	captureScreenShot(true);
 }
+
+/*!
+	 Slot to handle the selected context menu actions
+ */
+void NotesMainView::selectedMenuAction(HbAction *action)
+{
+	if (action == mOpenAction) {
+		openNote();
+	} else if (action == mEditTodoAction) {
+		editTodo();
+	} else if (action == mDeleteAction) {
+		deleteNote();
+	} else if (action == mMakeFavouriteAction) {
+		markNoteAsFavourite();
+	} else if (action == mMarkTodoAction) {
+		markNoteAsTodo();
+	} else if (action == mTodoStatusAction) {
+		markTodoStatus();
+	}
+}
+
+/*!
+	Slot to handle the context menu closed.
+ */
+void NotesMainView::handleMenuClosed()
+{
+	mIsLongTop = false;
+}
+
+/*!
+	CaptureScreenShot captures screen shot 
+	\param captureScreenShot bool to indicate if screenshot needs to be captured
+*/ 
+void NotesMainView::captureScreenShot(bool captureScreenShot)
+    {
+    if (captureScreenShot) // check if screen shot needs to be captured
+        {
+        mScreenShot.clear();
+        mScreenShot.insert("screenshot", QPixmap::grabWidget(mainWindow(), mainWindow()->rect()));
+        }
+    mIsScreenShotCapruted = captureScreenShot; // set mIsScreenShotCapruted set validity of screenshot
+    }
+
+/*!    
+	saveActivity saves main view as an activity 
+*/ 
+void NotesMainView::saveActivity()
+ {
+   // Get a pointer to activity Manager
+   HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+ 
+   if (!mIsScreenShotCapruted) // check if a valid screenshot is already captured
+       {
+       mScreenShot.clear();
+       mScreenShot.insert("screenshot", QPixmap::grabWidget(mainWindow(), mainWindow()->rect()));
+       }
+ 
+   // save any data necessary to save the state
+   QByteArray serializedActivity;
+   QDataStream stream(&serializedActivity, QIODevice::WriteOnly | QIODevice::Append);
+   stream << NotesNamespace::NotesMainViewId;
+ 
+   // add the activity to the activity manager
+   bool ok = activityManager->addActivity(notes, serializedActivity, mScreenShot);
+   if ( !ok )
+       {
+       qFatal("Add failed" );
+       }
+ }
 // End of file	--Don't remove this.

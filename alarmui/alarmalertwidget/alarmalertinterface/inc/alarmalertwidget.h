@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 // alarmalertwidget.h
@@ -21,15 +21,16 @@
 
 // System includes
 #include <QObject>
-#include <QVariantMap>
-#include <QDateTime>
+#include <hbdevicedialogsymbian.h>
 
 // User includes
 #include "alarmcommon.h"
 
 // Forward declarations
-class HbDeviceDialog;
+class CHbDeviceDialogSymbian;
 class AlarmAlertObserver;
+class CHbSymbianVariantMap;
+class CHbSymbianVariant;
 
 // Class declaration
 /**
@@ -37,10 +38,8 @@ class AlarmAlertObserver;
  * @brief This is the client side of the device dialog plugin.
  * Contains API's to show, update and dismiss alarm dialogs
  */
-class AlarmAlertWidget : public QObject
+class AlarmAlertWidget : public MHbDeviceDialogObserver
 {
-Q_OBJECT
-
 public:
 
     /**
@@ -48,93 +47,118 @@ public:
      * @param observer This is the observer of all user events
      */
 	AlarmAlertWidget(AlarmAlertObserver *observer);
-	
+
 	/**
 	 * @brief Destructor
 	 */
 	~AlarmAlertWidget();
-	
+
 	/**
 	 * @brief Shows the alarm dialog
 	 * @param The alarm information to display
 	 * @return true on success, false otherwise
 	 */
 	bool showAlarmDialog(SAlarmInfo *alarmInfo);
-	
+
 	/**
 	 * @brief Dismisses any alarm dialog that is being shown
 	 * @return true on success, false otherwise
 	 */
-	bool dismissAlarmDialog();
-	
+	void dismissAlarmDialog();
+
 	/**
 	 * @brief Updates the alarm dialog with new information
 	 * @param The alarm information to update
 	 * @return true on success, false otherwise
 	 */
 	bool updateAlarmDialog(SAlarmInfo *alarmInfo);
+
+public:
 	
-private slots:
+    /**
+     * @brief Inform the client about user interaction on dialog.
+     * @param List of aruguemnts the dialog has sent.
+     */
+	void DataReceived(CHbSymbianVariantMap& aData);
+
+	/**
+	 * @brief Updates the alarm dialog with new information
+	 * @param The alarm information to update
+	 */
+	void DeviceDialogClosed(TInt aCompletionCode);
+
+private:
+    /**
+     * @brief Handle the events sent by dialog.
+     * @param params List of arguments the dialog has sent
+     */
+    void triggerAction(const CHbSymbianVariant* source);
+
+private:
 
     /**
-     * @brief Slot to handle user interactions
-     * @param params List of arguments the dialog has sent 
+     * @var mVariantMap
+     * @brief Contain the parameters.
      */
-    void triggerAction(QVariantMap params);
-	
-private:
-    
+     CHbSymbianVariantMap* mVariantMap;
+
 	/**
 	 * @var mSubject
 	 * @brief Holds the alarm subject
 	 */
-    QString mSubject;
-    
+    CHbSymbianVariant* mAlarmSubject;
+
     /**
      * @var mLocation
      * @brief Holds the alarm location (for calendar alerts only)
      */
-    QString mLocation;
-    
+    CHbSymbianVariant* mLocation;
+
     /**
      * @var mAlarmTime
      * @brief Holds the alarm expiry time
      */
-    QDateTime mAlarmTime;
+    CHbSymbianVariant* mAlarmTime;
     
+    /**
+     * @var mAlarmDate
+     * @brief Holds the alarm expiry date
+     */
+    CHbSymbianVariant* mAlarmDate;
+
     /**
      * @var mDeviceDialog
      * @brief The interface to the device dialog server
      */
-    HbDeviceDialog *mDeviceDialog;
-    
+    CHbDeviceDialogSymbian *mDeviceDialog;
+
     /**
      * @var mAlarmAlertType
      * @brief Tells if the type of alert being displayed
      * is a clock /calendar/to-do alert
      */
-    int mAlarmAlertType;
-    
+    CHbSymbianVariant* mAlarmAlertType;
+
     /**
      * @var mCanSnooze
      * @brief Tells whether the current alert can be snoozed.
      * true->alarm can be snoozed
      * false->alarm cannot be snoozed
      */
-    bool mCanSnooze;
-    
+    CHbSymbianVariant* mCanSnooze;
+
     /**
      * @var mIsSilent
      * @brief Indicates if the alarm is silent or not
      */
-    bool mIsSilent;
-    
+    CHbSymbianVariant* mIsSilent;
+
     /**
      * @var mIsTimedAlarm
      * @brief Indicates if the alarm has time info or not
      */
-    bool mIsTimedAlarm;
-    
+    CHbSymbianVariant* mIsTimedAlarm;
+
     /**
      * @var mObserver
      * @brief The observer for user responses

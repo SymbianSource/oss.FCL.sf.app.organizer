@@ -45,9 +45,11 @@ public:
 private slots:
 	void launchTimePicker();
 	void launchDatePicker();
-	void handleOkAction();
-	void handleCancelAction();
 	void selectDueDate();
+	void selectedAction(HbAction *action);
+
+private:
+	void handleOkAction();
 
 private:
 	QPointer<HbDialog> mTimePickerDialog;
@@ -55,6 +57,10 @@ private:
 	QPointer<HbPushButton> mTimeWidget;
 	QPointer<HbPushButton> mDateWidget;
 	QPointer<HbPushButton> mDueDateItem;
+
+	HbAction *mOkAction;
+	HbAction *mCancelAction;
+
 	NotesEditorPrivate* mNotesTodoeditorPvt;
 	bool mDueDatePickerIsActive;
 

@@ -18,7 +18,7 @@
 // System includes
 #include <QtGui>
 #include <QScopedPointer>
-#include <QTranslator>
+#include <HbTranslator>
 #include <HbApplication>
 #include <HbMainWindow>
 
@@ -32,8 +32,6 @@
  */
 int main(int argc, char *argv[])
 {
-	qDebug("clock: main() -->");
-
 	// Initialization
 	HbApplication app(argc, argv);
 
@@ -45,18 +43,15 @@ int main(int argc, char *argv[])
 	window.setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
 
 	// Load the translation file.
-	QTranslator translator;
-    translator.load("clock", ":/translations");
-    app.installTranslator(&translator);
-
+	HbTranslator translator("clock");
+	translator.loadCommon();
+	
 	// Construct the application controller.
 	QScopedPointer<ClockAppController> controller(new ClockAppController);
 	Q_UNUSED(controller)
 
 	// Show widget
 	window.show();
-
-	qDebug("clock: main() <--");
 
 	// Enter event loop
 	return app.exec();
