@@ -65,6 +65,7 @@ CCalenController::CCalenController()
     
     iNextServicesCommandBase = KCustomCommandRangeStart;
     iRefCount = 0;
+    mAgendaUtil = 0;
     
     TRACE_EXIT_POINT;
 }
@@ -290,6 +291,12 @@ CCalenController::~CCalenController()
     	delete iCustomisationManager;
     	iCustomisationManager = NULL;
 		}
+		
+    if (mAgendaUtil) {
+        delete mAgendaUtil;
+        mAgendaUtil = 0;
+    }
+    
     Dll::SetTls( NULL );
     
     TRACE_EXIT_POINT;
