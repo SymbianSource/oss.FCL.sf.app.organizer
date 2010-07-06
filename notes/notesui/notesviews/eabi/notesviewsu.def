@@ -54,4 +54,6 @@ EXPORTS
 	_ZThn8_N19NotesCollectionViewD0Ev @ 53 NONAME
 	_ZThn8_N19NotesCollectionViewD1Ev @ 54 NONAME
 	_ZN13NotesMainView17captureScreenShotEb @ 55 NONAME
+	_ZN13NotesNoteView14updateNoteViewEv @ 56 NONAME
+	_ZN17NotesFavoriteView18updateFavoriteViewEv @ 57 NONAME
 

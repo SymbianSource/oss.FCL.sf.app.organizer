@@ -16,7 +16,9 @@
 */
 
 #include <QtTest/QtTest>
+#include <agendaentry.h>
 
+#include "calenagendautils.h"
 #include "test_calenagendautils.h"
 
 /*!
@@ -51,4 +53,40 @@ void TestCalenAgendaUtils::cleanup()
     // No implementation yet
 }
 
+/*!
+    This function is to test the api of CalenDateUtils::endsAtStartOfDayL.
+ */
+void TestCalenAgendaUtils::test_endsAtStartOfDay()
+{
+	AgendaEntry entry;
+	entry.setSummary("summary");
+	entry.setStartAndEndTime(QDateTime(QDate(2010, 5, 1), QTime(12, 30)),
+	                         QDateTime(QDate(2010, 5, 6), QTime(2, 59)));
+	bool outPut = CalenAgendaUtils::endsAtStartOfDay(
+												entry, 
+												QDateTime(QDate(2010, 5, 6)));
+	QVERIFY(!outPut);
+
+	entry.setStartAndEndTime(QDateTime(QDate(2010, 5, 1), QTime(1, 35)),
+	                         QDateTime(QDate(2010, 5, 6), QTime(23, 59)));
+	outPut = CalenAgendaUtils::endsAtStartOfDay(
+												entry, 
+												QDateTime(QDate(2010, 5, 6)));
+	QVERIFY(!outPut);
+	
+	entry.setStartAndEndTime(QDateTime(QDate(2010, 5, 1), QTime(2, 30)),
+		                         QDateTime(QDate(2010, 5, 5), QTime(23, 59, 59, 999)));
+	outPut = CalenAgendaUtils::endsAtStartOfDay(
+													entry, 
+													QDateTime(QDate(2010, 5, 6)));
+	QVERIFY(!outPut);
+	
+	entry.setStartAndEndTime(QDateTime(QDate(2010, 5, 1), QTime(1, 35)),
+	                         QDateTime(QDate(2010, 5, 6)));
+	outPut = CalenAgendaUtils::endsAtStartOfDay(
+												entry, 
+												QDateTime(QDate(2010, 5, 6)));
+	QVERIFY(outPut);
+
+}
 // End of file	--Don't remove this.

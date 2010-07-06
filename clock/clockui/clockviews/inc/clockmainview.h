@@ -90,6 +90,8 @@ private:
 
 	HbLabel *mDayLabel;
 	HbLabel *mPlaceLabel;
+	HbLabel *mHorizontalDivider;
+	HbLabel *mVerticalDivider;
 	ClockWidget *mClockWidget;
 	HbLabel *mNoAlarmLabel;
 	HbListView *mAlarmList;

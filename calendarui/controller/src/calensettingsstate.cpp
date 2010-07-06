@@ -103,8 +103,8 @@ TBool CCalenSettingsState::HandleCommandL( const TCalenCommand& aCommand,
             }
             break;
         case ECalenMonthView:
+        case ECalenAgendaView:
         case ECalenDayView:
-        case ECalenLandscapeDayView:
         case ECalenStartActiveStep:
             {
             // set previous state to idle

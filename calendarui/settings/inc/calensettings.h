@@ -19,6 +19,7 @@
 #define CALENSETTINGS_H
 
 #include <QObject>
+#include <QHash>
 
 class QPersistentModelIndex;
 class QModelIndex;
@@ -75,13 +76,11 @@ private:
 	HbDataFormModelItem* mShowRegionalInfoItem;
 	HbDataFormModelItem* mShowWeekStartOnInfoItem;
 	HbComboBox* mStartOfWeekItem;
+	QHash<int, int> mAlarmSnoozeTimeHash;
 	XQSettingsManager *mSettingsManager;
 	XQSettingsKey *mAlarmSnoozeCenrepKey;
 	XQSettingsKey *mWeekNumberCenrepKey;
 	XQSettingsKey *mShowRegionalInfoKey;
-	uint mAlarmSnoozeTime;
-	uint mShowWeekNumber;
-	uint mShowRegionalInfo;
 	int mStartOfWeek;
 	bool mWeekNumberItemAdded;
 	bool mRegionalpluginActive;

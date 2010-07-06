@@ -71,7 +71,7 @@ CalenMonthView::CalenMonthView(MCalenServices &services) :
 	mIsWeekNumbersShown = 0;
 	mOrientation = mServices.MainWindow().orientation();
 	// Read the date from the context
-	mDate = mServices.Context().focusDateAndTimeL();
+	mDate = mServices.Context().focusDateAndTime();
 	mCurrentDay = mDate;
 
 	// Create the settings manager instance and settings key for week number
@@ -106,7 +106,7 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 								   mDocLoader->findWidget(CALEN_MONTH_TITLE));
 	// Set the title text color
 	QColor monthTitleColor = HbColorScheme::color("qtc_cal_monthgrid_title");
-	if (monthTitleColor.isValid()) {
+	if (mTitleLabel && monthTitleColor.isValid()) {
 		mTitleLabel->setTextColor(monthTitleColor);
 	}
 		
@@ -430,24 +430,32 @@ void CalenMonthView::addBackgroundFrame()
     if (mTitleLabel) {
         // The month title
         drawer = new HbFrameDrawer("qtg_fr_cal_monthgrid_title_bg", HbFrameDrawer::ThreePiecesHorizontal);
-        frame = new HbFrameItem(drawer, this);
-        mTitleLabel->setBackgroundItem(frame->graphicsItem(), -2);
+		if (drawer)
+        	frame = new HbFrameItem(drawer, this);
+		if(frame)
+			mTitleLabel->setBackgroundItem(frame->graphicsItem(), -2);
     }
     
     // Set the frame to the preview pane
     drawer = new HbFrameDrawer("qtg_fr_cal_preview_bg", HbFrameDrawer::NinePieces);
-    frame = new HbFrameItem(drawer, this);
-    mPrevPaneLayoutWidget->setBackgroundItem(frame->graphicsItem(), -5);
+	if (drawer)
+	    frame = new HbFrameItem(drawer, this);
+	if(frame)
+	    mPrevPaneLayoutWidget->setBackgroundItem(frame->graphicsItem(), -5);
     
     // Set the frame to the preview pane
     drawer = new HbFrameDrawer("qtg_fr_cal_preview_bg", HbFrameDrawer::NinePieces);
-       frame = new HbFrameItem(drawer, this);
+    if(drawer)
+	   frame = new HbFrameItem(drawer, this);
+	if(frame)
     mCurrPaneLayoutWidget->setBackgroundItem(frame->graphicsItem(), -5);
     
     // Set the frame to the preview pane
     drawer = new HbFrameDrawer("qtg_fr_cal_preview_bg", HbFrameDrawer::NinePieces);
+	if(drawer)
            frame = new HbFrameItem(drawer, this);
-    mNextPaneLayoutWidget->setBackgroundItem(frame->graphicsItem(), -5);
+	if(frame)
+	    mNextPaneLayoutWidget->setBackgroundItem(frame->graphicsItem(), -5);
 }
 
 void CalenMonthView::showHideRegionalInformation()
@@ -583,24 +591,26 @@ void CalenMonthView::updateWeekNumGridModel()
 void CalenMonthView::goToToday()
 {
 	QDateTime today = CalenDateUtils::today();
+	// Set the context and repopulate the view
+    MCalenContext &context = mServices.Context();
+    context.setFocusDateAndTime(today);
+	    
 	// First check if we are not alread
 	// showing today's month view
 	if (mDate == today) {
 		return;
 	} else if (mActiveMonth.date().year() == today.date().year() && 
 				mActiveMonth.date().month() == today.date().month()) {
+        mDate = today;
 		// User is in current month only, so just set the focus to current
 		// date grid item and refresh the preview pane
 		int currIndex = mFirstDayOfGrid.daysTo(today);
 		setCurrGridIndex(currIndex);
-		return;
+		// Populate the preview panes
+		populatePreviewPane(mDate);
+	} else {	
+        refreshViewOnGoToDate();
 	}
-	
-	// Set the context and repopulate the view
-	MCalenContext &context = mServices.Context();
-	context.setFocusDateAndTimeL(today, KCalenMonthViewUidValue);
-	
-	refreshViewOnGoToDate();
 }
 
 /*
@@ -706,9 +716,7 @@ void CalenMonthView::prepareForPopulation()
  */
 void CalenMonthView::refreshViewOnGoToDate()
 {
-	setActiveDay(dateFromContext(mServices.Context()));
-	setDate();
-	updateMonthDataArrayWithActiveDates();
+	prepareForPopulation();
 	setDateToLabel();
 	// fetch list of required calendar instances
 	populateWithInstanceView();
@@ -731,13 +739,13 @@ QDateTime CalenMonthView::dateFromContext(const MCalenContext &context)
 	QDateTime ret;
 	if (AgendaEntry::TypeTodo == context.instanceId().mType) {
 		QDateTime today = CalenDateUtils::today();
-		if (context.focusDateAndTimeL() < today) {
+		if (context.focusDateAndTime() < today) {
 			ret = today;
 		} else {
-			ret = context.focusDateAndTimeL();
+			ret = context.focusDateAndTime();
 		}
 	} else {
-		ret = context.focusDateAndTimeL();
+		ret = context.focusDateAndTime();
 	}
 	return ret;
 }
@@ -759,8 +767,6 @@ void CalenMonthView::setActiveDay(QDateTime day)
 	date.setDate(date.year(), date.month(), 1);
 	QDateTime firstDayOfPrevMonth(date, day.time());
 
-	// TODO: Need to consider the week start frm the locale object
-	TLocale locale;
 	int offset(firstDayOfPrevMonth.date().dayOfWeek() - (mLocale.startOfWeek()
 	        + 1));
 	if (offset < 0) {
@@ -967,7 +973,7 @@ void CalenMonthView::updateModelWithFutureMonth()
 	date.setDate(date.year(), date.month(), 1);
 	// Get the first day of the future month
 	QDateTime firstDayOfFutMonth(date, futureMonthDateTime.time());
-	TLocale locale;
+
 	int offset = firstDayOfFutMonth.date().dayOfWeek() - (mLocale.startOfWeek()
 	        + 1);
 	if (offset < 0) {
@@ -1064,7 +1070,8 @@ void CalenMonthView::setCurrGridIndex(int index)
 void CalenMonthView::updateMonthDataArrayWithActiveDates()
 {
 	int activeMonth = mActiveMonth.date().month();
-	for (int i = 0; i < mMonthDataArray.count(); i++) {
+	int monthDataCount = mMonthDataArray.count();
+	for (int i = 0; i < monthDataCount; i++) {
 		if (mMonthDataArray[i].Day().date().month() == activeMonth) {
 			// Set the active flag
 			mMonthDataArray[i].setActive(true);
@@ -1108,7 +1115,8 @@ void CalenMonthView::populateWithInstanceView()
 	getInstanceList(datesWithEvents,gridStart,gridEnd);
 	
 	// Parse thru the list of dates and set the required flags
-	for(int i(0); i < datesWithEvents.count(); i++) {
+	int datesEventsCount = datesWithEvents.count();
+	for(int i(0); i < datesEventsCount; i++) {
 		int offset = mFirstDayOfGrid.date().daysTo(datesWithEvents.at(i));
 		mMonthDataArray[offset].SetHasEvents(true);
 	}
@@ -1135,7 +1143,8 @@ void CalenMonthView::populatePrevMonth()
 	getInstanceList(datesWithEvents,gridStart,gridEnd);
 	
 	// Parse thru the list of dates and set the required flags
-	for(int i(0); i < datesWithEvents.count(); i++) {
+	int datesEventsCount = datesWithEvents.count();
+	for(int i(0); i < datesEventsCount; i++) {
 		int offset = mFirstDayOfGrid.date().daysTo(datesWithEvents.at(i));
 		mMonthDataArray[offset].SetHasEvents(true);
 	}
@@ -1162,7 +1171,8 @@ void CalenMonthView::populateNextMonth()
 	getInstanceList(datesWithEvents,gridStart,gridEnd);
 	
 	// Parse thru the list of dates and set the required flags
-	for(int i(0); i < datesWithEvents.count(); i++) {
+	int datesEventsCount = datesWithEvents.count();
+	for(int i(0); i < datesEventsCount; i++) {
 		int offset = mFirstDayOfGrid.date().daysTo(datesWithEvents.at(i));
 		mMonthDataArray[offset].SetHasEvents(true);
 	}
@@ -1220,7 +1230,7 @@ void CalenMonthView::setContextForActiveDay(int index)
 {
 	QDateTime newActiveDay = mFirstDayOfGrid.addDays(index);
 	// Set the context
-	mServices.Context().setFocusDateL(newActiveDay, KCalenMonthViewUidValue);
+	mServices.Context().setFocusDate(newActiveDay);
 	mDate = newActiveDay;
 	setDateToLabel();
 	
@@ -1242,7 +1252,7 @@ void CalenMonthView::createEditor()
 }
 
 /*!
- Slot to launch the agenda view
+ Slot to launch the Day view
  */
 void CalenMonthView::launchDayView()
 {

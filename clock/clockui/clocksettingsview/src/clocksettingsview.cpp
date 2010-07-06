@@ -25,8 +25,7 @@
 #include <HbLabel>
 #include <HbPushButton>
 #include <HbCheckBox>
-#include <HbApplication>
-#include <QTranslator>
+#include <HbTranslator>
 #include <xqsettingsmanager.h>
 #include <xqsettingskey.h>
 #include <clockdomaincrkeys.h>
@@ -55,16 +54,10 @@
 ClockSettingsView::ClockSettingsView(QObject *parent)
 :QObject(parent)
 {
-	qDebug("clock: ClockSettingsView::ClockSettingsView() -->");
 	
 	// Load the translation file and install the editor specific translator
-    mTranslator = new QTranslator;
-    //QString lang = QLocale::system().name();
-    //QString path = "Z:/resource/qt/translations/";
-    mTranslator->load("clocksettingsview",":/translations");
-    // TODO: Load the appropriate .qm file based on locale
-    //bool loaded = mTranslator->load("caleneditor_" + lang, path);
-    HbApplication::instance()->installTranslator(mTranslator);
+    mTranslator = new HbTranslator("clocksettingsview");
+    mTranslator->loadCommon();
 
 	// Construct the settings utility.
 	mSettingsUtility = new SettingsUtility();
@@ -121,7 +114,6 @@ ClockSettingsView::~ClockSettingsView()
 	}
 	
 	// Remove the translator
-    HbApplication::instance()->removeTranslator(mTranslator);
     if (mTranslator) {
         delete mTranslator;
         mTranslator = 0;
@@ -130,9 +122,6 @@ ClockSettingsView::~ClockSettingsView()
     	delete mSettingsUtility;
     }
 	
-	if (!mTimezoneClient->isNull()) {
-	    mTimezoneClient->deleteInstance();
-    }
 	if(mSettingsModel){
 		delete mSettingsModel;
 	}
@@ -296,7 +285,7 @@ void ClockSettingsView::setupView()
 
 	// Create the custom prototype.
 	QList <HbAbstractViewItem*> prototypes = mSettingsForm->itemPrototypes();
-	SettingsCustomItem *customPrototype = new SettingsCustomItem();
+	SettingsCustomItem *customPrototype = new SettingsCustomItem(mSettingsForm);
 	prototypes.append(customPrototype);
 	mSettingsForm->setItemPrototypes(prototypes);
 
@@ -399,8 +388,28 @@ void ClockSettingsView::populateModel()
 			static_cast<HbDataFormModelItem::DataItemType>
 			(HbDataFormModelItem::CustomItemBase + RegionalSettingsItem);
 	mSettingsModel->appendDataFormItem(regionalSettingsItem);
-
-	// Add the alarm snooze time item.
+    
+	// Add the clock type item.
+    HbDataFormModelItem::DataItemType clockTypeSettingsItem =
+            static_cast<HbDataFormModelItem::DataItemType>
+            (HbDataFormModelItem::ToggleValueItem);
+    mClockTypeItem = mSettingsModel->appendDataFormItem(
+	clockTypeSettingsItem,hbTrId("txt_clock_setlabel_clock_type"));
+    QStringList clockTypeList;
+    int clockType = mSettingsUtility->clockType(clockTypeList);
+	int zeroIndex(0);
+    if( zeroIndex == clockType ){
+	    mClockTypeItem->setContentWidgetData("text", clockTypeList[0]);
+	    mClockTypeItem->setContentWidgetData("additionalText", clockTypeList[1]);
+    } else {
+	    mClockTypeItem->setContentWidgetData("text", clockTypeList[1]);
+	    mClockTypeItem->setContentWidgetData("additionalText", clockTypeList[0]);    
+    }
+    mSettingsForm->addConnection(
+            mClockTypeItem, SIGNAL(clicked()),
+            this, SLOT(handleClockTypeChanged()));
+    
+    // Add the alarm snooze time item.
 	mAlarmSnoozeItem = mSettingsModel->appendDataFormItem(
 			HbDataFormModelItem::ComboBoxItem,
 			hbTrId("txt_clock_setlabel_alarm_snooze_time"));
@@ -487,6 +496,15 @@ void ClockSettingsView::handleAlarmSnoozeTimeChanged(int index)
 		mSettingsManager->writeItemValue(
 				*mAlarmSnoozeTimeKey, mAlarmSnoozeTimeHash.value(index));
 	}
+}
+
+/*!
+    Slot which handles the clock type change..
+ */
+void ClockSettingsView::handleClockTypeChanged()
+{
+    mSettingsUtility->setClockType(
+                mClockTypeItem->contentWidgetData("text").toString());
 }
 
 /*!

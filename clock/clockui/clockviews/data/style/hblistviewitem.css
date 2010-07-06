@@ -7,7 +7,7 @@ HbListViewItem:landscape{
     layout: citylist-landscape;
 }
 
-HbListViewItem::icon-1{
+HbListViewItem[layoutName="citylist-portrait"]::icon-1{
     top: -var(hb-param-margin-gene-top);
     left: -var(hb-param-margin-gene-left);
     right: var(hb-param-margin-gene-middle-horizontal);
@@ -17,38 +17,42 @@ HbListViewItem::icon-1{
     fixed-width: var(hb-param-graphic-size-primary-large);
 }
 
-HbListViewItem::text-1{
+HbListViewItem[layoutName="citylist-portrait"]::text-1{
     top: -var(hb-param-margin-gene-top);
     right: var(hb-param-margin-gene-middle-horizontal);
     text-height: var(hb-param-text-height-tiny);
+    font-variant: secondary;
     text-align: left;
 }
 
-HbListViewItem::text-2{
+HbListViewItem[layoutName="citylist-portrait"]::text-2{
     top: -var(hb-param-margin-gene-middle-vertical);
     right: var(hb-param-margin-gene-middle-horizontal);
     text-height: var(hb-param-text-height-primary);
+    font-variant: primary;
     text-align: left;
 }
 
-HbListViewItem::text-3:portrait{
+HbListViewItem[layoutName="citylist-portrait"]::text-3{
     top: -var(hb-param-margin-gene-middle-vertical);
     right: var(hb-param-margin-gene-right);
     bottom: var(hb-param-margin-gene-bottom);
 
     text-height: var(hb-param-text-height-tiny);
+    font-variant: secondary;
     text-align: left;
 }
 
-HbListViewItem::text-3:landscape{
+HbListViewItem[layoutName="citylist-landscape"]::text-3{
     right: var(hb-param-margin-gene-right);
 
     text-height: var(hb-param-text-height-tiny);
+    font-variant: secondary;
     text-align: right;
     fixed-width: 24un;
 }
 
-HbListViewItem::icon-2{
+HbListViewItem[layoutName="citylist-portrait"]::icon-2{
     top: -var(hb-param-margin-gene-top);
     right: var(hb-param-margin-gene-right);
 
@@ -56,9 +60,10 @@ HbListViewItem::icon-2{
     fixed-width: var(hb-param-graphic-size-secondary);
 }
 
-HbListViewItem::text-4{
+HbListViewItem[layoutName="citylist-portrait"]::text-4{
     right: var(hb-param-margin-gene-right);
     text-height: var(hb-param-text-height-tiny);
+    font-variant: secondary;
     text-align: right;
     fixed-width: 16un;
 }

@@ -55,7 +55,6 @@ class  CalenNativeView : public CalenView,
 		QString *pluginText();
 	    /**
 	     * captureScreenshot captures the current screenshot
-	     * \param viewId of the view for which screenshot is to be taken
 	     */
 		CALENNATIVEVIEW_EXPORT void captureScreenshot(bool captureScreenShot = false);
 		
@@ -76,7 +75,6 @@ class  CalenNativeView : public CalenView,
 	    virtual void changeOrientation(Qt::Orientation orientation);
 	    /**
 	     * saveActivity saves the current view as an activity
-	     * \params viewId view Id to be saved as an activity
 	     * 
 	     */
 	    void saveActivity();
@@ -84,7 +82,7 @@ class  CalenNativeView : public CalenView,
     protected:
     
         MCalenServices	&mServices; // not owned.
-        int             mActivityId; // Recent Activity ID, currently it holdes wither of ECalenMonthView or ECalenDayView
+        int             mActivityId; // Recent Activity ID, currently it holdes wither of ECalenMonthView or ECalenAgendaView
         QVariantHash    mScreenShotMetadata; // Screenshot
     private:
         HbDateTimePicker	*mDatePicker;

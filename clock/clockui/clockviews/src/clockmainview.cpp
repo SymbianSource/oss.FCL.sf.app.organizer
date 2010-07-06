@@ -127,6 +127,12 @@ void ClockMainView::setupView(
 
 	bool loadSuccess = false;
 	Qt::Orientation currentOrienation = window->orientation();
+	
+	// Get the dividers.
+	mHorizontalDivider = static_cast<HbLabel *> (
+			mDocLoader->findObject("horizontalDivider"));
+	mVerticalDivider = static_cast<HbLabel *> (
+				mDocLoader->findObject("verticalDivider"));
 
 	// Get the "No alarm set" label.
 	mNoAlarmLabel = qobject_cast<HbLabel *> (
@@ -159,11 +165,15 @@ void ClockMainView::setupView(
 				CLOCK_MAIN_VIEW_DOCML,
 				CLOCK_MAIN_VIEW_PORTRAIT_SECTION,
 				&loadSuccess);
+		mHorizontalDivider->setVisible(true);
+		mVerticalDivider->setVisible(false);
 	} else {
 		mDocLoader->load(
 				CLOCK_MAIN_VIEW_DOCML,
 				CLOCK_MAIN_VIEW_LANDSCAPE_SECTION,
 				&loadSuccess);
+		mHorizontalDivider->setVisible(false);
+		mVerticalDivider->setVisible(true);
 	}
 	if (loadSuccess) {
 		if (0 == alarmCount) {
@@ -174,14 +184,8 @@ void ClockMainView::setupView(
 		}
 	}
 
-	mDayLabel = static_cast<HbLabel *> (
-			mDocLoader->findObject("dateLabel"));
-
-	mPlaceLabel = static_cast<HbLabel *> (
-			mDocLoader->findObject("placeLabel"));
-
-	
-
+	mDayLabel = static_cast<HbLabel *> (mDocLoader->findObject("dateLabel"));
+	mPlaceLabel = static_cast<HbLabel *> (mDocLoader->findObject("placeLabel"));
 	mClockWidget = static_cast<ClockWidget*> (
 			mDocLoader->findObject(CLOCK_WIDGET));
 
@@ -582,10 +586,14 @@ void ClockMainView::checkOrientationAndLoadSection(
 		mDocLoader->load(
 				CLOCK_MAIN_VIEW_DOCML, CLOCK_MAIN_VIEW_LANDSCAPE_SECTION,
 				&success);
+		mHorizontalDivider->setVisible(false);
+		mVerticalDivider->setVisible(true);
 	} else {
 		mDocLoader->load(
 				CLOCK_MAIN_VIEW_DOCML, CLOCK_MAIN_VIEW_PORTRAIT_SECTION,
 				&success);
+		mHorizontalDivider->setVisible(true);
+		mVerticalDivider->setVisible(false);
 	}
 
 	if(success) {
@@ -687,6 +695,23 @@ void ClockMainView::updateDateLabel()
  */
 void ClockMainView::updateClockWidget()
 {
+	QStringList clockType;
+    int index = mSettingsUtility->clockType(clockType);
+    int zeroIndex(0);
+    if(zeroIndex == index){
+    	mClockWidget->setClockType(ClockWidget::ClockTypeDigital);
+    } else {
+    	mClockWidget->setClockType(ClockWidget::ClockTypeAnalog);
+    }
+    
+    QStringList timeFormat;
+
+    if (zeroIndex == mSettingsUtility->timeFormat(timeFormat)) {
+    	mClockWidget->setTimeFormat(ClockWidget::TimeFormat24Hrs);
+    } else {
+    	mClockWidget->setTimeFormat(ClockWidget::TimeFormat12Hrs);
+    }
+
 	mClockWidget->updateTime();
 }
 

@@ -33,6 +33,9 @@
 #include "caleneditorrepeatfield.h"
 #include "caleneditorcustomitem.h"
 
+// Constants
+const int userRole = Qt::UserRole + 100;
+
 /*!
 	\class CalenEditorRepeatField
  */
@@ -71,8 +74,7 @@ CalenEditorRepeatField::CalenEditorRepeatField(CalenEditorPrivate* calenEditor,
 		QStringList repeatChoices;
 		repeatChoices << hbTrId("txt_calendar_setlabel_repeat_val_only_once")
 		        << hbTrId("txt_calendar_setlabel_repeat_val_daily")
-		        // TODO : add text ID for workdays
-		        << hbTrId("Workdays")
+		        << hbTrId("txt_calendar_setlabel_repeat_val_workdays")
 		        << hbTrId("txt_calendar_setlabel_repeat_val_weekly")
 		        << hbTrId("txt_calendar_setlabel_repeat_val_fortnightly")
 		        << hbTrId("txt_calendar_setlabel_repeat_val_monthly")
@@ -126,16 +128,16 @@ void CalenEditorRepeatField::populateRepeatItem(int index)
 	// Set the user roles for the combobox items so that we depend on these
 	// roles to identify the correct repeat type when repeat choices are 
 	// dynamically removed or added
-	mRepeatComboBox->setItemData(RepeatOnce, RepeatOnce, Qt::UserRole+100);
-	mRepeatComboBox->setItemData(RepeatDaily, RepeatDaily, Qt::UserRole+100);
+	mRepeatComboBox->setItemData(RepeatOnce, RepeatOnce, userRole);
+	mRepeatComboBox->setItemData(RepeatDaily, RepeatDaily, userRole);
 	mRepeatComboBox->setItemData(RepeatWorkdays, 
-								 RepeatWorkdays, Qt::UserRole+100);
-	mRepeatComboBox->setItemData(RepeatWeekly, RepeatWeekly, Qt::UserRole+100);
+								 RepeatWorkdays, userRole);
+	mRepeatComboBox->setItemData(RepeatWeekly, RepeatWeekly, userRole);
 	mRepeatComboBox->setItemData(RepeatBiWeekly, 
-								 RepeatBiWeekly, Qt::UserRole+100);
+								 RepeatBiWeekly, userRole);
 	mRepeatComboBox->setItemData(RepeatMonthly, 
-								 RepeatMonthly, Qt::UserRole+100);
-	mRepeatComboBox->setItemData(RepeatYearly, RepeatYearly, Qt::UserRole+100);
+								 RepeatMonthly, userRole);
+	mRepeatComboBox->setItemData(RepeatYearly, RepeatYearly, userRole);
 	
 	if (mCalenEditor->editedEntry()->isRepeating()) {
 		switch (mCalenEditor->editedEntry()->repeatRule().type()) {
@@ -197,9 +199,9 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 	mIsWorkdays = false;
 
 	HbExtendedLocale locale = HbExtendedLocale::system();
-	// Get the user role w ehave set for this index
-	QVariant userRole = mRepeatComboBox->itemData(index, Qt::UserRole + 100);
-	int value = userRole.toInt();
+	// Get the user role we have set for this index
+	QVariant role = mRepeatComboBox->itemData(index, userRole);
+	int value = role.toInt();
 	switch (value) {
 		case 1: {
 			if (!mRepeatUntilItemAdded) {
@@ -296,7 +298,9 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 		}
 		break;
 	}
-	mCalenEditor->addDiscardAction();
+	if(!mCalenEditor->isNewEntry()) {
+		mCalenEditor->addDiscardAction();
+	}
 	mCalenEditor->updateReminderChoices();
 }
 
@@ -446,8 +450,7 @@ void CalenEditorRepeatField::updateRepeatChoices()
 	QStringList repeatChoices;
 	repeatChoices << hbTrId("txt_calendar_setlabel_repeat_val_only_once")
 			<< hbTrId("txt_calendar_setlabel_repeat_val_daily")
-			// TODO : add text ID for workdays
-			<< hbTrId("Workdays")
+			<< hbTrId("txt_calendar_setlabel_repeat_val_workdays")
 			<< hbTrId("txt_calendar_setlabel_repeat_val_weekly")
 			<< hbTrId("txt_calendar_setlabel_repeat_val_fortnightly")
 			<< hbTrId("txt_calendar_setlabel_repeat_val_monthly")
@@ -456,19 +459,19 @@ void CalenEditorRepeatField::updateRepeatChoices()
 	// Set the user roles for the combobox items so that we depend on these
 	// roles to identify the correct repeat type when repeat choices are 
 	// dynamically removed or added
-	mRepeatComboBox->setItemData(RepeatOnce, RepeatOnce, Qt::UserRole + 100);
+	mRepeatComboBox->setItemData(RepeatOnce, RepeatOnce, userRole);
 	mRepeatComboBox->setItemData(RepeatDaily, RepeatDaily, 
-								 Qt::UserRole + 100);
+	                             userRole);
 	mRepeatComboBox->setItemData(RepeatWorkdays, 
-								 RepeatWorkdays, Qt::UserRole+100);
+								 RepeatWorkdays, userRole);
 	mRepeatComboBox->setItemData(RepeatWeekly, RepeatWeekly,
-								 Qt::UserRole + 100);
+	                             userRole);
 	mRepeatComboBox->setItemData(RepeatBiWeekly, RepeatBiWeekly,
-								 Qt::UserRole + 100);
+	                             userRole);
 	mRepeatComboBox->setItemData(RepeatMonthly, RepeatMonthly,
-								 Qt::UserRole + 100);
+	                             userRole);
 	mRepeatComboBox->setItemData(RepeatYearly, RepeatYearly, 
-								 Qt::UserRole + 100);
+	                             userRole);
 
 	int totalCount = mRepeatComboBox->count();
 

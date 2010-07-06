@@ -38,11 +38,11 @@ SOURCES += main.cpp \
 symbian : {
 
 	TARGET.CAPABILITY = ALL -TCB
-	TARGET.UID3 = 0x200315A5
+	TARGET.UID3 = 0x200315AE
 	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 	
-	LIBS += -lcalencommonutils
-	
+	LIBS += -lcalencommonutils \
+			-lagendainterface	
 	BLD_INF_RULES.prj_testexports += \
 		"./rom/unittest_calencommonutils.iby		CORE_APP_LAYER_IBY_EXPORT_PATH(unittest_calencommonutils.iby)" 		
 }

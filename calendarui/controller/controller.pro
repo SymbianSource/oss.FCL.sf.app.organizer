@@ -23,6 +23,7 @@ DEFINES += CALENCONTROLLER_DLL
 INCLUDEPATH += ./inc \
 						   ../inc \ 
 						   ../views/inc \
+						   ../views/dayview/inc \
 						   ../globaldata/inc 
 
 CONFIG += hb

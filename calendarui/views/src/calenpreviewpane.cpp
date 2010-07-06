@@ -45,6 +45,8 @@
 // Macros
 #define TWO_SECONDS_TIMER 2000 // millseconds
 #define SCROLLING_SPEED 10
+#define MAX_PAN_DIRECTION_THRESHOLD 50
+#define MIN_PAN_DIRECTION_THRESHOLD 20
 
 static const QString EMPTYSTRING(" ");
 
@@ -315,25 +317,49 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
 {
     if(HbPanGesture *gesture = qobject_cast<HbPanGesture *>(event->gesture(Qt::PanGesture))) {
         if (gesture->state() == Qt::GestureStarted) {
+            // TODO: This work aroung till framework provides an api
+            // to know the direciton of the pan, until then we need
+            // calculate the direction explicitly
             // Get to know the direction of the gesture
-        	QPointF delta = gesture->sceneDelta();
-            if (delta.x() > 20) {
-                mIsGestureHandled = true;
-                // right gesture
-                mView->handlePreviewPaneGesture(true);
-                event->accept(Qt::PanGesture);
-            } else if (delta.x() < -20){
-                mIsGestureHandled = true;
-                // left gesture
-                mView->handlePreviewPaneGesture(false);
-                event->accept(Qt::PanGesture);
+            QPointF delta = gesture->delta();
+            if (abs(delta.y()) > MAX_PAN_DIRECTION_THRESHOLD) {
+                // Now see if y coord diff has crossed threshold
+                if (delta.x() > MAX_PAN_DIRECTION_THRESHOLD) {
+                    mIsGestureHandled = true;
+                    // right gesture
+                    mView->handlePreviewPaneGesture(true);
+                    event->accept(Qt::PanGesture);
+                } else if (delta.x() < -MAX_PAN_DIRECTION_THRESHOLD){
+                    mIsGestureHandled = true;
+                    // left gesture
+                    mView->handlePreviewPaneGesture(false);
+                    event->accept(Qt::PanGesture);
+                } else {
+                    event->accept(Qt::PanGesture);
+                    return;
+                }
+            } else if (abs(delta.y()) < MAX_PAN_DIRECTION_THRESHOLD) {
+               if (delta.x() > MIN_PAN_DIRECTION_THRESHOLD) {
+                   mIsGestureHandled = true;
+                   // right gesture
+                   mView->handlePreviewPaneGesture(true);
+                   event->accept(Qt::PanGesture);
+               } else if (delta.x() < -MIN_PAN_DIRECTION_THRESHOLD){
+                   mIsGestureHandled = true;
+                   // left gesture
+                   mView->handlePreviewPaneGesture(false);
+                   event->accept(Qt::PanGesture);
+               }else {
+                   event->accept(Qt::PanGesture);
+                   return;
+               }
             }
         }
     } else if(HbTapGesture *gesture = qobject_cast<HbTapGesture *>(event->gesture(Qt::TapGesture))) {
         if (gesture->state() == Qt::GestureFinished) {
             if (gesture->tapStyleHint() == HbTapGesture::Tap) {
                 // Preview pane tapped
-                mServices.IssueCommandL(ECalenDayView);
+                mServices.IssueCommandL(ECalenAgendaView);
                 event->accept(Qt::TapGesture);
             }
         }

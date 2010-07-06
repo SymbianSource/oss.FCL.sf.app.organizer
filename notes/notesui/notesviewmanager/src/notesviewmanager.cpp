@@ -61,10 +61,6 @@ NotesViewManager::NotesViewManager(
 
 	mAgendaUtil = mAppControllerIf.agendaUtil();
 
-	connect(
-			mAgendaUtil, SIGNAL(instanceViewCreationCompleted(int)),
-			this,SLOT(handleInstanceViewCreationCompleted(int)));
-
 	// Check the Application Startup reason from Activity Manager
 	int activityReason = qobject_cast<HbApplication*>(qApp)->activateReason();
 
@@ -95,6 +91,10 @@ NotesViewManager::NotesViewManager(
         // Load the main view at the start up.
         loadNotesMainView();
 	    }
+
+	connect(
+			mAgendaUtil, SIGNAL(instanceViewCreationCompleted(int)),
+			this,SLOT(handleInstanceViewCreationCompleted(int)));
 
 	// Delay loading of other views till main view is loaded.
 	connect(
@@ -403,5 +403,11 @@ void NotesViewManager::handleInstanceViewCreationCompleted(int status)
 
 	// Update the title for to-do view.
 	mTodoView->updateTitle();
+	
+	// Update the plain notes view.
+	mNoteView->updateNoteView();
+	
+	// Update the favorites view.
+	mFavoriteView->updateFavoriteView();
 }
 // End of file	--Don't remove this.

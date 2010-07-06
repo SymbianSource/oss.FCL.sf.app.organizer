@@ -27,6 +27,7 @@
 #include <HbListViewItem>
 #include <HbInstance>
 #include <HbNotificationDialog>
+#include <HbLabel>
 
 // User includes
 #include "notesnoteview.h"
@@ -99,8 +100,9 @@ void NotesNoteView::setupView(
 	subModel->setSourceModel(mProxyModel);
 
 	// Get the list object from the document and update the model.
-	mListView = static_cast<HbListView *>
-	(mDocLoader->findWidget("noteListView"));
+	mListView = static_cast<HbListView *> (
+			mDocLoader->findWidget("noteListView"));
+	
 	// Update the list view model.
 	mListView->setModel(subModel);
 	// Setup the operations that can be done with a list view.
@@ -112,6 +114,10 @@ void NotesNoteView::setupView(
 			SIGNAL(longPressed(HbAbstractViewItem *, const QPointF &)),
 			this,
 			SLOT(handleItemLongPressed(HbAbstractViewItem *, const QPointF &)));
+
+	// Get the empty list label.
+	mEmptyListLabel = static_cast<HbLabel *> (
+			mDocLoader->findWidget("emptyListLabel"));
 
 	// Get the toolbar/menu actions.
 	mAddNoteAction = static_cast<HbAction *> (
@@ -128,8 +134,7 @@ void NotesNoteView::setupView(
 
 	mViewCollectionAction = static_cast<HbAction *> (
 			mDocLoader->findObject("displayCollectionsAction"));
-	mViewCollectionAction->setCheckable(true);
-	mViewCollectionAction->setChecked(true);
+	
 	connect(
 			mViewCollectionAction, SIGNAL(changed()),
 			this, SLOT(handleActionStateChanged()));
@@ -144,9 +149,29 @@ void NotesNoteView::setupView(
 			window, SIGNAL(orientationChanged(Qt::Orientation)),
 			this, SLOT(handleOrientationChanged(Qt::Orientation)));
 
+
+	connect(
+			mAgendaUtil, SIGNAL(entryAdded(ulong)),
+			this,SLOT(updateView(ulong)));
+	connect(
+			mAgendaUtil, SIGNAL(entryDeleted(ulong)),
+			this,SLOT(updateView(ulong)));
+	connect(
+			mAgendaUtil, SIGNAL(entryUpdated(ulong)),
+			this, SLOT(updateView(ulong)));
+	
+
 	// Set the graphics size for the icons.
 	HbListViewItem *prototype = mListView->listItemPrototype();
 	prototype->setGraphicsSize(HbListViewItem::SmallIcon);
+}
+
+/*
+	Updates the note view either to show notes or emptyListLabel.
+ */
+void NotesNoteView::updateNoteView()
+{
+	updateView();
 }
 
 /*!
@@ -457,5 +482,23 @@ void NotesNoteView::handleMenuClosed()
 {
 	mIsLongTop = false;
 }
+
+/*!
+	Handles the visibility of empty list label.
+ */
+void NotesNoteView::updateView(ulong id)
+{
+	Q_UNUSED(id)
+
+	// Get the numbers of notes.
+	if (0 >= mListView->model()->rowCount()) {
+		mEmptyListLabel->show();
+		mListView->hide();
+	} else {
+		mEmptyListLabel->hide();
+		mListView->show();
+	}
+}
+
 // End of file	--Don't remove this.
 

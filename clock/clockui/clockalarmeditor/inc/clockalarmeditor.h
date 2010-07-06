@@ -36,12 +36,13 @@ class HbDataFormModelItem;
 class HbAction;
 class HbDateTimePicker;
 class HbDialog;
+class HbTranslator;
 class XQSettingsManager;
 class XQSettingsKey;
 class AlarmClient;
 class TimezoneClient;
 class ClockAlarmCustomItem;
-class QTranslator;
+
 
 class ClockAlarmEditor : public QObject
 {
@@ -118,7 +119,7 @@ private:
 	AlarmClient &mAlarmClient;
 	AlarmInfo mAlarmInfo;
 	TimezoneClient *mTimezoneClient;
-	QTranslator *mTranslator;
+	HbTranslator *mTranslator;
 };
 
 #endif // CLOCKALARMEDITOR_H

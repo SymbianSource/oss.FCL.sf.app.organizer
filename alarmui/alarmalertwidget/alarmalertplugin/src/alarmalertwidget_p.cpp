@@ -20,17 +20,16 @@
 #include <QApplication>
 #include <QGesture>
 #include <QGestureEvent>
-#include <QDebug>
 #include <QGraphicsSceneMouseEvent>
-#include <QTranslator>
+
 #include <hbdocumentloader.h>
 #include <hbpushbutton.h>
 #include <hblabel.h>
 #include <hbinstance.h>
 #include <hbextendedlocale.h>
 #include <hbi18ndef.h>
-#include <hbapplication.h>
 #include <hbaction.h>
+#include <hbtranslator.h>
 
 // User includes
 #include "alarmalertwidget_p.h"
@@ -43,6 +42,7 @@
 // ---------------------------------------------------------
 //
 AlarmAlertDialogPrivate::AlarmAlertDialogPrivate(const QVariantMap &parameters):
+	mTranslator(new HbTranslator("alarmui")),
 	mClosedByClient(false),
 	mIsSilenceKey(false)
 	{
@@ -52,18 +52,12 @@ AlarmAlertDialogPrivate::AlarmAlertDialogPrivate(const QVariantMap &parameters):
 	// Set the dismiss policy and timeout property
 	setDismissPolicy(HbPopup::NoDismiss);
 	setTimeout(HbPopup::NoTimeout);
+	
+	// Listen the signal when alarmui is about to display so that we can start playing the alarm tone.
+	connect(this, SIGNAL(aboutToShow()), this, SLOT(aboutToDisplay()) );
 
 	// Initialize the user response
 	mUserResponse = Other;
-
-	// Load the translation file and install the editor specific translator
-	mTranslator = new QTranslator;
-	QString lang = QLocale::system().name();
-	QString path = "Z:/resource/qt/translations/";
-	bool loaded = mTranslator->load("alarmui_en_GB",":/translations");
-	// TODO: Load the appropriate .qm file based on locale
-	//bool loaded = mTranslator->load("alarmui_" + lang, path);
-	HbApplication::instance()->installTranslator(mTranslator);
 
 	// TODO: Gestures not working. Integrate once support is available from Qt
 	grabGesture(Qt::SwipeGesture);
@@ -88,7 +82,6 @@ AlarmAlertDialogPrivate::~AlarmAlertDialogPrivate()
     HbEffect::remove(mSlider);
 
 	// Remove the translator
-	HbApplication::instance()->removeTranslator(mTranslator);
 	if (mTranslator) {
 		delete mTranslator;
 		mTranslator = 0;
@@ -151,7 +144,7 @@ void AlarmAlertDialogPrivate::showEvent(QShowEvent *event)
 	HbDialog::showEvent(event);
 	QVariantMap param;
 	param.insert(alarmCommand, mUserResponse);
-	//emit deviceDialogData(param);
+	emit deviceDialogData(param);
 }
 
 // ---------------------------------------------------------
@@ -161,9 +154,7 @@ void AlarmAlertDialogPrivate::showEvent(QShowEvent *event)
 //
 void AlarmAlertDialogPrivate::closeEvent(QCloseEvent *event)
 {
-    // Forward the call to the base class
-	HbDialog::closeEvent(event);
-	
+    
 	// Do not notify the client back if the close was initiated by client itself
 	if(!mClosedByClient) {
 		// Package the user response and send it
@@ -173,6 +164,9 @@ void AlarmAlertDialogPrivate::closeEvent(QCloseEvent *event)
 	}
 	// This signal has to be emitted so that the dialog can be cleaned up later
 	emit deviceDialogClosed();
+	
+	// Forward the call to the base class
+	HbDialog::closeEvent(event);
 }
 
 // ---------------------------------------------------------
@@ -215,7 +209,20 @@ void AlarmAlertDialogPrivate::silenced()
 		close();
 	}
 }
-  
+
+// ---------------------------------------------------------
+// AlarmAlertDialogPrivate::aboutToDisplay
+// rest of the details are commented in the header
+// ---------------------------------------------------------
+//
+void AlarmAlertDialogPrivate::aboutToDisplay()
+    {
+    mUserResponse = Shown;
+    QVariantMap param;
+    param.insert(alarmCommand, mUserResponse);
+    emit deviceDialogData(param);
+    }
+	
 // ---------------------------------------------------------
 // AlarmAlertDialogPrivate::dismissed
 // rest of the details are commented in the header
@@ -243,8 +250,10 @@ void AlarmAlertDialogPrivate::parseAndFetchParams(const QVariantMap &parameters)
             mSubject = iter.value().toString();
         } else if (alarmLocation == key) {
             mLocation = iter.value().toString();
-        } else if (alarmDateTime == key) {
-            mAlarmTime = iter.value().toDateTime();
+        } else if (alarmTime == key) {
+            mAlarmTime = iter.value().toString();
+        } else if (alarmDate == key) {
+            mAlarmDate = iter.value().toString();
         } else if (alarmType == key) {
             mAlarmAlertType = static_cast <AlarmType> (iter.value().toInt());
         } else if (alarmCanSnooze == key) {
@@ -302,8 +311,7 @@ void AlarmAlertDialogPrivate::handleClockAlarms()
 	}
 	HbExtendedLocale locale = HbExtendedLocale::system();
 	mAlarmDateTime->setPlainText(
-			hbTrId("txt_calendar_info_alarm_start_time").arg(
-					locale.format(mAlarmTime.time(), r_qtn_time_usual)));
+			hbTrId("txt_calendar_info_alarm_start_time").arg(mAlarmTime));
 
 	mAlarmDescription = qobject_cast<HbLabel*> (
 			mAlertDocLoader->findWidget("alarmDescription"));
@@ -367,16 +375,14 @@ void AlarmAlertDialogPrivate::handleCalendarAlarms()
 			qFatal("Unable to find the alarmTime label");
 		}
 		mAlarmDateTime->setPlainText(
-				hbTrId("txt_calendar_info_alarm_start_time").arg(
-						locale.format(mAlarmTime.time(), r_qtn_time_usual)));
+				hbTrId("txt_calendar_info_alarm_start_time").arg(mAlarmTime));
 		HbLabel *alarmDate = qobject_cast<HbLabel*> (
 				mAlertDocLoader->findWidget("alarmDate"));
 		if (!alarmDate) {
 			qFatal("Unable to find the alarmDate label");
 		}
 		alarmDate->setPlainText(
-				hbTrId("txt_calendar_info_alarm_start_date").arg(
-				locale.format(mAlarmTime.date(), r_qtn_date_usual_with_zero)));
+				hbTrId("txt_calendar_info_alarm_start_date").arg(mAlarmDate));
 		HbLabel *alarmDateNonTimed = qobject_cast<HbLabel*> (
 				mAlertDocLoader->findWidget("nonTimedAlarmDate"));
 		if (!alarmDateNonTimed) {
@@ -407,8 +413,7 @@ void AlarmAlertDialogPrivate::handleCalendarAlarms()
 			qFatal("Unable to find the alarmDateNonTimed label");
 		}
 		alarmDateNonTimed->setPlainText(
-				hbTrId("txt_calendar_info_alarm_start_date").arg(
-				locale.format(mAlarmTime.date(), r_qtn_date_usual_with_zero)));
+				hbTrId("txt_calendar_info_alarm_start_date").arg(mAlarmDate));
 	}
 
 	QGraphicsWidget *headingWidget = mAlertDocLoader->findWidget("heading");
@@ -482,8 +487,7 @@ void AlarmAlertDialogPrivate::handleToDoAlarms()
 		qFatal("Unable to load the alarmDate label");
 	}
 	alarmDate->setPlainText(
-			hbTrId("txt_calendar_info_alarm_start_date").arg(
-					locale.format(mAlarmTime.date(), r_qtn_date_usual_with_zero)));
+			hbTrId("txt_calendar_info_alarm_start_date").arg(mAlarmDate));
 	
 	mAlarmDescription = qobject_cast<HbLabel*> (
 							mAlertDocLoader->findWidget("alarmDescription"));

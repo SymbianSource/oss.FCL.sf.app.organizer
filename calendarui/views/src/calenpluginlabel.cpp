@@ -30,7 +30,7 @@
 /*!
  constructor
  */
-CalenPluginLabel::CalenPluginLabel(MCalenServices& services, 
+Q_DECL_EXPORT CalenPluginLabel::CalenPluginLabel(MCalenServices& services, 
                                    QGraphicsItem* parent) :
 	HbLabel(parent),mServices(services)
 {
@@ -41,7 +41,7 @@ CalenPluginLabel::CalenPluginLabel(MCalenServices& services,
 /*!
  Destructor
  */
-CalenPluginLabel::~CalenPluginLabel()
+Q_DECL_EXPORT CalenPluginLabel::~CalenPluginLabel()
 {
 }
 

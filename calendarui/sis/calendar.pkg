@@ -29,6 +29,7 @@
 ;Calendar engine part
 "/epoc32/release/armv5/urel/AgnVersit2.dll"                             - "!:/sys/bin/AgnVersit2.dll"
 "/epoc32/release/armv5/urel/CalenImp.dll"		                        - "!:/sys/bin/CalenImp.dll"
+"/epoc32/release/armv5/urel/CalenInterimUtils2.dll" 					- "!:/sys/bin/CalenInterimUtils2.dll"
 "/epoc32/release/armv5/urel/Versit2.dll"							    - "!:/sys/bin/Versit2.dll"
 "/epoc32/data/z/resource/agnversit2strings.rsc"							- "!:/resource/agnversit2strings.rsc"
 "/epoc32/data/z/resource/plugins/AGNVERSIT2.rsc"						- "!:/resource/plugins/AGNVERSIT2.rsc"
@@ -40,11 +41,14 @@
 
 "/epoc32/release/armv5/urel/calendar.exe"							- "!:/sys/bin/calendar.exe"
 "/epoc32/data/Z/private/10003a3f/import/apps/calendar_reg.rsc"		- "!:/private/10003a3f/import/apps/calendar_reg.rsc"
-"/epoc32/data/z/resource/apps/calendar.rsc"                         - "!:/resource/apps/calendar.rsc"
-"/epoc32/data/z/resource/qt/translations/calendar_en.qm"            - "!:/resource/qt/translations/calendar_en.qm"
+"/epoc32/data/z/resource/apps/calendar.r01"                         - "!:/resource/apps/calendar.rsc"
+"/epoc32/data/z/resource/qt/translations/calendar_en.qm"            - "!:/resource/qt/translations/calendar.qm"
 
+"/epoc32/release/armv5/urel/calenviewerservice.exe"							- "!:/sys/bin/calenviewerservice.exe"
+"/epoc32/data/Z/private/10003a3f/import/apps/calenviewerservice_reg.rsc"		- "!:/private/10003a3f/import/apps/calenviewerservice_reg.rsc"
+"/epoc32/data/z/resource/apps/calenviewerservice.rsc"                         - "!:/resource/apps/calenviewerservice.rsc"
 
-"/epoc32/release/armv5/urel/calenviews.dll"						- "!:/sys/bin/calenviews.dll"
+"/epoc32/release/armv5/urel/calenviews.dll"					        - "!:/sys/bin/calenviews.dll"
 "/epoc32/release/armv5/urel/calensettings.dll"      				- "!:/sys/bin/calensettings.dll"
 "/epoc32/release/armv5/urel/calenglobaldata.dll"					- "!:/sys/bin/calenglobaldata.dll"
 "/epoc32/release/armv5/urel/calencustomisationmanager.dll"			- "!:/sys/bin/calencustomisationmanager.dll"

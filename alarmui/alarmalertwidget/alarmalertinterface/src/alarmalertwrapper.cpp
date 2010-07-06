@@ -60,10 +60,10 @@ EXPORT_C bool AlarmAlert::showAlarmAlert(SAlarmInfo *alarmInfo)
 // rest of the details are commented in the header
 // ---------------------------------------------------------
 //
-EXPORT_C bool AlarmAlert::dismissAlarmAlert()
+EXPORT_C void AlarmAlert::dismissAlarmAlert()
 {
     // Forward the call to the client
-	return mAlarmWidget->dismissAlarmDialog();
+	mAlarmWidget->dismissAlarmDialog();
 }
 
 // ---------------------------------------------------------

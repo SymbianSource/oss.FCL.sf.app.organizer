@@ -28,7 +28,7 @@
 // Forward declarations
 class QGraphicsWidget;
 class QEvent;
-class QTranslator;
+class HbTranslator;
 class HbMainWindow;
 class HbDocumentLoader;
 class HbLabel;
@@ -140,6 +140,11 @@ private slots:
      */
     void silenced();
     
+	/**
+     * @brief Called when the alarmui is about to display.
+     */
+    void aboutToDisplay();
+    
 private:
     /**
      * @brief Extracts the parameters sent by the client
@@ -192,13 +197,19 @@ private:
      * @var mAlarmTime
      * @brief Holds the alarm expiry time
      */
-    QDateTime mAlarmTime;
+    QString mAlarmTime;
+    
+    /**
+     * @var mAlarmDate
+     * @brief Holds the alarm expiry time
+     */
+    QString mAlarmDate;
     
     /**
      * @var mTranslator
      * @brief translator for the localisation of strings
      */
-    QTranslator *mTranslator;
+    HbTranslator *mTranslator;
 	
     /**
      * @var mAlarmDescription

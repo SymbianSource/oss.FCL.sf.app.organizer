@@ -47,7 +47,7 @@ const TInt KLastSolarTermYear(2100);
 // 
 // ---------------------------------------------------------------------------
 //
-CCalenSolarTerms* CCalenSolarTerms::NewL(RFs& aFs)
+EXPORT_C CCalenSolarTerms* CCalenSolarTerms::NewL(RFs& aFs)
     {
     TRACE_ENTRY_POINT;
     
@@ -65,7 +65,7 @@ CCalenSolarTerms* CCalenSolarTerms::NewL(RFs& aFs)
 //
 // ---------------------------------------------------------------------------
 //
-CCalenSolarTerms::~CCalenSolarTerms()
+EXPORT_C CCalenSolarTerms::~CCalenSolarTerms()
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
@@ -76,7 +76,7 @@ CCalenSolarTerms::~CCalenSolarTerms()
 // 
 // ---------------------------------------------------------------------------
 //
-TInt CCalenSolarTerms::CheckSolarTermDateL( const TDateTime& aDate )
+EXPORT_C TInt CCalenSolarTerms::CheckSolarTermDateL( const TDateTime& aDate )
     {
     TRACE_ENTRY_POINT;
     
@@ -180,12 +180,11 @@ void CCalenSolarTerms::ReadSolarTermsL(TDateTime aDate)
     if (iCachedYear != year)
         {
         RFile file;
-        RFs& fs = iFs;
-        TFindFile ffile(fs);
+        TFindFile ffile(iFs);
         User::LeaveIfError(ffile.FindByDir(KSolarTermsFile, KSolarTermsPath));
        // User::LeaveIfError(ffile.FindByPath(KSolarTermsFile, KSolarTermsPath));
         
-        User::LeaveIfError(file.Open(fs,
+        User::LeaveIfError(file.Open(iFs,
                                      ffile.File(), EFileRead));
         CleanupClosePushL(file);
 

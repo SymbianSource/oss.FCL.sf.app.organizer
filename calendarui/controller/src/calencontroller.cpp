@@ -65,72 +65,83 @@ CCalenController::CCalenController()
     
     iNextServicesCommandBase = KCustomCommandRangeStart;
     iRefCount = 0;
+    mAgendaUtil = 0;
     
-    // Store the pointer in tls, also avoid multiple creations
-    checkMultipleCreation();
-    
-    // Get an instance of AgendaUtil interface class
-    // This will take care of 
-    mAgendaUtil = new AgendaUtil();
-    
-    iStateMachine = CCalenStateMachine::NewL( *this );
-    
-    // Create the notifier.
-    iNotifier = new( ELeave )CalenNotifier( *iStateMachine );
-    
-    // Construct the context
-    mContext = new CalenContextImpl(iNotifier);
-    
-    // Set the default context.Once will start use of calencmdlinelauncher,
-    // Then need to remove this function
-    SetDefaultContext();
-    
-    RArray<TCalenNotification> notificationArray;
-    // Complete construction of the notifier and register the
-    // global data for notifications
-    iNotifier->ConstructL();
-    
-    // Create the services
-    iServices = CalenServicesImpl::NewL();
-    // Create the customisation manager, and register for 
-    // notifications
-    iCustomisationManager = CCalenCustomisationManager::NewL( *this,
-                                                                  *iServices );
-    // Create the view manager, and register for notifications
-	iViewManager = new CalenViewManager(*this);
-	
-	iViewManager->SecondPhaseConstruction();
-	
-	hbInstance->allMainWindows().first()->show();
-    
-    // Create the action uis.
-    iActionUi = CCalenActionUi::NewL( *this );
-                                                                    
-    notificationArray.Append(ECalenNotifySettingsChanged);
-    notificationArray.Append(ECalenNotifyCheckPluginUnloading);
-    notificationArray.Append(ECalenNotifyEComRegistryChanged);
-    notificationArray.Append(ECalenNotifySystemLanguageChanged);
-    
-    RegisterForNotificationsL( iCustomisationManager,notificationArray);
-    notificationArray.Reset();
-    
-    notificationArray.Append(ECalenNotifyViewPopulationComplete);
-    notificationArray.Append(ECalenNotifyExternalDatabaseChanged);
-    notificationArray.Append(ECalenNotifyMultipleEntriesDeleted);
-    notificationArray.Append(ECalenNotifyDialogClosed);
-    notificationArray.Append(ECalenNotifyEntrySaved);
-    notificationArray.Append(ECalenNotifyEntryDeleted);
-    notificationArray.Append(ECalenNotifyInstanceDeleted);
-    notificationArray.Append(ECalenNotifySystemLocaleChanged);
-    notificationArray.Append(ECalenNotifySystemLanguageChanged);
-    notificationArray.Append(ECalenNotifySystemTimeChanged);
-    notificationArray.Append(ECalenNotifyEntryClosed);
-    notificationArray.Append(ECalenNotifySettingsClosed);
-    		
-    RegisterForNotificationsL( iViewManager, notificationArray );
-    notificationArray.Reset();  
-    notificationArray.Close();
     TRACE_EXIT_POINT;
+}
+
+// ----------------------------------------------------------------------------
+// CCalenController::constuctController
+// Construct the controller completely
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenController::constructController()
+{
+	// Store the pointer in tls, also avoid multiple creations
+	checkMultipleCreation();
+
+	// Get an instance of AgendaUtil interface class
+	// This will take care of 
+	mAgendaUtil = new AgendaUtil();
+
+	iStateMachine = CCalenStateMachine::NewL( *this );
+
+	// Create the notifier.
+	iNotifier = new( ELeave )CalenNotifier( *iStateMachine );
+
+	// Construct the context
+	mContext = new CalenContextImpl(iNotifier);
+
+	// Set the default context.Once will start use of calencmdlinelauncher,
+	// Then need to remove this function
+	SetDefaultContext();
+
+	RArray<TCalenNotification> notificationArray;
+	// Complete construction of the notifier and register the
+	// global data for notifications
+	iNotifier->ConstructL();
+
+	// Create the services
+	iServices = CalenServicesImpl::NewL();
+	// Create the customisation manager, and register for 
+	// notifications
+	iCustomisationManager = CCalenCustomisationManager::NewL( *this,
+	                                                          *iServices );
+	// Create the view manager, and register for notifications
+	iViewManager = new CalenViewManager(*this);
+
+	iViewManager->SecondPhaseConstruction();
+
+	hbInstance->allMainWindows().first()->show();
+
+	// Create the action uis.
+	iActionUi = CCalenActionUi::NewL( *this );
+
+	notificationArray.Append(ECalenNotifySettingsChanged);
+	notificationArray.Append(ECalenNotifyCheckPluginUnloading);
+	notificationArray.Append(ECalenNotifyEComRegistryChanged);
+	notificationArray.Append(ECalenNotifySystemLanguageChanged);
+
+	RegisterForNotificationsL( iCustomisationManager,notificationArray);
+	notificationArray.Reset();
+
+	notificationArray.Append(ECalenNotifyViewPopulationComplete);
+	notificationArray.Append(ECalenNotifyExternalDatabaseChanged);
+	notificationArray.Append(ECalenNotifyMultipleEntriesDeleted);
+	notificationArray.Append(ECalenNotifyDialogClosed);
+	notificationArray.Append(ECalenNotifyEntrySaved);
+	notificationArray.Append(ECalenNotifyEntryDeleted);
+	notificationArray.Append(ECalenNotifyInstanceDeleted);
+	notificationArray.Append(ECalenNotifySystemLocaleChanged);
+	notificationArray.Append(ECalenNotifySystemLanguageChanged);
+	notificationArray.Append(ECalenNotifySystemTimeChanged);
+	notificationArray.Append(ECalenNotifyEntryClosed);
+	notificationArray.Append(ECalenNotifySettingsClosed);
+
+	RegisterForNotificationsL( iViewManager, notificationArray );
+	notificationArray.Reset();  
+	notificationArray.Close();
 }
 
 void CCalenController::checkMultipleCreation()
@@ -250,23 +261,25 @@ CCalenController::~CCalenController()
         iServices->Release();
         }
     
+    if( mContext )
+		{
+		delete mContext;
+		mContext = NULL;
+		}
+    // iActionUi has to be deleted before iNotifier
+    // as the unregistering of the notifications has to be done
+    if( iActionUi )
+ 	   {
+ 	   delete iActionUi;
+ 	   iActionUi = NULL;
+ 	   }
+    
     if( iNotifier )
 		{
     	delete iNotifier;
     	iNotifier = NULL;
 		}
-
-    if(mContext) {
-    	delete mContext;
-    	mContext = NULL;
-    }
-	
-   if( iActionUi )
-	   {
-	   delete iActionUi;
-	   iActionUi = NULL;
-	   }
-   
+    
     if( iViewManager )
 		{
     	delete iViewManager;
@@ -278,7 +291,11 @@ CCalenController::~CCalenController()
     	delete iCustomisationManager;
     	iCustomisationManager = NULL;
 		}
-    
+		
+    if (mAgendaUtil) {
+        delete mAgendaUtil;
+        mAgendaUtil = 0;
+    }
     
     Dll::SetTls( NULL );
     
@@ -533,7 +550,7 @@ void CCalenController::SetDefaultContext()
     {
     TRACE_ENTRY_POINT;  
     QDateTime focusTime = mContext->defaultCalTimeForViewsL();
-    mContext->setFocusDateAndTimeL(focusTime,KCalenDayViewUidValue );
+    mContext->setFocusDateAndTime(focusTime);
     TRACE_EXIT_POINT;
     }
 
@@ -588,13 +605,10 @@ void CCalenController::handleServiceManagerSlot(int view, const QDateTime& dateT
 	
 	if (iIsFromServiceFrmWrk) {
 		// Set the context properly
-		mContext->setFocusDateAndTimeL(dateTime,KCalenMonthViewUidValue);
+		mContext->setFocusDateAndTime(dateTime);
 		// launch the appropriate view
 		iViewManager->constructAndActivateView(view);
 		
-		// Construct other views
-		iViewManager->constructOtherViews();
-
 	} else { // Calendar was in backgroung but now its being brought to foreground
 		// If current state is editing state or printing state
 		// or deleting state or sending state, then dont do anything as
@@ -607,7 +621,7 @@ void CCalenController::handleServiceManagerSlot(int view, const QDateTime& dateT
 			// simply return - we dont have anything to do
 		} else {
 			// Set the context properly
-			mContext->setFocusDateAndTimeL(dateTime,KCalenMonthViewUidValue);
+			mContext->setFocusDateAndTime(dateTime);
 			IssueCommandL(view);
 		}
 	}

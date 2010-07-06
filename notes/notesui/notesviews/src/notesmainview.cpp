@@ -126,10 +126,12 @@ void NotesMainView::setupView(
 			mNotesModel, SIGNAL(rowAdded(QModelIndex)),
 			this, SLOT(scrollTo(QModelIndex)));
 
-	// Get the view heading label
-/*	mViewHeading = static_cast<HbLabel *> (
-			mDocLoader->findWidget("viewHeading"));*/
+	// Get the empty list label.
+	mEmptyListLabel = static_cast<HbLabel *> (
+			mDocLoader->findWidget("emptyListLabel"));
+	mEmptyListLabel->hide();
 
+	// Get the view heading label
 	mSubTitle = static_cast<HbGroupBox *>(
 			mDocLoader->findWidget("viewHeading"));
 
@@ -540,7 +542,15 @@ void NotesMainView::updateSubTitle(ulong id)
 			(AgendaUtil::IncludeNotes
 			| AgendaUtil::IncludeCompletedTodos
 			| AgendaUtil::IncludeIncompletedTodos));
-	int c= entries.count();
+	
+	if (0 >= entries.count()) {
+		mEmptyListLabel->show();
+		mListView->hide();
+	} else {
+		mEmptyListLabel->hide();
+		mListView->show();
+	}
+	
 	mSubTitle->setHeading(
 			hbTrId("txt_notes_subhead_ln_notes",entries.count()));
 }

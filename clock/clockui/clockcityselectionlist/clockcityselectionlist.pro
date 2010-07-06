@@ -43,7 +43,7 @@ SOURCES += \
 		clockcityselectionlist.cpp \
 		clockcityselectionlist_p.cpp \
 		clockcitylistproxymodel.cpp \
-		clockcityselectionlistprototype.cpp
+
 
 HEADERS += \
 		clockcityselectionlist.h \
@@ -51,9 +51,10 @@ HEADERS += \
 		clockcitylistproxymodel.h \
 		clockcityselectionlistdefines.h \
 		clockcityselectionlistcommon.h \
-		clockcityselectionlistprototype.h
 		
 RESOURCES += \
 		clockcityselectionlist.qrc
+		
+TRANSLATIONS += clockcityselectionlist.ts
 
 # End of file	--Don't remove this.

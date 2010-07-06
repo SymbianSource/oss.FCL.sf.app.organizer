@@ -68,5 +68,7 @@ HEADERS += \
 
 RESOURCES += \
 		noteseditor.qrc
+# TODO :need to use noteseditor.ts once it is released to platform		
+TRANSLATIONS += notes.ts		
 
 # End of file	--Don't remove this.

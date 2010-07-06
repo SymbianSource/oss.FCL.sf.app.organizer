@@ -16,7 +16,7 @@ EXPORTS
 	_ZN14TimezoneClient14deleteInstanceEv @ 15 NONAME
 	_ZN14TimezoneClient14populateCitiesEv @ 16 NONAME
 	_ZN14TimezoneClient15getLocationInfoEiiR12LocationInfo @ 17 NONAME
-	_ZN14TimezoneClient15mReferenceCountE @ 18 NONAME DATA 4
+	_ZN14TimezoneClient15mReferenceCountE @ 18 NONAME DATA 1
 	_ZN14TimezoneClient15mTimezoneClientE @ 19 NONAME DATA 4
 	_ZN14TimezoneClient15setTimeUpdateOnEb @ 20 NONAME
 	_ZN14TimezoneClient16getDstZoneOffsetEi @ 21 NONAME

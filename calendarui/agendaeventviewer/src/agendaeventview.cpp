@@ -17,9 +17,7 @@
 
 // System includes
 #include <QObject>
-#include <QDebug>
 #include <QDateTime>
-#include <qtranslator.h>
 #include <QGraphicsLinearLayout>
 #include <QFile>
 #include <QString>
@@ -27,7 +25,6 @@
 #include <QPluginLoader>
 #include <QDir>
 #include <HbInstance>
-#include <hbapplication.h>
 #include <HbMainWindow>
 #include <HbView>
 #include <HbMenu>
@@ -42,6 +39,8 @@
 #include <HbMessageBox>
 #include <HbDialog>
 #include <HbLabel>
+#include <HbTranslator>
+
 // User includes
 #include <maptileservice.h>//maptile service
 #include <agendautil.h>
@@ -57,11 +56,6 @@
 #define CHARACTER_HYPHEN    "-"
 #define CHARACTER_SPACE     " "
 #define CHARACTER_NEW_LINE  "\n"
-
-// This is used to set the maptile image height and width ,
-//because HbLabel by default not displaying the actual size of image 
-const int height = 128;
-const int width =  330;
 
 //This Property is use for setting a primary left icon
 static const char *primaryLeftIconItem("leftPrimaryIconItem");
@@ -83,9 +77,10 @@ static const char *primaryLeftIconItem("leftPrimaryIconItem");
 AgendaEventView::AgendaEventView(
 		AgendaEventViewerPrivate *owner, QObject *parent):
 		QObject(parent),
-		mOwner(owner),
-		mReminderWidgetAdded(true),
 		mMainWindow(NULL),
+		mOwner(owner),
+		mTranslator(new HbTranslator("caleneventviewer")),
+		mReminderWidgetAdded(true),
 		mMaptilePath(NULL),
 		mMaptileService(NULL),
 		mProgressTimer(NULL),
@@ -94,16 +89,6 @@ AgendaEventView::AgendaEventView(
 		mMaptileStatus(-1),
 		mNotesPluginLoaded(false)
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::AgendaEventView -->";
-
-	// Load the translator based on locale
-	mTranslator = new QTranslator;
-	QString lang = QLocale::system().name();
-	QString path = "Z:/resource/qt/translations/";
-	mTranslator->load("caleneventviewer_en_GB",":/translations");
-	// TODO: Load the appropriate .qm file based on locale
-	//bool loaded = mTranslator->load("caleneventviewer_" + lang, path);
-	HbApplication::instance()->installTranslator(mTranslator);
 	
 	mDocLoader = new AgendaEventViewerDocLoader;
 
@@ -161,7 +146,7 @@ AgendaEventView::AgendaEventView(
         mProgressTimer->setSingleShot(true);
         connect(mProgressTimer, SIGNAL(timeout()), this, SLOT(updateProgressIndicator()));
     }
-    qDebug() << "AgendaEventViewer: AgendaEventView::AgendaEventView <--";
+        
 	
 }
 
@@ -170,10 +155,8 @@ AgendaEventView::AgendaEventView(
  */
 AgendaEventView::~AgendaEventView()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::~AgendaEventView -->";
 
 	// Remove the translator
-	HbApplication::instance()->removeTranslator(mTranslator);
 	if (mTranslator) {
 		delete mTranslator;
 		mTranslator = 0;
@@ -205,7 +188,6 @@ AgendaEventView::~AgendaEventView()
         mProgressTimer = NULL;
     }
 	
-	qDebug() << "AgendaEventViewer: AgendaEventView::~AgendaEventView <--";
 }
 
 /*!
@@ -216,7 +198,6 @@ AgendaEventView::~AgendaEventView()
 void AgendaEventView::execute(AgendaEntry entry,
 											AgendaEventViewer::Actions action)
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::execute -->";
 
 	mOriginalAgendaEntry = entry;
 	mAgendaEntry = entry;
@@ -232,9 +213,6 @@ void AgendaEventView::execute(AgendaEntry entry,
 	
 	// Add the toolbar items to event viewer
 	addToolBarItem(action);
-	
-	// Add the title to event viewer.
-	addGroupBoxData();
 
 	// Connect for the entry updation and addtion signal to refresh the view
 	// when the same is edited in editor.
@@ -256,9 +234,11 @@ void AgendaEventView::execute(AgendaEntry entry,
 		mMainWindow = new HbMainWindow();
 		mMainWindow->addView(mViewer);
 		mMainWindow->setCurrentView(mViewer);
+	    connect(mMainWindow,SIGNAL(orientationChanged(Qt::Orientation)),this,SLOT(changedOrientation(Qt::Orientation)));		
 	} else {
 		window->addView(mViewer);
 		window->setCurrentView(mViewer);
+		connect(window,SIGNAL(orientationChanged(Qt::Orientation)),this,SLOT(changedOrientation(Qt::Orientation)));		
 	}
 	
 	// Add softkey after adding view on window
@@ -267,7 +247,6 @@ void AgendaEventView::execute(AgendaEntry entry,
 		
 	connect(mBackAction, SIGNAL(triggered()), this, SLOT(close()));
 
-	qDebug() << "AgendaEventViewer: AgendaEventView::execute <--";
 }
 
 /*!
@@ -275,7 +254,9 @@ void AgendaEventView::execute(AgendaEntry entry,
  */
 void AgendaEventView::addViewerData()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::addViewerData -->";
+	
+	// Add the title to event viewer.
+	addGroupBoxData();
 
 	// Set the summary & priority to viewer.
 	addSubjectAndPriorityData();
@@ -308,7 +289,6 @@ void AgendaEventView::addViewerData()
 	// Set the description.
 	addDescriptionData();
 	
-	qDebug() << "AgendaEventViewer: AgendaEventView::addViewerData <--";
 }
 
 /*!
@@ -316,7 +296,6 @@ void AgendaEventView::addViewerData()
  */
 void AgendaEventView::addMenuItem()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::addMenuItem -->";
 
 	if (mAgendaEntry.type() == AgendaEntry::TypeTodo) {
 
@@ -334,7 +313,6 @@ void AgendaEventView::addMenuItem()
 		        SLOT(markTodoStatus()));
 		menu->addAction(mMarkTodoAction);
 	}
-	qDebug() << "AgendaEventViewer: AgendaEventView::addMenuItem <--";
 }
 
 /*!
@@ -342,7 +320,6 @@ void AgendaEventView::addMenuItem()
  */
 void AgendaEventView::addToolBarItem(AgendaEventViewer::Actions action)
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::addToolBarItem -->";
 
 	HbToolBar *toolBar = qobject_cast<HbToolBar *> (
 	                       mDocLoader->findWidget(AGENDA_EVENT_VIEWER_TOOLBAR));
@@ -373,7 +350,6 @@ void AgendaEventView::addToolBarItem(AgendaEventViewer::Actions action)
 		toolBar->addAction(saveAction);
 	}
 
-	qDebug() << "AgendaEventViewer: AgendaEventView::addToolBarItem <--";
 }
 
 /*!
@@ -381,21 +357,20 @@ void AgendaEventView::addToolBarItem(AgendaEventViewer::Actions action)
  */
 void AgendaEventView::addGroupBoxData()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::addGroupBoxData -->";
 	
 	HbGroupBox *groupBox = qobject_cast<HbGroupBox *> (
 			mDocLoader->findWidget(AGENDA_EVENT_VIEWER_GROUPBOX));
 
-	if (mAgendaEntry.type() == AgendaEntry::TypeTodo) {
+	AgendaEntry::Type entryType = mAgendaEntry.type();
+	if (entryType == AgendaEntry::TypeTodo) {
 		groupBox->setHeading(hbTrId("txt_calendar_subhead_to_do"));
-	} else if (mAgendaEntry.type() == AgendaEntry::TypeNote) {
-		groupBox->setHeading(tr("Note"));
-	} else {
-		// TODO: Add the text id based on the entry type Anniversary or meeting
-		groupBox->setHeading(hbTrId("txt_calendar_subhead_event"));
+	} else if (entryType == AgendaEntry::TypeAppoinment) {
+		groupBox->setHeading(hbTrId("txt_calendar_subhead_meeting"));
+	}else if (entryType == AgendaEntry::TypeEvent) {
+		//TODO: Add text id once available
+		groupBox->setHeading(hbTrId("All day event"));
 	}
-
-	qDebug() << "AgendaEventViewer: AgendaEventView::addGroupBoxData <--";
+		
 }
 
 /*!
@@ -403,8 +378,6 @@ void AgendaEventView::addGroupBoxData()
  */
 void AgendaEventView::addSubjectAndPriorityData()
 {
-	qDebug()
-	     << "AgendaEventViewer: AgendaEventView::addSubjectAndPriorityData -->";
 
 	QStringList itemList;
 	itemList.append(hbTrId("txt_calendar_dblist_subject"));
@@ -428,8 +401,6 @@ void AgendaEventView::addSubjectAndPriorityData()
 
 	mSubjectWidget->setEventViewerItemData(itemList, Qt::DecorationRole);
 
-	qDebug()
-	     << "AgendaEventViewer: AgendaEventView::addSubjectAndPriorityData <--";
 }
 
 /*!
@@ -437,9 +408,6 @@ void AgendaEventView::addSubjectAndPriorityData()
  */
 void AgendaEventView::addDateTimeData()
 {
-    qDebug()
-         << "AgendaEventViewer: AgendaEventView::addDateTimeData -->";
-    
     
     QStringList itemData;
     HbExtendedLocale systemLocale = HbExtendedLocale::system();
@@ -520,8 +488,6 @@ void AgendaEventView::addDateTimeData()
 	itemData.append(data);
     mDateTimeWidget->setEventViewerItemData(itemData, Qt::DisplayRole);
     
-    qDebug()
-         << "AgendaEventViewer: AgendaEventView::addDateTimeData <--";
 }
 
 /*!
@@ -529,7 +495,6 @@ void AgendaEventView::addDateTimeData()
  */
 void AgendaEventView::addLocationData()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::addLocationData -->";
 	QStringList itemData;
 	QString progressIcon(QString::null);	
 	if ( mLocationFeatureEnabled ) {
@@ -552,7 +517,6 @@ void AgendaEventView::addLocationData()
 	itemData.append(QString::null);
 	itemData.append(mAgendaEntry.location());
 	mLocationWidget->setEventViewerItemData(itemData, Qt::DisplayRole);
-	qDebug() << "AgendaEventViewer: AgendaEventView::addLocationData <--";
 }
 
 /*!
@@ -564,11 +528,7 @@ void AgendaEventView::addMapTileImage()
 
         HbIcon maptile(mMaptilePath);
         mMaptileLabel->setIcon(maptile);
-        mMaptileLabel->setPreferredSize(QSizeF(width, height));
-        mMaptileLabel->setMinimumSize(QSizeF(width, height));
-        mMaptileLabel->setMaximumSize(QSizeF(width, height));
-        mMaptileLabel->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
-
+        mMaptileLabel->setPreferredSize(QSizeF(maptile.width(), maptile.height()));
     }
 }
 /*!
@@ -576,7 +536,6 @@ void AgendaEventView::addMapTileImage()
  */
 void AgendaEventView::addReminderData()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::addReminderData -->";
 	QStringList itemData;
 	itemData.append(QString::null);
     itemData.append(QString::null);
@@ -587,7 +546,6 @@ void AgendaEventView::addReminderData()
 	itemData.append(QString::null);
 	itemData.append(alarmTimeText());
 	mReminderWidget->setEventViewerItemData(itemData, Qt::DisplayRole);
-	qDebug() << "AgendaEventViewer: AgendaEventView::addReminderData <--";
     }
 
 /*!
@@ -595,7 +553,6 @@ void AgendaEventView::addReminderData()
  */
 void AgendaEventView::addCompletedTodoData()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::addCompletedTodoData -->";
 	QStringList itemData;
 	QString     completedText;
     HbExtendedLocale systemLocale = HbExtendedLocale::system();;
@@ -610,7 +567,6 @@ void AgendaEventView::addCompletedTodoData()
 	itemData.append(hbTrId("txt_calendar_dblist_completed_date"));
 	itemData.append(completedText);
 	mReminderWidget->setEventViewerItemData(itemData, Qt::DisplayRole);
-	qDebug() << "AgendaEventViewer: AgendaEventView::addCompletedTodoData <--";
 }
 
 /*!
@@ -618,7 +574,6 @@ void AgendaEventView::addCompletedTodoData()
  */
 void AgendaEventView::addRepeatData()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::addRepeatData -->";
 	QStringList itemData;
 	itemData.append(QString::null);
     itemData.append(QString::null);
@@ -629,7 +584,6 @@ void AgendaEventView::addRepeatData()
 	itemData.append(QString::null);
 	itemData.append(repeatRule());
 	mRepeatWidget->setEventViewerItemData(itemData, Qt::DisplayRole);
-	qDebug() << "AgendaEventViewer: AgendaEventView::addRepeatData <--";
 }
 
 /*!
@@ -637,7 +591,6 @@ void AgendaEventView::addRepeatData()
  */
 void AgendaEventView::addDescriptionData()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::addDiscriptionData -->";
 	QStringList itemData;
 	itemData.append(QString::null);
 	itemData.append(QString::null);
@@ -648,7 +601,6 @@ void AgendaEventView::addDescriptionData()
 	itemData.append(hbTrId("txt_calendar_dblist_description"));
 	itemData.append(mAgendaEntry.description());
 	mDescriptionWidget->setEventViewerItemData(itemData, Qt::DisplayRole);
-	qDebug() << "AgendaEventViewer: AgendaEventView::addDiscriptionData <--";
 }
 
 /*!
@@ -656,7 +608,6 @@ void AgendaEventView::addDescriptionData()
  */
 void AgendaEventView::getPriorityIcon(int priority, QString &priorityIcon)
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::getPriorityIcon -->";
 
 	switch(priority) {
 		case 1:priorityIcon.append("qtg_small_priority_high");
@@ -667,7 +618,6 @@ void AgendaEventView::getPriorityIcon(int priority, QString &priorityIcon)
 		break;
 	}
 
-	qDebug() << "AgendaEventViewer: AgendaEventView::getPriorityIcon <--";
 }
 
 /*!
@@ -675,7 +625,6 @@ void AgendaEventView::getPriorityIcon(int priority, QString &priorityIcon)
  */
 QString AgendaEventView::repeatRule() const
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::repeatRule -->";
 	
 	QString repeatRule;
 	AgendaRepeatRule agendaRepeatRule = mAgendaEntry.repeatRule();
@@ -687,8 +636,7 @@ QString AgendaEventView::repeatRule() const
 			break;
 			case AgendaRepeatRule::WeeklyRule:
 				if (AgendaUtil::isWorkdaysRepeatingEntry(agendaRepeatRule)) {
-					//TODO: Add text id for workdays
-					repeatRule.append(hbTrId("Workdays"));
+					repeatRule.append(hbTrId("txt_calendar_dblist_repeats_workdays"));
 				} else {
 					if (agendaRepeatRule.interval() == 2) {
 						repeatRule.append(
@@ -719,7 +667,6 @@ QString AgendaEventView::repeatRule() const
 			hbTrId("txt_calendar_dblist_repeats_daily_val_until_1").
 			arg(untilDateString));
 	}
-	qDebug() << "AgendaEventViewer: AgendaEventView::repeatRule <--";
 	
 	return repeatRule;
 }
@@ -731,7 +678,6 @@ QString AgendaEventView::repeatRule() const
  */
 QString AgendaEventView::alarmTimeText() const
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::alarmTimeText -->";
 
 	QString alarmDateTimeText;
 	QDateTime startTime;
@@ -756,7 +702,6 @@ QString AgendaEventView::alarmTimeText() const
 						r_qtn_date_usual_with_zero)));
 	}
 	
-	qDebug() << "AgendaEventViewer: AgendaEventView::alarmTimeText <--";
 	return alarmDateTimeText;
 }
 
@@ -765,7 +710,6 @@ QString AgendaEventView::alarmTimeText() const
  */
 void AgendaEventView::removeWidget()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::removeWidget -->";
 	
 	if (mAgendaEntry.location().isEmpty()) { 
 		mLocationWidget->hide();
@@ -783,7 +727,7 @@ void AgendaEventView::removeWidget()
         
 	if (mAgendaEntry.alarm().isNull()) { 
 		if (mAgendaEntry.type() == AgendaEntry::TypeTodo ) {
-				if (AgendaEntry::TodoNeedsAction == mAgendaEntry.status()) { 
+				if (AgendaEntry::TodoCompleted != mAgendaEntry.status()) { 
 					mReminderWidget->hide();
 					mLinearLayout->removeItem(mReminderWidget);
 					mReminderWidgetAdded = false;
@@ -808,7 +752,6 @@ void AgendaEventView::removeWidget()
 	mLinearLayout->invalidate();
 	mLinearLayout->activate();
 	
-	qDebug() << "AgendaEventViewer: AgendaEventView::removeWidget <--";
 }
 
 /*!
@@ -816,8 +759,6 @@ void AgendaEventView::removeWidget()
  */
 void AgendaEventView::updateCompletedReminderData()
 {
-	qDebug()
-	   << "AgendaEventViewer: AgendaEventView::updateCompletedReminderData -->";
 
 	if (AgendaEntry::TodoCompleted == mAgendaEntry.status()) {
 		addCompletedTodoData();
@@ -847,8 +788,6 @@ void AgendaEventView::updateCompletedReminderData()
 	
 	mLinearLayout->invalidate();
 	mLinearLayout->activate();
-	qDebug()
-	   << "AgendaEventViewer: AgendaEventView::updateCompletedReminderData <--";
 }
 
 /*!
@@ -856,7 +795,6 @@ void AgendaEventView::updateCompletedReminderData()
  */
 void AgendaEventView::removeAllWidgets()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::removeAllWidgets -->";
 
 	for (int i = 2; i < mLinearLayout->count(); i++) {
 		mLinearLayout->removeAt(i);
@@ -864,7 +802,6 @@ void AgendaEventView::removeAllWidgets()
 	mLinearLayout->invalidate();
 	mLinearLayout->activate();
 	
-	qDebug() << "AgendaEventViewer: AgendaEventView::removeAllWidgets <--";
 }
 
 /*!
@@ -872,7 +809,6 @@ void AgendaEventView::removeAllWidgets()
  */
 void AgendaEventView::addAllWidgets()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::addAllWidgets -->";
 	
 	mLinearLayout->addItem(mLocationWidget);
 	mLocationWidget->show();
@@ -888,7 +824,6 @@ void AgendaEventView::addAllWidgets()
 	mLinearLayout->invalidate();
 	mLinearLayout->activate();
 	
-	qDebug() << "AgendaEventViewer: AgendaEventView::addAllWidgets <--";
 }
 
 /*!
@@ -896,8 +831,6 @@ void AgendaEventView::addAllWidgets()
  */
 void AgendaEventView::showDeleteOccurencePopup()
 {
-	qDebug()
-		<< "AgendaEventViewer: AgendaEventView::showDeleteOccurencePopup -->";
 	HbDialog *popUp = new HbDialog();
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
 	popUp->setTimeout(HbDialog::NoTimeout);
@@ -931,8 +864,6 @@ void AgendaEventView::showDeleteOccurencePopup()
 	// Show the popup
 	popUp->open();
 
-	qDebug()
-		<< "AgendaEventViewer: AgendaEventView::showDeleteOccurencePopup <--";
 }
 
 /*!
@@ -940,8 +871,6 @@ void AgendaEventView::showDeleteOccurencePopup()
  */
 void AgendaEventView::showDeleteConfirmationQuery()
     {
-    qDebug()
-		<< "AgendaEventViewer: AgendaEventView::showDeleteConfirmationQuery -->";
     
     HbMessageBox *popup = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
     popup->setDismissPolicy(HbDialog::NoDismiss);
@@ -983,8 +912,6 @@ void AgendaEventView::showDeleteConfirmationQuery()
 												SLOT(handleDeleteAction()));
     popup->addAction(new HbAction(hbTrId("txt_calendar_button_cancel"), popup));
     popup->open();
-    qDebug()
-		<< "AgendaEventViewer: AgendaEventView::showDeleteConfirmationQuery <--";
 }
 
 /*!
@@ -1006,36 +933,26 @@ void AgendaEventView::handleDeleteAction()
  */
 void AgendaEventView::markTodoStatus()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::markTodoStatus -->";
 
 	QDateTime currentDateTime = QDateTime::currentDateTime();
 
 	// Set the to-do status using the agenda util.
-	if (AgendaEntry::TodoNeedsAction == mAgendaEntry.status()) {
-		
+	if (AgendaEntry::TodoCompleted != mAgendaEntry.status()) {
 		// Update the menu text to mark to-do as undone.
 		mMarkTodoAction->setText(hbTrId("txt_calendar_menu_mark_as_not_done"));
-		
 		mAgendaEntry.setStatus(AgendaEntry::TodoCompleted);
 		mAgendaEntry.setCompletedDateTime(currentDateTime);
 		mOwner->mAgendaUtil->setCompleted(mAgendaEntry, true, currentDateTime);
-		
-		
-
-	} else if (AgendaEntry::TodoCompleted == mAgendaEntry.status()) {
+	} else {
 		
 		// Update the menu text to mark to-do as done.
 		mMarkTodoAction->setText(hbTrId("txt_calendar_menu_mark_as_done"));
-				
 		mAgendaEntry.setStatus(AgendaEntry::TodoNeedsAction);
 		mOwner->mAgendaUtil->setCompleted(mAgendaEntry, false, currentDateTime);
-		
-		
 	}
 
 	updateCompletedReminderData();
 	
-	qDebug() << "AgendaEventViewer: AgendaEventView::markTodoStatus <--";
 }
 
 /*!
@@ -1043,7 +960,6 @@ void AgendaEventView::markTodoStatus()
  */
 void AgendaEventView::edit()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::edit -->";
 
 	mOwner->editingStarted();
 	
@@ -1082,7 +998,6 @@ void AgendaEventView::edit()
 	
 		
 	}
-	qDebug() << "AgendaEventViewer: AgendaEventView::edit <--";
 }
 
 /*!
@@ -1090,7 +1005,6 @@ void AgendaEventView::edit()
  */
 void AgendaEventView::deleteAgendaEntry()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::deleteAgendaEntry -->";
 
 	// Before we do anything, check in the entry is repeating
 	// OR its a child item
@@ -1105,7 +1019,6 @@ void AgendaEventView::deleteAgendaEntry()
         showDeleteConfirmationQuery();
 	}
 
-	qDebug() << "AgendaEventViewer: AgendaEventView::deleteAgendaEntry <--";
 }
 
 /*!
@@ -1113,21 +1026,18 @@ void AgendaEventView::deleteAgendaEntry()
  */
 void AgendaEventView::saveAgendaEntry()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::saveAgendaEntry -->";
 	
 	// Save entry to calendar.
 	mOwner->mAgendaUtil->addEntry(mAgendaEntry);
 	
 	// Close the agenda entry viewer
 	close();
-	qDebug() << "AgendaEventViewer: AgendaEventView::saveAgendaEntry <--";
 }
 /*!
 	Closes the event viewer
  */
 void AgendaEventView::close()
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::close -->";
 
 	// Remove the view from main window.
 	HbMainWindow *window = hbInstance->allMainWindows().first();
@@ -1140,7 +1050,6 @@ void AgendaEventView::close()
 	window->removeView(mViewer);
 	mOwner->viewingCompleted(mAgendaEntry.startTime().date());
 
-	qDebug() << "AgendaEventViewer: AgendaEventView::close <--";
 }
 
 /*!
@@ -1148,7 +1057,6 @@ void AgendaEventView::close()
  */
 void AgendaEventView::handleEntryUpdation(ulong id)
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::handleEntryUpdation -->";
 
 	AgendaEntry updatedEntry = mOwner->mAgendaUtil->fetchById(id);
 
@@ -1194,7 +1102,6 @@ void AgendaEventView::handleEntryUpdation(ulong id)
 		close();
 	}
 
-	qDebug() << "AgendaEventViewer: AgendaEventView::handleEntryUpdation <--";
 }
 
 /*!
@@ -1202,7 +1109,6 @@ void AgendaEventView::handleEntryUpdation(ulong id)
 */
 void AgendaEventView::handleEntryDeletion(ulong id)
 {
-	qDebug() <<"AgendaEventViewer: AgendaEventView::handleEntryDeletion -->";
 
 	if (id == mAgendaEntry.id()) {
 		// Close the agenda entry viewer
@@ -1210,7 +1116,6 @@ void AgendaEventView::handleEntryDeletion(ulong id)
 		mOwner->deletingCompleted();
 	}
 
-	qDebug() <<"AgendaEventViewer: AgendaEventView::handleEntryDeletion <--";
 }
 
 /*!
@@ -1219,14 +1124,12 @@ void AgendaEventView::handleEntryDeletion(ulong id)
 void AgendaEventView::handleNoteEditorClosed(bool status)
 {
 	Q_UNUSED(status);
-	qDebug() <<"AgendaEventViewer: AgendaEventView::handleNoteEditorClosed -->";
 
 	// To avoid loading the plugin again for editing,
 	// Unload the plug-in while destruction.
 
 	mOwner->editingCompleted();
 
-	qDebug() <<"AgendaEventViewer: AgendaEventView::handleNoteEditorClosed <--";
 }
 
 /*!
@@ -1234,15 +1137,11 @@ void AgendaEventView::handleNoteEditorClosed(bool status)
  */
 void AgendaEventView::handleCalendarEditorClosed()
 {
-	qDebug() 
-		<<"AgendaEventViewer: AgendaEventView::handleCalendarEditorClosed -->";
 
 	// Cleanup.
 	mCalenEditor->deleteLater();
 	mOwner->editingCompleted();
 
-	qDebug() 
-		<<"AgendaEventViewer: AgendaEventView::handleCalendarEditorClosed <--";
 }
 
 /*!
@@ -1250,7 +1149,6 @@ void AgendaEventView::handleCalendarEditorClosed()
  */
 void AgendaEventView::handleDeleteOccurence(int index)
 {
-	qDebug() << "AgendaEventViewer: AgendaEventView::handleDeleteOccurence -->";
 	
 	// To notify client that deleting Started
 	// Calendar Application changing state from viewing to deleting.
@@ -1270,7 +1168,6 @@ void AgendaEventView::handleDeleteOccurence(int index)
 			break;
 	}
 
-	qDebug() << "AgendaEventViewer: AgendaEventView::handleDeleteOccurence <--";
 }
 
 /*!
@@ -1278,11 +1175,10 @@ void AgendaEventView::handleDeleteOccurence(int index)
  */
 void AgendaEventView::getSubjectIcon(AgendaEntry::Type type, QString &subjectIcon)
     {
-    qDebug() << "AgendaEventViewer: AgendaEventView::getSubjectIcon -->";
     switch(type) {
         case AgendaEntry::TypeAppoinment:
             {
-            subjectIcon.append("qtg_small_favorite");//@to do add proper icon
+            subjectIcon.append("qtg_small_meeting");
             }
             break;
         case AgendaEntry::TypeTodo:
@@ -1304,7 +1200,6 @@ void AgendaEventView::getSubjectIcon(AgendaEntry::Type type, QString &subjectIco
             break;
     }
 
-    qDebug() << "AgendaEventViewer: AgendaEventView::getSubjectIcon <--";
     }
 
 /*!
@@ -1335,15 +1230,14 @@ void AgendaEventView::updateProgressIndicator()
             itemData.append("qtg_small_location");
             mLocationWidget->setProperty(primaryLeftIconItem, false);
             mLocationWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
-            MapTileService::AddressType addressType;
-            addressType = MapTileService::AddressPlain;
-            int eventId = mAgendaEntry.id();
-            mMaptileService->getMapTileImage(eventId, addressType, mMaptilePath);
+            Qt::Orientations orientation=hbInstance->allMainWindows().first()->orientation();
+            mMaptilePath.clear();
+            mMaptileStatus = mMaptileService->getMapTileImage(mAgendaEntry.id(), MapTileService::AddressPlain, mMaptilePath ,orientation);
             addMapTileImage();
             QFile file(mMaptilePath);
             if (file.exists()) {
                 //add to linear layout  
-                int indexMaptileLabel = 3;
+                int indexMaptileLabel = 3;// index of maptile widget position
                 mLinearLayout->insertItem(indexMaptileLabel, mMaptileLabel);
                 mMaptileLabel->show();
             }
@@ -1385,19 +1279,19 @@ void AgendaEventView::getProgressIndicatorstatus(QString &progressIcon)
     addressType = MapTileService::AddressPlain;
     int eventId = mAgendaEntry.id();
     mMaptilePath.clear();
-    int status = 0;
+    mMaptileStatus = -1;
     connect(mMaptileService, SIGNAL(maptileFetchingStatusUpdate(int,
             int ,int)), this, SLOT(receiveMapTileStatus(int,int,int)));
-    status = mMaptileService->getMapTileImage(eventId, addressType, mMaptilePath);
-    if (status == MapTileService::MapTileFetchingNetworkError || status
+    Qt::Orientations orientation=hbInstance->allMainWindows().first()->orientation();
+    mMaptileStatus = mMaptileService->getMapTileImage(eventId, addressType, mMaptilePath ,orientation);    
+    if (mMaptileStatus == MapTileService::MapTileFetchingNetworkError || mMaptileStatus
         == MapTileService::MapTileFetchingInProgress) {
         mMaptilePath.clear();
-        mMaptileStatusReceived = false; //reseting receiving status value
-        mMaptileStatus = -1;// reseting status value;
+        mMaptileStatusReceived = false; //reseting receiving status value       
         progressIcon.append(QString("qtg_anim_small_loading_1"));
         mProgressTimer->start(100);
     }
-    else if (status == MapTileService::MapTileFetchingInvalidAddress || status
+    else if (mMaptileStatus == MapTileService::MapTileFetchingInvalidAddress || mMaptileStatus
         == MapTileService::MapTileFetchingUnknownError) {
         mMaptilePath.clear();
         //no further need of this coonnection 
@@ -1412,4 +1306,16 @@ void AgendaEventView::getProgressIndicatorstatus(QString &progressIcon)
         progressIcon.append(QString::null);
     }
 }
+/*!
+    Reload the maptile image on system orientation change.
+ */
+void AgendaEventView::changedOrientation(Qt::Orientation orientation)
+{
+    if (mMaptileStatus == MapTileService::MapTileFetchingCompleted) {
+        mMaptilePath.clear();
+        mMaptileService->getMapTileImage(mAgendaEntry.id(), MapTileService::AddressPlain, mMaptilePath,orientation);
+        addMapTileImage();
+    }
+}
+
 // End of file

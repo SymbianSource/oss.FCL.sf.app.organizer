@@ -27,8 +27,8 @@ class CalenPluginLabel : public HbLabel
 	Q_OBJECT
 
 public:
-	Q_DECL_EXPORT CalenPluginLabel(MCalenServices &services, QGraphicsItem *parent = 0);
-	Q_DECL_EXPORT ~CalenPluginLabel();
+	IMPORT_C CalenPluginLabel(MCalenServices &services, QGraphicsItem *parent = 0);
+	IMPORT_C ~CalenPluginLabel();
 
 protected:
 	void gestureEvent(QGestureEvent *event);

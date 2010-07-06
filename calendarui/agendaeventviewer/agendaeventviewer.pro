@@ -67,7 +67,8 @@ HEADERS += \
 		agendaeventviewerdocloader.h \
 		agendaeventvieweritem.h
 				
-RESOURCES += \
-		agendaeventviewer.qrc
+RESOURCES += agendaeventviewer.qrc
+
+TRANSLATIONS += caleneventviewer.ts
 
 # End of file	--Don't remove this.

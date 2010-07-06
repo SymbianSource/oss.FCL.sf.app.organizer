@@ -24,6 +24,9 @@
 #include "calendarui_debug.h"
 #include "CalenExtraRowFormatter.h"
 
+// Constants
+const TInt KZero( 0 );
+
 // -----------------------------------------------------------------------------
 // CollapseDuplicatesL
 // -----------------------------------------------------------------------------
@@ -33,7 +36,7 @@ void CollapseDuplicatesL( TDes& aStr, TInt aPos, const TDesC& aSub )
     TRACE_ENTRY_POINT;
     
     const TInt sublen = aSub.Length();
-    if (aStr.Length() == 0 || sublen == 0)
+    if (aStr.Length() == KZero || sublen == KZero || aPos < KZero || (aPos >aStr.Length()))
         {
         return;
         }
@@ -41,14 +44,14 @@ void CollapseDuplicatesL( TDes& aStr, TInt aPos, const TDesC& aSub )
     TPtrC remaining = aStr.Mid( aPos );
     TInt fstInRemaining = remaining.Find( aSub );
     
-    if ( fstInRemaining >= 0 )
+    if ( fstInRemaining >= KZero )
         {
         TInt restPos = fstInRemaining + sublen;
         TPtrC rest = remaining.Mid( restPos );
         TInt sndInRest = rest.Find( aSub );
 
         // 1) two substrings found in sequence 
-        if (sndInRest == 0)
+        if (sndInRest == KZero)
             { 
             // replace second substring with empty string
             TInt fst = aPos + fstInRemaining;
@@ -58,7 +61,7 @@ void CollapseDuplicatesL( TDes& aStr, TInt aPos, const TDesC& aSub )
             CollapseDuplicatesL( aStr, fst, aSub );
             }
         // 2) substring found later in string 
-        else if (sndInRest > 0)
+        else if (sndInRest > KZero)
             {         
             // continue collapsing from this second substring
             TInt snd = aPos + restPos + sndInRest;
@@ -89,15 +92,15 @@ void RemoveLeadingAndTrailingL( TDes& aStr, const TDesC& aSub )
     
     // Trailing
     const TInt sublen = aSub.Length();
-    if ( aStr.Right( sublen ).Find( aSub ) == 0 )
+    if ( aStr.Right( sublen ).Find( aSub ) == KZero )
         {
         aStr.Replace( aStr.Length() - sublen, sublen, KNullDesC );
         }
 
     // Leading 
-    if ( aStr.Left( sublen ).Find( aSub ) == 0 )
+    if ( aStr.Left( sublen ).Find( aSub ) == KZero )
         {
-        aStr.Replace( 0, sublen, KNullDesC );
+        aStr.Replace( KZero, sublen, KNullDesC );
         }
         
     TRACE_EXIT_POINT;
@@ -162,7 +165,7 @@ EXPORT_C TPtrC CCalenExtraRowFormatter::FormatExtraRowInformationL(
 	TRACE_ENTRY_POINT;
 
 
-	if ( aPrioritizedFields.Count() == 0)
+	if ( aPrioritizedFields.Count() == KZero)
 	{
 		iText = KNullDesC;
 
@@ -182,7 +185,7 @@ EXPORT_C TPtrC CCalenExtraRowFormatter::FormatExtraRowInformationL(
 	// ASSERT that all prioritized fields can be found from subLabels
 	for ( TInt i=0; i < aPrioritizedFields.Count(); i++)
 	{
-		ASSERT( subLabels.Find( aPrioritizedFields[i] ) >= 0 ); 
+		ASSERT( subLabels.Find( aPrioritizedFields[i] ) >= KZero );
 	}
 
 	// Initialize substring array 

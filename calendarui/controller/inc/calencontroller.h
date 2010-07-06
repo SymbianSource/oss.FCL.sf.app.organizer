@@ -70,6 +70,11 @@ class CALENCONTROLLER_EXPORT CCalenController : public QObject, public MCalenSer
 		CCalenController();
 		
 		/**
+		 * Second phase contruction for controller
+		 */
+		void constructController();
+
+		/**
 		 * Constructs CCalenController with existing CAknViewAppUi. If the
 		 * controller has been previously initialized with the same CAknViewAppUi,
 		 * the existing instance will be returned.
@@ -237,7 +242,6 @@ class CALENCONTROLLER_EXPORT CCalenController : public QObject, public MCalenSer
         CalenContextImpl* mContext; 
         AgendaUtil *mAgendaUtil; // Agenda interface provider 
         CalenServicesImpl* iServices;   // Services. 
-        HbMainWindow* iMainWindow;
         CalenNotifier*     iNotifier;   // Broadcasts calendar events
         CCalenStateMachine* iStateMachine;
         CCalenActionUi*     iActionUi;   // Default internal command handling

@@ -38,7 +38,7 @@
  */
 NotesAppControllerIfImpl::NotesAppControllerIfImpl(
 		NotesAppController *controller, QObject *parent)
-:QObject(parent),
+:QObject(controller),
  mAppController(controller)
 {
 	// Nothing yet.

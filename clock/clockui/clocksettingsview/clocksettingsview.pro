@@ -62,5 +62,7 @@ HEADERS += \
 		
 RESOURCES += \
 		clocksettingsview.qrc
+		
+TRANSLATIONS += clocksettingsview.ts
 
 # End of file	--Don't remove this.

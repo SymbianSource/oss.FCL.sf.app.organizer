@@ -16,7 +16,6 @@
  */
 
 // System includes
-#include <QDebug>
 #include <QPainter>
 #include <QPen>
 #include <QGraphicsWidget>

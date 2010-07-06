@@ -37,7 +37,6 @@ private slots:
     void test_displayTimeOnDay();
     void test_timeRangesIntersect();
     void test_isValidDay();
-    void test_isNullTime();
     void test_limitToValidTime();
     void test_maxTime();
     void test_minTime();
@@ -48,7 +47,6 @@ private slots:
     void test_today();
     void test_isOnToday();
     void test_defaultTime();
-    void test_pastOf();
     void test_futureOf();
 };
 

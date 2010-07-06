@@ -85,6 +85,7 @@ public:  // From CCalenView
 	void handlePreviewPaneGesture(bool rightGesture);
 	QDateTime firstDayOfGrid();
 	void fetchEntriesAndUpdateModel();
+	void launchDayView();
 	
 private:
 	void createGrid();
@@ -114,9 +115,6 @@ private slots:
 	void handleLeftEffectCompleted(const HbEffect::EffectStatus &status);
 	void handleRightEffectCompleted(const HbEffect::EffectStatus &status);
 	void addRemoveActionsInMenu();
-	
-public slots:
-	void launchDayView();
 	void changeOrientation(Qt::Orientation orientation);
 	
 private:

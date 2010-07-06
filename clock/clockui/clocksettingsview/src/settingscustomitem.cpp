@@ -63,9 +63,7 @@ SettingsCustomItem::SettingsCustomItem(QGraphicsItem *parent)
  */
 SettingsCustomItem::~SettingsCustomItem()
 {
-	if (!mTimezoneClient->isNull()) {
-		mTimezoneClient->deleteInstance();
-	}
+    // Nothing yet.
 }
 
 /*!

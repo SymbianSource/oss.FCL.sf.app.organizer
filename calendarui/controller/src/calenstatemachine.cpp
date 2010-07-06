@@ -156,12 +156,8 @@ void CCalenStateMachine::HandleNotification(const TCalenNotification aNotificati
     {
     TRACE_ENTRY_POINT;
 
-	TRAPD(error,iStates[iCurrentState]->HandleNotificationL( aNotification, *this)); 
-    if(error!=KErrNone)
-		{
-		// do avoid warning
-		}
-	
+	TRAP_IGNORE(iStates[iCurrentState]->HandleNotificationL( aNotification, *this)); 
+   
     TRACE_EXIT_POINT;
     }
 

@@ -27,7 +27,7 @@ Q_OBJECT
 public:
 	enum CalenView{
 			MonthView = 0,
-			DayView
+			AgendaView
 		};
 	//Q_DECLARE_USER_METATYPE_ENUM(enum);
     CalenServiceProvider(CCalenController *controller, QObject* parent = 0);

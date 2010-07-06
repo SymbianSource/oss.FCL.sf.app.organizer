@@ -208,26 +208,6 @@ void TestCalenDateUtils::test_isValidDay()
 }
 
 /*!
-    This function is to test the api of CalenDateUtils::isNullTime.
- */
-void TestCalenDateUtils::test_isNullTime()
-{
-	QDateTime dateTime(QDate(1899,12,28));
-	
-	QVERIFY(!CalenDateUtils::isNullTime(dateTime));
-	
-	dateTime = QDateTime(QDate(0,0,0));
-	QVERIFY(!CalenDateUtils::isNullTime(dateTime));
-	
-	dateTime = QDateTime();
-	QVERIFY(CalenDateUtils::isNullTime(dateTime));
-	
-	dateTime = QDateTime(QDate(2100,2,31));
-	QVERIFY(!CalenDateUtils::isNullTime(dateTime));
-
-}
-
-/*!
     This function is to test the api of CalenDateUtils::limitToValidTime.
  */
 void TestCalenDateUtils::test_limitToValidTime()
@@ -396,17 +376,6 @@ void TestCalenDateUtils::test_defaultTime()
 	// 8:00 am is default time for Calendar Editor
 	expectedOutput.setTime(QTime(8, 0));
 	QDateTime actualOutput = CalenDateUtils::defaultTime(dateTime);
-	QCOMPARE(actualOutput, expectedOutput);
-}
-
-/*!
-    This function is to test the api of CalenDateUtils::pastOf.
- */
-void TestCalenDateUtils::test_pastOf()
-{
-	QDateTime dateTime = QDateTime(QDate(2009, 11, 26));
-	QDateTime expectedOutput = QDateTime(QDate(2009, 10, 30));
-	QDateTime actualOutput = CalenDateUtils::pastOf(dateTime, 27);
 	QCOMPARE(actualOutput, expectedOutput);
 }
 

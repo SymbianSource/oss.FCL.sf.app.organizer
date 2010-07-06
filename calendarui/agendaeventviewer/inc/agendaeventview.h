@@ -29,13 +29,13 @@
 
 // Forward declarations
 class QGraphicsLinearLayout;
-class QTranslator;
 class QTimer;
 class QPluginLoader;
 class HbView;
 class HbAction;
 class HbLabel;
 class HbMainWindow;
+class HbTranslator;
 class MapTileService;
 class AgendaEventViewerItem;
 class AgendaEventViewerPrivate;
@@ -90,8 +90,10 @@ private slots:
 	void handleDeleteAction();
 	void updateProgressIndicator();
 	void receiveMapTileStatus(int entryid,int addressType, int status); 
-private:
+	void changedOrientation(Qt::Orientation orientation);
 
+private:
+	HbMainWindow* mMainWindow;
 	HbView *mViewer;
 	QPointer<AgendaEventViewerItem> mSubjectWidget;
 	QPointer<AgendaEventViewerItem> mDateTimeWidget;
@@ -111,10 +113,10 @@ private:
 	CalenEditor *mCalenEditor;
 	QGraphicsLinearLayout *mLinearLayout;
 
-	QTranslator *mTranslator;
+	HbTranslator *mTranslator;
 	bool mReminderWidgetAdded;
 	HbAction *mBackAction;
-	HbMainWindow* mMainWindow;
+	
 	bool mLocationFeatureEnabled;
 	QString mMaptilePath;
     MapTileService *mMaptileService;

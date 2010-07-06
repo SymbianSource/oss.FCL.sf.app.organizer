@@ -39,7 +39,6 @@ class TCalenCommand
         int iCommand;
         QDateTime iFocusDateAndTime;
         TCalenInstanceId iInstanceId;
-        int iViewId;
     };
 
 inline TCalenCommand::TCalenCommand()
@@ -50,9 +49,8 @@ inline void TCalenCommand::SetCommandAndContextL( int aCommand,
                                                              MCalenContext& aContext)
     {
     iCommand = aCommand;
-    iFocusDateAndTime = aContext.focusDateAndTimeL();
+    iFocusDateAndTime = aContext.focusDateAndTime();
     iInstanceId = aContext.instanceId();
-    iViewId = aContext.viewId();
     }
 
 inline TInt TCalenCommand::Command() const
@@ -62,9 +60,8 @@ inline TInt TCalenCommand::Command() const
 
 inline void TCalenCommand::GetContextL( MCalenContext& aContext ) const
     {
-    aContext.setFocusDateAndTimeAndInstanceL( iFocusDateAndTime,
-                                              iInstanceId,
-                                              iViewId );
+    aContext.setFocusDateAndTimeAndInstance( iFocusDateAndTime,
+                                              iInstanceId );
     }
 
 

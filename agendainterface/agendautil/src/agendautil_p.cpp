@@ -43,7 +43,6 @@ _LIT8(KVersionICal,		"VERSION:2.0");
 //recognition string for vcal
 _LIT8(KVersionVCal,		"VERSION:1.0");
 const TInt KReadDataAmount = 256;
-const TInt KGuidLength = 30;
 const TInt KNoOfDaysInWeek = 7;
 static const int startDateArray[2] = { 1900, 1};
 static const int endDateArray[2] = { 2100, 1};
@@ -207,18 +206,16 @@ ulong AgendaUtilPrivate::addEntry(const AgendaEntry& entry)
 		return localUid;
 	}
 
+	// Get the global uid.
+	CCalenInterimUtils2* calenInterimUtils2 = CCalenInterimUtils2::NewL();
+	HBufC8* globalUid = calenInterimUtils2->GlobalUidL();
 	if (AgendaEntry::TypeNote == entry.type()) {
 		TRAP(
 				iError,
 
 				RPointerArray<CCalEntry> entryArray;
                 CleanupResetAndDestroyPushL(entryArray);
-
-				// Get the global uid.
-				CCalenInterimUtils2* calenInterimUtils2 = CCalenInterimUtils2::NewL();
-				HBufC8* globalUid = calenInterimUtils2->GlobalUidL();
 				CleanupStack::PushL(globalUid);
-				delete calenInterimUtils2;
 
 				// Construct a CCalEntry object and start filling the details.
 				CCalEntry* newEntry = 0;
@@ -276,15 +273,7 @@ ulong AgendaUtilPrivate::addEntry(const AgendaEntry& entry)
 
 				RPointerArray<CCalEntry> entryArray;
                 CleanupResetAndDestroyPushL(entryArray);
-
-				// Get the global uid.
-				TTime homeTime;
-				homeTime.HomeTime();
-				TInt64 seed = homeTime.Int64();
-				TInt randumNumber = Math::Rand(seed);
-				HBufC8* globalUid = HBufC8::NewLC(KGuidLength);
-				globalUid->Des().Num(randumNumber);
-
+                CleanupStack::PushL(globalUid);
 				// Construct a CCalEntry object and start filling the details.
 				CCalEntry* newEntry = 0;
 				newEntry = CCalEntry::NewL(
@@ -395,6 +384,9 @@ ulong AgendaUtilPrivate::addEntry(const AgendaEntry& entry)
 				CleanupStack::PopAndDestroy(&entryArray);
 		)
 	}
+	
+	delete calenInterimUtils2;
+	
 	// Emit signal upon successful creation of entry.
 	if (0 < localUid && 1 == success) {
 		emit q->entryAdded(localUid);
@@ -445,9 +437,7 @@ ulong AgendaUtilPrivate::cloneEntry(
 	// Now save the GUID of the saved entry.
 	TRAP(
 			iError,
-
-			globalUid = HBufC8::NewL(KGuidLength);
-			*globalUid = originalEntry->UidL();
+			globalUid = originalEntry->UidL().AllocL();
 	)
 
 	delete originalEntry;
@@ -458,7 +448,7 @@ ulong AgendaUtilPrivate::cloneEntry(
 				iError,
 
 				RPointerArray<CCalEntry> entryArray;
-                CleanupResetAndDestroyPushL(entryArray);
+				CleanupClosePushL(entryArray);
 
 				// Construct a CCalEntry object and start filling the details.
 				CCalEntry* newEntry = 0;
@@ -489,7 +479,7 @@ ulong AgendaUtilPrivate::cloneEntry(
 				iError,
 
 				RPointerArray<CCalEntry> entryArray;
-                CleanupResetAndDestroyPushL(entryArray);
+				CleanupClosePushL(entryArray);
 
 				// Construct a CCalEntry object and start filling the details.
 				CCalEntry* newEntry = 0;
@@ -650,7 +640,6 @@ void AgendaUtilPrivate::deleteRepeatedEntry(
 		AgendaEntry& entry,
 		AgendaUtil::RecurrenceRange range)
 {
-	qDebug("AgendaUtilPrivate::deleteRepeatedEntry");
 
 	// First prepare the session with agenda server.
 	if (!mInstanceViewCreated) {

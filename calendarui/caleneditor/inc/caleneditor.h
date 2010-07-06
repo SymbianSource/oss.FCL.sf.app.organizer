@@ -45,6 +45,7 @@ class CALENEDITOR_EXPORT CalenEditor : public QObject //HbView
 public:
 	enum CreateType{
 		TypeAppointment = 0,
+		// TODO: Need to add more types
 		TypeUnKnown = -1
 	};
 	

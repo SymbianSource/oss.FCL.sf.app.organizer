@@ -19,4 +19,6 @@ EXPORTS
 	??1NotesTodoView@@UAE@XZ @ 18 NONAME ; NotesTodoView::~NotesTodoView(void)
 	?setupView@NotesFavoriteView@@QAEXAAVNotesAppControllerIf@@PAVNotesDocLoader@@@Z @ 19 NONAME ; void NotesFavoriteView::setupView(class NotesAppControllerIf &, class NotesDocLoader *)
 	?captureScreenShot@NotesMainView@@QAEX_N@Z @ 20 NONAME ; void NotesMainView::captureScreenShot(bool)
+	?updateFavoriteView@NotesFavoriteView@@QAEXXZ @ 21 NONAME ; void NotesFavoriteView::updateFavoriteView(void)
+	?updateNoteView@NotesNoteView@@QAEXXZ @ 22 NONAME ; void NotesNoteView::updateNoteView(void)
 

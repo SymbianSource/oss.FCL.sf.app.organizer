@@ -18,8 +18,8 @@
 
 // User includes
 #include "calendocloader.h"
-#include "calendayview.h"
-#include "calendayviewwidget.h"
+#include "calenagendaview.h"
+#include "calenagendaviewwidget.h"
 #include "calenmonthview.h"
 #include "calenmonthgrid.h"
 #include "calenpreviewpane.h"
@@ -63,14 +63,14 @@ QObject *CalenDocLoader::createObject(const QString &type,
                                              const QString &name)
 {
     MCalenServices &services = mController.Services(); 
-	if (name == QString(CALEN_DAYVIEW)) {
-		QObject *calenDayView = new CalenDayView(services);
-		calenDayView->setObjectName(name);
-		return calenDayView;
-	} else if (name == QString(CALEN_DAYVIEW_WIDGET)) {
-	    QObject *calenDayViewWidget = new CalenDayViewWidget(services, this);
-	    calenDayViewWidget->setObjectName(name);
-	    return calenDayViewWidget;
+	if (name == QString(CALEN_AGENDAVIEW)) {
+		QObject *calenAgendaView = new CalenAgendaView(services);
+		calenAgendaView->setObjectName(name);
+		return calenAgendaView;
+	} else if (name == QString(CALEN_AGENDAVIEW_WIDGET)) {
+	    QObject *calenAgendaViewWidget = new CalenAgendaViewWidget(services, this);
+	    calenAgendaViewWidget->setObjectName(name);
+	    return calenAgendaViewWidget;
 	} else if (name == QString(CALEN_MONTHVIEW)) { // For Month View
         QObject *calenMonthView = new CalenMonthView(services);
         calenMonthView->setObjectName(name);

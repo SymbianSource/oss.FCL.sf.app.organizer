@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hbdocument version="0.9">
+<hbdocument version="1.1">
     <object name="alarmsAction" type="HbAction">
         <icon iconName="qtg_mono_alarm" name="icon"/>
     </object>
@@ -15,133 +15,173 @@
     <widget name="clockMainView" type="HbView">
         <widget name="clockMainViewWidget" role="HbView:widget" type="HbWidget">
             <widget name="clockWidget" plugin="clockwidgetplugin" type="ClockWidget">
-                <real name="z" value="8"/>
-            </widget>
-            <widget name="dateLabel" type="HbLabel">
-                <real name="z" value="9"/>
-                <sizehint height="var(hb-param-text-height-tiny)" type="PREFERRED"/>
-                <string name="plainText" value="Mon 18.05.2009"/>
-            </widget>
-            <widget name="placeLabel" type="HbLabel">
                 <real name="z" value="10"/>
-                <sizehint height="var(hb-param-text-height-primary)" type="PREFERRED"/>
-                <string name="plainText" value="Helsinki, Finland +2 GMT"/>
-            </widget>
-            <widget name="alarmListView" type="HbListView">
-                <widget name="prototype" role="HbListView:prototype" type="HbListViewItem">
-                    <string name="state" value="normal"/>
-                </widget>
-                <real name="z" value="11"/>
-                <sizehint height="47.7612un" type="PREFERRED" width="35.8209un"/>
+                <sizehint height="22.55un" type="PREFERRED" width="22.55un"/>
             </widget>
             <widget name="noAlarmLabel" type="HbLabel">
-                <real name="z" value="12"/>
-                <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
-                <sizehint height="3.9un" type="FIXED"/>
+                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                <real name="z" value="16"/>
+                <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
+                <sizehint height="var(hb-param-text-height-primary)" type="PREFERRED" width="49.7un"/>
+                <sizehint height="var(hb-param-text-height-primary)" type="MINIMUM" width="37.7un"/>
+                <sizehint height="var(hb-param-text-height-primary)" type="MAXIMUM" width="49.7un"/>
                 <string locid="txt_clk_main_view_list_no_alarms_set" name="plainText" value="No alarm set"/>
             </widget>
+            <widget name="dateLabel" type="HbLabel">
+                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                <real name="z" value="19"/>
+                <sizehint height="var(hb-param-text-height-tiny)" type="PREFERRED" width="expr(var(hb-param-screen-width)-53.73un-4un)"/>
+                <string name="plainText" value="Mon 18.05.2009"/>
+            </widget>
+            <widget name="alarmListView" type="HbListView">
+                <widget name="prototype" role="HbAbstractView:prototype" type="HbListViewItem">
+                    <string name="state" value="normal"/>
+                </widget>
+                <real name="z" value="21"/>
+                <sizepolicy horizontalPolicy="Expanding" horizontalStretch="0" verticalPolicy="Expanding" verticalStretch="0"/>
+                <sizehint height="47.7612un" type="PREFERRED" width="expr(var(hb-param-screen-short-edge) )"/>
+            </widget>
+            <widget name="horizontalDivider" type="HbLabel">
+                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                <icon iconName="qtg_graf_input_v_swipe" name="icon"/>
+                <real name="z" value="1"/>
+                <sizehint height="3.58209un" type="PREFERRED" width="21.49254un"/>
+            </widget>
+            <widget name="verticalDivider" type="HbLabel">
+                <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                <icon iconName="qtg_graf_input_h_swipe" name="icon"/>
+                <real name="z" value="2"/>
+            </widget>
+            <widget name="placeLabel" type="HbLabel">
+                <enums name="alignment" value="AlignAbsolute|AlignRight|AlignTrailing"/>
+                <enums name="layoutDirection" value="LeftToRight"/>
+                <real name="z" value="2"/>
+                <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
+                <sizehint height="expr(var(hb-param-text-height-tiny) )" type="PREFERRED" width="18.58295un"/>
+                <string name="plainText" value="united kingdom 0:00 GMT"/>
+            </widget>
             <layout type="anchor">
-                <anchoritem dst="clockWidget" dstEdge="CENTERH" spacing="0un" src="" srcEdge="CENTERH"/>
-                <anchoritem dst="dateLabel" dstEdge="LEFT" spacing="var(hb-param-margin-gene-left)" src="" srcEdge="LEFT"/>
-                <anchoritem dst="dateLabel" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="" srcEdge="RIGHT"/>
-                <anchoritem dst="dateLabel" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="clockWidget" srcEdge="BOTTOM"/>
-                <anchoritem dst="placeLabel" dstEdge="LEFT" spacing="var(hb-param-margin-gene-left)" src="" srcEdge="LEFT"/>
-                <anchoritem dst="placeLabel" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="" srcEdge="RIGHT"/>
-                <anchoritem dst="placeLabel" dstEdge="TOP" spacing="var(hb-param-margin-gene-middle-vertical)" src="dateLabel" srcEdge="BOTTOM"/>
+                <anchoritem dst="clockWidget" dstEdge="TOP" spacing="2un" src="" srcEdge="TOP"/>
+                <anchoritem dst="clockWidget" dstEdge="RIGHT" spacing="-10.91567un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="noAlarmLabel" dstEdge="LEFT" spacing="2un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="noAlarmLabel" dstEdge="BOTTOM" spacing="-35.26739un" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="dateLabel" dstEdge="LEFT" spacing="2un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="dateLabel" dstEdge="TOP" spacing="29.73761un" src="" srcEdge="TOP"/>
                 <anchoritem dst="alarmListView" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
-                <anchoritem dst="alarmListView" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
-                <anchoritem dst="alarmListView" dstEdge="TOP" spacing="var(hb-param-margin-gene-bottom)" src="placeLabel" srcEdge="BOTTOM"/>
-                <anchoritem dst="alarmListView" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
-                <anchoritem dst="clockWidget" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="" srcEdge="TOP"/>
-                <anchoritem dst="noAlarmLabel" dstEdge="LEFT" spacing="3.58209un" src="" srcEdge="LEFT"/>
-                <anchoritem dst="noAlarmLabel" dstEdge="TOP" spacing="23.43284un" src="" srcEdge="TOP"/>
+                <anchoritem dst="alarmListView" dstEdge="BOTTOM" spacing="-18un" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="horizontalDivider" dstEdge="LEFT" spacing="6.1194un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="horizontalDivider" dstEdge="BOTTOM" spacing="-9.70896un" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="verticalDivider" dstEdge="RIGHT" spacing="-8.80597un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="verticalDivider" dstEdge="BOTTOM" spacing="-2.84328un" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="placeLabel" dstEdge="TOP" spacing="35.07463un" src="" srcEdge="TOP"/>
+                <anchoritem dst="placeLabel" dstEdge="RIGHT" spacing="-16.04392un" src="" srcEdge="RIGHT"/>
             </layout>
         </widget>
         <widget name="viewToolbar" role="HbView:toolBar" type="HbToolBar">
-            <enums name="orientation" value="Horizontal"/>
-            <ref object="alarmsAction" role="HbToolBar:addAction"/>
-            <ref object="worldClockAction" role="HbToolBar:addAction"/>
-            <ref object="newAlarmAction" role="HbToolBar:addAction"/>
+            <ref object="alarmsAction" role="HbWidget:addAction"/>
+            <ref object="worldClockAction" role="HbWidget:addAction"/>
+            <ref object="newAlarmAction" role="HbWidget:addAction"/>
         </widget>
         <widget name="viewMenu" role="HbView:menu" type="HbMenu">
-            <ref object="settingsAction" role="HbMenu:addAction"/>
+            <ref object="settingsAction" role="HbWidget:addAction"/>
         </widget>
         <string locid="txt_common_common_clock" name="title" value="Clock"/>
     </widget>
-    <section name="landscape">
-        <widget name="noAlarmLabel" type="HbLabel">
-            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-            <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
-            <sizehint height="var(hb-param-text-height-primary)" type="PREFERRED" width="37.7un"/>
-            <sizehint height="var(hb-param-text-height-primary)" type="MINIMUM" width="37.7un"/>
-            <sizehint height="var(hb-param-text-height-primary)" type="MAXIMUM" width="37.7un"/>
+    <section name="portrait">
+        <widget name="alarmListView" type="HbListView">
+            <sizehint height="27.61194un" type="PREFERRED" width="expr(var(hb-param-screen-short-edge) )"/>
+        </widget>
+        <widget name="dateLabel" type="HbLabel">
+            <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
         </widget>
         <widget name="clockMainViewWidget" role="HbView:widget" type="HbWidget">
             <layout type="anchor">
-                <anchoritem dst="dateLabel" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="clockWidget" srcEdge="BOTTOM"/>
-                <anchoritem dst="placeLabel" dstEdge="LEFT" spacing="var(hb-param-margin-gene-left)" src="" srcEdge="LEFT"/>
-                <anchoritem dst="placeLabel" dstEdge="TOP" spacing="var(hb-param-margin-gene-middle-vertical)" src="dateLabel" srcEdge="BOTTOM"/>
-                <anchoritem dst="alarmListView" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
-                <anchoritem dst="clockWidget" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="" srcEdge="TOP"/>
-                <anchoritem dst="clockWidget" dstEdge="LEFT" spacing="9.5un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="clockWidget" dstEdge="TOP" spacing="expr(var(hb-param-margin-gene-top) )" src="" srcEdge="TOP"/>
+                <anchoritem dst="clockWidget" dstEdge="CENTERH" spacing="0un" src="" srcEdge="CENTERH"/>
+                <anchoritem dst="dateLabel" dstEdge="LEFT" spacing="expr(var(hb-param-margin-gene-left) )" src="" srcEdge="LEFT"/>
+                <anchoritem dst="dateLabel" dstEdge="TOP" spacing="expr(var(hb-param-margin-gene-top) )" src="clockWidget" srcEdge="BOTTOM"/>
+                <anchoritem dst="dateLabel" dstEdge="RIGHT" spacing="expr(-var(hb-param-margin-gene-right) )" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="noAlarmLabel" dstEdge="LEFT" spacing="expr(var(hb-param-margin-gene-left) )" src="" srcEdge="LEFT"/>
+                <anchoritem dst="noAlarmLabel" dstEdge="CENTERV" spacing="0un" src="alarmListView" srcEdge="CENTERV"/>
+                <anchoritem dst="alarmListView" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="alarmListView" dstEdge="TOP" spacing="0un" src="horizontalDivider" srcEdge="BOTTOM"/>
+                <anchoritem dst="alarmListView" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="alarmListView" dstEdge="BOTTOM" spacing="-0un" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="verticalDivider" dstEdge="RIGHT" spacing="-8.80597un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="verticalDivider" dstEdge="BOTTOM" spacing="-2.84328un" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="horizontalDivider" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="horizontalDivider" dstEdge="TOP" spacing="expr(var(hb-param-margin-gene-bottom) )" src="placeLabel" srcEdge="BOTTOM"/>
+                <anchoritem dst="horizontalDivider" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="placeLabel" dstEdge="LEFT" spacing="expr(var(hb-param-margin-gene-left) )" src="" srcEdge="LEFT"/>
+                <anchoritem dst="placeLabel" dstEdge="TOP" spacing="expr(var(hb-param-margin-gene-middle-vertical) )" src="dateLabel" srcEdge="BOTTOM"/>
+                <anchoritem dst="placeLabel" dstEdge="RIGHT" spacing="expr(-var(hb-param-margin-gene-right) )" src="" srcEdge="RIGHT"/>
+            </layout>
+        </widget>
+        <widget name="placeLabel" type="HbLabel">
+            <sizehint height="expr(var(hb-param-text-height-tiny) )" type="PREFERRED" width="expr(var(hb-param-screen-short-edge) - 4un  )"/>
+            <enums name="alignment" value="AlignAbsolute|AlignVCenter|AlignHCenter"/>
+        </widget>
+        <widget name="clockWidget" plugin="clockwidgetplugin" type="ClockWidget">
+            <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
+            <sizehint height="31.9un" type="FIXED" width="31.9un"/>
+        </widget>
+        <widget name="horizontalDivider" type="HbLabel">
+            <icon iconName="qtg_graf_divider_h_thin" name="icon"/>
+            <enums name="aspectRatioMode" value="IgnoreAspectRatio"/>
+            <sizepolicy horizontalPolicy="Minimum" horizontalStretch="1" verticalPolicy="Fixed" verticalStretch="0"/>
+            <sizehint height="0.5un" type="PREFERRED" width="21.49254un"/>
+        </widget>
+        <widget name="verticalDivider" type="HbLabel">
+            <bool name="visible" value="TRUE"/>
+        </widget>
+    </section>
+    <section name="landscape">
+        <widget name="alarmListView" type="HbListView">
+            <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Expanding" verticalStretch="0"/>
+            <sizehint type="MAXIMUM" width="53.73un"/>
+        </widget>
+        <widget name="clockMainViewWidget" role="HbView:widget" type="HbWidget">
+            <layout type="anchor">
                 <anchoritem dst="alarmListView" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
                 <anchoritem dst="alarmListView" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
-                <anchoritem dst="alarmListView" dstEdge="LEFT" spacing="9.5un" src="clockWidget" srcEdge="RIGHT"/>
-                <anchoritem dst="dateLabel" dstEdge="LEFT" spacing="var(hb-param-margin-gene-left)" src="" srcEdge="LEFT"/>
-                <anchoritem dst="dateLabel" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="alarmListView" srcEdge="LEFT"/>
-                <anchoritem dst="placeLabel" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="alarmListView" srcEdge="LEFT"/>
-                <anchoritem dst="noAlarmLabel" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="" srcEdge="RIGHT"/>
-                <anchoritem dst="noAlarmLabel" dstEdge="TOP" spacing="15.8un" src="" srcEdge="TOP"/>
-                <anchoritem dst="noAlarmLabel" dstEdge="LEFT" spacing="var(hb-param-margin-gene-left)" src="alarmListView" srcEdge="LEFT"/>
-            </layout>
-        </widget>
-        <widget name="dateLabel" type="HbLabel">
-            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-        </widget>
-        <widget name="placeLabel" type="HbLabel">
-            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-        </widget>
-        <widget name="clockWidget" plugin="clockwidgetplugin" type="ClockWidget">
-            <sizehint height="22.3un" type="PREFERRED" width="22.3un"/>
-        </widget>
-    </section>
-    <section name="portrait">
-        <widget name="noAlarmLabel" type="HbLabel">
-            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-            <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
-            <sizehint height="var(hb-param-text-height-primary)" type="PREFERRED" width="49.7un"/>
-            <sizehint height="var(hb-param-text-height-primary)" type="MINIMUM" width="37.7un"/>
-            <sizehint height="var(hb-param-text-height-primary)" type="MAXIMUM" width="49.7un"/>
-        </widget>
-        <widget name="clockMainViewWidget" role="HbView:widget" type="HbWidget">
-            <layout type="anchor">
-                <anchoritem dst="clockWidget" dstEdge="CENTERH" spacing="0un" src="" srcEdge="CENTERH"/>
-                <anchoritem dst="dateLabel" dstEdge="LEFT" spacing="var(hb-param-margin-gene-left)" src="" srcEdge="LEFT"/>
-                <anchoritem dst="dateLabel" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="" srcEdge="RIGHT"/>
-                <anchoritem dst="dateLabel" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="clockWidget" srcEdge="BOTTOM"/>
-                <anchoritem dst="placeLabel" dstEdge="LEFT" spacing="var(hb-param-margin-gene-left)" src="" srcEdge="LEFT"/>
-                <anchoritem dst="placeLabel" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-right)" src="" srcEdge="RIGHT"/>
-                <anchoritem dst="placeLabel" dstEdge="TOP" spacing="var(hb-param-margin-gene-middle-vertical)" src="dateLabel" srcEdge="BOTTOM"/>
-                <anchoritem dst="alarmListView" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
-                <anchoritem dst="alarmListView" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
-                <anchoritem dst="alarmListView" dstEdge="TOP" spacing="var(hb-param-margin-gene-bottom)" src="placeLabel" srcEdge="BOTTOM"/>
                 <anchoritem dst="alarmListView" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
-                <anchoritem dst="clockWidget" dstEdge="TOP" spacing="var(hb-param-margin-gene-top)" src="" srcEdge="TOP"/>
-                <anchoritem dst="noAlarmLabel" dstEdge="LEFT" spacing="var(hb-param-margin-gene-left)" src="" srcEdge="LEFT"/>
-                <anchoritem dst="noAlarmLabel" dstEdge="TOP" spacing="17.8un" src="placeLabel" srcEdge="BOTTOM"/>
+                <anchoritem dst="noAlarmLabel" dstEdge="LEFT" spacing="expr(var(hb-param-margin-gene-left) )" src="alarmListView" srcEdge="LEFT"/>
+                <anchoritem dst="noAlarmLabel" dstEdge="CENTERV" spacing="0un" src="alarmListView" srcEdge="CENTERV"/>
+                <anchoritem dst="clockWidget" dstEdge="TOP" spacing="expr(var(hb-param-margin-gene-top) )" src="" srcEdge="TOP"/>
+                <anchoritem dst="clockWidget" dstEdge="CENTERH" spacing="0un" src="dateLabel" srcEdge="CENTERH"/>
+                <anchoritem dst="dateLabel" dstEdge="LEFT" spacing="expr(var(hb-param-margin-gene-left) )" src="" srcEdge="LEFT"/>
+                <anchoritem dst="dateLabel" dstEdge="TOP" spacing="expr(var(hb-param-margin-gene-bottom) )" src="clockWidget" srcEdge="BOTTOM"/>
+                <anchoritem dst="dateLabel" dstEdge="RIGHT" spacing="expr(-var(hb-param-margin-gene-right) )" src="verticalDivider" srcEdge="LEFT"/>
+                <anchoritem dst="verticalDivider" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
+                <anchoritem dst="verticalDivider" dstEdge="RIGHT" spacing="0un" src="alarmListView" srcEdge="LEFT"/>
+                <anchoritem dst="verticalDivider" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="horizontalDivider" dstEdge="RIGHT" spacing="-17.16418un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="horizontalDivider" dstEdge="BOTTOM" spacing="-7.17164un" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="placeLabel" dstEdge="LEFT" spacing="expr(var(hb-param-margin-gene-left) )" src="" srcEdge="LEFT"/>
+                <anchoritem dst="placeLabel" dstEdge="TOP" spacing="expr(var(hb-param-margin-gene-middle-vertical) )" src="dateLabel" srcEdge="BOTTOM"/>
+                <anchoritem dst="placeLabel" dstEdge="RIGHT" spacing="expr(-var(hb-param-margin-gene-right) )" src="alarmListView" srcEdge="LEFT"/>
+                <anchoritem dst="placeLabel" dstEdge="BOTTOM" spacing="expr(-var(hb-param-margin-gene-bottom) )" src="" srcEdge="BOTTOM"/>
             </layout>
         </widget>
-        <widget name="dateLabel" type="HbLabel">
-            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-        </widget>
         <widget name="placeLabel" type="HbLabel">
-            <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+            <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
+            <enums name="alignment" value="AlignAbsolute|AlignVCenter|AlignHCenter"/>
         </widget>
         <widget name="clockWidget" plugin="clockwidgetplugin" type="ClockWidget">
-            <sizehint height="31.9un" type="PREFERRED" width="31.9un"/>
+            <sizehint height="expr(var(hb-param-screen-short-edge)  - var(hb-param-widget-chrome-height) - var(hb-param-widget-toolbar-height) - 12.75un )" type="PREFERRED" width="expr(var(hb-param-screen-short-edge)  - var(hb-param-widget-chrome-height) - var(hb-param-widget-toolbar-height) - 12.75un )"/>
+        </widget>
+        <widget name="horizontalDivider" type="HbLabel">
+            <sizehint height="0.5un" type="PREFERRED" width="21.49254un"/>
+            <bool name="visible" value="TRUE"/>
+        </widget>
+        <widget name="verticalDivider" type="HbLabel">
+            <icon iconName="qtg_graf_divider_v_thin" name="icon"/>
+            <enums name="aspectRatioMode" value="IgnoreAspectRatio"/>
+            <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
+            <sizehint type="PREFERRED" width="0.1un"/>
         </widget>
     </section>
-    <metadata activeUIState="landscape" display="NHD landscape" unit="un">
+    <metadata activeUIState="portrait" display="NHD-3.2-inch_portrait" unit="un">
         <uistate name="Common ui state" sections="#common"/>
         <uistate name="portrait" sections="#common portrait"/>
         <uistate name="landscape" sections="#common landscape"/>

@@ -13,51 +13,34 @@ ClockAlarmListItemPrototype::text-1{
 	top: -var(hb-param-margin-gene-top);
     right: var(hb-param-margin-gene-right);
 	text-height: var(hb-param-text-height-secondary);
+	font-variant: secondary;
     fixed-width: 8.2un;
 	text-align: right;
 	text-line-count-min: 2;
     text-line-count-max: 2;
 }
-ClockAlarmListItemPrototype::text-2:portrait{
+ClockAlarmListItemPrototype::text-2{
     top: -var(hb-param-margin-gene-top);
     right: var(hb-param-margin-gene-right);
     text-height: var(hb-param-text-height-tiny);
+    font-variant: secondary;
 	fixed-width: 28.7un;
     text-align: left;
 }
-ClockAlarmListItemPrototype::text-3:portrait{
+ClockAlarmListItemPrototype::text-3{
     text-height: var(hb-param-text-height-primary);
+    font-variant: primary;
     top: -var(hb-param-margin-gene-middle-vertical);
     right: var(hb-param-margin-gene-right);
     fixed-width: 28.7un;
     text-align: left;
 }
-ClockAlarmListItemPrototype::text-4:portrait{
-    text-height: var(hb-param-text-height-primary-small);
-    top: -var(hb-param-margin-gene-middle-vertical);
-    bottom: var(hb-param-margin-gene-bottom);
-    fixed-width: 28.7un;
-    text-align: left;
-}
-ClockAlarmListItemPrototype::text-2:landscape{
-    top: -var(hb-param-margin-gene-top);
-    right: var(hb-param-margin-gene-right);
+ClockAlarmListItemPrototype::text-4{
     text-height: var(hb-param-text-height-tiny);
-    fixed-width: 21un;
-    text-align: left;
-}
-ClockAlarmListItemPrototype::text-3:landscape{
-    text-height: var(hb-param-text-height-primary);
-    top: -var(hb-param-margin-gene-middle-vertical);
-    right: var(hb-param-margin-gene-right);
-    fixed-width: 21un;
-    text-align: left;
-}
-ClockAlarmListItemPrototype::text-4:landscape{
-    text-height: var(hb-param-text-height-primary-small);
+    font-variant: secondary;
     top: -var(hb-param-margin-gene-middle-vertical);
     bottom: var(hb-param-margin-gene-bottom);
-    fixed-width: 21un;
+    fixed-width: 28.7un;
     text-align: left;
 }
 ClockAlarmListItemPrototype::alarmIconItem{

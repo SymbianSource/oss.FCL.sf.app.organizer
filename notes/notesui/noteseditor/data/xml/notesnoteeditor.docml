@@ -52,8 +52,8 @@
             </layout>
         </widget>
         <widget name="viewMenu" role="HbView:menu" type="HbMenu">
-            <ref object="makeAsTodoAction" role="HbMenu:addAction"/>
             <ref object="makeFavoriteAction" role="HbMenu:addAction"/>
+            <ref object="makeAsTodoAction" role="HbMenu:addAction"/>
         </widget>
         <widget name="viewToolbar" role="HbView:toolBar" type="HbToolBar">
             <enums name="orientation" value="Horizontal"/>

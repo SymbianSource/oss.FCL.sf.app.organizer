@@ -18,13 +18,12 @@
 
 #include <QString>
 #include <QStringList>
-#include <QTranslator>
 #include <HbAction>
 #include <HbView>
 #include <HbMenu>
 #include <HbMessageBox>
 #include <HbLabel>
-#include <HbApplication>
+#include <HbTranslator>
 
 #include <eikenv.h>
 #include <data_caging_path_literals.hrh>
@@ -102,11 +101,13 @@ CCalenLunarChinesePlugin::~CCalenLunarChinesePlugin()
  	    }
         
 	delete iInfoProvider;
+	iInfoProvider = NULL;
 	delete iLocalizer;
+	iLocalizer = NULL;
 	delete iLocInfo;
+	iLocInfo = NULL;
 	
 	// Remove the translator for plugin
-	HbApplication::instance()->removeTranslator(iTranslator);
 	if (iTranslator) {
 		delete iTranslator;
 		iTranslator = 0;
@@ -125,13 +126,7 @@ void CCalenLunarChinesePlugin::ConstructL()
 	iServices->GetCommandRange( iStart, iEnd );
 	
 	// Install the translator before the CCalenLunarLocalizer is constructed
-	iTranslator = new QTranslator;
-	QString lang = QLocale::system().name();
-	QString path = "Z:/resource/qt/translations/";
-	bool loaded = iTranslator->load("calenregional_en_GB", ":/translations");
-	// TODO: Load the appropriate .qm file based on locale
-	//bool loaded = iTranslator->load("calenregional_" + lang, path);
-	HbApplication::instance()->installTranslator(iTranslator);
+	iTranslator = new HbTranslator("calenregional");
 	
 	iLocalizer = CCalenLunarLocalizer::NewL();
 	
@@ -269,7 +264,7 @@ MCalenCommandHandler* CCalenLunarChinesePlugin::CommandHandlerL( TInt aCommand )
 void CCalenLunarChinesePlugin::UpdateLocalizerInfoL()
 	{
 	TRACE_ENTRY_POINT;
-	QDateTime focusDateTime= iServices->Context().focusDateAndTimeL();
+	QDateTime focusDateTime= iServices->Context().focusDateAndTime();
 	TDateTime tempDateTime(
 					focusDateTime.date().year(),
 					static_cast<TMonth>(focusDateTime.date().month() - 1),

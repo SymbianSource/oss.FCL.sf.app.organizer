@@ -51,6 +51,7 @@ CalenNativeView::CalenNativeView(MCalenServices &services) :
 
 	// Create services API and register for notifications
 	RArray<TCalenNotification> notificationArray;
+	CleanupClosePushL(notificationArray);
 
 	notificationArray.Append(ECalenNotifySystemTimeChanged);
 	notificationArray.Append(ECalenNotifySystemLocaleChanged);
@@ -58,7 +59,7 @@ CalenNativeView::CalenNativeView(MCalenServices &services) :
 
 	mServices.RegisterForNotificationsL(this, notificationArray);
 
-	notificationArray.Reset();
+	CleanupStack::PopAndDestroy(&notificationArray);
 }
 
 /*!
@@ -105,17 +106,14 @@ void CalenNativeView::goToDate()
 	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
 	popUp->setHeadingWidget(new HbLabel(hbTrId("txt_calendar_opt_go_to_date")));
 	
-	// Get the current date.
-	QDateTime currentDateTime = CalenDateUtils::today();
-	QDate currentDate = currentDateTime.date();
 	if(mDatePicker) {
 		mDatePicker = NULL;
 	}
-	mDatePicker = new HbDateTimePicker(currentDate, popUp);
+	mDatePicker = new HbDateTimePicker(QDate::currentDate(), popUp);
 	// Set the date range.
 	mDatePicker->setMinimumDate(CalenDateUtils::minTime().date());
 	mDatePicker->setMaximumDate(CalenDateUtils::maxTime().date());
-	mDatePicker->setDate(currentDate);
+	mDatePicker->setDate(QDate::currentDate());
 	
 	popUp->setContentWidget(mDatePicker);
 	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
@@ -137,11 +135,11 @@ void CalenNativeView::goToSelectedDate()
 	        selectedDate >= CalenDateUtils::minTime().date() &&
 	        selectedDate <= CalenDateUtils::maxTime().date()) {
 		MCalenContext& context = mServices.Context();
-		QDateTime contextDate = context.focusDateAndTimeL();
+		QDateTime contextDate = context.focusDateAndTime();
 
 		//Set the selected date to contextDate.
 		contextDate.setDate(selectedDate);
-		context.setFocusDateAndTimeL(contextDate, KCalenMonthViewUidValue);
+		context.setFocusDateAndTime(contextDate);
 	}
 	refreshViewOnGoToDate();
 }

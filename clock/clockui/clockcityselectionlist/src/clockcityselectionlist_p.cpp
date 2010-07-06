@@ -40,7 +40,7 @@
 #include "clockcityselectionlist.h"
 #include "clockcitylistproxymodel.h"
 #include "clockcityselectionlistcommon.h"
-#include "clockcityselectionlistprototype.h"
+
 #include "timezoneclient.h"
 #include "clockdatatypes.h"
 
@@ -77,7 +77,7 @@ ClockCitySelectionListPrivate::ClockCitySelectionListPrivate(
  */
 ClockCitySelectionListPrivate::~ClockCitySelectionListPrivate()
 {
-	if (mOwnsClient && !mClient->isNull()) {
+	if (mOwnsClient) {
 		mClient->deleteInstance();
 	}
 	if (mLoader) {
@@ -123,6 +123,7 @@ void ClockCitySelectionListPrivate::populateListModel()
 		displayString += info.cityName;
 		displayString += ", ";
 		displayString += info.countryName;
+		mListModel->setData(index, displayString, Qt::DisplayRole);
 		mListModel->setData(index, displayString, Qt::UserRole + 100);
 
 		// Now save the timezone and city group ids.
@@ -401,15 +402,6 @@ void ClockCitySelectionListPrivate::showCityList()
 	mProxyModel->setDynamicSortFilter(true);
 	mProxyModel->setSourceModel(mListModel);
 	mProxyModel->setFilterRole(Qt::UserRole + 100);
-
-	// Construct the custom list item prototype.
-	ClockCitySelectionListPrototype *prototype =
-			new ClockCitySelectionListPrototype;
-
-	// Loader the custom list view layout.
-	HbStyleLoader::registerFilePath(":/style/");
-	mListView->setLayoutName("cityselectionlist-default");
-	mListView->setItemPrototype(prototype);
 
 	// Construct the model for the list.
 	QTimer::singleShot(1, this, SLOT(populateListModel()));

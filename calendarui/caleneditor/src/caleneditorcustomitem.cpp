@@ -55,7 +55,13 @@
 	\param parent The parent object.
  */
 CalenEditorCustomItem::CalenEditorCustomItem(QGraphicsItem *parent)
-:HbDataFormViewItem(parent)
+:HbDataFormViewItem(parent),
+ mPushButtonTime(NULL),
+ mPushButtonDate(NULL),
+ mRepeatUntilWidget(NULL),
+ mReminderTimeWidget(NULL),
+ mDatePicker(NULL),
+ mTimePicker(NULL)
 {
 	mMinDate = CalenDateUtils::minTime().date();
 	mMaxDate = CalenDateUtils::maxTime().date();
@@ -155,6 +161,10 @@ HbWidget* CalenEditorCustomItem::createCustomWidget()
 												SLOT(launchLocationPicker()));
 			connect(mLocationLineEdit, SIGNAL(textChanged(const QString)),
 						this, SLOT(handleLocationTextChange(const QString)));
+						
+			connect(mLocationLineEdit, SIGNAL(editingFinished()),
+			            this, SLOT(handleEditingFinished()));
+			
 			return widgetLocation;
 		}
 		
@@ -213,7 +223,7 @@ void CalenEditorCustomItem::setSelectedLocation( QVariant &aValue )
 			locationString.append(',');
 		}
 		locationString.append(selectedLocation.mCountry);
-		emit locationTextChanged(locationString);
+		emit locationTextChanged(locationString, selectedLocation.mLatitude, selectedLocation.mLongitude);
 		mLocationLineEdit->setText(locationString );
     }
 }
@@ -284,6 +294,14 @@ void CalenEditorCustomItem::handleLocationTextChange(QString location)
 }
 
 /*!
+	Handles the location editing finished
+ */
+void CalenEditorCustomItem::handleEditingFinished()
+{
+    emit locationEditingFinished();
+}
+
+/*!
 	Launches the date picker
  */
 void CalenEditorCustomItem::handleDate()
@@ -309,12 +327,12 @@ void CalenEditorCustomItem::handleDate()
 	mDatePicker = new HbDateTimePicker(mDate, popUp);
 	mDatePicker->setMinimumDate(mMinDate);
 	mDatePicker->setMaximumDate(mMaxDate);
-	
+	mDatePicker->setDate(mDate);
 	popUp->setContentWidget(mDatePicker);
-	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
+	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"), popUp);
 	popUp->addAction(okAction);
 	connect(okAction, SIGNAL(triggered()), this, SLOT(saveDate()));
-	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel")));
+	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"), popUp));
 	popUp->open();
 }
 
@@ -351,7 +369,7 @@ void CalenEditorCustomItem::handleTime()
 	mTimePicker->setTime(mTime);
 	popUp->setContentWidget(mTimePicker);
 
-	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
+	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"), popUp);
 	popUp->addAction(okAction);
 	connect(okAction, SIGNAL(triggered()), this, SLOT(saveTime()));
 	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"), popUp));

@@ -16,7 +16,6 @@
 */
 
 // System includes.
-#include <QDebug>
 #include <QFile>
 #include <QDir>
 
@@ -43,9 +42,8 @@
  */
 AgendaEventViewerPrivate::AgendaEventViewerPrivate(
 		AgendaUtil *agendaUtil, QObject *parent)
-: QObject(parent)
+: QObject(parent),mShowEventViewById(false),mShowEventViewByFileHandle(false),mFileName(NULL),mAction(AgendaEventViewer::ActionNothing)
 {
-	qDebug() <<"AgendaEventViewerPrivate::AgendaEventViewerPrivate -->";
 
 	// Get the q-pointer.from parent
 	q_ptr = static_cast<AgendaEventViewer *> (parent);
@@ -65,8 +63,12 @@ AgendaEventViewerPrivate::AgendaEventViewerPrivate(
 	connect(
 			mAgendaUtil, SIGNAL(entriesChanged(QList<ulong> )),
 			this, SLOT(handleEntriesChanged(QList<ulong> )));
+	
+	// Register for the calenInstance view creation sucessfully
+	connect(
+	        mAgendaUtil, SIGNAL(entryViewCreationCompleted(int)),
+	        this, SLOT(viewCreationCompleted(int)));
 
-	qDebug() <<"AgendaEventViewerPrivate::AgendaEventViewerPrivate <--";
 }
 
 /*!
@@ -74,14 +76,12 @@ AgendaEventViewerPrivate::AgendaEventViewerPrivate(
  */
 AgendaEventViewerPrivate::~AgendaEventViewerPrivate()
 {
-	qDebug() <<"AgendaEventViewerPrivate::~AgendaEventViewerPrivate -->";
 
 	if (mViewerOwnsAgendaUtil) {
 		delete mAgendaUtil;
 		mAgendaUtil = 0;
 	}
 
-	qDebug() <<"AgendaEventViewerPrivate::~AgendaEventViewerPrivate <--";
 }
 
 /*!
@@ -93,18 +93,22 @@ AgendaEventViewerPrivate::~AgendaEventViewerPrivate()
 void AgendaEventViewerPrivate::view(const ulong id, 
                                     AgendaEventViewer::Actions action)
 {
-	qDebug() <<"AgendaEventViewerPrivate::view(id) -->";
 	
 	AgendaEntry entry = mAgendaUtil->fetchById(id);
 	
 	if (entry.isNull()) {
+        // save the entries , to show the entry once instances are created
+        // if entry is null exit ,later  call back comes in viewCreationCompleted 
+	    mAction = action;
+        mId =id;
+        //to avoid view creation multiple times
+        mShowEventViewById = true;
 		return;
 	}
 	// Construct the agenda event view
 	mAgendaEventView = new AgendaEventView(this);
 	mAgendaEventView->execute(entry, action);
 
-	qDebug() <<"AgendaEventViewerPrivate::view(id) <--";
 }
 
 /*!
@@ -116,7 +120,6 @@ void AgendaEventViewerPrivate::view(const ulong id,
 void AgendaEventViewerPrivate::view(const QFile &fileHandle, 
                                     AgendaEventViewer::Actions action)
 {
-	qDebug() <<"AgendaEventViewerPrivate::view(fileHandle) -->";
 
 	// Using calendar importer read the filehandle and generate agenda entry
 	QString filePath = fileHandle.fileName();
@@ -127,9 +130,12 @@ void AgendaEventViewerPrivate::view(const QFile &fileHandle,
 		mAgendaEventView = new AgendaEventView(this);
 		mAgendaEventView->execute(entry, action);
 	} else {
-	    q_ptr->viewingCompleted(QDateTime::currentDateTime().date());
+        //store the file name
+        mFileName = filePath ;
+        mAction = action ;
+        mShowEventViewByFileHandle = true;
+        q_ptr->viewingCompleted(QDateTime::currentDateTime().date());
 	}
-	qDebug() <<"AgendaEventViewerPrivate::view(fileHandle) <--";
 }
 
 /*!
@@ -139,7 +145,6 @@ void AgendaEventViewerPrivate::view(const QFile &fileHandle,
 void AgendaEventViewerPrivate::view(AgendaEntry entry, 
                                     AgendaEventViewer::Actions action)
 {
-	qDebug() <<"AgendaEventViewerPrivate::view(entry) -->";
 
 	if (entry.isNull()) {
 			return;
@@ -148,7 +153,6 @@ void AgendaEventViewerPrivate::view(AgendaEntry entry,
 	mAgendaEventView = new AgendaEventView(this);
 	mAgendaEventView->execute(entry, action);
 
-	qDebug() <<"AgendaEventViewerPrivate::view(entry) <--";
 }
 
 /*!
@@ -158,7 +162,6 @@ void AgendaEventViewerPrivate::view(AgendaEntry entry,
  */
 void AgendaEventViewerPrivate::viewingCompleted(const QDate date)
 {
-	qDebug() <<"AgendaEventViewerPrivate::viewingCompleted -->";
 
 	emit q_ptr->viewingCompleted(date);
 
@@ -167,7 +170,6 @@ void AgendaEventViewerPrivate::viewingCompleted(const QDate date)
 		mAgendaEventView->deleteLater();
 	}
 
-	qDebug() <<"AgendaEventViewerPrivate::viewingCompleted -->";
 }
 
 /*!
@@ -175,11 +177,9 @@ void AgendaEventViewerPrivate::viewingCompleted(const QDate date)
  */
 void AgendaEventViewerPrivate::editingStarted()
 {
-	qDebug() <<"AgendaEventViewerPrivate::editingStarted -->";
 
 	emit q_ptr->editingStarted();
 
-	qDebug() <<"AgendaEventViewerPrivate::editingStarted -->";
 }
 
 /*!
@@ -187,11 +187,9 @@ void AgendaEventViewerPrivate::editingStarted()
  */
 void AgendaEventViewerPrivate::editingCompleted()
 {
-	qDebug() <<"AgendaEventViewerPrivate::editingCompleted -->";
 
 	emit q_ptr->editingCompleted();
 
-	qDebug() <<"AgendaEventViewerPrivate::editingCompleted -->";
 }
 
 /*!
@@ -199,11 +197,9 @@ void AgendaEventViewerPrivate::editingCompleted()
  */
 void AgendaEventViewerPrivate::deletingStarted()
 {
-	qDebug() <<"AgendaEventViewerPrivate::deletingStarted -->";
 
 	emit q_ptr->deletingStarted();
 
-	qDebug() <<"AgendaEventViewerPrivate::deletingStarted -->";
 }
 
 /*!
@@ -211,11 +207,43 @@ void AgendaEventViewerPrivate::deletingStarted()
  */
 void AgendaEventViewerPrivate::deletingCompleted()
 {
-	qDebug() <<"AgendaEventViewerPrivate::deletingCompleted -->";
 
 	emit q_ptr->deletingCompleted();
 
-	qDebug() <<"AgendaEventViewerPrivate::deletingCompleted -->";
 }
 
+
+/*!
+     calls when instances of calenInstanceview and 
+     entryInstanceview is created successfully
+ */
+void AgendaEventViewerPrivate::viewCreationCompleted(int error)
+    {
+    
+    if((KErrNone == error))
+        {
+        AgendaEntry entry;
+        if (mShowEventViewById)
+            {
+            entry = mAgendaUtil->fetchById(mId);
+            }
+        else if(mShowEventViewByFileHandle)
+            {
+            QString nativeFilePath = QDir::toNativeSeparators(mFileName);
+            mAgendaUtil->importvCalendar(nativeFilePath, entry);
+            }
+        //if entry is there , then show the view
+        if (!entry.isNull()) 
+            {
+            mAgendaEventView = new AgendaEventView(this);
+            mAgendaEventView->execute(entry, mAction);
+            }
+        }      
+    //reset the variables
+    mId = 0;
+    mFileName.clear();
+    mShowEventViewById = false;
+    mShowEventViewByFileHandle = false;
+    mAction = AgendaEventViewer::ActionNothing;
+	}
 // End of file

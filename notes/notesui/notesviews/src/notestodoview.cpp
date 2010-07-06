@@ -115,7 +115,11 @@ void NotesTodoView::setupView(
 			SIGNAL(longPressed(HbAbstractViewItem *, const QPointF &)),
 			this,
 			SLOT(handleItemLongPressed(HbAbstractViewItem *, const QPointF &)));
-
+	
+	// Get the empty list string.
+	mEmptyListLabel = static_cast<HbLabel *> (
+			mDocLoader->findWidget("emptyListLabel"));
+	
 	// Get the toolbar/menu actions.
 	mAddTodoAction = static_cast<HbAction *> (
 			mDocLoader->findObject("newTodoAction"));
@@ -131,8 +135,7 @@ void NotesTodoView::setupView(
 
 	mViewCollectionAction = static_cast<HbAction *> (
 			mDocLoader->findObject("displayCollectionsAction"));
-	mViewCollectionAction->setCheckable(true);
-	mViewCollectionAction->setChecked(true);
+	
 	connect(
 			mViewCollectionAction, SIGNAL(changed()),
 			this, SLOT(handleActionStateChanged()));
@@ -439,6 +442,14 @@ void NotesTodoView::updateSubTitle(ulong id)
 		AgendaUtil::IncludeIncompletedTodos);
 	mSubTitle->setHeading(
 			hbTrId("txt_notes_subhead_todos_ln_pending",entries.count()));
+	
+	if (0 >= entries.count()) {
+		mEmptyListLabel->show();
+		mListView->hide();
+	} else {
+		mEmptyListLabel->hide();
+		mListView->show();
+	}
 }
 
 /*

@@ -30,8 +30,7 @@
 #include <HbListWidget>
 #include <HbComboBox>
 #include <HbListWidgetItem>
-#include <HbApplication>
-#include <QTranslator>
+#include <HbTranslator>
 
 // User includes
 #include "clockregionalsettingsview.h"
@@ -61,13 +60,9 @@ ClockRegionalSettingsView::ClockRegionalSettingsView(QObject *parent)
 	mSettingsUtility = new SettingsUtility();
 	
 	// Load the translation file and install the editor specific translator
-    mTranslator = new QTranslator;
-    //QString lang = QLocale::system().name();
-    //QString path = "Z:/resource/qt/translations/";
-    mTranslator->load("clocksettingsview",":/translations");
-    // TODO: Load the appropriate .qm file based on locale
-    //bool loaded = mTranslator->load("caleneditor_" + lang, path);
-    HbApplication::instance()->installTranslator(mTranslator);
+    mTranslator = new HbTranslator("clocksettingsview");
+    mTranslator->loadCommon();
+    
 	// Create the custom prototype.
 	mCustomPrototype = new SettingsCustomItem();
 }
@@ -90,7 +85,6 @@ ClockRegionalSettingsView::~ClockRegionalSettingsView()
 		delete mFormModel;
 	}
 // Remove the translator
-    HbApplication::instance()->removeTranslator(mTranslator);
     if (mTranslator) {
         delete mTranslator;
         mTranslator = 0;

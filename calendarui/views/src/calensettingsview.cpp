@@ -31,7 +31,11 @@
 #include "calensettings.h"
 
 CalenSettingsView::CalenSettingsView(MCalenServices& services, QGraphicsItem *parent)
-:HbView(parent), mServices(services)
+:HbView(parent), 
+ mServices(services),
+ mCalenSettingsForm(NULL),
+ mCalenSettings(NULL),
+ mSoftKeyAction(NULL)
 {
 
 	mCalenSettingsForm = new HbDataForm(this);
@@ -40,16 +44,26 @@ CalenSettingsView::CalenSettingsView(MCalenServices& services, QGraphicsItem *pa
 	setTitle(hbTrId("txt_calendar_title_calendar"));
 
 	// Construct the settings utility.
-	mCalenSettings = new CalenSettings(mServices, mCalenSettingsForm);
-	mCalenSettings->createModel();
-
-	setWidget(mCalenSettingsForm);
+	if(mCalenSettingsForm)
+	{
+	    mCalenSettings = new CalenSettings(mServices, mCalenSettingsForm);
+        if(mCalenSettings)
+        {
+    	    mCalenSettings->createModel();
+            setWidget(mCalenSettingsForm);
+        }
+    }
 	
 }
 
 CalenSettingsView::~CalenSettingsView()
 {
-	// Nothing yet.
+	if (mCalenSettings) {
+		delete mCalenSettings;
+	}
+	if (mSoftKeyAction) {
+		delete mSoftKeyAction;
+	}
 }
 
 void CalenSettingsView::launchPreviousView()
@@ -60,31 +74,22 @@ void CalenSettingsView::launchPreviousView()
 											this, SLOT(launchPreviousView()));
 	mServices.MainWindow().removeView(this);
 	mServices.IssueNotificationL(ECalenNotifySettingsClosed);
-   
-    //TODO :: For ART3 we are launching agenda view later we have to use week view
-    // GEt the current orientation
-   /* Qt::Orientation orientation = mServices.MainWindow().orientation();
-    if(orientation == Qt::Vertical)
-        {
-        mServices.IssueCommandL(ECalenDayView);
-        }
-    else if(orientation == Qt::Horizontal)
-        {
-        mServices.IssueCommandL(ECalenLandscapeDayView);
-        }*/
 }
 
 void CalenSettingsView::initializeForm()
-    {
+{
     mCalenSettings->populateSettingList();
     
     // Add view on main window and set back softkey
 	mServices.MainWindow().addView(this);
 	mSoftKeyAction = new HbAction(Hb::BackNaviAction);
-	setNavigationAction(mSoftKeyAction);
-	connect(mSoftKeyAction, SIGNAL(triggered()), 
+	if(mSoftKeyAction)
+	{
+		setNavigationAction(mSoftKeyAction);
+		connect(mSoftKeyAction, SIGNAL(triggered()), 
 											this, SLOT(launchPreviousView()));
-    }
+	}
+}
 
 void CalenSettingsView::refreshView()
     {

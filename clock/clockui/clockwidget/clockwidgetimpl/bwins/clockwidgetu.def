@@ -15,4 +15,7 @@ EXPORTS
 	?getStaticMetaObject@ClockWidget@@SAABUQMetaObject@@XZ @ 14 NONAME ; struct QMetaObject const & ClockWidget::getStaticMetaObject(void)
 	?qt_metacall@ClockWidget@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 15 NONAME ; int ClockWidget::qt_metacall(enum QMetaObject::Call, int, void * *)
 	?clockType@ClockWidget@@QBE?AW4ClockType@1@XZ @ 16 NONAME ; enum ClockWidget::ClockType ClockWidget::clockType(void) const
+	?updateClockWidget@ClockWidget@@AAEXXZ @ 17 NONAME ; void ClockWidget::updateClockWidget(void)
+	?timeFormat@ClockWidget@@QBE?AW4TimeFormat@1@XZ @ 18 NONAME ; enum ClockWidget::TimeFormat ClockWidget::timeFormat(void) const
+	?setTimeFormat@ClockWidget@@QAEXABW4TimeFormat@1@@Z @ 19 NONAME ; void ClockWidget::setTimeFormat(enum ClockWidget::TimeFormat const &)
 

@@ -19,7 +19,9 @@
 
 TEMPLATE = subdirs
 SUBDIRS += unittest_calenviewerservice \
-			unittest_calencommonutils
+			unittest_calencommonutils \
+			../views/dayview/tsrc \
+			
 CONFIG += ordered
 
 # End of file	--Don't remove this

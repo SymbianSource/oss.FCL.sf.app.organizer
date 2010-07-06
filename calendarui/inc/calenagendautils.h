@@ -43,12 +43,6 @@ NONSHARABLE_CLASS( CALENAGENDAUTIL_EXPORT CalenAgendaUtils )
     public:
         
         /**
-         * Removes entries ending aDay at midnight.
-         **/
-        static void removeEntriesEndingAtMidnightL( QList<AgendaEntry>& list, 
-                                                                    const QDateTime& day );
-
-        /**
          * Checks that if entry ends at starting midnight of the day,
          * but has started earlier.
          * Such entries are not shown in day that they end, because end time 
@@ -56,7 +50,7 @@ NONSHARABLE_CLASS( CALENAGENDAUTIL_EXPORT CalenAgendaUtils )
          * @returns ETrue, if entry ends at starting midnight of day, but starts before that
          *          EFalse, otherwise
          **/
-        static bool endsAtStartOfDayL( AgendaEntry& entry,
+        static bool endsAtStartOfDay( AgendaEntry& entry,
                                                         const QDateTime& day );
 
     };

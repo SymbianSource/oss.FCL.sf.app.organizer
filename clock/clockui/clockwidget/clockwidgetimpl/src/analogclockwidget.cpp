@@ -41,7 +41,9 @@ const int clockUpdateInterval  (1000); // msec
 AnalogClockWidget::AnalogClockWidget(QGraphicsItem *parent)
     : HbWidget(parent)
 {
-    HbStyleLoader::registerFilePath(":/resource");
+    bool result = HbStyleLoader::registerFilePath(":/resource/analogclockwidget.widgetml");
+    result = HbStyleLoader::registerFilePath(":/resource/analogclockwidget.css");
+        
     updatePrimitives();
     mTimer = new QTimer(this);
     connect(mTimer, SIGNAL(timeout()), SLOT(tick()));

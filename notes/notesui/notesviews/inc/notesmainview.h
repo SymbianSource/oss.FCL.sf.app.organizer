@@ -100,6 +100,7 @@ private:
 	HbAction *mOpenAction;
 
 	HbGroupBox *mSubTitle;
+	HbLabel *mEmptyListLabel;
 
 	AgendaUtil *mAgendaUtil;
 

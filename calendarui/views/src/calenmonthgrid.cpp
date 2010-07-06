@@ -36,6 +36,8 @@
 // Constants
 #define SCROLL_SPEEED 3000 
 #define GRIDLINE_WIDTH 0.075 //units
+#define MAX_PAN_DIRECTION_THRESHOLD 50
+#define MIN_PAN_DIRECTION_THRESHOLD 20
 
 /*!
  \class CalenMonthGrid
@@ -306,6 +308,13 @@ void CalenMonthGrid::updateMonthGridWithEventIndicators(
  */
 void CalenMonthGrid::downGesture()
 {
+    // Make sure that content widget is properly placed
+    if (mIsNonActiveDayFocused) {
+        mIsAtomicScroll = true;
+        int itemToBeScrolled = mView->rowsInPrevMonth() * KCalenDaysInWeek;
+        QModelIndex indexToBeScrolled  = mModel->index(itemToBeScrolled, 0);
+        scrollTo(indexToBeScrolled);
+    }
     mDirection = down;
     mIsAtomicScroll = false;
     setAttribute(Hb::InteractionDisabled);
@@ -318,6 +327,14 @@ void CalenMonthGrid::downGesture()
  */
 void CalenMonthGrid::upGesture()
 {
+    // Make sure that content widget is properly placed
+    if (mIsNonActiveDayFocused) {
+        mIsAtomicScroll = true;
+        int itemToBeScrolled = mView->rowsInPrevMonth() * KCalenDaysInWeek;
+        itemToBeScrolled += KNumOfVisibleRows * KCalenDaysInWeek;
+        QModelIndex indexToBeScrolled  = mModel->index(itemToBeScrolled, 0);
+        scrollTo(indexToBeScrolled);
+    }
     mDirection = up;
     mIsAtomicScroll = false;
     setAttribute(Hb::InteractionDisabled);
@@ -361,38 +378,67 @@ void CalenMonthGrid::gestureEvent(QGestureEvent *event)
             setAttribute(Hb::InteractionDisabled);
             mIsAtomicScroll = false;
             if (!mIsPanGesture) {
-                mIsPanGesture = true;
-                mIgnoreItemActivated = true;
+                mDirection = invalid;
                 mStartPos = mContentWidget->pos();
+                // TODO: This work aroung till framework provides an api
+                // to know the direciton of the pan, until then we need
+                // calculate the direction explicitly
                 // Get to know the direction of the gesture
-                QPointF velocity = gesture->velocity();
-                if (velocity.y() > 0) {
-                    mDirection = down;
-                } else {
-                    mDirection = up;
-                }
+                // Use our defined threshold temporarily till scrollarea 
+                // frm orbit side is made clever enough not to scroll in other direction
+                // apart frm the registered scroll direction
+                QPointF delta = gesture->delta();
+                if (abs(delta.x()) > MAX_PAN_DIRECTION_THRESHOLD) {
+                    // Now see if y coord diff has crossed threshold
+                    if (delta.y() > MAX_PAN_DIRECTION_THRESHOLD) {
+                        mIsPanGesture = true;
+                        mIgnoreItemActivated = true;
+                        mDirection = down;
+                    } else if (delta.y() < -MAX_PAN_DIRECTION_THRESHOLD){
+                        mIsPanGesture = true;
+                        mIgnoreItemActivated = true;
+                        mDirection = up;
+                    } else {
+                        event->accept(Qt::PanGesture);
+                        return;
+                    }
+                } else if (abs(delta.x()) < MAX_PAN_DIRECTION_THRESHOLD) {
+                   if (delta.y() > MIN_PAN_DIRECTION_THRESHOLD) {
+                        mIsPanGesture = true;
+                        mIgnoreItemActivated = true;
+                        mDirection = down;
+                   } else if (delta.y() < -MIN_PAN_DIRECTION_THRESHOLD){
+                        mIsPanGesture = true;
+                        mIgnoreItemActivated = true;
+                        mDirection = up;
+                   }else {
+                       event->accept(Qt::PanGesture);
+                       return;
+                   }
+                } 
             }
-        } else if(gesture->state() == Qt::GestureFinished) {
-		// TODO: Need to handle here to avoid followOn animation
         }
     } else if(HbSwipeGesture *gesture = qobject_cast<HbSwipeGesture *>(event->gesture(Qt::SwipeGesture))) {
         if (gesture->state() == Qt::GestureStarted) {
             setAttribute(Hb::InteractionDisabled);
             mIsAtomicScroll = false;
-            if (gesture->swipeAngle() > 250 && gesture->swipeAngle() < 290 && 
-                    gesture->verticalDirection() == QSwipeGesture::Down) {
+            mDirection = invalid;
+            if (gesture->sceneVerticalDirection() == QSwipeGesture::Down) {
                 mDirection = down;
-            } else if (gesture->swipeAngle() > 70 && gesture->swipeAngle() < 110 && 
-                    gesture->verticalDirection() == QSwipeGesture::Up) {
+            } else if (gesture->sceneVerticalDirection() == QSwipeGesture::Up) {
                 mDirection = up;
+            } else {
+                event->accept(Qt::SwipeGesture);
+                return;
             }
         }
-        gesture->setSpeed(SCROLL_SPEEED);
     }
    
-    // Call the parent class to perform the pan gesture
-    // When scrolling finished, month grid will adjust to show the proper month
-    HbScrollArea::gestureEvent(event);
+   if (mDirection!= invalid) {
+        // Call the parent class to perform the pan gesture
+        // When scrolling finished, month grid will adjust to show the proper month
+        HbScrollArea::gestureEvent(event);
+   }
 }
 
 /*!
@@ -418,6 +464,7 @@ void CalenMonthGrid::scrollingFinished()
 		mDirection = invalid;
 	} else {
         mIsAtomicScroll = false;
+        mDirection = invalid;
 	}
 	mIgnoreItemActivated = false;
 	setAttribute(Hb::InteractionDisabled, false);
@@ -750,7 +797,7 @@ void CalenMonthGrid::itemActivated(const QModelIndex &index)
 	mIsNonActiveDayFocused = false;
 	// Check if the same item has been tapped twice
 	if (mCurrentRow == index.row()) {
-		// Launch the agenda view
+		// Launch the Day view
 		mView->launchDayView();
 	} else {
 		// Reset the focus attribute to this item		
@@ -996,7 +1043,9 @@ void CalenMonthGrid::paint(QPainter* painter,
 	} else {
 		pen.setBrush(mGridBorderColor);
 	}
-	// Set the pen to the painter
+	//store the old pen first
+    QPen oldPen = painter->pen();
+	// Set the new pen to the painter
 	painter->setPen(pen);
 	
 	// Get the sizes of content widget
@@ -1052,6 +1101,8 @@ void CalenMonthGrid::paint(QPainter* painter,
 	
 	// Draw the lines for the points in the vector list
 	painter->drawLines(pointList);
+	// Set the old pen back
+	painter->setPen(oldPen);
 }
 
 // End of File

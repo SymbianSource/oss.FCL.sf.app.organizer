@@ -25,7 +25,6 @@ INCLUDEPATH += ..\controller\inc \
 
 CONFIG += hb
 
-
 symbian: { 
 
 	BLD_INF_RULES.prj_exports += \
@@ -57,10 +56,6 @@ symbian: {
 
     CONFIG += service
     SERVICE.FILE = calendar_conf.xml
-
-    RESOURCES += calendar.qrc
-
-    TRANSLATIONS += calendar.ts
     
     SKINICON = qtg_large_calendar
 
@@ -71,5 +66,9 @@ HEADERS += calenserviceprovider.h
 
 SOURCES += main.cpp \
 	     calenserviceprovider.cpp	
+
+RESOURCES += calendar.qrc
+
+TRANSLATIONS += calendar.ts
 
 # End of file	--Don't remove this.

@@ -35,7 +35,7 @@ class HbDataFormModel;
 class HbDataFormModelItem;
 class HbListWidget;
 class HbComboBox;
-class QTranslator;
+class HbTranslator;
 class ClockSettingsDocLoader;
 class SettingsCustomItem;
 
@@ -90,7 +90,7 @@ private:
 	ClockSettingsDocLoader *mLoader;
 	SettingsUtility *mSettingsUtility;
 	SettingsCustomItem *mCustomPrototype;
-    QTranslator *mTranslator;
+    HbTranslator *mTranslator;
 };
 
 #endif // CLOCKREGIONALSETTINGSVIEW_H

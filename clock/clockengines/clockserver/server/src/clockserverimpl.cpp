@@ -506,6 +506,11 @@ void CClkSrvImpl::NotifyTimeChangeL( CClockTimeSourceInterface& aPluginImpl )
 		    }
 		}
 	
+	// Initialise the attributes to null.
+	TTime invalidTime( 0 );
+	iTimeAttributes->iDstOffset = TTimeIntervalMinutes( 0 );
+	iTimeAttributes->iTimeZoneOffset =  TTimeIntervalMinutes( 0 );
+	iTimeAttributes->iUtcDateTime = invalidTime.DateTime();
 	// Get all the information related to the plugin.
 	// The UTC time.
 	TRAP_IGNORE( aPluginImpl.GetTimeInformationL( EUTCTime, iTimeAttributes ) );	
@@ -523,7 +528,7 @@ void CClkSrvImpl::NotifyTimeChangeL( CClockTimeSourceInterface& aPluginImpl )
 		
 		// Try to resolve the timezone id with the data that we have recieved.
 		TInt timezoneId;
-		 TInt errorVal;
+		TInt errorVal = 0;
 		TRAP_IGNORE( errorVal = iTzResolver->GetTimeZoneL( *iTimeAttributes, iMcc, timezoneId ) );
 		
 		__PRINT( "CClkSrvImpl::NotifyTimeChangeL - timeZoneId: %d", timezoneId );
@@ -593,7 +598,7 @@ void CClkSrvImpl::NotifyTimeChangeL( CClockTimeSourceInterface& aPluginImpl )
 		
 		// Try to resolve the timezone id with the data that we have recieved.
 		TInt timezoneId;
-		TInt errorVal;
+		TInt errorVal = 0;
 		const TBuf< 4 > invalidMCC( KInvalidMCC );
 		TRAP_IGNORE( errorVal = iTzResolver->GetTimeZoneL( *iTimeAttributes, invalidMCC, timezoneId ) );
 		
@@ -671,8 +676,49 @@ void CClkSrvImpl::NotifyMccChangeL()
 		// Lets see if we can narrow down to a single timezone with the MCC recieved.
 		RArray< CTzId > tzIdArray;
 		
-		// Try and fetch the timezone ID using the MCC recieved.
-		TRAP_IGNORE( iTzResolver->TzIdFromMccL( iMcc, tzIdArray, KInvalidTimeZoneId ) );
+		// This parte of code introduced due to error ID EASH-82DPPC(3G Tests for NITZ and GPRS Interaction)
+		// Fix is bascially to narrowing down to single timezone id if NITZ packet is received prior to MCC.
+		// In first IF state we are trying to narrowdown to single timezone ID, if not possible try to use MCC to get timezone
+		// In second IF , we are using MCC to narrow down to single timezone ID directly as dont have NITZ info.
+		if( iTimeAttributes )
+		{
+            __PRINTS("timeatrrtibutes has value");
+		
+			TTime invalidTime(0);
+			if( iTimeAttributes->iDstOffset != TTimeIntervalMinutes( 0 ) &&
+			iTimeAttributes->iTimeZoneOffset != TTimeIntervalMinutes( 0 ) &&
+			iTimeAttributes->iUtcDateTime.Year() != invalidTime.DateTime().Year() )
+			{
+				// Try to resolve the timezone id with the data that we have recieved.
+				TInt timezoneId;
+				TRAP_IGNORE( TInt errorVal = iTzResolver->GetTimeZoneL( *iTimeAttributes, iMcc, timezoneId ) );
+				
+				__PRINT("TIMEZONE ID %d", timezoneId );
+
+				// Append the timezone id to array.
+
+				CTzId* matchingDSTZoneId = CTzId::NewL( timezoneId );
+				CleanupStack::PushL( matchingDSTZoneId );
+
+				tzIdArray.AppendL( *matchingDSTZoneId );
+
+				CleanupStack::PopAndDestroy( matchingDSTZoneId );
+
+				matchingDSTZoneId = NULL;
+			}
+			else
+			{
+				__PRINTS("NOT ABLE TO NARROW DOWN TO TIMEZONE ID WITH RECEIVED NITZ HENCE TRY WITH MCC");
+				// Not able to narrow down to single timezone id with received NITZ packet hence try with MCC.
+				TRAP_IGNORE( iTzResolver->TzIdFromMccL( iMcc, tzIdArray, KInvalidTimeZoneId ) );	
+			}
+		}
+		else
+		{
+			__PRINTS("NO NITZ INFO HENCE TRY WITH MCC");
+			// No NITZ info hecne try with MCC to get the time zone Id.
+			TRAP_IGNORE( iTzResolver->TzIdFromMccL( iMcc, tzIdArray, KInvalidTimeZoneId ) );
+		}
 		
 		// A single matching timezone was found. Set it as the default one.
 		if( KSingleZone == tzIdArray.Count() )
@@ -708,8 +754,34 @@ void CClkSrvImpl::NotifyMccChangeL()
 				CleanupStack::PopAndDestroy( newTzId );
 				}
 			CleanupStack::PopAndDestroy( currentCTzId );
-			CleanupStack::PopAndDestroy( &tz );
-			}
+			CleanupStack::PopAndDestroy( &tz );		
+	
+		}
+		
+		// Set the time on device and set the attributes to null so that we avoid setting old value.		
+		if( iTimeAttributes )
+		    {
+            // Time sent by nw is UTC
+            TTime nwUtcTime( iTimeAttributes->iUtcDateTime);
+    
+            // Set the UTC time only. This is being done because with the UTC time,
+            // before the time is being set, the dst properties for the timezone are being checked.
+            // If its not the first boot, then set the time.
+            __PRINTS( "Setting the UTC time." );
+    
+            TRAP_IGNORE( User::SetUTCTime( nwUtcTime ) );
+    
+            // Setting the attributes to null again as we dont trust on
+            // previous NITZ data recevied by device.If device receive
+            // NITZ data again attributes would get filled with actual value.
+            // Has been kept outside because this statement is valid for
+            // first boot also.
+    
+            iTimeAttributes->iDstOffset = TTimeIntervalMinutes( 0 );
+            iTimeAttributes->iTimeZoneOffset =  TTimeIntervalMinutes( 0 );
+            TTime invalidTime( 0 );
+            iTimeAttributes->iUtcDateTime = invalidTime.DateTime(); 
+            }
 		}
 	
 	// Notify the sessions about the change in mcc.

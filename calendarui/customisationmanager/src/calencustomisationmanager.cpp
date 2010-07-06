@@ -509,17 +509,19 @@ void CCalenCustomisationManager::LoadPluginL( TUid aPluginUid )
 
     // Get a new services object from global data
     MCalenServices* services = iServicesFactory.NewServicesL();
-
+    CleanupStack::PushL( services );
     // Creates the plugin and transfers ownership of the services
     // object to the plugin.
     CCalenCustomisation* plugin = 
         CCalenCustomisation::CreateImplementationL( aPluginUid, services );
-    
-   CleanupStack::PushL( plugin );
+    CleanupStack::PushL( plugin );
 
     // the plugin array takes ownership of the plugin
     AddPluginL( plugin, aPluginUid  );
+    
+    // Cleanup
     CleanupStack::Pop( plugin );
+    CleanupStack::Pop( services );
 
 
     TRACE_EXIT_POINT;

@@ -31,7 +31,7 @@
 // Forward declarations
 class QFile;
 class QString;
-class QTranslator;
+class HbTranslator;
 class HbView;
 class AgendaUtil;
 class NotesEditor;
@@ -85,7 +85,7 @@ private:
 	bool mOwnsAgendaUtil;
 	bool mSaveEntry;
 
-	QPointer<QTranslator> mTranslator;
+	HbTranslator *mTranslator;
 
 	ulong mNoteId;
 private:

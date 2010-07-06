@@ -100,6 +100,7 @@ TBool CCalenBackgroundState::HandleCommandL( const TCalenCommand& aCommand,
 
     switch( cmd )
         {
+        case ECalenAgendaView:
         case ECalenDayView:
             SetCurrentState(aStateMachine,CCalenStateMachine::ECalenIdleState);
             cmdUsed = ETrue;

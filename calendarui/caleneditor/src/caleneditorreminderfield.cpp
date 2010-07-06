@@ -69,7 +69,9 @@ CalenEditorReminderField::CalenEditorReminderField(
  */
 CalenEditorReminderField::~CalenEditorReminderField()
 {
-	// Nothing Yet
+	if(mReminderHash.count()) {
+		mReminderHash.clear();
+	}
 }
 
 /*!
@@ -187,10 +189,10 @@ void CalenEditorReminderField::populateReminderItem(bool newEntry)
 				}
 			}
 			QStringList reminderChoicesForAllDay;
-			reminderChoicesForAllDay << hbTrId("off") 
-					<< hbTrId("On event day")
-					<< hbTrId("1 day before")
-					<< hbTrId("2 days before");
+			reminderChoicesForAllDay << hbTrId("txt_calendar_setlabel_reminder_val_off") 
+					<< hbTrId("txt_calendar_setlabel_reminder_val_on_event_day")
+					<< hbTrId("txt_calendar_setlabel_reminder_val_1_day_before")
+					<< hbTrId("txt_calendar_setlabel_reminder_val_2_days_before");
 			mReminderItem->setContentWidgetData(QString("items"),
 			                                    reminderChoicesForAllDay);
 			QTime referenceTime(0, 0, 0);
@@ -288,7 +290,9 @@ void CalenEditorReminderField::handleReminderIndexChanged(int index)
 	}
 	// Set the reminder to the entry.
 	mCalenEditor->editedEntry()->setAlarm(reminder);
-	mCalenEditor->addDiscardAction();
+	if(!mCalenEditor->isNewEntry()) {
+		mCalenEditor->addDiscardAction();
+	}
 }
 
 /*!
@@ -400,7 +404,7 @@ void CalenEditorReminderField::insertReminderTimeField()
 	mCustomReminderTimeItem = mCalenEditorModel->insertDataFormItem(
 							index,
 							itemType,
-							QString(hbTrId("Reminder Time")),
+							QString(hbTrId("txt_calendar_setlabel_reminder_time")),
 							mCalenEditorModel->invisibleRootItem());
 	if (currentReminderIndex() != 1){
 		mReminderTimeForAllDay.setHMS(18,0,0,0);
@@ -433,13 +437,13 @@ void CalenEditorReminderField::removeReminderTimeField()
 {
 	mReminderTimeAdded = false;
 	if (mCustomReminderTimeItem) {
-					QModelIndex reminderIndex =
-					        mCalenEditorModel->indexFromItem(mCustomReminderTimeItem);
-					mCalenEditorModel->removeItem(
-					                              mCalenEditorModel->index(
-					                            		  reminderIndex.row(), 0));
-					mCustomReminderTimeItem = NULL;
-				}
+		QModelIndex reminderIndex =
+				mCalenEditorModel->indexFromItem(mCustomReminderTimeItem);
+		mCalenEditorModel->removeItem(
+				mCalenEditorModel->index(
+						reminderIndex.row(), 0));
+		mCustomReminderTimeItem = NULL;
+	}
 }
 
 /*!

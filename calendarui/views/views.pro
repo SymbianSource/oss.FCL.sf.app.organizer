@@ -52,9 +52,9 @@ HEADERS += calenmonthview.h \
 		   calenmonthgrid.h \
 		   calengriditemprototype.h \
 		   calennativeview.h \
-		   calendayview.h \
+		   calenagendaview.h \
 		   caleneventlistviewitem.h \
-		   calendayviewwidget.h \
+		   calenagendaviewwidget.h \
 		   calenpreviewpane.h \
 		   calensettingsview.h \
 		   calenthicklinesdrawer.h \
@@ -66,9 +66,9 @@ SOURCES += calenmonthview.cpp \
            calenmonthgrid.cpp \
            calengriditemprototype.cpp \
            calennativeview.cpp \
-           calendayview.cpp \
+           calenagendaview.cpp \
            caleneventlistviewitem.cpp \
-           calendayviewwidget.cpp \
+           calenagendaviewwidget.cpp \
            calenpreviewpane.cpp \
            calensettingsview.cpp \
            calenthicklinesdrawer.cpp \
@@ -76,6 +76,8 @@ SOURCES += calenmonthview.cpp \
 		   calentodayindicatorlinedrawer.cpp
 
 RESOURCES += calenresources.qrc
+
+include(dayview/dayview.pri)
 
 # End of file	--Don't remove this.
 

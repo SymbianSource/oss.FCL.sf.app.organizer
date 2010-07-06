@@ -50,14 +50,14 @@ private slots:
 	void launchPreviousView();
 	
 private:
-    /**
-     * @var mSoftKeyAction
-     * @brief Holder for soft key action
-     */
-    HbAction *mSoftKeyAction;
+	MCalenServices  &mServices;
 	HbDataForm *mCalenSettingsForm;
 	CalenSettings *mCalenSettings;
-	MCalenServices  &mServices;
+	/**
+   * @var mSoftKeyAction
+   * @brief Holder for soft key action
+   */
+  HbAction *mSoftKeyAction;
 };
 
 #endif // DTSETTINGVIEW_H

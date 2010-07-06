@@ -17,8 +17,7 @@
 */
 
 //System Include
-#include<HbApplication>
-#include<QTranslator>
+#include<HbTranslator>
 
 
 // User includes
@@ -55,13 +54,8 @@ ClockCitySelectionList::ClockCitySelectionList(
  d_ptr(new ClockCitySelectionListPrivate(client, this))
 {
 	// Load the translation file and install the editor specific translator
-	mTranslator = new QTranslator;
-	//QString lang = QLocale::system().name();
-	//QString path = "Z:/resource/qt/translations/";
-	mTranslator->load("clockcityselectionlist",":/translations");
-	// TODO: Load the appropriate .qm file based on locale
-	//bool loaded = mTranslator->load("caleneditor_" + lang, path);
-	HbApplication::instance()->installTranslator(mTranslator);
+	mTranslator = new HbTranslator("clockcityselectionlist");
+	mTranslator->loadCommon();
 }
 
 /*!
@@ -74,20 +68,13 @@ ClockCitySelectionList::ClockCitySelectionList(QObject *parent)
  d_ptr(new ClockCitySelectionListPrivate(0, this))
 {
 	// Load the translation file and install the editor specific translator
-	mTranslator = new QTranslator;
-	//QString lang = QLocale::system().name();
-	//QString path = "Z:/resource/qt/translations/";
-	mTranslator->load("clockcityselectionlist",":/translations");
-	// TODO: Load the appropriate .qm file based on locale
-	//bool loaded = mTranslator->load("caleneditor_" + lang, path);
-	HbApplication::instance()->installTranslator(mTranslator);
-
+	mTranslator = new HbTranslator("clockcityselectionlist");
+	mTranslator->loadCommon();
 }
 
 ClockCitySelectionList::~ClockCitySelectionList()
 {
     // Remove the translator
-    HbApplication::instance()->removeTranslator(mTranslator);
     if (mTranslator) {
         delete mTranslator;
          mTranslator = 0;

@@ -30,6 +30,8 @@ public:
 private slots:
     void init();
     void cleanup();
+    
+    void test_endsAtStartOfDay();
  
 private:
     
