@@ -37,6 +37,10 @@
 #include "calenactionuiutils.h"
 #include "calendateutils.h"
 #include "calenagendautils.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calendeleteuiTraces.h"
+#endif
 
 
 // Local constants
@@ -50,14 +54,14 @@ const TInt KEntriesToDelete = 1;
 //
 CalenDeleteUi* CalenDeleteUi::NewL( CCalenController& aController )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CALENDELETEUI_NEWL_ENTRY );
+    
     CalenDeleteUi* self = new( ELeave ) CalenDeleteUi( aController, NULL );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENDELETEUI_NEWL_EXIT );
     return self;
     }
 
@@ -70,9 +74,11 @@ CalenDeleteUi* CalenDeleteUi::NewL( CCalenController& aController )
 CalenDeleteUi::CalenDeleteUi( CCalenController& aController, QObject *parent )
     :QObject(parent), iController( aController )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENDELETEUI_CALENDELETEUI_ENTRY );
+    
     iIsDeleting = false;
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CALENDELETEUI_CALENDELETEUI_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -83,9 +89,9 @@ CalenDeleteUi::CalenDeleteUi( CCalenController& aController, QObject *parent )
 //
 CalenDeleteUi::~CalenDeleteUi()
     {
-    TRACE_ENTRY_POINT;
-
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( DUP1_CALENDELETEUI_CALENDELETEUI_ENTRY );
+    
+    OstTraceFunctionExit0( DUP1_CALENDELETEUI_CALENDELETEUI_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -96,12 +102,14 @@ CalenDeleteUi::~CalenDeleteUi()
 //
 void CalenDeleteUi::ConstructL()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENDELETEUI_CONSTRUCTL_ENTRY );
+    
     iController.RegisterForNotificationsL( this, ECalenNotifyCancelDelete );
     iMoreEntriesToDelete = EFalse;
     iDisplayQuery = EFalse;
     iEntriesToDelete = KEntriesToDelete;
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CALENDELETEUI_CONSTRUCTL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -112,7 +120,7 @@ void CalenDeleteUi::ConstructL()
 //
 void CalenDeleteUi::HandleNotification(const TCalenNotification aNotification )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENDELETEUI_HANDLENOTIFICATION_ENTRY );
 
     if( aNotification == ECalenNotifyCancelDelete)
         {
@@ -125,7 +133,8 @@ void CalenDeleteUi::HandleNotification(const TCalenNotification aNotification )
            
             }
         }
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CALENDELETEUI_HANDLENOTIFICATION_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -136,7 +145,8 @@ void CalenDeleteUi::HandleNotification(const TCalenNotification aNotification )
 //
 TBool CalenDeleteUi::HandleCommandL( const TCalenCommand& aCommand )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENDELETEUI_HANDLECOMMANDL_ENTRY );
+    
     TBool continueCommand(EFalse);
     
     switch( aCommand.Command() )
@@ -180,7 +190,7 @@ TBool CalenDeleteUi::HandleCommandL( const TCalenCommand& aCommand )
             break;
         }
         
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENDELETEUI_HANDLECOMMANDL_EXIT );
     return continueCommand;
     }
 
@@ -193,7 +203,7 @@ TBool CalenDeleteUi::HandleCommandL( const TCalenCommand& aCommand )
 //
 void CalenDeleteUi::DeleteThisOrAllL( AgendaUtil::RecurrenceRange aRepeatType )
 {
-	TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENDELETEUI_DELETETHISORALLL_ENTRY );
 
 	if( iController.context().instanceId().mEntryLocalUid )
 	{
@@ -205,7 +215,8 @@ void CalenDeleteUi::DeleteThisOrAllL( AgendaUtil::RecurrenceRange aRepeatType )
 			DeleteSingleInstanceL( instance, aRepeatType );
 		}
 	}
-	TRACE_EXIT_POINT;
+	
+	OstTraceFunctionExit0( CALENDELETEUI_DELETETHISORALLL_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -216,7 +227,8 @@ void CalenDeleteUi::DeleteThisOrAllL( AgendaUtil::RecurrenceRange aRepeatType )
 //
 TBool CalenDeleteUi::DeleteEntryWithoutQueryL()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENDELETEUI_DELETEENTRYWITHOUTQUERYL_ENTRY );
+    
 	bool continueCommand(EFalse);
     
 	// get the context
@@ -279,7 +291,7 @@ TBool CalenDeleteUi::DeleteEntryWithoutQueryL()
             iController.BroadcastNotification(ECalenNotifyDeleteFailed);    
             }
 	
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENDELETEUI_DELETEENTRYWITHOUTQUERYL_EXIT );
     return continueCommand;
     }
 
@@ -291,8 +303,8 @@ TBool CalenDeleteUi::DeleteEntryWithoutQueryL()
 //
 void CalenDeleteUi::DeleteCurrentEntryL()
 {
-	TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CALENDELETEUI_DELETECURRENTENTRYL_ENTRY );
+    
 	// Make sure we're focused on an entry.
 	if (iController.context().instanceId().mEntryLocalUid) {
 		// Fetch the entry
@@ -318,7 +330,7 @@ void CalenDeleteUi::DeleteCurrentEntryL()
 				}
 			}
 	}
-	TRACE_EXIT_POINT;
+	OstTraceFunctionExit0( CALENDELETEUI_DELETECURRENTENTRYL_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -329,11 +341,15 @@ void CalenDeleteUi::DeleteCurrentEntryL()
 //
 void CalenDeleteUi::DeleteAllEntriesL()
     {
+    OstTraceFunctionEntry0( CALENDELETEUI_DELETEALLENTRIESL_ENTRY );
+    
 	if(iIsDeleting) {
+		OstTraceFunctionExit0( CALENDELETEUI_DELETEALLENTRIESL_EXIT );
 		return;
 	}
 
     showDeleteQuery(EDeleteAll );
+	OstTraceFunctionExit0( DUP1_CALENDELETEUI_DELETEALLENTRIESL_EXIT );
 	}
 
 // ----------------------------------------------------------------------------
@@ -344,13 +360,15 @@ void CalenDeleteUi::DeleteAllEntriesL()
 //
 void CalenDeleteUi::DeleteEntriesBeforeDateL()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENDELETEUI_DELETEENTRIESBEFOREDATEL_ENTRY );
+    
 	if(iIsDeleting) {
+		OstTraceFunctionExit0( CALENDELETEUI_DELETEENTRIESBEFOREDATEL_EXIT );
 		return;
 	}    
     // launch the datepicker
     dateQuery();
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CALENDELETEUI_DELETEENTRIESBEFOREDATEL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -361,6 +379,8 @@ void CalenDeleteUi::DeleteEntriesBeforeDateL()
 //
 void CalenDeleteUi::dateQuery()
 	{
+    OstTraceFunctionEntry0( CALENDELETEUI_DATEQUERY_ENTRY );
+    
 	// Create a popup with datepicker to select the date.
 	HbDialog *popUp = new HbDialog();
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
@@ -386,6 +406,8 @@ void CalenDeleteUi::dateQuery()
 	popUp->addAction(mCancelAction);
 	// Show the popup
 	popUp->open(this, SLOT(handleDateQuery(HbAction*)));
+	
+	OstTraceFunctionExit0( CALENDELETEUI_DATEQUERY_EXIT );
 	}
 
 // ----------------------------------------------------------------------------
@@ -396,6 +418,8 @@ void CalenDeleteUi::dateQuery()
 //
 void CalenDeleteUi::handleDateQuery(HbAction* action)
 {
+    OstTraceFunctionEntry0( CALENDELETEUI_HANDLEDATEQUERY_ENTRY );
+    
 	if(action == mDeleteAction) {
 		// User selected the date before which all the entries has to be deleted
 		QDate selectedDate(mDatePicker->date());
@@ -428,6 +452,8 @@ void CalenDeleteUi::handleDateQuery(HbAction* action)
 	// Reset the member variables
 	mDeleteAction = NULL;
 	mCancelAction = NULL;
+	
+	OstTraceFunctionExit0( CALENDELETEUI_HANDLEDATEQUERY_EXIT );
 }
 // ----------------------------------------------------------------------------
 // CalenDeleteUi::showRepeatingEntryDeleteQuery
@@ -437,6 +463,8 @@ void CalenDeleteUi::handleDateQuery(HbAction* action)
 //
 void CalenDeleteUi::showRepeatingEntryDeleteQuery()
 {
+    OstTraceFunctionEntry0( CALENDELETEUI_SHOWREPEATINGENTRYDELETEQUERY_ENTRY );
+    
     HbDialog *popUp = new HbDialog();
     popUp->setDismissPolicy(HbDialog::NoDismiss);
     popUp->setTimeout(HbDialog::NoTimeout);
@@ -472,6 +500,8 @@ void CalenDeleteUi::showRepeatingEntryDeleteQuery()
     
     // Show the popup
     popUp->open();
+    
+    OstTraceFunctionExit0( CALENDELETEUI_SHOWREPEATINGENTRYDELETEQUERY_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -482,11 +512,17 @@ void CalenDeleteUi::showRepeatingEntryDeleteQuery()
 //
 void CalenDeleteUi::handleDeleteCancel()
 {
+    OstTraceFunctionEntry0( CALENDELETEUI_HANDLEDELETECANCEL_ENTRY );
+    
 	iController.BroadcastNotification(ECalenNotifyDeleteFailed);
+	
+	OstTraceFunctionExit0( CALENDELETEUI_HANDLEDELETECANCEL_EXIT );
 }
 
 void CalenDeleteUi::handleRepeatedEntryDelete(int index)
 {
+    OstTraceFunctionEntry0( CALENDELETEUI_HANDLEREPEATEDENTRYDELETE_ENTRY );
+    
 	// Fetch the entry
 	// Find all possible instances
 	AgendaEntry instance = CalenActionUiUtils::findPossibleInstanceL(
@@ -510,6 +546,7 @@ void CalenDeleteUi::handleRepeatedEntryDelete(int index)
 				break;
 		}
 	}
+	OstTraceFunctionExit0( CALENDELETEUI_HANDLEREPEATEDENTRYDELETE_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -521,6 +558,8 @@ void CalenDeleteUi::handleRepeatedEntryDelete(int index)
 void CalenDeleteUi::showDeleteQuery(const TDeleteConfirmationType type,
                                                      const int count)
     {
+    OstTraceFunctionEntry0( CALENDELETEUI_SHOWDELETEQUERY_ENTRY );
+    
     HbMessageBox *popup = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
     popup->setDismissPolicy(HbDialog::NoDismiss);
     popup->setTimeout(HbDialog::NoTimeout);
@@ -565,9 +604,11 @@ void CalenDeleteUi::showDeleteQuery(const TDeleteConfirmationType type,
     mDeleteAction = new HbAction(
 						hbTrId("txt_calendar_button_dialog_delete"), popup);
     popup->addAction(mDeleteAction);
-    mCancelAction = new HbAction(hbTrId("txt_calendar_button_cancel"), popup);
+    mCancelAction = new HbAction(hbTrId("txt_common_button_cancel"), popup); 
     popup->addAction(mCancelAction);
     popup->open(this, SLOT(handleDeletion(HbAction*)));
+    
+    OstTraceFunctionExit0( CALENDELETEUI_SHOWDELETEQUERY_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -578,6 +619,8 @@ void CalenDeleteUi::showDeleteQuery(const TDeleteConfirmationType type,
 //
 void CalenDeleteUi::handleDeletion(HbAction* action)
 {
+    OstTraceFunctionEntry0( CALENDELETEUI_HANDLEDELETION_ENTRY );
+    
 	TCalenNotification notification = ECalenNotifyDeleteFailed;
 	
 	if(action == mDeleteAction) {
@@ -638,15 +681,21 @@ void CalenDeleteUi::handleDeletion(HbAction* action)
 	// Reset the member variables
 	mDeleteAction = NULL;
 	mCancelAction = NULL;
+	
+	OstTraceFunctionExit0( CALENDELETEUI_HANDLEDELETION_EXIT );
 }
 
 void CalenDeleteUi::entryDeleted(ulong id)
 {
+    OstTraceFunctionEntry0( CALENDELETEUI_ENTRYDELETED_ENTRY );
+    
     if (iController.context().instanceId().mEntryLocalUid == id) {
         iController.BroadcastNotification(ECalenNotifyEntryDeleted);
     }
     disconnect(iController.Services().agendaInterface(), SIGNAL(entryDeleted(ulong)),
                this, SLOT(entryDeleted(ulong)));
+    
+    OstTraceFunctionExit0( CALENDELETEUI_ENTRYDELETED_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -659,16 +708,17 @@ void CalenDeleteUi::HandleDeleteMultipleEventsL( const QDateTime& aFirstDay,
                                                  const QDateTime& aLastDay,
                                                  int aConfNoteId )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENDELETEUI_HANDLEDELETEMULTIPLEEVENTSL_ENTRY );
     
 	if(iIsDeleting) {
+		OstTraceFunctionExit0( CALENDELETEUI_HANDLEDELETEMULTIPLEEVENTSL_EXIT );
 		return;
 	}
     iConfirmationNoteId = aConfNoteId;
     
     DeleteDayRangeL( aFirstDay, aLastDay );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CALENDELETEUI_HANDLEDELETEMULTIPLEEVENTSL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -680,8 +730,8 @@ void CalenDeleteUi::HandleDeleteMultipleEventsL( const QDateTime& aFirstDay,
 void CalenDeleteUi::DeleteDayRangeL( const QDateTime& aStart,
                                                       const QDateTime& aEnd )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CALENDELETEUI_DELETEDAYRANGEL_ENTRY );
+    
     iStartTime = aStart;
     iEndTime = aEnd;
     
@@ -700,7 +750,7 @@ void CalenDeleteUi::DeleteDayRangeL( const QDateTime& aStart,
     // 1: First pass, delete all entries.
     iController.agendaInterface()->deleteEntries(iStartTime, iEndTime, filter);
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENDELETEUI_DELETEDAYRANGEL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -711,7 +761,7 @@ void CalenDeleteUi::DeleteDayRangeL( const QDateTime& aStart,
 //
 void CalenDeleteUi::doCompleted( int aFirstPassError )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENDELETEUI_DOCOMPLETED_ENTRY );
 
     if( aFirstPassError == KErrNone )
         {
@@ -727,7 +777,7 @@ void CalenDeleteUi::doCompleted( int aFirstPassError )
     
     iController.BroadcastNotification( ECalenNotifyMultipleEntriesDeleted );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENDELETEUI_DOCOMPLETED_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -738,7 +788,7 @@ void CalenDeleteUi::doCompleted( int aFirstPassError )
 //
 void CalenDeleteUi::deleteEntriesEndingAtMidnight( QDateTime aMidnight )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENDELETEUI_DELETEENTRIESENDINGATMIDNIGHT_ENTRY );
 
     QDateTime start, end;
     QTime startTime(aMidnight.time());
@@ -773,7 +823,7 @@ void CalenDeleteUi::deleteEntriesEndingAtMidnight( QDateTime aMidnight )
             }
         }
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENDELETEUI_DELETEENTRIESENDINGATMIDNIGHT_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -784,9 +834,11 @@ void CalenDeleteUi::deleteEntriesEndingAtMidnight( QDateTime aMidnight )
 //
 void CalenDeleteUi::DeleteSingleInstanceL( AgendaEntry& aInstance )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENDELETEUI_DELETESINGLEINSTANCEL_ENTRY );
+    
     DoDeleteSingleInstanceL( aInstance, EFalse, AgendaUtil::ThisAndAll );
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CALENDELETEUI_DELETESINGLEINSTANCEL_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -798,10 +850,11 @@ void CalenDeleteUi::DeleteSingleInstanceL( AgendaEntry& aInstance )
 void CalenDeleteUi::DeleteSingleInstanceL( AgendaEntry& aInstance, 
                                 AgendaUtil::RecurrenceRange aRepeatType )
     {
-    TRACE_ENTRY_POINT;
-    DoDeleteSingleInstanceL( aInstance, ETrue, aRepeatType );
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( DUP1_CALENDELETEUI_DELETESINGLEINSTANCEL_ENTRY );
     
+    DoDeleteSingleInstanceL( aInstance, ETrue, aRepeatType );
+    
+    OstTraceFunctionExit0( DUP1_CALENDELETEUI_DELETESINGLEINSTANCEL_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -818,7 +871,8 @@ void CalenDeleteUi::DoDeleteSingleInstanceL(
 									bool aHasRepeatType,
 									AgendaUtil::RecurrenceRange aRepeatType )
 {
-	TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENDELETEUI_DODELETESINGLEINSTANCEL_ENTRY );
+    
 	bool repeating = aInstance.isRepeating();
 
 	if( !repeating ) {
@@ -846,7 +900,7 @@ void CalenDeleteUi::DoDeleteSingleInstanceL(
 														EDeleteToDo :
 														EDeleteEntry );
 	}
-	TRACE_EXIT_POINT;
+	OstTraceFunctionExit0( CALENDELETEUI_DODELETESINGLEINSTANCEL_EXIT );
 }
 
 
@@ -859,7 +913,7 @@ void CalenDeleteUi::DoDeleteSingleInstanceL(
 //
 void CalenDeleteUi::DialogDismissedL( const TInt /*aButtonId*/ )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENDELETEUI_DIALOGDISMISSEDL_ENTRY );
     
     // no more entries to delete
     iMoreEntriesToDelete = EFalse;
@@ -867,7 +921,8 @@ void CalenDeleteUi::DialogDismissedL( const TInt /*aButtonId*/ )
     
     // issue notification cancel delete
     iController.BroadcastNotification(ECalenNotifyCancelDelete);
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CALENDELETEUI_DIALOGDISMISSEDL_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -877,11 +932,11 @@ void CalenDeleteUi::DialogDismissedL( const TInt /*aButtonId*/ )
 //
 void CalenDeleteUi::DeleteEntryL(ulong& aEntryLocalUid)
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENDELETEUI_DELETEENTRYL_ENTRY );
     
     iController.Services().agendaInterface()->deleteEntry(aEntryLocalUid);
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENDELETEUI_DELETEENTRYL_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -891,8 +946,9 @@ void CalenDeleteUi::DeleteEntryL(ulong& aEntryLocalUid)
 //
 void CalenDeleteUi::DisplayWaitDialogL()
     {
-    TRACE_ENTRY_POINT;   
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CALENDELETEUI_DISPLAYWAITDIALOGL_ENTRY );
+    
+    OstTraceFunctionExit0( CALENDELETEUI_DISPLAYWAITDIALOGL_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -902,11 +958,12 @@ void CalenDeleteUi::DisplayWaitDialogL()
 //
 void CalenDeleteUi::MarkedEntriesDeletedL()
     {
-    TRACE_ENTRY_POINT;    
+    OstTraceFunctionEntry0( CALENDELETEUI_MARKEDENTRIESDELETEDL_ENTRY );
+    
     // notify marked entries deleted
     iController.BroadcastNotification( ECalenNotifyMarkedEntryDeleted );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENDELETEUI_MARKEDENTRIESDELETEDL_EXIT );
     }
 
 // End of File

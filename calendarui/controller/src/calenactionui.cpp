@@ -27,6 +27,10 @@
 #include "calensettingsview.h"
 #include "calenviewmanager.h"
 #include <hbmainwindow.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenactionuiTraces.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // CCalenActionUi::NewL
@@ -36,14 +40,14 @@
 //
 CCalenActionUi* CCalenActionUi::NewL( CCalenController& aController )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENACTIONUI_NEWL_ENTRY );
+    
     CCalenActionUi* self = new( ELeave ) CCalenActionUi( aController );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENACTIONUI_NEWL_EXIT );
     return self;
     }
 
@@ -56,8 +60,9 @@ CCalenActionUi* CCalenActionUi::NewL( CCalenController& aController )
 CCalenActionUi::CCalenActionUi( CCalenController& aController )
     : iController( aController )
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENACTIONUI_CCALENACTIONUI_ENTRY );
+    
+    OstTraceFunctionExit0( CCALENACTIONUI_CCALENACTIONUI_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -68,8 +73,9 @@ CCalenActionUi::CCalenActionUi( CCalenController& aController )
 //
 void CCalenActionUi::ConstructL()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENACTIONUI_CONSTRUCTL_ENTRY );
+    
+    OstTraceFunctionExit0( CCALENACTIONUI_CONSTRUCTL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -80,12 +86,12 @@ void CCalenActionUi::ConstructL()
 //
 CCalenActionUi::~CCalenActionUi()
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( DUP1_CCALENACTIONUI_CCALENACTIONUI_ENTRY );
+    
     delete iDeleteUi;
     delete iEditUi;   
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CCALENACTIONUI_CCALENACTIONUI_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -95,6 +101,8 @@ CCalenActionUi::~CCalenActionUi()
 //
 MCalenCommandHandler* CCalenActionUi::GetCommandHandlerL( TInt aCommand )
     {
+    OstTraceFunctionEntry0( CCALENACTIONUI_GETCOMMANDHANDLERL_ENTRY );
+    
     MCalenCommandHandler* handler = NULL;
 
     if ( aCommand >= ECalenEditCommandBase
@@ -125,7 +133,7 @@ MCalenCommandHandler* CCalenActionUi::GetCommandHandlerL( TInt aCommand )
         {
         }
         
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENACTIONUI_GETCOMMANDHANDLERL_EXIT );
     return handler;
     }
 
@@ -137,7 +145,8 @@ MCalenCommandHandler* CCalenActionUi::GetCommandHandlerL( TInt aCommand )
 //
 TBool CCalenActionUi::HandleCommandL( const TCalenCommand& aCommand )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENACTIONUI_HANDLECOMMANDL_ENTRY );
+    
     TBool continueCommand(EFalse);
     
     if(aCommand.Command()==ECalenShowSettings)
@@ -145,7 +154,7 @@ TBool CCalenActionUi::HandleCommandL( const TCalenCommand& aCommand )
         iController.ViewManager().launchSettingsView();
         }
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENACTIONUI_HANDLECOMMANDL_EXIT );
     return continueCommand; 
     }
 

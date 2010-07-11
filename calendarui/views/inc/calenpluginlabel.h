@@ -18,6 +18,12 @@
 #ifndef CALENPLUGINLABEL_H
 #define CALENPLUGINLABEL_H
 
+#ifdef  CALENVIEWS_DLL
+#define CALENPLUGINLABEL_EXPORT Q_DECL_EXPORT
+#else
+#define CALENPLUGINLABEL_EXPORT Q_DECL_IMPORT
+#endif
+
 // System includes
 #include <hblabel.h>
 
@@ -27,8 +33,8 @@ class CalenPluginLabel : public HbLabel
 	Q_OBJECT
 
 public:
-	IMPORT_C CalenPluginLabel(MCalenServices &services, QGraphicsItem *parent = 0);
-	IMPORT_C ~CalenPluginLabel();
+	CALENPLUGINLABEL_EXPORT CalenPluginLabel(MCalenServices &services, QGraphicsItem *parent = 0);
+	CALENPLUGINLABEL_EXPORT ~CalenPluginLabel();
 
 protected:
 	void gestureEvent(QGestureEvent *event);

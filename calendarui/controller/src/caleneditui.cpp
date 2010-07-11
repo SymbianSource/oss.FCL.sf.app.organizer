@@ -27,6 +27,10 @@
 #include "agendaentry.h"
 #include "caleneditor.h"
 #include "calendateutils.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenedituiTraces.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // CCalenEditUi::NewL
@@ -36,14 +40,14 @@
 //
 CCalenEditUi* CCalenEditUi::NewL( CCalenController& aController )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENEDITUI_NEWL_ENTRY );
+    
     CCalenEditUi* self = new(ELeave) CCalenEditUi( aController );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENEDITUI_NEWL_EXIT );
     return self;
     }
 
@@ -55,9 +59,11 @@ CCalenEditUi* CCalenEditUi::NewL( CCalenController& aController )
 //
 CCalenEditUi::~CCalenEditUi()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENEDITUI_CCALENEDITUI_ENTRY );
+    
     iController.CancelNotifications(this);
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CCALENEDITUI_CCALENEDITUI_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -69,8 +75,9 @@ CCalenEditUi::~CCalenEditUi()
 CCalenEditUi::CCalenEditUi( CCalenController& aController )
     : iController( aController )
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENEDITUI_CCALENEDITUI_ENTRY );
+    
+    OstTraceFunctionExit0( DUP1_CCALENEDITUI_CCALENEDITUI_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -81,11 +88,11 @@ CCalenEditUi::CCalenEditUi( CCalenController& aController )
 //
 void CCalenEditUi::ConstructL()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENEDITUI_CONSTRUCTL_ENTRY );
     
     iController.RegisterForNotificationsL( this, ECalenNotifyDialogClosed );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENEDITUI_CONSTRUCTL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -96,7 +103,7 @@ void CCalenEditUi::ConstructL()
 //
 TBool CCalenEditUi::HandleCommandL( const TCalenCommand& aCommand )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENEDITUI_HANDLECOMMANDL_ENTRY );
 
     TBool continueCommand(EFalse);
     TInt command = aCommand.Command();
@@ -140,7 +147,7 @@ TBool CCalenEditUi::HandleCommandL( const TCalenCommand& aCommand )
             break;
         }
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENEDITUI_HANDLECOMMANDL_EXIT );
     return continueCommand;
     }
 
@@ -151,7 +158,11 @@ TBool CCalenEditUi::HandleCommandL( const TCalenCommand& aCommand )
 //
 void CCalenEditUi::handleEntrySaved()
 {
+    OstTraceFunctionEntry0( CCALENEDITUI_HANDLEENTRYSAVED_ENTRY );
+    
 	iController.Services().IssueNotificationL(ECalenNotifyEntrySaved);
+	
+	OstTraceFunctionExit0( CCALENEDITUI_HANDLEENTRYSAVED_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -161,7 +172,11 @@ void CCalenEditUi::handleEntrySaved()
 //
 void CCalenEditUi::handleDialogClosed()
 {
+    OstTraceFunctionEntry0( CCALENEDITUI_HANDLEDIALOGCLOSED_ENTRY );
+    
 	iController.Services().IssueNotificationL(ECalenNotifyDialogClosed);
+	
+	OstTraceFunctionExit0( CCALENEDITUI_HANDLEDIALOGCLOSED_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -172,13 +187,14 @@ void CCalenEditUi::handleDialogClosed()
 //
 void CCalenEditUi::HandleNotification(const TCalenNotification aNotification )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENEDITUI_HANDLENOTIFICATION_ENTRY );
     
     if( aNotification == ECalenNotifyDialogClosed )
 		{
     	iEditor->deleteLater();
 		}
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CCALENEDITUI_HANDLENOTIFICATION_EXIT );
     }
 
 // End of file

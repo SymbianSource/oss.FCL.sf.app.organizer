@@ -45,6 +45,11 @@
 #include "caleneventlistviewitem.h"
 #include "calenpluginlabel.h"
 #include "calendarprivatecrkeys.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenagendaviewwidgetTraces.h"
+#endif
+
 
 // Constants
 const QString singleSpace(" ");
@@ -76,6 +81,8 @@ mRegionalInfoGroupBox(NULL),
 mLongTapEventFlag(false),
 mNotesPluginLoaded(false)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_CALENAGENDAVIEWWIDGET_ENTRY );
+    
     // Construct the list view prototype
     mListViewPrototype = new CalenEventListViewItem(this);
     
@@ -87,6 +94,8 @@ mNotesPluginLoaded(false)
     
     //Create the setting manager
     mSettingsManager = new XQSettingsManager(this);
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_CALENAGENDAVIEWWIDGET_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -96,6 +105,8 @@ mNotesPluginLoaded(false)
 //    
 EXPORT_C CalenAgendaViewWidget::~CalenAgendaViewWidget()
 {
+    OstTraceFunctionEntry0( DUP1_CALENAGENDAVIEWWIDGET_CALENAGENDAVIEWWIDGET_ENTRY );
+    
 	// Unload notes editor if loaded.
 	if (mNotesEditorPluginLoader) {
 		mNotesEditorPluginLoader->unload();
@@ -103,18 +114,12 @@ EXPORT_C CalenAgendaViewWidget::~CalenAgendaViewWidget()
 		mNotesEditorPluginLoader = 0;
 	}
 
-    if (mListViewPrototype) {
-        delete mListViewPrototype;
-        mListViewPrototype = NULL;
-    }
-    if (mListModel) {
-        // Do not delete the model since its owned by the view
-        mListModel->clear();
-    }
     if (mSettingsManager) {
     	delete mSettingsManager;
     	mSettingsManager = NULL;
     }
+    
+    OstTraceFunctionExit0( DUP1_CALENAGENDAVIEWWIDGET_CALENAGENDAVIEWWIDGET_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -124,16 +129,20 @@ EXPORT_C CalenAgendaViewWidget::~CalenAgendaViewWidget()
 //    
 void CalenAgendaViewWidget::setupWidget(CalenAgendaView *view)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_SETUPWIDGET_ENTRY );
+    
     // Store the view for future reference
 	mView = view;
 	
 	if (!mDocLoader) {
 	    // Nothing much can be done. Simply return
+	    OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_SETUPWIDGET_EXIT );
 	    return;
 	}
 
 	// Initialize the child widgets
 	initChildWidgets();
+	OstTraceFunctionExit0( DUP1_CALENAGENDAVIEWWIDGET_SETUPWIDGET_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -143,6 +152,8 @@ void CalenAgendaViewWidget::setupWidget(CalenAgendaView *view)
 //
 void CalenAgendaViewWidget::showWidget()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_SHOWWIDGET_ENTRY );
+    
     // Get the date for which this view has been launched
     mDate = mServices.Context().focusDateAndTime();
         
@@ -194,6 +205,8 @@ void CalenAgendaViewWidget::showWidget()
         // Now populate the list with the events
         populateListWidget();
     }
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_SHOWWIDGET_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -203,6 +216,8 @@ void CalenAgendaViewWidget::showWidget()
 //
 void CalenAgendaViewWidget::orientationChanged(Qt::Orientation orientation)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_ORIENTATIONCHANGED_ENTRY );
+    
     // Load the appropriate section based on the number of events for the day
     if (0 == mInstanceArray.count()) {
         // There are no entries for the day
@@ -238,6 +253,8 @@ void CalenAgendaViewWidget::orientationChanged(Qt::Orientation orientation)
         }
         handleListItemStretching(orientation);
     }
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_ORIENTATIONCHANGED_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -247,7 +264,9 @@ void CalenAgendaViewWidget::orientationChanged(Qt::Orientation orientation)
 //
 void CalenAgendaViewWidget::handleLocaleChange()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_HANDLELOCALECHANGE_ENTRY );
 
+    OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_HANDLELOCALECHANGE_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -257,6 +276,8 @@ void CalenAgendaViewWidget::handleLocaleChange()
 //    
 void CalenAgendaViewWidget::setContextFromHighlight(AgendaEntry entry)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_SETCONTEXTFROMHIGHLIGHT_ENTRY );
+    
     if (entry.isTimedEntry()) {
         // Timed entry.
         QDateTime start = entry.startTime();
@@ -275,6 +296,8 @@ void CalenAgendaViewWidget::setContextFromHighlight(AgendaEntry entry)
                                                                 TCalenInstanceId::create(entry));
         }
     }
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_SETCONTEXTFROMHIGHLIGHT_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -284,6 +307,8 @@ void CalenAgendaViewWidget::setContextFromHighlight(AgendaEntry entry)
 //
 void CalenAgendaViewWidget::initChildWidgets()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_INITCHILDWIDGETS_ENTRY );
+    
     // Get the pointer to the events list
     mEventsList = static_cast<HbListView*> (mDocLoader->findWidget(CALEN_AGENDAVIEW_LISTWIDGET));
     if (!mEventsList) {
@@ -317,6 +342,7 @@ void CalenAgendaViewWidget::initChildWidgets()
     
     mRegionalPluginLayout = static_cast<QGraphicsLinearLayout*>(headingPluginWidget->layout());
     
+    OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_INITCHILDWIDGETS_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -326,6 +352,8 @@ void CalenAgendaViewWidget::initChildWidgets()
 //    
 void CalenAgendaViewWidget::populateListWidget()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_POPULATELISTWIDGET_ENTRY );
+    
     // Recycle the list items so that only needed rows
     // are added or removed
     if (mInstanceArray.count() == 0) {
@@ -333,6 +361,7 @@ void CalenAgendaViewWidget::populateListWidget()
         mEventsList->reset();
         // Clear the model to ensure it does not have any old items
         mListModel->clear();
+        OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_POPULATELISTWIDGET_EXIT );
         return;
     } else if (mInstanceArray.count() > mListModel->rowCount()) {
         // There are more events than the number of items
@@ -361,6 +390,8 @@ void CalenAgendaViewWidget::populateListWidget()
         // Scroll to the index only if index is valid
         mEventsList->scrollTo(mListModel->index(scrollToIndex, 0));
     }
+    
+    OstTraceFunctionExit0( DUP1_CALENAGENDAVIEWWIDGET_POPULATELISTWIDGET_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -370,6 +401,8 @@ void CalenAgendaViewWidget::populateListWidget()
 //    
 void CalenAgendaViewWidget::getInstanceList()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_GETINSTANCELIST_ENTRY );
+    
     // Clear the previous instance list
     mInstanceArray.clear();
     
@@ -388,6 +421,7 @@ void CalenAgendaViewWidget::getInstanceList()
     // Fetch the instance list from the agenda interface
     mInstanceArray = mServices.agendaInterface()->createEntryIdListForDay(mDate, filter);
     
+    OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_GETINSTANCELIST_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -397,6 +431,8 @@ void CalenAgendaViewWidget::getInstanceList()
 //
 void CalenAgendaViewWidget::setHeadingText()
     {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_SETHEADINGTEXT_ENTRY );
+    
     // Format the date as per the device locale settings
 	HbExtendedLocale systemLocale = HbExtendedLocale::system();
 	
@@ -409,6 +445,8 @@ void CalenAgendaViewWidget::setHeadingText()
 	mHeadingLabel->setHeading(hbTrId(
 				"txt_calendar_subhead_1_2").arg(dayString).arg(
 				systemLocale.format(mDate.date(), r_qtn_date_usual_with_zero)));
+	
+	OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_SETHEADINGTEXT_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -418,8 +456,11 @@ void CalenAgendaViewWidget::setHeadingText()
 //
 void CalenAgendaViewWidget::createListItem(int index, AgendaEntry entry)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_CREATELISTITEM_ENTRY );
+    
     if (index < 0 || entry.isNull()) {
         // Not a valid index or entry. Dont do anything
+        OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_CREATELISTITEM_EXIT );
         return;
     }
     // Check if the entry is a timed entry
@@ -431,6 +472,8 @@ void CalenAgendaViewWidget::createListItem(int index, AgendaEntry entry)
     } else {
         addNonTimedEventToList(index, entry);
     }
+    
+    OstTraceFunctionExit0( DUP1_CALENAGENDAVIEWWIDGET_CREATELISTITEM_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -440,6 +483,8 @@ void CalenAgendaViewWidget::createListItem(int index, AgendaEntry entry)
 //
 void CalenAgendaViewWidget::addTimedEventToList(int index, AgendaEntry entry)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_ADDTIMEDEVENTTOLIST_ENTRY );
+    
     // Create text and icon list to set to the model
     QVariantList textData;
     QVariantList iconData;
@@ -590,6 +635,8 @@ void CalenAgendaViewWidget::addTimedEventToList(int index, AgendaEntry entry)
     if (listViewItem) {
         listViewItem->setProperty(stretchLayout, false);
     }
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_ADDTIMEDEVENTTOLIST_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -599,6 +646,8 @@ void CalenAgendaViewWidget::addTimedEventToList(int index, AgendaEntry entry)
 //
 void CalenAgendaViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_ADDNONTIMEDEVENTTOLIST_ENTRY );
+    
     QVariantList textData;
     QVariantList iconData;
     
@@ -753,6 +802,8 @@ void CalenAgendaViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
             listViewItem->setProperty(stretchLayout, false);
         }
     }
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_ADDNONTIMEDEVENTTOLIST_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -762,8 +813,11 @@ void CalenAgendaViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
 // 
 void CalenAgendaViewWidget::handleListItemStretching(Qt::Orientation orientation)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_HANDLELISTITEMSTRETCHING_ENTRY );
+    
     if (mInstanceArray.count() == 0) {
         // Nothing much to do. Simply return
+        OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_HANDLELISTITEMSTRETCHING_EXIT );
         return;
     }
     for(int index = 0; index < mInstanceArray.count() ; index ++) {
@@ -803,6 +857,8 @@ void CalenAgendaViewWidget::handleListItemStretching(Qt::Orientation orientation
             }
         }
     }
+    
+    OstTraceFunctionExit0( DUP1_CALENAGENDAVIEWWIDGET_HANDLELISTITEMSTRETCHING_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -812,10 +868,13 @@ void CalenAgendaViewWidget::handleListItemStretching(Qt::Orientation orientation
 //  
 int CalenAgendaViewWidget::getIndexToScrollTo()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_GETINDEXTOSCROLLTO_ENTRY );
+    
     int scrollIndex = 0;
     TCalenInstanceId instanceId = mServices.Context().instanceId();
     if (instanceId == TCalenInstanceId::nullInstanceId()) {
         // If the instance is not set, then scroll to zero index
+        OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_GETINDEXTOSCROLLTO_EXIT );
         return scrollIndex;
     }
     
@@ -827,6 +886,7 @@ int CalenAgendaViewWidget::getIndexToScrollTo()
             break;
         }
     }
+    OstTraceFunctionExit0( DUP1_CALENAGENDAVIEWWIDGET_GETINDEXTOSCROLLTO_EXIT );
     return scrollIndex;
 }
 
@@ -837,6 +897,8 @@ int CalenAgendaViewWidget::getIndexToScrollTo()
 //
 void CalenAgendaViewWidget::showHideRegionalInformation()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_SHOWHIDEREGIONALINFORMATION_ENTRY );
+    
 	if (mView->pluginEnabled()) {
 		XQSettingsKey regionalInfo(XQSettingsKey::TargetCentralRepository,
 		                           KCRUidCalendar, KCalendarShowRegionalInfo);
@@ -865,6 +927,8 @@ void CalenAgendaViewWidget::showHideRegionalInformation()
             mRegionalInfoGroupBox = NULL;
         }
     }
+	
+	OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_SHOWHIDEREGIONALINFORMATION_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -874,9 +938,13 @@ void CalenAgendaViewWidget::showHideRegionalInformation()
 //    
 void CalenAgendaViewWidget::createNewEvent()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_CREATENEWEVENT_ENTRY );
+    
     // Issue a command to launch editor to create
     // a new event
 	mServices.IssueCommandL(ECalenNewMeeting);
+	
+	OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_CREATENEWEVENT_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -886,8 +954,11 @@ void CalenAgendaViewWidget::createNewEvent()
 //    
 void CalenAgendaViewWidget::editEntry()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_EDITENTRY_ENTRY );
+    
     // Check if the selected index is valid
     if (mSelectedIndex < 0 || mSelectedIndex > mInstanceArray.count()) {
+        OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_EDITENTRY_EXIT );
         return;
     }
 
@@ -924,6 +995,8 @@ void CalenAgendaViewWidget::editEntry()
 		// Issue a command to launch the editor to edit this entry
 		mServices.IssueCommandL(ECalenEditCurrentEntry);
 	}
+	
+	OstTraceFunctionExit0( DUP1_CALENAGENDAVIEWWIDGET_EDITENTRY_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -933,6 +1006,8 @@ void CalenAgendaViewWidget::editEntry()
 //    
 void CalenAgendaViewWidget::viewEntry()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_VIEWENTRY_ENTRY );
+    
     // Get the entry details first
     AgendaEntry entry = mInstanceArray[mSelectedIndex];
     
@@ -941,6 +1016,8 @@ void CalenAgendaViewWidget::viewEntry()
         
     // Launch the event viewer.
     mServices.IssueCommandL(ECalenEventView);
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_VIEWENTRY_EXIT );
 }
 
 
@@ -951,8 +1028,11 @@ void CalenAgendaViewWidget::viewEntry()
 //    
 void CalenAgendaViewWidget::deleteEntry()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_DELETEENTRY_ENTRY );
+    
     // Check if the selected index is valid
 	if (mSelectedIndex < 0 || mSelectedIndex > mInstanceArray.count()) {
+		OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_DELETEENTRY_EXIT );
 		return;
 	}
 	
@@ -962,6 +1042,8 @@ void CalenAgendaViewWidget::deleteEntry()
 	setContextFromHighlight(entry);
 	// Issue the command to delete the entry
 	mServices.IssueCommandL(ECalenDeleteCurrentEntry);
+	
+	OstTraceFunctionExit0( DUP1_CALENAGENDAVIEWWIDGET_DELETEENTRY_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -971,8 +1053,11 @@ void CalenAgendaViewWidget::deleteEntry()
 //  
 void CalenAgendaViewWidget::markAsDone()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_MARKASDONE_ENTRY );
+    
     // Check if the selected index is valid
     if (mSelectedIndex < 0 || mSelectedIndex > mInstanceArray.count()) {
+        OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_MARKASDONE_EXIT );
         return;
     }
     
@@ -990,6 +1075,8 @@ void CalenAgendaViewWidget::markAsDone()
         mServices.agendaInterface()->setCompleted(entry, true, mDate);
 		mServices.IssueCommandL(ECalenStartActiveStep);
     }
+    
+    OstTraceFunctionExit0( DUP1_CALENAGENDAVIEWWIDGET_MARKASDONE_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -1000,12 +1087,15 @@ void CalenAgendaViewWidget::markAsDone()
 void CalenAgendaViewWidget::itemLongPressed(HbAbstractViewItem* listViewItem,
                                          const QPointF& coords)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_ITEMLONGPRESSED_ENTRY );
+    
 	mLongTapEventFlag = true;
     // Update the selection index first
     mSelectedIndex = listViewItem->modelIndex().row();
     
     if (mSelectedIndex < 0 || mSelectedIndex > mInstanceArray.count()) {
         // Invalid index
+        OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_ITEMLONGPRESSED_EXIT );
         return;
     }
 
@@ -1043,6 +1133,8 @@ void CalenAgendaViewWidget::itemLongPressed(HbAbstractViewItem* listViewItem,
 								SLOT(contextMenuClosed()));
     
     contextMenu->open(this, SLOT(contextManuTriggered(HbAction *)));
+    
+    OstTraceFunctionExit0( DUP1_CALENAGENDAVIEWWIDGET_ITEMLONGPRESSED_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -1052,17 +1144,22 @@ void CalenAgendaViewWidget::itemLongPressed(HbAbstractViewItem* listViewItem,
 //    
 void CalenAgendaViewWidget::itemActivated(const QModelIndex &index)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_ITEMACTIVATED_ENTRY );
+    
     // Update the selection index first
     mSelectedIndex = index.row();
 
     // Check if the selected index is valid
     if (mSelectedIndex < 0 || mSelectedIndex > mInstanceArray.count()) {
+        OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_ITEMACTIVATED_EXIT );
         return;
     }
     if( !mLongTapEventFlag ) {
     // Open the event for viewing
     viewEntry();
     }
+    
+    OstTraceFunctionExit0( DUP1_CALENAGENDAVIEWWIDGET_ITEMACTIVATED_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -1072,6 +1169,8 @@ void CalenAgendaViewWidget::itemActivated(const QModelIndex &index)
 // 
 void CalenAgendaViewWidget::noteEditingCompleted(bool status)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_NOTEEDITINGCOMPLETED_ENTRY );
+    
 	// We need to refresh the list since user
 	// might have marked the to-do as complete or
 	// edited it or deleted it. So get the instance
@@ -1079,6 +1178,8 @@ void CalenAgendaViewWidget::noteEditingCompleted(bool status)
 	if (status) {
 		mServices.IssueCommandL(ECalenStartActiveStep);
 	}
+	
+	OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_NOTEEDITINGCOMPLETED_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -1088,9 +1189,12 @@ void CalenAgendaViewWidget::noteEditingCompleted(bool status)
 // 
 void CalenAgendaViewWidget::goToToday()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_GOTOTODAY_ENTRY );
+    
     // First check if we are not already
     // showing today's agenda
     if (mDate == CalenDateUtils::today()) {
+        OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_GOTOTODAY_EXIT );
         return;
     }
     
@@ -1098,6 +1202,8 @@ void CalenAgendaViewWidget::goToToday()
     mServices.Context().setFocusDate(CalenDateUtils::today());
     
     mView->refreshViewOnGoToDate();
+    
+    OstTraceFunctionExit0( DUP1_CALENAGENDAVIEWWIDGET_GOTOTODAY_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -1107,7 +1213,11 @@ void CalenAgendaViewWidget::goToToday()
 //
 void CalenAgendaViewWidget::contextMenuClosed()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_CONTEXTMENUCLOSED_ENTRY );
+    
 	mLongTapEventFlag = false;
+	
+	OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_CONTEXTMENUCLOSED_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -1117,6 +1227,8 @@ void CalenAgendaViewWidget::contextMenuClosed()
 //
 void CalenAgendaViewWidget::contextManuTriggered(HbAction *action)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_CONTEXTMANUTRIGGERED_ENTRY );
+    
 	if (action->text() == hbTrId("txt_common_menu_open")) {
 		viewEntry();
 	} else if (action->text() == hbTrId("txt_calendar_menu_mark_as_done")) {
@@ -1128,6 +1240,8 @@ void CalenAgendaViewWidget::contextManuTriggered(HbAction *action)
 			deleteEntry();
 		}
 	}
+	
+	OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_CONTEXTMANUTRIGGERED_EXIT );
 }
 // ----------------------------------------------------------------------------
 // CalenAgendaViewWidget::clearListModel
@@ -1136,7 +1250,11 @@ void CalenAgendaViewWidget::contextManuTriggered(HbAction *action)
 // 
 void CalenAgendaViewWidget::clearListModel()
     {
+    OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_CLEARLISTMODEL_ENTRY );
+    
     mListModel->clear();
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_CLEARLISTMODEL_EXIT );
     }
 
 // End of file	--Don't remove this.

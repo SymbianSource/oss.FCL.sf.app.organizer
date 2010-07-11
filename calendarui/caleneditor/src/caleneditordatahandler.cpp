@@ -24,6 +24,11 @@
 #include "caleneditordatahandler.h"
 #include "calendateutils.h"
 #include "agendaentry.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "caleneditordatahandlerTraces.h"
+#endif
+
 
 /*!
 	\class CalenEditorDataHandler
@@ -37,7 +42,9 @@ CalenEditorDataHandler::CalenEditorDataHandler(CalenEditorPrivate* calenEditor,
                     	                       AgendaEntry* originalEntry)
 : mCalenEditor(calenEditor),mEditedEntry(editedEntry), mOriginalEntry(originalEntry)
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_CALENEDITORDATAHANDLER_ENTRY );
 	
+	OstTraceFunctionExit0( CALENEDITORDATAHANDLER_CALENEDITORDATAHANDLER_EXIT );
 }
 
 /*!
@@ -45,7 +52,9 @@ CalenEditorDataHandler::CalenEditorDataHandler(CalenEditorPrivate* calenEditor,
  */
 CalenEditorDataHandler::~CalenEditorDataHandler()
 {
+	OstTraceFunctionEntry0( DUP1_CALENEDITORDATAHANDLER_CALENEDITORDATAHANDLER_ENTRY );
 	// Nothing Yet
+	OstTraceFunctionExit0( DUP1_CALENEDITORDATAHANDLER_CALENEDITORDATAHANDLER_EXIT );
 }
 
 /*!
@@ -54,6 +63,8 @@ CalenEditorDataHandler::~CalenEditorDataHandler()
  */
 AgendaEntry* CalenEditorDataHandler::editedEntry()
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_EDITEDENTRY_ENTRY );
+	OstTraceFunctionExit0( CALENEDITORDATAHANDLER_EDITEDENTRY_EXIT );
 	return mEditedEntry;
 }
 
@@ -63,6 +74,8 @@ AgendaEntry* CalenEditorDataHandler::editedEntry()
  */
 AgendaEntry* CalenEditorDataHandler::originalEntry()
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ORIGINALENTRY_ENTRY );
+	OstTraceFunctionExit0( CALENEDITORDATAHANDLER_ORIGINALENTRY_EXIT );
 	return mOriginalEntry;
 }
 
@@ -72,6 +85,7 @@ AgendaEntry* CalenEditorDataHandler::originalEntry()
  */
 CalenEditorPrivate::Error CalenEditorDataHandler::checkErrorsForThisAndAll()
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_CHECKERRORSFORTHISANDALL_ENTRY );
 	//TODO :  Remove implementation once handle all repeating errors
 	const QDateTime startTime = mEditedEntry->startTime();
 	const QDateTime endTime = mEditedEntry->endTime();
@@ -109,11 +123,14 @@ CalenEditorPrivate::Error CalenEditorDataHandler::checkErrorsForThisAndAll()
 		}
 
 		if (durationGreaterThanRepeatIntervalError()) {
+			OstTraceFunctionExit0( CALENEDITORDATAHANDLER_CHECKERRORSFORTHISANDALL_EXIT );
 			return CalenEditorPrivate::
 							CalenEditorErrorDurationGreaterThanRepeatInterval;
 		}
+		OstTraceFunctionExit0( DUP1_CALENEDITORDATAHANDLER_CHECKERRORSFORTHISANDALL_EXIT );
 		return CalenEditorPrivate::CalenEditorErrorNone;
 	}
+	OstTraceFunctionExit0( DUP2_CALENEDITORDATAHANDLER_CHECKERRORSFORTHISANDALL_EXIT );
 	return CalenEditorPrivate::CalenEditorErrorNone;
 }
 
@@ -123,6 +140,7 @@ CalenEditorPrivate::Error CalenEditorDataHandler::checkErrorsForThisAndAll()
  */
 bool CalenEditorDataHandler::isEdited() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ISEDITED_ENTRY );
 	return (isSummaryEdited() ||
 			isAllDayEdited() ||
 			isLocationEdited() ||
@@ -139,6 +157,7 @@ bool CalenEditorDataHandler::isEdited() const
  */
 bool CalenEditorDataHandler::isSummaryEdited() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ISSUMMARYEDITED_ENTRY );
 	return (mOriginalEntry->summary() != mEditedEntry->summary());
 }
 
@@ -148,24 +167,30 @@ bool CalenEditorDataHandler::isSummaryEdited() const
  */
 bool CalenEditorDataHandler::isAllDayEdited() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ISALLDAYEDITED_ENTRY );
 	HbDataFormModelItem* alldayItem = mCalenEditor->allDayCheckBoxItem();
 	if (alldayItem) {
 		if (mOriginalEntry->type() == AgendaEntry::TypeEvent) {
 			if (alldayItem->contentWidgetData("checkState")
 			        == Qt::Checked) {
+				OstTraceFunctionExit0( CALENEDITORDATAHANDLER_ISALLDAYEDITED_EXIT );
 				return false;
 			} else {
+				OstTraceFunctionExit0( DUP1_CALENEDITORDATAHANDLER_ISALLDAYEDITED_EXIT );
 				return true;
 			}
 		} else if (mOriginalEntry->type() == AgendaEntry::TypeAppoinment) {
 			if (alldayItem->contentWidgetData("checkState")
 			        == Qt::Checked) {
+				OstTraceFunctionExit0( DUP2_CALENEDITORDATAHANDLER_ISALLDAYEDITED_EXIT );
 				return true;
 			} else {
+				OstTraceFunctionExit0( DUP3_CALENEDITORDATAHANDLER_ISALLDAYEDITED_EXIT );
 				return false;
 			}
 		}
 	}
+	OstTraceFunctionExit0( DUP4_CALENEDITORDATAHANDLER_ISALLDAYEDITED_EXIT );
 	return false;
 }
 
@@ -175,6 +200,7 @@ bool CalenEditorDataHandler::isAllDayEdited() const
  */
 bool CalenEditorDataHandler::isLocationEdited() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ISLOCATIONEDITED_ENTRY );
 	return (mOriginalEntry->location() != mEditedEntry->location());
 }
 
@@ -184,6 +210,7 @@ bool CalenEditorDataHandler::isLocationEdited() const
  */
 bool CalenEditorDataHandler::isStartDateTimeEdited() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ISSTARTDATETIMEEDITED_ENTRY );
 	return (mOriginalEntry->startTime() != mEditedEntry->startTime());
 }
 
@@ -193,6 +220,7 @@ bool CalenEditorDataHandler::isStartDateTimeEdited() const
  */
 bool CalenEditorDataHandler::isEndDateTimeEdited() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ISENDDATETIMEEDITED_ENTRY );
 	return (mOriginalEntry->endTime() != mEditedEntry->endTime());
 }
 
@@ -202,6 +230,7 @@ bool CalenEditorDataHandler::isEndDateTimeEdited() const
  */
 bool CalenEditorDataHandler::isAlarmEdited() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ISALARMEDITED_ENTRY );
 	return (mOriginalEntry->alarm() != mEditedEntry->alarm());
 }
 
@@ -211,9 +240,11 @@ bool CalenEditorDataHandler::isAlarmEdited() const
  */
 bool CalenEditorDataHandler::isRepeatRuleEdited() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ISREPEATRULEEDITED_ENTRY );
 	if ((mOriginalEntry->repeatRule().type() == AgendaRepeatRule::InvalidRule)
 	        && (mEditedEntry->repeatRule().type()
 	                == AgendaRepeatRule::InvalidRule)) {
+		OstTraceFunctionExit0( CALENEDITORDATAHANDLER_ISREPEATRULEEDITED_EXIT );
 		return false;
 	} else {
 		return ((mOriginalEntry->repeatRule().type() != 
@@ -229,6 +260,7 @@ bool CalenEditorDataHandler::isRepeatRuleEdited() const
  */
 bool CalenEditorDataHandler::isDescriptionEdited() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ISDESCRIPTIONEDITED_ENTRY );
 	return (mOriginalEntry->description() != mEditedEntry->description());
 }
 
@@ -239,6 +271,7 @@ bool CalenEditorDataHandler::isDescriptionEdited() const
  */
 bool CalenEditorDataHandler::nonTextItemsEdited() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_NONTEXTITEMSEDITED_ENTRY );
 	return (isAllDayEdited() ||
 			isStartDateTimeEdited() ||
 			isEndDateTimeEdited() ||
@@ -253,6 +286,7 @@ bool CalenEditorDataHandler::nonTextItemsEdited() const
  */
 bool CalenEditorDataHandler::areTextItemsEmpty() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ARETEXTITEMSEMPTY_ENTRY );
 	return (mEditedEntry->summary().isEmpty()
 	        && mEditedEntry->location().isEmpty()
 	        && mEditedEntry->description().isEmpty());
@@ -265,15 +299,18 @@ bool CalenEditorDataHandler::areTextItemsEmpty() const
  */
 bool CalenEditorDataHandler::areTextItemsCleared() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ARETEXTITEMSCLEARED_ENTRY );
 	if (mEditedEntry->summary().isEmpty() &&
 			mEditedEntry->location().isEmpty() &&
 			mEditedEntry->description().isEmpty()) {
 		if (isSummaryEmptied() 
 				|| isLocationEmptied() 
 				|| isDescriptionEmptied()) {
+			OstTraceFunctionExit0( CALENEDITORDATAHANDLER_ARETEXTITEMSCLEARED_EXIT );
 			return true;
 		}
 	}
+	OstTraceFunctionExit0( DUP1_CALENEDITORDATAHANDLER_ARETEXTITEMSCLEARED_EXIT );
 	return false;
 }
 
@@ -284,6 +321,7 @@ bool CalenEditorDataHandler::areTextItemsCleared() const
  */
 bool CalenEditorDataHandler::isSummaryEmptied() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ISSUMMARYEMPTIED_ENTRY );
 	return (!mOriginalEntry->summary().isEmpty()
 	        && mEditedEntry->summary().isEmpty());
 }
@@ -295,6 +333,7 @@ bool CalenEditorDataHandler::isSummaryEmptied() const
  */
 bool CalenEditorDataHandler::isLocationEmptied() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ISLOCATIONEMPTIED_ENTRY );
 	return (!mOriginalEntry->location().isEmpty()
 	        && mEditedEntry->location().isEmpty());
 }
@@ -306,6 +345,7 @@ bool CalenEditorDataHandler::isLocationEmptied() const
  */
 bool CalenEditorDataHandler::isDescriptionEmptied() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ISDESCRIPTIONEMPTIED_ENTRY );
 	return (!mOriginalEntry->description().isEmpty()
 	        && mEditedEntry->description().isEmpty());
 }
@@ -318,6 +358,7 @@ bool CalenEditorDataHandler::isDescriptionEmptied() const
 CalenEditorPrivate::Action CalenEditorDataHandler::shouldSaveOrDeleteOrDoNothing(bool launchCalendar) 
 																		const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_SHOULDSAVEORDELETEORDONOTHING_ENTRY );
 	// Need to save the entry if third party calls editor to launch the
 	// calendar after that. So, that entry will be new entry adn we assume
 	// that client launches editor with some prefilled text items
@@ -326,6 +367,7 @@ CalenEditorPrivate::Action CalenEditorDataHandler::shouldSaveOrDeleteOrDoNothing
 		// Only added space characters to text fields but not
 		// edited the non-text items
 		// no need to save the entry
+		OstTraceFunctionExit0( CALENEDITORDATAHANDLER_SHOULDSAVEORDELETEORDONOTHING_EXIT );
 		return CalenEditorPrivate::ActionNothing;
 	}
 	// new entry is edited
@@ -335,8 +377,10 @@ CalenEditorPrivate::Action CalenEditorDataHandler::shouldSaveOrDeleteOrDoNothing
 		// If text items as a whole is empty, we can still save the note
 		// since we edited "non-text" fields
 		if (!nonTextItemsEdited() && areTextItemsEmpty()) {
+			OstTraceFunctionExit0( DUP1_CALENEDITORDATAHANDLER_SHOULDSAVEORDELETEORDONOTHING_EXIT );
 			return CalenEditorPrivate::ActionNothing;
 		} else {
+			OstTraceFunctionExit0( DUP2_CALENEDITORDATAHANDLER_SHOULDSAVEORDELETEORDONOTHING_EXIT );
 			return CalenEditorPrivate::ActionSave;
 		}
 	}
@@ -344,9 +388,11 @@ CalenEditorPrivate::Action CalenEditorDataHandler::shouldSaveOrDeleteOrDoNothing
 		// ***** edited entry + text items emptied + non-text items not edited
 		// Even if user may have edited non-text fields, 
 		// delete the note 
+		OstTraceFunctionExit0( DUP3_CALENEDITORDATAHANDLER_SHOULDSAVEORDELETEORDONOTHING_EXIT );
 		return CalenEditorPrivate::ActionDelete;
 	}
 	// Save the note, since the text fields contain something
+	OstTraceFunctionExit0( DUP4_CALENEDITORDATAHANDLER_SHOULDSAVEORDELETEORDONOTHING_EXIT );
 	return CalenEditorPrivate::ActionSave;
 }
 
@@ -358,6 +404,7 @@ CalenEditorPrivate::Action CalenEditorDataHandler::shouldSaveOrDeleteOrDoNothing
  */
 bool CalenEditorDataHandler::durationGreaterThanRepeatIntervalError() const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_DURATIONGREATERTHANREPEATINTERVALERROR_ENTRY );
 	bool isError = false;
 	switch (mEditedEntry->repeatRule().type()) {
 		case AgendaRepeatRule::DailyRule: {
@@ -395,6 +442,7 @@ bool CalenEditorDataHandler::durationGreaterThanRepeatIntervalError() const
 			isError = false;
 			break;
 	}
+	OstTraceFunctionExit0( CALENEDITORDATAHANDLER_DURATIONGREATERTHANREPEATINTERVALERROR_EXIT );
 	return isError;
 }
 
@@ -405,6 +453,7 @@ bool CalenEditorDataHandler::durationGreaterThanRepeatIntervalError() const
 CalenEditorPrivate::Error CalenEditorDataHandler::checkAlarmFieldsForErrors(
 															bool series) const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_CHECKALARMFIELDSFORERRORS_ENTRY );
 	CalenEditorPrivate::Error error = CalenEditorPrivate::CalenEditorErrorNone;
 	// If alarm not active, no check
 	if (!mEditedEntry->alarm().isNull()) {
@@ -424,6 +473,7 @@ CalenEditorPrivate::Error CalenEditorDataHandler::checkAlarmFieldsForErrors(
 			}
 		}
 	}
+	OstTraceFunctionExit0( CALENEDITORDATAHANDLER_CHECKALARMFIELDSFORERRORS_EXIT );
 	return error;
 }
 
@@ -439,6 +489,7 @@ bool CalenEditorDataHandler::isAlarmInAcceptablePeriod(CalenEditorPrivate::Error
 										const QDateTime &alarmTime,
 										const QDateTime &startTime) const
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ISALARMINACCEPTABLEPERIOD_ENTRY );
 	QDateTime upperLimit = startTime;
 
 	QDateTime lowerLimit = startTime.addDays(-31);
@@ -452,6 +503,7 @@ bool CalenEditorDataHandler::isAlarmInAcceptablePeriod(CalenEditorPrivate::Error
 			error = CalenEditorPrivate::CalenEditorErrorAlarmTimeLaterThanNote;
 		}
 	}
+	OstTraceFunctionExit0( CALENEDITORDATAHANDLER_ISALARMINACCEPTABLEPERIOD_EXIT );
 	return acceptable;
 }
 
@@ -461,6 +513,7 @@ bool CalenEditorDataHandler::isAlarmInAcceptablePeriod(CalenEditorPrivate::Error
  */
 void CalenEditorDataHandler::displayErrorMsg(int error)
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_DISPLAYERRORMSG_ENTRY );
 	QString errorMsg = QString::Null();
 
 	switch (error) {
@@ -494,6 +547,7 @@ void CalenEditorDataHandler::displayErrorMsg(int error)
 	if (!errorMsg.isNull()) {
 		HbMessageBox::information(errorMsg);
 	}
+	OstTraceFunctionExit0( CALENEDITORDATAHANDLER_DISPLAYERRORMSG_EXIT );
 }
 
 /*!
@@ -501,6 +555,7 @@ void CalenEditorDataHandler::displayErrorMsg(int error)
  */
 void CalenEditorDataHandler::dispalyErrorMsgByRepeatType()
 {
+	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_DISPALYERRORMSGBYREPEATTYPE_ENTRY );
 	QString errorMsg = QString::Null();
 
 	int durationDays =
@@ -534,6 +589,7 @@ void CalenEditorDataHandler::dispalyErrorMsgByRepeatType()
 	if (!errorMsg.isNull()) {
 		HbMessageBox::information(errorMsg.arg(numDaysEntrySpan));
 	}
+	OstTraceFunctionExit0( CALENEDITORDATAHANDLER_DISPALYERRORMSGBYREPEATTYPE_EXIT );
 }
 
 // End of file	--Don't remove this.

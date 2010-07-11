@@ -22,6 +22,10 @@
 #include "calencontroller.h"
 #include "calenstatemachine.h"
 #include "calennotifier.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenprintingstateTraces.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // CCalenPrintingState::NewLC
@@ -30,13 +34,13 @@
 CCalenPrintingState* CCalenPrintingState::NewLC( CCalenController& aController,
                                                         RHashSet<TCalenNotification>& aOutstandingNotifications )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENPRINTINGSTATE_NEWLC_ENTRY );
+    
     CCalenPrintingState* self = new ( ELeave ) CCalenPrintingState( aController,aOutstandingNotifications );
     CleanupStack::PushL( self );
     self->ConstructL();
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENPRINTINGSTATE_NEWLC_EXIT );
     return self;
     }
 
@@ -46,10 +50,11 @@ CCalenPrintingState* CCalenPrintingState::NewLC( CCalenController& aController,
 // ----------------------------------------------------------------------------
 void CCalenPrintingState::ConstructL()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENPRINTINGSTATE_CONSTRUCTL_ENTRY );
+    
     BaseConstructL();    
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENPRINTINGSTATE_CONSTRUCTL_EXIT );
     }
     
 // ----------------------------------------------------------------------------
@@ -60,9 +65,9 @@ CCalenPrintingState::CCalenPrintingState( CCalenController& aController,
                                                 RHashSet<TCalenNotification>& aOutstandingNotifications )
     : CCalenState( aController, aOutstandingNotifications )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENPRINTINGSTATE_CCALENPRINTINGSTATE_ENTRY );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENPRINTINGSTATE_CCALENPRINTINGSTATE_EXIT );
     }
     
 // ----------------------------------------------------------------------------
@@ -71,9 +76,9 @@ CCalenPrintingState::CCalenPrintingState( CCalenController& aController,
 // ----------------------------------------------------------------------------    
 CCalenPrintingState::~CCalenPrintingState()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENPRINTINGSTATE_CCALENPRINTINGSTATE_ENTRY );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CCALENPRINTINGSTATE_CCALENPRINTINGSTATE_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -83,7 +88,8 @@ CCalenPrintingState::~CCalenPrintingState()
 TBool CCalenPrintingState::HandleCommandL( const TCalenCommand& aCommand,
                                           CCalenStateMachine& aStateMachine )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENPRINTINGSTATE_HANDLECOMMANDL_ENTRY );
+    
     TInt cmd = aCommand.Command();
     MCalenCommandHandler* handler = iController.GetCommandHandlerL( cmd );
     
@@ -99,7 +105,7 @@ TBool CCalenPrintingState::HandleCommandL( const TCalenCommand& aCommand,
         cmdUsed = ETrue;
         }
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENPRINTINGSTATE_HANDLECOMMANDL_EXIT );
     return cmdUsed;
     }
 
@@ -110,8 +116,9 @@ TBool CCalenPrintingState::HandleCommandL( const TCalenCommand& aCommand,
 void CCalenPrintingState::HandleNotificationL(const TCalenNotification& /*aNotification*/,
                                                CCalenStateMachine& /*aStateMachine*/ )
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENPRINTINGSTATE_HANDLENOTIFICATIONL_ENTRY );
+    
+    OstTraceFunctionExit0( CCALENPRINTINGSTATE_HANDLENOTIFICATIONL_EXIT );
     }
 
 // end of file

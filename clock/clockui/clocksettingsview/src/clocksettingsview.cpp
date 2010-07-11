@@ -335,6 +335,7 @@ void ClockSettingsView::populateModel()
 			"checkState", state);
 	mNetworkTimeItem->setContentWidgetData(
 			"text", QString(hbTrId("txt_clk_setlabel_use_network_date_time")));
+	mNetworkTimeItem->setContentWidgetData("objectName", "networkTime");
 	mSettingsForm->addConnection(
 			mNetworkTimeItem, SIGNAL(stateChanged(int)),
 			this, SLOT(handleNetworkTimeStateChange(int)));
@@ -347,6 +348,7 @@ void ClockSettingsView::populateModel()
 	mTimeDataFormItem = mSettingsModel->appendDataFormItem(
 			timeItemType, QString(hbTrId("txt_clock_setlabel_time")));
 	mTimeDataFormItem->setContentWidgetData("text", mSettingsUtility->time());
+	mTimeDataFormItem->setContentWidgetData("objectName", "timeItem");
 
 	// Add the date item.
 	// Custom data type for adding a time button to the data form.
@@ -356,6 +358,7 @@ void ClockSettingsView::populateModel()
 	mDateDataFormItem = mSettingsModel->appendDataFormItem(
 			dateItemType, QString(hbTrId("txt_clock_setlabel_date")));
 	mDateDataFormItem->setContentWidgetData("text", mSettingsUtility->date());
+	mDateDataFormItem->setContentWidgetData("objectName", "dateItem");
 
 	// Add the place item.
 	HbDataFormModelItem::DataItemType placeItemType =
@@ -372,6 +375,7 @@ void ClockSettingsView::populateModel()
 	}
 	placeItemText.append(currentZoneInfo.countryName);
 	mPlaceDataFormItem->setContentWidgetData("text", placeItemText);
+	mPlaceDataFormItem->setContentWidgetData("objectName", "placeItem");
 	
 	if (networkTime) {
 		mTimeDataFormItem->setEnabled(false);
@@ -387,7 +391,9 @@ void ClockSettingsView::populateModel()
 	HbDataFormModelItem::DataItemType regionalSettingsItem =
 			static_cast<HbDataFormModelItem::DataItemType>
 			(HbDataFormModelItem::CustomItemBase + RegionalSettingsItem);
-	mSettingsModel->appendDataFormItem(regionalSettingsItem);
+	(mSettingsModel->appendDataFormItem(
+			regionalSettingsItem))->setContentWidgetData(
+					"objectName", "regionalSettings");
     
 	// Add the clock type item.
     HbDataFormModelItem::DataItemType clockTypeSettingsItem =
@@ -405,6 +411,7 @@ void ClockSettingsView::populateModel()
 	    mClockTypeItem->setContentWidgetData("text", clockTypeList[1]);
 	    mClockTypeItem->setContentWidgetData("additionalText", clockTypeList[0]);    
     }
+    mClockTypeItem->setContentWidgetData("objectName", "clockType");
     mSettingsForm->addConnection(
             mClockTypeItem, SIGNAL(clicked()),
             this, SLOT(handleClockTypeChanged()));
@@ -436,6 +443,7 @@ void ClockSettingsView::populateModel()
 		index = mAlarmSnoozeTimeHash.key(15);
 	}
 	mAlarmSnoozeItem->setContentWidgetData("currentIndex", index);
+	mAlarmSnoozeItem->setContentWidgetData("objectName", "alarmSnooze");
 	mSettingsForm->addConnection(
 			mAlarmSnoozeItem, SIGNAL(currentIndexChanged(int)),
 			this, SLOT(handleAlarmSnoozeTimeChanged(int)));

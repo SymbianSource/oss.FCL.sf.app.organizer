@@ -22,6 +22,10 @@
 #include "calencontroller.h"
 #include "calenstatemachine.h"
 #include "calennotifier.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenidlestateTraces.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // CalenIdleState::NewLC
@@ -30,14 +34,14 @@
 CCalenIdleState* CCalenIdleState::NewLC( CCalenController& aController, 
                     RHashSet<TCalenNotification>&  aOutstandingNotifications  )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENIDLESTATE_NEWLC_ENTRY );
+    
     CCalenIdleState* self = new ( ELeave ) CCalenIdleState( aController, 
                                                     aOutstandingNotifications );
     CleanupStack::PushL( self );
     self->ConstructL();
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENIDLESTATE_NEWLC_EXIT );
     return self;
     }
 
@@ -47,10 +51,11 @@ CCalenIdleState* CCalenIdleState::NewLC( CCalenController& aController,
 // ----------------------------------------------------------------------------
 void CCalenIdleState::ConstructL()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENIDLESTATE_CONSTRUCTL_ENTRY );
+    
     BaseConstructL();
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENIDLESTATE_CONSTRUCTL_EXIT );
     }
     
 // ----------------------------------------------------------------------------
@@ -61,9 +66,9 @@ CCalenIdleState::CCalenIdleState( CCalenController& aController,
                     RHashSet<TCalenNotification>&  aOutstandingNotifications )
     : CCalenState( aController, aOutstandingNotifications )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENIDLESTATE_CCALENIDLESTATE_ENTRY );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENIDLESTATE_CCALENIDLESTATE_EXIT );
     }
     
 // ----------------------------------------------------------------------------
@@ -72,9 +77,9 @@ CCalenIdleState::CCalenIdleState( CCalenController& aController,
 // ----------------------------------------------------------------------------    
 CCalenIdleState::~CCalenIdleState()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENIDLESTATE_CCALENIDLESTATE_ENTRY );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CCALENIDLESTATE_CCALENIDLESTATE_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -84,7 +89,7 @@ CCalenIdleState::~CCalenIdleState()
 TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
                                        CCalenStateMachine& aStateMachine )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENIDLESTATE_HANDLECOMMANDL_ENTRY );
     
     TInt cmd = aCommand.Command();
     MCalenCommandHandler* handler = iController.GetCommandHandlerL( cmd );
@@ -220,7 +225,7 @@ TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
         
     RequestCallbackL( handler, aCommand );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENIDLESTATE_HANDLECOMMANDL_EXIT );
     return cmdUsed;
     }
 
@@ -231,11 +236,11 @@ TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
 void CCalenIdleState::HandleNotificationL(const TCalenNotification& aNotification,
                                           CCalenStateMachine& aStateMachine)
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENIDLESTATE_HANDLENOTIFICATIONL_ENTRY );
     
     CCalenState::HandleNotificationL( aNotification, aStateMachine );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENIDLESTATE_HANDLENOTIFICATIONL_EXIT );
     }
 
 // end of file

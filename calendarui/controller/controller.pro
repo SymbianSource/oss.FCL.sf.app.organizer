@@ -24,7 +24,8 @@ INCLUDEPATH += ./inc \
 						   ../inc \ 
 						   ../views/inc \
 						   ../views/dayview/inc \
-						   ../globaldata/inc 
+						   ../globaldata/inc \
+						   ./traces
 
 CONFIG += hb
 

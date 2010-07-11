@@ -25,6 +25,10 @@
 
 #include "caleneditor.h"
 #include "caleneditor_p.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "caleneditorTraces.h"
+#endif
 
 /*!
 	\class CalenEditor
@@ -37,7 +41,9 @@
 CalenEditor::CalenEditor(QObject *parent)
 :QObject(parent),d_ptr(new CalenEditorPrivate(0, this))
 {
+	OstTraceFunctionEntry0( CALENEDITOR_CALENEDITOR_ENTRY );
 	
+	OstTraceFunctionExit0( CALENEDITOR_CALENEDITOR_EXIT );
 }
 
 /*!
@@ -49,7 +55,9 @@ CalenEditor::CalenEditor(QObject *parent)
 CalenEditor::CalenEditor(AgendaUtil *agendaUtil, QObject *parent)
 :QObject(parent), d_ptr(new CalenEditorPrivate(agendaUtil, this))
 {
+	OstTraceFunctionEntry0( DUP1_CALENEDITOR_CALENEDITOR_ENTRY );
 	
+	OstTraceFunctionExit0( DUP1_CALENEDITOR_CALENEDITOR_EXIT );
 }
 
 /*!
@@ -57,9 +65,11 @@ CalenEditor::CalenEditor(AgendaUtil *agendaUtil, QObject *parent)
  */
 CalenEditor::~CalenEditor()
 {
+	OstTraceFunctionEntry0( DUP2_CALENEDITOR_CALENEDITOR_ENTRY );
 	if (d_ptr) {
 		delete d_ptr;
 	}
+	OstTraceFunctionExit0( DUP2_CALENEDITOR_CALENEDITOR_EXIT );
 }
 
 /*!
@@ -70,7 +80,9 @@ CalenEditor::~CalenEditor()
  */
 void CalenEditor::edit(const QFile &handle, bool launchCalendar)
 {
+	OstTraceFunctionEntry0( CALENEDITOR_EDIT_ENTRY );
 	d_ptr->edit(handle, launchCalendar);
+	OstTraceFunctionExit0( CALENEDITOR_EDIT_EXIT );
 }
 
 /*!
@@ -81,10 +93,13 @@ void CalenEditor::edit(const QFile &handle, bool launchCalendar)
  */
 void CalenEditor::edit(AgendaEntry entry, bool launchCalendar)
 {
+	OstTraceFunctionEntry0( DUP1_CALENEDITOR_EDIT_ENTRY );
 	if(entry.isNull()) {
+		OstTraceFunctionExit0( DUP1_CALENEDITOR_EDIT_EXIT );
 		return;
 	}
 	d_ptr->edit(entry, launchCalendar);
+	OstTraceFunctionExit0( DUP2_CALENEDITOR_EDIT_EXIT );
 }
 
 /*!
@@ -93,7 +108,9 @@ void CalenEditor::edit(AgendaEntry entry, bool launchCalendar)
  */
 void CalenEditor::edit(ulong id, bool launchCalendar)
 {
+	OstTraceFunctionEntry0( DUP2_CALENEDITOR_EDIT_ENTRY );
 	d_ptr->edit(id, launchCalendar);
+	OstTraceFunctionExit0( DUP3_CALENEDITOR_EDIT_EXIT );
 }
 
 /*!
@@ -107,7 +124,9 @@ void CalenEditor::edit(ulong id, bool launchCalendar)
 void CalenEditor::create(QDateTime newEntryDateTime, bool launchCalendar, 
                          CalenEditor::CreateType type)
 {
+	OstTraceFunctionEntry0( CALENEDITOR_CREATE_ENTRY );
 	d_ptr->create(type, newEntryDateTime, launchCalendar);
+	OstTraceFunctionExit0( CALENEDITOR_CREATE_EXIT );
 }
 
 /*!
@@ -121,10 +140,13 @@ void CalenEditor::create(QDateTime newEntryDateTime, bool launchCalendar,
 void CalenEditor::create(AgendaEntry entry, bool launchCalendar, 
                          CalenEditor::CreateType type)
 {
+	OstTraceFunctionEntry0( DUP1_CALENEDITOR_CREATE_ENTRY );
 	if(entry.isNull()) {
+		OstTraceFunctionExit0( DUP1_CALENEDITOR_CREATE_EXIT );
 		return;
 	}
 	d_ptr->create(type, entry, launchCalendar);
+	OstTraceFunctionExit0( DUP2_CALENEDITOR_CREATE_EXIT );
 }
 
 // End of file	--Don't remove this.

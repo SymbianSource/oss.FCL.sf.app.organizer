@@ -137,6 +137,11 @@ private slots:
 	 * @brief Slot which launches the day view
 	 */
 	void launchDayView();
+	
+	/**
+	 * @brief Slot which launches the editor
+	 */
+	void createNewEvent();
 
 private:
 	

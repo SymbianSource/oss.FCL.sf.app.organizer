@@ -98,6 +98,11 @@ public:
      */
     void clearListModel();
     
+    /**
+     * @brief Opens the editor to create a new entry
+     */
+    void createNewEvent();
+    
 private:
     
     /**
@@ -167,16 +172,10 @@ private:
      */
     
     void showHideRegionalInformation();
-    
-   
+
     
 private slots:
 
-    /**
-     * @brief Opens the editor to create a new entry
-     */
-    void createNewEvent();
-    
     /**
      * @brief Opens the entry at position index in the list for
      * editing in the editor. Does nothing if the index is invalid

@@ -174,6 +174,8 @@ private:
 	bool mInstanceViewCreated;
 	mutable int iError;
 	bool mIsDeleting;
+	bool mIsInstanceViewBeingDeleted;
+	bool mIsEntryViewBeingDeleted;
 
 	enum CompareResult {
 		Equal = 0, 			// 1. == 2.

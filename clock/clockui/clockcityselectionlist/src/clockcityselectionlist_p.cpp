@@ -240,51 +240,42 @@ void ClockCitySelectionListPrivate::handleAddOwnCityAction()
 	if (mAddOwnCityDialog) {
 		delete mAddOwnCityDialog;
 	}
+	
+	HbMainWindow *window = hbInstance->allMainWindows().first();
 
-	// Create the dialog.
-	mAddOwnCityDialog = new HbDialog;
+	connect(
+			window, SIGNAL(orientationChanged(Qt::Orientation)),
+			this, SLOT(loadSection(Qt::Orientation)));
+	
+	mAddCityDocloader = new HbDocumentLoader();
+	bool success = false;
+	mAddCityDocloader->load(":/xml/clockaddcitydialog.docml", &success);
+	if (!success) {
+		qFatal("Unable to load the document.");
+	}
+
+	// Get the dialog.
+	mAddOwnCityDialog = static_cast<HbDialog *> (mAddCityDocloader->findWidget("dialog"));
+	if (!mAddOwnCityDialog) {
+		qFatal("Unable to get the selection view.");
+	}
 	mAddOwnCityDialog->setTimeout(HbDialog::NoTimeout);
 	mAddOwnCityDialog->setDismissPolicy(HbDialog::NoDismiss);
 	mAddOwnCityDialog->setAttribute(Qt::WA_DeleteOnClose, true);
-
-	// Set the heading text
-	HbLabel *titlelabel = new HbLabel(hbTrId("txt_clk_opt_add_own_city"));
-	mAddOwnCityDialog->setHeadingWidget(titlelabel);
-
-	QGraphicsGridLayout *layout = new QGraphicsGridLayout();
-
-	// Set city name label and line edit
-	HbLabel *cityNameLabel = new HbLabel(hbTrId("txt_clock_formlabel_city_name"));
-	layout->addItem(cityNameLabel,0,0);
-
-	addCityNameField();
-	layout->addItem(mCityNameEdit, 0, 1);
-
-	// Set time zone label and combobox
-	HbLabel *timeZoneLabel = new HbLabel(hbTrId("txt_clock_formlabel_timezone"));
-	layout->addItem(timeZoneLabel, 1,0);
-
-	addTimeZoneField();
-	layout->addItem(mTimeZoneComboBox, 1,1);
-
-	// Set the country label and combobox
-	HbLabel *countryLabel = new HbLabel(hbTrId("txt_clock_formlabel_country"));
-	layout->addItem(countryLabel, 2,0);
-
+	
+	// Find the elements from the docml.
+	mCityNameEdit = static_cast<HbLineEdit *> (mAddCityDocloader->findWidget("cityNameLineEdit"));
+	
+	mTimeZoneComboBox = static_cast<HbComboBox *> (mAddCityDocloader->findWidget("timezoneCombobox"));
+	if (mTimeZoneComboBox) {
+		addTimeZoneField();
+	}
+	
+	mCountryComboBox = static_cast<HbComboBox *> (mAddCityDocloader->findWidget("counrtyCombobox"));
 	addCountryListField();
-	layout->addItem(mCountryComboBox, 2,1);
-
-	QGraphicsWidget *widget = new QGraphicsWidget();
-	widget->setLayout(layout);
-
-	// Add actions to the dialog
-	mOkAction = new HbAction(hbTrId("txt_common_button_ok"));
-	mCancelAction = new HbAction(hbTrId("txt_common_button_cancel"));
-
-	mAddOwnCityDialog->addAction(mOkAction);
-	mAddOwnCityDialog->addAction(mCancelAction);
-
-	mAddOwnCityDialog->setContentWidget(widget);
+	
+	mOkAction = static_cast<HbAction *> (mAddCityDocloader->findObject("okAction"));
+	
 	mAddOwnCityDialog->open(this, SLOT(selectedAction(HbAction*)));
 }
 
@@ -356,6 +347,24 @@ void ClockCitySelectionListPrivate::selectedAction(HbAction *action)
 		handleOkAction();
 	}
 }
+
+/*!
+	Slot to handle the orientation change.
+ */
+void ClockCitySelectionListPrivate::loadSection(Qt::Orientation orientation)
+{
+	bool loadSuccess;
+	if (mAddOwnCityDialog) {
+		if (Qt::Horizontal == orientation) {
+			mAddCityDocloader->load(":/xml/clockaddcitydialog.docml",
+					"landscape", &loadSuccess);
+		} else if (Qt::Vertical == orientation) {
+			mAddCityDocloader->load(":/xml/clockaddcitydialog.docml",
+					"portrait", &loadSuccess);
+		}
+	}
+}
+
 /*!
 	Displays the city selection list.
  */
@@ -490,7 +499,7 @@ void ClockCitySelectionListPrivate::addCityNameField()
  */
 void ClockCitySelectionListPrivate::addTimeZoneField()
 {
-	mTimeZoneComboBox = new HbComboBox();
+//	mTimeZoneComboBox = new HbComboBox();
 
 	QStringList texts = getOffsetTexts();
 	mTimeZoneComboBox->addItems(texts);
@@ -511,8 +520,6 @@ void ClockCitySelectionListPrivate::addTimeZoneField()
  */
 void ClockCitySelectionListPrivate::addCountryListField()
 {
-	mCountryComboBox = new HbComboBox();
-
 	// Populate the country list based on the current TZ offset selected.
 	handleTimeZoneSelection(mCurrentTZOffsetIndex);
 }

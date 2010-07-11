@@ -44,6 +44,11 @@
 #include "calendateutils.h"
 #include "caleneditorcommon.h"
 #include "caleneditordocloader.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "caleneditorcustomitemTraces.h"
+#endif
+
 
 /*!
 	\class CalenEditorCustomItem
@@ -63,6 +68,7 @@ CalenEditorCustomItem::CalenEditorCustomItem(QGraphicsItem *parent)
  mDatePicker(NULL),
  mTimePicker(NULL)
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_CALENEDITORCUSTOMITEM_ENTRY );
 	mMinDate = CalenDateUtils::minTime().date();
 	mMaxDate = CalenDateUtils::maxTime().date();
 	mMinTime.setHMS(0,0,0,0);
@@ -70,19 +76,23 @@ CalenEditorCustomItem::CalenEditorCustomItem(QGraphicsItem *parent)
 	mLocale = HbExtendedLocale::system();
 	mLocationLineEdit = NULL;
 	mLocationPushButton = NULL;
+	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_CALENEDITORCUSTOMITEM_EXIT );
 }
 /*!
 	Destructor.
  */
 CalenEditorCustomItem::~CalenEditorCustomItem()
 {
+	OstTraceFunctionEntry0( DUP1_CALENEDITORCUSTOMITEM_CALENEDITORCUSTOMITEM_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( DUP1_CALENEDITORCUSTOMITEM_CALENEDITORCUSTOMITEM_EXIT );
 }
 /*!
 	Creates a new CalenEditorCustomItem.
  */
 HbAbstractViewItem* CalenEditorCustomItem::createItem()
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_CREATEITEM_ENTRY );
 	return new CalenEditorCustomItem(*this);
 }
 /*!
@@ -90,6 +100,7 @@ HbAbstractViewItem* CalenEditorCustomItem::createItem()
  */
 HbWidget* CalenEditorCustomItem::createCustomWidget()
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_CREATECUSTOMWIDGET_ENTRY );
 	HbDataFormModelItem::DataItemType itemType =
 			static_cast<HbDataFormModelItem::DataItemType> (modelIndex() .data(
 					HbDataFormModelItem::ItemTypeRole).toInt());
@@ -103,15 +114,18 @@ HbWidget* CalenEditorCustomItem::createCustomWidget()
 		widgetTop->setLayout(layoutTop);
 
 			mPushButtonTime = new HbPushButton();
+			mPushButtonTime->setObjectName("startTime");
 			connect(mPushButtonTime, SIGNAL(clicked()),
 									this, SLOT(handleTime()));
 			layoutTop->addItem(mPushButtonTime);
 
 			mPushButtonDate =
 			                new HbPushButton();
+			mPushButtonDate->setObjectName("startDate");
 			connect(mPushButtonDate, SIGNAL(clicked()),
 												this, SLOT(handleDate()));
 			layoutTop->addItem(mPushButtonDate);
+			OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_CREATECUSTOMWIDGET_EXIT );
 			return widgetTop;
 		}
 
@@ -124,14 +138,17 @@ HbWidget* CalenEditorCustomItem::createCustomWidget()
 		widgetBottom->setLayout(layoutBottom);
 
 		mPushButtonTime = new HbPushButton(this);
+		mPushButtonTime->setObjectName("endTime");
 		connect(mPushButtonTime, SIGNAL(clicked()),
 											this, SLOT(handleTime()));
 		layoutBottom->addItem(mPushButtonTime);
 		
 		mPushButtonDate = new HbPushButton(this);
+		mPushButtonDate->setObjectName("endDate");
 		connect(mPushButtonDate, SIGNAL(clicked()),
 												this, SLOT(handleDate()));
 		layoutBottom->addItem(mPushButtonDate);
+			OstTraceFunctionExit0( DUP1_CALENEDITORCUSTOMITEM_CREATECUSTOMWIDGET_EXIT );
 		return widgetBottom;
 		}
 				
@@ -150,11 +167,13 @@ HbWidget* CalenEditorCustomItem::createCustomWidget()
 			mLocationLineEdit = qobject_cast<HbLineEdit *>( 
 									editorLocationDocLoader.findWidget(
 											CALEN_EDITOR_LOCATION_LINEEDIT));
+			mLocationLineEdit->setObjectName("locationLineEdit");
 			mLocationLineEdit->setMinRows(1);
 			mLocationLineEdit->setMaxRows(4);
 			mLocationPushButton = qobject_cast<HbPushButton*>(
 									editorLocationDocLoader.findWidget(
 											CALEN_EDITOR_LOCATION_PUSHBUTTON));
+			mLocationPushButton->setObjectName("locationIcon");
 			mLocationPushButton->setIcon( HbIcon("qtg_mono_location"));
 			
 			connect(mLocationPushButton, SIGNAL(clicked()), this, 
@@ -165,18 +184,23 @@ HbWidget* CalenEditorCustomItem::createCustomWidget()
 			connect(mLocationLineEdit, SIGNAL(editingFinished()),
 			            this, SLOT(handleEditingFinished()));
 			
+			OstTraceFunctionExit0( DUP2_CALENEDITORCUSTOMITEM_CREATECUSTOMWIDGET_EXIT );
 			return widgetLocation;
 		}
 		
 		case RepeatUntilOffset:
 		{
 		mRepeatUntilWidget = new HbPushButton(this);
+		mRepeatUntilWidget->setObjectName("repeatUntilItem");
+		OstTraceFunctionExit0( DUP3_CALENEDITORCUSTOMITEM_CREATECUSTOMWIDGET_EXIT );
 		return mRepeatUntilWidget;
 		}
 				
 		case ReminderTimeOffset:
 		{
 			mReminderTimeWidget = new HbPushButton(this);
+			mReminderTimeWidget->setObjectName("remainderTimeItem");
+			OstTraceFunctionExit0( DUP4_CALENEDITORCUSTOMITEM_CREATECUSTOMWIDGET_EXIT );
 			return mReminderTimeWidget;
 		}
 		
@@ -190,6 +214,7 @@ HbWidget* CalenEditorCustomItem::createCustomWidget()
 
 void CalenEditorCustomItem::launchLocationPicker()
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_LAUNCHLOCATIONPICKER_ENTRY );
 	XQApplicationManager *appManager = new XQApplicationManager();
 
     XQAiwRequest *request = appManager->create("com.nokia.symbian", "ILocationPick", "pick()", true);
@@ -201,6 +226,7 @@ void CalenEditorCustomItem::launchLocationPicker()
 			setSelectedLocation(retValue);
 		}
 	}
+    OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_LAUNCHLOCATIONPICKER_EXIT );
 }
 /*!
 	set the selected location from the picker to the line edit widget 
@@ -208,6 +234,7 @@ void CalenEditorCustomItem::launchLocationPicker()
 */
 void CalenEditorCustomItem::setSelectedLocation( QVariant &aValue )
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_SETSELECTEDLOCATION_ENTRY );
 	QLocationPickerItem selectedLocation = aValue.value<QLocationPickerItem>();
 	if( selectedLocation.mIsValid )
     {
@@ -226,6 +253,7 @@ void CalenEditorCustomItem::setSelectedLocation( QVariant &aValue )
 		emit locationTextChanged(locationString, selectedLocation.mLatitude, selectedLocation.mLongitude);
 		mLocationLineEdit->setText(locationString );
     }
+	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_SETSELECTEDLOCATION_EXIT );
 }
 
 /*!
@@ -233,6 +261,7 @@ void CalenEditorCustomItem::setSelectedLocation( QVariant &aValue )
  */
 void CalenEditorCustomItem::populateDateTime(QDateTime defaultDateTime, bool isFromItem)
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_POPULATEDATETIME_ENTRY );
 	// Store the date and time to be shown
     mDate = defaultDateTime.date();
 	mTime = defaultDateTime.time();
@@ -243,6 +272,7 @@ void CalenEditorCustomItem::populateDateTime(QDateTime defaultDateTime, bool isF
 												r_qtn_date_usual_with_zero));
 	mPushButtonTime->setText(mLocale.format(defaultDateTime.time(), 
 												r_qtn_time_usual_with_zero));
+	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_POPULATEDATETIME_EXIT );
 }
 
 /*!
@@ -250,7 +280,9 @@ void CalenEditorCustomItem::populateDateTime(QDateTime defaultDateTime, bool isF
  */
 void CalenEditorCustomItem::populateLocation(QString location )
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_POPULATELOCATION_ENTRY );
 	mLocationLineEdit->setText( location );
+	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_POPULATELOCATION_EXIT );
 }
 
 /*!
@@ -258,6 +290,7 @@ void CalenEditorCustomItem::populateLocation(QString location )
  */
 void CalenEditorCustomItem::setDateRange(QDate start, QDate end)
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_SETDATERANGE_ENTRY );
 	mMaxDate = end;
 	mMinDate = start;
 	// Check if both are falling on same day
@@ -266,6 +299,7 @@ void CalenEditorCustomItem::setDateRange(QDate start, QDate end)
 			(mMaxDate.day() == mMinDate.day())) {
 		enableDateButton(false);
 	}
+	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_SETDATERANGE_EXIT );
 }
 
 /*!
@@ -273,8 +307,10 @@ void CalenEditorCustomItem::setDateRange(QDate start, QDate end)
  */
 void CalenEditorCustomItem::setTimeRange(QTime start, QTime end)
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_SETTIMERANGE_ENTRY );
 	mMaxTime = start;
 	mMinTime = end;
+	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_SETTIMERANGE_EXIT );
 }
 
 /*!
@@ -282,7 +318,9 @@ void CalenEditorCustomItem::setTimeRange(QTime start, QTime end)
  */
 void CalenEditorCustomItem::enableDateButton(bool value)
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_ENABLEDATEBUTTON_ENTRY );
 	mPushButtonDate->setEnabled(value);
+	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_ENABLEDATEBUTTON_EXIT );
 }
 
 /*!
@@ -290,7 +328,9 @@ void CalenEditorCustomItem::enableDateButton(bool value)
  */
 void CalenEditorCustomItem::handleLocationTextChange(QString location)
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_HANDLELOCATIONTEXTCHANGE_ENTRY );
 	emit locationTextChanged(location);
+	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_HANDLELOCATIONTEXTCHANGE_EXIT );
 }
 
 /*!
@@ -298,7 +338,9 @@ void CalenEditorCustomItem::handleLocationTextChange(QString location)
  */
 void CalenEditorCustomItem::handleEditingFinished()
 {
+    OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_HANDLEEDITINGFINISHED_ENTRY );
     emit locationEditingFinished();
+    OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_HANDLEEDITINGFINISHED_EXIT );
 }
 
 /*!
@@ -306,6 +348,7 @@ void CalenEditorCustomItem::handleEditingFinished()
  */
 void CalenEditorCustomItem::handleDate()
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_HANDLEDATE_ENTRY );
 	// Create a popup with datepicker for the user to select date.
 	HbDialog *popUp = new HbDialog();
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
@@ -334,6 +377,7 @@ void CalenEditorCustomItem::handleDate()
 	connect(okAction, SIGNAL(triggered()), this, SLOT(saveDate()));
 	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"), popUp));
 	popUp->open();
+	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_HANDLEDATE_EXIT );
 }
 
 /*!
@@ -341,6 +385,7 @@ void CalenEditorCustomItem::handleDate()
  */
 void CalenEditorCustomItem::handleTime()
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_HANDLETIME_ENTRY );
 	// Create a popup with time picker for the user to select time.
 	HbDialog *popUp = new HbDialog();
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
@@ -374,6 +419,7 @@ void CalenEditorCustomItem::handleTime()
 	connect(okAction, SIGNAL(triggered()), this, SLOT(saveTime()));
 	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"), popUp));
 	popUp->open();
+	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_HANDLETIME_EXIT );
 }
 
 /*!
@@ -381,6 +427,7 @@ void CalenEditorCustomItem::handleTime()
  */
 void CalenEditorCustomItem::saveDate()
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_SAVEDATE_ENTRY );
 	mDate = mDatePicker->date(); 
 	if (mDate.isValid()) {
 		mPushButtonDate->setText(mLocale.format(mDate, 
@@ -388,6 +435,7 @@ void CalenEditorCustomItem::saveDate()
 		QDateTime dateTime(mDate,mTime);
 		emit dateTimeUpdated(dateTime);
 		}
+	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_SAVEDATE_EXIT );
 }
 
 /*!
@@ -395,6 +443,7 @@ void CalenEditorCustomItem::saveDate()
  */
 void CalenEditorCustomItem::saveTime()
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_SAVETIME_ENTRY );
 	mTime = mTimePicker->time();
 	if (mTime.isValid()) {
 		mPushButtonTime->setText(mLocale.format(mTime, 
@@ -403,6 +452,7 @@ void CalenEditorCustomItem::saveTime()
 		QDateTime dateTime(mDate,mTime);
 		emit dateTimeUpdated(dateTime);
 	}
+	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_SAVETIME_EXIT );
 }
 
 /*!
@@ -410,6 +460,7 @@ void CalenEditorCustomItem::saveTime()
  */
 void CalenEditorCustomItem::enableFromTimeFieldAndSetTime(bool enableTimeFiles, QDateTime fromDateTime)
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_ENABLEFROMTIMEFIELDANDSETTIME_ENTRY );
 	// Set FromTime filed Read-Only/Editable 
 	mPushButtonTime->setEnabled(enableTimeFiles);
 	
@@ -418,6 +469,7 @@ void CalenEditorCustomItem::enableFromTimeFieldAndSetTime(bool enableTimeFiles, 
 	
 	// Store the time
     mTime = fromDateTime.time();
+    OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_ENABLEFROMTIMEFIELDANDSETTIME_EXIT );
 }
 
 /*!
@@ -425,8 +477,10 @@ void CalenEditorCustomItem::enableFromTimeFieldAndSetTime(bool enableTimeFiles, 
  */
 void CalenEditorCustomItem::disableFromToDateField()
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_DISABLEFROMTODATEFIELD_ENTRY );
 	// disable the date field.
 	mPushButtonDate->setEnabled(false);
+	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_DISABLEFROMTODATEFIELD_EXIT );
 }
 
 /*!
@@ -434,6 +488,7 @@ void CalenEditorCustomItem::disableFromToDateField()
  */
 void CalenEditorCustomItem::enableToTimeFieldAndSetTime(bool enableTimeFiles, QDateTime toDateTime)
 {
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_ENABLETOTIMEFIELDANDSETTIME_ENTRY );
 	// Set ToTime filed Read-Only/Editable 
 	mPushButtonTime->setEnabled(enableTimeFiles);
 	
@@ -443,6 +498,7 @@ void CalenEditorCustomItem::enableToTimeFieldAndSetTime(bool enableTimeFiles, QD
 	
 	// Store the time
 	mTime = toDateTime.time();
+	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_ENABLETOTIMEFIELDANDSETTIME_EXIT );
 }
 
 /*!
@@ -450,20 +506,24 @@ void CalenEditorCustomItem::enableToTimeFieldAndSetTime(bool enableTimeFiles, QD
  */
 bool CalenEditorCustomItem::canSetModelIndex(const QModelIndex &index) const
 {
+    OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_CANSETMODELINDEX_ENTRY );
     HbDataFormModelItem::DataItemType itemType = 
         static_cast<HbDataFormModelItem::DataItemType>(
         index.data(HbDataFormModelItem::ItemTypeRole).toInt());
 
     if(itemType == CustomWidgetFrom || itemType == CustomWidgetTo || itemType == RepeatUntilOffset 
 			|| itemType == CustomWidgetLocation || itemType == ReminderTimeOffset ) {
+        OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_CANSETMODELINDEX_EXIT );
         return true;
     } else {
+        OstTraceFunctionExit0( DUP1_CALENEDITORCUSTOMITEM_CANSETMODELINDEX_EXIT );
         return false;
     }
 }
 
 void CalenEditorCustomItem::restore()
 {
+    OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_RESTORE_ENTRY );
     HbDataFormModelItem::DataItemType itemType = 
         static_cast<HbDataFormModelItem::DataItemType>(
         modelIndex().data(HbDataFormModelItem::ItemTypeRole).toInt());
@@ -485,10 +545,12 @@ void CalenEditorCustomItem::restore()
     	}
     	break;
     }
+    OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_RESTORE_EXIT );
 }
 
 QDateTime CalenEditorCustomItem::getDateTime()
 {
+    OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_GETDATETIME_ENTRY );
     return QDateTime(mDate, mTime);
 }
 

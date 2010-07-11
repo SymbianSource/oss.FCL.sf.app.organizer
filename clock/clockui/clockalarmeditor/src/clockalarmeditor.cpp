@@ -482,6 +482,7 @@ void ClockAlarmEditor::populateModelItems()
 			mAlarmEditorModel->invisibleRootItem());
 	mAlarmTimeItem->setContentWidgetData(
 			"text", mAlarmInfo.nextDueTime.toString(mTimeFormat));
+	mAlarmTimeItem->setContentWidgetData("objectName", "alarmTime");
 	mAlarmEditorForm->addConnection(
 			mAlarmTimeItem, SIGNAL(pressed()),
 			this, SLOT(launchTimePicker()));
@@ -497,6 +498,8 @@ void ClockAlarmEditor::populateModelItems()
 			<< hbTrId("txt_clk_setlabel_val_repeat_weekly")
 			<< hbTrId("txt_clk_setlabel_val_repeat_on_workdays");
 	mAlarmOccurenceItem->setContentWidgetData("items", repeatTypes);
+	mAlarmOccurenceItem->setContentWidgetData(
+			"objectName", "alarmOccurence");
 	mAlarmEditorForm->addConnection(
 			mAlarmOccurenceItem, SIGNAL(currentIndexChanged(int)),
 			this, SLOT(handleOccurenceChanged(int)));
@@ -528,7 +531,7 @@ void ClockAlarmEditor::populateModelItems()
 			mAlarmDayItem->setContentWidgetData("items", alarmDays);
 			mAlarmDayItem->setContentWidgetData(
 					"currentIndex",currentIndex);
-
+			mAlarmDayItem->setContentWidgetData("objectName", "alarmDay");
 			mAlarmDayItemInserted = true;
 		}/* else { TODO: check and remove this else block.
 			HbDataFormModelItem *dayItem = formItem(2);
@@ -551,7 +554,7 @@ void ClockAlarmEditor::populateModelItems()
 	if (AlarmVolumeOn == mAlarmInfo.volumeStatus) {
 		mAlarmSoundItem->setContentWidgetData("checkState",Qt::Checked);
 	}
-
+	mAlarmSoundItem->setContentWidgetData("objectName", "alarmaSound");
 	mAlarmEditorForm->addConnection(
 			mAlarmSoundItem, SIGNAL(stateChanged(int)),
 			this,SLOT(handleAlarmSoundChanged(int)));
@@ -562,6 +565,7 @@ void ClockAlarmEditor::populateModelItems()
 			QString(hbTrId("txt_clk_formlabel_description")),
 			mAlarmEditorModel->invisibleRootItem());
 	mAlarmDescription->setContentWidgetData("text", mAlarmInfo.alarmDesc);
+	mAlarmDescription->setContentWidgetData("objectName", "alaramDescription");
 
 }
 

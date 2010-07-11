@@ -21,6 +21,7 @@ TARGET = caleneditor
 DEFINES += CALENEDITOR_LIB
 INCLUDEPATH += ./src \
 			./inc \
+			./traces \
 			..\inc
 DEPENDPATH += ./src \
 			  ./inc \

@@ -152,6 +152,7 @@ class  CalenViewManager :	public QObject,
 		void handleInstanceViewCreation(int status);
 		void handleEntryViewCreation(int status);
 		void handleDayViewReady();
+		void handleEntriesChanged(QList<ulong>);
 		
     private:  // Data        
 

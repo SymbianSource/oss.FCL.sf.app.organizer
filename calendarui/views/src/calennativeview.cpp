@@ -35,6 +35,11 @@
 #include "calensettingsview.h"
 #include "calendateutils.h"
 #include "calenconstants.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calennativeviewTraces.h"
+#endif
+
 
 /*!
  \class CalenNativeView
@@ -47,6 +52,8 @@
 CalenNativeView::CalenNativeView(MCalenServices &services) :
 	mServices(services), mIsCapturedScreenShotValid(false)
 {
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_CALENNATIVEVIEW_ENTRY );
+    
 	setTitle(hbTrId("txt_calendar_title_calendar"));
 
 	// Create services API and register for notifications
@@ -60,6 +67,8 @@ CalenNativeView::CalenNativeView(MCalenServices &services) :
 	mServices.RegisterForNotificationsL(this, notificationArray);
 
 	CleanupStack::PopAndDestroy(&notificationArray);
+	
+	OstTraceFunctionExit0( CALENNATIVEVIEW_CALENNATIVEVIEW_EXIT );
 }
 
 /*!
@@ -67,6 +76,9 @@ CalenNativeView::CalenNativeView(MCalenServices &services) :
  */
 CalenNativeView::~CalenNativeView()
 {
+    OstTraceFunctionEntry0( DUP1_CALENNATIVEVIEW_CALENNATIVEVIEW_ENTRY );
+    
+    OstTraceFunctionExit0( DUP1_CALENNATIVEVIEW_CALENNATIVEVIEW_EXIT );
 }
 
 /*!
@@ -74,8 +86,12 @@ CalenNativeView::~CalenNativeView()
  */
 void CalenNativeView::populationComplete()
 {
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_POPULATIONCOMPLETE_ENTRY );
+    
 	// Population is complete, issue the notification
 	mServices.IssueNotificationL(ECalenNotifyViewPopulationComplete);
+	
+	OstTraceFunctionExit0( CALENNATIVEVIEW_POPULATIONCOMPLETE_EXIT );
 }
 
 /*!
@@ -83,7 +99,11 @@ void CalenNativeView::populationComplete()
  */
 void CalenNativeView::deleteBeforeDate()
 {
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_DELETEBEFOREDATE_ENTRY );
+    
 	mServices.IssueCommandL(ECalenDeleteEntriesBeforeDate);
+	
+	OstTraceFunctionExit0( CALENNATIVEVIEW_DELETEBEFOREDATE_EXIT );
 }
 
 /*!
@@ -91,7 +111,11 @@ void CalenNativeView::deleteBeforeDate()
  */
 void CalenNativeView::deleteAllEntries()
 {
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_DELETEALLENTRIES_ENTRY );
+    
 	mServices.IssueCommandL(ECalenDeleteAllEntries);
+	
+	OstTraceFunctionExit0( CALENNATIVEVIEW_DELETEALLENTRIES_EXIT );
 }
 
 /*!
@@ -99,6 +123,8 @@ void CalenNativeView::deleteAllEntries()
  */
 void CalenNativeView::goToDate()
 {
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_GOTODATE_ENTRY );
+    
 	// Create a popup with datepicker for the user to select date.
 	HbDialog *popUp = new HbDialog();
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
@@ -121,6 +147,8 @@ void CalenNativeView::goToDate()
 	connect(okAction, SIGNAL(triggered()), this, SLOT(goToSelectedDate()));
 	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"), popUp));
 	popUp->open();
+	
+	OstTraceFunctionExit0( CALENNATIVEVIEW_GOTODATE_EXIT );
 }
 
 /*
@@ -128,6 +156,8 @@ void CalenNativeView::goToDate()
  */
 void CalenNativeView::goToSelectedDate()
 {
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_GOTOSELECTEDDATE_ENTRY );
+    
 	QDate selectedDate = mDatePicker->date();
 
 	// Check if the selected date is within the range.
@@ -142,6 +172,8 @@ void CalenNativeView::goToSelectedDate()
 		context.setFocusDateAndTime(contextDate);
 	}
 	refreshViewOnGoToDate();
+	
+	OstTraceFunctionExit0( CALENNATIVEVIEW_GOTOSELECTEDDATE_EXIT );
 }
 
 /*!
@@ -150,7 +182,11 @@ void CalenNativeView::goToSelectedDate()
  */
 void CalenNativeView::refreshViewOnGoToDate()
 {
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_REFRESHVIEWONGOTODATE_ENTRY );
+    
 	mServices.IssueCommandL(ECalenStartActiveStep);
+	
+	OstTraceFunctionExit0( CALENNATIVEVIEW_REFRESHVIEWONGOTODATE_EXIT );
 }
 
 /*!
@@ -158,7 +194,11 @@ void CalenNativeView::refreshViewOnGoToDate()
  */
 void CalenNativeView::launchSettingsView()
 {
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_LAUNCHSETTINGSVIEW_ENTRY );
+    
 	mServices.IssueCommandL(ECalenShowSettings);
+	
+	OstTraceFunctionExit0( CALENNATIVEVIEW_LAUNCHSETTINGSVIEW_EXIT );
 }
 
 /*!
@@ -166,8 +206,11 @@ void CalenNativeView::launchSettingsView()
  */
 void CalenNativeView::changeOrientation(Qt::Orientation orientation)
 {
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_CHANGEORIENTATION_ENTRY );
+    
     Q_UNUSED(orientation);
     // Nothing, derived classes will implement it
+    OstTraceFunctionExit0( CALENNATIVEVIEW_CHANGEORIENTATION_EXIT );
 }
 
 /*!
@@ -175,6 +218,8 @@ void CalenNativeView::changeOrientation(Qt::Orientation orientation)
  */
 void CalenNativeView::HandleNotification(const TCalenNotification notification)
 {
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_HANDLENOTIFICATION_ENTRY );
+    
 	switch (notification) {
 		case ECalenNotifySystemLocaleChanged: {
 			onLocaleChanged(EChangesLocale);
@@ -187,6 +232,8 @@ void CalenNativeView::HandleNotification(const TCalenNotification notification)
 		default:
 			break;
 	}
+	
+	OstTraceFunctionExit0( CALENNATIVEVIEW_HANDLENOTIFICATION_EXIT );
 }
 
 /*!
@@ -194,17 +241,25 @@ void CalenNativeView::HandleNotification(const TCalenNotification notification)
  */
 TBool CalenNativeView::pluginEnabled()
 {
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_PLUGINENABLED_ENTRY );
+    
 	QString *pluginInfo = mServices.InfobarTextL();
 	if (!pluginInfo) {
+		OstTraceFunctionExit0( CALENNATIVEVIEW_PLUGINENABLED_EXIT );
 		return false;
 	} else {
+		OstTraceFunctionExit0( DUP1_CALENNATIVEVIEW_PLUGINENABLED_EXIT );
 		return true;
 	}
 }
 
 QString *CalenNativeView::pluginText()
 {
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_PLUGINTEXT_ENTRY );
+    
+    OstTraceFunctionExit0( CALENNATIVEVIEW_PLUGINTEXT_EXIT );
 	return mServices.InfobarTextL();
+	
 }
 
 // ----------------------------------------------------------------------------
@@ -214,6 +269,8 @@ QString *CalenNativeView::pluginText()
 // 
 void CalenNativeView::captureScreenshot(bool captureScreenShot)
     {
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_CAPTURESCREENSHOT_ENTRY );
+    
     // get a screenshot for saving to the activity manager. It's done for once
     // to optimize the performance
     if (captureScreenShot) {
@@ -221,6 +278,8 @@ void CalenNativeView::captureScreenshot(bool captureScreenShot)
         mScreenShotMetadata.insert("screenshot", QPixmap::grabWidget(mainWindow(), mainWindow()->rect()));
         }
     mIsCapturedScreenShotValid = captureScreenShot; // set the validity of the screenshot captured
+    
+    OstTraceFunctionExit0( CALENNATIVEVIEW_CAPTURESCREENSHOT_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -229,6 +288,8 @@ void CalenNativeView::captureScreenshot(bool captureScreenShot)
 // 
 void CalenNativeView::saveActivity()
  {
+   OstTraceFunctionEntry0( CALENNATIVEVIEW_SAVEACTIVITY_ENTRY );
+    
    // Get a pointer to activity manager 
    HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
  
@@ -251,5 +312,6 @@ void CalenNativeView::saveActivity()
    if ( !ok )  {
        qFatal("Add failed" ); // Panic is activity is not saved successfully
        }
+   OstTraceFunctionExit0( CALENNATIVEVIEW_SAVEACTIVITY_EXIT );
  }
 //End Of File

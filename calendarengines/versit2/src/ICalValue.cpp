@@ -26,6 +26,7 @@
 // User includes.
 #include "ICalKeyWords.h"		// Literals
 #include "ICalRuleSegment.h"	// CICalRuleSegment
+#include "CleanupPointerArray.h"	// For TCleanupPointerArray
 
 // Constants.
 
@@ -814,7 +815,7 @@ EXPORT_C void CICalValue::GetRecurrenceRuleL(RPointerArray<CICalRuleSegment>& aR
 		}
 		
 	TUint charNum(0);
-	
+	CleanupPointerArrayPushL(aRuleSegmentArray);
 	do
 		{
 		// Create a rule segment from characters charNum to nextSemiColon
@@ -847,6 +848,7 @@ EXPORT_C void CICalValue::GetRecurrenceRuleL(RPointerArray<CICalRuleSegment>& aR
 		}
 	while (charNum < iValue->Length());
 	
+	CleanupStack::Pop(&aRuleSegmentArray);
 	TRACE_EXIT_POINT;
 	}
 

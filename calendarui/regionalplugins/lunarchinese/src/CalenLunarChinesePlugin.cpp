@@ -36,6 +36,7 @@
 #include "CalenLunarLocalizer.h"
 #include "CalenLunarInfoProvider.h"
 #include "CalendarPrivateCRKeys.h"
+#include "calenRegionalInfoData.h"
 #include "hb_calencommands.hrh"
 
 //CONSTANTS
@@ -99,7 +100,11 @@ CCalenLunarChinesePlugin::~CCalenLunarChinesePlugin()
  	    delete iInfoBarText;
  	    iInfoBarText = NULL;
  	    }
-        
+    if(iRegionalInfo)
+        {
+         delete iRegionalInfo;
+         iRegionalInfo = NULL;
+        }
 	delete iInfoProvider;
 	iInfoProvider = NULL;
 	delete iLocalizer;
@@ -132,7 +137,8 @@ void CCalenLunarChinesePlugin::ConstructL()
 	
 	iInfoProvider = CCalenLunarInfoProvider::NewL( 
 											CEikonEnv::Static()->FsSession() );
-	
+    //Qt class having a slot ,calls when user clicked show lunar data option
+	iRegionalInfo = new CalenRegionalInfo(*this);
 	
     TRACE_EXIT_POINT;	
 	}
@@ -203,9 +209,13 @@ void CCalenLunarChinesePlugin::CustomiseMenu(HbMenu* aHbMenu)
     {
     HbAction* lunarAction = new HbAction("Show Lunar Data");
     QList<QAction*> actionList = aHbMenu->actions();     
-    TInt count = actionList.count() - 1;  
+    TInt count = actionList.count() - 1;  //To show the option "show lunar data"
+                                          //as a second last action item  for all 
+                                          //Menu
     if(count >= 0)
     aHbMenu->insertAction(actionList[count], lunarAction);
+    //calls a slot whenever user clicked "show lunar data" option
+    QObject::connect(lunarAction,SIGNAL(triggered()), iRegionalInfo,SLOT(showRegionalDetails()));
     }
 
 // -----------------------------------------------------------------------------

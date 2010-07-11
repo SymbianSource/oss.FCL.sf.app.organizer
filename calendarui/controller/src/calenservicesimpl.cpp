@@ -23,6 +23,10 @@
 #include "calenservicesimpl.h"
 #include "calencontroller.h"
 #include "calenviewmanager.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenservicesimplTraces.h"
+#endif
 
 
 
@@ -36,7 +40,7 @@
 CalenServicesImpl* CalenServicesImpl::NewL( TInt aCommandRangeStart,
                                                                   TInt aCommandRangeEnd )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_NEWL_ENTRY );
     CalenServicesImpl* self = new( ELeave ) CalenServicesImpl(
                                        aCommandRangeStart, aCommandRangeEnd );
 
@@ -44,7 +48,7 @@ CalenServicesImpl* CalenServicesImpl::NewL( TInt aCommandRangeStart,
     self->ConstructL();
     CleanupStack::Pop( self );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENSERVICESIMPL_NEWL_EXIT );
     return self;
     }
 
@@ -56,14 +60,15 @@ CalenServicesImpl* CalenServicesImpl::NewL( TInt aCommandRangeStart,
 //
 CalenServicesImpl* CalenServicesImpl::NewL()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( DUP1_CALENSERVICESIMPL_NEWL_ENTRY );
+    
     CalenServicesImpl* self = new( ELeave ) CalenServicesImpl( 0, 0 );
 
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CALENSERVICESIMPL_NEWL_EXIT );
     return self;
     }
 
@@ -78,8 +83,9 @@ CalenServicesImpl::CalenServicesImpl( TInt aCommandRangeStart,
     : iCommandRangeStart( aCommandRangeStart ),
       iCommandRangeEnd( aCommandRangeEnd )
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_CALENSERVICESIMPL_ENTRY );
+    
+    OstTraceFunctionExit0( CALENSERVICESIMPL_CALENSERVICESIMPL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -90,11 +96,11 @@ CalenServicesImpl::CalenServicesImpl( TInt aCommandRangeStart,
 //
 void CalenServicesImpl::ConstructL()
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_CONSTRUCTL_ENTRY );
+    
     iController = CCalenController::InstanceL();
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENSERVICESIMPL_CONSTRUCTL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -105,7 +111,7 @@ void CalenServicesImpl::ConstructL()
 //
 void CalenServicesImpl::Release()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_RELEASE_ENTRY );
 
     if( iController )
         {
@@ -114,7 +120,7 @@ void CalenServicesImpl::Release()
     
     delete this;
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENSERVICESIMPL_RELEASE_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -125,9 +131,11 @@ void CalenServicesImpl::Release()
 //
 HbMainWindow& CalenServicesImpl::MainWindow()
     {
-	TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_MAINWINDOW_ENTRY );
+    
     ASSERT( iController ); // Make sure ConstructL has been called.
-	TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CALENSERVICESIMPL_MAINWINDOW_EXIT );
     return iController->MainWindow();
     }
 
@@ -140,12 +148,12 @@ HbMainWindow& CalenServicesImpl::MainWindow()
 void CalenServicesImpl::RegisterForNotificationsL( MCalenNotificationHandler* aHandler,
                                                             TCalenNotification aNotification )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_REGISTERFORNOTIFICATIONSL_ENTRY );
+    
     ASSERT( iController ); // Make sure ConstructL has been called.
     iController->RegisterForNotificationsL( aHandler, aNotification );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENSERVICESIMPL_REGISTERFORNOTIFICATIONSL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -157,12 +165,12 @@ void CalenServicesImpl::RegisterForNotificationsL( MCalenNotificationHandler* aH
 void CalenServicesImpl::RegisterForNotificationsL( MCalenNotificationHandler* aHandler,
                                                             RArray<TCalenNotification>& aNotifications )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( DUP1_CALENSERVICESIMPL_REGISTERFORNOTIFICATIONSL_ENTRY );
+    
     ASSERT( iController ); // Make sure ConstructL has been called.
     iController->RegisterForNotificationsL( aHandler, aNotifications );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CALENSERVICESIMPL_REGISTERFORNOTIFICATIONSL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -173,12 +181,12 @@ void CalenServicesImpl::RegisterForNotificationsL( MCalenNotificationHandler* aH
 //
 void CalenServicesImpl::CancelNotifications( MCalenNotificationHandler* aHandler )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_CANCELNOTIFICATIONS_ENTRY );
+    
     ASSERT( iController ); // Make sure ConstructL has been called.
     iController->CancelNotifications( aHandler );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENSERVICESIMPL_CANCELNOTIFICATIONS_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -189,10 +197,11 @@ void CalenServicesImpl::CancelNotifications( MCalenNotificationHandler* aHandler
 //
 TBool CalenServicesImpl::IssueCommandL( TInt aCommand )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_ISSUECOMMANDL_ENTRY );
+    
     ASSERT( iController ); // Make sure ConstructL has been called.
-
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CALENSERVICESIMPL_ISSUECOMMANDL_EXIT );
     return iController->IssueCommandL( aCommand );
     }
 
@@ -205,12 +214,12 @@ TBool CalenServicesImpl::IssueCommandL( TInt aCommand )
 //
 void CalenServicesImpl::IssueNotificationL( TCalenNotification aNotification )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_ISSUENOTIFICATIONL_ENTRY );
+    
     ASSERT( iController ); // Make sure ConstructL has been called.
     iController->BroadcastNotification( aNotification );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENSERVICESIMPL_ISSUENOTIFICATIONL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -221,8 +230,11 @@ void CalenServicesImpl::IssueNotificationL( TCalenNotification aNotification )
 //
 void CalenServicesImpl::RequestActivationL( const TVwsViewId& /*aViewId*/ )
     {
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_REQUESTACTIVATIONL_ENTRY );
     //ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
    // iController->RequestActivationL( aViewId );
+    
+    OstTraceFunctionExit0( CALENSERVICESIMPL_REQUESTACTIVATIONL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -233,7 +245,10 @@ void CalenServicesImpl::RequestActivationL( const TVwsViewId& /*aViewId*/ )
 //
 void CalenServicesImpl::ActivationNotificationL( const TVwsViewId& /*aViewId*/ )
     {
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_ACTIVATIONNOTIFICATIONL_ENTRY );
+    
     //ASSERT( iGlobalData && iController ); // Make sure ConstructL has been called.
+    OstTraceFunctionExit0( CALENSERVICESIMPL_ACTIVATIONNOTIFICATIONL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -244,9 +259,11 @@ void CalenServicesImpl::ActivationNotificationL( const TVwsViewId& /*aViewId*/ )
 //
 MCalenContext& CalenServicesImpl::Context()
     {
-	TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_CONTEXT_ENTRY );
+    
     ASSERT( iController ); // Make sure ConstructL has been called.
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CALENSERVICESIMPL_CONTEXT_EXIT );
     return iController->context();
     }
 
@@ -258,9 +275,9 @@ MCalenContext& CalenServicesImpl::Context()
 //
 HbWidget* CalenServicesImpl::Infobar( )
     {    
-    TRACE_ENTRY_POINT;
-
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_INFOBAR_ENTRY );
+    
+    OstTraceFunctionExit0( CALENSERVICESIMPL_INFOBAR_EXIT );
     return iController->Infobar();
     }
 // ----------------------------------------------------------------------------
@@ -271,9 +288,9 @@ HbWidget* CalenServicesImpl::Infobar( )
 //
 QString* CalenServicesImpl::InfobarTextL()
     {
-    TRACE_ENTRY_POINT;
-
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_INFOBARTEXTL_ENTRY );
+    
+    OstTraceFunctionExit0( CALENSERVICESIMPL_INFOBARTEXTL_EXIT );
     return iController->InfobarTextL();
     }
 // ----------------------------------------------------------------------------
@@ -285,12 +302,12 @@ QString* CalenServicesImpl::InfobarTextL()
 void CalenServicesImpl::GetCommandRange( TInt& aCommandRangeStart, 
                                                               TInt& aCommandRangeEnd ) const
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_GETCOMMANDRANGE_ENTRY );
+    
     aCommandRangeStart = iCommandRangeStart;
     aCommandRangeEnd = iCommandRangeEnd;
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENSERVICESIMPL_GETCOMMANDRANGE_EXIT );
     }
 // ----------------------------------------------------------------------------
 // CalenServicesImpl::OfferMenu
@@ -300,11 +317,11 @@ void CalenServicesImpl::GetCommandRange( TInt& aCommandRangeStart,
 //
 void CalenServicesImpl::OfferMenu(HbMenu* aHbMenu )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_OFFERMENU_ENTRY );
+    
     iController->OfferMenu(aHbMenu);
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENSERVICESIMPL_OFFERMENU_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -315,9 +332,9 @@ void CalenServicesImpl::OfferMenu(HbMenu* aHbMenu )
 //
 AgendaUtil* CalenServicesImpl::agendaInterface()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_AGENDAINTERFACE_ENTRY );
     
+    OstTraceFunctionExit0( CALENSERVICESIMPL_AGENDAINTERFACE_EXIT );
     return iController->agendaInterface();
     
     }
@@ -330,9 +347,9 @@ AgendaUtil* CalenServicesImpl::agendaInterface()
 //
 int CalenServicesImpl::getFirstView()
 {
-	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;
-	
+    OstTraceFunctionEntry0( CALENSERVICESIMPL_GETFIRSTVIEW_ENTRY );
+    
+    OstTraceFunctionExit0( CALENSERVICESIMPL_GETFIRSTVIEW_EXIT );
 	return iController->getFirstView();
 }
 

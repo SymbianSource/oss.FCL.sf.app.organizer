@@ -60,6 +60,7 @@ private slots:
 	void handleOkAction();
 	void handleTimeZoneSelection(int index);
 	void selectedAction(HbAction *action);
+	void loadSection(Qt::Orientation orientation);
 
 private:
 	void showCityList();
@@ -67,10 +68,12 @@ private:
 	void addCityNameField();
 	void addTimeZoneField();
 	void addCountryListField();
+	
 private:
 	QPointer<QStandardItemModel> mListModel;
 
 	HbDocumentLoader *mLoader;
+	HbDocumentLoader *mAddCityDocloader;
 	QPointer<HbView> mView;
 	QPointer<HbListView> mListView;
 	HbAction *mBackAction;

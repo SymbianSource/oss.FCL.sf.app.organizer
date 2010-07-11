@@ -21,6 +21,11 @@
 
 //  INCLUDES
 #include "calenmonthdata.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenmonthdataTraces.h"
+#endif
+
 
 
 // ================= MEMBER FUNCTIONS =======================
@@ -34,8 +39,9 @@
 CalenMonthData::CalenMonthData()
     : mDay(QDateTime()), mHasEvents(false)
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CALENMONTHDATA_CALENMONTHDATA_ENTRY );
+
+    OstTraceFunctionExit0( CALENMONTHDATA_CALENMONTHDATA_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -48,8 +54,9 @@ CalenMonthData::CalenMonthData
 (QDateTime day)
     : mDay(day), mHasEvents(false)
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( DUP1_CALENMONTHDATA_CALENMONTHDATA_ENTRY );
+    
+    OstTraceFunctionExit0( DUP1_CALENMONTHDATA_CALENMONTHDATA_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -60,8 +67,9 @@ CalenMonthData::CalenMonthData
 //
 CalenMonthData::~CalenMonthData()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( DUP2_CALENMONTHDATA_CALENMONTHDATA_ENTRY );
+    
+    OstTraceFunctionExit0( DUP2_CALENMONTHDATA_CALENMONTHDATA_EXIT );
     }
 
 // ---------------------------------------------------------
@@ -72,9 +80,9 @@ CalenMonthData::~CalenMonthData()
 //
 QDateTime CalenMonthData::Day()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENMONTHDATA_DAY_ENTRY );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENMONTHDATA_DAY_EXIT );
     return mDay;
     }
 
@@ -86,11 +94,11 @@ QDateTime CalenMonthData::Day()
 //
 void CalenMonthData::SetHasEvents(bool hasEvents)
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENMONTHDATA_SETHASEVENTS_ENTRY );
     
     mHasEvents = hasEvents;
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENMONTHDATA_SETHASEVENTS_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -101,19 +109,26 @@ void CalenMonthData::SetHasEvents(bool hasEvents)
 //
 bool CalenMonthData::HasEvents()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENMONTHDATA_HASEVENTS_ENTRY );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENMONTHDATA_HASEVENTS_EXIT );
     return mHasEvents;
     }
 
 void CalenMonthData::setActive(bool isActive)
     {
+    OstTraceFunctionEntry0( CALENMONTHDATA_SETACTIVE_ENTRY );
+    
     mIsActive = isActive;
+    
+    OstTraceFunctionExit0( CALENMONTHDATA_SETACTIVE_EXIT );
     }
 
 bool CalenMonthData::isActive()
     {
+    OstTraceFunctionEntry0( CALENMONTHDATA_ISACTIVE_ENTRY );
+    
+    OstTraceFunctionExit0( CALENMONTHDATA_ISACTIVE_EXIT );
     return mIsActive;
     }
 // End of File

@@ -33,6 +33,11 @@
 #include "calencontext.h"
 #include "calendateutils.h"
 #include "calenconstants.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenagendaviewTraces.h"
+#endif
+
 
 // ----------------------------------------------------------------------------
 // CalenAgendaView::CalenAgendaView
@@ -47,8 +52,12 @@ mSwitchToDayViewAction(NULL),
 mActionTaken(false),
 mIsAboutToQuitEventConnected(false)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEW_CALENAGENDAVIEW_ENTRY );
+    
     // No implementation yet
     grabGesture(Qt::SwipeGesture);
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEW_CALENAGENDAVIEW_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -58,7 +67,11 @@ mIsAboutToQuitEventConnected(false)
 //    
 CalenAgendaView::~CalenAgendaView()
 {
+    OstTraceFunctionEntry0( DUP1_CALENAGENDAVIEW_CALENAGENDAVIEW_ENTRY );
+    
     // No implementation yet
+    
+    OstTraceFunctionExit0( DUP1_CALENAGENDAVIEW_CALENAGENDAVIEW_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -68,8 +81,11 @@ CalenAgendaView::~CalenAgendaView()
 //    
 void CalenAgendaView::setupView(CalenDocLoader *docLoader)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEW_SETUPVIEW_ENTRY );
+    
     if (!docLoader) {
         // Nothing can be done. Simply return
+        OstTraceFunctionExit0( CALENAGENDAVIEW_SETUPVIEW_EXIT );
         return;
     }
     // Store the document loader for reference later
@@ -88,6 +104,14 @@ void CalenAgendaView::setupView(CalenDocLoader *docLoader)
 	
 	// Initialize all the menu and toolbar actions
 	setupActions();
+	
+    //add "show lunar data" action item ,if regional plugin is present
+    //regional plugin will add the option itself and handles it accordingly
+    //use this api after adding all action item to the menu
+    //so that plugin add the "Show lunar data" item as a second last option 
+    // in all views
+   mServices.OfferMenu(menu());
+	
 	// get a poitner to activity manager
 	HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
 
@@ -96,6 +120,7 @@ void CalenAgendaView::setupView(CalenDocLoader *docLoader)
 	// only for debugging purpose.
 	bool ok = activityManager->removeActivity(activityName);
 	
+	OstTraceFunctionExit0( DUP1_CALENAGENDAVIEW_SETUPVIEW_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -105,8 +130,11 @@ void CalenAgendaView::setupView(CalenDocLoader *docLoader)
 // 
 void CalenAgendaView::doPopulation()
     {
+    OstTraceFunctionEntry0( CALENAGENDAVIEW_DOPOPULATION_ENTRY );
+    
     // The content widget has not been constructed. Don't do anything
     if (!mAgendaViewWidget) {
+        OstTraceFunctionExit0( CALENAGENDAVIEW_DOPOPULATION_EXIT );
         return;
     }
     // Get the day for which this view is being shown from the context
@@ -157,6 +185,8 @@ void CalenAgendaView::doPopulation()
 
     // Population is complete, issue a notification
     populationComplete();
+    
+    OstTraceFunctionExit0( DUP1_CALENAGENDAVIEW_DOPOPULATION_EXIT );
     }
 
 /*!
@@ -165,6 +195,8 @@ void CalenAgendaView::doPopulation()
  */
 void CalenAgendaView::refreshViewOnGoToDate()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEW_REFRESHVIEWONGOTODATE_ENTRY );
+    
 	// Get the day for which this view is being shown from the context
 	mDate = mServices.Context().focusDateAndTime();
 	
@@ -180,6 +212,8 @@ void CalenAgendaView::refreshViewOnGoToDate()
 	
 	// Initialize the content widget
 	mAgendaViewWidget->showWidget();
+	
+	OstTraceFunctionExit0( CALENAGENDAVIEW_REFRESHVIEWONGOTODATE_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -189,8 +223,11 @@ void CalenAgendaView::refreshViewOnGoToDate()
 //    
 void CalenAgendaView::HandleNotification(const TCalenNotification notification)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEW_HANDLENOTIFICATION_ENTRY );
+    
     Q_UNUSED(notification)
     // No implementation yet
+    OstTraceFunctionExit0( CALENAGENDAVIEW_HANDLENOTIFICATION_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -200,6 +237,9 @@ void CalenAgendaView::HandleNotification(const TCalenNotification notification)
 //    
 CalenDocLoader* CalenAgendaView::docLoader()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEW_DOCLOADER_ENTRY );
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEW_DOCLOADER_EXIT );
     return mDocLoader;
 }
 
@@ -208,6 +248,8 @@ CalenDocLoader* CalenAgendaView::docLoader()
 */
 void CalenAgendaView::gestureEvent(QGestureEvent *event)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEW_GESTUREEVENT_ENTRY );
+    
     if(HbSwipeGesture *gesture = qobject_cast<HbSwipeGesture *>(event->gesture(Qt::SwipeGesture))) {
         if (gesture->state() == Qt::GestureStarted) {
             if(QSwipeGesture::Left == gesture->sceneHorizontalDirection()) {
@@ -219,6 +261,8 @@ void CalenAgendaView::gestureEvent(QGestureEvent *event)
             }
         }
     } 
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEW_GESTUREEVENT_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -228,6 +272,8 @@ void CalenAgendaView::gestureEvent(QGestureEvent *event)
 //
 void CalenAgendaView::setupActions()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEW_SETUPACTIONS_ENTRY );
+    
 	// Get the actions associated with this view
 	HbAction *newEventAction = qobject_cast<HbAction *>
                                 (mDocLoader->findObject(CALEN_AGENDAVIEW_MENU_NEW_EVENT));
@@ -235,8 +281,8 @@ void CalenAgendaView::setupActions()
 	    qFatal("calenagendaview.cpp : Unable to find new event action");
 	}
 	// Connect to the signal triggered by new event action
-	connect(newEventAction, SIGNAL(triggered()), mAgendaViewWidget, SLOT(createNewEvent()));
-	
+	connect(newEventAction, SIGNAL(triggered()), this, SLOT(createNewEvent()));
+	    
 	mGoToTodayAction = qobject_cast<HbAction *>
                         (mDocLoader->findObject(CALEN_AGENDAVIEW_MENU_GO_TO_TODAY));
 	if (!mGoToTodayAction) {
@@ -268,6 +314,18 @@ void CalenAgendaView::setupActions()
 	}
 	// Connect to the signal triggered by settings action
 	connect(settingsAction, SIGNAL(triggered()), this, SLOT(launchSettingsView()));
+	
+	OstTraceFunctionExit0( CALENAGENDAVIEW_SETUPACTIONS_EXIT );
+}
+
+// ----------------------------------------------------------------------------
+// CalenAgendaView::createNewEvent
+// ----------------------------------------------------------------------------
+//    
+void CalenAgendaView::createNewEvent()
+{
+    captureScreenshot(true);
+    mAgendaViewWidget->createNewEvent();
 }
 
 // ----------------------------------------------------------------------------
@@ -277,11 +335,15 @@ void CalenAgendaView::setupActions()
 //    
 void CalenAgendaView::onLocaleChanged(int reason)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEW_ONLOCALECHANGED_ENTRY );
+    
     Q_UNUSED(reason)
     // Notify the content widget about the change
     if(mAgendaViewWidget) {
     mAgendaViewWidget->handleLocaleChange();
     }
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEW_ONLOCALECHANGED_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -291,10 +353,13 @@ void CalenAgendaView::onLocaleChanged(int reason)
 // 
 void CalenAgendaView::orientationChanged(Qt::Orientation orientation)
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEW_ORIENTATIONCHANGED_ENTRY );
+    
     // Notify the content widget about the change
     if (mAgendaViewWidget) {
     mAgendaViewWidget->orientationChanged(orientation);
     }
+    OstTraceFunctionExit0( CALENAGENDAVIEW_ORIENTATIONCHANGED_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -303,11 +368,15 @@ void CalenAgendaView::orientationChanged(Qt::Orientation orientation)
 //    
 void CalenAgendaView::launchMonthView()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEW_LAUNCHMONTHVIEW_ENTRY );
+    
     // Issue the command to launch the month view
     mServices.IssueCommandL(ECalenMonthView);
 	// month view launched now, disconnect to get the call backs for saveActivity 
 	// on aboutToQuit signal
     disconnectAboutToQuitEvent();
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEW_LAUNCHMONTHVIEW_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -316,8 +385,12 @@ void CalenAgendaView::launchMonthView()
 //    
 void CalenAgendaView::launchDayView()
 {
+    OstTraceFunctionEntry0( CALENAGENDAVIEW_LAUNCHDAYVIEW_ENTRY );
+    
     // Issue the command to launch the day view
     mServices.IssueCommandL(ECalenDayView);
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEW_LAUNCHDAYVIEW_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -326,9 +399,13 @@ void CalenAgendaView::launchDayView()
 // 
 void CalenAgendaView::clearListModel()
     {
+    OstTraceFunctionEntry0( CALENAGENDAVIEW_CLEARLISTMODEL_ENTRY );
+    
 	// day view is removed from the list disconnect for aboutToQuit events
     disconnectAboutToQuitEvent();
     mAgendaViewWidget->clearListModel();
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEW_CLEARLISTMODEL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -337,11 +414,15 @@ void CalenAgendaView::clearListModel()
 // 
 void CalenAgendaView::disconnectAboutToQuitEvent()
     {
+    OstTraceFunctionEntry0( CALENAGENDAVIEW_DISCONNECTABOUTTOQUITEVENT_ENTRY );
+    
     if (mIsAboutToQuitEventConnected)
         {
         disconnect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()), this, SLOT(saveActivity()));
         mIsAboutToQuitEventConnected = false;
         }
+    
+    OstTraceFunctionExit0( CALENAGENDAVIEW_DISCONNECTABOUTTOQUITEVENT_EXIT );
     }
 
 // End of file	--Don't remove this.

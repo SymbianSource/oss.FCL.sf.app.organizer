@@ -24,10 +24,12 @@ INCLUDEPATH += ../inc ../../inc
 
 
 # Input
-HEADERS += ./inc/CalenLunarChinesePlugin.h 
+HEADERS += ./inc/CalenLunarChinesePlugin.h \
+           ./inc/CalenRegionalInfoData.h
 
 SOURCES +=  ./src/CalenLunarChinesePlugin.cpp \
-            ./src/CalenLunarChinesePluginProxy.cpp 
+            ./src/CalenLunarChinesePluginProxy.cpp \
+            ./src/CalenRegionalInfoData.cpp 
           
 LIBS +=    -lcalinterimapi \
 			-lcone \

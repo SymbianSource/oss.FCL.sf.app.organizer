@@ -51,6 +51,11 @@
 #include "calendarprivatecrkeys.h"
 #include "calenpluginlabel.h"
 #include "calenconstants.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenmonthviewTraces.h"
+#endif
+
 /*!
  \class CalenMonthView
 
@@ -68,6 +73,8 @@ CalenMonthView::CalenMonthView(MCalenServices &services) :
 	mNextRegionalInfo(0),
 	mIsAboutToQuitEventConnected(false)
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_CALENMONTHVIEW_ENTRY );
+    
 	mIsWeekNumbersShown = 0;
 	mOrientation = mServices.MainWindow().orientation();
 	// Read the date from the context
@@ -85,6 +92,8 @@ CalenMonthView::CalenMonthView(MCalenServices &services) :
 	mIsPrevPaneGesture = false;
 	// Get the week day color from the theme
 	mWeekDaysColor = HbColorScheme::color("qtc_cal_week_day");
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_CALENMONTHVIEW_EXIT );
 }
 
 /*!
@@ -92,6 +101,9 @@ CalenMonthView::CalenMonthView(MCalenServices &services) :
  */
 CalenMonthView::~CalenMonthView()
 {
+    OstTraceFunctionEntry0( DUP1_CALENMONTHVIEW_CALENMONTHVIEW_ENTRY );
+    
+    OstTraceFunctionExit0( DUP1_CALENMONTHVIEW_CALENMONTHVIEW_EXIT );
 }
 
 /*!
@@ -100,6 +112,8 @@ CalenMonthView::~CalenMonthView()
  */
 void CalenMonthView::setupView(CalenDocLoader *docLoader)
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_SETUPVIEW_ENTRY );
+    
 	mDocLoader = docLoader;
 	mTitleLabel
 	        = qobject_cast<HbLabel *> (
@@ -214,6 +228,7 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 	// only for debugging purpose.
 	bool ok = activityManager->removeActivity(activityName);
 
+	OstTraceFunctionExit0( CALENMONTHVIEW_SETUPVIEW_EXIT );
 }
 
 /*!
@@ -222,6 +237,7 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
  */
 void CalenMonthView::doLazyLoading()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_DOLAZYLOADING_ENTRY );
 	// Add background items to all the widgets
 	addBackgroundFrame();
 	
@@ -293,6 +309,19 @@ void CalenMonthView::doLazyLoading()
 	// This is required to add/remove dynamically some options
 	connect(menu(), SIGNAL(aboutToShow ()), this,
 			SLOT(addRemoveActionsInMenu()));	
+	//add "show lunar data" action item ,if regional plugin is present
+	//regional plugin will add the option itself and handles it accordingly
+	//use this api after adding all action item to the menu
+	//so that plugin add the "Show lunar data" item as a second last option 
+	// in all views
+	mServices.OfferMenu(menu());
+	
+	// populate entries for the month view if the month view is launched 
+	// from the service APIs. Otherwise the month view is not populated with 
+	// the entries as CalenViewManager::handleInstanceViewCreation is called 
+	// before the month view creation so the model array is not populated.
+	fetchEntriesAndUpdateModel();	
+	OstTraceFunctionExit0( CALENMONTHVIEW_DOLAZYLOADING_EXIT );
 }
 
 /*!
@@ -300,6 +329,8 @@ void CalenMonthView::doLazyLoading()
  */
 void CalenMonthView::addWeekNumbers()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_ADDWEEKNUMBERS_ENTRY );
+    
 	if (!mFirstWeekLabel) {
 	// Get all the six week labels
 	mFirstWeekLabel
@@ -370,6 +401,8 @@ void CalenMonthView::addWeekNumbers()
 		layout->invalidate();
 		layout->activate();
 	}
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_ADDWEEKNUMBERS_EXIT );
 }
 
 /*!
@@ -378,6 +411,8 @@ void CalenMonthView::addWeekNumbers()
 void CalenMonthView::removeWeekNumbers()
 
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_REMOVEWEEKNUMBERS_ENTRY );
+    
 	// Remove the week number grid if setting is off
 	QGraphicsLinearLayout *layout = static_cast<QGraphicsLinearLayout *> 
 									(mMonthGridPlusWeekNumWidget->layout());
@@ -409,6 +444,8 @@ void CalenMonthView::removeWeekNumbers()
 			dayNamesLayout->activate();
 		}
 	}
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_REMOVEWEEKNUMBERS_EXIT );
 }
 
 /*!
@@ -416,6 +453,8 @@ void CalenMonthView::removeWeekNumbers()
  */
 void CalenMonthView::addBackgroundFrame()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_ADDBACKGROUNDFRAME_ENTRY );
+    
     // Set the background items for all the widgets
     HbFrameItem* frame = NULL;
     HbFrameDrawer *drawer = NULL;
@@ -456,10 +495,14 @@ void CalenMonthView::addBackgroundFrame()
            frame = new HbFrameItem(drawer, this);
 	if(frame)
 	    mNextPaneLayoutWidget->setBackgroundItem(frame->graphicsItem(), -5);
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_ADDBACKGROUNDFRAME_EXIT );
 }
 
 void CalenMonthView::showHideRegionalInformation()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_SHOWHIDEREGIONALINFORMATION_ENTRY );
+    
 	if (pluginEnabled()) {
 		XQSettingsKey regionalInfo(XQSettingsKey::TargetCentralRepository,
 									KCRUidCalendar, KCalendarShowRegionalInfo);
@@ -533,6 +576,8 @@ void CalenMonthView::showHideRegionalInformation()
 			}
 		}
 	}
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_SHOWHIDEREGIONALINFORMATION_EXIT );
 }
 
 /*!
@@ -540,6 +585,7 @@ void CalenMonthView::showHideRegionalInformation()
  */
 void CalenMonthView::onContextChanged()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_ONCONTEXTCHANGED_ENTRY );
 	//Update plugin label after setting context
 	if (mCurrRegionalInfo && mPrevRegionalInfo && mNextPaneLayout
 	        && pluginEnabled()) {
@@ -548,6 +594,7 @@ void CalenMonthView::onContextChanged()
 		mCurrRegionalInfo->setPlainText(*pluginString);
 		mNextRegionalInfo->setPlainText(*pluginString);
 	}
+	OstTraceFunctionExit0( CALENMONTHVIEW_ONCONTEXTCHANGED_EXIT );
 }
 
 /*!
@@ -556,6 +603,8 @@ void CalenMonthView::onContextChanged()
 void CalenMonthView::updateWeekNumGridModel()
 
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_UPDATEWEEKNUMGRIDMODEL_ENTRY );
+    
 	// Get the visible date
 	QDateTime firstVisibleDate = mFirstDayOfGrid.addDays(KCalenDaysInWeek
 	        * mNumOfRowsInPrevMonth);
@@ -583,6 +632,8 @@ void CalenMonthView::updateWeekNumGridModel()
 	mFifthWeekLabel->setPlainText(text);
 	text = QString::number(mWeekNumbers.at(5));
 	mSixthWeekLabel->setPlainText(text);
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_UPDATEWEEKNUMGRIDMODEL_EXIT );
 }
 
 /*!
@@ -590,6 +641,8 @@ void CalenMonthView::updateWeekNumGridModel()
  */
 void CalenMonthView::goToToday()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_GOTOTODAY_ENTRY );
+    
 	QDateTime today = CalenDateUtils::today();
 	// Set the context and repopulate the view
     MCalenContext &context = mServices.Context();
@@ -598,6 +651,7 @@ void CalenMonthView::goToToday()
 	// First check if we are not alread
 	// showing today's month view
 	if (mDate == today) {
+		OstTraceFunctionExit0( CALENMONTHVIEW_GOTOTODAY_EXIT );
 		return;
 	} else if (mActiveMonth.date().year() == today.date().year() && 
 				mActiveMonth.date().month() == today.date().month()) {
@@ -611,6 +665,8 @@ void CalenMonthView::goToToday()
 	} else {	
         refreshViewOnGoToDate();
 	}
+	
+	OstTraceFunctionExit0( DUP1_CALENMONTHVIEW_GOTOTODAY_EXIT );
 }
 
 /*
@@ -619,6 +675,7 @@ void CalenMonthView::goToToday()
  */
 void CalenMonthView::addRemoveActionsInMenu()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_ADDREMOVEACTIONSINMENU_ENTRY );
 	HbAction* menuAction = mDeleteSubMenu->menuAction();
 	// Check if there are no entries in the database
 	if (mAgendaUtil->areNoEntriesInCalendar() && menuAction) {
@@ -636,6 +693,7 @@ void CalenMonthView::addRemoveActionsInMenu()
 	} else if (mGoToTodayAction){
 		mGoToTodayAction->setVisible(true);
 	}
+	OstTraceFunctionExit0( CALENMONTHVIEW_ADDREMOVEACTIONSINMENU_EXIT );
 }
 
 /*!
@@ -643,6 +701,7 @@ void CalenMonthView::addRemoveActionsInMenu()
  */
 void CalenMonthView::doPopulation()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_DOPOPULATION_ENTRY );
 
  	// Get the layout and add the preview pane layout.
 	QGraphicsLinearLayout* viewLayout = static_cast<QGraphicsLinearLayout *>
@@ -699,6 +758,8 @@ void CalenMonthView::doPopulation()
 	}
 	// Reset the first time load flag
 	mIsFirstTimeLoad = false;
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_DOPOPULATION_EXIT );
 }
 
 /*!
@@ -706,9 +767,13 @@ void CalenMonthView::doPopulation()
  */
 void CalenMonthView::prepareForPopulation()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_PREPAREFORPOPULATION_ENTRY );
+    
 	setActiveDay(dateFromContext(mServices.Context()));
 	setDate();
 	updateMonthDataArrayWithActiveDates();
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_PREPAREFORPOPULATION_EXIT );
 }
 
 /*!
@@ -716,6 +781,8 @@ void CalenMonthView::prepareForPopulation()
  */
 void CalenMonthView::refreshViewOnGoToDate()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_REFRESHVIEWONGOTODATE_ENTRY );
+    
 	prepareForPopulation();
 	setDateToLabel();
 	// fetch list of required calendar instances
@@ -729,6 +796,8 @@ void CalenMonthView::refreshViewOnGoToDate()
 	if (mIsWeekNumbersShown) {
 		updateWeekNumGridModel();
 	}
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_REFRESHVIEWONGOTODATE_EXIT );
 }
 
 /*!
@@ -736,6 +805,7 @@ void CalenMonthView::refreshViewOnGoToDate()
  */
 QDateTime CalenMonthView::dateFromContext(const MCalenContext &context)
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_DATEFROMCONTEXT_ENTRY );
 	QDateTime ret;
 	if (AgendaEntry::TypeTodo == context.instanceId().mType) {
 		QDateTime today = CalenDateUtils::today();
@@ -747,6 +817,7 @@ QDateTime CalenMonthView::dateFromContext(const MCalenContext &context)
 	} else {
 		ret = context.focusDateAndTime();
 	}
+	OstTraceFunctionExit0( CALENMONTHVIEW_DATEFROMCONTEXT_EXIT );
 	return ret;
 }
 
@@ -755,6 +826,8 @@ QDateTime CalenMonthView::dateFromContext(const MCalenContext &context)
  */
 void CalenMonthView::setActiveDay(QDateTime day)
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_SETACTIVEDAY_ENTRY );
+    
 	mDate = day;
     
 	mActiveMonth = mDate;
@@ -814,6 +887,8 @@ void CalenMonthView::setActiveDay(QDateTime day)
 		mNumOfRowsInFutureMonth++;
 		dateTimeToCalc = dateTimeToCalc.addDays(-KCalenDaysInWeek);
 	}
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_SETACTIVEDAY_EXIT );
 }
 
 /*!
@@ -821,6 +896,8 @@ void CalenMonthView::setActiveDay(QDateTime day)
  */
 void CalenMonthView::setDate()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_SETDATE_ENTRY );
+    
 	mMonthDataArray.clear();
 	// Calculate the actual number of dates to be populated from previous month
 	// to future month
@@ -829,6 +906,8 @@ void CalenMonthView::setDate()
 		CalenMonthData element(currentDay);
 		mMonthDataArray.append(element);
 	}
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_SETDATE_EXIT );
 }
 
 /*!
@@ -836,6 +915,9 @@ void CalenMonthView::setDate()
  */
 QDateTime CalenMonthView::getCurrentDay()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_GETCURRENTDAY_ENTRY );
+    
+	OstTraceFunctionExit0( CALENMONTHVIEW_GETCURRENTDAY_EXIT );
 	return mCurrentDay;
 }
 
@@ -844,6 +926,9 @@ QDateTime CalenMonthView::getCurrentDay()
  */
 QDateTime CalenMonthView::getActiveDay()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_GETACTIVEDAY_ENTRY );
+    
+	OstTraceFunctionExit0( CALENMONTHVIEW_GETACTIVEDAY_EXIT );
 	return mDate;
 }
 
@@ -852,6 +937,9 @@ QDateTime CalenMonthView::getActiveDay()
  */
 QList<CalenMonthData> CalenMonthView::monthDataList()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_MONTHDATALIST_ENTRY );
+    
+	OstTraceFunctionExit0( CALENMONTHVIEW_MONTHDATALIST_EXIT );
 	return mMonthDataArray;
 }
 
@@ -860,6 +948,7 @@ QList<CalenMonthData> CalenMonthView::monthDataList()
  */
 void CalenMonthView::createGrid()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_CREATEGRID_ENTRY );
 	// Update the month grid
 	mMonthGrid->updateMonthGridModel(mMonthDataArray, mIndexToBeScrolled, 
 	                                 mIsFirstTimeLoad);
@@ -884,6 +973,7 @@ void CalenMonthView::createGrid()
 		// remove the weeknumbergrid from the layout
 		removeWeekNumbers();
 	}
+	OstTraceFunctionExit0( CALENMONTHVIEW_CREATEGRID_EXIT );
 }
 
 /*!
@@ -892,6 +982,8 @@ void CalenMonthView::createGrid()
  */
 void CalenMonthView::updateModelWithPrevMonth()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_UPDATEMODELWITHPREVMONTH_ENTRY );
+    
 	// Get the new previous month
 	QDateTime prevMonthDateTime = mActiveMonth.addMonths(-1);
 	QDateTime dateTime = mFirstDayOfGrid;
@@ -960,12 +1052,16 @@ void CalenMonthView::updateModelWithPrevMonth()
 	if (mIsWeekNumbersShown) {
 		updateWeekNumGridModel();
 	}
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_UPDATEMODELWITHPREVMONTH_EXIT );
 }
 /*!
  Called when up gesture is performed
  */
 void CalenMonthView::updateModelWithFutureMonth()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_UPDATEMODELWITHFUTUREMONTH_ENTRY );
+    
 	// Get the new future month
 	QDateTime previousLastDayOfGrid = mLastDayOfGrid;
 	QDateTime futureMonthDateTime = mActiveMonth.addMonths(2);
@@ -1029,6 +1125,7 @@ void CalenMonthView::updateModelWithFutureMonth()
 	// Update the mMonthDataArray with instances if any
 	populateNextMonth();
 		
+	OstTraceFunctionExit0( CALENMONTHVIEW_UPDATEMODELWITHFUTUREMONTH_EXIT );
 }
 
 /*!
@@ -1036,6 +1133,9 @@ void CalenMonthView::updateModelWithFutureMonth()
  */
 int CalenMonthView::rowsInPrevMonth()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_ROWSINPREVMONTH_ENTRY );
+    
+	OstTraceFunctionExit0( CALENMONTHVIEW_ROWSINPREVMONTH_EXIT );
 	return mNumOfRowsInPrevMonth;
 }
 
@@ -1044,6 +1144,9 @@ int CalenMonthView::rowsInPrevMonth()
  */
 int CalenMonthView::rowsInFutMonth()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_ROWSINFUTMONTH_ENTRY );
+    
+	OstTraceFunctionExit0( CALENMONTHVIEW_ROWSINFUTMONTH_EXIT );
 	return mNumOfRowsInFutureMonth;
 }
 
@@ -1052,6 +1155,9 @@ int CalenMonthView::rowsInFutMonth()
  */
 int CalenMonthView::getCurrGridIndex()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_GETCURRGRIDINDEX_ENTRY );
+    
+    OstTraceFunctionExit0( CALENMONTHVIEW_GETCURRGRIDINDEX_EXIT );
 	return mMonthGrid->getCurrentIndex();
 }
 
@@ -1060,8 +1166,10 @@ int CalenMonthView::getCurrGridIndex()
  */
 void CalenMonthView::setCurrGridIndex(int index)
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_SETCURRGRIDINDEX_ENTRY );
 	mIsPrevPaneGesture = true;
 	mMonthGrid->setCurrentIdex(index);
+	OstTraceFunctionExit0( CALENMONTHVIEW_SETCURRGRIDINDEX_EXIT );
 }
 
 /*!
@@ -1069,6 +1177,8 @@ void CalenMonthView::setCurrGridIndex(int index)
  */
 void CalenMonthView::updateMonthDataArrayWithActiveDates()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_UPDATEMONTHDATAARRAYWITHACTIVEDATES_ENTRY );
+    
 	int activeMonth = mActiveMonth.date().month();
 	int monthDataCount = mMonthDataArray.count();
 	for (int i = 0; i < monthDataCount; i++) {
@@ -1080,6 +1190,8 @@ void CalenMonthView::updateMonthDataArrayWithActiveDates()
 			mMonthDataArray[i].setActive(false);
 		}
 	}
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_UPDATEMONTHDATAARRAYWITHACTIVEDATES_EXIT );
 }
 
 /*!
@@ -1088,6 +1200,8 @@ void CalenMonthView::updateMonthDataArrayWithActiveDates()
 void CalenMonthView::getInstanceList(QList<QDate> &list,
                                      QDateTime rangeStart, QDateTime rangeEnd)
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_GETINSTANCELIST_ENTRY );
+    
 	AgendaUtil::FilterFlags filter =
 	        AgendaUtil::FilterFlags(AgendaUtil::IncludeAnniversaries
 	                | AgendaUtil::IncludeAppointments
@@ -1095,6 +1209,8 @@ void CalenMonthView::getInstanceList(QList<QDate> &list,
 	                | AgendaUtil::IncludeReminders
 	                | AgendaUtil::IncludeIncompletedTodos);
 	mAgendaUtil->markDatesWithEvents(rangeStart, rangeEnd, filter, list);
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_GETINSTANCELIST_EXIT );
 }
 
 /*!
@@ -1102,6 +1218,8 @@ void CalenMonthView::getInstanceList(QList<QDate> &list,
  */
 void CalenMonthView::populateWithInstanceView()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_POPULATEWITHINSTANCEVIEW_ENTRY );
+    
 	const QDateTime today(CalenDateUtils::today());
 	const QDateTime gridStart(CalenDateUtils::beginningOfDay(mFirstDayOfGrid));
 
@@ -1122,6 +1240,8 @@ void CalenMonthView::populateWithInstanceView()
 	}
 
 	datesWithEvents.clear();
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_POPULATEWITHINSTANCEVIEW_EXIT );
 }
 
 /*!
@@ -1130,6 +1250,8 @@ void CalenMonthView::populateWithInstanceView()
  */
 void CalenMonthView::populatePrevMonth()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_POPULATEPREVMONTH_ENTRY );
+    
 	const QDateTime gridStart(CalenDateUtils::beginningOfDay(mFirstDayOfGrid));
 	const QDateTime today(CalenDateUtils::today());
 
@@ -1149,6 +1271,8 @@ void CalenMonthView::populatePrevMonth()
 		mMonthDataArray[offset].SetHasEvents(true);
 	}
 	datesWithEvents.clear();
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_POPULATEPREVMONTH_EXIT );
 }
 
 /*!
@@ -1157,6 +1281,7 @@ void CalenMonthView::populatePrevMonth()
  */
 void CalenMonthView::populateNextMonth()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_POPULATENEXTMONTH_ENTRY );
 	QList<AgendaEntry> list;
 	int actualIndex = mNumOfRowsInFutureMonth * KCalenDaysInWeek;
 	const QDateTime gridStart(mLastDayOfGrid.addDays(-actualIndex));
@@ -1177,6 +1302,7 @@ void CalenMonthView::populateNextMonth()
 		mMonthDataArray[offset].SetHasEvents(true);
 	}
 	datesWithEvents.clear();
+	OstTraceFunctionExit0( CALENMONTHVIEW_POPULATENEXTMONTH_EXIT );
 }
 
 /*!
@@ -1185,12 +1311,16 @@ void CalenMonthView::populateNextMonth()
  */
 void CalenMonthView::fetchEntriesAndUpdateModel()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_FETCHENTRIESANDUPDATEMODEL_ENTRY );
+    
 	// Get to know if entries are there from the agenda server
 	populateWithInstanceView();
 	// Update the month grid model
 	mMonthGrid->updateMonthGridWithEventIndicators(mMonthDataArray);
 	// Populate the preview panes
 	populatePreviewPane(mDate);
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_FETCHENTRIESANDUPDATEMODEL_EXIT );
 }
 
 /*!
@@ -1198,12 +1328,16 @@ void CalenMonthView::fetchEntriesAndUpdateModel()
  */
 void CalenMonthView::populatePreviewPane(QDateTime &dateTime)
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_POPULATEPREVIEWPANE_ENTRY );
+    
 	mPrevPreviewPane->populateLabel(dateTime.addDays(-1));
 	mCurrPreviewPane->populateLabel(dateTime);
 	mNextPreviewPane->populateLabel(dateTime.addDays(1));
 	
 	// Start the auto scroll on current preview pane
     mCurrPreviewPane->startAutoScroll();
+    
+    OstTraceFunctionExit0( CALENMONTHVIEW_POPULATEPREVIEWPANE_EXIT );
 }
 
 /*!
@@ -1212,7 +1346,11 @@ void CalenMonthView::populatePreviewPane(QDateTime &dateTime)
  */
 void CalenMonthView::completePopulation()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_COMPLETEPOPULATION_ENTRY );
+    
 	setDateToLabel();
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_COMPLETEPOPULATION_EXIT );
 }
 
 /*!
@@ -1220,7 +1358,11 @@ void CalenMonthView::completePopulation()
  */
 void CalenMonthView::handleGridItemActivated()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_HANDLEGRIDITEMACTIVATED_ENTRY );
+    
 	mServices.IssueCommandL(ECalenDayView);
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_HANDLEGRIDITEMACTIVATED_EXIT );
 }
 
 /*!
@@ -1228,6 +1370,7 @@ void CalenMonthView::handleGridItemActivated()
  */
 void CalenMonthView::setContextForActiveDay(int index)
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_SETCONTEXTFORACTIVEDAY_ENTRY );
 	QDateTime newActiveDay = mFirstDayOfGrid.addDays(index);
 	// Set the context
 	mServices.Context().setFocusDate(newActiveDay);
@@ -1241,6 +1384,7 @@ void CalenMonthView::setContextForActiveDay(int index)
 		mIsPrevPaneGesture = false;
 	}
 	
+	OstTraceFunctionExit0( CALENMONTHVIEW_SETCONTEXTFORACTIVEDAY_EXIT );
 }
 
 /*!
@@ -1248,7 +1392,12 @@ void CalenMonthView::setContextForActiveDay(int index)
  */
 void CalenMonthView::createEditor()
 {
+	OstTraceFunctionEntry0( CALENMONTHVIEW_CREATEEDITOR_ENTRY );
+	
+    captureScreenshot(true);
 	mServices.IssueCommandL(ECalenNewMeeting);
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_CREATEEDITOR_EXIT );
 }
 
 /*!
@@ -1256,6 +1405,8 @@ void CalenMonthView::createEditor()
  */
 void CalenMonthView::launchDayView()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_LAUNCHDAYVIEW_ENTRY );
+    
 	mServices.IssueCommandL(ECalenDayView);
 	// day view launched now, disconnect to get the call backs for saveActivity 
 	// on aboutToQuit signal
@@ -1264,6 +1415,8 @@ void CalenMonthView::launchDayView()
         disconnect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()), this, SLOT(saveActivity()));
         mIsAboutToQuitEventConnected = false;
 	    }
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_LAUNCHDAYVIEW_EXIT );
 }
 
 /*!
@@ -1271,11 +1424,15 @@ void CalenMonthView::launchDayView()
  */
 void CalenMonthView::changeOrientation(Qt::Orientation orientation)
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_CHANGEORIENTATION_ENTRY );
+    
 		if (mOrientation != orientation) {
 			// change the orientation here
 			mOrientation = orientation;
 			handleChangeOrientation();
 		}
+		
+	OstTraceFunctionExit0( CALENMONTHVIEW_CHANGEORIENTATION_EXIT );
 }
 
 /*!
@@ -1284,6 +1441,8 @@ void CalenMonthView::changeOrientation(Qt::Orientation orientation)
  */
 void CalenMonthView::handleChangeOrientation()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_HANDLECHANGEORIENTATION_ENTRY );
+    
 	bool loadSuccess = false;
 	if (mOrientation == Qt::Horizontal) {
 		mDocLoader->load(CALEN_MONTHVIEW_XML_FILE, CALEN_LANDSCAPE,
@@ -1307,6 +1466,8 @@ void CalenMonthView::handleChangeOrientation()
 	if (this == mServices.MainWindow().currentView()) {
 		viewLayout->addItem(mCurrPaneParent);
 	}
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_HANDLECHANGEORIENTATION_EXIT );
 }
 
 /*!
@@ -1314,6 +1475,8 @@ void CalenMonthView::handleChangeOrientation()
  */
 void CalenMonthView::setDateToLabel()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_SETDATETOLABEL_ENTRY );
+    
 	// Get the localised string for month name from system locale
 	QString monthString = mLocale.monthName(mDate.date().month(), HbExtendedLocale::LongFormat);
 	// Append a single space
@@ -1321,6 +1484,8 @@ void CalenMonthView::setDateToLabel()
 	mLocale.setNumberOptions(QLocale::OmitGroupSeparator);
 	QString yearString = mLocale.toString(mDate.date().year());
 	mTitleLabel->setPlainText(hbTrId("txt_calendar_month_label_title_12").arg(monthString).arg(yearString));
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_SETDATETOLABEL_EXIT );
 }
 
 /*!
@@ -1328,6 +1493,8 @@ void CalenMonthView::setDateToLabel()
  */
 void CalenMonthView::handlePreviewPaneGesture(bool rightGesture)
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_HANDLEPREVIEWPANEGESTURE_ENTRY );
+    
 	QGraphicsLinearLayout* viewLayout = static_cast<QGraphicsLinearLayout *>
 												(widget()->layout());
 	if(rightGesture) {
@@ -1388,6 +1555,8 @@ void CalenMonthView::handlePreviewPaneGesture(bool rightGesture)
 		viewLayout->removeAt(1);
 		viewLayout->addItem(mNextPaneParent);
 	}
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_HANDLEPREVIEWPANEGESTURE_EXIT );
 }
 
 /*!
@@ -1395,6 +1564,9 @@ void CalenMonthView::handlePreviewPaneGesture(bool rightGesture)
  */
 QDateTime CalenMonthView::firstDayOfGrid()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_FIRSTDAYOFGRID_ENTRY );
+    
+	OstTraceFunctionExit0( CALENMONTHVIEW_FIRSTDAYOFGRID_EXIT );
 	return mFirstDayOfGrid;
 }
 
@@ -1403,7 +1575,10 @@ QDateTime CalenMonthView::firstDayOfGrid()
  */
 void CalenMonthView::onLocaleChanged(int reason)
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_ONLOCALECHANGED_ENTRY );
+    
 	Q_UNUSED(reason);
+	OstTraceFunctionExit0( CALENMONTHVIEW_ONLOCALECHANGED_EXIT );
 }
 
 /*!
@@ -1412,6 +1587,7 @@ void CalenMonthView::onLocaleChanged(int reason)
 void CalenMonthView::handleLeftEffectCompleted(
 										const HbEffect::EffectStatus &status)
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_HANDLELEFTEFFECTCOMPLETED_ENTRY );
 	Q_UNUSED(status);
 	
 	int index = getCurrGridIndex();
@@ -1439,6 +1615,7 @@ void CalenMonthView::handleLeftEffectCompleted(
 	// Start the auto scroll on current preview pane
 	mCurrPreviewPane->startAutoScroll();
 	mNextPreviewPane->populateLabel(mDate.addDays(1));
+	OstTraceFunctionExit0( CALENMONTHVIEW_HANDLELEFTEFFECTCOMPLETED_EXIT );
 }
 
 /*!
@@ -1447,6 +1624,8 @@ void CalenMonthView::handleLeftEffectCompleted(
 void CalenMonthView::handleRightEffectCompleted(
 										const HbEffect::EffectStatus &status) 	
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_HANDLERIGHTEFFECTCOMPLETED_ENTRY );
+    
 	Q_UNUSED(status);
 	
 	int index = getCurrGridIndex();
@@ -1474,12 +1653,16 @@ void CalenMonthView::handleRightEffectCompleted(
 	// Start the auto scroll on current preview pane
 	mCurrPreviewPane->startAutoScroll();
 	mPrevPreviewPane->populateLabel(mDate.addDays(-1));
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_HANDLERIGHTEFFECTCOMPLETED_EXIT );
 }
 /*!
  update the Day labels 
  */
 void CalenMonthView::updateDayLabel()
 {
+    OstTraceFunctionEntry0( CALENMONTHVIEW_UPDATEDAYLABEL_ENTRY );
+    
     // Set the short day names to these labels  
     int startOfWeek = mLocale.startOfWeek();
     int weekDayIndex = startOfWeek;
@@ -1513,5 +1696,7 @@ void CalenMonthView::updateDayLabel()
         }
     labels.clear();
     weekDayArray.clear();
+    
+    OstTraceFunctionExit0( CALENMONTHVIEW_UPDATEDAYLABEL_EXIT );
 }
 // End of file  --Don't remove this.

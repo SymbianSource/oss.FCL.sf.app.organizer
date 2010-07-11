@@ -21,6 +21,11 @@
 // User includes
 #include "calenservices.h"
 #include "calenpluginlabel.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenpluginlabelTraces.h"
+#endif
+
 /*!
  \class CalenPluginLabel
 
@@ -30,19 +35,26 @@
 /*!
  constructor
  */
-Q_DECL_EXPORT CalenPluginLabel::CalenPluginLabel(MCalenServices& services, 
+CalenPluginLabel::CalenPluginLabel(MCalenServices& services, 
                                    QGraphicsItem* parent) :
 	HbLabel(parent),mServices(services)
 {
+    OstTraceFunctionEntry0( CALENPLUGINLABEL_CALENPLUGINLABEL_ENTRY );
+    
 	setAlignment(Qt::AlignCenter);
 	grabGesture(Qt::TapGesture);
+	
+	OstTraceFunctionExit0( CALENPLUGINLABEL_CALENPLUGINLABEL_EXIT );
 }
 
 /*!
  Destructor
  */
-Q_DECL_EXPORT CalenPluginLabel::~CalenPluginLabel()
+CalenPluginLabel::~CalenPluginLabel()
 {
+    OstTraceFunctionEntry0( DUP1_CALENPLUGINLABEL_CALENPLUGINLABEL_ENTRY );
+    
+    OstTraceFunctionExit0( DUP1_CALENPLUGINLABEL_CALENPLUGINLABEL_EXIT );
 }
 
 
@@ -51,6 +63,8 @@ Q_DECL_EXPORT CalenPluginLabel::~CalenPluginLabel()
 */
 void CalenPluginLabel::gestureEvent(QGestureEvent *event)
 {
+    OstTraceFunctionEntry0( CALENPLUGINLABEL_GESTUREEVENT_ENTRY );
+    
     if(HbTapGesture *gesture = qobject_cast<HbTapGesture *>(event->gesture(Qt::TapGesture))) {
         if (gesture->state() == Qt::GestureFinished) {
             if (gesture->tapStyleHint() == HbTapGesture::Tap) {
@@ -60,6 +74,8 @@ void CalenPluginLabel::gestureEvent(QGestureEvent *event)
             }
         }
     }
+    
+    OstTraceFunctionExit0( CALENPLUGINLABEL_GESTUREEVENT_EXIT );
 }
 
 

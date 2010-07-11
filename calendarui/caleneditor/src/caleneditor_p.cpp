@@ -62,6 +62,11 @@
 #include "caleneditordatahandler.h"
 #include "caleneditorreminderfield.h"
 #include "caleneditorrepeatfield.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "caleneditor_pTraces.h"
+#endif
+
 
 /*!
 	\class CalenEditorPrivate
@@ -217,6 +222,7 @@ CalenEditorPrivate::CalenEditorPrivate(AgendaUtil *agendaUtil,
 									mLaunchCalendar(false),
 									mMenuItemAdded(false)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_CALENEDITORPRIVATE_ENTRY );
 	// First get the q-pointer.
 	q_ptr = static_cast<CalenEditor *> (parent);
 	mMainWindow = NULL;
@@ -229,6 +235,7 @@ CalenEditorPrivate::CalenEditorPrivate(AgendaUtil *agendaUtil,
 		mAgendaUtil = agendaUtil;
 		mOwnsAgendaUtil = false;
 	}
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_CALENEDITORPRIVATE_EXIT );
 }
 
 /*!
@@ -236,6 +243,7 @@ CalenEditorPrivate::CalenEditorPrivate(AgendaUtil *agendaUtil,
  */
 CalenEditorPrivate::~CalenEditorPrivate()
 {
+	OstTraceFunctionEntry0( DUP1_CALENEDITORPRIVATE_CALENEDITORPRIVATE_ENTRY );
 	if(mOwnsAgendaUtil) {
 		delete mAgendaUtil;
 		mAgendaUtil = NULL;
@@ -279,6 +287,7 @@ CalenEditorPrivate::~CalenEditorPrivate()
 		delete mMainWindow;
 		mMainWindow = NULL;
 	}
+	OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_CALENEDITORPRIVATE_EXIT );
 }
 
 /*!
@@ -288,9 +297,11 @@ CalenEditorPrivate::~CalenEditorPrivate()
  */
 void CalenEditorPrivate::edit(const QFile &/*handle*/, bool launchCalendar)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_EDIT_ENTRY );
 	// TODO: Needs to be implemented using importer.
 	mNewEntry = false;
 	mLaunchCalendar = launchCalendar;
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_EDIT_EXIT );
 }
 
 /*!
@@ -299,9 +310,11 @@ void CalenEditorPrivate::edit(const QFile &/*handle*/, bool launchCalendar)
  */
 void CalenEditorPrivate::edit(AgendaEntry entry, bool launchCalendar)
 {
+	OstTraceFunctionEntry0( DUP1_CALENEDITORPRIVATE_EDIT_ENTRY );
 	mNewEntry = false;
 	mLaunchCalendar = launchCalendar;
 	openEditor(entry);
+	OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_EDIT_EXIT );
 }
 
 /*!
@@ -310,12 +323,15 @@ void CalenEditorPrivate::edit(AgendaEntry entry, bool launchCalendar)
  */
 void CalenEditorPrivate::edit(ulong id, bool launchCalendar)
 {
+	OstTraceFunctionEntry0( DUP2_CALENEDITORPRIVATE_EDIT_ENTRY );
 	mNewEntry = false;
 	AgendaEntry entry = mAgendaUtil->fetchById(id);
 	if(entry.isNull()) {
+		OstTraceFunctionExit0( DUP2_CALENEDITORPRIVATE_EDIT_EXIT );
 		return;
 	}
 	edit(entry, launchCalendar);
+	OstTraceFunctionExit0( DUP3_CALENEDITORPRIVATE_EDIT_EXIT );
 }
 
 /*!
@@ -327,6 +343,7 @@ void CalenEditorPrivate::edit(ulong id, bool launchCalendar)
 void CalenEditorPrivate::create(CalenEditor::CreateType type,
                                 QDateTime newEntryDateTime, bool launchCalendar)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_CREATE_ENTRY );
 	mNewEntryDateTime = newEntryDateTime;
 	mNewEntry = true;
 	AgendaEntry entry;
@@ -343,6 +360,7 @@ void CalenEditorPrivate::create(CalenEditor::CreateType type,
 	}
 	mLaunchCalendar = launchCalendar;
 	openEditor(entry);
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_CREATE_EXIT );
 }
 
 /*!
@@ -354,6 +372,7 @@ void CalenEditorPrivate::create(CalenEditor::CreateType type,
 void CalenEditorPrivate::create(CalenEditor::CreateType type,
                                 AgendaEntry entry, bool launchCalendar)
 {
+	OstTraceFunctionEntry0( DUP1_CALENEDITORPRIVATE_CREATE_ENTRY );
 	mNewEntry = true;
 	switch(type){
 		case CalenEditor::TypeAppointment: {
@@ -369,6 +388,7 @@ void CalenEditorPrivate::create(CalenEditor::CreateType type,
 	mNewEntryDateTime = entry.startTime();
 	mLaunchCalendar = launchCalendar;
 	openEditor(entry);
+	OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_CREATE_EXIT );
 }
 
 /*!
@@ -376,6 +396,7 @@ void CalenEditorPrivate::create(CalenEditor::CreateType type,
  */
 void CalenEditorPrivate::showEditOccurencePopup()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SHOWEDITOCCURENCEPOPUP_ENTRY );
 	HbDialog *popUp = new HbDialog();
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
 	popUp->setTimeout(HbDialog::NoTimeout);
@@ -409,6 +430,7 @@ void CalenEditorPrivate::showEditOccurencePopup()
 
 	// Show the popup
 	popUp->open();
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_SHOWEDITOCCURENCEPOPUP_EXIT );
 }
 
 /*!
@@ -416,6 +438,7 @@ void CalenEditorPrivate::showEditOccurencePopup()
  */
 void CalenEditorPrivate::handleEditOccurence(int index)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLEEDITOCCURENCE_ENTRY );
 	switch (index) {
 		case 0:
 			// User wants to edit only this occurence
@@ -433,6 +456,7 @@ void CalenEditorPrivate::handleEditOccurence(int index)
 		entryToBeEdited = mAgendaUtil->parentEntry(mEntry);
 	}
 	showEditor(entryToBeEdited);
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLEEDITOCCURENCE_EXIT );
 }
 
 /*!
@@ -440,10 +464,12 @@ void CalenEditorPrivate::handleEditOccurence(int index)
  */
 void CalenEditorPrivate::handleCancel()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLECANCEL_ENTRY );
 	// User has chosen not to edit the event, hence return
 	mEditRange = UserCancelled;
 	// Do cleanup and return
 	emit q_ptr->dialogClosed();
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLECANCEL_EXIT );
 	return;
 }
 
@@ -452,6 +478,7 @@ void CalenEditorPrivate::handleCancel()
  */
 void CalenEditorPrivate::openEditor(AgendaEntry entry)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_OPENEDITOR_ENTRY );
 	if (0 < entry.id()) {
 		mNewEntry = false;
 	}
@@ -466,12 +493,14 @@ void CalenEditorPrivate::openEditor(AgendaEntry entry)
 			// Query user if he wants to edit whole series 
 			// or just this occurence
 			showEditOccurencePopup();
+			OstTraceFunctionExit0( CALENEDITORPRIVATE_OPENEDITOR_EXIT );
 			return;
 		}else {
 			mEditRange = ThisAndAll;
 		}
 	}
 	showEditor(entry);
+	OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_OPENEDITOR_EXIT );
 }
 
 /*!
@@ -479,6 +508,7 @@ void CalenEditorPrivate::openEditor(AgendaEntry entry)
  */
 void CalenEditorPrivate::showEditor(AgendaEntry entry)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SHOWEDITOR_ENTRY );
 	mOriginalEntry = new AgendaEntry(entry);
 	mEditedEntry = new AgendaEntry(entry);
 
@@ -498,6 +528,7 @@ void CalenEditorPrivate::showEditor(AgendaEntry entry)
 
 	// Create the data handler
 	mDataHandler = new CalenEditorDataHandler(this,mEditedEntry, mOriginalEntry);
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_SHOWEDITOR_EXIT );
 }
 
 /*!
@@ -505,6 +536,7 @@ void CalenEditorPrivate::showEditor(AgendaEntry entry)
  */
 void CalenEditorPrivate::setUpView()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SETUPVIEW_ENTRY );
 	mEditorDocLoader = new CalenEditorDocLoader();
 	bool loadSuccess = false;
 
@@ -578,6 +610,7 @@ void CalenEditorPrivate::setUpView()
 		window->setCurrentView(mEditorView);
 	}
 	
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_SETUPVIEW_EXIT );
 }
 
 /*!
@@ -585,6 +618,7 @@ void CalenEditorPrivate::setUpView()
  */
 void CalenEditorPrivate::addDiscardAction()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ADDDISCARDACTION_ENTRY );
 	if (!mMenuItemAdded) {
 		// Set this specific menu   
 		HbMenu *menu = mEditorView->menu();
@@ -596,6 +630,7 @@ void CalenEditorPrivate::addDiscardAction()
 		mEditorView->setMenu(menu);
 		mMenuItemAdded = true;
 	}
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_ADDDISCARDACTION_EXIT );
 }
 
 /*!
@@ -603,6 +638,7 @@ void CalenEditorPrivate::addDiscardAction()
  */
 void CalenEditorPrivate::initModel()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_INITMODEL_ENTRY );
 	// Remove the model.
 	if (mCalenEditorForm->model()) {
 		delete mCalenEditorForm->model();
@@ -628,6 +664,7 @@ void CalenEditorPrivate::initModel()
 		addRepeatItem();
 	}
 	mCalenEditorForm->setModel(mCalenEditorModel);
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_INITMODEL_EXIT );
 }
 
 /*!
@@ -635,12 +672,14 @@ void CalenEditorPrivate::initModel()
  */
 void CalenEditorPrivate::addSubjectItem()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ADDSUBJECTITEM_ENTRY );
 	// Creats and appends data form model item to set subject of entry.
 	mSubjectItem = mCalenEditorModel->appendDataFormItem(
 										HbDataFormModelItem::TextItem,
 										hbTrId(
 										"txt_calendar_formlabel_val_subject"),
 										mCalenEditorModel->invisibleRootItem());
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_ADDSUBJECTITEM_EXIT );
 }
 
 /*!
@@ -648,10 +687,12 @@ void CalenEditorPrivate::addSubjectItem()
  */
 void CalenEditorPrivate::addAllDayCheckBoxItem()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ADDALLDAYCHECKBOXITEM_ENTRY );
 	mAllDayCheckBoxItem = new HbDataFormModelItem();
 	mAllDayCheckBoxItem->setType(HbDataFormModelItem::CheckBoxItem);
 	mCalenEditorModel->appendDataFormItem(mAllDayCheckBoxItem);
 	mIsAllDayItemAdded = true;
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_ADDALLDAYCHECKBOXITEM_EXIT );
 }
 
 /*!
@@ -659,11 +700,13 @@ void CalenEditorPrivate::addAllDayCheckBoxItem()
  */
 void CalenEditorPrivate::addCustomItemFrom()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ADDCUSTOMITEMFROM_ENTRY );
 	HbDataFormModelItem::DataItemType itemType =
 	        static_cast<HbDataFormModelItem::DataItemType> (CustomWidgetFrom);
 	HbDataFormModelItem *customModelItem = new HbDataFormModelItem(itemType,
 								hbTrId("txt_calendar_setlabel_start_time"));
 	mCalenEditorModel->appendDataFormItem(customModelItem);
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_ADDCUSTOMITEMFROM_EXIT );
 }
 
 /*!
@@ -671,12 +714,14 @@ void CalenEditorPrivate::addCustomItemFrom()
  */
 void CalenEditorPrivate::addCustomItemTo()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ADDCUSTOMITEMTO_ENTRY );
 
 	HbDataFormModelItem::DataItemType itemType =
 	        static_cast<HbDataFormModelItem::DataItemType> (CustomWidgetTo);
 	HbDataFormModelItem *customModelItem = new HbDataFormModelItem(itemType,
 									hbTrId("txt_calendar_setlabel_end_time"));
 	mCalenEditorModel->appendDataFormItem(customModelItem);
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_ADDCUSTOMITEMTO_EXIT );
 }
 
 /*!
@@ -688,11 +733,13 @@ void CalenEditorPrivate::addCustomItemTo()
  */
 void CalenEditorPrivate::addCustomItemLocation()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ADDCUSTOMITEMLOCATION_ENTRY );
 	HbDataFormModelItem::DataItemType
     itemType =
             static_cast<HbDataFormModelItem::DataItemType> (CustomWidgetLocation);
     HbDataFormModelItem *customModelItem = new HbDataFormModelItem(itemType, hbTrId("txt_calendar_formlabel_val_location"));
     mCalenEditorModel->appendDataFormItem(customModelItem);
+    OstTraceFunctionExit0( CALENEDITORPRIVATE_ADDCUSTOMITEMLOCATION_EXIT );
 }
 
 /*!
@@ -700,20 +747,24 @@ void CalenEditorPrivate::addCustomItemLocation()
  */
 void CalenEditorPrivate::addRepeatItem()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ADDREPEATITEM_ENTRY );
 	// Create the editor reminder field class to handle reminder related
 	// features
 	mRepeatField = new CalenEditorRepeatField(this, mCalenEditorForm, 
 												  mCalenEditorModel, this);
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_ADDREPEATITEM_EXIT );
 }
 /*!
  Appends the reminder item to the Data form Model.
  */
 void CalenEditorPrivate::addReminderItem()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ADDREMINDERITEM_ENTRY );
 	// Create the editor reminder field class to handle reminder related
 	// features
 	mReminderField = new CalenEditorReminderField(this, mCalenEditorForm, 
 	                                              mCalenEditorModel, this);
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_ADDREMINDERITEM_EXIT );
 }
 
 /*!
@@ -721,6 +772,7 @@ void CalenEditorPrivate::addReminderItem()
  */
 void CalenEditorPrivate::handleDescriptionAction()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLEDESCRIPTIONACTION_ENTRY );
 	if (!mDescriptionItemAdded) {
 		populateDescriptionItem();
 		mDescriptionAction->setText(
@@ -730,6 +782,7 @@ void CalenEditorPrivate::handleDescriptionAction()
 		mDescriptionAction->setText(
 							hbTrId("txt_calendar_opt_add_description"));
 	}
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLEDESCRIPTIONACTION_EXIT );
 }
 
 /*!
@@ -737,6 +790,7 @@ void CalenEditorPrivate::handleDescriptionAction()
  */
 void CalenEditorPrivate::populateModel()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_POPULATEMODEL_ENTRY );
 	populateSubjectItem();
 
 	if (mIsAllDayItemAdded) {
@@ -755,6 +809,7 @@ void CalenEditorPrivate::populateModel()
 	if (mDescriptionItemAdded) {
 		populateDescriptionItem();
 	}
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_POPULATEMODEL_EXIT );
 }
 
 /*!
@@ -762,12 +817,15 @@ void CalenEditorPrivate::populateModel()
  */
 void CalenEditorPrivate::populateSubjectItem()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_POPULATESUBJECTITEM_ENTRY );
 	mSubjectItem->setContentWidgetData("text", mEditedEntry->summary());
 	mSubjectItem->setContentWidgetData("minRows", 2);
 	mSubjectItem->setContentWidgetData("maxRows", 4);
+	mSubjectItem->setContentWidgetData("objectName", "subjectItem");
 	mCalenEditorForm->addConnection(mSubjectItem,
 	                                SIGNAL(textChanged(const QString)), this,
 	                                SLOT(handleSubjectChange(const QString)));
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_POPULATESUBJECTITEM_EXIT );
 }
 
 /*!
@@ -775,16 +833,19 @@ void CalenEditorPrivate::populateSubjectItem()
  */
 void CalenEditorPrivate::populateAllDayItem()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_POPULATEALLDAYITEM_ENTRY );
 	mAllDayCheckBoxItem->setContentWidgetData("text",
 									hbTrId("txt_calendar_list_all_day_event"));
 	if (AgendaEntry::TypeEvent == mEditedEntry->type()) {
 		//If All day is enabled.
 		mAllDayCheckBoxItem->setContentWidgetData("checkState", Qt::Checked);
 	}
+	mAllDayCheckBoxItem->setContentWidgetData("objectName", "allDayItem");
 	mCalenEditorForm->addConnection(mAllDayCheckBoxItem,
 	                                SIGNAL(stateChanged(int )), this,
 	                                SLOT(handleAllDayChange(int)));
 
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_POPULATEALLDAYITEM_EXIT );
 }
 
 /*!
@@ -792,6 +853,7 @@ void CalenEditorPrivate::populateAllDayItem()
  */
 void CalenEditorPrivate::populateCustomItemDateTime()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_POPULATECUSTOMITEMDATETIME_ENTRY );
 	// Get the index of the start time of the event item.
 	// Check if all day has been added or not 
 	// and calculate the index accordingly
@@ -885,20 +947,24 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 			
 			// If no instances earlier then set it to 01/01/1900.
 			if (prevInstanceStartTime.isNull()) {
-				prevInstanceStartTime.setDate(QDate(1900, 01, 01));
-				prevInstanceStartTime.setTime(QTime(0, 0, 0));
+				prevInstanceEndTime.setDate(QDate(1900, 01, 01));
+				prevInstanceEndTime.setTime(QTime(0, 0, 0));
+			} else {
+				prevInstanceEndTime = prevInstanceEndTime.addDays(1);
 			}
 			
 			// If no instances later then set it to 30/01/2100.
 			if (nextInstanceEndTime.isNull()) {
-				nextInstanceEndTime.setDate(QDate(2100, 12, 30));
-				nextInstanceEndTime.setTime(QTime(0, 0, 0));
+				nextInstanceStartTime.setDate(QDate(2100, 12, 30));
+				nextInstanceStartTime.setTime(QTime(0, 0, 0));
+			} else {
+				nextInstanceStartTime = nextInstanceStartTime.addDays(-1);
 			}
 			mViewFromItem->setDateRange(
-									prevInstanceStartTime.addDays(1).date(),
-									nextInstanceStartTime.addDays(-1).date());
-			mViewToItem->setDateRange(prevInstanceEndTime.date().addDays(1),
-			                        nextInstanceEndTime.date().addDays(-1));
+									prevInstanceEndTime.date(),
+									nextInstanceStartTime.date());
+			mViewToItem->setDateRange(prevInstanceEndTime.date(),
+									nextInstanceStartTime.date());
 			
 			// If repeating daily then disable the date fields as 
 			// date cannot be changed
@@ -934,6 +1000,7 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 		enableFromTotimeFileds(false, mEditedEntry->startTime(),
                                 actualEndTime);
 	}
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_POPULATECUSTOMITEMDATETIME_EXIT );
 }
 /*!
 	Populate location item from the editor model and set it in the widget and listen 
@@ -941,6 +1008,7 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 */
 void CalenEditorPrivate::populateCustomItemLocation()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_POPULATECUSTOMITEMLOCATION_ENTRY );
 	//Get the index of the custom location  widget item of the event item.
 	// Check if all day has been added or not 
 	// and calculate the index accordingly
@@ -953,25 +1021,29 @@ void CalenEditorPrivate::populateCustomItemLocation()
 	}
 	QModelIndex index = mCalenEditorModel->index(itemIndex, 0);
 	mViewLocationItem = qobject_cast<CalenEditorCustomItem *> 
-	                      (mCalenEditorForm->itemByIndex(index));
-
+									(mCalenEditorForm->itemByIndex(index));
+	mViewLocationItem->populateLocation(mEditedEntry->location());
+	
+	// Connect the slots only after setting the location text
 	connect(mViewLocationItem, SIGNAL(locationTextChanged(const QString)),
 			this, SLOT(handleLocationChange(const QString)));
 	
-	connect(mViewLocationItem, SIGNAL(locationTextChanged(const QString, const double, const double)),
-			this, SLOT(handleLocationChange(const QString, const double, const double)));
+	connect(mViewLocationItem, 
+		SIGNAL(locationTextChanged(const QString, const double, const double)),
+		this, 
+		SLOT(handleLocationChange(const QString, const double, const double)));
 
-	mViewLocationItem->populateLocation(mEditedEntry->location());	
+	connect(mViewLocationItem, SIGNAL(locationEditingFinished()),
+				this, SLOT(handleLocationEditingFinished()));
 	
-    connect(mViewLocationItem, SIGNAL(locationEditingFinished()),
-            this, SLOT(handleLocationEditingFinished()));
-	        
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_POPULATECUSTOMITEMLOCATION_EXIT );
 }
 /*!
 	Save the changed start time of the event.
  */
 void CalenEditorPrivate::saveFromDateTime(QDateTime& fromDateTime)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SAVEFROMDATETIME_ENTRY );
 	QDateTime endTime = mEditedEntry->endTime();
 	// Update the end time accordingly on UI - duration will be 60 mins
 	// bydefault only while creating new entry and if it crossed the endtime
@@ -999,10 +1071,12 @@ void CalenEditorPrivate::saveFromDateTime(QDateTime& fromDateTime)
 	}
 
 	updateReminderChoices();
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_SAVEFROMDATETIME_EXIT );
 }
 
 void CalenEditorPrivate::updateReminderChoices()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_UPDATEREMINDERCHOICES_ENTRY );
 	QDate referenceDate;
 	
 	// Start date or repeat until date will be the reference to decide 
@@ -1040,6 +1114,7 @@ void CalenEditorPrivate::updateReminderChoices()
 			}
 		}
 	}
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_UPDATEREMINDERCHOICES_EXIT );
 }
 
 /*!
@@ -1047,6 +1122,7 @@ void CalenEditorPrivate::updateReminderChoices()
  */
 void CalenEditorPrivate::saveToDateTime(QDateTime& toDateTime)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SAVETODATETIME_ENTRY );
 	QDateTime startTime = mEditedEntry->startTime();
 	bool fromDateChanged = false;
 	// Update the start time accordingly on UI - duration will be 60 mins
@@ -1082,6 +1158,7 @@ void CalenEditorPrivate::saveToDateTime(QDateTime& toDateTime)
 	if (fromDateChanged) {
 		updateReminderChoices();
 	}
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_SAVETODATETIME_EXIT );
 }
 
 /*!
@@ -1089,6 +1166,7 @@ void CalenEditorPrivate::saveToDateTime(QDateTime& toDateTime)
  */
 void CalenEditorPrivate::populateRepeatItem()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_POPULATEREPEATITEM_ENTRY );
 	// Check if all day has been added or not 
 	// and calculate the index accordingly
 	// all day added implies reminder time field is also added
@@ -1102,6 +1180,7 @@ void CalenEditorPrivate::populateRepeatItem()
 	}
 	
 	mRepeatField->populateRepeatItem(index);
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_POPULATEREPEATITEM_EXIT );
 }
 
 /*!
@@ -1109,6 +1188,7 @@ void CalenEditorPrivate::populateRepeatItem()
  */
 void CalenEditorPrivate::populateDescriptionItem()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_POPULATEDESCRIPTIONITEM_ENTRY );
 	QModelIndex repeatIndex;
 	if (mEditRange == ThisOnly) {
 		repeatIndex = mReminderField->modelIndex();
@@ -1131,14 +1211,15 @@ void CalenEditorPrivate::populateDescriptionItem()
 	mDescriptionItem->setContentWidgetData("text", mEditedEntry->description());
 	mDescriptionItem->setContentWidgetData("minRows", 2);
 	mDescriptionItem->setContentWidgetData("maxRows", 4);
+	mDescriptionItem->setContentWidgetData("objectName", "descriptionItem");
 	mCalenEditorForm->addConnection(
 								mDescriptionItem,
 								SIGNAL(textChanged(const QString)), this,
 								SLOT(handleDescriptionChange(const QString)));
 	mDescriptionItemAdded = true;
-	// TODO: Scroll the previous form item to the top so that the description 
-	// field automatically scrolls to the top as well
-	// mCalenEditorForm->scrollTo(repeatIndex, HbAbstractItemView::EnsureVisible);
+    //Scroll to the description item added.
+	mCalenEditorForm->scrollTo(mCalenEditorModel->index(descIndex, 0), HbAbstractItemView::EnsureVisible);
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_POPULATEDESCRIPTIONITEM_EXIT );
 }
 
 /*!
@@ -1146,6 +1227,7 @@ void CalenEditorPrivate::populateDescriptionItem()
  */
 void CalenEditorPrivate::removeDescriptionItem()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_REMOVEDESCRIPTIONITEM_ENTRY );
 	// Disconnect the slot connected to description item
 	mCalenEditorForm->removeConnection(
 								   mDescriptionItem,
@@ -1169,6 +1251,7 @@ void CalenEditorPrivate::removeDescriptionItem()
 
 	mDescriptionItem = NULL;
 	mDescriptionItemAdded = false;
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_REMOVEDESCRIPTIONITEM_EXIT );
 }
 
 
@@ -1177,9 +1260,11 @@ void CalenEditorPrivate::removeDescriptionItem()
  */
 void CalenEditorPrivate::closeEditor()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_CLOSEEDITOR_ENTRY );
 	HbMainWindow* window = hbInstance->allMainWindows().first();
 	window->removeView(mEditorView);
 	emit q_ptr->dialogClosed();
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_CLOSEEDITOR_EXIT );
 }
 
 /*!
@@ -1200,6 +1285,7 @@ void CalenEditorPrivate::handleSubjectChange(const QString subject)
  */
 void CalenEditorPrivate::handleAllDayChange(int state)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLEALLDAYCHANGE_ENTRY );
 	Q_UNUSED(state)
 	if (mAllDayCheckBoxItem->contentWidgetData("checkState") == Qt::Checked) {
 		// AllDayCheckBox is checked
@@ -1258,6 +1344,7 @@ void CalenEditorPrivate::handleAllDayChange(int state)
 	if(!mNewEntry){
 		addDiscardAction();
 	}
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLEALLDAYCHANGE_EXIT );
 }
 
 /*!
@@ -1266,10 +1353,12 @@ void CalenEditorPrivate::handleAllDayChange(int state)
  */
 void CalenEditorPrivate::handleLocationChange(const QString location)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLELOCATIONCHANGE_ENTRY );
 	mEditedEntry->setLocation(location);
 	if(!mNewEntry){
 		addDiscardAction();
 	}
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLELOCATIONCHANGE_EXIT );
 }
 
 
@@ -1280,9 +1369,11 @@ void CalenEditorPrivate::handleLocationChange(const QString location)
 void CalenEditorPrivate::handleLocationChange(const QString location,
     const double /*geoLatitude*/, const double /*geoLongitude*/)
 {
+	OstTraceFunctionEntry0( DUP1_CALENEDITORPRIVATE_HANDLELOCATIONCHANGE_ENTRY );
 	mEditedEntry->setLocation(location);
 	mEditedEntry->clearGeoValue();
 	addDiscardAction();
+	OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_HANDLELOCATIONCHANGE_EXIT );
 }
 
 /*!
@@ -1290,6 +1381,7 @@ void CalenEditorPrivate::handleLocationChange(const QString location,
  */
 void CalenEditorPrivate::handleLocationEditingFinished()
 {
+    OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLELOCATIONEDITINGFINISHED_ENTRY );
     if ( !mOriginalEntry->location().isEmpty() )
     {
        AgendaGeoValue entryGeoValue =mAgendaUtil->fetchById(mEditedEntry->id()).geoValue();
@@ -1322,6 +1414,7 @@ void CalenEditorPrivate::handleLocationEditingFinished()
            confirmationQuery->open(this, SLOT(selectEditingFinishedAction(HbAction*)));
        }
     }       
+    OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLELOCATIONEDITINGFINISHED_EXIT );
 }
 
 /*!
@@ -1329,12 +1422,14 @@ void CalenEditorPrivate::handleLocationEditingFinished()
  */
 void CalenEditorPrivate::selectEditingFinishedAction(HbAction* action)
 {
+    OstTraceFunctionEntry0( CALENEDITORPRIVATE_SELECTEDITINGFINISHEDACTION_ENTRY );
     HbMessageBox* dlg = static_cast<HbMessageBox*>(sender());    
 
     if (action == dlg->actions().at(1))
     {           
         mEditedEntry->clearGeoValue();
     } 
+    OstTraceFunctionExit0( CALENEDITORPRIVATE_SELECTEDITINGFINISHEDACTION_EXIT );
 }
 
 /*!
@@ -1343,10 +1438,12 @@ void CalenEditorPrivate::selectEditingFinishedAction(HbAction* action)
  */
 void CalenEditorPrivate::handleDescriptionChange(const QString description)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLEDESCRIPTIONCHANGE_ENTRY );
 	mEditedEntry->setDescription(description);
 	if(!mNewEntry){
 		addDiscardAction();
 	}
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLEDESCRIPTIONCHANGE_EXIT );
 }
 
 /*!
@@ -1355,6 +1452,7 @@ void CalenEditorPrivate::handleDescriptionChange(const QString description)
  */
 void CalenEditorPrivate::saveAndCloseEditor()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SAVEANDCLOSEEDITOR_ENTRY );
 	Action action = handleDone();
 	if (CalenEditorPrivate::ActionDelete != action) {
 		closeEditor();
@@ -1372,6 +1470,7 @@ void CalenEditorPrivate::saveAndCloseEditor()
 									SLOT(handleCalendarLaunchError(int)));
 		}
 	}
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_SAVEANDCLOSEEDITOR_EXIT );
 }
 
 /*!
@@ -1379,8 +1478,10 @@ void CalenEditorPrivate::saveAndCloseEditor()
  */
 void CalenEditorPrivate::handleCalendarLaunchError(int error)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLECALENDARLAUNCHERROR_ENTRY );
 	// emit signal to the editor launcher
 	emit q_ptr->calendarLaunchFailed(error);
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLECALENDARLAUNCHERROR_EXIT );
 }
 
 /*!
@@ -1388,14 +1489,17 @@ void CalenEditorPrivate::handleCalendarLaunchError(int error)
  */
 void CalenEditorPrivate::handleDeleteAction()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLEDELETEACTION_ENTRY );
 	// If its a new entry just close the editor
 	if (mNewEntry) {
 		closeEditor();
+		OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLEDELETEACTION_EXIT );
 		return;
 	}else {
 		// Delete entry and close editor
 		deleteEntry(true);
 	}
+	OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_HANDLEDELETEACTION_EXIT );
 }
 
 /*!
@@ -1403,7 +1507,9 @@ void CalenEditorPrivate::handleDeleteAction()
  */
 void CalenEditorPrivate::launchSettingsView()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_LAUNCHSETTINGSVIEW_ENTRY );
 	// TODO :: Not yet implemented.
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_LAUNCHSETTINGSVIEW_EXIT );
 }
 
 /*!
@@ -1411,8 +1517,10 @@ void CalenEditorPrivate::launchSettingsView()
  */
 void CalenEditorPrivate::discardChanges()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_DISCARDCHANGES_ENTRY );
 	// Close the editor without saving the changes.
 	closeEditor();
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_DISCARDCHANGES_EXIT );
 }
 
 /*!
@@ -1420,6 +1528,7 @@ void CalenEditorPrivate::discardChanges()
  */
 void CalenEditorPrivate::showDeleteConfirmationQuery(bool closeEditor)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SHOWDELETECONFIRMATIONQUERY_ENTRY );
 	HbMessageBox *popup = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
 	popup->setDismissPolicy(HbDialog::NoDismiss);
 	popup->setTimeout(HbDialog::NoTimeout);
@@ -1450,12 +1559,12 @@ void CalenEditorPrivate::showDeleteConfirmationQuery(bool closeEditor)
         {
         popup->removeAction(list[i]);
         }
-	HbAction *deleteAction = new HbAction(hbTrId("txt_calendar_button_delete"),
+	HbAction *deleteAction = new HbAction(hbTrId("txt_calendar_button_dialog_delete"),
 										popup);
 	popup->addAction(deleteAction);
 	connect(deleteAction, SIGNAL(triggered()), this, 
 										SLOT(handleDeleteAction()));
-	HbAction *cancelAction = new HbAction(hbTrId("txt_calendar_button_cancel"),
+	HbAction *cancelAction = new HbAction(hbTrId("txt_common_button_cancel"), 
 											popup);
 	// Editor should not be closed for all the cases when cancel is pressed
 	if(closeEditor) {
@@ -1464,6 +1573,7 @@ void CalenEditorPrivate::showDeleteConfirmationQuery(bool closeEditor)
 	}
 	popup->addAction(cancelAction);
 	popup->open();
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_SHOWDELETECONFIRMATIONQUERY_EXIT );
 }
 
 /*!
@@ -1472,6 +1582,7 @@ void CalenEditorPrivate::showDeleteConfirmationQuery(bool closeEditor)
  */
 bool CalenEditorPrivate::isChild() const
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ISCHILD_ENTRY );
 	return mEditedEntry->recurrenceId().toUTC().isNull();
 }
 
@@ -1489,6 +1600,7 @@ bool CalenEditorPrivate::isChild() const
  */
 CalenEditorPrivate::Action CalenEditorPrivate::handleDone()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLEDONE_ENTRY );
 	if (mEditRange == ThisAndAll) {
 		mRepeatField->saveRepeatRule();
 	}
@@ -1496,17 +1608,21 @@ CalenEditorPrivate::Action CalenEditorPrivate::handleDone()
 	switch (mDataHandler->shouldSaveOrDeleteOrDoNothing(mLaunchCalendar)) {
 		case CalenEditorPrivate::ActionSave:
 			if (saveEntry()) {
+				OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLEDONE_EXIT );
 				return CalenEditorPrivate::ActionSave;
 			}
+			OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_HANDLEDONE_EXIT );
 			return CalenEditorPrivate::ActionNothing;
 		case CalenEditorPrivate::ActionDelete:
 			showDeleteConfirmationQuery(true);
+			OstTraceFunctionExit0( DUP2_CALENEDITORPRIVATE_HANDLEDONE_EXIT );
 			return CalenEditorPrivate::ActionDelete;
 		case CalenEditorPrivate::ActionNothing:
 			return CalenEditorPrivate::ActionNothing;
 		default:
 			break;
 	}
+	OstTraceFunctionExit0( DUP3_CALENEDITORPRIVATE_HANDLEDONE_EXIT );
 	return CalenEditorPrivate::ActionNothing;
 }
 
@@ -1516,6 +1632,7 @@ CalenEditorPrivate::Action CalenEditorPrivate::handleDone()
  */
 bool CalenEditorPrivate::saveEntry()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SAVEENTRY_ENTRY );
 	// check if we are editing child
 	if (mIsChild && (mEditRange == ThisOnly)) {
 		// Add the entry
@@ -1527,6 +1644,7 @@ bool CalenEditorPrivate::saveEntry()
 			HbNotificationDialog::launchDialog(hbTrId("All day event updated"));
 		}
 		emit q_ptr->entrySaved();
+		OstTraceFunctionExit0( CALENEDITORPRIVATE_SAVEENTRY_EXIT );
 		return true;
 	} else if ((mEditRange == ThisOnly)) {
 		// If we are editing only this occurence, then 
@@ -1569,8 +1687,10 @@ bool CalenEditorPrivate::saveEntry()
 		emit q_ptr->entrySaved();
 	} else if (error) {
 		mDataHandler->displayErrorMsg(error);
+		OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_SAVEENTRY_EXIT );
 		return false;
 	}
+	OstTraceFunctionExit0( DUP2_CALENEDITORPRIVATE_SAVEENTRY_EXIT );
 	return true;
 
 }
@@ -1581,6 +1701,7 @@ bool CalenEditorPrivate::saveEntry()
  */
 void CalenEditorPrivate::deleteEntry(bool close)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_DELETEENTRY_ENTRY );
 	// if editor is launched from Notes then don't delete entry
 	// Just exit from calendar editor
 	if (mOriginalEntry->id() > 0) {
@@ -1599,6 +1720,7 @@ void CalenEditorPrivate::deleteEntry(bool close)
 			closeEditor();
 		}
 	}
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_DELETEENTRY_EXIT );
 }
 
 /*!
@@ -1606,8 +1728,10 @@ void CalenEditorPrivate::deleteEntry(bool close)
  */
 bool CalenEditorPrivate::handleAllDayToSave()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLEALLDAYTOSAVE_ENTRY );
 	if (!mIsAllDayItemAdded) {
 		// All day item was not added, return true
+		OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLEALLDAYTOSAVE_EXIT );
 		return false;
 	}
 	// Check the state of AllDay checkBox
@@ -1629,6 +1753,7 @@ bool CalenEditorPrivate::handleAllDayToSave()
 		// changes Start/End times of entry to Beginning ot the day
 		mEditedEntry->setStartAndEndTime(tempSartTime, tempEndTime);
 		mEditedEntry->setType(AgendaEntry::TypeEvent);
+		OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_HANDLEALLDAYTOSAVE_EXIT );
 		return false;
 	} else if ((mAllDayCheckBoxItem->contentWidgetData("checkState")
 	        == Qt::Checked) && (mEditedEntry->type() != 
@@ -1641,6 +1766,7 @@ bool CalenEditorPrivate::handleAllDayToSave()
 		mAgendaUtil->cloneEntry(*mEditedEntry, AgendaEntry::TypeEvent);
 		// For later reference for the notification popup
 		mEditedEntry->setType(AgendaEntry::TypeEvent);
+		OstTraceFunctionExit0( DUP2_CALENEDITORPRIVATE_HANDLEALLDAYTOSAVE_EXIT );
 		return true;
 	} else if (mAllDayCheckBoxItem->contentWidgetData("checkState")
 	        != Qt::Checked) {
@@ -1650,6 +1776,7 @@ bool CalenEditorPrivate::handleAllDayToSave()
 	            mAgendaUtil->cloneEntry(*mEditedEntry, AgendaEntry::TypeAppoinment);
 	            // For later reference for the notification popup
 	            mEditedEntry->setType(AgendaEntry::TypeAppoinment);
+	            OstTraceFunctionExit0( DUP3_CALENEDITORPRIVATE_HANDLEALLDAYTOSAVE_EXIT );
 	            return true;
 	        }
             // Check if the duration of the meeting is matching the all-day criteria
@@ -1663,6 +1790,7 @@ bool CalenEditorPrivate::handleAllDayToSave()
                 // or it is a new entry
                 if (mOriginalEntry->type() == AgendaEntry::TypeEvent ||
                         mNewEntry) {
+                    OstTraceFunctionExit0( DUP4_CALENEDITORPRIVATE_HANDLEALLDAYTOSAVE_EXIT );
                     return false;
                 } else {
                     // It was a meeting
@@ -1671,11 +1799,13 @@ bool CalenEditorPrivate::handleAllDayToSave()
                     mAgendaUtil->cloneEntry(*mEditedEntry, AgendaEntry::TypeEvent);
                     // For later reference for the notification popup
                     mEditedEntry->setType(AgendaEntry::TypeEvent);
+                    OstTraceFunctionExit0( DUP5_CALENEDITORPRIVATE_HANDLEALLDAYTOSAVE_EXIT );
                     return true;
                 }
             }
         } 
 	} 
+	OstTraceFunctionExit0( DUP6_CALENEDITORPRIVATE_HANDLEALLDAYTOSAVE_EXIT );
 	return false;
 }
 
@@ -1686,9 +1816,11 @@ void CalenEditorPrivate::enableFromTotimeFileds(bool enableFileds,
                                                 QDateTime fromTime,
                                                 QDateTime toTime)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ENABLEFROMTOTIMEFILEDS_ENTRY );
 	mViewFromItem->enableFromTimeFieldAndSetTime(enableFileds, fromTime);
 	mViewToItem->enableToTimeFieldAndSetTime(enableFileds, toTime);
 
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_ENABLEFROMTOTIMEFILEDS_EXIT );
 }
 
 /*!
@@ -1696,6 +1828,8 @@ void CalenEditorPrivate::enableFromTotimeFileds(bool enableFileds,
  */
 AgendaEntry* CalenEditorPrivate::editedEntry()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_EDITEDENTRY_ENTRY );
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_EDITEDENTRY_EXIT );
 	return mEditedEntry;
 }
 
@@ -1704,6 +1838,8 @@ AgendaEntry* CalenEditorPrivate::editedEntry()
  */
 AgendaEntry* CalenEditorPrivate::originalEntry()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ORIGINALENTRY_ENTRY );
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_ORIGINALENTRY_EXIT );
 	return mOriginalEntry;
 }
 
@@ -1712,6 +1848,8 @@ AgendaEntry* CalenEditorPrivate::originalEntry()
  */
 bool CalenEditorPrivate::isNewEntry()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ISNEWENTRY_ENTRY );
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_ISNEWENTRY_EXIT );
 	return mNewEntry;
 }
 
@@ -1720,6 +1858,8 @@ bool CalenEditorPrivate::isNewEntry()
  */
 HbDataFormModelItem* CalenEditorPrivate::allDayCheckBoxItem()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ALLDAYCHECKBOXITEM_ENTRY );
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_ALLDAYCHECKBOXITEM_EXIT );
 	return mAllDayCheckBoxItem;
 }
 
@@ -1731,6 +1871,7 @@ HbDataFormModelItem* CalenEditorPrivate::allDayCheckBoxItem()
  */
 bool CalenEditorPrivate::isReminderTimeForAllDayAdded()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ISREMINDERTIMEFORALLDAYADDED_ENTRY );
 	return mReminderField->isReminderTimeForAllDayAdded();
 }
 
@@ -1739,14 +1880,17 @@ bool CalenEditorPrivate::isReminderTimeForAllDayAdded()
  */
 bool CalenEditorPrivate::isAllDayEvent()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ISALLDAYEVENT_ENTRY );
 	if (mAllDayCheckBoxItem) {
 		return (mAllDayCheckBoxItem->contentWidgetData("checkState") 
 													== Qt::Checked)? true:false;
 	} else if (!mNewEntry && mEditedEntry->type() == AgendaEntry::TypeEvent) {
 		// If editing single occurence then all day item not shown but still it 
 		// is an all day event..
+		OstTraceFunctionExit0( CALENEDITORPRIVATE_ISALLDAYEVENT_EXIT );
 		return true;;
 	} else {
+		OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_ISALLDAYEVENT_EXIT );
 		return false;
 	}
 }
@@ -1756,6 +1900,7 @@ bool CalenEditorPrivate::isAllDayEvent()
  */
 int CalenEditorPrivate::currentIndexOfReminderField()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_CURRENTINDEXOFREMINDERFIELD_ENTRY );
 	return mReminderField->currentReminderIndex();
 }
 
@@ -1765,7 +1910,9 @@ int CalenEditorPrivate::currentIndexOfReminderField()
  */
 void CalenEditorPrivate::setCurrentIndexOfReminderField(int index)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SETCURRENTINDEXOFREMINDERFIELD_ENTRY );
 	mReminderField->setCurrentIndex(index);
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_SETCURRENTINDEXOFREMINDERFIELD_EXIT );
 }
 
 /*!
@@ -1773,7 +1920,9 @@ void CalenEditorPrivate::setCurrentIndexOfReminderField(int index)
  */
 void CalenEditorPrivate::setReminderChoices()
 {
-		mReminderField->setReminderChoices();
+    OstTraceFunctionEntry0( CALENEDITORPRIVATE_SETREMINDERCHOICES_ENTRY );
+    mReminderField->setReminderChoices();
+    OstTraceFunctionExit0( CALENEDITORPRIVATE_SETREMINDERCHOICES_EXIT );
 }
 
 /*!
@@ -1781,6 +1930,8 @@ void CalenEditorPrivate::setReminderChoices()
  */
 bool CalenEditorPrivate::isEditRangeThisOnly()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ISEDITRANGETHISONLY_ENTRY );
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_ISEDITRANGETHISONLY_EXIT );
 	return (mEditRange == ThisOnly);
 }
 
@@ -1789,6 +1940,8 @@ bool CalenEditorPrivate::isEditRangeThisOnly()
  */
 bool CalenEditorPrivate::isAllDayFieldAdded()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ISALLDAYFIELDADDED_ENTRY );
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_ISALLDAYFIELDADDED_EXIT );
 	return mIsAllDayItemAdded;
 }
 

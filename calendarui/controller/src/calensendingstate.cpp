@@ -22,6 +22,10 @@
 #include "calencontroller.h"
 #include "calenstatemachine.h"
 #include "calennotifier.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calensendingstateTraces.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // CCalenSendingState::NewLC
@@ -30,13 +34,13 @@
 CCalenSendingState* CCalenSendingState::NewLC( CCalenController& aController,
                                                     RHashSet<TCalenNotification>&  aOutstandingNotifications )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENSENDINGSTATE_NEWLC_ENTRY );
+    
     CCalenSendingState* self = new ( ELeave ) CCalenSendingState( aController,aOutstandingNotifications );
     CleanupStack::PushL( self );
     self->ConstructL();
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENSENDINGSTATE_NEWLC_EXIT );
     return self;
     }
 
@@ -46,10 +50,11 @@ CCalenSendingState* CCalenSendingState::NewLC( CCalenController& aController,
 // ----------------------------------------------------------------------------
 void CCalenSendingState::ConstructL()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENSENDINGSTATE_CONSTRUCTL_ENTRY );
+    
     BaseConstructL();
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENSENDINGSTATE_CONSTRUCTL_EXIT );
     }
     
 // ----------------------------------------------------------------------------
@@ -60,9 +65,9 @@ CCalenSendingState::CCalenSendingState( CCalenController& aController,
                                                     RHashSet<TCalenNotification>&  aOutstandingNotifications )
     : CCalenState( aController, aOutstandingNotifications )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENSENDINGSTATE_CCALENSENDINGSTATE_ENTRY );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENSENDINGSTATE_CCALENSENDINGSTATE_EXIT );
     }
     
 // ----------------------------------------------------------------------------
@@ -71,9 +76,9 @@ CCalenSendingState::CCalenSendingState( CCalenController& aController,
 // ----------------------------------------------------------------------------    
 CCalenSendingState::~CCalenSendingState()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENSENDINGSTATE_CCALENSENDINGSTATE_ENTRY );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CCALENSENDINGSTATE_CCALENSENDINGSTATE_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -83,7 +88,8 @@ CCalenSendingState::~CCalenSendingState()
 TBool CCalenSendingState::HandleCommandL( const TCalenCommand& aCommand,
                                          CCalenStateMachine& aStateMachine )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENSENDINGSTATE_HANDLECOMMANDL_ENTRY );
+    
     TInt cmd = aCommand.Command();
     MCalenCommandHandler* handler = iController.GetCommandHandlerL( cmd );
     
@@ -99,7 +105,7 @@ TBool CCalenSendingState::HandleCommandL( const TCalenCommand& aCommand,
         cmdUsed = ETrue;
         }
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENSENDINGSTATE_HANDLECOMMANDL_EXIT );
     return cmdUsed;
     }
 
@@ -110,8 +116,8 @@ TBool CCalenSendingState::HandleCommandL( const TCalenCommand& aCommand,
 void CCalenSendingState::HandleNotificationL(const TCalenNotification& aNotification,
                                               CCalenStateMachine& aStateMachine )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENSENDINGSTATE_HANDLENOTIFICATIONL_ENTRY );
+    
     switch( aNotification )
         {
         case ECalenNotifyDialogClosed:  // issued when send method query dialog is cancelled
@@ -133,7 +139,7 @@ void CCalenSendingState::HandleNotificationL(const TCalenNotification& aNotifica
             break;
         }
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENSENDINGSTATE_HANDLENOTIFICATIONL_EXIT );
     }
 
 

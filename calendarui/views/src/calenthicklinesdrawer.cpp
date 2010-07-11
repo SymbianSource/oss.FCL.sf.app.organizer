@@ -24,6 +24,11 @@
 
 // User includes
 #include "calenthicklinesdrawer.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenthicklinesdrawerTraces.h"
+#endif
+
 
 // CONSTANTS
 #define CALENTHICKLINEWIDTH     0.15 // Units
@@ -42,9 +47,13 @@ CalenThickLinesDrawer::CalenThickLinesDrawer( CalendarNamespace::WidgetType type
 	QGraphicsItem* parent):
 	HbWidget(parent)
 {
+    OstTraceFunctionEntry0( CALENTHICKLINESDRAWER_CALENTHICKLINESDRAWER_ENTRY );
+    
 	typeOfWidget = type;
 	mGridBorderColor = HbColorScheme::color("qtc_cal_grid_line");
 	setFlag(QGraphicsItem::ItemHasNoContents, false);
+	
+	OstTraceFunctionExit0( CALENTHICKLINESDRAWER_CALENTHICKLINESDRAWER_EXIT );
 }
 
 /*!
@@ -52,7 +61,9 @@ CalenThickLinesDrawer::CalenThickLinesDrawer( CalendarNamespace::WidgetType type
  */
 CalenThickLinesDrawer::~CalenThickLinesDrawer()
 {
+    OstTraceFunctionEntry0( DUP1_CALENTHICKLINESDRAWER_CALENTHICKLINESDRAWER_ENTRY );
 
+    OstTraceFunctionExit0( DUP1_CALENTHICKLINESDRAWER_CALENTHICKLINESDRAWER_EXIT );
 }
 
 /*!
@@ -62,6 +73,8 @@ void CalenThickLinesDrawer::paint(QPainter* painter,
 								const QStyleOptionGraphicsItem* option,
 								QWidget* widget)
 {
+    OstTraceFunctionEntry0( CALENTHICKLINESDRAWER_PAINT_ENTRY );
+    
 	Q_UNUSED(option);
 	Q_UNUSED(widget);
 	QPen pen;
@@ -74,6 +87,10 @@ void CalenThickLinesDrawer::paint(QPainter* painter,
 	qreal widthInPixels = CALENTHICKLINEWIDTH * unitValue;
 	pen.setWidth(widthInPixels);
 	pen.setBrush(mGridBorderColor);
+	
+	// Store the old pen
+    QPen oldPen = painter->pen();
+	    
 	painter->setPen(pen);
 	QRectF controlRect = this->boundingRect();
 
@@ -95,6 +112,11 @@ void CalenThickLinesDrawer::paint(QPainter* painter,
 			painter->drawLine(startPoint, endPoint);
 		}
 	}
+	
+	// Set the old pen back
+    painter->setPen(oldPen);
+    
+    OstTraceFunctionExit0( CALENTHICKLINESDRAWER_PAINT_EXIT );
 }
 
 // End of file  --Don't remove this.

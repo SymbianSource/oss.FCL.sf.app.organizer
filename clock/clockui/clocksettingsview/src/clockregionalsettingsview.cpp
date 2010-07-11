@@ -343,6 +343,7 @@ void ClockRegionalSettingsView::populateFormModel()
 		mTimeFormatItem->setContentWidgetData("text", mTimeFormatStringList[1]);
 		mTimeFormatItem->setContentWidgetData("additionalText", mTimeFormatStringList[0]);
 	}
+	mTimeFormatItem->setContentWidgetData("objectName", "timeFormat");
 	mForm->addConnection(
 			mTimeFormatItem, SIGNAL(clicked()),
 			this, SLOT(handleTimeFormatChange()));
@@ -361,6 +362,7 @@ void ClockRegionalSettingsView::populateFormModel()
 		mTimeSeparatorItem->setContentWidgetData(
 				"additionalText", mTimeSeparatorStringList[0]);
 	}
+	mTimeSeparatorItem->setContentWidgetData("objectName", "timeSeparator");
 	mForm->addConnection(
 			mTimeSeparatorItem, SIGNAL(clicked()),
 			this, SLOT(handleTimeSeparatorChange()));
@@ -373,6 +375,7 @@ void ClockRegionalSettingsView::populateFormModel()
 
 	mDateFormatItem->setContentWidgetData("items", mDateFormatStringList);
 	mDateFormatItem->setContentWidgetData("currentIndex",index);
+	mDateFormatItem->setContentWidgetData("objectName", "dateFormat");
 	mForm->addConnection(
 			mDateFormatItem, SIGNAL(currentIndexChanged(QString)),
 	 		this, SLOT(handleDateFormatChange(QString)));
@@ -385,6 +388,7 @@ void ClockRegionalSettingsView::populateFormModel()
 
 	mDateSeparatorItem->setContentWidgetData("items", mDateSeparatorStringList);
 	mDateSeparatorItem->setContentWidgetData("currentIndex",index);
+	mDateSeparatorItem->setContentWidgetData("objectName", "dateSeparator");
 	mForm->addConnection(
 			mDateSeparatorItem, SIGNAL(currentIndexChanged(QString)),
 			this, SLOT(handleDateSeparatorChange(QString)));
@@ -408,6 +412,7 @@ void ClockRegionalSettingsView::populateFormModel()
 	item = new HbDataFormModelItem(workdaysItemType,
 			hbTrId("txt_clock_setlabel_workdays"));
 	mFormModel->appendDataFormItem(item);
+	item->setContentWidgetData("objectName", "workdays");
 
 	// Start of week item.
 	item = 0;
@@ -416,6 +421,7 @@ void ClockRegionalSettingsView::populateFormModel()
 	HbExtendedLocale::WeekDay startOfWeek = locale.startOfWeek();
 	item->setContentWidgetData("items", weekdaysList);
 	item->setContentWidgetData("currentIndex", startOfWeek);
+	item->setContentWidgetData("objectName", "startOfWeek");
 }
 
 /*!

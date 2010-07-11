@@ -501,11 +501,19 @@ void CalenPluginLabel::paint ( QPainter * painter, const QStyleOptionGraphicsIte
     pen.setStyle(Qt::SolidLine);
     pen.setWidth(1);
     pen.setBrush(Qt::gray);
+    
+    // Store the old pen
+    QPen oldPen = painter->pen();
+        
     painter->setPen(pen);
     QRectF rect = this->rect();
     painter->eraseRect(rect);
     painter->drawRect(rect);
     painter->fillRect(rect,Qt::gray);
+    
+    // Set the old pen back
+    painter->setPen(oldPen);
+        
     TRACE_EXIT_POINT;    
     }
 	

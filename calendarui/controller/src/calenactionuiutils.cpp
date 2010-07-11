@@ -32,6 +32,10 @@
 #include "caleninstanceid.h"
 #include "CleanupResetAndDestroy.h"
 #include "calendateutils.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenactionuiutilsTraces.h"
+#endif
 
 // -----------------------------------------------------------------------------
 // CCalenCommonUI::FindPossibleInstanceL
@@ -42,7 +46,7 @@
 AgendaEntry CalenActionUiUtils::findPossibleInstanceL(const TCalenInstanceId& id,
                                                          AgendaUtil* agendaUtil )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENACTIONUIUTILS_FINDPOSSIBLEINSTANCEL_ENTRY );
     
     QList<AgendaEntry> instances = agendaUtil->createEntryIdListForDay(id.mInstanceTime,
                                                                        AgendaUtil::FilterFlags(AgendaUtil::IncludeAll));
@@ -78,7 +82,7 @@ AgendaEntry CalenActionUiUtils::findPossibleInstanceL(const TCalenInstanceId& id
             }
         }
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENACTIONUIUTILS_FINDPOSSIBLEINSTANCEL_EXIT );
     return result;
     }
 
@@ -94,15 +98,15 @@ void CalenActionUiUtils::setToDoCompleteStatus( AgendaUtil* agendaUtil,
                                                  AgendaEntry& entry,
                                                  const bool status )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CALENACTIONUIUTILS_SETTODOCOMPLETESTATUS_ENTRY );
+    
     ASSERT( !entry.isNull() );
     QDateTime now = QDateTime::currentDateTime();
 
     // set as completed or restore and update the entry in the database
-    agendaUtil->setCompleted(entry, status, now)
+    agendaUtil->setCompleted(entry, status, now);
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENACTIONUIUTILS_SETTODOCOMPLETESTATUS_EXIT );
     }
 
 // End of file

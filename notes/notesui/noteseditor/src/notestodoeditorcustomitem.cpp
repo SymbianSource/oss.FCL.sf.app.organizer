@@ -87,6 +87,7 @@ HbWidget* NotesTodoEditorCustomItem::createCustomWidget()
 	switch(itemType) {
 		case HbDataFormModelItem::CustomItemBase + DueDateItemOffset: {
 			mDueDateItem = new HbPushButton();
+			mDueDateItem->setObjectName("dueDateItem");
 			connect(
 					mDueDateItem, SIGNAL(clicked()),
 					this, SLOT(selectDueDate()));
@@ -101,12 +102,14 @@ HbWidget* NotesTodoEditorCustomItem::createCustomWidget()
 			widget->setLayout(layout);
 
 			mTimeWidget = new HbPushButton();
+			mTimeWidget->setObjectName("alarmTime");
 			layout->addItem(mTimeWidget);
 			connect(
 					mTimeWidget, SIGNAL(clicked()),
 					this, SLOT(launchTimePicker()));
 
 			mDateWidget = new HbPushButton();
+			mDateWidget->setObjectName("alarmDate");
 			layout->addItem(mDateWidget);
 			connect(
 					mDateWidget, SIGNAL(clicked()),

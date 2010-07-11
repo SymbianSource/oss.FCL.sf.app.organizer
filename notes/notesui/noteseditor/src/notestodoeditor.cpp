@@ -351,8 +351,8 @@ void NotesTodoEditor::insertSubjectItem()
 			HbDataFormModelItem::TextItem,
 			QString(""), mFormModel->invisibleRootItem());
 
-	mSubjectItem->setContentWidgetData(
-			QString("text"), mOwner->mModifiedNote.summary());
+	mSubjectItem->setContentWidgetData("text", mOwner->mModifiedNote.summary());
+	mSubjectItem->setContentWidgetData("objectName", "subjectItem");
 
 	mDataForm->addConnection(
 			mSubjectItem , SIGNAL(textChanged(const QString &)),
@@ -385,6 +385,7 @@ void NotesTodoEditor::insertDueDateItem()
 					mOwner->dateFormatString());
 	}
 	mDueDateItem->setContentWidgetData("text",dueDateText);
+
 }
 /*!
 	 Inserts the reminder enabler item into the model.
@@ -403,7 +404,7 @@ void NotesTodoEditor::insertReminderToggle()
 	} else {
 		mReminderEnabler->setContentWidgetData("checkState",Qt::Unchecked);
 	}
-
+	mReminderEnabler->setContentWidgetData("objectName", "remainderToggleItem");
 	mDataForm->addConnection(
 			mReminderEnabler, SIGNAL(stateChanged(int)),
 			this, SLOT(handleReminderItem(int)));

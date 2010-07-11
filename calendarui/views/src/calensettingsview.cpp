@@ -29,6 +29,11 @@
 #include "calensettingsview.h"
 #include "calenservices.h"
 #include "calensettings.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calensettingsviewTraces.h"
+#endif
+
 
 CalenSettingsView::CalenSettingsView(MCalenServices& services, QGraphicsItem *parent)
 :HbView(parent), 
@@ -37,6 +42,8 @@ CalenSettingsView::CalenSettingsView(MCalenServices& services, QGraphicsItem *pa
  mCalenSettings(NULL),
  mSoftKeyAction(NULL)
 {
+    OstTraceFunctionEntry0( CALENSETTINGSVIEW_CALENSETTINGSVIEW_ENTRY );
+    
 
 	mCalenSettingsForm = new HbDataForm(this);
 
@@ -54,30 +61,41 @@ CalenSettingsView::CalenSettingsView(MCalenServices& services, QGraphicsItem *pa
         }
     }
 	
+	OstTraceFunctionExit0( CALENSETTINGSVIEW_CALENSETTINGSVIEW_EXIT );
 }
 
 CalenSettingsView::~CalenSettingsView()
 {
+    OstTraceFunctionEntry0( DUP1_CALENSETTINGSVIEW_CALENSETTINGSVIEW_ENTRY );
+    
 	if (mCalenSettings) {
 		delete mCalenSettings;
 	}
 	if (mSoftKeyAction) {
 		delete mSoftKeyAction;
 	}
+	
+	OstTraceFunctionExit0( DUP1_CALENSETTINGSVIEW_CALENSETTINGSVIEW_EXIT );
 }
 
 void CalenSettingsView::launchPreviousView()
 {
+    OstTraceFunctionEntry0( CALENSETTINGSVIEW_LAUNCHPREVIOUSVIEW_ENTRY );
+    
 	// Remove the view from mainwindow
 
 	disconnect(mSoftKeyAction, SIGNAL(triggered()), 
 											this, SLOT(launchPreviousView()));
 	mServices.MainWindow().removeView(this);
 	mServices.IssueNotificationL(ECalenNotifySettingsClosed);
+	
+	OstTraceFunctionExit0( CALENSETTINGSVIEW_LAUNCHPREVIOUSVIEW_EXIT );
 }
 
 void CalenSettingsView::initializeForm()
 {
+    OstTraceFunctionEntry0( CALENSETTINGSVIEW_INITIALIZEFORM_ENTRY );
+    
     mCalenSettings->populateSettingList();
     
     // Add view on main window and set back softkey
@@ -89,12 +107,18 @@ void CalenSettingsView::initializeForm()
 		connect(mSoftKeyAction, SIGNAL(triggered()), 
 											this, SLOT(launchPreviousView()));
 	}
+	
+	OstTraceFunctionExit0( CALENSETTINGSVIEW_INITIALIZEFORM_EXIT );
 }
 
 void CalenSettingsView::refreshView()
     {
+    OstTraceFunctionEntry0( CALENSETTINGSVIEW_REFRESHVIEW_ENTRY );
+    
     //populate the new items 
     mCalenSettings->populateSettingList();
+    
+    OstTraceFunctionExit0( CALENSETTINGSVIEW_REFRESHVIEW_EXIT );
     }
 
 // End of file

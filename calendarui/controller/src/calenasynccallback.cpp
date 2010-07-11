@@ -19,7 +19,12 @@
  // INCLUDE FILES
  
 #include "calenasynccallback.h"
-#include "calendarui_debug.h" 
+#include "calendarui_debug.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenasynccallbackTraces.h"
+#endif
+ 
 
 
 // ---------------------------------------------------------------------------
@@ -33,8 +38,9 @@ CalenAsyncCallBack::CalenAsyncCallBack(TCallBack& aCallBack, CActive::TPriority 
     :CAsyncCallBack(aCallBack, aPriority),
     iController(aController)
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;    
+    OstTraceFunctionEntry0( CALENASYNCCALLBACK_CALENASYNCCALLBACK_ENTRY );
+     
+    OstTraceFunctionExit0( CALENASYNCCALLBACK_CALENASYNCCALLBACK_EXIT );
     }
 
 // ---------------------------------------------------------------------------
@@ -46,11 +52,11 @@ CalenAsyncCallBack::CalenAsyncCallBack(TCallBack& aCallBack, CActive::TPriority 
 CalenAsyncCallBack* CalenAsyncCallBack::NewL(TCallBack& aCallBack, CActive::TPriority  aPriority,
                              CCalenController& aController)
     {
-    TRACE_ENTRY_POINT;
-  
+    OstTraceFunctionEntry0( CALENASYNCCALLBACK_NEWL_ENTRY );
+    
     CalenAsyncCallBack* self = new( ELeave ) CalenAsyncCallBack( aCallBack, aPriority , aController );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENASYNCCALLBACK_NEWL_EXIT );
     return self;
     }
 // ---------------------------------------------------------------------------
@@ -61,8 +67,9 @@ CalenAsyncCallBack* CalenAsyncCallBack::NewL(TCallBack& aCallBack, CActive::TPri
 //	
 CalenAsyncCallBack::~CalenAsyncCallBack()
 	{
-	TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+	OstTraceFunctionEntry0( DUP1_CALENASYNCCALLBACK_CALENASYNCCALLBACK_ENTRY );
+	
+	OstTraceFunctionExit0( DUP1_CALENASYNCCALLBACK_CALENASYNCCALLBACK_EXIT );
 	}
 
 // ---------------------------------------------------------------------------
@@ -72,9 +79,9 @@ CalenAsyncCallBack::~CalenAsyncCallBack()
 //
 void CalenAsyncCallBack::BaseConstructL()
 	{
-	TRACE_ENTRY_POINT;
+	OstTraceFunctionEntry0( CALENASYNCCALLBACK_BASECONSTRUCTL_ENTRY );
 
-    TRACE_EXIT_POINT;
+	OstTraceFunctionExit0( CALENASYNCCALLBACK_BASECONSTRUCTL_EXIT );
 	}
 	
 // ---------------------------------------------------------------------------
@@ -85,7 +92,7 @@ void CalenAsyncCallBack::BaseConstructL()
 //	
 void CalenAsyncCallBack::RunL()
 	{
-	TRACE_ENTRY_POINT;
+	OstTraceFunctionEntry0( CALENASYNCCALLBACK_RUNL_ENTRY );
 	
 	if(iCallBack.CallBack())
 	    {
@@ -93,8 +100,8 @@ void CalenAsyncCallBack::RunL()
 	    // request for continuing the executing command
 	    CallBack();
 	    }
-        
-	TRACE_EXIT_POINT;
+	
+	OstTraceFunctionExit0( CALENASYNCCALLBACK_RUNL_EXIT );
 	}
 
 

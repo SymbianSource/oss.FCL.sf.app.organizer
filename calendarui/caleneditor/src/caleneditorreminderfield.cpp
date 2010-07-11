@@ -32,6 +32,11 @@
 
 // User Includes
 #include "caleneditorreminderfield.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "caleneditorreminderfieldTraces.h"
+#endif
+
 
 #define numberOfMinutesInADay 1440
 /*!
@@ -55,6 +60,7 @@ CalenEditorReminderField::CalenEditorReminderField(
 	 mCustomReminderTimeItem(NULL),
 	 mReminderTimeAdded(false)
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_CALENEDITORREMINDERFIELD_ENTRY );
 	mReminderItem = new HbDataFormModelItem();
 	mReminderItem->setType(HbDataFormModelItem::ComboBoxItem);
 	mReminderItem->setData(HbDataFormModelItem::LabelRole,
@@ -62,6 +68,7 @@ CalenEditorReminderField::CalenEditorReminderField(
 	// Add it to the model
 	mCalenEditorModel->appendDataFormItem(mReminderItem,
 										mCalenEditorModel->invisibleRootItem());
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_CALENEDITORREMINDERFIELD_EXIT );
 }
 
 /*!
@@ -69,9 +76,11 @@ CalenEditorReminderField::CalenEditorReminderField(
  */
 CalenEditorReminderField::~CalenEditorReminderField()
 {
+	OstTraceFunctionEntry0( DUP1_CALENEDITORREMINDERFIELD_CALENEDITORREMINDERFIELD_ENTRY );
 	if(mReminderHash.count()) {
 		mReminderHash.clear();
 	}
+	OstTraceFunctionExit0( DUP1_CALENEDITORREMINDERFIELD_CALENEDITORREMINDERFIELD_EXIT );
 }
 
 /*!
@@ -79,6 +88,7 @@ CalenEditorReminderField::~CalenEditorReminderField()
  */
 void CalenEditorReminderField::setReminderChoices()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_SETREMINDERCHOICES_ENTRY );
 	// Create the reminder choices
 	QStringList reminderChoices;
 	reminderChoices << hbTrId("txt_calendar_setlabel_reminder_val_off")
@@ -87,7 +97,8 @@ void CalenEditorReminderField::setReminderChoices()
 				<< hbTrId("txt_calendar_setlabel_reminder_val_30_minutes_befo")
 				<< hbTrId("txt_calendar_setlabel_reminder_val_1_hour_before");
 
-	mReminderItem->setContentWidgetData(QString("items"), reminderChoices);
+	mReminderItem->setContentWidgetData("items", reminderChoices);
+	mReminderItem->setContentWidgetData("objectName", "remainderItem");
 
 	// Build the hash map for the reminder.
 	mReminderHash[0] = -1; // OFF.
@@ -96,6 +107,7 @@ void CalenEditorReminderField::setReminderChoices()
 	mReminderHash[3] = 30;
 	mReminderHash[4] = 60;
 	mReminderItem->setEnabled(true);
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_SETREMINDERCHOICES_EXIT );
 }
 
 /*!
@@ -103,9 +115,11 @@ void CalenEditorReminderField::setReminderChoices()
  */
 void CalenEditorReminderField::addItemToModel()
 {	
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_ADDITEMTOMODEL_ENTRY );
 	// Add reminder to the model
 	mCalenEditorModel->appendDataFormItem( mReminderItem,
 				   mCalenEditorModel->invisibleRootItem());
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_ADDITEMTOMODEL_EXIT );
 }
 
 /*!
@@ -113,7 +127,9 @@ void CalenEditorReminderField::addItemToModel()
  */
 void CalenEditorReminderField::removeItemFromModel()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_REMOVEITEMFROMMODEL_ENTRY );
 	mCalenEditorModel->removeItem(modelIndex());
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_REMOVEITEMFROMMODEL_EXIT );
 }
 
 /*!
@@ -122,6 +138,7 @@ void CalenEditorReminderField::removeItemFromModel()
  */
 void CalenEditorReminderField::populateReminderItem(bool newEntry)
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_POPULATEREMINDERITEM_ENTRY );
 	AgendaAlarm reminder;
 	bool pastEvent =  false;
 	
@@ -222,6 +239,7 @@ void CalenEditorReminderField::populateReminderItem(bool newEntry)
 	mEditorForm->addConnection(mReminderItem,
 							SIGNAL(currentIndexChanged(int)), this,
 							SLOT(handleReminderIndexChanged(int)));
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_POPULATEREMINDERITEM_EXIT );
 }
 
 /*!
@@ -231,6 +249,7 @@ void CalenEditorReminderField::populateReminderItem(bool newEntry)
  */
 void CalenEditorReminderField::handleReminderIndexChanged(int index)
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_HANDLEREMINDERINDEXCHANGED_ENTRY );
 	AgendaAlarm reminder;
 	if (!mCalenEditor->editedEntry()->alarm().isNull()) {
 		reminder = mCalenEditor->editedEntry()->alarm();
@@ -291,8 +310,9 @@ void CalenEditorReminderField::handleReminderIndexChanged(int index)
 	// Set the reminder to the entry.
 	mCalenEditor->editedEntry()->setAlarm(reminder);
 	if(!mCalenEditor->isNewEntry()) {
-		mCalenEditor->addDiscardAction();
+	mCalenEditor->addDiscardAction();
 	}
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_HANDLEREMINDERINDEXCHANGED_EXIT );
 }
 
 /*!
@@ -301,6 +321,7 @@ void CalenEditorReminderField::handleReminderIndexChanged(int index)
  */
 QModelIndex CalenEditorReminderField::modelIndex()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_MODELINDEX_ENTRY );
 	return mCalenEditorModel->indexFromItem(mReminderItem);
 }
 
@@ -309,11 +330,13 @@ QModelIndex CalenEditorReminderField::modelIndex()
  */
 void CalenEditorReminderField::setReminderOff()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_SETREMINDEROFF_ENTRY );
 	// Create the remindar choices
 	QStringList reminderChoices;
 	reminderChoices << hbTrId("txt_calendar_setlabel_reminder_val_off");
 	mReminderItem->setContentWidgetData(QString("items"), reminderChoices);
 	mReminderItem->setEnabled(false); 
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_SETREMINDEROFF_EXIT );
 }
 
 /*!
@@ -321,6 +344,7 @@ void CalenEditorReminderField::setReminderOff()
  */
 void CalenEditorReminderField::setDefaultAlarmForAllDay()
 {	
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_SETDEFAULTALARMFORALLDAY_ENTRY );
 	// Set default alarm if its a new entry.
 	if (mCalenEditor->isNewEntry()) {
 		AgendaAlarm reminder;
@@ -342,6 +366,7 @@ void CalenEditorReminderField::setDefaultAlarmForAllDay()
 		mCalenEditor->editedEntry()->setAlarm(reminder);
 		mCalenEditor->originalEntry()->setAlarm(reminder);
 	}
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_SETDEFAULTALARMFORALLDAY_EXIT );
 }
 
 /*!
@@ -350,6 +375,7 @@ void CalenEditorReminderField::setDefaultAlarmForAllDay()
  */
 void CalenEditorReminderField::updateReminderChoicesForAllDay(QDate referenceDate)
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_UPDATEREMINDERCHOICESFORALLDAY_ENTRY );
 	if (!mReminderTimeAdded){
 		insertReminderTimeField();
 	}
@@ -386,6 +412,7 @@ void CalenEditorReminderField::updateReminderChoicesForAllDay(QDate referenceDat
 		mReminderItem->setContentWidgetData(QString("items"), 
 											reminderChoicesForAllDay);
 	}
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_UPDATEREMINDERCHOICESFORALLDAY_EXIT );
 }
 
 /*!
@@ -393,6 +420,7 @@ void CalenEditorReminderField::updateReminderChoicesForAllDay(QDate referenceDat
  */
 void CalenEditorReminderField::insertReminderTimeField()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_INSERTREMINDERTIMEFIELD_ENTRY );
 	HbDataFormModelItem::DataItemType itemType =
 			static_cast<HbDataFormModelItem::DataItemType> (ReminderTimeOffset);
 	
@@ -416,6 +444,7 @@ void CalenEditorReminderField::insertReminderTimeField()
 	                           this, SLOT(launchReminderTimePicker()));
 	setDisplayTime();
 	mReminderTimeAdded = true;
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_INSERTREMINDERTIMEFIELD_EXIT );
 }
 
 /*!
@@ -423,11 +452,13 @@ void CalenEditorReminderField::insertReminderTimeField()
  */
 void CalenEditorReminderField::setDisplayTime()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_SETDISPLAYTIME_ENTRY );
 	HbExtendedLocale locale = HbExtendedLocale::system();
 	QString timeString = locale.format(
 			mReminderTimeForAllDay,
 			r_qtn_time_usual_with_zero);
 	mCustomReminderTimeItem->setContentWidgetData("text", timeString);
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_SETDISPLAYTIME_EXIT );
 }
 
 /*!
@@ -435,6 +466,7 @@ void CalenEditorReminderField::setDisplayTime()
  */
 void CalenEditorReminderField::removeReminderTimeField()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_REMOVEREMINDERTIMEFIELD_ENTRY );
 	mReminderTimeAdded = false;
 	if (mCustomReminderTimeItem) {
 		QModelIndex reminderIndex =
@@ -444,6 +476,7 @@ void CalenEditorReminderField::removeReminderTimeField()
 						reminderIndex.row(), 0));
 		mCustomReminderTimeItem = NULL;
 	}
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_REMOVEREMINDERTIMEFIELD_EXIT );
 }
 
 /*!
@@ -451,6 +484,7 @@ void CalenEditorReminderField::removeReminderTimeField()
  */
 void CalenEditorReminderField::launchReminderTimePicker()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_LAUNCHREMINDERTIMEPICKER_ENTRY );
 	mTimePicker = new HbDateTimePicker(mReminderTimeForAllDay);
 	mTimePicker->setTime(mReminderTimeForAllDay);
 	HbDialog *popUp = new HbDialog();
@@ -466,6 +500,7 @@ void CalenEditorReminderField::launchReminderTimePicker()
 	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"),
 	                                      popUp));
 	popUp->open();
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_LAUNCHREMINDERTIMEPICKER_EXIT );
 }
 
 /*!
@@ -473,12 +508,14 @@ void CalenEditorReminderField::launchReminderTimePicker()
  */
 void CalenEditorReminderField::setReminderTimeForAllDay()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_SETREMINDERTIMEFORALLDAY_ENTRY );
 	mReminderTimeForAllDay = mTimePicker->time();
 	if (mReminderTimeForAllDay.isValid()) {
 		// Change the time displayed to that selected by the user.
 		setDisplayTime();
 		handleReminderIndexChanged(currentReminderIndex());
 	}	
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_SETREMINDERTIMEFORALLDAY_EXIT );
 }
 
 /*!
@@ -486,6 +523,7 @@ void CalenEditorReminderField::setReminderTimeForAllDay()
  */
 bool CalenEditorReminderField::isReminderFieldEnabled()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_ISREMINDERFIELDENABLED_ENTRY );
 	return mReminderItem->isEnabled();
 }
 
@@ -494,9 +532,11 @@ bool CalenEditorReminderField::isReminderFieldEnabled()
  */
 int CalenEditorReminderField::reminderItemsCount()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_REMINDERITEMSCOUNT_ENTRY );
 	QVariant strings = mReminderItem->contentWidgetData("items");
 	QStringList stringList(strings.toStringList());
 	int count = stringList.count();
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_REMINDERITEMSCOUNT_EXIT );
 	return count;
 }
 
@@ -505,8 +545,10 @@ int CalenEditorReminderField::reminderItemsCount()
  */
 int CalenEditorReminderField::currentReminderIndex()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_CURRENTREMINDERINDEX_ENTRY );
 	QVariant countVariant = mReminderItem->contentWidgetData("currentIndex");
 	int index = countVariant.toInt();
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_CURRENTREMINDERINDEX_EXIT );
 	return index;
 }
 
@@ -516,7 +558,9 @@ int CalenEditorReminderField::currentReminderIndex()
  */
 void CalenEditorReminderField::setCurrentIndex(int index)
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_SETCURRENTINDEX_ENTRY );
 	mReminderItem->setContentWidgetData("currentIndex", index);
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_SETCURRENTINDEX_EXIT );
 }
 
 /*!
@@ -524,9 +568,11 @@ void CalenEditorReminderField::setCurrentIndex(int index)
  */
 void CalenEditorReminderField::disableReminderTimeField()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_DISABLEREMINDERTIMEFIELD_ENTRY );
 	if (mReminderTimeAdded) {
 		mCustomReminderTimeItem->setEnabled(false);
 	}
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_DISABLEREMINDERTIMEFIELD_EXIT );
 }
 
 /*!
@@ -534,6 +580,8 @@ void CalenEditorReminderField::disableReminderTimeField()
  */
 bool CalenEditorReminderField::isReminderTimeForAllDayAdded()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_ISREMINDERTIMEFORALLDAYADDED_ENTRY );
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_ISREMINDERTIMEFORALLDAYADDED_EXIT );
 	return mReminderTimeAdded;
 }
 

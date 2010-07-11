@@ -122,6 +122,7 @@ void CalenSettings::createModel()
 	mSettingsForm->addConnection(mAlarmSnoozeTimeItem, 
 								SIGNAL(currentIndexChanged(int)),
 								this, SLOT(handleAlarmSnoozeTimeChange(int)));
+	mAlarmSnoozeTimeItem->setContentWidgetData("objectName", "alarmSnoozeTime");
 	mSettingsModel->appendDataFormItem(mAlarmSnoozeTimeItem);
 	
 	// Create the weekday list based on start of week.
@@ -143,7 +144,9 @@ void CalenSettings::createModel()
     HbExtendedLocale locale = HbExtendedLocale::system();
     mStartOfWeek = locale.startOfWeek();
 	mShowWeekStartOnInfoItem->setContentWidgetData("items", weekdaysList);
-	mShowWeekStartOnInfoItem->setContentWidgetData("currentIndex", mStartOfWeek);
+	mShowWeekStartOnInfoItem->setContentWidgetData(
+			"currentIndex", mStartOfWeek);
+	mShowWeekStartOnInfoItem->setContentWidgetData("objectName", "startOfWeek");
 	mSettingsForm->addConnection(mShowWeekStartOnInfoItem, 
 									SIGNAL(currentIndexChanged(int)),
 									this, SLOT(setStartDayOfWeek(int)));
@@ -171,6 +174,8 @@ void CalenSettings::addRegionalInfoItem()
 								QString(hbTrId("txt_calendar_button_no")));
 	mShowRegionalInfoItem->setContentWidgetData(QString("additionalText"), 
 								QString(hbTrId("txt_calendar_button_yes")));
+	mShowRegionalInfoItem->setContentWidgetData(
+			"objectName", "showRegionalInfo");
 	mSettingsForm->addConnection(mShowRegionalInfoItem, SIGNAL(clicked()),
 								this, SLOT(handleRegionalInfoChange()));
 	mSettingsModel->appendDataFormItem(mShowRegionalInfoItem);
@@ -308,6 +313,7 @@ void CalenSettings::addWeekNumberItem()
 			<< hbTrId("txt_calendar_button_yes");
 	mShowWeekNumberItem->setData(HbDataFormModelItem::LabelRole, 
 					QString(hbTrId("txt_calendar_setlabel_show_week_numbers")));
+	mShowWeekNumberItem->setContentWidgetData("objectName", "showWeekNumber");
 
 	mSettingsModel->appendDataFormItem(mShowWeekNumberItem);
 	mSettingsForm->addConnection(mShowWeekNumberItem, SIGNAL(clicked()), 

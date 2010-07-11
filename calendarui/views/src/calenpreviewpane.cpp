@@ -41,6 +41,11 @@
 #include "calencommon.h"
 #include "calenpreviewpane.h"
 #include "calenmonthview.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenpreviewpaneTraces.h"
+#endif
+
 
 // Macros
 #define TWO_SECONDS_TIMER 2000 // millseconds
@@ -57,6 +62,8 @@ CalenPreviewPane::CalenPreviewPane(MCalenServices& services,
 							QGraphicsItem* parent)
 	: HbScrollArea(parent),mServices(services)
 {
+    OstTraceFunctionEntry0( CALENPREVIEWPANE_CALENPREVIEWPANE_ENTRY );
+    
 	// Create the timer
 	mTwoSecTimer = new QTimer(this);
 	mScrollDirection = invalid;
@@ -72,6 +79,8 @@ CalenPreviewPane::CalenPreviewPane(MCalenServices& services,
 	// Connect the scrollig finished signal
 	connect(this, SIGNAL(scrollingEnded()), this,
 				SLOT(scrollingFinished()));
+	
+	OstTraceFunctionExit0( CALENPREVIEWPANE_CALENPREVIEWPANE_EXIT );
 }
 
 /*!
@@ -79,6 +88,9 @@ CalenPreviewPane::CalenPreviewPane(MCalenServices& services,
  */
 CalenPreviewPane::~CalenPreviewPane()
 {
+    OstTraceFunctionEntry0( DUP1_CALENPREVIEWPANE_CALENPREVIEWPANE_ENTRY );
+    
+    OstTraceFunctionExit0( DUP1_CALENPREVIEWPANE_CALENPREVIEWPANE_EXIT );
 }
 
 /*!
@@ -86,7 +98,11 @@ CalenPreviewPane::~CalenPreviewPane()
  */
 void CalenPreviewPane::setNoEntriesLabel(HbLabel* label)
 {
+    OstTraceFunctionEntry0( CALENPREVIEWPANE_SETNOENTRIESLABEL_ENTRY );
+    
 	mNoEntriesLabel = label;
+	
+	OstTraceFunctionExit0( CALENPREVIEWPANE_SETNOENTRIESLABEL_EXIT );
 }
 
 /*!
@@ -94,6 +110,8 @@ void CalenPreviewPane::setNoEntriesLabel(HbLabel* label)
  */
 void CalenPreviewPane::populateLabel(QDateTime date)
 {
+    OstTraceFunctionEntry0( CALENPREVIEWPANE_POPULATELABEL_ENTRY );
+    
 	mScrollDirection = up;
 	
 	// Scroll contents to zero position before we display to the user
@@ -116,6 +134,7 @@ void CalenPreviewPane::populateLabel(QDateTime date)
 	if (mIsNoEntriesAdded) {
 		if (!instanceCount) {
 		    mNoEntriesLabel->setVisible(true);
+		    OstTraceFunctionExit0( CALENPREVIEWPANE_POPULATELABEL_EXIT );
 		    return;
 		} else {
 			// Remove the no entries label
@@ -160,10 +179,11 @@ void CalenPreviewPane::populateLabel(QDateTime date)
 				// No summary display "No subject"
 				summary.append(hbTrId("txt_calendar_dblist_unnamed"));
 			}
-			// Chcek the entry type, based on the type display time field in
+			// Check the entry type, based on the type display time field in
 			// preview pane.
 			QString start;
-			if(mInstanceArray[i].type() != AgendaEntry::TypeTodo ) {
+			if(mInstanceArray[i].type() != AgendaEntry::TypeTodo && 
+					mInstanceArray[i].type() != AgendaEntry::TypeAnniversary) {
 				QDateTime startTime = mInstanceArray[i].startTime();
 				HbExtendedLocale systemLocale =HbExtendedLocale::system();
 				start = systemLocale.format(startTime.time(), 
@@ -211,6 +231,8 @@ void CalenPreviewPane::populateLabel(QDateTime date)
 		mIsNoEntriesAdded = true;
 	}
 	layout->activate();
+	
+	OstTraceFunctionExit0( DUP1_CALENPREVIEWPANE_POPULATELABEL_EXIT );
 }
 
 /*!
@@ -218,6 +240,8 @@ void CalenPreviewPane::populateLabel(QDateTime date)
  */
 void CalenPreviewPane::GetInstanceListL()
 {
+    OstTraceFunctionEntry0( CALENPREVIEWPANE_GETINSTANCELISTL_ENTRY );
+    
 	mInstanceArray.clear();
 
 	// Find Meetings, Remainders, Anniversaries and Day Notes
@@ -232,6 +256,8 @@ void CalenPreviewPane::GetInstanceListL()
 										AgendaUtil::IncludeReminders);
 	mInstanceArray = mServices.agendaInterface()->
 									createEntryIdListForDay(dayStart, filter);
+	
+	OstTraceFunctionExit0( CALENPREVIEWPANE_GETINSTANCELISTL_EXIT );
 }
 
 /*!
@@ -239,6 +265,9 @@ void CalenPreviewPane::GetInstanceListL()
  */
 QDateTime CalenPreviewPane::Date()
 {
+    OstTraceFunctionEntry0( CALENPREVIEWPANE_DATE_ENTRY );
+    
+	OstTraceFunctionExit0( CALENPREVIEWPANE_DATE_EXIT );
 	return mDate;
 }
 
@@ -247,8 +276,11 @@ QDateTime CalenPreviewPane::Date()
  */
 void CalenPreviewPane::startAutoScroll()
 {
+    OstTraceFunctionEntry0( CALENPREVIEWPANE_STARTAUTOSCROLL_ENTRY );
+    
 	if (mIsNoEntriesAdded) {
 		scrollContentsTo(QPointF(0.0,0.0));
+		OstTraceFunctionExit0( CALENPREVIEWPANE_STARTAUTOSCROLL_EXIT );
 		return;
 	}
 
@@ -256,6 +288,8 @@ void CalenPreviewPane::startAutoScroll()
 	mTwoSecTimer->setSingleShot(true);
 	connect(mTwoSecTimer, SIGNAL(timeout()), this, SLOT(onTwoSecondsTimeout()));
 	mTwoSecTimer->start(TWO_SECONDS_TIMER);
+	
+	OstTraceFunctionExit0( DUP1_CALENPREVIEWPANE_STARTAUTOSCROLL_EXIT );
 }
 
 /*!
@@ -264,6 +298,8 @@ void CalenPreviewPane::startAutoScroll()
  */
 void CalenPreviewPane::onTwoSecondsTimeout()
 {
+    OstTraceFunctionEntry0( CALENPREVIEWPANE_ONTWOSECONDSTIMEOUT_ENTRY );
+    
 	mTwoSecTimer->stop();
 	disconnect(mTwoSecTimer, SIGNAL(timeout()), 
 										   this, SLOT(onTwoSecondsTimeout()));
@@ -292,6 +328,8 @@ void CalenPreviewPane::onTwoSecondsTimeout()
 		QPointF targetPos(0.0, 0.0);
         scrollContentsTo(targetPos, mScrollDuration * 1000);
 	}
+	
+	OstTraceFunctionExit0( CALENPREVIEWPANE_ONTWOSECONDSTIMEOUT_EXIT );
 }
 
 /*!
@@ -300,14 +338,19 @@ void CalenPreviewPane::onTwoSecondsTimeout()
  */
 void CalenPreviewPane::scrollingFinished()
 {
+    OstTraceFunctionEntry0( CALENPREVIEWPANE_SCROLLINGFINISHED_ENTRY );
+    
 	// If we are here because of calling scrollContentsTo()
 	if (!mNumOfScrolls) {
+		OstTraceFunctionExit0( CALENPREVIEWPANE_SCROLLINGFINISHED_EXIT );
 		return;
 	}
 	// Now start the two seconds timer again
 	mTwoSecTimer->setSingleShot(true);
 	connect(mTwoSecTimer, SIGNAL(timeout()), this, SLOT(onTwoSecondsTimeout()));
 	mTwoSecTimer->start(TWO_SECONDS_TIMER);
+	
+	OstTraceFunctionExit0( DUP1_CALENPREVIEWPANE_SCROLLINGFINISHED_EXIT );
 }
 
 /*!
@@ -315,6 +358,8 @@ void CalenPreviewPane::scrollingFinished()
  */
 void CalenPreviewPane::gestureEvent(QGestureEvent *event)
 {
+    OstTraceFunctionEntry0( CALENPREVIEWPANE_GESTUREEVENT_ENTRY );
+    
     if(HbPanGesture *gesture = qobject_cast<HbPanGesture *>(event->gesture(Qt::PanGesture))) {
         if (gesture->state() == Qt::GestureStarted) {
             // TODO: This work aroung till framework provides an api
@@ -336,6 +381,7 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
                     event->accept(Qt::PanGesture);
                 } else {
                     event->accept(Qt::PanGesture);
+                    OstTraceFunctionExit0( CALENPREVIEWPANE_GESTUREEVENT_EXIT );
                     return;
                 }
             } else if (abs(delta.y()) < MAX_PAN_DIRECTION_THRESHOLD) {
@@ -351,6 +397,7 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
                    event->accept(Qt::PanGesture);
                }else {
                    event->accept(Qt::PanGesture);
+                   OstTraceFunctionExit0( DUP1_CALENPREVIEWPANE_GESTUREEVENT_EXIT );
                    return;
                }
             }
@@ -364,6 +411,8 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
             }
         }
     }
+    
+    OstTraceFunctionExit0( DUP2_CALENPREVIEWPANE_GESTUREEVENT_EXIT );
 }
 
 /*!
@@ -371,7 +420,11 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
  */
 void CalenPreviewPane::setView(CalenMonthView* view)
 {
+    OstTraceFunctionEntry0( CALENPREVIEWPANE_SETVIEW_ENTRY );
+    
 	mView = view;
+	
+	OstTraceFunctionExit0( CALENPREVIEWPANE_SETVIEW_EXIT );
 }
 
 /*!
@@ -379,6 +432,8 @@ void CalenPreviewPane::setView(CalenMonthView* view)
  */
 void CalenPreviewPane::stopScrolling()
 {
+    OstTraceFunctionEntry0( CALENPREVIEWPANE_STOPSCROLLING_ENTRY );
+    
 	if (isScrolling() || mTwoSecTimer->isActive()) {
 		scrollContentsTo(QPointF(0.0,0.0));
 		
@@ -386,6 +441,8 @@ void CalenPreviewPane::stopScrolling()
 		HbScrollArea::panGesture(QPointF(0.0,0.0));
 		mTwoSecTimer->stop();
 	}
+	
+	OstTraceFunctionExit0( CALENPREVIEWPANE_STOPSCROLLING_EXIT );
 }
 
 // End of file  --Don't remove this.

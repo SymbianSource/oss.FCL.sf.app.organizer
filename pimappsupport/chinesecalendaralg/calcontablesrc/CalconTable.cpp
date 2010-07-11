@@ -78,7 +78,7 @@ void CCalconTableEngine::GenerateTableL()
 	time+=TTimeIntervalDays(27);
 	TBool hadLeapMonth=EFalse;	
 
-	iSession.Connect();
+	User::LeaveIfError(iSession.Connect());
 	TInt err=iFile.Replace(iSession, _L("c:\\calcondata.cpp"), EFileShareExclusive);
 	if (err!=KErrNone)
 		return;

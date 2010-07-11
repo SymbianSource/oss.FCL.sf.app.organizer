@@ -26,7 +26,8 @@ DEFINES += CALENVIEWS_DLL
 INCLUDEPATH += ./inc \
 			   ../inc \
 			   ../controller/inc \
-			   ../cenrep
+			   ../cenrep \
+			   ./traces
 
 							
 CONFIG += hb

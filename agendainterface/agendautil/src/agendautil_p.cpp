@@ -53,6 +53,8 @@ AgendaUtilPrivate::AgendaUtilPrivate(AgendaUtil* parent)
 	mEntryViewCreated = false;
 	mInstanceViewCreated = false;
 	mIsDeleting = false;
+	mIsEntryViewBeingDeleted = false;
+	mIsInstanceViewBeingDeleted = false;
 	prepareSession();
 }
 
@@ -95,13 +97,13 @@ bool AgendaUtilPrivate::prepareSession()
 				endDateArray[0], static_cast<TMonth>(endDateArray[1]),
 				0, 0, 0, 0, 0);
 
-		startDate.SetTimeLocalL(startTime);
-		endDate.SetTimeLocalL(endTime);
-		CalCommon::TCalTimeRange searchTimeRange(startDate, startDate);
+		startDate.SetTimeUtcL(startTime);
+		endDate.SetTimeUtcL(endTime);
+		CalCommon::TCalTimeRange searchTimeRange(startDate, endDate);
 
 		CCalChangeNotificationFilter* filter = 0;
 		filter = CCalChangeNotificationFilter::NewL(
-				EChangeEntryAll, true, searchTimeRange);
+				MCalChangeCallBack2::EChangeEntryAll, true, searchTimeRange);
 
 		iCalSession->StartChangeNotification(*this, *filter);
 
@@ -124,8 +126,18 @@ bool AgendaUtilPrivate::prepareSession()
 
 AgendaUtilPrivate::~AgendaUtilPrivate()
 {
-	delete iCalEntryView;
-	delete iCalInstanceView;
+    if (iCalEntryView && !mIsEntryViewBeingDeleted) {
+        mIsEntryViewBeingDeleted = true;
+        delete iCalEntryView;
+        iCalEntryView = NULL;
+    }
+    
+    if (iCalInstanceView && !mIsInstanceViewBeingDeleted) {
+        mIsInstanceViewBeingDeleted = true;
+        delete iCalInstanceView;
+        iCalInstanceView = NULL;
+    }
+	
 	if (iCalSession) {
 		iCalSession->StopChangeNotification();
 	}
@@ -135,8 +147,6 @@ AgendaUtilPrivate::~AgendaUtilPrivate()
 void AgendaUtilPrivate::Completed(TInt aError)
 {
 	iError = aError;
-	static bool isInstanceViewDeleted = false;
-	static bool isEntryViewDeleted = false;
 
 	if (mIsDeleting) {
 		// If deletion was in progress, then it is completed now
@@ -147,15 +157,17 @@ void AgendaUtilPrivate::Completed(TInt aError)
 
 	if (KErrNone != iError) {
 		// Something has gone wrong, return
-		if (iCalEntryView && !isEntryViewDeleted) {
-		isEntryViewDeleted = true;
-		delete iCalEntryView;
-		iCalEntryView = NULL;
+		if (iCalEntryView && !mIsEntryViewBeingDeleted) {
+            mIsEntryViewBeingDeleted = true;
+            delete iCalEntryView;
+            iCalEntryView = NULL;
+            mIsEntryViewBeingDeleted = false;
 		}
-		if (iCalInstanceView && !isInstanceViewDeleted) {
-		isInstanceViewDeleted = true;
-		delete iCalInstanceView;
-		iCalInstanceView = NULL;
+		if (iCalInstanceView && !mIsInstanceViewBeingDeleted) {
+            mIsInstanceViewBeingDeleted = true;
+            delete iCalInstanceView;
+            iCalInstanceView = NULL;
+            mIsInstanceViewBeingDeleted = false;
 		}
 		return;
 	}

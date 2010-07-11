@@ -20,25 +20,43 @@
 
 // User includes
 #include "caleneventlistviewitem.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "caleneventlistviewitemTraces.h"
+#endif
+
 
 CalenEventListViewItem::CalenEventListViewItem(QGraphicsItem *parent) :
 HbListViewItem(parent)
 {
+    OstTraceFunctionEntry0( CALENEVENTLISTVIEWITEM_CALENEVENTLISTVIEWITEM_ENTRY );
+    
+    OstTraceFunctionExit0( CALENEVENTLISTVIEWITEM_CALENEVENTLISTVIEWITEM_EXIT );
 }
 
 CalenEventListViewItem::~CalenEventListViewItem()
 {
+    OstTraceFunctionEntry0( DUP1_CALENEVENTLISTVIEWITEM_CALENEVENTLISTVIEWITEM_ENTRY );
+    
     // No implementation yet
+    OstTraceFunctionExit0( DUP1_CALENEVENTLISTVIEWITEM_CALENEVENTLISTVIEWITEM_EXIT );
 }
 
 HbAbstractViewItem* CalenEventListViewItem::createItem()
 {
+    OstTraceFunctionEntry0( CALENEVENTLISTVIEWITEM_CREATEITEM_ENTRY );
+    
+    OstTraceFunctionExit0( CALENEVENTLISTVIEWITEM_CREATEITEM_EXIT );
     return new CalenEventListViewItem(*this);
 }
 
 void CalenEventListViewItem::updateChildItems()
 {
+    OstTraceFunctionEntry0( CALENEVENTLISTVIEWITEM_UPDATECHILDITEMS_ENTRY );
+    
     HbListViewItem::updateChildItems();
+    
+    OstTraceFunctionExit0( CALENEVENTLISTVIEWITEM_UPDATECHILDITEMS_EXIT );
 }
 
 // End of file

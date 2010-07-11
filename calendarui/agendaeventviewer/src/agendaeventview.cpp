@@ -559,7 +559,7 @@ void AgendaEventView::addCompletedTodoData()
     itemData.append(QString::null);
 	itemData.append(QString::null);
 	itemData.append(QString::null);
-    mReminderWidget->setProperty(primaryLeftIconItem, false);
+    mReminderWidget->setProperty(primaryLeftIconItem, true);
 	mReminderWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 	itemData.clear();
 	completedText = systemLocale.format(mAgendaEntry.completedDateTime().date(),
@@ -595,7 +595,7 @@ void AgendaEventView::addDescriptionData()
 	itemData.append(QString::null);
 	itemData.append(QString::null);
     itemData.append(QString::null);
-    mDescriptionWidget->setProperty(primaryLeftIconItem, false);
+    mDescriptionWidget->setProperty(primaryLeftIconItem, true);
 	mDescriptionWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 	itemData.clear();
 	itemData.append(hbTrId("txt_calendar_dblist_description"));
@@ -910,7 +910,7 @@ void AgendaEventView::showDeleteConfirmationQuery()
     popup->addAction(deleteAction);
     connect(deleteAction, SIGNAL(triggered()), this ,
 												SLOT(handleDeleteAction()));
-    popup->addAction(new HbAction(hbTrId("txt_calendar_button_cancel"), popup));
+    popup->addAction(new HbAction(hbTrId("txt_common_button_cancel"), popup));
     popup->open();
 }
 

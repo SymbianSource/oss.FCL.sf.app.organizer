@@ -26,12 +26,14 @@
                 <sizehint height="var(hb-param-text-height-primary)" type="MINIMUM" width="37.7un"/>
                 <sizehint height="var(hb-param-text-height-primary)" type="MAXIMUM" width="49.7un"/>
                 <string locid="txt_clk_main_view_list_no_alarms_set" name="plainText" value="No alarm set"/>
+                <fontspec name="fontSpec" role="Undefined" textheight="expr(var(hb-param-text-height-primary) )"/>
             </widget>
             <widget name="dateLabel" type="HbLabel">
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                 <real name="z" value="19"/>
                 <sizehint height="var(hb-param-text-height-tiny)" type="PREFERRED" width="expr(var(hb-param-screen-width)-53.73un-4un)"/>
                 <string name="plainText" value="Mon 18.05.2009"/>
+                <fontspec name="fontSpec" role="Undefined" textheight="expr(var(hb-param-text-height-tiny) )"/>
             </widget>
             <widget name="alarmListView" type="HbListView">
                 <widget name="prototype" role="HbAbstractView:prototype" type="HbListViewItem">
@@ -59,6 +61,7 @@
                 <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
                 <sizehint height="expr(var(hb-param-text-height-tiny) )" type="PREFERRED" width="18.58295un"/>
                 <string name="plainText" value="united kingdom 0:00 GMT"/>
+                <fontspec name="fontSpec" role="Undefined" textheight="expr(var(hb-param-text-height-tiny) )"/>
             </widget>
             <layout type="anchor">
                 <anchoritem dst="clockWidget" dstEdge="TOP" spacing="2un" src="" srcEdge="TOP"/>

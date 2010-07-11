@@ -37,6 +37,11 @@
 #include "calenservicesimpl.h"          // Calendar service implementation
 #include "CalenUid.h"
 #include "calencontextimpl.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calencontrollerTraces.h"
+#endif
+
 
 // Constants
 const TInt KCustomCommandRangeStart     = ECalenLastCommand; 
@@ -50,7 +55,8 @@ const TInt KNumberOfCommandsPerServices = 100;
 //
 CCalenController::CCalenController()
 {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_CCALENCONTROLLER_ENTRY );
+    
 	// Check the Application Startup reason, set iIsFromServiceFrmWrk if application
 	// is started by service framework, false otherwise
     /*Hb::ActivationReasonService == qobject_cast<HbApplication*>(qApp)->activateReason() ? 
@@ -67,7 +73,7 @@ CCalenController::CCalenController()
     iRefCount = 0;
     mAgendaUtil = 0;
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCONTROLLER_CCALENCONTROLLER_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -78,6 +84,7 @@ CCalenController::CCalenController()
 //
 void CCalenController::constructController()
 {
+	OstTraceFunctionEntry0( CCALENCONTROLLER_CONSTRUCTCONTROLLER_ENTRY );
 	// Store the pointer in tls, also avoid multiple creations
 	checkMultipleCreation();
 
@@ -142,10 +149,13 @@ void CCalenController::constructController()
 	RegisterForNotificationsL( iViewManager, notificationArray );
 	notificationArray.Reset();  
 	notificationArray.Close();
+	
+	OstTraceFunctionExit0( CCALENCONTROLLER_CONSTRUCTCONTROLLER_EXIT );
 }
 
 void CCalenController::checkMultipleCreation()
 {
+	OstTraceFunctionEntry0( CCALENCONTROLLER_CHECKMULTIPLECREATION_ENTRY );
 	TAny* tlsPtr = Dll::Tls();
 
 	// Check Thread local storage
@@ -164,6 +174,7 @@ void CCalenController::checkMultipleCreation()
 		// This function should only have been called once, by CCalenAppUi
 		User::Leave( KErrAlreadyExists );
 		}	
+	OstTraceFunctionExit0( CCALENCONTROLLER_CHECKMULTIPLECREATION_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -177,8 +188,8 @@ void CCalenController::checkMultipleCreation()
 //
 CCalenController* CCalenController::InstanceL()
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENCONTROLLER_INSTANCEL_ENTRY );
+    
     CCalenController* self = NULL;
     TAny* tlsPtr = Dll::Tls();
 
@@ -197,7 +208,8 @@ CCalenController* CCalenController::InstanceL()
 
     ++self->iRefCount;
 
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_INSTANCEL_EXIT );
     return self;    
     }
 
@@ -210,12 +222,12 @@ CCalenController* CCalenController::InstanceL()
 //
 void CCalenController::ReleaseCustomisations()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_RELEASECUSTOMISATIONS_ENTRY );
     
     delete iCustomisationManager;
     iCustomisationManager = NULL;
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCONTROLLER_RELEASECUSTOMISATIONS_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -228,7 +240,8 @@ void CCalenController::ReleaseCustomisations()
 //
 void CCalenController::Release()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_RELEASE_ENTRY );
+    
     --iRefCount;
     
     // The controller owns its own instance of the services, therefore the
@@ -237,7 +250,8 @@ void CCalenController::Release()
         {
         delete this;
         }
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_RELEASE_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -249,7 +263,7 @@ void CCalenController::Release()
 //
 CCalenController::~CCalenController()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENCONTROLLER_CCALENCONTROLLER_ENTRY );
 
     if(iStateMachine) {
     	delete iStateMachine;
@@ -299,7 +313,7 @@ CCalenController::~CCalenController()
     
     Dll::SetTls( NULL );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CCALENCONTROLLER_CCALENCONTROLLER_EXIT );
     }
 
 
@@ -313,12 +327,14 @@ CCalenController::~CCalenController()
 //
 TBool CCalenController::IssueCommandL( TInt aCommand )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_ISSUECOMMANDL_ENTRY );
+    
     TCalenCommand cmd;
     cmd.SetCommandAndContextL( aCommand ,context());
 
     TBool ret = iStateMachine->HandleCommandL( cmd );
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_ISSUECOMMANDL_EXIT );
     return ret;
     }
 
@@ -330,8 +346,9 @@ TBool CCalenController::IssueCommandL( TInt aCommand )
 //
 MCalenServices& CCalenController::Services()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_SERVICES_ENTRY );
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_SERVICES_EXIT );
     return *iServices;
     }
 
@@ -342,8 +359,9 @@ MCalenServices& CCalenController::Services()
 // ----------------------------------------------------------------------------
 CalenViewManager& CCalenController::ViewManager()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_VIEWMANAGER_ENTRY );
+    
+	OstTraceFunctionExit0( CCALENCONTROLLER_VIEWMANAGER_EXIT );
 	return *iViewManager;
     }
     
@@ -354,11 +372,14 @@ CalenViewManager& CCalenController::ViewManager()
 // ----------------------------------------------------------------------------
 HbMainWindow& CCalenController::MainWindow()
     {
-    TRACE_ENTRY_POINT;
+    
+    OstTraceFunctionEntry0( DUP1_CCALENCONTROLLER_MAINWINDOW_ENTRY );
+
+    OstTraceFunctionExit0( DUP1_CCALENCONTROLLER_MAINWINDOW_EXIT );
     
     return *(hbInstance->allMainWindows().first());
 	
-	TRACE_EXIT_POINT;
+	
     }    
 
 // ----------------------------------------------------------------------------
@@ -370,11 +391,11 @@ HbMainWindow& CCalenController::MainWindow()
 //
 void CCalenController::BroadcastNotification( TCalenNotification aNotification )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_BROADCASTNOTIFICATION_ENTRY );
 
     iNotifier->BroadcastNotification( aNotification );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCONTROLLER_BROADCASTNOTIFICATION_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -386,11 +407,11 @@ void CCalenController::BroadcastNotification( TCalenNotification aNotification )
 void CCalenController::RegisterForNotificationsL( MCalenNotificationHandler* aHandler,
                                                             TCalenNotification aNotification )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_REGISTERFORNOTIFICATIONSL_ENTRY );
 
     iNotifier->RegisterForNotificationsL( aHandler, aNotification );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCONTROLLER_REGISTERFORNOTIFICATIONSL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -402,11 +423,11 @@ void CCalenController::RegisterForNotificationsL( MCalenNotificationHandler* aHa
 void CCalenController::RegisterForNotificationsL( MCalenNotificationHandler* aHandler,
                                                             RArray<TCalenNotification>& aNotifications )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENCONTROLLER_REGISTERFORNOTIFICATIONSL_ENTRY );
 
     iNotifier->RegisterForNotificationsL( aHandler, aNotifications );
-
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( DUP1_CCALENCONTROLLER_REGISTERFORNOTIFICATIONSL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -417,11 +438,11 @@ void CCalenController::RegisterForNotificationsL( MCalenNotificationHandler* aHa
 //
 void CCalenController::CancelNotifications( MCalenNotificationHandler* aHandler )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_CANCELNOTIFICATIONS_ENTRY );
 
     iNotifier->CancelNotifications( aHandler );
-
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_CANCELNOTIFICATIONS_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -432,7 +453,7 @@ void CCalenController::CancelNotifications( MCalenNotificationHandler* aHandler 
 // ----------------------------------------------------------------------------
 MCalenCommandHandler* CCalenController::GetCommandHandlerL( TInt aCommand )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_GETCOMMANDHANDLERL_ENTRY );
     
     MCalenCommandHandler* handler( NULL );
 
@@ -465,8 +486,9 @@ MCalenCommandHandler* CCalenController::GetCommandHandlerL( TInt aCommand )
 
     // No command handler is an error  
     
+    OstTraceFunctionExit0( CCALENCONTROLLER_GETCOMMANDHANDLERL_EXIT );
+    
     // return the handler
-    TRACE_EXIT_POINT;
     return handler;
     }
 
@@ -478,14 +500,15 @@ MCalenCommandHandler* CCalenController::GetCommandHandlerL( TInt aCommand )
 //
 MCalenServices* CCalenController::NewServicesL()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_NEWSERVICESL_ENTRY );
     
     TInt commandRangeStart = iNextServicesCommandBase;
     TInt commandRangeEnd = commandRangeStart + KNumberOfCommandsPerServices;
     iNextServicesCommandBase = commandRangeEnd + 1;
 
     CalenServicesImpl* svc = CalenServicesImpl::NewL( commandRangeStart,commandRangeEnd );
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_NEWSERVICESL_EXIT );
     return svc;
     }
 
@@ -497,8 +520,9 @@ MCalenServices* CCalenController::NewServicesL()
 //
 CalenNotifier& CCalenController::Notifier()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_NOTIFIER_ENTRY );
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_NOTIFIER_EXIT );
     return *iNotifier;
     }
     
@@ -511,8 +535,9 @@ CalenNotifier& CCalenController::Notifier()
 //
 HbWidget* CCalenController::Infobar()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENCONTROLLER_INFOBAR_ENTRY );
+    
+    OstTraceFunctionExit0( DUP1_CCALENCONTROLLER_INFOBAR_EXIT );
     return iCustomisationManager->Infobar();
     }
 // ----------------------------------------------------------------------------
@@ -523,8 +548,9 @@ HbWidget* CCalenController::Infobar()
 //
 QString* CCalenController::InfobarTextL()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_INFOBARTEXTL_ENTRY );
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_INFOBARTEXTL_EXIT );
     return iCustomisationManager->InfobarTextL();
     }
 // ----------------------------------------------------------------------------
@@ -535,8 +561,9 @@ QString* CCalenController::InfobarTextL()
 //
 CCalenCustomisationManager& CCalenController::CustomisationManager()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_CUSTOMISATIONMANAGER_ENTRY );
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_CUSTOMISATIONMANAGER_EXIT );
     return *iCustomisationManager;
     }
 
@@ -548,10 +575,12 @@ CCalenCustomisationManager& CCalenController::CustomisationManager()
 //       
 void CCalenController::SetDefaultContext()
     {
-    TRACE_ENTRY_POINT;  
+    OstTraceFunctionEntry0( CCALENCONTROLLER_SETDEFAULTCONTEXT_ENTRY );
+      
     QDateTime focusTime = mContext->defaultCalTimeForViewsL();
     mContext->setFocusDateAndTime(focusTime);
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_SETDEFAULTCONTEXT_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -563,9 +592,11 @@ void CCalenController::SetDefaultContext()
 
 void CCalenController::OfferMenu(HbMenu* aHbMenu)
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_OFFERMENU_ENTRY );
+    
     iCustomisationManager->OfferMenu(aHbMenu);
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_OFFERMENU_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -576,8 +607,10 @@ void CCalenController::OfferMenu(HbMenu* aHbMenu)
 //
 AgendaUtil* CCalenController::agendaInterface()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_AGENDAINTERFACE_ENTRY );
+    
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_AGENDAINTERFACE_EXIT );
     return mAgendaUtil;
     }
 
@@ -589,8 +622,9 @@ AgendaUtil* CCalenController::agendaInterface()
 //
 MCalenContext& CCalenController::context()
     {
-	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;
+	OstTraceFunctionEntry0( CCALENCONTROLLER_CONTEXT_ENTRY );
+	
+    OstTraceFunctionExit0( CCALENCONTROLLER_CONTEXT_EXIT );
     return *mContext;
     }
 
@@ -602,6 +636,7 @@ MCalenContext& CCalenController::context()
 //
 void CCalenController::handleServiceManagerSlot(int view, const QDateTime& dateTime)
 {
+	OstTraceFunctionEntry0( CCALENCONTROLLER_HANDLESERVICEMANAGERSLOT_ENTRY );
 	
 	if (iIsFromServiceFrmWrk) {
 		// Set the context properly
@@ -625,6 +660,7 @@ void CCalenController::handleServiceManagerSlot(int view, const QDateTime& dateT
 			IssueCommandL(view);
 		}
 	}
+	OstTraceFunctionExit0( CCALENCONTROLLER_HANDLESERVICEMANAGERSLOT_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -635,8 +671,9 @@ void CCalenController::handleServiceManagerSlot(int view, const QDateTime& dateT
 //
 int CCalenController::getFirstView()
 {
-	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;
+	OstTraceFunctionEntry0( CCALENCONTROLLER_GETFIRSTVIEW_ENTRY );
+	
+	OstTraceFunctionExit0( CCALENCONTROLLER_GETFIRSTVIEW_EXIT );
 	
 	return iViewManager->getFirstView();
 	
@@ -650,6 +687,8 @@ int CCalenController::getFirstView()
 //
 bool CCalenController::eventFilter(QObject *object, QEvent *event)
 {
+    OstTraceFunctionEntry0( CCALENCONTROLLER_EVENTFILTER_ENTRY );
+    
     switch (event->type())
         {
         case QEvent::LanguageChange:
@@ -662,6 +701,8 @@ bool CCalenController::eventFilter(QObject *object, QEvent *event)
         default:
             break;
         }
+    OstTraceFunctionExit0( CCALENCONTROLLER_EVENTFILTER_EXIT );
+
     return QObject::eventFilter(object, event);
 }
 // End of file

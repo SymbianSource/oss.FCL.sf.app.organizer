@@ -27,6 +27,10 @@
 #include "calenthicklinesdrawer.h"
 #include "calencommon.h"
 #include "calenpluginlabel.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calendocloaderTraces.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // CalenDocLoader::CalenDocLoader
@@ -37,7 +41,10 @@
 CalenDocLoader::CalenDocLoader(CCalenController &controller) :
 	mController(controller)
 	{
+    OstTraceFunctionEntry0( CALENDOCLOADER_CALENDOCLOADER_ENTRY );
+    
 
+	OstTraceFunctionExit0( CALENDOCLOADER_CALENDOCLOADER_EXIT );
 	}
 
 // ----------------------------------------------------------------------------
@@ -47,7 +54,10 @@ CalenDocLoader::CalenDocLoader(CCalenController &controller) :
 //
 CalenDocLoader::~CalenDocLoader()
 {
+    OstTraceFunctionEntry0( DUP1_CALENDOCLOADER_CALENDOCLOADER_ENTRY );
+    
 
+    OstTraceFunctionExit0( DUP1_CALENDOCLOADER_CALENDOCLOADER_EXIT );
 }
 // ----------------------------------------------------------------------------
 // CalenDocLoader::createObject
@@ -62,61 +72,76 @@ CalenDocLoader::~CalenDocLoader()
 QObject *CalenDocLoader::createObject(const QString &type,
                                              const QString &name)
 {
+    OstTraceFunctionEntry0( CALENDOCLOADER_CREATEOBJECT_ENTRY );
+    
     MCalenServices &services = mController.Services(); 
 	if (name == QString(CALEN_AGENDAVIEW)) {
 		QObject *calenAgendaView = new CalenAgendaView(services);
 		calenAgendaView->setObjectName(name);
+		OstTraceFunctionExit0( CALENDOCLOADER_CREATEOBJECT_EXIT );
 		return calenAgendaView;
 	} else if (name == QString(CALEN_AGENDAVIEW_WIDGET)) {
 	    QObject *calenAgendaViewWidget = new CalenAgendaViewWidget(services, this);
 	    calenAgendaViewWidget->setObjectName(name);
+	    OstTraceFunctionExit0( DUP1_CALENDOCLOADER_CREATEOBJECT_EXIT );
 	    return calenAgendaViewWidget;
 	} else if (name == QString(CALEN_MONTHVIEW)) { // For Month View
         QObject *calenMonthView = new CalenMonthView(services);
         calenMonthView->setObjectName(name);
+        OstTraceFunctionExit0( DUP2_CALENDOCLOADER_CREATEOBJECT_EXIT );
         return calenMonthView;
 	} else if (name == QString(CALEN_MONTHGRID)) {
         QObject *calenMonthGrid = new CalenMonthGrid();
         calenMonthGrid->setObjectName(name);
+        OstTraceFunctionExit0( DUP3_CALENDOCLOADER_CREATEOBJECT_EXIT );
         return calenMonthGrid;
 	} else if(name == QString(CALEN_PREVPREVIEWPANE)) {
         QObject *prevPreviewPane =
         new CalenPreviewPane(services);
         prevPreviewPane->setObjectName(name);
+        OstTraceFunctionExit0( DUP4_CALENDOCLOADER_CREATEOBJECT_EXIT );
         return prevPreviewPane;
     } else if(name == QString(CALEN_CURRPREVIEWPANE)) {
         QObject *currPreviewPane =
         new CalenPreviewPane(services);
         currPreviewPane->setObjectName(name);
+        OstTraceFunctionExit0( DUP5_CALENDOCLOADER_CREATEOBJECT_EXIT );
         return currPreviewPane;
     } else if(name == QString(CALEN_NEXTPREVIEWPANE)) {
         QObject *nextPreviewPane =
         new CalenPreviewPane(services);
         nextPreviewPane->setObjectName(name);
+        OstTraceFunctionExit0( DUP6_CALENDOCLOADER_CREATEOBJECT_EXIT );
         return nextPreviewPane;
     } else if (name == QString(CALEN_DAYNAMES_WIDGET)) {
 	    QObject *calenDayNamesWidget = 
         new CalenThickLinesDrawer(CalendarNamespace::CalenDayNameWidget);
 	    calenDayNamesWidget->setObjectName(name);
+	    OstTraceFunctionExit0( DUP7_CALENDOCLOADER_CREATEOBJECT_EXIT );
 	    return calenDayNamesWidget;
 	} else if (name == QString(CALEN_WEEKNUMBERS_WIDGET)) {
 	    QObject *calenSWeekNumWidget =
         new CalenThickLinesDrawer(CalendarNamespace::CalenWeekNumWidget);
 	    calenSWeekNumWidget->setObjectName(name);
+	    OstTraceFunctionExit0( DUP8_CALENDOCLOADER_CREATEOBJECT_EXIT );
 	    return calenSWeekNumWidget;
 	} else if (name == QString(CALEN_PREVREGIONALINFO)) {
 		QObject *calenPrevRegionalLabel = new CalenPluginLabel(services);
 		calenPrevRegionalLabel->setObjectName(name);
+		OstTraceFunctionExit0( DUP9_CALENDOCLOADER_CREATEOBJECT_EXIT );
 		return calenPrevRegionalLabel;
 	} else if (name == QString(CALEN_CURRREGIONALINFO)) {
 		QObject *calencurrRegionalLabel = new CalenPluginLabel(services);
 		calencurrRegionalLabel->setObjectName(name);
+		OstTraceFunctionExit0( DUP10_CALENDOCLOADER_CREATEOBJECT_EXIT );
 		return calencurrRegionalLabel;
 	} else if (name == QString(CALEN_NEXTREGIONALINFO)) {
 		QObject *calenNextRegionalLabel = new CalenPluginLabel(services);
 		calenNextRegionalLabel->setObjectName(name);
+		OstTraceFunctionExit0( DUP11_CALENDOCLOADER_CREATEOBJECT_EXIT );
 		return calenNextRegionalLabel;
 	} else {
+        OstTraceFunctionExit0( DUP12_CALENDOCLOADER_CREATEOBJECT_EXIT );
 		return HbDocumentLoader::createObject(type, name);
 	}
 }

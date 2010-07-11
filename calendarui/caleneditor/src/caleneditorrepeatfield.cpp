@@ -32,6 +32,11 @@
 // User Included
 #include "caleneditorrepeatfield.h"
 #include "caleneditorcustomitem.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "caleneditorrepeatfieldTraces.h"
+#endif
+
 
 // Constants
 const int userRole = Qt::UserRole + 100;
@@ -60,29 +65,32 @@ CalenEditorRepeatField::CalenEditorRepeatField(CalenEditorPrivate* calenEditor,
 	mIsWorkdays(false),
 	mRepeatUntilItemAdded(false)
 {
+	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_CALENEDITORREPEATFIELD_ENTRY );
 	if (!mCalenEditor->editedEntry()->repeatRule().isNull()) {
 		mRepeatRuleType = mCalenEditor->editedEntry()->repeatRule().type();
 		mRepeatUntilDate = mCalenEditor->editedEntry()->repeatRule().until().date();
-		}
-		
-		mRepeatItem = new HbDataFormModelItem();
-		mRepeatItem->setType(HbDataFormModelItem::ComboBoxItem);
-		mRepeatItem->setData(HbDataFormModelItem::LabelRole,
-		                     hbTrId("txt_calendar_setlabel_repeat"));
+	}
 
-		// Create the repeat choices
-		QStringList repeatChoices;
-		repeatChoices << hbTrId("txt_calendar_setlabel_repeat_val_only_once")
-		        << hbTrId("txt_calendar_setlabel_repeat_val_daily")
-		        << hbTrId("txt_calendar_setlabel_repeat_val_workdays")
-		        << hbTrId("txt_calendar_setlabel_repeat_val_weekly")
-		        << hbTrId("txt_calendar_setlabel_repeat_val_fortnightly")
-		        << hbTrId("txt_calendar_setlabel_repeat_val_monthly")
-		        << hbTrId("txt_calendar_setlabel_repeat_val_yearly");
+	mRepeatItem = new HbDataFormModelItem();
+	mRepeatItem->setType(HbDataFormModelItem::ComboBoxItem);
+	mRepeatItem->setData(HbDataFormModelItem::LabelRole,
+	                     hbTrId("txt_calendar_setlabel_repeat"));
 
-		mRepeatItem->setContentWidgetData(QString("items"), repeatChoices);
+	// Create the repeat choices
+	QStringList repeatChoices;
+	repeatChoices << hbTrId("txt_calendar_setlabel_repeat_val_only_once")
+					<< hbTrId("txt_calendar_setlabel_repeat_val_daily")
+					<< hbTrId("txt_calendar_setlabel_repeat_val_workdays")
+					<< hbTrId("txt_calendar_setlabel_repeat_val_weekly")
+					<< hbTrId("txt_calendar_setlabel_repeat_val_fortnightly")
+					<< hbTrId("txt_calendar_setlabel_repeat_val_monthly")
+					<< hbTrId("txt_calendar_setlabel_repeat_val_yearly");
+
+		mRepeatItem->setContentWidgetData("items", repeatChoices);
+		mRepeatItem->setContentWidgetData("objectName", "repeatItem");
 		mCalenEditorModel->appendDataFormItem( mRepeatItem,
 									mCalenEditorModel->invisibleRootItem());
+	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_CALENEDITORREPEATFIELD_EXIT );
 }
 
 /*!
@@ -90,7 +98,9 @@ CalenEditorRepeatField::CalenEditorRepeatField(CalenEditorPrivate* calenEditor,
  */
 CalenEditorRepeatField::~CalenEditorRepeatField()
 {
+	OstTraceFunctionEntry0( DUP1_CALENEDITORREPEATFIELD_CALENEDITORREPEATFIELD_ENTRY );
 	// Nothing Yet
+	OstTraceFunctionExit0( DUP1_CALENEDITORREPEATFIELD_CALENEDITORREPEATFIELD_EXIT );
 }
 
 /*!
@@ -98,9 +108,11 @@ CalenEditorRepeatField::~CalenEditorRepeatField()
  */
 void CalenEditorRepeatField::addItemToModel()
 {	
+	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_ADDITEMTOMODEL_ENTRY );
 	// Add reminder to the model
 	mCalenEditorModel->appendDataFormItem( mRepeatItem,
 				   mCalenEditorModel->invisibleRootItem());
+	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_ADDITEMTOMODEL_EXIT );
 }
 
 /*!
@@ -108,7 +120,9 @@ void CalenEditorRepeatField::addItemToModel()
  */
 void CalenEditorRepeatField::removeItemFromModel()
 {
+	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_REMOVEITEMFROMMODEL_ENTRY );
 	mCalenEditorModel->removeItem(modelIndex());
+	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_REMOVEITEMFROMMODEL_EXIT );
 }
 
 /*!
@@ -117,6 +131,7 @@ void CalenEditorRepeatField::removeItemFromModel()
  */
 void CalenEditorRepeatField::populateRepeatItem(int index)
 {
+	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_POPULATEREPEATITEM_ENTRY );
 	HbDataFormViewItem
 			*item =
 					qobject_cast<HbDataFormViewItem *> (
@@ -186,6 +201,7 @@ void CalenEditorRepeatField::populateRepeatItem(int index)
 	updateRepeatChoices();
 	connect(mRepeatComboBox, SIGNAL(currentIndexChanged(int)), this,
 				SLOT(handleRepeatIndexChanged(int)));
+	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_POPULATEREPEATITEM_EXIT );
 }
 
 /*!
@@ -195,6 +211,7 @@ void CalenEditorRepeatField::populateRepeatItem(int index)
  */
 void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 {
+	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_HANDLEREPEATINDEXCHANGED_ENTRY );
 	mIsBiWeekly = false;
 	mIsWorkdays = false;
 
@@ -302,6 +319,7 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 		mCalenEditor->addDiscardAction();
 	}
 	mCalenEditor->updateReminderChoices();
+	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_HANDLEREPEATINDEXCHANGED_EXIT );
 }
 
 /*!
@@ -310,6 +328,7 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
  */
 QModelIndex CalenEditorRepeatField::modelIndex()
 {
+	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_MODELINDEX_ENTRY );
 	return mCalenEditorModel->indexFromItem(mRepeatItem);
 }
 
@@ -318,6 +337,7 @@ QModelIndex CalenEditorRepeatField::modelIndex()
  */
 void CalenEditorRepeatField::insertRepeatUntilItem()
 {
+	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_INSERTREPEATUNTILITEM_ENTRY );
 	HbDataFormModelItem::DataItemType itemType =
 	        static_cast<HbDataFormModelItem::DataItemType> (RepeatUntilOffset);
 	
@@ -344,6 +364,7 @@ void CalenEditorRepeatField::insertRepeatUntilItem()
 		mCustomRepeatUntilItem->setContentWidgetData("text", dateString);
 	}
 	//TODO: Scroll to functionality has to be implemented	
+	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_INSERTREPEATUNTILITEM_EXIT );
 }
 
 /*!
@@ -352,6 +373,8 @@ void CalenEditorRepeatField::insertRepeatUntilItem()
  */
 bool CalenEditorRepeatField::isRepeatUntilItemAdded()
 {
+	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_ISREPEATUNTILITEMADDED_ENTRY );
+	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_ISREPEATUNTILITEMADDED_EXIT );
 	return mRepeatUntilItemAdded;
 }
 
@@ -360,6 +383,7 @@ bool CalenEditorRepeatField::isRepeatUntilItemAdded()
  */
 void CalenEditorRepeatField::launchRepeatUntilDatePicker()
 {
+	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_LAUNCHREPEATUNTILDATEPICKER_ENTRY );
 	HbDialog *popUp = new HbDialog();
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
 	popUp->setTimeout(HbDialog::NoTimeout);
@@ -407,6 +431,7 @@ void CalenEditorRepeatField::launchRepeatUntilDatePicker()
 	connect(okAction, SIGNAL(triggered()), this, SLOT(setRepeatUntilDate()));
 	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"), popUp));
 	popUp->open();
+	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_LAUNCHREPEATUNTILDATEPICKER_EXIT );
 }
 
 /*!
@@ -414,6 +439,7 @@ void CalenEditorRepeatField::launchRepeatUntilDatePicker()
  */
 void CalenEditorRepeatField::setRepeatUntilDate()
 {
+	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_SETREPEATUNTILDATE_ENTRY );
 	mRepeatUntilDate = mDatePicker->date();
 	if (mRepeatUntilDate.isValid()) {
 		HbExtendedLocale locale = HbExtendedLocale::system();
@@ -422,6 +448,7 @@ void CalenEditorRepeatField::setRepeatUntilDate()
 		mCustomRepeatUntilItem->setContentWidgetData("text", dateString);
 	}
 	mCalenEditor->updateReminderChoices();
+	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_SETREPEATUNTILDATE_EXIT );
 }
 
 /*!
@@ -429,6 +456,8 @@ void CalenEditorRepeatField::setRepeatUntilDate()
  */
 QDate CalenEditorRepeatField::repeatUntilDate()
 {
+	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_REPEATUNTILDATE_ENTRY );
+	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_REPEATUNTILDATE_EXIT );
 	return mRepeatUntilDate;
 }
 
@@ -437,7 +466,9 @@ QDate CalenEditorRepeatField::repeatUntilDate()
 */
 void CalenEditorRepeatField::updateRepeatChoices()
 {
+    OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_UPDATEREPEATCHOICES_ENTRY );
     if (!mRepeatComboBox) {
+        OstTraceFunctionExit0( CALENEDITORREPEATFIELD_UPDATEREPEATCHOICES_EXIT );
         return;
     }
 	// Clear all the choices and add it again. If we dont do it 
@@ -547,6 +578,7 @@ void CalenEditorRepeatField::updateRepeatChoices()
 	}
 	// Set the previous user's choice
 	mRepeatComboBox->setCurrentIndex(choice);
+	OstTraceFunctionExit0( DUP1_CALENEDITORREPEATFIELD_UPDATEREPEATCHOICES_EXIT );
 }
 
 /*!
@@ -554,6 +586,7 @@ void CalenEditorRepeatField::updateRepeatChoices()
  */
 void CalenEditorRepeatField::saveRepeatRule()
 {
+	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_SAVEREPEATRULE_ENTRY );
 	// saves repeat type of entry.
 	if (mRepeatRuleType != AgendaRepeatRule::InvalidRule) {
 		AgendaRepeatRule repeatRule(mRepeatRuleType);
@@ -627,6 +660,7 @@ void CalenEditorRepeatField::saveRepeatRule()
 											AgendaRepeatRule::InvalidRule));
 	}
 	// TODO: Need to update rDates here
+	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_SAVEREPEATRULE_EXIT );
 }
 
 // End of file	--Don't remove this.

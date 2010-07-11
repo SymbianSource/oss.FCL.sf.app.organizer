@@ -32,6 +32,11 @@
 #include "calengriditemprototype.h"
 #include "calencommon.h"
 #include "calentodayindicatorlinedrawer.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calengriditemprototypeTraces.h"
+#endif
+
 
 /*!
  \class CalenGridItemPrototype
@@ -55,6 +60,9 @@ CalenGridItemPrototype::CalenGridItemPrototype(QColor todayIndColor, QColor acti
 	mFocusIndicatorItem(0),
 	mTodayIndicatorItem(0)
 	{
+    OstTraceFunctionEntry0( CALENGRIDITEMPROTOTYPE_CALENGRIDITEMPROTOTYPE_ENTRY );
+    
+	OstTraceFunctionExit0( CALENGRIDITEMPROTOTYPE_CALENGRIDITEMPROTOTYPE_EXIT );
 	}
 
 /*!
@@ -62,6 +70,8 @@ CalenGridItemPrototype::CalenGridItemPrototype(QColor todayIndColor, QColor acti
 */
 void CalenGridItemPrototype::createPrimitives()
 {
+    OstTraceFunctionEntry0( CALENGRIDITEMPROTOTYPE_CREATEPRIMITIVES_ENTRY );
+    
 	if (!mMonthDayInfoItem) {
 		mMonthDayInfoItem = new HbTextItem(this);
 		HbStyle::setItemName(mMonthDayInfoItem,
@@ -90,6 +100,7 @@ void CalenGridItemPrototype::createPrimitives()
 				mTodayIndicatorItem, QLatin1String("todayIndicatorItem"));
 	}
 
+	OstTraceFunctionExit0( CALENGRIDITEMPROTOTYPE_CREATEPRIMITIVES_EXIT );
 }
 
 /*!
@@ -100,6 +111,8 @@ void CalenGridItemPrototype::createPrimitives()
  */
 HbAbstractViewItem *CalenGridItemPrototype::createItem()
 {
+    OstTraceFunctionEntry0( CALENGRIDITEMPROTOTYPE_CREATEITEM_ENTRY );
+    
 	CalenGridItemPrototype* item = new CalenGridItemPrototype(*this);
 	item->createPrimitives();
 	
@@ -109,6 +122,7 @@ HbAbstractViewItem *CalenGridItemPrototype::createItem()
 	frame.setFrameGraphicsName(QString(""));
 	item->setDefaultFrame(frame);
 	
+	OstTraceFunctionExit0( CALENGRIDITEMPROTOTYPE_CREATEITEM_EXIT );
 	return item;
 }
 
@@ -119,6 +133,8 @@ HbAbstractViewItem *CalenGridItemPrototype::createItem()
  */
 void CalenGridItemPrototype::updateChildItems()
 {		
+    OstTraceFunctionEntry0( CALENGRIDITEMPROTOTYPE_UPDATECHILDITEMS_ENTRY );
+    
 	// Here update content of each item.
 	QVariant monthDayRole;
 	bool monthFocusRole;
@@ -179,6 +195,7 @@ void CalenGridItemPrototype::updateChildItems()
 	
 	// base class implementation
 	HbGridViewItem::updateChildItems();
+	OstTraceFunctionExit0( CALENGRIDITEMPROTOTYPE_UPDATECHILDITEMS_EXIT );
 }
 
 /*!
@@ -186,9 +203,12 @@ void CalenGridItemPrototype::updateChildItems()
  */
 void CalenGridItemPrototype::pressStateChanged(bool pressed,bool animate)
 {
+    OstTraceFunctionEntry0( CALENGRIDITEMPROTOTYPE_PRESSSTATECHANGED_ENTRY );
+    
 	Q_UNUSED(pressed)
 	Q_UNUSED(animate)		
 	// Just overrode it as we dont want to have any default behavior
+	OstTraceFunctionExit0( CALENGRIDITEMPROTOTYPE_PRESSSTATECHANGED_EXIT );
 }
 
 /*!
@@ -196,13 +216,20 @@ void CalenGridItemPrototype::pressStateChanged(bool pressed,bool animate)
  */
 void CalenGridItemPrototype::pressStateChanged(bool animate)
 {
+    OstTraceFunctionEntry0( DUP1_CALENGRIDITEMPROTOTYPE_PRESSSTATECHANGED_ENTRY );
+    
 	Q_UNUSED(animate)
 	// Just overrode it as we dont want to have any default behavior
+    OstTraceFunctionExit0( DUP1_CALENGRIDITEMPROTOTYPE_PRESSSTATECHANGED_EXIT );
 }
 
 bool CalenGridItemPrototype::canSetModelIndex(const QModelIndex& index)
 {
+    OstTraceFunctionEntry0( CALENGRIDITEMPROTOTYPE_CANSETMODELINDEX_ENTRY );
+    
 	Q_UNUSED(index)
+    
+    OstTraceFunctionExit0( CALENGRIDITEMPROTOTYPE_CANSETMODELINDEX_EXIT );
 	return true;
 }
 

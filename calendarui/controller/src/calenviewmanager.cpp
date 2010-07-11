@@ -39,6 +39,11 @@
 #include "calendarui_debug.h"
 #include "calencommon.h"
 #include "calendayview.h"
+#include "agendautil.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenviewmanagerTraces.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // CalenViewManager::CalenViewManager
@@ -49,7 +54,7 @@
 CalenViewManager::CalenViewManager( CCalenController& aController)
 : mController(aController)
 {
-	TRACE_ENTRY_POINT;
+	OstTraceFunctionEntry0( CALENVIEWMANAGER_CALENVIEWMANAGER_ENTRY );
 	
 	// Following block intializes member variables
 	mCalenEventViewer = NULL;
@@ -68,14 +73,14 @@ CalenViewManager::CalenViewManager( CCalenController& aController)
 	        this, SLOT(handleInstanceViewCreation(int)));
 	connect(mController.agendaInterface(), SIGNAL(entryViewCreationCompleted(int)),
 		        this, SLOT(handleEntryViewCreation(int)));
-	
-	TRACE_EXIT_POINT;
+	connect(mController.agendaInterface(), SIGNAL(entriesChanged(QList<ulong>)),
+								this, SLOT(handleEntriesChanged(QList<ulong>)));
+	OstTraceFunctionExit0( CALENVIEWMANAGER_CALENVIEWMANAGER_EXIT );
 }
 
 void CalenViewManager::SecondPhaseConstruction()
 {
-
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_SECONDPHASECONSTRUCTION_ENTRY );
     
     // Check the Application Startup reason from Activity Manager
     int activityReason = qobject_cast<HbApplication*>(qApp)->activateReason();
@@ -144,8 +149,8 @@ void CalenViewManager::SecondPhaseConstruction()
         mController.MainWindow().setCurrentView(mCalenMonthView);
     }
     
-    TRACE_EXIT_POINT;
 
+    OstTraceFunctionExit0( CALENVIEWMANAGER_SECONDPHASECONSTRUCTION_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -156,8 +161,8 @@ void CalenViewManager::SecondPhaseConstruction()
 //
 CalenViewManager::~CalenViewManager()
 {
-	TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( DUP1_CALENVIEWMANAGER_CALENVIEWMANAGER_ENTRY );
+    
 	if (mSettingsView) {
 		delete mSettingsView;
 		mSettingsView = 0;
@@ -174,7 +179,8 @@ CalenViewManager::~CalenViewManager()
 		delete mMonthViewDocLoader;
 		mMonthViewDocLoader = 0;
 	}
-	TRACE_EXIT_POINT;
+	
+	OstTraceFunctionExit0( DUP1_CALENVIEWMANAGER_CALENVIEWMANAGER_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -185,8 +191,9 @@ CalenViewManager::~CalenViewManager()
 //
 void CalenViewManager::constructAndActivateView(int view)
 {
-	TRACE_ENTRY_POINT;
-	// We are here because, some other application is launching calendar with 
+	OstTraceFunctionEntry0( CALENVIEWMANAGER_CONSTRUCTANDACTIVATEVIEW_ENTRY );
+	
+    // We are here because, some other application is launching calendar with 
 	// the view, hence connect to viewReady() signal to do any lazy loading
 	// in the slot
 	
@@ -209,7 +216,7 @@ void CalenViewManager::constructAndActivateView(int view)
 		mController.MainWindow().addView(mCalenAgendaView);
 		mController.MainWindow().setCurrentView(mCalenAgendaView);
 	}
-	TRACE_EXIT_POINT;
+	OstTraceFunctionExit0( CALENVIEWMANAGER_CONSTRUCTANDACTIVATEVIEW_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -220,6 +227,8 @@ void CalenViewManager::constructAndActivateView(int view)
 //
 void CalenViewManager::loadMonthView()
 {
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_LOADMONTHVIEW_ENTRY );
+    
 	bool loadSuccess = false;
 	Qt::Orientation currentOrienation = mController.MainWindow().orientation();
 	// Create the month view docloader object.
@@ -245,6 +254,8 @@ void CalenViewManager::loadMonthView()
 	
 	// Setup the month view.
 	mCalenMonthView->setupView(mMonthViewDocLoader);
+	
+	OstTraceFunctionExit0( CALENVIEWMANAGER_LOADMONTHVIEW_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -255,6 +266,8 @@ void CalenViewManager::loadMonthView()
 //
 void CalenViewManager::loadAgendaView()
 {
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_LOADAGENDAVIEW_ENTRY );
+    
 	bool loadSuccess = false;
 	// Create the agenda view docloader object.
 	mAgendaViewDocLoader = new CalenDocLoader(mController);
@@ -280,6 +293,7 @@ void CalenViewManager::loadAgendaView()
 	// to provide an illusion of flow to the user
 	loadAlternateAgendaView();
 	
+	OstTraceFunctionExit0( CALENVIEWMANAGER_LOADAGENDAVIEW_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -290,6 +304,8 @@ void CalenViewManager::loadAgendaView()
 //
 void CalenViewManager::handleMainViewReady()
 {
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEMAINVIEWREADY_ENTRY );
+    
 	// Construct the month view part that is kept for lazy loading
 	if (mCalenMonthView) {
 		mCalenMonthView->doLazyLoading();
@@ -305,6 +321,8 @@ void CalenViewManager::handleMainViewReady()
 	// disconnect the view ready signal as we dont need it anymore
 	disconnect(&mController.MainWindow(), SIGNAL(viewReady()), 
 			   this, SLOT(handleMainViewReady()));
+	
+	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEMAINVIEWREADY_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -315,6 +333,8 @@ void CalenViewManager::handleMainViewReady()
 //
 void CalenViewManager::constructOtherViews()
 {
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_CONSTRUCTOTHERVIEWS_ENTRY );
+    
 	// Load all other views except mFirstView
 	
 	// NOTE: Right now, since Calendar has only two views, month view 
@@ -344,6 +364,8 @@ void CalenViewManager::constructOtherViews()
 
 	// Setup the settings view
 	mSettingsView = new CalenSettingsView(mController.Services());
+	
+	OstTraceFunctionExit0( CALENVIEWMANAGER_CONSTRUCTOTHERVIEWS_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -354,6 +376,9 @@ void CalenViewManager::constructOtherViews()
 //
 int CalenViewManager::getFirstView()
 {
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_GETFIRSTVIEW_ENTRY );
+    
+	OstTraceFunctionExit0( CALENVIEWMANAGER_GETFIRSTVIEW_EXIT );
 	return mFirstView;
 }
 
@@ -364,6 +389,8 @@ int CalenViewManager::getFirstView()
 //
 void CalenViewManager::showNextDay()
 {
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_SHOWNEXTDAY_ENTRY );
+    
     // Set the context for the next day
     QDateTime currentDay = mController.Services().Context().focusDateAndTime();
     currentDay = currentDay.addDays(1);
@@ -395,6 +422,7 @@ void CalenViewManager::showNextDay()
         mCalenAgendaView->doPopulation();
         mController.MainWindow().setCurrentView(mCalenAgendaView, true, Hb::ViewSwitchUseNormalAnim);
     }
+    OstTraceFunctionExit0( CALENVIEWMANAGER_SHOWNEXTDAY_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -404,6 +432,8 @@ void CalenViewManager::showNextDay()
 //
 void CalenViewManager::showPrevDay()
 {
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_SHOWPREVDAY_ENTRY );
+    
     QDateTime currentDay = mController.Services().Context().focusDateAndTime();
     currentDay = currentDay.addDays(-1);
     mController.Services().Context().setFocusDate(currentDay);
@@ -431,6 +461,8 @@ void CalenViewManager::showPrevDay()
         mCalenAgendaView->doPopulation();
         mController.MainWindow().setCurrentView(mCalenAgendaView, true, Hb::ViewSwitchUseNormalAnim);
     }
+    
+    OstTraceFunctionExit0( CALENVIEWMANAGER_SHOWPREVDAY_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -440,6 +472,8 @@ void CalenViewManager::showPrevDay()
 //
 void CalenViewManager::removePreviousView()
 {
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_REMOVEPREVIOUSVIEW_ENTRY );
+    
 	if (ECalenAgendaView == mCurrentViewId) {
 		mCalenAgendaView->clearListModel();
 		mCalenAgendaViewAlt->clearListModel();
@@ -453,6 +487,7 @@ void CalenViewManager::removePreviousView()
 		}
 	}
 
+	OstTraceFunctionExit0( CALENVIEWMANAGER_REMOVEPREVIOUSVIEW_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -463,14 +498,15 @@ void CalenViewManager::removePreviousView()
 //
 void CalenViewManager::ActivateDefaultViewL(int defaultView)
 {
-	TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_ACTIVATEDEFAULTVIEWL_ENTRY );
+    
 	mCurrentViewId = defaultView;
 	if (ECalenMonthView == defaultView) {
 		mCalenMonthView->doPopulation();
 	} else if (ECalenAgendaView == defaultView) {
 		mCalenAgendaView->doPopulation();
 	}
-	TRACE_EXIT_POINT;
+	OstTraceFunctionExit0( CALENVIEWMANAGER_ACTIVATEDEFAULTVIEWL_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -479,9 +515,11 @@ void CalenViewManager::ActivateDefaultViewL(int defaultView)
 // ----------------------------------------------------------------------------
 void CalenViewManager::refreshCurrentViewL()
 {
-	TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_REFRESHCURRENTVIEWL_ENTRY );
+    
 	activateCurrentView();
-	TRACE_EXIT_POINT;
+	
+	OstTraceFunctionExit0( CALENVIEWMANAGER_REFRESHCURRENTVIEWL_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -490,7 +528,8 @@ void CalenViewManager::refreshCurrentViewL()
 // ----------------------------------------------------------------------------
 void CalenViewManager::activateCurrentView()
 {
-	TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_ACTIVATECURRENTVIEW_ENTRY );
+    
 	switch (mCurrentViewId) {
 		case ECalenMonthView:
 		    mCalenMonthView->doPopulation();
@@ -532,7 +571,8 @@ void CalenViewManager::activateCurrentView()
 			mController.MainWindow().setCurrentView(mCalenDayView);
 			break;
 	}
-	TRACE_EXIT_POINT;
+	
+	OstTraceFunctionExit0( CALENVIEWMANAGER_ACTIVATECURRENTVIEW_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -543,6 +583,8 @@ void CalenViewManager::activateCurrentView()
 //
 void CalenViewManager::launchEventView()
 {
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_LAUNCHEVENTVIEW_ENTRY );
+    
     // capture cureent view in case app closed/quits from AgendaEventViewer
     if (mCalenMonthView) {
     mCalenMonthView->captureScreenshot(true);
@@ -575,6 +617,7 @@ void CalenViewManager::launchEventView()
 
 	// Launch agenda event viewer
 	mCalenEventViewer->view(viewEntry, AgendaEventViewer::ActionEditDelete);
+	OstTraceFunctionExit0( CALENVIEWMANAGER_LAUNCHEVENTVIEW_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -584,6 +627,8 @@ void CalenViewManager::launchEventView()
 //
 void CalenViewManager::loadAlternateAgendaView()
 {
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_LOADALTERNATEAGENDAVIEW_ENTRY );
+    
     bool loadSuccess = false;
     // Create the agenda view docloader object.
     mAgendaViewAltDocLoader = new CalenDocLoader(mController);
@@ -602,6 +647,7 @@ void CalenViewManager::loadAlternateAgendaView()
 
     // Setup the agenda view
     mCalenAgendaViewAlt->setupView(mAgendaViewAltDocLoader);
+    OstTraceFunctionExit0( CALENVIEWMANAGER_LOADALTERNATEAGENDAVIEW_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -612,7 +658,8 @@ void CalenViewManager::loadAlternateAgendaView()
 //
 TBool CalenViewManager::HandleCommandL(const TCalenCommand& command)
 {
-	TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLECOMMANDL_ENTRY );
+    
 	TBool commandUsed(EFalse);
 	
 	switch (command.Command()) {
@@ -654,7 +701,7 @@ TBool CalenViewManager::HandleCommandL(const TCalenCommand& command)
             showPrevDay();
 		    break;
 	}
-	TRACE_EXIT_POINT;
+	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLECOMMANDL_EXIT );
 	return commandUsed;
 }
 
@@ -667,7 +714,8 @@ TBool CalenViewManager::HandleCommandL(const TCalenCommand& command)
 void CalenViewManager::HandleNotification(
                                          const TCalenNotification notification)
 {
-	TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLENOTIFICATION_ENTRY );
+    
 	switch (notification) {
 		case ECalenNotifyExternalDatabaseChanged:
 		case ECalenNotifyDialogClosed:
@@ -677,13 +725,16 @@ void CalenViewManager::HandleNotification(
 		case ECalenNotifyInstanceDeleted:
 		case ECalenNotifyEntryClosed:
 		case ECalenNotifySystemLocaleChanged:
-		case ECalenNotifySystemLanguageChanged:
-		    {
-		    activateCurrentView(); 
-		    }
+		case ECalenNotifySystemLanguageChanged: {
+            activateCurrentView(); 
+            if (mCalenMonthView) {
+                mCalenMonthView->captureScreenshot();
+            } else if (mCalenAgendaView) {
+                mCalenAgendaView->captureScreenshot();
+            }
+		}
 		    break;
-		case ECalenNotifySettingsClosed:
-		    {
+		case ECalenNotifySettingsClosed: {
 		    //when setting view closed , switch to the previous view
 		    mCurrentViewId = mPreviousViewsId ;
 			mController.Services().IssueCommandL(ECalenStartActiveStep);
@@ -700,7 +751,7 @@ void CalenViewManager::HandleNotification(
 		default:
 			break;
 	}
-	TRACE_EXIT_POINT;
+	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLENOTIFICATION_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -711,6 +762,9 @@ void CalenViewManager::HandleNotification(
 //
 CalenSettingsView* CalenViewManager::settingsView()
 {
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_SETTINGSVIEW_ENTRY );
+    
+	OstTraceFunctionExit0( CALENVIEWMANAGER_SETTINGSVIEW_EXIT );
 	return mSettingsView;
 }
 
@@ -722,12 +776,10 @@ CalenSettingsView* CalenViewManager::settingsView()
 //
 void CalenViewManager::handleViewingCompleted(const QDate date)
 {
+	OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEVIEWINGCOMPLETED_ENTRY );
 	
 	// Cleanup.
 	mCalenEventViewer->deleteLater();
-	if (!date.isNull() && date.isValid()) {
-	mController.Services().Context().setFocusDate(QDateTime(date));
-	}
 	mController.Services().IssueNotificationL(ECalenNotifyEntryClosed);
 	
 	// invalidate captured screenshots as either agenda view is activated now
@@ -736,6 +788,7 @@ void CalenViewManager::handleViewingCompleted(const QDate date)
 	} else if (mCalenAgendaView) {
 		mCalenAgendaView->captureScreenshot();
 	}
+	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEVIEWINGCOMPLETED_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -746,9 +799,11 @@ void CalenViewManager::handleViewingCompleted(const QDate date)
 //
 void CalenViewManager::handleEditingStarted()
 {
+	OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEEDITINGSTARTED_ENTRY );
 	
 	mController.IssueCommandL(ECalenEditEntryFromViewer);
 	
+	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEEDITINGSTARTED_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -759,9 +814,11 @@ void CalenViewManager::handleEditingStarted()
 //
 void CalenViewManager::handleEditingCompleted()
 {
+	OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEEDITINGCOMPLETED_ENTRY );
 	
 	mController.Services().IssueNotificationL(ECalenNotifyEditorClosedFromViewer);
 	
+	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEEDITINGCOMPLETED_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -772,9 +829,11 @@ void CalenViewManager::handleEditingCompleted()
 //
 void CalenViewManager::handleDeletingStarted()
 {
+	OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEDELETINGSTARTED_ENTRY );
 	
 	mController.IssueCommandL(ECalenDeleteEntryFromViewer);
 	
+	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEDELETINGSTARTED_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -785,6 +844,7 @@ void CalenViewManager::handleDeletingStarted()
 //
 void CalenViewManager::handleDeletingCompleted()
 {
+	OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEDELETINGCOMPLETED_ENTRY );
 	
 	mController.Services().IssueNotificationL(ECalenNotifyEntryDeleted);
 
@@ -794,8 +854,8 @@ void CalenViewManager::handleDeletingCompleted()
     } else if (mCalenAgendaView) {
     	mCalenAgendaView->captureScreenshot();
     }
-
 	
+    OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEDELETINGCOMPLETED_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -806,6 +866,8 @@ void CalenViewManager::handleDeletingCompleted()
 //
 void CalenViewManager::handleInstanceViewCreation(int status)
 {
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEINSTANCEVIEWCREATION_ENTRY );
+    
 	Q_UNUSED(status);
 	// handleInstanceViewCreation function is called only once. Now that the instance
 	// view creation is successfull. Events need to be populated on screen
@@ -820,6 +882,8 @@ void CalenViewManager::handleInstanceViewCreation(int status)
 	else if (mCalenAgendaView) {
 		mCalenAgendaView->doPopulation();
 	}
+	
+	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEINSTANCEVIEWCREATION_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -830,8 +894,12 @@ void CalenViewManager::handleInstanceViewCreation(int status)
 //
 void CalenViewManager::handleEntryViewCreation(int status)
 {
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEENTRYVIEWCREATION_ENTRY );
+    
 	// Nothing Yet
 	Q_UNUSED(status);
+
+	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEENTRYVIEWCREATION_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -841,6 +909,8 @@ void CalenViewManager::handleEntryViewCreation(int status)
 //
 void CalenViewManager::handleDayViewReady() 
 {
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEDAYVIEWREADY_ENTRY );
+    
     // Removes current view
     // Notice: removing view should be done after new view is set as current to
     // avoid situation that there is no current view in application
@@ -849,6 +919,18 @@ void CalenViewManager::handleDayViewReady()
     // Sets and activates day view
     mCurrentViewId = ECalenDayView;
     activateCurrentView();
+	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEDAYVIEWREADY_EXIT );
+}
+
+// ----------------------------------------------------------------------------
+// CalenViewManager::handleEntriesChanged
+// this function will be called when someone else has changed the database
+// ----------------------------------------------------------------------------
+//
+void CalenViewManager::handleEntriesChanged(QList<ulong> ids)
+{
+	// Update and refresh the view.
+	activateCurrentView();
 }
 
 // ----------------------------------------------------------------------------
@@ -859,6 +941,8 @@ void CalenViewManager::handleDayViewReady()
 //
 void CalenViewManager::launchSettingsView()
 {
+    OstTraceFunctionEntry0( CALENVIEWMANAGER_LAUNCHSETTINGSVIEW_ENTRY );
+    
     mPreviousViewsId = mCurrentViewId ;  
     mCurrentViewId = ECalenShowSettings;
     mSettingsView->initializeForm();
@@ -870,6 +954,8 @@ void CalenViewManager::launchSettingsView()
     } else if(mCalenAgendaView){
     	mCalenAgendaView->captureScreenshot(true);
     }
+    
+    OstTraceFunctionExit0( CALENVIEWMANAGER_LAUNCHSETTINGSVIEW_EXIT );
 }
 
 // End of file	--Don't remove this.

@@ -25,6 +25,10 @@
 #include "calendarui_debug.h"
 #include "calennotifier.h"            // CalenNotifier
 #include "calenstatemachine.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calennotifierTraces.h"
+#endif
 
 const TInt KHashLength = 64;
 
@@ -37,8 +41,9 @@ const TInt KHashLength = 64;
 CalenNotifier::CalenNotifier( CCalenStateMachine& aStateMachine )
     : iStateMachine( aStateMachine )
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CALENNOTIFIER_CALENNOTIFIER_ENTRY );
+    
+    OstTraceFunctionExit0( CALENNOTIFIER_CALENNOTIFIER_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -49,8 +54,8 @@ CalenNotifier::CalenNotifier( CCalenStateMachine& aStateMachine )
 //
 CalenNotifier::~CalenNotifier()
     {
-    TRACE_ENTRY_POINT;
-  
+    OstTraceFunctionEntry0( DUP1_CALENNOTIFIER_CALENNOTIFIER_ENTRY );
+    
     // Reset the handler array.
     // Before we reset , close hashset for each handler
     for(TInt i = 0 ; i < iHandlers.Count() ; i++)
@@ -68,7 +73,7 @@ CalenNotifier::~CalenNotifier()
         delete iEnvChangeNotifier;
         }
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CALENNOTIFIER_CALENNOTIFIER_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -79,7 +84,7 @@ CalenNotifier::~CalenNotifier()
 //
 void CalenNotifier::ConstructL()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENNOTIFIER_CONSTRUCTL_ENTRY );
     
     // Register for system environment changes
     TCallBack envCallback( EnvChangeCallbackL, this );
@@ -89,7 +94,7 @@ void CalenNotifier::ConstructL()
 
     iIgnoreFirstLocaleChange = ETrue;
  
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENNOTIFIER_CONSTRUCTL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -101,8 +106,8 @@ void CalenNotifier::ConstructL()
 void CalenNotifier::RegisterForNotificationsL( MCalenNotificationHandler* aHandler, 
                                                 TCalenNotification aNotification)
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CALENNOTIFIER_REGISTERFORNOTIFICATIONSL_ENTRY );
+    
     TNotificationHandler handler;
     handler.iHandler = aHandler;
     
@@ -129,7 +134,7 @@ void CalenNotifier::RegisterForNotificationsL( MCalenNotificationHandler* aHandl
     
     iHandlers.Append( handler );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENNOTIFIER_REGISTERFORNOTIFICATIONSL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -141,7 +146,7 @@ void CalenNotifier::RegisterForNotificationsL( MCalenNotificationHandler* aHandl
 void CalenNotifier::RegisterForNotificationsL( MCalenNotificationHandler* aHandler, 
                                                            RArray<TCalenNotification>& aNotifications  )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( DUP1_CALENNOTIFIER_REGISTERFORNOTIFICATIONSL_ENTRY );
 
     TNotificationHandler handler;
     handler.iHandler = aHandler;
@@ -172,7 +177,7 @@ void CalenNotifier::RegisterForNotificationsL( MCalenNotificationHandler* aHandl
     
     iHandlers.Append( handler );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CALENNOTIFIER_REGISTERFORNOTIFICATIONSL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -183,8 +188,8 @@ void CalenNotifier::RegisterForNotificationsL( MCalenNotificationHandler* aHandl
 //
 void CalenNotifier::CancelNotifications( MCalenNotificationHandler* aHandler )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CALENNOTIFIER_CANCELNOTIFICATIONS_ENTRY );
+    
     for( TInt x = 0; x < iHandlers.Count(); ++x )
         {
         if( iHandlers[x].iHandler == aHandler )
@@ -195,11 +200,12 @@ void CalenNotifier::CancelNotifications( MCalenNotificationHandler* aHandler )
             iHandlers[x].iHashSet.Close();
             iHandlers[x].iHandler = NULL;
             TRACE_EXIT_POINT;
+            OstTraceFunctionExit0( CALENNOTIFIER_CANCELNOTIFICATIONS_EXIT );
             return;
             }
         }
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CALENNOTIFIER_CANCELNOTIFICATIONS_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -210,11 +216,11 @@ void CalenNotifier::CancelNotifications( MCalenNotificationHandler* aHandler )
 //
 void CalenNotifier::ContextChanged()
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CALENNOTIFIER_CONTEXTCHANGED_ENTRY );
+    
     BroadcastNotification( ECalenNotifyContextChanged );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENNOTIFIER_CONTEXTCHANGED_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -228,9 +234,10 @@ void CalenNotifier::ContextChanged()
 //
 TInt CalenNotifier::EnvChangeCallbackL( TAny* aThisPtr )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENNOTIFIER_ENVCHANGECALLBACKL_ENTRY );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENNOTIFIER_ENVCHANGECALLBACKL_EXIT );
+    
     // Return value for functions used as TCallBack objects should be EFalse
     // unless the function is intended to be called again from a timer.
    // return EFalse;
@@ -244,7 +251,7 @@ TInt CalenNotifier::EnvChangeCallbackL( TAny* aThisPtr )
 //
 TInt CalenNotifier::DoEnvChange()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENNOTIFIER_DOENVCHANGE_ENTRY );
     
     if( ((iEnvChangeNotifier->Change() & EChangesMidnightCrossover)
         || (iEnvChangeNotifier->Change() & EChangesSystemTime))
@@ -262,7 +269,7 @@ TInt CalenNotifier::DoEnvChange()
         iIgnoreFirstLocaleChange = EFalse;
         }   
 
-    TRACE_EXIT_POINT; 
+    OstTraceFunctionExit0( CALENNOTIFIER_DOENVCHANGE_EXIT );
     return EFalse ;
     }
 
@@ -274,14 +281,14 @@ TInt CalenNotifier::DoEnvChange()
 //
 void CalenNotifier::BroadcastNotification( TCalenNotification aNotification )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CALENNOTIFIER_BROADCASTNOTIFICATION_ENTRY );
+    
     // Someone has told us to broadcast, or one of our notifiers completed.
     // We run it past the state machine and that may or may not call the
     // function to really do the broadcast.
     iStateMachine.HandleNotification( aNotification );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENNOTIFIER_BROADCASTNOTIFICATION_EXIT );
     }
     
 // ----------------------------------------------------------------------------
@@ -292,7 +299,7 @@ void CalenNotifier::BroadcastNotification( TCalenNotification aNotification )
 //
 void CalenNotifier::BroadcastApprovedNotification( TCalenNotification aNotification )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENNOTIFIER_BROADCASTAPPROVEDNOTIFICATION_ENTRY );
     
     iBroadcastQueue.Append( aNotification );
 
@@ -308,7 +315,7 @@ void CalenNotifier::BroadcastApprovedNotification( TCalenNotification aNotificat
         iBroadcastActive = EFalse;
         }
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENNOTIFIER_BROADCASTAPPROVEDNOTIFICATION_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -319,8 +326,8 @@ void CalenNotifier::BroadcastApprovedNotification( TCalenNotification aNotificat
 //
 void CalenNotifier::DoBroadcast( TCalenNotification aNotification )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CALENNOTIFIER_DOBROADCAST_ENTRY );
+    
     for( TInt x = 0; x < iHandlers.Count(); ++x )
         {
         TNotificationHandler handler = iHandlers[x];
@@ -339,7 +346,7 @@ void CalenNotifier::DoBroadcast( TCalenNotification aNotification )
             }
         }
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENNOTIFIER_DOBROADCAST_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -349,8 +356,9 @@ void CalenNotifier::DoBroadcast( TCalenNotification aNotification )
 CalenNotifier::TNotificationHandler::TNotificationHandler() : 
                 iHashSet(&::HashCalenNotificationFunction,&::HashCalenNotificationIdentityRelation)
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( TNOTIFICATIONHANDLER_TNOTIFICATIONHANDLER_ENTRY );
+    
+    OstTraceFunctionExit0( TNOTIFICATIONHANDLER_TNOTIFICATIONHANDLER_EXIT );
     }
 
 // End of file
