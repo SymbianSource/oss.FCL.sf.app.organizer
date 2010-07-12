@@ -27,6 +27,7 @@ PRJ_MMPFILES
 #include "../caleninterimutils/group/bld.inf"
 #include "../calenimp/group/bld.inf"
 #include "../calenlauncher/group/bld.inf"
+#include "../caldav/group/bld.inf"
 
 
 
