@@ -446,6 +446,14 @@ NONSHARABLE_CLASS(CCalenGlobalData) : public CBase,
 		* Deletes a calendar from the calendar list
 		*/
 		void HandleCalendarFileDeletedL();
+		
+		/*
+		 * @brief Delete all missed alarms for deleted calendar 
+		 * @param aCalendarFilename filename of the calendar for which missed 
+		 *        alarms should be deleted
+		 * @return void       
+		 */
+		void DeleteCalendarMissedAlarmsL(const TDesC& aCalendarFilename);
 
 	private:
         // Member data owned by this class.  Member data is only initialised on first use

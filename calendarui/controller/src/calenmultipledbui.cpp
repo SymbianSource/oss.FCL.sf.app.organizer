@@ -659,7 +659,7 @@ TInt CCalenMultipleDbUi::AddItemL()
     
     iCalendarInfoNew = CCalCalendarInfo::NewL();
     iCalendarInfoNew->SetNameL(KNullDesC16);
-    iCalendarInfoNew->SetColor(255);
+    iCalendarInfoNew->SetColor(KCalenBlue.Value());
     iCalendarInfoNew->SetEnabled(ETrue);
     iDbEditor = CCalenMultiDBEditor::NewL(*this,*iCalendarInfoNew, iController, EFalse );
   
@@ -681,20 +681,25 @@ TInt CCalenMultipleDbUi::AddItemL()
 // CCalenMultipleDbUi::UpdateAddOrEditL
 // ----------------------------------------------------------------------------
 //
-void CCalenMultipleDbUi::UpdateOnAddOrEditL(TBool aItemAdded)
+TInt CCalenMultipleDbUi::UpdateOnAddOrEditL(TBool aItemAdded)
     {
     TRACE_ENTRY_POINT
-	
+	TInt retError = KErrNone;
+    
 	iDbEditor = NULL;
     
     if(aItemAdded)
         {
+        TRAP(retError,
         // Set calendar properties for new calendar being created.
         SetCalendarAddPropertiesL(*iCalendarInfoNew);
        
+        //This makes sure calendarInfo will get deleted anyway!
         iController.AddCalendarL(iCalendarInfoNew);
+        );
+        
         iCalendarInfoNew = NULL;
-       
+        
         //Highlight the newly created list item
         iListBox->ScrollToMakeItemVisible(iListBox->BottomItemIndex());
         iListBox->SetCurrentItemIndexAndDraw(iDesArray->Count()-1);
@@ -707,19 +712,26 @@ void CCalenMultipleDbUi::UpdateOnAddOrEditL(TBool aItemAdded)
                 CheckForChangesL(*iCalendarInfoOriginal,
                 *iCalendarInfoEdited))
             {
+            TRAP(retError,
             // update the calendar properties such as modification time, sync status.
             SetCalendarUpdatePropertiesL(*iCalendarInfoEdited);
             
             iController.UpdateCalendarL(iCalendarInfoEdited);
+            );
+            
             }
 
         iConflictOccured = EFalse;
         delete iCalendarInfoOriginal,iCalendarInfoOriginal = NULL;
         }
+    
     iIsDbEditorOpen = EFalse ; //iIsDbEditorOpen should be set before calling UpdateListboxL() 
-    UpdateListboxL();
+    
+    TRAP_IGNORE(UpdateListboxL());
+    
     
     TRACE_EXIT_POINT
+	return retError;
     }
 
 // ----------------------------------------------------------------------------

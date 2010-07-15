@@ -776,9 +776,16 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
 			case MCalFileChangeObserver::ECalendarInfoDeleted:
 				{
 				TFileName calFileName = aCalendarInfoChangeEntries[index]->FileNameL();
-                CCalSession& session = iGlobalData->CalSessionL( calFileName );
+                CCalSession* session = NULL;
+                TRAPD(err, session = &iGlobalData->CalSessionL( calFileName ));
+                if(KErrNotFound == err && ECalendarInfoUpdated == changeType)
+                    {
+                    BroadcastNotification(ECalenNotifyDeleteInstanceView);
+                    BroadcastNotification(ECalenNotifyCalendarInfoCreated);
+                    break;
+                    }
 				
-				CCalCalendarInfo* calendarInfo = session.CalendarInfoL();
+				CCalCalendarInfo* calendarInfo = session->CalendarInfoL();
                 CleanupStack::PushL(calendarInfo);
 
                 TBuf8<KBuffLength> keyBuff;
@@ -786,7 +793,7 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
 
                 TBool markAsdelete;
                 TPckgC<TBool> pkgMarkAsDelete(markAsdelete);
-                TRAPD(err,pkgMarkAsDelete.Set(calendarInfo->PropertyValueL(keyBuff)));
+                TRAP(err,pkgMarkAsDelete.Set(calendarInfo->PropertyValueL(keyBuff)));
                 markAsdelete = pkgMarkAsDelete();
 
                 CleanupStack::PopAndDestroy(calendarInfo);

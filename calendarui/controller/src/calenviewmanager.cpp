@@ -101,8 +101,11 @@ CCalenViewManager::~CCalenViewManager()
     TRACE_ENTRY_POINT;
 
     delete iPopulator;
-    delete iToolbar;
-
+    if(iToolbar)
+        {
+        delete iToolbar;
+        iToolbar = NULL;
+        }
     if( iSetting )
         {
         iSetting->Release();
@@ -625,7 +628,8 @@ TBool  CCalenViewManager::HandleCommandL( const TCalenCommand& aCommand )
             
             SetRepopulation(EFalse);
             // reactivate the current view
-            RequestActivationL(iCurrentViewId.iViewUid);
+            //RequestActivationL(iCurrentViewId.iViewUid);
+            RequestActivationL(KUidCalenDayView);
 
 			// dim "today" toolbar item since focus is on today            
             iToolbar->Toolbar().SetItemDimmed( ECalenGotoToday, ETrue, ETrue);
@@ -1144,7 +1148,7 @@ void CCalenViewManager::HandleNotificationL( TCalenNotification aNotification )
             
             if( iController.IsFasterAppFlagEnabled() )
                 {
-                iController.RemoveDeadCalendarsL();
+                TRAP_IGNORE(iController.RemoveDeadCalendarsL());
                 }
             }
             break;

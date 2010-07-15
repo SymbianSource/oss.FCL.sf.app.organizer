@@ -239,6 +239,23 @@ enum
      ECalenSelectCmdOk = 3000
      };
 
+//Colors of color grid in Muliple calendars view
+#define KCalenDarkBlue      TRgb(0x792B00)
+#define KCalenBlue          TRgb(0xC0580F)
+#define KCalenCyan          TRgb(0xB0A157)
+#define KCalenlightBlue     TRgb(0xF5D8B3)
+#define KCalenDarkGreen     TRgb(0x1C4C02)
+#define KCalenGreen         TRgb(0x359C50)
+#define KCalenlightGreen    TRgb(0x53D292)
+#define KCalenGold          TRgb(0x5BDDDC)
+#define KCalenDarkRed       TRgb(0x0A12B8)
+#define KCalenOrange        TRgb(0x009DFF)
+#define KCalenYellow        TRgb(0x05E8FF)
+#define KCalenDarkOrange    TRgb(0x2D63D4)
+#define KCalenMegenta       TRgb(0xA4006D)
+#define KCalenlightMagenta  TRgb(0xE68DA7)
+#define KCalenlightPink     TRgb(0xCFACFF)
+#define KCalenPink          TRgb(0x8217E0)
 #endif // end of CALENDAR_HRH
 
 

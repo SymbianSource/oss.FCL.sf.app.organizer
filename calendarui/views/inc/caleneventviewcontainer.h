@@ -283,14 +283,8 @@ public: // New methods
  	/**
      * Populate the icon drawer with the icons for this entry
      */
-    void PopulateIconDrawerL( CCalenIconDrawer& aIconDrawer );
-    
-	/**
-	* Calculates the number of lines before the location field in the document
-	* so that map icon is placed at correct place
-	**/
-    void CalcNumOfLinesBeforeLocation();
-	
+    void PopulateIconDrawerL( CCalenIconDrawer& aIconDrawer );    
+
     /**
      * Formats the heading and adds it the the view
      * Headings are bolded with no indentation.
@@ -578,8 +572,7 @@ private:
 private:
      CRepository* iCenRepSession; // Central Repository session
      // Notifier to listen changes of offline state
-     CCenRepNotifyHandler* iNotifier;
-     TInt iNumOfLinesBeforeLocField; // Number of lines before locaiton field in the rich text editor
+     CCenRepNotifyHandler* iNotifier;  
      TInt iTimeFieldLines;  // Number of lines occupied by time field on the viewer   
      TBool iEmbeddedFileOpened;
      CFindItemMenu* iFindMenu;  

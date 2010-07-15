@@ -413,7 +413,13 @@ CCalenView::TNextPopulationStep CCalenMonthView::ActiveStepL()
     TRACE_ENTRY_POINT;
 
     CCalenMonthContainer* cnt = static_cast<CCalenMonthContainer*>( iContainer );
-
+    if(!cnt)
+        {
+        TRACE_EXIT_POINT;
+        iPopulationStep = EPopulationDone;
+        return CCalenView::EDone;
+        }
+        
     switch( iPopulationStep )
         {
         case ENothingDone:

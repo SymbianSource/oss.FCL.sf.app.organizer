@@ -119,12 +119,18 @@ CCalUiDialogImpl::~CCalUiDialogImpl()
     iColorUidArray.Reset();
     iColorUidArray.Close();
     
-    delete iDesArray;
+    if(iDesArray)
+        delete iDesArray;
     
-    delete iBgContext;
+    if(iBgContext)
+        delete iBgContext;
     
-    iAsyncExit->Cancel();
-    delete iAsyncExit;
+    if(iAsyncExit)
+        {
+        iAsyncExit->Cancel();
+        delete iAsyncExit;
+        }
+    
 
     TRACE_EXIT_POINT
     }

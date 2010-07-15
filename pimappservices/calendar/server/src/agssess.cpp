@@ -2066,6 +2066,16 @@ void CAgnServerSession::RequestChangeNotificationParametersL()
 	// Restore length
 	const TInt KBufferSize = iMessage.GetDesLength(KSlot2);
 	
+    if (KBufferSize == KErrArgument)
+        {
+        PanicClientL(EIndexError);
+        }
+    else if (KBufferSize == KErrBadDescriptor)
+        {
+        PanicClientL(EBadDescriptor);
+        }
+    User::LeaveIfError(KBufferSize);
+	
 	// Restore buffer
 	CBufFlat* buffer = CBufFlat::NewL(KBufferSize);
 	CleanupStack::PushL(buffer);

@@ -508,8 +508,10 @@ void CCalenLocationUi::HandleSelectionCompletedL( CMnMapView& aMapView, TInt aEr
     
     // Forcefully broadcast app foreground notification, so that
     // ECalenMapState would be current state
-    iController.BroadcastNotification(ECalenNotifyAppForegrounded);	
-    
+    if(!iController.IsFasterAppFlagEnabled())
+        {
+    	iController.BroadcastNotification(ECalenNotifyAppForegrounded);	
+        }
     // selection is done, analyze error code first...
     if ( !aError )
         {

@@ -174,6 +174,11 @@ void CCalenDbChangeNotifier::CalChangeNotification( RArray<TCalChangeEntry>& aCh
 
     TRACE_EXIT_POINT;
     }
+
+// -----------------------------------------------------------------------------
+// CCalenDbChangeNotifier::HandleMissedAlarmsL
+// Delete missed alarms when externally the entries are getting deleted.
+// -----------------------------------------------------------------------------
 void CCalenDbChangeNotifier::HandleMissedAlarmsL(const RArray<TCalChangeEntry>& aChangeItems)
     {
     TRACE_ENTRY_POINT
@@ -183,13 +188,18 @@ void CCalenDbChangeNotifier::HandleMissedAlarmsL(const RArray<TCalChangeEntry>& 
     CMissedAlarmStore* missedAlarmStore = CMissedAlarmStore::NewL(
             *missedAlarmStoreRepository);
     CleanupStack::PushL(missedAlarmStore);
+
     RPointerArray<CMissedAlarm> missedAlarmStorelist;
     CleanupResetAndDestroyPushL(missedAlarmStorelist);
+
     missedAlarmStore->GetL(missedAlarmStorelist);
+
     CCalCalendarInfo* calendarInfo = iSession.CalendarInfoL();
     CleanupStack::PushL(calendarInfo);
+
     CCalenDbChangeNotifier::TCalLuidFilename calLuidFilename;
     calLuidFilename.iFilename = calendarInfo->FileNameL();
+
     if (missedAlarmStorelist.Count())
         {
         for (TInt idx = 0; idx < aChangeItems.Count(); idx++)
@@ -197,9 +207,9 @@ void CCalenDbChangeNotifier::HandleMissedAlarmsL(const RArray<TCalChangeEntry>& 
             if (aChangeItems[idx].iChangeType == EChangeDelete)
                 {
                 calLuidFilename.iLuid = aChangeItems[idx].iEntryId;
-                TInt index = missedAlarmStorelist.Find(
-                        calLuidFilename,CCalenDbChangeNotifier::DoFindEntryByLuid);
-                if(index != KErrNotFound)
+                TInt index = missedAlarmStorelist.Find(calLuidFilename,
+                        CCalenDbChangeNotifier::DoFindEntryByLuid);
+                if (index != KErrNotFound)
                     {
                     CMissedAlarm* missedAlarm = missedAlarmStorelist[index];
                     missedAlarmStore->RemoveL(*missedAlarm);
@@ -207,11 +217,17 @@ void CCalenDbChangeNotifier::HandleMissedAlarmsL(const RArray<TCalChangeEntry>& 
                 }
             }
         }
+
     CleanupStack::PopAndDestroy(calendarInfo);
     CleanupStack::PopAndDestroy(&missedAlarmStorelist);
     CleanupStack::PopAndDestroy(missedAlarmStore);
+
     TRACE_EXIT_POINT    
     }
+
+// -----------------------------------------------------------------------------
+// CCalenDbChangeNotifier::DoFindEntryByLuid
+// -----------------------------------------------------------------------------
 TBool CCalenDbChangeNotifier::DoFindEntryByLuid(
                 const TCalLuidFilename* aLuidFilename,const CMissedAlarm& aMissedAlarm)
     {

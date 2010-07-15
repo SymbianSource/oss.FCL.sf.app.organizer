@@ -144,7 +144,7 @@ void CCalenUnifiedEditorControl::MakeUnifiedEditorL()
 // Set data to the collapsed unified editor
 // -----------------------------------------------------------------------------
 //
-void CCalenUnifiedEditorControl::SetDataToEditorL()
+void CCalenUnifiedEditorControl::SetDataToEditorL(TBool onLocaleUpdate)
     {
     TRACE_ENTRY_POINT;
     
@@ -155,7 +155,9 @@ void CCalenUnifiedEditorControl::SetDataToEditorL()
     
     TPtrC subject = iUnifiedEditor.Edited().Summary().Left(
                         iUnifiedEditor.MaxTextEditorLength() );
-    iUnifiedEditor.SetEditorTextL( ECalenEditorSubject, &subject );
+    
+    if(!onLocaleUpdate)
+        iUnifiedEditor.SetEditorTextL( ECalenEditorSubject, &subject );
    
 
     
@@ -246,7 +248,9 @@ void CCalenUnifiedEditorControl::SetDataToEditorL()
         {
         TPtrC location = iUnifiedEditor.Edited().Location().Left(
                             iUnifiedEditor.MaxTextEditorLength() );
-        iUnifiedEditor.SetEditorTextL( ECalenEditorPlace, &location );
+        
+        if(!onLocaleUpdate)
+            iUnifiedEditor.SetEditorTextL( ECalenEditorPlace, &location );
         }
     
     // TODO: Uncomment this when enabling attachment support
@@ -1431,7 +1435,7 @@ void CCalenUnifiedEditorControl::UpdateLinesOnLocaleChangeL()
         }
 
     iUnifiedEditor.TryChangeFocusToL( lastFocusedItem );
-    SetDataToEditorL();
+    SetDataToEditorL(ETrue);
     iUnifiedEditor.UpdateFormL();
     TRACE_EXIT_POINT;
     }

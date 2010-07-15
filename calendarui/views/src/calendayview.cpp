@@ -192,6 +192,16 @@ void CCalenDayView::DoActivateImplL( const TVwsViewId& aPrevViewId,
     }
 
 // ---------------------------------------------------------
+// CCalenDayView::isEventViewCommandHandled
+// Check if event view command is handled or not
+// ---------------------------------------------------------
+//
+TBool CCalenDayView::isEventViewCommandHandled()
+    {
+    return iEventViewCommandHandled ;
+    }
+
+// ---------------------------------------------------------
 // CCalenDayView::DoDeactivateImpl
 // Second phase DoDeactivate
 // (other items were commented in a header).
@@ -405,9 +415,7 @@ void CCalenDayView::HandleCommandL(TInt aCommand)
         case EAknSoftkeyOpen:
         case ECalenViewCurrentEntry:
             {
-            if(!iEventViewCommandHandled)
-                {
-                if(iDayContainer->IsValidEntryL()&&!iDayContainer->IsEmptyView())
+               if(iDayContainer->IsValidEntryL()&&!iDayContainer->IsEmptyView())
                     {
                     // Set the context when performing an action
                     iDayContainer->SetContextFromHighlightL();
@@ -415,7 +423,7 @@ void CCalenDayView::HandleCommandL(TInt aCommand)
                     CCalenNativeView::HandleCommandL( ECalenEventView );
                     iEventViewCommandHandled = ETrue;
                     }
-                }
+
             }
             break;
          // TODO:will be uncommented with copy to cal functionality.   

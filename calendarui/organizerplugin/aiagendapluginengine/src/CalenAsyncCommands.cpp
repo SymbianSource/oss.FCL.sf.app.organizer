@@ -418,8 +418,10 @@ void CGetEntriesCommand::RunL(void)
                         &&
                         iInstanceArray[i]->StartTimeL().TimeLocalL() < iDay )
                         {
-                        delete iInstanceArray[i];
+                        CCalInstance* instance = iInstanceArray[i];
                         iInstanceArray.Remove( i );
+                        delete instance;
+                        
                         }
                     else
                         {
@@ -952,8 +954,9 @@ void CGetEntriesForDaysCommand::RunL(void)
                     if( entry.EntryTypeL() == CCalEntry::EAppt && 
                         entry.StatusL() == CCalEntry::ECancelled )
                         {
-                        delete iInstanceArray[i];
+                        CCalInstance* instance = iInstanceArray[i];
                         iInstanceArray.Remove( i );
+                        delete instance;
                         }
                     else
                         {

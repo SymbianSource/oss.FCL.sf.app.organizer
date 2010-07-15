@@ -189,22 +189,22 @@ void CCalenMultiDBEditor::LoadColorsL()
     
     iRgbColors = new(ELeave) CArrayFixFlat<TRgb>(2);
     
-    iRgbColors->AppendL(KRgbRed);
-    iRgbColors->AppendL(KRgbDarkGray);
-    iRgbColors->AppendL(KRgbDarkRed);
-    iRgbColors->AppendL(KRgbDarkGreen);
-    iRgbColors->AppendL(KRgbDarkYellow);
-    iRgbColors->AppendL(KRgbDarkBlue);
-    iRgbColors->AppendL(KRgbDarkMagenta);
-    iRgbColors->AppendL(KRgbDarkCyan);
-    iRgbColors->AppendL(KRgbBlack);
-    iRgbColors->AppendL(KRgbGreen);
-    iRgbColors->AppendL(KRgbYellow);
-    iRgbColors->AppendL(KRgbBlue);
-    iRgbColors->AppendL(KRgbMagenta);
-    iRgbColors->AppendL(KRgbCyan);
-    iRgbColors->AppendL(KRgbGray);
-    iRgbColors->AppendL(KRgbWhite);
+    iRgbColors->AppendL(KCalenDarkBlue);
+    iRgbColors->AppendL(KCalenDarkGreen);
+    iRgbColors->AppendL(KCalenDarkRed);
+    iRgbColors->AppendL(KCalenMegenta);
+    iRgbColors->AppendL(KCalenBlue);
+    iRgbColors->AppendL(KCalenGreen);
+    iRgbColors->AppendL(KCalenOrange);
+    iRgbColors->AppendL(KCalenlightMagenta);
+    iRgbColors->AppendL(KCalenCyan);
+    iRgbColors->AppendL(KCalenlightGreen);
+    iRgbColors->AppendL(KCalenYellow);
+    iRgbColors->AppendL(KCalenlightPink);
+    iRgbColors->AppendL(KCalenlightBlue);
+    iRgbColors->AppendL(KCalenGold);
+    iRgbColors->AppendL(KCalenDarkOrange);
+    iRgbColors->AppendL(KCalenPink);
     
     TRACE_EXIT_POINT
     }
@@ -388,23 +388,31 @@ TBool CCalenMultiDBEditor::OkToExitL(TInt aButtonId)
         case EAknSoftkeyDone:
             {
             isExitForm = SaveNoteL(aButtonId);
-            if(isExitForm)
+            if (isExitForm)
                 {
-                iMultipleDbUi.UpdateOnAddOrEditL(!iEditFlag);
+                TInt err = iMultipleDbUi.UpdateOnAddOrEditL(!iEditFlag);
+                if (err != KErrNone)
+                    {
+                    ShowErrorNoteL(err);
+                    }
                 }
             }
             break;
         case EAknSoftkeyExit:    
         case EAknCmdExit:
             {
-            isExitForm  = SaveNoteL(aButtonId); 
-            if(isExitForm)
+            isExitForm = SaveNoteL(aButtonId);
+            if (isExitForm)
                 {
-                iMultipleDbUi.UpdateOnAddOrEditL(!iEditFlag);
+                TInt err = iMultipleDbUi.UpdateOnAddOrEditL(!iEditFlag);
+                if (err != KErrNone)
+                    {
+                    ShowErrorNoteL(err);
+                    }
                 }
-             isExitForm = ETrue;
-             iMultipleDbUi.ExitDialogL();           
-			 }
+            isExitForm = ETrue;
+            iMultipleDbUi.ExitDialogL();
+            }
             break;
         case EAknSoftkeyQuit:
             {
@@ -629,18 +637,19 @@ void CCalenMultiDBEditor::FocusChanged(TDrawNow /*aDrawNow*/)
 TBool CCalenMultiDBEditor::SaveNoteL( TInt aButtonId )
 	{
     TRACE_ENTRY_POINT;
-    
-    if( CheckSpaceBelowCriticalLevelL() )
+
+    if (CheckSpaceBelowCriticalLevelL())
         {
         TRACE_EXIT_POINT;
-        return EFalse; 
+        return EFalse;
         }
 
     if (Conflict() == CCalenMultiDBEditor::EConflictDelete)
         {
         CAknNoteDialog *note = new (ELeave) CAknNoteDialog(
                 CAknNoteDialog::EWarningTone, CAknNoteDialog::ENoTimeout);
-        HBufC* buf = StringLoader::LoadLC( R_QTN_CALENDAREDITOR_NOTE_DB_CONFLICT_DELETE, iEikonEnv);
+        HBufC* buf = StringLoader::LoadLC(
+                R_QTN_CALENDAREDITOR_NOTE_DB_CONFLICT_DELETE, iEikonEnv);
         note->SetTextL(*buf);
         note->ExecuteLD(R_CALEN_CALENDAREDITOR_CONFLICT_DIALOG);
         CleanupStack::PopAndDestroy(buf);
@@ -650,7 +659,8 @@ TBool CCalenMultiDBEditor::SaveNoteL( TInt aButtonId )
         {
         CAknNoteDialog *note = new (ELeave) CAknNoteDialog(
                 CAknNoteDialog::EWarningTone, CAknNoteDialog::ENoTimeout);
-        HBufC* buf = StringLoader::LoadLC(R_QTN_CALENDAREDITOR_NOTE_DB_CONFLICT_UPDATE, iEikonEnv);
+        HBufC* buf = StringLoader::LoadLC(
+                R_QTN_CALENDAREDITOR_NOTE_DB_CONFLICT_UPDATE, iEikonEnv);
         note->SetTextL(*buf);
         note->ExecuteLD(R_CALEN_CALENDAREDITOR_CONFLICT_DIALOG);
         CleanupStack::PopAndDestroy(buf);
@@ -665,111 +675,116 @@ TBool CCalenMultiDBEditor::SaveNoteL( TInt aButtonId )
     iController.GetAllCalendarInfoL(calendarInfoList);
     CleanupClosePushL(calendarInfoList);
     const TBool continueOnError = ETrue;
-    ReadDataFromFormL( continueOnError); 
-	
+    ReadDataFromFormL(continueOnError);
+
     iCalendarName->Des().Trim();
     // Check for the empty text
-    if((!iCalendarName->Size()) )
+    if ((!iCalendarName->Size()))
         {
         // If in editing mode, just save the name used before.
-        if( iEditFlag )
+        if (iEditFlag)
             {
-			iCalendarName->Des().Copy(iCalendarInfo.NameL());
-            SetEdwinTextL( ECalenMultiDbName, iCalendarName );
+            iCalendarName->Des().Copy(iCalendarInfo.NameL());
+            SetEdwinTextL(ECalenMultiDbName, iCalendarName);
             }
         else
             {
             // else use the default name.
-            TInt index( KOne );
-            HBufC* calendarName = StringLoader::LoadLC( R_CALE_DB_CALENDAR );
-            TBuf< KBuffLength > numBuf;
+            TInt index(KOne);
+            HBufC* calendarName = StringLoader::LoadLC(R_CALE_DB_CALENDAR);
+            TBuf<KBuffLength> numBuf;
 
             // Check if the name is already present.
-            while( IsNameFoundL( *calendarName ) )
+            while (IsNameFoundL(*calendarName))
                 {
-                CleanupStack::PopAndDestroy( calendarName );
+                CleanupStack::PopAndDestroy(calendarName);
                 numBuf.Zero();
-                if( index < KTen ) 
+                if (index < KTen)
                     {
-                    numBuf.Format( KFormatStringTwoDigit, index );
+                    numBuf.Format(KFormatStringTwoDigit, index);
                     }
                 else
                     {
-                    numBuf.Format( KFormatString, index );
+                    numBuf.Format(KFormatString, index);
                     }
                 AknTextUtils::DisplayTextLanguageSpecificNumberConversion(
-                        numBuf );
+                        numBuf);
                 calendarName = StringLoader::LoadLC(
-                        R_CALE_DB_CALENDAR_DEFAULT_NAME, numBuf );
+                        R_CALE_DB_CALENDAR_DEFAULT_NAME, numBuf);
 
                 ++index;
                 }
-            
-            iCalendarName->Des().Append( calendarName->Des() );
-            
-            CleanupStack::PopAndDestroy( calendarName );
-            SetEdwinTextL( ECalenMultiDbName, iCalendarName );
+
+            iCalendarName->Des().Append(calendarName->Des());
+
+            CleanupStack::PopAndDestroy(calendarName);
+            SetEdwinTextL(ECalenMultiDbName, iCalendarName);
             }
 
         }
-    
-       // Check for the validity of the calendar name.
-       if( IsNameValid( *iCalendarName ) )
-           {
-           // Name is valid. then check if it already exists or not.
-           if( IsNameEditedL( *iCalendarName ) )
-               {
-               TInt index = calendarInfoList.Find( *iCalendarName,CCalenMultiDBEditor::CalenInfoIdentifierL );
-               if(index != KErrNotFound)
-                   {
-                   retValue = EFalse;
-                   if( EAknCmdExit != aButtonId )
-                       {                       
-                       HBufC* infoText = StringLoader::LoadLC(
-                               R_QTN_CALE_DB_ALREADY_EXISTS_NOTE , iCalendarName->Des() );
-                       CAknInformationNote* dialog = new( ELeave ) CAknInformationNote(ETrue);
-                       dialog->ExecuteLD( *infoText );
-                       CleanupStack::PopAndDestroy( infoText );                        
-                       }
-                   }
-               else
-                   {
-                   iCalendarInfo.SetNameL(*iCalendarName);
-                   }
-               }
-           
-           }
-       else
-           {
-           if( EAknCmdExit != aButtonId )
-               {
-               retValue = EFalse;
-               HBufC* infoText(NULL);
-               infoText = AreIllegalChars( *iCalendarName ) ? StringLoader::LoadLC( R_CALEN_ILLEGAL_CHARACTERS ) : 
-                                                        StringLoader::LoadLC( R_CALEN_BAD_FILE_NAME );
-               CAknInformationNote* dialog = new( ELeave ) CAknInformationNote(ETrue);
-               dialog->ExecuteLD( *infoText );
-               CleanupStack::PopAndDestroy( infoText ); 
-               }
-           }
-		    
-	   
-       	if(IsColorEditedL( iColVal ) )
-    		{
-    		iCalendarInfo.SetColor(iColVal);
-    		}
 
-        
-
-        if( IsVisiblityFieldEditedL( iCalendarStatus ) )
+    // Check for the validity of the calendar name.
+    if (IsNameValid(*iCalendarName))
+        {
+        // Name is valid. then check if it already exists or not.
+        if (IsNameEditedL(*iCalendarName))
             {
-            iCalendarInfo.SetEnabled(iCalendarStatus);
+            TInt index = calendarInfoList.Find(*iCalendarName,
+                    CCalenMultiDBEditor::CalenInfoIdentifierL);
+            if (index != KErrNotFound)
+                {
+                retValue = EFalse;
+                if (EAknCmdExit != aButtonId)
+                    {
+                    HBufC* infoText = StringLoader::LoadLC(
+                            R_QTN_CALE_DB_ALREADY_EXISTS_NOTE,
+                            iCalendarName->Des());
+                    CAknInformationNote* dialog =
+                            new (ELeave) CAknInformationNote(ETrue);
+                    dialog->ExecuteLD(*infoText);
+                    CleanupStack::PopAndDestroy(infoText);
+                    }
+                }
+            else
+                {
+                iCalendarInfo.SetNameL(*iCalendarName);
+                }
             }
-    
-	CleanupStack::PopAndDestroy(&calendarInfoList);   		   
+
+        }
+    else
+        {
+        if (EAknCmdExit != aButtonId)
+            {
+            retValue = EFalse;
+            HBufC* infoText(NULL);
+            infoText
+                    = AreIllegalChars(*iCalendarName)
+                                                      ? StringLoader::LoadLC(
+                                                             R_CALEN_ILLEGAL_CHARACTERS)
+                                                         : StringLoader::LoadLC(
+                                                                 R_CALEN_BAD_FILE_NAME);
+            CAknInformationNote* dialog = new (ELeave) CAknInformationNote(
+                    ETrue);
+            dialog->ExecuteLD(*infoText);
+            CleanupStack::PopAndDestroy(infoText);
+            }
+        }
+
+    if (IsColorEditedL(iColVal))
+        {
+        iCalendarInfo.SetColor(iColVal);
+        }
+
+    if (IsVisiblityFieldEditedL(iCalendarStatus))
+        {
+        iCalendarInfo.SetEnabled(iCalendarStatus);
+        }
+
+    CleanupStack::PopAndDestroy(&calendarInfoList);
     TRACE_EXIT_POINT;
     return retValue;
-	}
+    }
 
 // ---------------------------------------------------------------------------
 // CCalenMultiDBEditor::ExecuteLD
@@ -1172,15 +1187,25 @@ TBool CCalenMultiDBEditor::CheckSpaceBelowCriticalLevelL()
     TBool retcode(EFalse);
     if ( SysUtil::FFSSpaceBelowCriticalLevelL( &( iCoeEnv->FsSession() ) ) )
         {
-        CErrorUI* errorUi = CErrorUI::NewLC();
-        errorUi->ShowGlobalErrorNoteL( KErrDiskFull );
-        CleanupStack::PopAndDestroy( errorUi ); 
+        ShowErrorNoteL(KErrDiskFull);
         retcode = ETrue;
         }
     TRACE_EXIT_POINT;
     return retcode;
     }
 
+// -----------------------------------------------------------------------------
+// CCalenMultiDBEditor::ShowErrorNoteL
+// -----------------------------------------------------------------------------
+//
+void CCalenMultiDBEditor::ShowErrorNoteL(TInt aError)
+    {
+    TRACE_ENTRY_POINT
+    CErrorUI* errorUi = CErrorUI::NewLC();
+    errorUi->ShowGlobalErrorNoteL( aError );
+    CleanupStack::PopAndDestroy( errorUi ); 
+    TRACE_EXIT_POINT
+    }
 
 // -----------------------------------------------------------------------------
 // CDbColorPicture::CDbColorPicture

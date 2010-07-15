@@ -79,8 +79,9 @@ NONSHARABLE_CLASS( CCalenUnifiedEditorControl ) : public CBase
         
         /**
          * @brief Set data to the collapsed unified editor
+         * @param onLocaleUpdate TBool to indicate locale change impact on this method
          */
-        void SetDataToEditorL();
+        void SetDataToEditorL(TBool onLocaleUpdate = EFalse);
         
         /** 
          * @brief Set date of date editor aControlId in form to aTime 

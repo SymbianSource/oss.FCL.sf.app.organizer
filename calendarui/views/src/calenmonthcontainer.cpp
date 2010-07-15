@@ -1706,7 +1706,7 @@ void CCalenMonthContainer::HandlePointerEventL(const TPointerEvent& aPointerEven
             {
             switch(aPointerEvent.iType)
                 {
-                case TPointerEvent::EButton1Down:
+                case TPointerEvent::EButton1Up:
                     {
                     HandleWeekNumberTapL(aPointerEvent.iPosition);
                     break;

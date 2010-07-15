@@ -76,6 +76,7 @@ LIBRARY         aknicon.lib				// icons
 LIBRARY         egul.lib
 LIBRARY			gdi.lib
 LIBRARY         CalenInterimUtils2.lib
+LIBRARY         commonui.lib            // CErrorUi
 
 
 // Capability and vendor info

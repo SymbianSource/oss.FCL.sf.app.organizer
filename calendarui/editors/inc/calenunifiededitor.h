@@ -268,12 +268,7 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
         void  ActivateL();
         
     private:
-        /**
-         * @brief Insert Send menu item if needed.
-         * @param : Menu pane where send menu is inserted
-         */
-        void TryInsertSendMenuL( TInt aResourceId, CEikMenuPane* aMenuPane );
-        
+       
         /**
          * @brief Handles "Cancel" menu command for discarding the user changes.
          */
@@ -284,12 +279,6 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
          */
         void OnCmdDeleteNoteL();
         
-        /**
-         * @brief Handles send command
-         * @param aCommandId Holds ECalenSend command
-         */
-        void OnCmdSendL( TInt aCommandId );
-
         /**
          * @brief Handles "Help" command.
          */

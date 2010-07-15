@@ -263,6 +263,15 @@ private:
      * @return ETrue : Below critical level
      */
     TBool CheckSpaceBelowCriticalLevelL();
+    
+    /*
+     * @breif Show appropriate error note
+     * @param aError system wide error id.
+     * @return void  
+     */
+    void ShowErrorNoteL(TInt aError);
+    
+    
  protected:
 
 	/**

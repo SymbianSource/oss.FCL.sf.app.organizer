@@ -393,14 +393,21 @@ void CCalenAlarmManager::CreateMissedAlarmsListL()
         entryLocalUid = missedAlarm->iLuid;
         instanceTime = missedAlarm->iInstanceTime;
 
-        
-        CCalSession &session = iController.Services().SessionL( missedAlarm->iCalFileName );
-       
-        // pack instance ids of the missed alarm instances
-        TRAP_IGNORE(instanceId = TCalenInstanceId::CreateL( entryLocalUid, instanceTime, 0 ));
-        instanceId.iColId = session.CollectionIdL();
-
-        iMissedAlarmList.Append(instanceId);
+        CCalSession *session = NULL; 
+        TRAPD(err,session = &iController.Services().SessionL( missedAlarm->iCalFileName ));
+        //missed alarm belongs to existing calendar 
+        if(err != KErrNotFound)
+            {
+            // pack instance ids of the missed alarm instances
+            TRAP_IGNORE(instanceId = TCalenInstanceId::CreateL( entryLocalUid, instanceTime, 0 ));
+            instanceId.iColId = session->CollectionIdL();
+            iMissedAlarmList.Append(instanceId);
+            }
+        else 
+            {
+            //missed alarm does not belong to any calendar so delete it, since user has deleted the calendar
+            iMissedAlarmStore->RemoveL(*missedAlarm);
+            }
         }
 
     CleanupStack::PopAndDestroy(); // missedAlarmStorelist
@@ -685,6 +692,8 @@ void CCalenAlarmManager::OnCmdLaunchFromIdleL()
     RPointerArray<CMissedAlarm> aMissedAlarmArray;      
     CleanupResetAndDestroyPushL( aMissedAlarmArray );   
     iMissedAlarmStore->GetL(aMissedAlarmArray);
+    if (aMissedAlarmArray.Count())
+        {
     CCalSession &session = iController.Services().SessionL(aMissedAlarmArray[0]->iCalFileName);
     CCalEntry* entry = iController.Services().EntryViewL(session.CollectionIdL())->FetchL(
             aMissedAlarmArray[0]->iLuid);
@@ -704,6 +713,7 @@ void CCalenAlarmManager::OnCmdLaunchFromIdleL()
 	CleanupStack::PopAndDestroy( entry );
 	iMissedAlarmList.Remove(0); //Clear the alarm list
 	iMissedAlarmStore->RemoveL(*aMissedAlarmArray[0]);
+        }
     CleanupStack::PopAndDestroy(); // aMissedAlarmArray
     
     iViewManager.StartActiveStepL();

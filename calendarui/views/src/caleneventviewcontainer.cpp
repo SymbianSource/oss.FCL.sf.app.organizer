@@ -119,7 +119,6 @@ CCalenEventViewContainer::CCalenEventViewContainer(CCalenNativeView* aView,
 						  iEmbeddedFileOpened(EFalse)
     {
 	TRACE_ENTRY_POINT;
-	iNumOfLinesBeforeLocField = 0;
 	iLocaleChanged = EFalse;
 	TRACE_EXIT_POINT;
     }
@@ -669,7 +668,7 @@ void CCalenEventViewContainer::SetIconsL(CCalenIconDrawer* aIconDrawer)
     // Insert at index 0 in the document to cause the icons to be drawn when
     // the first line is visible.  The icons will not be drawn at position 0,
     // but this position must be on the screen for the icons to be drawn.
-    iTextEditor->RichText()->InsertL( iTextEditor->RichText()->DocumentLength(), header );
+    iTextEditor->RichText()->InsertL( 0, header );
 
     // Tell the text editor that it has been updated.  This will cause
     // a redraw.
@@ -928,13 +927,12 @@ void CCalenEventViewContainer::AddFieldsL()
 	if(IsEventHasMapLocationL())
         {
         // Update iNumOfLinesBeforeLocField
-        CalcNumOfLinesBeforeLocation();
         
         // Add map icon to the icon drawer
         iconDrawer->AddIconL( MCalenServices::ECalenMapIcon );
                
         // Set the icon sizes
-        iconDrawer->SetIconSizesFromLayout(iNumOfLinesBeforeLocField);
+        iconDrawer->SetIconSizesFromLayout();       
         }
 	SetIconsL(iconDrawer);
 
@@ -1199,7 +1197,7 @@ void CCalenEventViewContainer::PopulateIconDrawerL(CCalenIconDrawer& aIconDrawer
             }
         }
     // Set the icon sizes
-    aIconDrawer.SetIconSizesFromLayout(iNumOfLinesBeforeLocField);
+    aIconDrawer.SetIconSizesFromLayout(); 
 
     // Get the icon drawer width
     iIconDrawerWidthInPixels = aIconDrawer.WidthInPixels();
@@ -2356,16 +2354,23 @@ void CCalenEventViewContainer::HandleStopCommandL()
 // ----------------------------------------------------------------------------
 TBool CCalenEventViewContainer::IsEventHasMapLocationL()
 	{
-	CCalGeoValue* geoValue = iEntry->GeoValueL();
-	if(geoValue)
-		{
-		delete geoValue;
-		return 	ETrue;
-		}
-	else
-		{
-		return 	EFalse;
-		}
+    if(iEntry)
+        {
+        CCalGeoValue* geoValue = iEntry->GeoValueL();
+        if(geoValue)
+            {
+            delete geoValue; 
+            return 	ETrue;
+            }
+        else
+            {
+            return 	EFalse;
+            }
+        }
+    else
+        {
+        return EFalse;
+        }
 	}
 
 // ----------------------------------------------------------------------------
@@ -2374,15 +2379,22 @@ TBool CCalenEventViewContainer::IsEventHasMapLocationL()
 // ----------------------------------------------------------------------------
 TBool CCalenEventViewContainer::IsEventHasNoLocationTextL()
 	{
-	TPtrC location = iEntry->LocationL();
-	if(!location.Length())
-		{
-		return ETrue;
-		}
-	else
-		{
-		return EFalse;
-		}
+    if(iEntry)
+        {
+        TPtrC location = iEntry->LocationL();
+        if(!location.Length())
+            {
+            return ETrue;
+            }
+        else
+            {
+            return EFalse;
+            }
+        }
+    else
+        {
+        return EFalse;
+        }
 	}
 	
 // ----------------------------------------------------------------------------
@@ -2606,62 +2618,6 @@ void CCalenEventViewContainer::CheckAndOpenTappedAttachment(TTmPosInfo2* posInfo
         }
     }
 
-// ----------------------------------------------------------------------------
-// CCalenEventViewContainer::CalcNumOfLinesBeforeLocation
-// Calculates the number of line before locaiton field in the document of the rich text editor
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CCalenEventViewContainer::CalcNumOfLinesBeforeLocation()
-    {
-    TRACE_ENTRY_POINT;
-        
-        CCalGeoValue* geoValue = iEntry->GeoValueL();
-        if(geoValue)
-            {
-            // Get the count of lines before location field
-            // so that map icon is drwan exactly at the firlst line of location text on the event viewer
-            HBufC* visualText = NULL;
-            CArrayFixFlat<TInt>* lineWidths = new( ELeave )CArrayFixFlat<TInt>( 5 );
-            CleanupStack::PushL( lineWidths );
-            lineWidths->AppendL(iMaxWidth - iIconDrawerWidthInPixels);
-            // trim of enter keys entered at the end of the summary text,
-            TBuf<160> summary;
-            summary.Append(iEventViewData->Summary());
-            TChar ch = 0x2029; // For Enter key
-            TInt length = iEventViewData->Summary().Length();
-            TInt count = 0;
-            
-            while( length > 0 )
-                {
-                if(summary[--length] == ch)
-                    {
-                    count++;
-                    summary.Copy(summary.Left(length)); // trim off the enter key
-                    }
-                }
-            
-            // Count the number of lines summary will occupy after squeezing enter keys at the end of the text
-            CArrayFixFlat<TPtrC>* textLines = new(ELeave)CArrayFixFlat<TPtrC>(5);
-            CleanupStack::PushL( textLines );
-            visualText = AknBidiTextUtils::ConvertToVisualAndWrapToArrayWholeTextL(summary , 
-                                                                                    *lineWidths, 
-                                                                                    *iHeadingFont,
-                                                                                    *textLines);
-            iNumOfLinesBeforeLocField += textLines->Count() + iTimeFieldLines; // Added for time and date field
-            if (iEventViewData->Summary() == KNullDesC) // If summary is NULL, then <Unnamed> will be added as first line, hence, increment it
-                {
-                iNumOfLinesBeforeLocField++;
-                }
-            iNumOfLinesBeforeLocField += count; // Add the number of enter keys added at the end of the summary
-            iTimeFieldLines = 0; // Reset the value
-            CleanupStack::PopAndDestroy(textLines);
-            CleanupStack::PopAndDestroy(lineWidths);
-            delete visualText;
-            delete geoValue;    
-            }
-    }
-	
 // -----------------------------------------------------------------------------
 // CCalenCommonUI::FindPossibleInstanceL
 // Finds an instance with the given instance id and instance view.
@@ -2796,6 +2752,7 @@ void CCalenEventViewContainer::OnCmdFindPhoneNumL()
     BuildSearchBufferL();
     MCalenToolbar* toolbar = iServices.ToolbarOrNull();
     CFindItemDialog* finder = CFindItemDialog::NewL( *iSearchBuf, CFindItemEngine::EFindItemSearchPhoneNumberBin);
+    finder->EnableSingleClick(ETrue);
     toolbar->SetToolbarVisibilityL(EFalse);
     finder->ExecuteLD();
     toolbar->SetToolbarVisibilityL(ETrue);
@@ -2815,6 +2772,7 @@ void CCalenEventViewContainer::OnCmdFindUrlL()
     BuildSearchBufferL();
     MCalenToolbar* toolbar = iServices.ToolbarOrNull();
     CFindItemDialog* finder = CFindItemDialog::NewL( *iSearchBuf, CFindItemEngine::EFindItemSearchURLBin);
+    finder->EnableSingleClick(ETrue);
     toolbar->SetToolbarVisibilityL(EFalse);
     finder->ExecuteLD();
     toolbar->SetToolbarVisibilityL(ETrue);
@@ -2833,6 +2791,7 @@ void CCalenEventViewContainer::OnCmdFindEmailL()
     BuildSearchBufferL();
     MCalenToolbar* toolbar = iServices.ToolbarOrNull();
     CFindItemDialog* finder = CFindItemDialog::NewL( *iSearchBuf, CFindItemEngine::EFindItemSearchMailAddressBin);
+    finder->EnableSingleClick(ETrue);
     toolbar->SetToolbarVisibilityL(EFalse);
     finder->ExecuteLD();
     toolbar->SetToolbarVisibilityL(ETrue);

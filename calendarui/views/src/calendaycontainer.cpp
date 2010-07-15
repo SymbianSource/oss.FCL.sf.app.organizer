@@ -1477,11 +1477,6 @@ void CCalenDayContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent
 		if(iGestureHelper)
         {
         iGestureHelper->HandlePointerEventL( aPointerEvent );
-        if (  iGestureHandled )
-            {
-            TRACE_EXIT_POINT;
-            return;
-            }
         }
 	        	
 	        	
@@ -1526,16 +1521,27 @@ void CCalenDayContainer::HandleGestureL( const GestureHelper::MGestureEvent& aEv
             }
         case GestureHelper::EGestureSwipeRight:
             {
-            HandleNaviDecoratorEventL( EAknNaviDecoratorEventLeftTabArrow );
-            iGestureHandled = ETrue;
+            //Handle swipe only if event view command
+            //is not yet handled
+            if(!DayView().isEventViewCommandHandled())
+                {
+                HandleNaviDecoratorEventL( EAknNaviDecoratorEventLeftTabArrow );
+                iGestureHandled = ETrue;
+                }
             break;
             }
         case GestureHelper::EGestureSwipeLeft:
             {
-            HandleNaviDecoratorEventL( EAknNaviDecoratorEventRightTabArrow );
-            iGestureHandled = ETrue;
-            break;
+            //Handle swipe only if event view command
+            //is not yet handled
+            if(!DayView().isEventViewCommandHandled())
+                {
+                HandleNaviDecoratorEventL( EAknNaviDecoratorEventRightTabArrow );
+                iGestureHandled = ETrue;
+                }
+            
             }
+            break;
         default:
             // Other gestures are not handled here
             break;

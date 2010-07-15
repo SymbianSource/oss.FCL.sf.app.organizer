@@ -57,6 +57,13 @@ public:  // New function
      * 
      */
     void UpdateCbaL();
+    
+    /**
+     * To check if the Command to open event view 
+     * from day view is handled
+     * @return ETrue : if eventview command is handled 
+     */
+    TBool isEventViewCommandHandled();
 
 public:  // From CCalenView
     virtual TNextPopulationStep ActiveStepL();

@@ -248,7 +248,10 @@ class CClockAlarmEditorImpl : public CAknForm,
         * @param aControlId The control that sent event EEventStateChanged 
         */
         void HandleControlStateChangeL( TInt aControlId );
-
+		/**
+        * @brief CurrentValueTextLC from base class        
+        */
+        virtual HBufC* CurrentValueTextLC(){};
         
     private:            // Data
         
@@ -319,6 +322,8 @@ class CClockAlarmEditorImpl : public CAknForm,
 		* @brief Object of alarm server session.
 		*/
 		RASCliSession                   iAlarmSrvSes;
+		CAknQueryValueTextArray*        iAlmDayFieldTextArray;
+		CAknQueryValueText*             iAlmDayFieldTextValue;
 	};
 
 #endif 			// __CLOCK_ALARMEDITORIMPL_H__

@@ -94,7 +94,7 @@ void CCalenIconDrawer::ConstructL()
 // (other items were commented in a header).
 // ---------------------------------------------------------------------------
 //
-void CCalenIconDrawer::SetIconSizesFromLayout(TInt aNumOfLinesBefLocField)
+void CCalenIconDrawer::SetIconSizesFromLayout()
     {
     TRACE_ENTRY_POINT;
 
@@ -121,16 +121,6 @@ void CCalenIconDrawer::SetIconSizesFromLayout(TInt aNumOfLinesBefLocField)
     icon_layout_rect.LayoutRect( list_cale_ev2_pane.Rect(), AknLayoutScalable_Apps::field_cale_ev2_pane_g3(2).LayoutLine() );
     iThirdIconRect = icon_layout_rect.Rect();
     
-    // Adjust the map icon size
-    if(isMapIconAdded)
-        {
-        TInt mapIconIndex = IconIndex(MCalenServices::ECalenMapIcon);
-        TAknLayoutRect field_cale_ev2_pane;
-        field_cale_ev2_pane.LayoutRect(list_cale_ev2_pane.Rect(), AknLayoutScalable_Apps::field_cale_ev2_pane(aNumOfLinesBefLocField, 0, 0).LayoutLine() );
-            
-        icon_layout_rect.LayoutRect( field_cale_ev2_pane.Rect(), AknLayoutScalable_Apps::field_cale_ev2_pane_g4(0).LayoutLine() );
-        SetMapIconSize(icon_layout_rect.Rect());
-        }
     AknIconUtils::SetSize( iIconArray->At(iFirstIconIndex)->Bitmap(), iFirstIconRect.Size() );
     AknIconUtils::SetSize( iIconArray->At(iSecondIconIndex)->Bitmap(), iSecondIconRect.Size() );
     AknIconUtils::SetSize( iIconArray->At(iThirdIconIndex)->Bitmap(), iThirdIconRect.Size() );
@@ -138,37 +128,6 @@ void CCalenIconDrawer::SetIconSizesFromLayout(TInt aNumOfLinesBefLocField)
     TRACE_EXIT_POINT;
     }
 
-// ---------------------------------------------------------------------------
-// CCalenIconDrawer::SetMapIconSize
-// Fuction to set map icon size
-// (other items were commented in a header).
-// ---------------------------------------------------------------------------
-//
-void CCalenIconDrawer::SetMapIconSize(TRect aIconRect)
-	{
-	TRACE_ENTRY_POINT;
-
-	if(iIconIndices[iFirstIconIndex] == MCalenServices::ECalenMapIcon)
-		{
-		iFirstIconRect = aIconRect;
-		iFirstIconRect.iBr.iX = iFirstIconRect.iTl.iX + 30;
-		iFirstIconRect.iBr.iY = iFirstIconRect.iTl.iY + 30;	
-		}
-	else if(iIconIndices[iSecondIconIndex] == MCalenServices::ECalenMapIcon)
-		{
-		iSecondIconRect = aIconRect;
-		iSecondIconRect.iBr.iX = iSecondIconRect.iTl.iX + 30;
-		iSecondIconRect.iBr.iY = iSecondIconRect.iTl.iY + 30;	
-		}
-	else if(iIconIndices[iThirdIconIndex] == MCalenServices::ECalenMapIcon)
-		{
-		iThirdIconRect = aIconRect;
-		iThirdIconRect.iBr.iX = iThirdIconRect.iTl.iX + 30;
-		iThirdIconRect.iBr.iY = iThirdIconRect.iTl.iY + 30;	
-		}
-		
-	TRACE_EXIT_POINT;	
-	}
 // ---------------------------------------------------------------------------
 // CCalenIconDrawer::CCalenIconDrawer
 // C++ constructor can NOT contain any code, that might leave.

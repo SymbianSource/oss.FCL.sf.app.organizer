@@ -944,7 +944,7 @@ void CCalenUnifiedEditor::DoHandleLocaleChangeL( TInt aChange )
                 iEditorDataHandler->ResetOriginalDataL();
                 }
             }
-        iUnifiedEditorControl->SetDataToEditorL();
+        iUnifiedEditorControl->SetDataToEditorL(ETrue);
         }
 
     if ( aChange & EChangesLocale )
@@ -1061,9 +1061,6 @@ void CCalenUnifiedEditor::ProcessCommandL( TInt aCommandId )
             break;
         case EAknCmdHelp:
             OnCmdHelpL();
-            break;
-        case ECalenSend:
-            OnCmdSendL( aCommandId );
             break;
         case ECalenGetLocation:
           {
@@ -1320,8 +1317,6 @@ void CCalenUnifiedEditor::DynInitMenuPaneL(
                 {
                 aMenuPane->DeleteMenuItem( ECalenCmdAddPeople );
                 }
-            
-            TryInsertSendMenuL( aResourceId, aMenuPane );
             }
             break;
 
@@ -1363,42 +1358,6 @@ void CCalenUnifiedEditor::OnCmdDeleteNoteL()
 
     TryToDeleteNoteL( ETrue );
     
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenUnifiedEditor::OnCmdSendL
-// Handles the send command. This function differs from the ViewerBase version
-// in that the ViewerBase does not attempt to save or delete the entry first.
-// -----------------------------------------------------------------------------
-//
-void CCalenUnifiedEditor::OnCmdSendL( TInt aCommandId )
-    {
-    TRACE_ENTRY_POINT;
-
-    // Show menu to user 
-    // CCalenSend handles selection internally, so we don't get anything in return
-    iGlobalData->CalenSendL().DisplaySendCascadeMenuL();
-
-    // Try to send
-    if ( iGlobalData->CalenSendL().CanSendL(aCommandId) )
-        {
-        TBool canSend(ETrue);
-
-        const TBool continueOnError = EFalse;
-        iUnifiedEditorControl->ReadDataFromEditorL( continueOnError );
-        CCalenEditorDataHandler::TAction action =
-            EditorDataHandler().ShouldSaveOrDeleteOrDoNothingL();
-        if(  action == CCalenEditorDataHandler::EActionSave )
-            {
-            canSend = TryToSaveNoteL();
-            }
-
-        if ( canSend )
-            {
-            iGlobalData->CalenSendL().SendAsVCalendarL( aCommandId, EditorDataHandler().Entry() );
-            }
-        }
     TRACE_EXIT_POINT;
     }
 
@@ -1464,27 +1423,6 @@ void CCalenUnifiedEditor::TryToDeleteNoteL( TBool /* aIsViaDeleteMenu */ )
                                     EditorDataHandler().InstanceDateTime() ,
                                    iRepeatType, *iServices );
         }
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenUnifiedEditor::TryInsertSendMenuL
-// Inserts the send menu, if needed.
-// (other items were commented in a header).
-// -----------------------------------------------------------------------------
-//
-void CCalenUnifiedEditor::TryInsertSendMenuL( TInt /*aResourceId*/, CEikMenuPane* aMenuPane )
-    {
-    TRACE_ENTRY_POINT;
-
-    // Only insert if there is some summary (or location)
-    // Changes done to remove Lunar calendar item from options menu
-    if( EditorDataHandler().AreTextFieldsEmptyL() )
-        {
-        // Delete Send Menu item if exists
-        aMenuPane->DeleteMenuItem( ECalenSend );
-        }    
-
     TRACE_EXIT_POINT;
     }
 

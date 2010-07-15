@@ -319,7 +319,7 @@ public:
      * Called from editor before exiting the dialog.
      * @param aItemAdded ETure if add else edit.
      */
-    void UpdateOnAddOrEditL(TBool aItemAdded);
+    TInt UpdateOnAddOrEditL(TBool aItemAdded);
     
     /*
      * Exit the dialog;

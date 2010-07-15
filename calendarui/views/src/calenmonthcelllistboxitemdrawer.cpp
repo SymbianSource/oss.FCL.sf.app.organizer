@@ -89,7 +89,23 @@ void CCalenMonthCellListBoxItemDrawer::DrawItemText(TInt aItemIndex, const TRect
         {
         iGc->Clear( aItemTextRect );
         }
+    TTime today( CalenDateUtils::Today() );
+    TTime currentDay( iCalendarMonthGrid->FirstDayOfGrid() +TTimeIntervalDays( aItemIndex ) );
 
+    TBool underline( CalenDateUtils::OnSameDay( today, currentDay ) );
+    if (underline)
+        {
+            TRgb seeThroughBack;
+            AknsUtils::GetCachedColor(AknsUtils::SkinInstance(), 
+                                      seeThroughBack, 
+                                      KAknsIIDQsnOtherColors,
+                                      EAknsCIQsnOtherColorsCG24);
+            iGc->SetBrushColor(seeThroughBack);
+            iGc->SetPenColor(seeThroughBack);
+            iGc->SetBrushStyle(CGraphicsContext::ESolidBrush);
+            iGc->DrawRect(aItemTextRect);
+            skinUsed = ETrue;
+        }
     // Setup colors, mainly try to fetch them from skins. 
     // FIXME: investigate if this could be done somewhere else, so that we set them to 
     // properties of grid
@@ -98,7 +114,14 @@ void CCalenMonthCellListBoxItemDrawer::DrawItemText(TInt aItemIndex, const TRect
     colors.iBack = iBackColor;
     colors.iText = iTextColor;
 
-    if(aItemIsSelected)
+    if (underline)
+    	  {
+         AknsUtils::GetCachedColor(AknsUtils::SkinInstance(), 
+                                   colors.iText, 
+                                   KAknsIIDQsnTextColors, 
+                                   EAknsCIQsnTextColorsCG85);
+    	  }
+		else if(aItemIsSelected)
         { 
         // active month days
         if(aItemIsCurrent) 
@@ -132,10 +155,7 @@ void CCalenMonthCellListBoxItemDrawer::DrawItemText(TInt aItemIndex, const TRect
 
     // set underline if current day is today.
     // (current day is day of item.)
-    TTime today( CalenDateUtils::Today() );
-    TTime currentDay( iCalendarMonthGrid->FirstDayOfGrid() +TTimeIntervalDays( aItemIndex ) );
 
-    TBool underline( CalenDateUtils::OnSameDay( today, currentDay ) );
     iGc->SetUnderlineStyle( underline ? EUnderlineOn : EUnderlineOff );
 
     TPtrC cellData( iModel->ItemText(aItemIndex) );

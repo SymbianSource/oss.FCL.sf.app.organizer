@@ -27,6 +27,9 @@
 #include "CalenInterimUtils2.h"     // CalenInterimUtils
 #include "calencontextimpl.h"       // Calendar context implementation
 #include "calenfilemapping.h"
+#include "missedalarmstore.h"
+#include "CleanupResetAndDestroy.h"
+#include "calendar.hrh"
 
 #include <Calendar.rsg>             // Calendar resources
 #include <cmrmailboxutils.h>        // CMRMailboxUtils
@@ -1269,7 +1272,8 @@ TBool CCalenGlobalData::CalenInfoIdentifierL( const HBufC* aName,
 EXPORT_C void CCalenGlobalData::AddCalendarL(CCalCalendarInfo* aCalendarInfo)
 	{	
 	TRACE_ENTRY_POINT;
-
+	CleanupStack::PushL(aCalendarInfo);
+	
 	CCalenFileMapping* fileMapping = CCalenFileMapping::NewL();
 	CleanupStack::PushL(fileMapping);
 	
@@ -1283,7 +1287,6 @@ EXPORT_C void CCalenGlobalData::AddCalendarL(CCalCalendarInfo* aCalendarInfo)
 		iNewEntryView  = NULL;
 		iNewEntryViewCreation  = NULL;
 		TPtrC calFileName = fileMapping->GetCalendarFileName();
-		CleanupStack::PushL(aCalendarInfo);
 		CCalSession& tempSession = CreateNewSessionL( calFileName,
 													*aCalendarInfo );
 		fileMapping->SetSessionPtr(&tempSession);
@@ -1297,10 +1300,9 @@ EXPORT_C void CCalenGlobalData::AddCalendarL(CCalCalendarInfo* aCalendarInfo)
 		CCalenDbChangeNotifier* dbChangeNotifier = CCalenDbChangeNotifier::NewL( tempSession );
 		dbChangeNotifier->RegisterObserverL(*iDBChangeNotifier);
 		fileMapping->SetDBChangeNotifier(dbChangeNotifier);
-		CleanupStack::PopAndDestroy(aCalendarInfo);
 		iCalendarInfoList.Append(tempSession.CalendarInfoL());
 		}
-
+	
 	CleanupStack::Pop(fileMapping);
 	iFileMappingArray.Append(fileMapping);
 	
@@ -1310,6 +1312,9 @@ EXPORT_C void CCalenGlobalData::AddCalendarL(CCalCalendarInfo* aCalendarInfo)
 	    iHashDbidIndexMap.InsertL( iFileMappingArray[index]->GetCollectionId(),
                                    index);
 	    }
+	
+	CleanupStack::PopAndDestroy(aCalendarInfo);
+	aCalendarInfo = NULL;
 	
 	TRACE_EXIT_POINT
 	}
@@ -1415,6 +1420,9 @@ EXPORT_C void CCalenGlobalData::RemoveCalendarL(const TDesC& aCalendarFileName)
                 session->SetCalendarInfoL( *caleninfo );
                 CleanupStack::PopAndDestroy(caleninfo);            
                 }
+            
+            TRAP_IGNORE(DeleteCalendarMissedAlarmsL(aCalendarFileName));
+            
             TInt infoListIndex = iCalendarInfoList.Find(*calendarFilename,
                         CCalenGlobalData::CalenCalendarInfoIdentiferL);
             
@@ -1643,7 +1651,7 @@ CCalCalendarInfo* CCalenGlobalData::GetDefaultCalendarInfoL()
 
 	CCalCalendarInfo* defaultCalendarInfo = CCalCalendarInfo::NewL();
 	CleanupStack::PushL(defaultCalendarInfo);
-	defaultCalendarInfo->SetColor(KRgbRed.Value());
+	defaultCalendarInfo->SetColor(KCalenBlue.Value());
 	defaultCalendarInfo->SetEnabled(ETrue);
 	defaultCalendarInfo->SetNameL(KPhoneCalendar);
 	CleanupStack::Pop(defaultCalendarInfo);
@@ -1772,5 +1780,34 @@ void CCalenGlobalData::HandleCalendarFileDeletedL()
 	
 	TRACE_EXIT_POINT;
 	}
+
+// -----------------------------------------------------------------------------
+// CCalenGlobalData::DeleteCalendarMissedAlarmsL
+// Delete all missed alarms for deleted calendar 
+// -----------------------------------------------------------------------------
+//
+void CCalenGlobalData::DeleteCalendarMissedAlarmsL(const TDesC& aCalendarFilename)
+    {
+    TRACE_ENTRY_POINT
+    //Clear all missed alarms related to this calendar
+    CMissedAlarmStore* missedAlarmStore = CMissedAlarmStore::NewLC();
+    RPointerArray<CMissedAlarm> missedAlarms;
+    CleanupResetAndDestroyPushL(missedAlarms);
+
+    missedAlarmStore->GetL(missedAlarms);
+
+    for (TInt idx = 0; idx < missedAlarms.Count(); idx++)
+        {
+        CMissedAlarm* missedAlarm = missedAlarms[idx];
+        if (!missedAlarm->iCalFileName.CompareF(aCalendarFilename))
+            {
+            missedAlarmStore->RemoveL(*missedAlarm);
+            }
+        }
+
+    CleanupStack::PopAndDestroy(&missedAlarms);
+    CleanupStack::PopAndDestroy(missedAlarmStore);
+    TRACE_EXIT_POINT    
+    }
 
 // End of file

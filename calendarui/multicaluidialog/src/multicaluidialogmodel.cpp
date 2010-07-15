@@ -23,6 +23,7 @@
 #include <calcalendarinfo.h>
 #include <calcalendariterator.h>
 #include <calenmulticaluids.hrh>
+#include <ErrorUI.h>
 
 // user include.
 #include "multicaluidialogmodel.h"
@@ -146,9 +147,17 @@ void CMultiCalUiDialogModel::ConstructL()
     TRACE_ENTRY_POINT
     //iCalSessionArray takes ownership of this.
     CCalSession* defaultSession = CCalSession::NewL();
-
-    GetAllCalendarInfoL(iCalendarInfoList);
-
+    
+    TRAPD(err,GetAllCalendarInfoL(iCalendarInfoList));
+    
+    //Something happened and 
+    if(err!=KErrNone)
+        {
+        CErrorUI* errorUi = CErrorUI::NewLC();
+        errorUi->ShowGlobalErrorNoteL( err );
+        CleanupStack::PopAndDestroy( errorUi );
+        }
+    
     for (TInt index = 0; index < iCalendarInfoList.Count(); index++)
         {
         iCalendarStatus.Append(0);

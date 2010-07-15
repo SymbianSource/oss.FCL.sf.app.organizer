@@ -974,13 +974,13 @@ void CNotepadListDialog::DynInitMenuPaneL(
                 // this must after InsertSendMenuItemAfterL
                 aMenuPane->DeleteMenuItem(ENotepadCmdOpen);
                 }
-            if ( markCount >= 1 && IsNoteListDialog() )
+            if ( markCount >= 1 && IsNoteListDialog() && ( memoCount > 0 ) )
                 {
                 aMenuPane->SetItemSpecific( ENotepadCmdSend, EFalse );
                 aMenuPane->SetItemSpecific( ENotepadCmdDelete, EFalse );
                 }
             
-            if ( IsTemplateListDialog() )
+            if ( IsTemplateListDialog() && ( memoCount > 0 ) )
                 {
                 aMenuPane->SetItemSpecific( ENotepadCmdSend, ETrue );
                 if ( markCount >= 1 )

@@ -75,7 +75,7 @@ NONSHARABLE_CLASS( CCalenIconDrawer ) : public CPicture
         void GetOriginalSizeInTwips( TSize& aSize ) const;
 
         void AddIconL( MCalenServices::TCalenIcons aIconIndex );
-        void SetIconSizesFromLayout(TInt aNumOfLinesBefLocField = 0);
+        void SetIconSizesFromLayout();
         TInt WidthInPixels();
 
     public:
@@ -84,11 +84,6 @@ NONSHARABLE_CLASS( CCalenIconDrawer ) : public CPicture
     private:
         CAknIconArray* CreateIconsL( const RArray<MCalenServices::TCalenIcons>& aIndexArray );
         TInt IconIndex( MCalenServices::TCalenIcons aType ) const;
-        
-        /**
-        * Fuction to set map icon size
-        */
-        void SetMapIconSize(TRect aIconRect);
 
         enum TCalViewerIconSlot
             {
