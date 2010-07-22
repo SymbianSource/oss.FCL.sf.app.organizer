@@ -58,7 +58,7 @@ CalenEditorReminderField::CalenEditorReminderField(
 	mReminderItem = new HbDataFormModelItem();
 	mReminderItem->setType(HbDataFormModelItem::ComboBoxItem);
 	mReminderItem->setData(HbDataFormModelItem::LabelRole,
-						   hbTrId("txt_calendar_setlabel_alarm"));	
+						   hbTrId("txt_calendar_setlabel_reminder"));	
 	// Add it to the model
 	mCalenEditorModel->appendDataFormItem(mReminderItem,
 										mCalenEditorModel->invisibleRootItem());
@@ -69,7 +69,9 @@ CalenEditorReminderField::CalenEditorReminderField(
  */
 CalenEditorReminderField::~CalenEditorReminderField()
 {
-	// Nothing Yet
+	if(mReminderHash.count()) {
+		mReminderHash.clear();
+	}
 }
 
 /*!
@@ -79,25 +81,20 @@ void CalenEditorReminderField::setReminderChoices()
 {
 	// Create the reminder choices
 	QStringList reminderChoices;
-	reminderChoices << hbTrId("txt_calendar_setlabel_alarm_val_off")
-			<< hbTrId("txt_calendar_setlabel_alarm_val_before_ln_minutes", 5)
-			<< hbTrId("txt_calendar_setlabel_alarm_val_before_ln_minutes", 10)
-			<< hbTrId("txt_calendar_setlabel_alarm_val_before_ln_minutes", 15)
-			<< hbTrId("txt_calendar_setlabel_alarm_val_before_ln_minutes", 30)
-			<< hbTrId("txt_calendar_setlabel_alarm_val_before_ln_hours", 1)
-			<< hbTrId("txt_calendar_setlabel_alarm_val_before_ln_hours", 2);
+	reminderChoices << hbTrId("txt_calendar_setlabel_reminder_val_off")
+				<< hbTrId("txt_calendar_setlabel_reminder_val_at_the_start")
+				<< hbTrId("txt_calendar_setlabel_reminder_val_15_minutes_befo")
+				<< hbTrId("txt_calendar_setlabel_reminder_val_30_minutes_befo")
+				<< hbTrId("txt_calendar_setlabel_reminder_val_1_hour_before");
 
 	mReminderItem->setContentWidgetData(QString("items"), reminderChoices);
 
 	// Build the hash map for the reminder.
-	mReminderHash[0] = 0; // OFF.
-	mReminderHash[1] = 5;
-	mReminderHash[2] = 10;
-	mReminderHash[3] = 15;
-	mReminderHash[4] = 30;
-	mReminderHash[5] = 60;
-	mReminderHash[6] = 120;
-
+	mReminderHash[0] = -1; // OFF.
+	mReminderHash[1] = 0;
+	mReminderHash[2] = 15;
+	mReminderHash[3] = 30;
+	mReminderHash[4] = 60;
 	mReminderItem->setEnabled(true);
 }
 
@@ -153,9 +150,9 @@ void CalenEditorReminderField::populateReminderItem(bool newEntry)
 	// Set the default reminder value to 15 minutes 
 	if (newEntry) {
 		if (!pastEvent) {
-			mReminderItem->setContentWidgetData("currentIndex", 3);
+			mReminderItem->setContentWidgetData("currentIndex", 2);
 			// Save the reminder alarm for the entry
-			reminder.setTimeOffset(mReminderHash.value(3));
+			reminder.setTimeOffset(mReminderHash.value(2));
 			reminder.setAlarmSoundName(QString(" "));
 			// Set the reminder to the entry as well as original entry.
 			mCalenEditor->editedEntry()->setAlarm(reminder);
@@ -192,10 +189,10 @@ void CalenEditorReminderField::populateReminderItem(bool newEntry)
 				}
 			}
 			QStringList reminderChoicesForAllDay;
-			reminderChoicesForAllDay << hbTrId("off") 
-					<< hbTrId("On event day")
-					<< hbTrId("1 day before")
-					<< hbTrId("2 days before");
+			reminderChoicesForAllDay << hbTrId("txt_calendar_setlabel_reminder_val_off") 
+					<< hbTrId("txt_calendar_setlabel_reminder_val_on_event_day")
+					<< hbTrId("txt_calendar_setlabel_reminder_val_1_day_before")
+					<< hbTrId("txt_calendar_setlabel_reminder_val_2_days_before");
 			mReminderItem->setContentWidgetData(QString("items"),
 			                                    reminderChoicesForAllDay);
 			QTime referenceTime(0, 0, 0);
@@ -240,10 +237,10 @@ void CalenEditorReminderField::handleReminderIndexChanged(int index)
 	}
 	// Check whether all day event or not and store appropriately.
 	if (!mCalenEditor->isAllDayEvent()) {
-		// If value for the index in hash table is 0 i.e reminder is "OFF",
+		// If value for the index in hash table is -1 i.e reminder is "OFF",
 		// then set the default constructed reminder to
 		// the entry which is Null.
-		if (!mReminderHash.value(index)) {
+		if (mReminderHash.value(index) < 0) {
 			// Construct the default alarm which is NULL
 			reminder = AgendaAlarm();
 		} else {
@@ -293,7 +290,9 @@ void CalenEditorReminderField::handleReminderIndexChanged(int index)
 	}
 	// Set the reminder to the entry.
 	mCalenEditor->editedEntry()->setAlarm(reminder);
-	mCalenEditor->addDiscardAction();
+	if(!mCalenEditor->isNewEntry()) {
+		mCalenEditor->addDiscardAction();
+	}
 }
 
 /*!
@@ -312,7 +311,7 @@ void CalenEditorReminderField::setReminderOff()
 {
 	// Create the remindar choices
 	QStringList reminderChoices;
-	reminderChoices << hbTrId("txt_calendar_setlabel_alarm_val_off");
+	reminderChoices << hbTrId("txt_calendar_setlabel_reminder_val_off");
 	mReminderItem->setContentWidgetData(QString("items"), reminderChoices);
 	mReminderItem->setEnabled(false); 
 }
@@ -361,23 +360,25 @@ void CalenEditorReminderField::updateReminderChoicesForAllDay(QDate referenceDat
 	if (referenceDate < QDate::currentDate() || 
 			referenceDate == QDate::currentDate()) {
 		// Set reminder off for past event.
-		reminderChoicesForAllDay << hbTrId("off");
+		reminderChoicesForAllDay << hbTrId("txt_calendar_setlabel_reminder_val_off");
 		mReminderItem->setContentWidgetData(QString("items"), 
 													reminderChoicesForAllDay);
 		mReminderItem->setEnabled(false); 
 		removeReminderTimeField();
 	} else if (theDayAfterTomorrow < referenceDate || 
 			theDayAfterTomorrow == referenceDate) {
-		reminderChoicesForAllDay << hbTrId("off")
-								 << hbTrId("On event day")
-								 << hbTrId("1 day before")
-								 << hbTrId("2 days before");
+		reminderChoicesForAllDay 
+				<< hbTrId("txt_calendar_setlabel_reminder_val_off")
+				<< hbTrId("txt_calendar_setlabel_reminder_val_on_event_day")
+				<< hbTrId("txt_calendar_setlabel_reminder_val_1_day_before")
+				<< hbTrId("txt_calendar_setlabel_reminder_val_2_days_before");
 		mReminderItem->setEnabled(true);
 		mCustomReminderTimeItem->setEnabled(true);
 	} else {
-		reminderChoicesForAllDay << hbTrId("off")
-								 << hbTrId("On event day")
-								 << hbTrId("1 day before");
+		reminderChoicesForAllDay 
+					<< hbTrId("txt_calendar_setlabel_reminder_val_off")
+					<< hbTrId("txt_calendar_setlabel_reminder_val_on_event_day")
+					<< hbTrId("txt_calendar_setlabel_reminder_val_1_day_before");
 		mReminderItem->setEnabled(true);
 		mCustomReminderTimeItem->setEnabled(true);
 	}
@@ -403,7 +404,7 @@ void CalenEditorReminderField::insertReminderTimeField()
 	mCustomReminderTimeItem = mCalenEditorModel->insertDataFormItem(
 							index,
 							itemType,
-							QString(hbTrId("Reminder Time")),
+							QString(hbTrId("txt_calendar_setlabel_reminder_time")),
 							mCalenEditorModel->invisibleRootItem());
 	if (currentReminderIndex() != 1){
 		mReminderTimeForAllDay.setHMS(18,0,0,0);
@@ -436,13 +437,13 @@ void CalenEditorReminderField::removeReminderTimeField()
 {
 	mReminderTimeAdded = false;
 	if (mCustomReminderTimeItem) {
-					QModelIndex reminderIndex =
-					        mCalenEditorModel->indexFromItem(mCustomReminderTimeItem);
-					mCalenEditorModel->removeItem(
-					                              mCalenEditorModel->index(
-					                            		  reminderIndex.row(), 0));
-					mCustomReminderTimeItem = NULL;
-				}
+		QModelIndex reminderIndex =
+				mCalenEditorModel->indexFromItem(mCustomReminderTimeItem);
+		mCalenEditorModel->removeItem(
+				mCalenEditorModel->index(
+						reminderIndex.row(), 0));
+		mCustomReminderTimeItem = NULL;
+	}
 }
 
 /*!

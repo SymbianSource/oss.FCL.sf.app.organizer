@@ -32,13 +32,13 @@
 #include <HbExtendedLocale>
 #include <HbGroupBox>
 #include <HbDocumentLoader>
-#include <HbApplication>
+#include <HbTranslator>
 #include <xqsettingsmanager.h>
 #include <xqsettingskey.h>
-#include <QTranslator>
+
 
 // User includes
-#include "clockcommon.h"
+#include "clockprivatecrkeys.h"
 #include "clockalarmeditor.h"
 #include "alarmclient.h"
 #include "settingsutility.h"
@@ -85,14 +85,9 @@ ClockAlarmEditor::ClockAlarmEditor(
  mAlarmClient(alarmClient)
 {
  	// Load the translation file and install the alarmeditor specific translator
-	mTranslator = new QTranslator;
-	//QString lang = QLocale::system().name();
-	//QString path = "Z:/resource/qt/translations/";
-	mTranslator->load("clockalarmeditor",":/translations");
-	// TODO: Load the appropriate .qm file based on locale
-	//bool loaded = mTranslator->load("caleneditor_" + lang, path);
-	HbApplication::instance()->installTranslator(mTranslator);
-
+	mTranslator = new HbTranslator("clockalarmeditor");
+	mTranslator->loadCommon();
+	
 	// create the timezone client object
 	mTimezoneClient = TimezoneClient::getInstance();
 	// Create the settings manager.
@@ -107,7 +102,7 @@ ClockAlarmEditor::ClockAlarmEditor(
 	// TODO: do i need to delete this object ??
 	SettingsUtility *settingsUtil = new SettingsUtility(this);
 	mTimeFormat = settingsUtil->timeFormatString();
-
+	
 	// Get start of week from the locale.
     HbExtendedLocale locale = HbExtendedLocale::system();
     mStartOfWeek = locale.startOfWeek();
@@ -176,11 +171,7 @@ ClockAlarmEditor::ClockAlarmEditor(
  */
 ClockAlarmEditor::~ClockAlarmEditor()
 {
-	if(!mTimezoneClient->isNull()) {
-		mTimezoneClient->deleteInstance();
-	}
 	// Remove the translator
-	HbApplication::instance()->removeTranslator(mTranslator);
 	if (mTranslator) {
 		delete mTranslator;
 		mTranslator = 0;
@@ -398,7 +389,7 @@ void ClockAlarmEditor::launchTimePicker()
 	mTimePickerDialog = new HbDialog;
 	mTimePickerDialog->setTimeout(HbDialog::NoTimeout);
 	mTimePickerDialog->setDismissPolicy(HbDialog::NoDismiss);
-
+	mTimePickerDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 	// Set the heading for the dialog.
 	HbLabel * timeLabel =
 		new HbLabel(hbTrId("txt_tumbler_title_alarm_time"),
@@ -408,6 +399,7 @@ void ClockAlarmEditor::launchTimePicker()
 	SettingsUtility *settingsUtil = new SettingsUtility(this);
 	QStringList timeSeparator;
 	int index = settingsUtil->timeFormat(timeSeparator);
+	
 	QString tumblerDisplayFormat =
 			mTimeFormat.replace(timeSeparator.at(index), QString("."));
 

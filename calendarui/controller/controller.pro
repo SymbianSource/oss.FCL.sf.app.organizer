@@ -23,6 +23,7 @@ DEFINES += CALENCONTROLLER_DLL
 INCLUDEPATH += ./inc \
 						   ../inc \ 
 						   ../views/inc \
+						   ../views/dayview/inc \
 						   ../globaldata/inc 
 
 CONFIG += hb
@@ -43,7 +44,8 @@ symbian : {
 					-lcaleneditor \
 					-lbafl \
 					-lagendainterface \
-					-lagendaeventviewer
+					-lagendaeventviewer \
+					-lxqserviceutil
 						
  	TARGET.UID3 = 0x10282F25					  
   TARGET.CAPABILITY = CAP_GENERAL_DLL

@@ -62,12 +62,6 @@ public:
     static bool isValidDay( const QDateTime& time );
 
     /**
-     * Return ETrue if aTime is NULL
-     * @param aTime time to be compared against NULL time
-     */
-    static bool isNullTime( QDateTime& time );
-
-    /**
      * Return Min or Max time if aTime goes out of bounds. 
      * Valid range is [CalenDateUtils::MinTime(), CalenDateUtils::MaxTime]
      * @param aTime time to be checked
@@ -125,8 +119,6 @@ public:
      */
     static QDateTime defaultTime( const QDateTime& date );
     
-    static QDateTime pastOf(const QDateTime& dateTime, int numOfDays);
-        
     static QDateTime futureOf(const QDateTime& dateTime, int numOfDays);
     
    

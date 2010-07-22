@@ -2,7 +2,7 @@
 # Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 # All rights reserved.
 # This component and the accompanying materials are made available
-# under the terms of "Eclipse Public License v1.0"
+# under the terms of the License "Eclipse Public License v1.0"
 # which accompanies this distribution, and is available
 # at the URL "http://www.eclipse.org/legal/epl-v10.html".
 #
@@ -20,6 +20,7 @@ TEMPLATE = app
 TARGET = ut_caleneditor
 CONFIG += qtestlib \
 			hb
+CONFIG += symbian_test
 DEPENDPATH += . \
 				./src/ \
 				../../../../calendarui/caleneditor/inc \
@@ -46,7 +47,10 @@ symbian: {
     TARGET.EPOCHEAPSIZE = 0x200000 0x4000000
     TARGET.CAPABILITY = CAP_GENERAL_DLL
 	
-	INCLUDEPATH +=  $$APP_LAYER_SYSTEMINCLUDE
+		INCLUDEPATH +=  $$APP_LAYER_SYSTEMINCLUDE
+	
+		BLD_INF_RULES.prj_testexports += \
+	"../rom/unit_caleneditor.iby		CORE_APP_LAYER_IBY_EXPORT_PATH(unit_caleneditor.iby)"
 }
 
 SOURCES +=  unittest_caleneditor.cpp \

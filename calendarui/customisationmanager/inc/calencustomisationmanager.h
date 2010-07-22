@@ -70,6 +70,9 @@ public:  // Construction and destruction
                                        MCalenServicesFactory& aFactory,                                       
 									   									 MCalenServices& aServices );
 
+    static TBool PluginInfoFinder( const TUid* aUid  , 
+								const CImplementationInformation&  aArrayItem);
+    
     /**
      * Destructor.
      */
@@ -145,6 +148,8 @@ private: // New functions
     void AddPluginL( CCalenCustomisation* aPlugin, TUid aUid );     
 
     void CreateActivePluginListL();
+    
+    void LoadPluginsBasedOnVariantL();
 
     void EnablePluginL( TUid aPluginUid );
 

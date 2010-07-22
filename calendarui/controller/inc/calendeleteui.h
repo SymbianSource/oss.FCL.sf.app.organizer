@@ -181,11 +181,6 @@ private: // own methods
     void showDeleteQuery(const TDeleteConfirmationType type,
                          const int count = 0);
     
-    /**
-     * Deletes the entries before the selected date
-     */
-    void getSelectedDateAndDelete();
-
 private: // own methods
     /**
      * C++ constructor
@@ -239,6 +234,8 @@ private: // data
     QDateTime iStartTime;
     QDateTime iEndTime;
     HbDateTimePicker *mDatePicker;
+    HbAction *mDeleteAction;
+    HbAction *mCancelAction;
     // Confirmation note id is stored here. Note is shown when asynchronous
     // delete completes.
     int iConfirmationNoteId;

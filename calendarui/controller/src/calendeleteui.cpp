@@ -35,7 +35,6 @@
 #include "CleanupResetAndDestroy.h"
 #include "caleninstanceid.h"
 #include "calenactionuiutils.h"
-#include "CalendarPrivateCRKeys.h"  // includes CalendarInternalCRKeys.h
 #include "calendateutils.h"
 #include "calenagendautils.h"
 
@@ -299,29 +298,25 @@ void CalenDeleteUi::DeleteCurrentEntryL()
 		// Fetch the entry
 		AgendaEntry entry = iController.Services().agendaInterface()->fetchById(
 				iController.context().instanceId().mEntryLocalUid);
-
-		// Check if the entry is a To-Do
-		if (AgendaEntry::TypeTodo == entry.type()) {
-			if(!entry.isNull()) {
-				showDeleteQuery(entry.type() == AgendaEntry::TypeTodo ?
-															EDeleteToDo :
-															EDeleteEntry );
-			}
-		}
-		else {
-			if (entry.isRepeating() || !entry.recurrenceId().isNull()) {
-				// Show a confirmation note whether the user
-				// wants to delete the single instance or all of them
-				showRepeatingEntryDeleteQuery();
+			// Check if the entry is a To-Do
+			if (AgendaEntry::TypeTodo == entry.type()) {
+				showDeleteQuery(EDeleteToDo);
 			} else {
-				// If the entry is not a repeating entry,
-				// delete it directly
-				// Save the entry for later reference in the slot
-				showDeleteQuery(entry.type() == AgendaEntry::TypeTodo ?
-															EDeleteToDo :
-															EDeleteEntry );
+				// Show the repeat entry delete query for repeating entries except Anniversary
+				// Even though the anniversary is repeating 
+				// all the instances will be deleted
+				if ((entry.isRepeating() || !entry.recurrenceId().isNull()) 
+							&& (AgendaEntry::TypeAnniversary != entry.type())) {
+					// Show a confirmation note whether the user
+					// wants to delete the single instance or all of them
+					showRepeatingEntryDeleteQuery();
+				} else {
+					// If the entry is not a repeating entry,
+					// delete it directly
+					// Save the entry for later reference in the slot
+					showDeleteQuery(EDeleteEntry);
+				}
 			}
-		}
 	}
 	TRACE_EXIT_POINT;
 }
@@ -334,7 +329,9 @@ void CalenDeleteUi::DeleteCurrentEntryL()
 //
 void CalenDeleteUi::DeleteAllEntriesL()
     {
-    ASSERT( !iIsDeleting );
+	if(iIsDeleting) {
+		return;
+	}
 
     showDeleteQuery(EDeleteAll );
 	}
@@ -348,8 +345,9 @@ void CalenDeleteUi::DeleteAllEntriesL()
 void CalenDeleteUi::DeleteEntriesBeforeDateL()
     {
     TRACE_ENTRY_POINT;
-    ASSERT( !iIsDeleting );
-    
+	if(iIsDeleting) {
+		return;
+	}    
     // launch the datepicker
     dateQuery();
     TRACE_EXIT_POINT;
@@ -381,9 +379,11 @@ void CalenDeleteUi::dateQuery()
 	mDatePicker->setDate(currentDate);
 
 	popUp->setContentWidget(mDatePicker);  
-	
-	popUp->addAction(new HbAction(hbTrId("txt_calendar_button_dialog_delete")));
-	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"),popUp));
+	mDeleteAction = new HbAction(
+						hbTrId("txt_calendar_button_dialog_delete"), popUp);
+	popUp->addAction(mDeleteAction);
+	mCancelAction = new HbAction(hbTrId("txt_common_button_cancel"),popUp);
+	popUp->addAction(mCancelAction);
 	// Show the popup
 	popUp->open(this, SLOT(handleDateQuery(HbAction*)));
 	}
@@ -396,11 +396,38 @@ void CalenDeleteUi::dateQuery()
 //
 void CalenDeleteUi::handleDateQuery(HbAction* action)
 {
-	if(action->text() == hbTrId("txt_calendar_button_dialog_delete")) {
-		getSelectedDateAndDelete();
+	if(action == mDeleteAction) {
+		// User selected the date before which all the entries has to be deleted
+		QDate selectedDate(mDatePicker->date());
+		// Check if the date is within the range.
+		if(selectedDate.isValid()) {
+			QTime time(0,0,0,0);
+			QDateTime dateTime;
+			dateTime.setDate(selectedDate);
+			dateTime.setTime(time);
+			// Do delete only if inputted day is after beginning of range
+			if(dateTime > AgendaUtil::minTime()) {
+				// Two pass delete:
+				// 1. pass
+				// To prevent destroying entries starting and ending midnight
+				// subtract one second and do delete on that range.
+				dateTime = dateTime.addSecs(-1);
+				dateTime = ( dateTime > AgendaUtil::minTime()? 
+											dateTime :  AgendaUtil::minTime());
+
+				HandleDeleteMultipleEventsL( AgendaUtil::minTime(), 
+																 dateTime, 1);
+			}else {
+				iController.BroadcastNotification(ECalenNotifyDeleteFailed);
+			}
+		}
 	}else {
+		// User pressed cancel
 		handleDeleteCancel();
 	}
+	// Reset the member variables
+	mDeleteAction = NULL;
+	mCancelAction = NULL;
 }
 // ----------------------------------------------------------------------------
 // CalenDeleteUi::showRepeatingEntryDeleteQuery
@@ -458,61 +485,31 @@ void CalenDeleteUi::handleDeleteCancel()
 	iController.BroadcastNotification(ECalenNotifyDeleteFailed);
 }
 
-// ----------------------------------------------------------------------------
-// CalenDeleteUi::getSelectedDateAndDelete
-// Deletes the entries before the selected date
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenDeleteUi::getSelectedDateAndDelete()
-{
-	QDate selectedDate(mDatePicker->date());
-
-	// Check if the date is within the range.
-	if(selectedDate.isValid()) {
-		QTime time(0,0,0,0);
-		QDateTime dateTime;
-		dateTime.setDate(selectedDate);
-		dateTime.setTime(time);
-		// Do delete only if inputted day is after beginning of range
-		if(dateTime > AgendaUtil::minTime()) {
-			// Two pass delete:
-			// 1. pass
-			// To prevent destroying entries starting and ending midnight
-			// subtract one second and do delete on that range.
-			dateTime = dateTime.addSecs(-1);
-			dateTime = ( dateTime > AgendaUtil::minTime()? dateTime :  AgendaUtil::minTime());
-
-			HandleDeleteMultipleEventsL( AgendaUtil::minTime(), dateTime,1 );
-			iController.BroadcastNotification(ECalenNotifyEntryDeleted);
-		}else {
-			iController.BroadcastNotification(ECalenNotifyDeleteFailed);
-		}
-	}
-}
-
 void CalenDeleteUi::handleRepeatedEntryDelete(int index)
 {
-    // Fetch the entry
-    // Find all possible instances
-    AgendaEntry instance = CalenActionUiUtils::findPossibleInstanceL(
-                                iController.context().instanceId(),
-                                iController.Services().agendaInterface());
+	// Fetch the entry
+	// Find all possible instances
+	AgendaEntry instance = CalenActionUiUtils::findPossibleInstanceL(
+									iController.context().instanceId(),
+									iController.Services().agendaInterface());
 
-    if (!instance.isNull()) {
-        connect(iController.Services().agendaInterface(), SIGNAL(entryDeleted(ulong)),
-                this, SLOT(entryDeleted(ulong)));
-        switch(index) {
-            case 0:
-                // User wants to delete only this occurence
-                iController.Services().agendaInterface()->deleteRepeatedEntry(instance, AgendaUtil::ThisOnly);
-                break;
-            case 1:
-                // User wants to delete all the occurences
-                iController.Services().agendaInterface()->deleteRepeatedEntry(instance, AgendaUtil::ThisAndAll);
-                break;
-        }
-    }
+	if (!instance.isNull()) {
+		connect(iController.Services().agendaInterface(), 
+									SIGNAL(entryDeleted(ulong)),
+									this, SLOT(entryDeleted(ulong)));
+		switch(index) {
+			case 0:
+				// User wants to delete only this occurence
+				iController.Services().agendaInterface()->deleteRepeatedEntry(
+									instance, AgendaUtil::ThisOnly);
+				break;
+			case 1:
+				// User wants to delete all the occurences
+				iController.Services().agendaInterface()->deleteRepeatedEntry(
+									instance, AgendaUtil::ThisAndAll);
+				break;
+		}
+	}
 }
 
 // ----------------------------------------------------------------------------
@@ -535,8 +532,7 @@ void CalenDeleteUi::showDeleteQuery(const TDeleteConfirmationType type,
         {
         case EDeleteEntry:
             {
-            // TODO: Add the text id
-            text.append("Delete entry?");
+            text.append(hbTrId("txt_calendar_info_delete_meeting"));
             break;
             }
         case EDeleteToDo:
@@ -566,9 +562,11 @@ void CalenDeleteUi::showDeleteQuery(const TDeleteConfirmationType type,
         {
         popup->removeAction(list[i]);
         }
-    popup->addAction(new HbAction(hbTrId("txt_calendar_button_delete"), popup));
-    popup->addAction(new HbAction(
-    		hbTrId("txt_calendar_button_cancel"), popup));
+    mDeleteAction = new HbAction(
+						hbTrId("txt_calendar_button_dialog_delete"), popup);
+    popup->addAction(mDeleteAction);
+    mCancelAction = new HbAction(hbTrId("txt_calendar_button_cancel"), popup);
+    popup->addAction(mCancelAction);
     popup->open(this, SLOT(handleDeletion(HbAction*)));
     }
 
@@ -582,19 +580,19 @@ void CalenDeleteUi::handleDeletion(HbAction* action)
 {
 	TCalenNotification notification = ECalenNotifyDeleteFailed;
 	
-	if(action->text() == hbTrId("txt_calendar_button_delete")) {
+	if(action == mDeleteAction) {
 		
 		switch (mDeleteCommand) {
 			
 			case ECalenDeleteCurrentEntry:
 			{
-				// Get the entry
-				AgendaEntry entry = 
-						iController.Services().agendaInterface()->fetchById(
-							iController.context().instanceId().mEntryLocalUid);
+				// Get the entry id
+				ulong id = iController.context().instanceId().mEntryLocalUid;
+				connect(iController.Services().agendaInterface(), 
+												SIGNAL(entryDeleted(ulong)),
+												this, SLOT(entryDeleted(ulong)));
 				// Delete the entry if the delete button is been pressed
-				iController.Services().agendaInterface()->deleteEntry(entry.id());
-				notification = ECalenNotifyEntryDeleted;
+				iController.Services().agendaInterface()->deleteEntry(id);
 			}
 				break;
 			
@@ -605,15 +603,18 @@ void CalenDeleteUi::handleDeletion(HbAction* action)
 						CalenActionUiUtils::findPossibleInstanceL(
 								iController.context().instanceId(),
 								iController.Services().agendaInterface() );
-				QDateTime recId = instance.recurrenceId().toUTC();
-				const bool child = recId.isNull();
-
-				if( !child || mRecurrenceRange == AgendaUtil::ThisOnly 
-						|| mRecurrenceRange == AgendaUtil::ThisAndAll) {
-					iController.Services().agendaInterface()->deleteRepeatedEntry( 
-							instance, mRecurrenceRange );
+				if(!instance.isNull()) {
+					QDateTime recId = instance.recurrenceId().toUTC();
+					const bool child = recId.isNull();
+					connect(iController.Services().agendaInterface(), 
+					        SIGNAL(entryDeleted(ulong)),
+					        this, SLOT(entryDeleted(ulong)));
+					if( !child || mRecurrenceRange == AgendaUtil::ThisOnly 
+							|| mRecurrenceRange == AgendaUtil::ThisAndAll) {
+						iController.Services().agendaInterface()->deleteRepeatedEntry( 
+								instance, mRecurrenceRange );
+					}
 				}
-				notification = ECalenNotifyEntryDeleted;
 			}
 				break;
 			
@@ -621,7 +622,6 @@ void CalenDeleteUi::handleDeletion(HbAction* action)
 			{
 				HandleDeleteMultipleEventsL( AgendaUtil::minTime(), 
 											AgendaUtil::maxTime(),1 );
-				notification = ECalenNotifyEntryDeleted;
 			}
 				break;
 			
@@ -634,6 +634,10 @@ void CalenDeleteUi::handleDeletion(HbAction* action)
 	// ECalenNotifyDeleteFailed as default.
 	// Notify the status
 	iController.BroadcastNotification(notification);
+	
+	// Reset the member variables
+	mDeleteAction = NULL;
+	mCancelAction = NULL;
 }
 
 void CalenDeleteUi::entryDeleted(ulong id)
@@ -656,9 +660,10 @@ void CalenDeleteUi::HandleDeleteMultipleEventsL( const QDateTime& aFirstDay,
                                                  int aConfNoteId )
     {
     TRACE_ENTRY_POINT;
-
     
-    ASSERT( !iIsDeleting );
+	if(iIsDeleting) {
+		return;
+	}
     iConfirmationNoteId = aConfNoteId;
     
     DeleteDayRangeL( aFirstDay, aLastDay );
@@ -756,7 +761,7 @@ void CalenDeleteUi::deleteEntriesEndingAtMidnight( QDateTime aMidnight )
         // for CCalEntry type.
 
         // First check that if _instance_ ends at midnight, but starts earlier
-        if( CalenAgendaUtils::endsAtStartOfDayL( entry, aMidnight ) )
+        if( CalenAgendaUtils::endsAtStartOfDay( entry, aMidnight ) )
             {
             // Second, check that _entry's_ endtime is exactly the midnight
             // This prevents us from destroying repeating entries, that has one
@@ -833,8 +838,7 @@ void CalenDeleteUi::DoDeleteSingleInstanceL(
 
 	if( !aHasRepeatType && ( child || repeating ) && 
 			( aInstance.type() != AgendaEntry::TypeAnniversary ) ) {
-		//doDelete = CalenActionUiUtils::ShowRepeatTypeQueryL( aRepeatType,
-		//                                                 CalenActionUiUtils::EDelete );
+		showRepeatingEntryDeleteQuery();
 	}
 	else
 	{

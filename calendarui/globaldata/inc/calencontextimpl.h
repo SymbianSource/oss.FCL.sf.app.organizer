@@ -50,7 +50,7 @@ class CalenContextImpl : public MCalenContext
         CALENCONTEXTIMPL_EXPORT CalenContextImpl( MCalenContextChangeObserver* observer );
         CALENCONTEXTIMPL_EXPORT CalenContextImpl();
         CALENCONTEXTIMPL_EXPORT CalenContextImpl( const CalenContextImpl& context );
-        ~CalenContextImpl();
+        CALENCONTEXTIMPL_EXPORT ~CalenContextImpl();
 
     public:  // from MCalenContext
     // Utils
@@ -72,10 +72,8 @@ class CalenContextImpl : public MCalenContext
         /**
          * Sets the date and time currently focused.
          * @param aFocusTime The new focus date and time.
-         * @param aViewId The view id of the currently active view.
          */
-        void setFocusDateAndTimeL( const QDateTime& focusDateTime,
-                                            const int& viewId );
+        void setFocusDateAndTime( const QDateTime& focusDateTime);
 
         /**
          * Sets the date currently focused. When retrieving the focus
@@ -83,29 +81,23 @@ class CalenContextImpl : public MCalenContext
          * will be set to the default of view. When retrieving the focus
          * time only, it will be set to -1.
          * @param aFocusDate The new focus date and time.
-         * @param aViewId The view id of the currently active view.
          */
-        void setFocusDateL( const QDateTime& focusDateTime,
-                                    const int& viewId );
+        void setFocusDate( const QDateTime& focusDateTime );
 
         /**
          * Sets the id of the instance currently focused.
          * @param aInstanceId the id of the focused instance.
-         * @param aViewId The view id of the currently active view.
          */
-        void setInstanceIdL( const TCalenInstanceId& instanceId,
-                                     const int& viewId );
+        void setInstanceId( const TCalenInstanceId& instanceId );
 
         /**
          * Sets the time and instance currently focused.
          * @param aFocusTime The new focus time. If no time is focused, set
          * the Utc time of this object to be Time::NullTTime.
          * @param aInstanceId the id of the focused instance.
-         * @param aViewId The view id of the currently active view.
          */
-        void setFocusDateAndTimeAndInstanceL( const QDateTime& focusDateTime,
-                                              const TCalenInstanceId& aInstanceId,
-                                              const int& viewId );
+        void setFocusDateAndTimeAndInstance( const QDateTime& focusDateTime,
+                                              const TCalenInstanceId& aInstanceId);
 
     // Getters
         /**
@@ -113,7 +105,7 @@ class CalenContextImpl : public MCalenContext
          * @return The currently focused date and time. When no time is
          * focused, the default time on the current date will be returned.
          */
-        QDateTime focusDateAndTimeL() const;
+        QDateTime focusDateAndTime() const;
 
         /**
          * Gets the time currently focused.
@@ -129,12 +121,6 @@ class CalenContextImpl : public MCalenContext
          */
         TCalenInstanceId instanceId() const;
 
-        /**
-         * Gets the id of the currently active view.
-         * @return The view id of the currently active view.
-         */
-        int viewId() const;
-        
         
 public:	// Multiple Context support
 		

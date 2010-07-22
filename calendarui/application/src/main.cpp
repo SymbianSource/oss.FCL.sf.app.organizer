@@ -17,10 +17,10 @@
 
 
 #include <QtGui>
-#include <QTranslator>
 #include <xqserviceutil.h>
-#include <hbapplication.h> 
-#include <hbmainwindow.h>  
+#include <hbapplication.h>
+#include <hbmainwindow.h>
+#include <hbtranslator.h>
 #include "calencontroller.h"
 #include "calenserviceprovider.h"
 
@@ -33,28 +33,25 @@
 	HbMainWindow window;
 	
     //For translation, loading and installing translator
-	QTranslator translator;
-    QString lang = QLocale::system().name();
-    QString path = "Z:/resource/qt/translations/";
-    // TODO: Load the appropriate .qm file based on locale
-    bool loaded = translator.load("calendar_en_GB",":/translations");
-    app.installTranslator(&translator);
-
-    //Backup and restore code  need to write here.
+	HbTranslator translator("calendar");
+	translator.loadCommon();
 	
-    // Check if calendar is launched thru XQService framework
-    bool isFromServiceFrmwrk = XQServiceUtil::isService();
-    CCalenController *controller = new CCalenController(isFromServiceFrmwrk);
+    // Backup and restore code need to write here.
+	
+    CCalenController *controller = new CCalenController();
+
+	int retValue = 0;
+	if (controller) {
+	    controller->constructController();
+    	// Create the Calendar service provider
+	    CalenServiceProvider service(controller);
     
-    // Create the Calendar service provider
-    CalenServiceProvider service(controller);
+    	retValue = app.exec();
     
-    int retValue = app.exec();
-    
-    // delete the controller
-    controller->ReleaseCustomisations();
-    controller->Release();
-    
+	    // delete the controller
+    	controller->ReleaseCustomisations();
+	    controller->Release();
+	}
     return retValue;
     }
 

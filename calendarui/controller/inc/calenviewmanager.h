@@ -28,10 +28,10 @@
 #include "hb_calencommands.hrh"
 #include "calencommandhandler.h"
 
-
+class CalenNativeView;
 class CCalenController;
 class CalenMonthView;
-class CalenDayView;
+class CalenAgendaView;
 class AgendaEventViewer;
 class CalenLandscapeDayView;
 class CalenSettingsView;
@@ -52,8 +52,12 @@ class  CalenViewManager :	public QObject,
 		/**
 		 * Constructor
 		 */
-		CalenViewManager ( CCalenController& aController, 
-		                   bool isFromServiceFrmwrk);
+		CalenViewManager ( CCalenController& aController);
+		
+		/**
+		 * Second Phase Constructor
+		 */
+		void SecondPhaseConstruction();
 		
         /**
          * Destructor
@@ -93,9 +97,12 @@ class  CalenViewManager :	public QObject,
 		
 		void showPrevDay();
 		
-		void removeDayViews();
+		void removePreviousView();
 		
 		void constructOtherViews();
+		
+		void launchSettingsView();
+		
 		
 	public: // from MCalenNotificationHandler
    
@@ -112,7 +119,7 @@ class  CalenViewManager :	public QObject,
         /**
 		 * Loads day view frm the docml
 		 */
-        void loadDayView();
+        void loadAgendaView();
 	    /**
 	     * Activates the default view, as retrieved from settings.
 	     */
@@ -133,7 +140,7 @@ class  CalenViewManager :	public QObject,
 		 * to provide illusion of swiping to next or prev
 		 * day
 		 */
-		void loadAlternateDayView();
+		void loadAlternateAgendaView();
         
     private slots:
 		void handleMainViewReady();
@@ -144,22 +151,24 @@ class  CalenViewManager :	public QObject,
 		void handleDeletingCompleted();
 		void handleInstanceViewCreation(int status);
 		void handleEntryViewCreation(int status);
+		void handleDayViewReady();
 		
     private:  // Data        
 
 		CCalenController		&mController;
 		CalenMonthView			*mCalenMonthView;
-		CalenDayView			*mCalenDayView;
+		CalenAgendaView			*mCalenAgendaView;
 		AgendaEventViewer		*mCalenEventViewer;
 		CalenLandscapeDayView	*mCalenLandscapeDayView;
 		CalenSettingsView		*mSettingsView;
-		CalenDocLoader			*mDayViewDocLoader;
+		CalenDocLoader			*mAgendaViewDocLoader;
 		CalenDocLoader			*mMonthViewDocLoader;
-		CalenDayView            *mCalenDayViewAlt;
-		CalenDocLoader          *mDayViewAltDocLoader;
+		CalenAgendaView         *mCalenAgendaViewAlt;
+		CalenDocLoader          *mAgendaViewAltDocLoader;
+		CalenNativeView			*mCalenDayView;
         
 		int  mCurrentViewId;
-		int  mPreviousViewId;
+		int  mPreviousViewsId;
 		int  mFirstView;
         };
 

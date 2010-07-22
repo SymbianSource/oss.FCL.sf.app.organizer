@@ -142,23 +142,11 @@ TBool CCalenActionUi::HandleCommandL( const TCalenCommand& aCommand )
     
     if(aCommand.Command()==ECalenShowSettings)
         {  
-        launchSettingsView();
+        iController.ViewManager().launchSettingsView();
         }
     
     TRACE_EXIT_POINT;
-    return continueCommand;    }
-
-// ----------------------------------------------------------------------------
-// CCalenActionUi::launchSettingsView
-// Launches settings view
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CCalenActionUi::launchSettingsView()
-    {
-    CalenSettingsView* settingsView = iController.ViewManager().settingsView();
-    settingsView->initializeForm();
-    iController.Services().MainWindow().setCurrentView(settingsView);
+    return continueCommand; 
     }
 
 // End of file

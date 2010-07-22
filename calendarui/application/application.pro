@@ -25,7 +25,6 @@ INCLUDEPATH += ..\controller\inc \
 
 CONFIG += hb
 
-
 symbian: { 
 
 	BLD_INF_RULES.prj_exports += \
@@ -33,9 +32,13 @@ symbian: {
 	"../rom/calendarresources.iby			LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(calendarresources.iby)" \
 	"../rom/calenregionalutil.iby			LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(calenregionalutil.iby)" \
 	"../rom/calenlunarchinese_variant.iby	CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(calenlunarchinese_variant.iby)" \
+	"../rom/calenviewerservice.iby			CORE_APP_LAYER_IBY_EXPORT_PATH(calenviewerservice.iby)" \
 	# Generic configuration interface for component cenrep settings  
 	"../conf/calendarUI.confml				APP_LAYER_CONFML(calendarUI.confml)" \
-	"../conf/calendarUI_101F874B.crml		APP_LAYER_CRML(calendarUI_101F874B.crml)" 	
+	"../conf/calendarUI_101F874B.crml		APP_LAYER_CRML(calendarUI_101F874B.crml)" \
+	# stubsis is added to provide IAD
+	"../stubsis/calendar_stub.sis             /epoc32/data/z/system/install/calendar_stub.sis"
+
 
 	LIBS += -lcalencontroller \
 		-lxqservice \ 
@@ -53,10 +56,8 @@ symbian: {
 
     CONFIG += service
     SERVICE.FILE = calendar_conf.xml
-
-    RESOURCES += calendar.qrc
-
-    TRANSLATIONS += calendar.ts
+    
+    SKINICON = qtg_large_calendar
 
 }
 
@@ -65,5 +66,9 @@ HEADERS += calenserviceprovider.h
 
 SOURCES += main.cpp \
 	     calenserviceprovider.cpp	
+
+RESOURCES += calendar.qrc
+
+TRANSLATIONS += calendar.ts
 
 # End of file	--Don't remove this.

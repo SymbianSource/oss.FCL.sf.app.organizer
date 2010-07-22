@@ -38,7 +38,7 @@ SettingsUtility::SettingsUtility(QObject *parent)
 :QObject(parent)
 {
 	mTimeSeparatorList << tr(".") << tr(":");
-	mClockTypeList << tr("Analog") << tr("Digital");
+	mClockTypeList << hbTrId("txt_clock_button_digital") << hbTrId("txt_clock_button_analog");
 	mTimeFormatList << hbTrId("txt_clk_setlabel_val_24_hour") << hbTrId("txt_clk_setlabel_val_12_hour");
 	mDateFormatList << hbTrId("txt_clk_setlabel_val_dd_mm_yyyy") << hbTrId("txt_clk_setlabel_val_mm_dd_yyyy") << hbTrId("txt_clk_setlabel_val_yyyy_mm_dd");
 	mDateSeparatorList << tr(".") << tr(":") << tr("/") << tr("-");
@@ -320,9 +320,9 @@ QString SettingsUtility::timeFormatString()
 	QStringList dummyList;
 
 	if (ETime24 == locale.TimeFormat()) {
-		format = QString("h:mm");
+		format = QString("hh:mm");
 	} else if (ETime12 == locale.TimeFormat()) {
-		format = QString("h:mm ap");
+		format = QString("hh:mm ap");
 	}
 
 	QString separator = mTimeSeparatorList.at(timeSeparator(dummyList));

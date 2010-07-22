@@ -40,12 +40,14 @@ INCLUDEPATH += ./inc
 
 SOURCES += \
 		clockwidget.cpp \
-		analogclockwidget.cpp 
+		analogclockwidget.cpp \
+		digitalclockwidget.cpp
 
 HEADERS += \
         clockwidgetdefines.h \ 
 		clockwidget.h \
-		analogclockwidget.h 
+		analogclockwidget.h \
+		digitalclockwidget.h
             
 symbian {
     TARGET.UID3 = 0x2002E715

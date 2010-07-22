@@ -861,15 +861,14 @@ void CCAgnVersit2Test::doTestStepL(  )
         }
 
     // 13. Clean DB totally. This is a MUST for the next test
-    TBool databaseHasEntries;    
+    TBool databaseHasEntries(EFalse);    
     TRAP(err, databaseHasEntries = CleanDatabaseL() );
-   /* if(err) || databaseHasEntries)
+    if(err || databaseHasEntries)
         {
         EUNIT_PRINT(_L( "13. Clean DB totally fails" ) );
         EUNIT_ASSERT( EFalse );
         }
-    */
-    
+        
     
     // test passed..            
     }

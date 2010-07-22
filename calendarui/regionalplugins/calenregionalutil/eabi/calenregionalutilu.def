@@ -24,12 +24,4 @@ EXPORTS
 	_ZN24CCalenLunarLocalizedInfoD0Ev @ 23 NONAME
 	_ZN24CCalenLunarLocalizedInfoD1Ev @ 24 NONAME
 	_ZN24CCalenLunarLocalizedInfoD2Ev @ 25 NONAME
-	_ZTI20CCalenLunarLocalizer @ 26 NONAME
-	_ZTI23CCalenExtraRowFormatter @ 27 NONAME
-	_ZTI23CCalenLunarInfoProvider @ 28 NONAME
-	_ZTI24CCalenLunarLocalizedInfo @ 29 NONAME
-	_ZTV20CCalenLunarLocalizer @ 30 NONAME
-	_ZTV23CCalenExtraRowFormatter @ 31 NONAME
-	_ZTV23CCalenLunarInfoProvider @ 32 NONAME
-	_ZTV24CCalenLunarLocalizedInfo @ 33 NONAME
 

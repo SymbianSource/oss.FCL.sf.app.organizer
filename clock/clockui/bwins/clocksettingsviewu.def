@@ -1,5 +1,0 @@
-EXPORTS
-	??0ClockSettingsView@@QAE@PAVQObject@@@Z @ 1 NONAME ; ClockSettingsView::ClockSettingsView(class QObject *)
-	?loadSettingsView@ClockSettingsView@@QAEXXZ @ 2 NONAME ; void ClockSettingsView::loadSettingsView(void)
-	??1ClockSettingsView@@UAE@XZ @ 3 NONAME ; ClockSettingsView::~ClockSettingsView(void)
-

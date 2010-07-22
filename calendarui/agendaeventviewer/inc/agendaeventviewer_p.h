@@ -50,6 +50,7 @@ private slots:
 	void editingCompleted();
 	void deletingStarted();
 	void deletingCompleted();
+	void viewCreationCompleted(int error);
 
 private:
 	AgendaEventViewer *q_ptr;
@@ -60,6 +61,11 @@ private:
 
 private:
 	friend class AgendaEventView;
+	ulong mId;
+	AgendaEventViewer::Actions mAction;
+	bool mShowEventViewById;
+	bool mShowEventViewByFileHandle;
+	QString mFileName;
 };
 
 #endif // AGENDAEVENTVIEWERPRIVATE_H

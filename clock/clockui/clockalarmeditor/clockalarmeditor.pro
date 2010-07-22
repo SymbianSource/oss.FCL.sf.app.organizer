@@ -51,7 +51,8 @@ HEADERS += \
         	clockalarmcustomitem.h \ 
 	    	clockalarmeditordefines.h
 		
-RESOURCES += \
-		clockalarmeditor.qrc
+RESOURCES += clockalarmeditor.qrc
+		
+TRANSLATIONS += clockalarmeditor.ts
 
 # End of file	--Don't remove this.

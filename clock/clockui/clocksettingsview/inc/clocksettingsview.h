@@ -37,7 +37,7 @@ class TimezoneClient;
 class SettingsUtility;
 class ClockSettingsDocLoader;
 class ClockSettingsView;
-class QTranslator;
+class HbTranslator;
 class XQSettingsManager;
 class XQSettingsKey;
 
@@ -61,6 +61,7 @@ private slots:
 	void handleNetworkTimeStateChange(int state);
 	void handleAutoTimeUpdateChange(int value);
 	void handleAlarmSnoozeTimeChanged(int index);
+	void handleClockTypeChanged();
 	void eventMonitor(const XQSettingsKey& key, const QVariant& value);
 
 private:
@@ -82,15 +83,15 @@ private:
 	HbDataFormModelItem *mTimeDataFormItem;
 	HbDataFormModelItem *mDateDataFormItem;
 	HbDataFormModelItem *mPlaceDataFormItem;
+	HbDataFormModelItem *mClockTypeItem;
 	HbDataFormModelItem *mAlarmSnoozeItem;
-
 	ClockSettingsDocLoader *mDocLoader;
 	SettingsUtility *mSettingsUtility;
 	TimezoneClient *mTimezoneClient;	
 	XQSettingsManager *mSettingsManager;
 	XQSettingsKey *mAlarmSnoozeTimeKey;
 	QHash<int, int> mAlarmSnoozeTimeHash;
-	QTranslator *mTranslator;
+	HbTranslator *mTranslator;
 };
 
 #endif // CLOCKSETTINGSVIEW_H

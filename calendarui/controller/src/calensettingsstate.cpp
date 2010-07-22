@@ -103,8 +103,8 @@ TBool CCalenSettingsState::HandleCommandL( const TCalenCommand& aCommand,
             }
             break;
         case ECalenMonthView:
+        case ECalenAgendaView:
         case ECalenDayView:
-        case ECalenLandscapeDayView:
         case ECalenStartActiveStep:
             {
             // set previous state to idle
@@ -149,6 +149,11 @@ void CCalenSettingsState::HandleNotificationL(const TCalenNotification& aNotific
             SetCurrentState( aStateMachine, iPreviousState );
             iOutstandingNotifications.InsertL(aNotification);
             ActivateCurrentStateL(aStateMachine);
+            }
+            break;
+        case ECalenNotifySystemLocaleChanged:
+            {
+            CCalenState::HandleNotificationL( aNotification, aStateMachine );
             }
             break;
         default:

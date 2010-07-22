@@ -194,9 +194,9 @@ bool AgendaUtil::storeRepeatingEntry(const AgendaEntry& entry,
 	AgendaUtil::Error that indicates which error occurred
 	\sa addEntry(), deleteEntry()
  */
-bool AgendaUtil::createException(const AgendaEntry& entry)
+bool AgendaUtil::createException(const AgendaEntry& entry,QDateTime instanceOriginalDateTime)
 {
-	return d->createException(entry);
+	return d->createException(entry, instanceOriginalDateTime);
 }
 /*!
 	Fetches the entry which of id is equal to given \a id.

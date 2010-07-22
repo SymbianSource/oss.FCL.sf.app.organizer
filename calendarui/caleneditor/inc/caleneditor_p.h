@@ -20,6 +20,7 @@
 
 // System includes
 #include <QObject>
+#include <QPointer>
 #include <hbmainwindow.h>
 #include <QHash>
 #include <QDateTime>
@@ -31,7 +32,6 @@
 #include "caleneditorcommon.h"
 
 //forward declarations
-class QTranslator;
 class QFile;
 class HbDataForm;
 class HbDataFormModel;
@@ -42,6 +42,7 @@ class HbPushButton;
 class HbCheckBox;
 class HbComboBox;
 class HbView;
+class HbTranslator;
 class MCalenServices;
 class AgendaEntry;
 class AgendaUtil;
@@ -159,6 +160,8 @@ private slots:
 	void saveFromDateTime(QDateTime& fromDateTime);
 	void saveToDateTime(QDateTime& toDateTime);
 	void handleLocationChange(const QString location);
+	void handleLocationChange(const QString location, 
+            const double geoLatitude, const double geoLongitude);
 	void handleDescriptionChange(const QString description);
 	void saveAndCloseEditor();
 	void showDeleteConfirmationQuery(bool closeEditor = false);
@@ -170,6 +173,8 @@ private slots:
 	void handleCancel();
 	void handleCalendarLaunchError(int error);
 	void closeEditor();
+	void handleLocationEditingFinished();
+	void selectEditingFinishedAction(HbAction* action);	
 	
 private:
 	enum EditRange {
@@ -179,7 +184,7 @@ private:
 	};
 	
 	CalenEditor *q_ptr;
-	AgendaUtil *mAgendaUtil;
+	QPointer<AgendaUtil> mAgendaUtil;
 	
 	CalenEditorDocLoader *mEditorDocLoader;
 	HbView *mEditorView;
@@ -208,7 +213,7 @@ private:
 	HbAction *mSoftKeyAction;
 	HbAction *mDescriptionAction;
 	HbMainWindow *mMainWindow;
-	QTranslator *mTranslator;
+	HbTranslator *mTranslator;
 	
 	bool mNewEntry;
 	bool mDescriptionItemAdded;

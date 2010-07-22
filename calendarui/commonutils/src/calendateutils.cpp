@@ -120,17 +120,6 @@ const int KDefaultStartTime(8);    // 8 am ( 0 to 23 hour scale)
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
- bool CalenDateUtils::isNullTime( QDateTime& time )
-    {
-    return( time.isNull() );
-    }
-
-// -----------------------------------------------------------------------------
-// ?classname::?member_function
-// ?implementation_description
-// (other items were commented in a header).
-// -----------------------------------------------------------------------------
-//
  QDateTime CalenDateUtils::limitToValidTime( const QDateTime& time )
     {    
     QDateTime valid = time;
@@ -169,7 +158,7 @@ const int KDefaultStartTime(8);    // 8 am ( 0 to 23 hour scale)
 //
  int CalenDateUtils::timeOfDay( const QDateTime& dateTime )
     {    
-    QDateTime midnight = CalenDateUtils::beginningOfDay( dateTime );
+    QDateTime midnight = beginningOfDay( dateTime );
     int resultInSec = midnight.secsTo(dateTime);
     
     return (resultInSec/60);
@@ -201,15 +190,7 @@ const int KDefaultStartTime(8);    // 8 am ( 0 to 23 hour scale)
 //
  QDateTime CalenDateUtils::now()
     {
-    TTime currentTime;
-    currentTime.HomeTime();
-    TDateTime curDateTime = currentTime.DateTime();
-    QDateTime ret;
-    ret.setDate(QDate(curDateTime.Year(), curDateTime.Month() + 1, curDateTime.Day() + 1));
-    ret.setTime(QTime(curDateTime.Hour(), curDateTime.Minute(), curDateTime.Second(), curDateTime.MicroSecond()));
-    // TODO: need to use QDateTime::currentDateTime() from QT4.6 onwards
-    //return QDateTime::currentDateTime();
-    return ret;
+    return QDateTime::currentDateTime();
     }
 
 // -----------------------------------------------------------------------------
@@ -246,44 +227,6 @@ const int KDefaultStartTime(8);    // 8 am ( 0 to 23 hour scale)
     return dateTime;
     }      
 
- // -----------------------------------------------------------------------------
- // (other items were commented in a header).
- // -----------------------------------------------------------------------------
- //
- QDateTime CalenDateUtils::pastOf(const QDateTime& dateTime, int numOfDays)
-     {
-     QDateTime result;
-     int dayNumber = dateTime.date().day();
-      int numOfDaysInMonth = dayNumber;
-      int month = dateTime.date().month();
-      int year = dateTime.date().year();
-      int buff = numOfDays;
-      QDate date(year, month, dayNumber);
-      while(buff > numOfDaysInMonth)
-          {
-          if(month == 1) {
-          // If January,
-          month = 12; // December
-          year--;
-          }
-          else {
-          month--;
-          }
-          // Create the qdate with these details
-          date.setDate(year, month, 1);
-          // check to see if it goes beyond the next month also
-          buff = buff - numOfDaysInMonth;
-          numOfDaysInMonth = date.daysInMonth();
-          }
-      
-      // Substract buff days from end of the month
-      int day = numOfDaysInMonth - buff;
-      date.setYMD(date.year(), date.month(), day);
-      result.setDate(date);
-      result.setTime(dateTime.time());
-      return result;
-     }
- 
  // -----------------------------------------------------------------------------
  // (other items were commented in a header).
  // -----------------------------------------------------------------------------

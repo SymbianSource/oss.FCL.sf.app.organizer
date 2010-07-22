@@ -31,6 +31,7 @@
 #include "timezoneclient.h"
 #include "clockcommon.h"
 #include "clockserverclt.h"
+#include "clockprivatecrkeys.h"
 
 const int KDaysInWeek(7);
 const int KZerothRule(0);
@@ -45,7 +46,7 @@ const int KNoDifference(0);
  */
 
 TimezoneClient* TimezoneClient::mTimezoneClient = 0;
-int TimezoneClient::mReferenceCount = 0;
+bool TimezoneClient::mReferenceCount = false;
 /*!
 	Call this funtion to instantiate the TimezoneClient class.
  */
@@ -53,9 +54,9 @@ TimezoneClient* TimezoneClient::getInstance()
 {
 	if (!mTimezoneClient) {
 		mTimezoneClient = new TimezoneClient();
+		mReferenceCount = true;
 	}
 
-	mReferenceCount++;
 	return mTimezoneClient;
 }
 
@@ -64,9 +65,7 @@ TimezoneClient* TimezoneClient::getInstance()
  */
 void TimezoneClient::deleteInstance()
 {
-	mReferenceCount--;
-
-	if (0 == mReferenceCount) {
+	if (mReferenceCount) {
 		delete mTimezoneClient;
 		mTimezoneClient = 0;
 	}
@@ -77,11 +76,7 @@ void TimezoneClient::deleteInstance()
  */
 bool TimezoneClient::isNull()
 {
-	bool deleted = false;
-	if (0 == mReferenceCount) {
-		deleted = true;
-	}
-	return deleted;
+	return !mReferenceCount;
 }
 
 /*!

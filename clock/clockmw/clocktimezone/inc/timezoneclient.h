@@ -70,7 +70,7 @@ private:
 
 private:
 	static TimezoneClient *mTimezoneClient;
-	static int mReferenceCount;
+	static bool mReferenceCount;
 
 // TODO: still refatoring
 public:

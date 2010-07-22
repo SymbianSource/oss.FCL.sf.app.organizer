@@ -30,43 +30,12 @@
 // ============================ CalenAgendaUtils ==============================
 
 // -----------------------------------------------------------------------------
-// CalenAgendaUtils::RemoveEntriesStartingAtMidnight
+// CalenAgendaUtils::EndsAtStartOfDay
 // ?implementation_description
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
- void CalenAgendaUtils::removeEntriesEndingAtMidnightL( QList<AgendaEntry>& list, 
-                                                                const QDateTime& day )
-    {
-    TRACE_ENTRY_POINT;
-
-    // Remove events starting before aDay and ending at midnight
-    TInt i( 0 );
-
-    while( i < list.count() )
-        {
-        AgendaEntry& entry = list[i];
-
-        if( endsAtStartOfDayL( entry, day ) )
-            {
-            list.removeAt( i );
-            }
-        else
-            {
-            ++i;
-            }
-        }
-    
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CalenAgendaUtils::EndsAtStartOfDayL
-// ?implementation_description
-// (other items were commented in a header).
-// -----------------------------------------------------------------------------
-//
- bool CalenAgendaUtils::endsAtStartOfDayL( AgendaEntry& entry,
+ bool CalenAgendaUtils::endsAtStartOfDay( AgendaEntry& entry,
                                           const QDateTime& day )
     {
     TRACE_ENTRY_POINT;

@@ -19,9 +19,10 @@ TARGET = calensettings
 CONFIG += hb
 DEPENDPATH += . \
               ../../inc
+			  
 INCLUDEPATH += . \
                ../../inc \
-               ../cenrep
+	       ../inc
 
 DEFINES += CALENSETTINGS_DLL
 

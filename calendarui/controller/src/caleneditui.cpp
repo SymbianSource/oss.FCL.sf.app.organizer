@@ -56,7 +56,7 @@ CCalenEditUi* CCalenEditUi::NewL( CCalenController& aController )
 CCalenEditUi::~CCalenEditUi()
     {
     TRACE_ENTRY_POINT;
-
+    iController.CancelNotifications(this);
     TRACE_EXIT_POINT;
     }
 
@@ -102,7 +102,7 @@ TBool CCalenEditUi::HandleCommandL( const TCalenCommand& aCommand )
     TInt command = aCommand.Command();
     MCalenContext& context = iController.Services().Context();
     AgendaEntry editedEntry;
-    QDateTime newEntryDateTime = iController.context().focusDateAndTimeL();
+    QDateTime newEntryDateTime = iController.context().focusDateAndTime();
    
     // Check if it is not on same day and set the default time and date accordingly.
     bool isSameDay = CalenDateUtils::isOnToday(newEntryDateTime);
@@ -122,15 +122,17 @@ TBool CCalenEditUi::HandleCommandL( const TCalenCommand& aCommand )
                                     context.instanceId().mEntryLocalUid );
             // For repeating entry, we need to update proper start time here
             // from the context
-            if (editedEntry.isRepeating()) {
-            	// Get the instancde time frm the context
-            	QDateTime instanceTime = context.focusDateAndTimeL();
-            	editedEntry.setStartAndEndTime(instanceTime, editedEntry.endTime());
+            if(!editedEntry.isNull()) {
+            	if (editedEntry.isRepeating()) {
+            		// Get the instancde time frm the context
+            		QDateTime instanceTime = context.focusDateAndTime();
+            		editedEntry.setStartAndEndTime(instanceTime, editedEntry.endTime());
+            	}
+            	iEditor= new CalenEditor(iController.Services().agendaInterface());
+            	iEditor->edit(editedEntry, false);
+            	connect(iEditor, SIGNAL(entrySaved()), this, SLOT(handleEntrySaved()));
+            	connect(iEditor, SIGNAL(dialogClosed()), this, SLOT(handleDialogClosed()));
             }
-			iEditor= new CalenEditor(iController.Services().agendaInterface());
-			iEditor->edit(editedEntry, false);
-		    connect(iEditor, SIGNAL(entrySaved()), this, SLOT(handleEntrySaved()));
-		    connect(iEditor, SIGNAL(dialogClosed()), this, SLOT(handleDialogClosed()));
             break;
         default:
             // Controller decided this class was the place to handle this

@@ -19,8 +19,8 @@
 #include <QObject>
 #include <QTimer>
 #include <QGraphicsLinearLayout>
-#include <qtranslator.h>
-#include <qapplication.h>
+#include <QApplication>
+
 #include <hbdataform.h>
 #include <hbmainwindow.h>
 #include <hbinstance.h>
@@ -42,9 +42,9 @@
 #include <hbi18ndef.h>
 #include <qdatetime.h>
 #include <hbgroupbox.h>
-#include <hbapplication.h>
 #include <hbradiobuttonlist.h>
 #include <hbnotificationdialog.h>
+#include <hbtranslator.h>
 
 // User includes
 #include <CalenLauncher>
@@ -209,6 +209,7 @@ CalenEditorPrivate::CalenEditorPrivate(AgendaUtil *agendaUtil,
 									mEditRange(ThisAndAll),
 									mOriginalEntry(NULL),
 									mEditedEntry(NULL),
+									mTranslator(new HbTranslator("caleneditor")),
 									mNewEntry(true),
 									mDescriptionItemAdded(false),
 									mIsChild(false),
@@ -219,6 +220,7 @@ CalenEditorPrivate::CalenEditorPrivate(AgendaUtil *agendaUtil,
 	// First get the q-pointer.
 	q_ptr = static_cast<CalenEditor *> (parent);
 	mMainWindow = NULL;
+	mTranslator->loadCommon();
 	
 	if (!agendaUtil) {
 		mAgendaUtil = new AgendaUtil(this);
@@ -227,15 +229,6 @@ CalenEditorPrivate::CalenEditorPrivate(AgendaUtil *agendaUtil,
 		mAgendaUtil = agendaUtil;
 		mOwnsAgendaUtil = false;
 	}
-
-	// Load the translation file and install the editor specific translator
-	mTranslator = new QTranslator;
-	QString lang = QLocale::system().name();
-	QString path = "Z:/resource/qt/translations/";
-	mTranslator->load("caleneditor_en_GB", ":/translations");
-	// TODO: Load the appropriate .qm file based on locale
-	//bool loaded = mTranslator->load("caleneditor_" + lang, path);
-	HbApplication::instance()->installTranslator(mTranslator);
 }
 
 /*!
@@ -243,6 +236,10 @@ CalenEditorPrivate::CalenEditorPrivate(AgendaUtil *agendaUtil,
  */
 CalenEditorPrivate::~CalenEditorPrivate()
 {
+	if(mOwnsAgendaUtil) {
+		delete mAgendaUtil;
+		mAgendaUtil = NULL;
+	}
 	if (mOriginalEntry) {
 		delete mOriginalEntry;
 		mOriginalEntry = NULL;
@@ -251,12 +248,27 @@ CalenEditorPrivate::~CalenEditorPrivate()
 		delete mEditedEntry;
 		mEditedEntry = NULL;
 	}
+	if(mEditorDocLoader) {
+		delete mEditorDocLoader;
+		mEditorDocLoader = NULL;
+	}
+	if(mReminderField) {
+		delete mReminderField;
+		mReminderField = NULL;
+	}
+	if(mRepeatField) {
+		delete mRepeatField;
+		mRepeatField = NULL;
+	}
+	if(mDataHandler) {
+		delete mDataHandler;
+		mDataHandler = NULL;
+	}
 	if (mCalenEditorModel) {
 		delete mCalenEditorModel;
 		mCalenEditorModel = NULL;
 	}
 	// Remove the translator
-	HbApplication::instance()->removeTranslator(mTranslator);
 	if (mTranslator) {
 		delete mTranslator;
 		mTranslator = 0;
@@ -300,6 +312,9 @@ void CalenEditorPrivate::edit(ulong id, bool launchCalendar)
 {
 	mNewEntry = false;
 	AgendaEntry entry = mAgendaUtil->fetchById(id);
+	if(entry.isNull()) {
+		return;
+	}
 	edit(entry, launchCalendar);
 }
 
@@ -320,8 +335,10 @@ void CalenEditorPrivate::create(CalenEditor::CreateType type,
 			entry.setType(AgendaEntry::TypeAppoinment);
 		}
 		break;
-		case CalenEditor::TypeUnKnown:
 		default:
+			// What ever be the type of entry, currently editor supports only to
+			// open the entries of TypeAppoinment
+			entry.setType(AgendaEntry::TypeAppoinment);
 			break;
 	}
 	mLaunchCalendar = launchCalendar;
@@ -343,8 +360,10 @@ void CalenEditorPrivate::create(CalenEditor::CreateType type,
 			entry.setType(AgendaEntry::TypeAppoinment);
 		}
 		break;
-		case CalenEditor::TypeUnKnown:
 		default:
+			// What ever be the type of entry, currently editor supports only to
+			// open the entries of TypeAppoinment
+			entry.setType(AgendaEntry::TypeAppoinment);
 			break;
 	}
 	mNewEntryDateTime = entry.startTime();
@@ -383,9 +402,9 @@ void CalenEditorPrivate::showEditOccurencePopup()
 	HbAction *cancelAction =
 	        new HbAction(hbTrId("txt_calendar_button_softkey1_cancel"));
 	popUp->addAction(cancelAction);
+	connect(editButtonList, SIGNAL(itemSelected(int)), popUp, SLOT(close()));
 	connect(editButtonList, SIGNAL(itemSelected(int)), this,
 	        SLOT(handleEditOccurence(int)));
-	connect(editButtonList, SIGNAL(itemSelected(int)), popUp, SLOT(close()));
 	connect(cancelAction, SIGNAL(triggered()), this, SLOT(handleCancel()));
 
 	// Show the popup
@@ -519,12 +538,21 @@ void CalenEditorPrivate::setUpView()
 	HbAction *deleteEventAction = qobject_cast<HbAction *> (
 							mEditorDocLoader->findObject(
 										CALEN_EDITOR_DELETE_EVENT_ACTION));
+	deleteEventAction->setText(hbTrId("txt_common_menu_delete"));
 	connect(deleteEventAction, SIGNAL(triggered()), this,
 							SLOT(showDeleteConfirmationQuery()));
 
 	if (!mNewEntry) {
-		//TODO: Add the text id based on the entry type Anniversary or meeting
-		headingWidget->setHeading(hbTrId("txt_calendar_subhead_event"));
+		AgendaEntry::Type entryType = mEditedEntry->type();
+		if( entryType == AgendaEntry::TypeAppoinment) {
+			headingWidget->setHeading(hbTrId("txt_calendar_subhead_meeting"));
+		}else if(entryType == AgendaEntry::TypeEvent) {
+			//TODO: Add the text id once available
+			headingWidget->setHeading(hbTrId("All-day event"));
+		}else if (entryType == AgendaEntry::TypeTodo) {
+			headingWidget->setHeading(hbTrId("txt_calendar_subhead_to_do"));
+		}
+		
 	}
 
 	initModel();
@@ -854,6 +882,18 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 			mAgendaUtil->getNextInstanceTimes(*mEditedEntry,
 			                                  nextInstanceStartTime,
 			                                  nextInstanceEndTime);
+			
+			// If no instances earlier then set it to 01/01/1900.
+			if (prevInstanceStartTime.isNull()) {
+				prevInstanceStartTime.setDate(QDate(1900, 01, 01));
+				prevInstanceStartTime.setTime(QTime(0, 0, 0));
+			}
+			
+			// If no instances later then set it to 30/01/2100.
+			if (nextInstanceEndTime.isNull()) {
+				nextInstanceEndTime.setDate(QDate(2100, 12, 30));
+				nextInstanceEndTime.setTime(QTime(0, 0, 0));
+			}
 			mViewFromItem->setDateRange(
 									prevInstanceStartTime.addDays(1).date(),
 									nextInstanceStartTime.addDays(-1).date());
@@ -862,7 +902,10 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 			
 			// If repeating daily then disable the date fields as 
 			// date cannot be changed
- 			if (mEditedEntry->repeatRule().type() == AgendaRepeatRule::DailyRule) {
+ 			if ((prevInstanceEndTime.date().daysTo(
+				mEditedEntry->startTime().date()) == 1) && 
+				(mEditedEntry->endTime().date().daysTo(
+				nextInstanceStartTime.date()) == 1)) {
 				mViewFromItem->disableFromToDateField();
 			}
 		}
@@ -880,10 +923,16 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 	if ((mAllDayCheckBoxItem && 
 		(mAllDayCheckBoxItem->contentWidgetData("checkState") == Qt::Checked))
 		|| (!mNewEntry && mEditedEntry->type() == AgendaEntry::TypeEvent)) {
+        
+        // For all-day, we need to substratc 1 minute to get the actual end time
+        // as we store all-day as 12.00AM to 12.00 AM next day
+        QDateTime actualEndTime = mEditedEntry->endTime().addSecs(-60);
+        mViewToItem->populateDateTime(actualEndTime, false);
+        
 		// If the all day option is checked, we need to
 		// disable the time fields
 		enableFromTotimeFileds(false, mEditedEntry->startTime(),
-		                       mEditedEntry->endTime());
+                                actualEndTime);
 	}
 }
 /*!
@@ -908,8 +957,15 @@ void CalenEditorPrivate::populateCustomItemLocation()
 
 	connect(mViewLocationItem, SIGNAL(locationTextChanged(const QString)),
 			this, SLOT(handleLocationChange(const QString)));
+	
+	connect(mViewLocationItem, SIGNAL(locationTextChanged(const QString, const double, const double)),
+			this, SLOT(handleLocationChange(const QString, const double, const double)));
 
-	mViewLocationItem->populateLocation(mEditedEntry->location());
+	mViewLocationItem->populateLocation(mEditedEntry->location());	
+	
+    connect(mViewLocationItem, SIGNAL(locationEditingFinished()),
+            this, SLOT(handleLocationEditingFinished()));
+	        
 }
 /*!
 	Save the changed start time of the event.
@@ -1133,7 +1189,9 @@ void CalenEditorPrivate::closeEditor()
 void CalenEditorPrivate::handleSubjectChange(const QString subject)
 {
 	mEditedEntry->setSummary(subject);
-	addDiscardAction();
+	if(!mNewEntry ){
+		addDiscardAction();
+	}
 }
 
 /*!
@@ -1180,6 +1238,12 @@ void CalenEditorPrivate::handleAllDayChange(int state)
 		// Update Start/End Times with Edited entry values
 		enableFromTotimeFileds(true, mEditedEntry->startTime(),
 		                       mEditedEntry->endTime());
+		// If original entry was an All-day, then we need to save the date that
+		// is shown on the "To" date push button
+		if (mOriginalEntry->type() == AgendaEntry::TypeEvent) {
+            mEditedEntry->setStartAndEndTime(mViewFromItem->getDateTime(),
+                                    mViewToItem->getDateTime());
+		}
 		int index;
 		if (mIsAllDayItemAdded) {
 			index = ReminderTimeForAllDayItem;
@@ -1190,7 +1254,10 @@ void CalenEditorPrivate::handleAllDayChange(int state)
 		mReminderField->setReminderChoices();
 		updateReminderChoices();
 	}
-	addDiscardAction();
+
+	if(!mNewEntry){
+		addDiscardAction();
+	}
 }
 
 /*!
@@ -1200,9 +1267,75 @@ void CalenEditorPrivate::handleAllDayChange(int state)
 void CalenEditorPrivate::handleLocationChange(const QString location)
 {
 	mEditedEntry->setLocation(location);
+	if(!mNewEntry){
+		addDiscardAction();
+	}
+}
+
+
+/*!
+	Triggered when the location editor is being edited.
+	\param subject Contains the string displayed in the subject item.
+ */
+void CalenEditorPrivate::handleLocationChange(const QString location,
+    const double /*geoLatitude*/, const double /*geoLongitude*/)
+{
+	mEditedEntry->setLocation(location);
+	mEditedEntry->clearGeoValue();
 	addDiscardAction();
 }
 
+/*!
+ * Handles the completion of location editing
+ */
+void CalenEditorPrivate::handleLocationEditingFinished()
+{
+    if ( !mOriginalEntry->location().isEmpty() )
+    {
+       AgendaGeoValue entryGeoValue =mAgendaUtil->fetchById(mEditedEntry->id()).geoValue();
+       if ( !entryGeoValue.isNull() && (mEditedEntry->location()!=mOriginalEntry->location()) )
+       {   
+          
+           mEditedEntry->setGeoValue(entryGeoValue);
+           HbMessageBox* confirmationQuery = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
+                   
+           confirmationQuery->setDismissPolicy(HbDialog::NoDismiss);
+           confirmationQuery->setTimeout(HbDialog::NoTimeout);
+           confirmationQuery->setIconVisible(true);  
+           
+           QString displayText;
+           displayText = displayText.append("Location changed. Keep existing location on Map?");
+           
+           confirmationQuery->setText(displayText);
+           
+           // Remove the default actions.
+           QList<QAction *> defaultActions = confirmationQuery->actions();
+           for (int index=0;index<defaultActions.count();index++) 
+           {
+               confirmationQuery->removeAction(defaultActions[index]);
+           }
+           
+           defaultActions.clear();
+           
+           confirmationQuery->addAction(new HbAction("Yes"));
+           confirmationQuery->addAction(new HbAction("No"));
+           confirmationQuery->open(this, SLOT(selectEditingFinishedAction(HbAction*)));
+       }
+    }       
+}
+
+/*!
+ * Handles the editing finished action.
+ */
+void CalenEditorPrivate::selectEditingFinishedAction(HbAction* action)
+{
+    HbMessageBox* dlg = static_cast<HbMessageBox*>(sender());    
+
+    if (action == dlg->actions().at(1))
+    {           
+        mEditedEntry->clearGeoValue();
+    } 
+}
 
 /*!
 	Triggered when the description editor is being edited.
@@ -1211,7 +1344,9 @@ void CalenEditorPrivate::handleLocationChange(const QString location)
 void CalenEditorPrivate::handleDescriptionChange(const QString description)
 {
 	mEditedEntry->setDescription(description);
-	addDiscardAction();
+	if(!mNewEntry){
+		addDiscardAction();
+	}
 }
 
 /*!
@@ -1230,7 +1365,7 @@ void CalenEditorPrivate::saveAndCloseEditor()
 		if (mLaunchCalendar) {
 			CalenLauncher* launcher = new CalenLauncher(this);
 			QDateTime startTime = mEditedEntry->startTime();
-			launcher->launchCalendarApp(CalenLauncher::DayView, startTime);
+			launcher->launchCalendarApp(CalenLauncher::AgendaView, startTime);
 
 			// connect to the error signal
 			connect(launcher, SIGNAL(calendarLaunchFailed(int)), this,
@@ -1385,8 +1520,12 @@ bool CalenEditorPrivate::saveEntry()
 	if (mIsChild && (mEditRange == ThisOnly)) {
 		// Add the entry
 		mAgendaUtil->updateEntry(*mEditedEntry, true);
-		// TODO: Add the text id based on meeting or anniversary
-		HbNotificationDialog::launchDialog(hbTrId("Event updated"));
+		// TODO: Add the text id once available
+		if(mEditedEntry->type() == AgendaEntry::TypeAppoinment) {
+			HbNotificationDialog::launchDialog(hbTrId("Meeting updated"));
+		}else if(mEditedEntry->type() == AgendaEntry::TypeEvent) {
+			HbNotificationDialog::launchDialog(hbTrId("All day event updated"));
+		}
 		emit q_ptr->entrySaved();
 		return true;
 	} else if ((mEditRange == ThisOnly)) {
@@ -1401,22 +1540,31 @@ bool CalenEditorPrivate::saveEntry()
 		if (!handleAllDayToSave()) {
 			if (mNewEntry) {
 				mAgendaUtil->addEntry(*mEditedEntry);
-			} else if (mEditRange == ThisAndAll) {
+			} else if (mEditRange == ThisAndAll && mOriginalEntry->isRepeating()) {
 				mAgendaUtil->storeRepeatingEntry(*mEditedEntry, true);
 			} else if (!mIsChild && (mEditRange == ThisOnly)) {
 				// Create the new exception
-				mAgendaUtil->createException(*mEditedEntry);
+				mAgendaUtil->createException(*mEditedEntry, 
+												mOriginalEntry->startTime());
 			} else {
 				// Normal entry updation
 				mAgendaUtil->updateEntry(*mEditedEntry, false);
 			}
 		}
 		if (mNewEntry) {
-			// TODO: Add the text id based on meeting or anniversary
-			HbNotificationDialog::launchDialog(hbTrId("New Event saved"));
+			// TODO: Add the text id once available
+			if(mEditedEntry->type() == AgendaEntry::TypeAppoinment) {
+				HbNotificationDialog::launchDialog(hbTrId("New meeting saved"));
+			} else if(mEditedEntry->type() == AgendaEntry::TypeEvent) {
+				HbNotificationDialog::launchDialog(hbTrId("New all-day saved"));
+			}
 		} else {
-			// TODO: Add the text id based on meeting or anniversary
-			HbNotificationDialog::launchDialog(hbTrId("Event updated"));
+			// TODO: Add the text id once available
+			if(mEditedEntry->type() == AgendaEntry::TypeAppoinment) {
+				HbNotificationDialog::launchDialog(hbTrId("Meeting updated"));
+			} else if(mEditedEntry->type() == AgendaEntry::TypeEvent) {
+				HbNotificationDialog::launchDialog(hbTrId("All day event updated"));
+			}
 		}
 		emit q_ptr->entrySaved();
 	} else if (error) {
@@ -1470,10 +1618,10 @@ bool CalenEditorPrivate::handleAllDayToSave()
 	QDateTime tempSartTime =
 	        CalenDateUtils::beginningOfDay(mEditedEntry->startTime());
 
-	// Set EndTime of AllDay event to 23:59:59
-	QDateTime tempEndTime = mEditedEntry->endTime();
+	// Set EndTime of AllDay event to 00:00:00 of next day
+	QDateTime tempEndTime = mEditedEntry->endTime().addDays(1);
 	QTime tempEndQTime = tempEndTime.time();
-	tempEndQTime.setHMS(23, 59, 59);
+	tempEndQTime.setHMS(0, 0, 0);
 	tempEndTime.setTime(tempEndQTime);
 
 	if (mNewEntry && (mAllDayCheckBoxItem->contentWidgetData("checkState")
@@ -1491,19 +1639,43 @@ bool CalenEditorPrivate::handleAllDayToSave()
 
 		// Clone the entry to AllDayEntry, Delete old entry from Database
 		mAgendaUtil->cloneEntry(*mEditedEntry, AgendaEntry::TypeEvent);
-		mAgendaUtil->deleteEntry(mEditedEntry->id());
-
+		// For later reference for the notification popup
+		mEditedEntry->setType(AgendaEntry::TypeEvent);
 		return true;
-	} else if ((mAllDayCheckBoxItem->contentWidgetData("checkState")
-	        != Qt::Checked) && (mEditedEntry->type()
-	        != AgendaEntry::TypeAppoinment)) {
-		// Editing exissting AllDayentry, and Alldat Box is Not-Checked
-		// Clone the entry to MeetingEntry, Delete old entry from Database
-		mAgendaUtil->cloneEntry(*mEditedEntry, AgendaEntry::TypeAppoinment);
-		mAgendaUtil->deleteEntry(mEditedEntry->id());
-
-		return true;
-	}
+	} else if (mAllDayCheckBoxItem->contentWidgetData("checkState")
+	        != Qt::Checked) {
+             if (mEditedEntry->type() != AgendaEntry::TypeAppoinment) {
+	            // Editing existing AllDayentry, and Alldat Box is Not-Checked
+	            // Clone the entry to MeetingEntry, Delete old entry from Database
+	            mAgendaUtil->cloneEntry(*mEditedEntry, AgendaEntry::TypeAppoinment);
+	            // For later reference for the notification popup
+	            mEditedEntry->setType(AgendaEntry::TypeAppoinment);
+	            return true;
+	        }
+            // Check if the duration of the meeting is matching the all-day criteria
+            // if yes, then we need to store it as all-day instead of normal meeting
+             else if (mEditedEntry->startTime() == CalenDateUtils::beginningOfDay(mEditedEntry->startTime())) {
+            // Get the end time and see if it is at the beginning of the end date day
+            if (mEditedEntry->endTime() == CalenDateUtils::beginningOfDay(mEditedEntry->endTime())) {
+                // Store it as all-day
+                mEditedEntry->setType(AgendaEntry::TypeEvent);
+                // Check if this was an all-day earlier and now user has changed it like that
+                // or it is a new entry
+                if (mOriginalEntry->type() == AgendaEntry::TypeEvent ||
+                        mNewEntry) {
+                    return false;
+                } else {
+                    // It was a meeting
+                    // Clone the entry to AllDayEntry, Delete old entry from Database
+                    mEditedEntry->setStartAndEndTime(tempSartTime, tempEndTime);
+                    mAgendaUtil->cloneEntry(*mEditedEntry, AgendaEntry::TypeEvent);
+                    // For later reference for the notification popup
+                    mEditedEntry->setType(AgendaEntry::TypeEvent);
+                    return true;
+                }
+            }
+        } 
+	} 
 	return false;
 }
 

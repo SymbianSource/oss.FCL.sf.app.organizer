@@ -105,6 +105,9 @@ public:
 
 	// Used to append the file to the delete list
 	IMPORT_C void RegisterCalFileL(const TDesC& aFileName);
+	
+	// Create a calendar file. It leaves if the file exists.
+	IMPORT_C RPointerArray<CCalSession>& CreateCalSubSessionL(const TDesC& aFileName);
 
 
 // Session and Views handling
@@ -220,6 +223,7 @@ private:
 	TBool				iDelFileFlag;
 	RMutex				iChunkMutex;
 	RASCliSession		iAlarmServer;
+	RPointerArray<CCalSession> iSubCalSessions;
 	};
 
 

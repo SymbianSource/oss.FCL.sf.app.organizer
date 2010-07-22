@@ -23,6 +23,7 @@
 #include <qdatetime.h>
 #include <hblabel.h>
 #include <hbextendedlocale.h>
+#include <hbframeitem.h>
 
 // User includes
 #include "calennativeview.h"
@@ -46,7 +47,6 @@ class CalenMonthGrid;
 class CalenPluginLabel;
 
 // Constants
-const int KCalenDaysInWeek = 7;
 const int KNumOfVisibleRows = 6;
 
 #ifdef  CALENVIEWS_DLL
@@ -85,6 +85,7 @@ public:  // From CCalenView
 	void handlePreviewPaneGesture(bool rightGesture);
 	QDateTime firstDayOfGrid();
 	void fetchEntriesAndUpdateModel();
+	void launchDayView();
 	
 private:
 	void createGrid();
@@ -105,6 +106,7 @@ private:
 	void refreshViewOnGoToDate();
 	void showHideRegionalInformation();
 	void onContextChanged();
+	void updateDayLabel();
 	
 private slots:
 	void createEditor();
@@ -113,9 +115,6 @@ private slots:
 	void handleLeftEffectCompleted(const HbEffect::EffectStatus &status);
 	void handleRightEffectCompleted(const HbEffect::EffectStatus &status);
 	void addRemoveActionsInMenu();
-	
-public slots:
-	void launchDayView();
 	void changeOrientation(Qt::Orientation orientation);
 	
 private:
@@ -175,6 +174,7 @@ private:
 	CalenPluginLabel *mNextRegionalInfo;
 	HbMenu *mDeleteSubMenu;
 	QColor mWeekDaysColor;
+	bool   mIsAboutToQuitEventConnected; // bool to check if month view is registered to get aboutToQuit signals
 };
 
 #endif //CALENMONTHVIEW_H

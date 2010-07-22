@@ -66,8 +66,11 @@ public:
 
 protected:
 	void orientationChanged(Qt::Orientation newOrientation);
+	void gestureEvent(QGestureEvent *event);
 		
 private:
+	void downGesture();
+    void upGesture();
 	void handlePrependingRows(QList<CalenMonthData > &monthDataList);
 	void handleAppendingRows(QList<CalenMonthData > &monthDataList);
 	void handlePanGestureFinished();
@@ -83,11 +86,6 @@ public slots:
 	void prependRows();
 	void appendRows();
 	void itemActivated(const QModelIndex &index);
-
-protected slots:
-	void downGesture(int value);
-	void upGesture(int value);
-	void panGesture(const QPointF &delta);
 
 private:
 	QStandardItemModel *mModel;

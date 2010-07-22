@@ -37,8 +37,8 @@ symbian: {
 			-lcalencommonutils \
 			-lcalensettings \
 			-lagendainterface \
-			-lxqsettingsmanager \
-			-lnoteseditor
+			-lxqsettingsmanager
+
     TARGET.UID3 = 0x10282F26
     TARGET.CAPABILITY = CAP_GENERAL_DLL
 
@@ -52,28 +52,32 @@ HEADERS += calenmonthview.h \
 		   calenmonthgrid.h \
 		   calengriditemprototype.h \
 		   calennativeview.h \
-		   calendayview.h \
+		   calenagendaview.h \
 		   caleneventlistviewitem.h \
-		   calendayviewwidget.h \
+		   calenagendaviewwidget.h \
 		   calenpreviewpane.h \
 		   calensettingsview.h \
 		   calenthicklinesdrawer.h \
-		   calenpluginlabel.h
+		   calenpluginlabel.h \
+		   calentodayindicatorlinedrawer.h
 	
 SOURCES += calenmonthview.cpp \
            calenmonthdata.cpp \
            calenmonthgrid.cpp \
            calengriditemprototype.cpp \
            calennativeview.cpp \
-           calendayview.cpp \
+           calenagendaview.cpp \
            caleneventlistviewitem.cpp \
-           calendayviewwidget.cpp \
+           calenagendaviewwidget.cpp \
            calenpreviewpane.cpp \
            calensettingsview.cpp \
            calenthicklinesdrawer.cpp \
-		   calenpluginlabel.cpp
+		   calenpluginlabel.cpp \
+		   calentodayindicatorlinedrawer.cpp
 
 RESOURCES += calenresources.qrc
+
+include(dayview/dayview.pri)
 
 # End of file	--Don't remove this.
 

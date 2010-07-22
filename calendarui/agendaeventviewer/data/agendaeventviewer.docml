@@ -5,7 +5,7 @@
 			<widget name="groupBox" type="HbGroupBox">
                 <real name="z" value="1"/>
                 <bool name="collapsable" value="FALSE"/>
-                <string locid="txt_calendar_subhead_event" name="titleText" value="Event"/>
+                <string locid="txt_calendar_subhead_event" name="heading" value="Event"/>
             </widget>
             <widget name="scrollArea" type="HbScrollArea">
                 <widget name="scrollAreaContents" role="HbScrollArea:contents" type="HbWidget">
@@ -15,7 +15,9 @@
 					<widget name="reminderWidget" type="HbWidget"/>
 					<widget name="repeatWidget" type="HbWidget"/>
 					<widget name="descriptionWidget" type="HbWidget"/>
-                    <widget name="maptileWidget" type="HbLabel" />                     
+                    <widget name="maptileWidget" type="HbLabel">
+                        <contentsmargins bottom="var(hb-param-margin-gene-bottom)" left="var(hb-param-margin-gene-left)" right="var(hb-param-margin-gene-right)" top="0un"/>
+                    </widget>
                     <layout orientation="Vertical" type="linear">
                         <contentsmargins bottom="0un" left="0un" top="0un"/>
                         <linearitem itemname="subjectWidget"/>

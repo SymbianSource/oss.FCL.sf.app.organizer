@@ -31,3 +31,7 @@ SOURCES +=  alarmalertplugin.cpp \
 			alarmalertdocloader.cpp
 
 RESOURCES += alarmalert.qrc
+
+TRANSLATIONS += alarmui.ts
+
+# End of file   --Don't remove this.

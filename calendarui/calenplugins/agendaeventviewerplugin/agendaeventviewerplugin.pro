@@ -39,12 +39,11 @@ symbian: {
 	TARGET.CAPABILITY = ALL -TCB
 	TARGET.EPOCALLOWDLLDATA = 1
 	TARGET.UID3 = 0x2002E6A0 
-	
+	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE	
 	
 	LIBS += -lagendainterface \
 			-lagendaeventviewer
 
-INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 load(data_caging_paths)
 # plugin stub deployment

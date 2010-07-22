@@ -15,8 +15,9 @@
 *
 */
 //#include <qdatetime.h>
-#include <qdebug.h>
 #include <hbmainwindow.h>
+
+#include <CalenLauncher>
 
 #include "calencontroller.h"
 #include "caleneditor.h"
@@ -36,17 +37,16 @@ CalenServiceProvider::~CalenServiceProvider()
 
 void CalenServiceProvider::launchCalendarApp(const QDateTime& date, int viewId)
 {	
-	qDebug() << "launchCalendarApp slot getting called -->";
 	
 	// Check the view ID and launch the corresponding view
 	switch(viewId) {
-		case 0:
+		case CalenLauncher::MonthView:
 			// Launch the month view
 			mController->handleServiceManagerSlot(ECalenMonthView, date);
 			break;
-		case 1:
-			// Launch the month view
-			mController->handleServiceManagerSlot(ECalenDayView, date);
+		case CalenLauncher::AgendaView:
+			// Launch the agenda view
+			mController->handleServiceManagerSlot(ECalenAgendaView, date);
 			break;
 		default:
 			// Keep Quiet

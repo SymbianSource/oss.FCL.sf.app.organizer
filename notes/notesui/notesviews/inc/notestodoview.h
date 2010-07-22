@@ -32,6 +32,7 @@ class HbListView;
 class HbAction;
 class HbAbstractViewItem;
 class HbGroupBox;
+class HbLabel;
 class NotesModel;
 class NotesDocLoader;
 class AgendaUtil;
@@ -88,7 +89,8 @@ private:
 	HbAction *mOpenAction;
 
 	HbGroupBox *mSubTitle;
-
+	HbLabel *mEmptyListLabel;
+	
 	AgendaUtil *mAgendaUtil;
 
 	NotesAppControllerIf *mAppControllerIf;

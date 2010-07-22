@@ -48,6 +48,7 @@ public:
 	void enableDateButton(bool value);
 	bool canSetModelIndex(const QModelIndex &index) const;
 	void restore();
+	QDateTime getDateTime();
 	
 protected:
 	virtual HbWidget* createCustomWidget();
@@ -62,11 +63,13 @@ protected slots:
 	void saveDate();
 	void handleLocationTextChange(QString location);
     void launchLocationPicker();
+    void handleEditingFinished();
 	
 Q_SIGNALS:
 	void dateTimeUpdated(QDateTime& fromDateTime);
 	void locationTextChanged(QString location);
-		
+	void locationTextChanged(QString location, double latitude, double longitude);
+	void locationEditingFinished();	
 private:
 	AgendaEntry *mEditedEntry;
 	QDate mDate;

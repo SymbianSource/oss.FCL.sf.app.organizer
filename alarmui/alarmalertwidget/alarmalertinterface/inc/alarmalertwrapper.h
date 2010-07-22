@@ -74,10 +74,9 @@ public:
 	 * AlarmAlertObserver::alertCancelled is called once the
 	 * alert is cancelled successfully
 	 * 
-	 * @return true on success, false otherwise
 	 */
-	IMPORT_C bool dismissAlarmAlert();
-	
+	IMPORT_C void dismissAlarmAlert();
+
 	/**
 	 * @brief Updates the alarm alert with the information
 	 * provided

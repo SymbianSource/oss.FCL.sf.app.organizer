@@ -71,9 +71,13 @@ ClockWorldView::~ClockWorldView()
 		delete mDocLoader;
 		mDocLoader = 0;
 	}
+	if(mCityListModel){
+		delete mCityListModel;
+	}
+	
 	HbStyleLoader::unregisterFilePath(":/style/hblistviewitem.css");
-	HbStyleLoader::unregisterFilePath(
-			":/style/hblistviewitem.widgetml");
+	HbStyleLoader::unregisterFilePath(":/style/hblistviewitem.widgetml");
+	HbStyleLoader::unregisterFilePath(":/style/hblistviewitem_color.css");
 }
 
 /*!
@@ -125,8 +129,8 @@ void ClockWorldView::setupView(
 	mCityListView = qobject_cast<HbListView *> (
 			mDocLoader->findWidget(CLOCK_WORLD_CITYLIST));
 	HbStyleLoader::registerFilePath(":/style/hblistviewitem.css");
-	HbStyleLoader::registerFilePath(
-			":/style/hblistviewitem.widgetml");
+	HbStyleLoader::registerFilePath(":/style/hblistviewitem.widgetml");
+	HbStyleLoader::registerFilePath(":/style/hblistviewitem_color.css");
 	mCityListView->setLayoutName("citylist-portrait");
 	mCityListView->setModel(mCityListModel);
 	
@@ -244,13 +248,13 @@ void ClockWorldView::updateCurrentLocationInfo(int networkTime)
 				mSettingsUtility->timeFormatString());
 		itemList.insert(value.setNum(ClockHomeCityItem::Time), timeInfo);
 
-		// TODO: Use the home city specific icons.
+		//Use the home city specific icons.
 		// Display day/night indicators.
 		QString dayNightIconPath = "";
 		if (isDay(dateTime)) {
-			dayNightIconPath = "qtg_large_clock";
+			dayNightIconPath = "qtg_large_clock_home";
 		} else {
-			dayNightIconPath = "qtg_large_clock";
+			dayNightIconPath = "qtg_large_clock_night_home";
 		}
 		itemList.insert(value.setNum(
 				ClockHomeCityItem::DayNightIndicator), dayNightIconPath);
@@ -289,6 +293,7 @@ void ClockWorldView::handleItemLongPressed(
 	// Show the menu.
 	itemContextMenu->open(this, SLOT(selectedMenuAction(HbAction*)));
 	itemContextMenu->setPreferredPos(coords);
+	itemContextMenu->setAttribute( Qt::WA_DeleteOnClose,true);
 }
 
 /*!
@@ -660,7 +665,7 @@ QVariantList ClockWorldView::getCityListDecorationString(
 	if (isDay(dateTime)) {
 		dayNightIconPath = "qtg_large_clock";
 	} else {
-		dayNightIconPath = "qtg_large_clock";
+		dayNightIconPath = "qtg_large_clock_night";
 	}
 	decorationString.append(HbIcon(dayNightIconPath));
 

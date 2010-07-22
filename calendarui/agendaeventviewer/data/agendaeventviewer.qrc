@@ -2,11 +2,9 @@
 	<qresource prefix="/docml">
 		<file alias="agendaeventviewer.docml">agendaeventviewer.docml</file>
 	</qresource>
-	<qresource prefix="/translations">
-		<file alias="caleneventviewer_en_GB">caleneventviewer_en_GB.qm</file>
-	</qresource>
 	<qresource>
 		<file alias="agendaeventvieweritem.css">agendaeventvieweritem.css</file>
+		<file alias="agendaeventvieweritem_color.css">agendaeventvieweritem_color.css</file>
 		<file alias="agendaeventvieweritem.widgetml">agendaeventvieweritem.widgetml</file>
 	</qresource>
 </RCC>

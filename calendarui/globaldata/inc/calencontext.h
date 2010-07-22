@@ -54,10 +54,8 @@ class MCalenContext
         /**
          * Sets the date and time currently focused.
          * @param aFocusTime The new focus date and time.
-         * @param aViewId The view id of the currently active view.
          */
-        virtual void setFocusDateAndTimeL( const QDateTime& focusDateTime,
-                                        const int& viewId ) = 0;
+        virtual void setFocusDateAndTime( const QDateTime& focusDateTime) = 0;
 
         /**
          * Sets the date currently focused. When retrieving the focus
@@ -65,29 +63,23 @@ class MCalenContext
          * will be set to the default of view. When retrieving the focus
          * time only, it will be set to -1.
          * @param aFocusDate The new focus date and time.
-         * @param aViewId The view id of the currently active view.
          */
-        virtual void setFocusDateL( const QDateTime& focusDateTime,
-                                    const int& viewId ) = 0;
+        virtual void setFocusDate( const QDateTime& focusDateTime) = 0;
 
         /**
          * Sets the id of the instance currently focused.
          * @param aInstanceId the id of the focused instance.
-         * @param aViewId The view id of the currently active view.
          */
-        virtual void setInstanceIdL( const TCalenInstanceId& instanceId,
-                                     const int& viewId ) = 0;
+        virtual void setInstanceId( const TCalenInstanceId& instanceId ) = 0;
 
         /**
          * Sets the time and instance currently focused.
          * @param aFocusTime The new focus time. If no time is focused, set
          * the Utc time of this object to be Time::NullTTime.
          * @param aInstanceId the id of the focused instance.
-         * @param aViewId The view id of the currently active view.
          */
-        virtual void setFocusDateAndTimeAndInstanceL( const QDateTime& focusDateTime,
-                                                      const TCalenInstanceId& aInstanceId,
-                                                      const int& viewId ) = 0;
+        virtual void setFocusDateAndTimeAndInstance( const QDateTime& focusDateTime,
+                                                      const TCalenInstanceId& aInstanceId ) = 0;
 
     // Getters
         /**
@@ -95,7 +87,8 @@ class MCalenContext
          * @return The currently focused date and time. When no time is
          * focused, the default time on the current date will be returned.
          */
-        virtual QDateTime focusDateAndTimeL() const = 0;
+        virtual QDateTime focusDateAndTime() const = 0;
+	
 
         /**
          * Gets the time currently focused.
@@ -111,13 +104,6 @@ class MCalenContext
          */
         virtual TCalenInstanceId instanceId() const = 0;
 
-        /**
-         * Gets the id of the currently active view.
-         * @return The view id of the currently active view.
-         */
-        virtual int viewId() const = 0;
-        
- 
  public: // For Mutliple Context Support    
  
      /**
@@ -153,23 +139,6 @@ class MCalenContext
 	    * @return 
 	    */
 		virtual int mutlipleContextIdsCount() = 0;
-		
-		/**
-	    * Sets the user selected landmark
-	    * @param aLandMark	Landmark object
-	    */
-		//virtual void SetLandMark(CPosLandmark* aLandMark) = 0;
-		
-		/**
-	    * Returns the user selected landmark
-	    * @return Landmark object
-	    */
-		//virtual CPosLandmark* GetLandMark() = 0;
-		
-		/**
-	    * Resets the landmark
-	    */
-		//virtual void ResetLandMark() = 0;
 		
     };
 

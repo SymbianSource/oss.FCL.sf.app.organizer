@@ -14,8 +14,6 @@
 # Description:  Project definition file for calendar regional plugins
 #
 
-BLD_INF_RULES.prj_mmpfiles +=	"./calenregionalutil/group/calenregionalutil.mmp"
-
 BLD_INF_RULES.prj_exports += \
 "./calenregionalutil/inc/calenextrarowformatter.h			|./inc/calenextrarowformatter.h" \
 "./calenregionalutil/inc/calenlunarinfo.h					|./inc/calenlunarinfo.h" \
@@ -31,5 +29,6 @@ BLD_INF_RULES.prj_exports += \
 "./lunarchinese/data/SolarItems								/epoc32/release/winscw/urel/z/private/10005901/solaritems"
 
 TEMPLATE = subdirs
-SUBDIRS += lunarchinese
+SUBDIRS += calenregionalutil \
+					 lunarchinese
 CONFIG += ordered

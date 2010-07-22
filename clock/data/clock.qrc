@@ -11,8 +11,5 @@
 		
 		<file alias="fade_out.fxml">effects/fade_out.fxml</file>
 		<file alias="fade_in.fxml">effects/fade_in.fxml</file>
-	</qresource>
-	<qresource prefix="/translations">
-		<file alias="clock" >translations/clock.qm</file>
-	</qresource>
+	</qresource>	
 </RCC>

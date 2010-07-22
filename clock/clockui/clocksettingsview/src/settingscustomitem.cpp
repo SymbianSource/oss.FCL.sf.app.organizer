@@ -63,9 +63,7 @@ SettingsCustomItem::SettingsCustomItem(QGraphicsItem *parent)
  */
 SettingsCustomItem::~SettingsCustomItem()
 {
-	if (!mTimezoneClient->isNull()) {
-		mTimezoneClient->deleteInstance();
-	}
+    // Nothing yet.
 }
 
 /*!
@@ -228,6 +226,7 @@ void SettingsCustomItem::launchTimePicker()
 	mTimePickerDialog = new HbDialog;
 	mTimePickerDialog->setTimeout(HbDialog::NoTimeout);
 	mTimePickerDialog->setDismissPolicy(HbDialog::NoDismiss);
+	mTimePickerDialog->setAttribute(Qt::WA_DeleteOnClose, true );
 
 	// Set the heading for the dialog.
 	HbLabel * timeLabel =
@@ -274,7 +273,8 @@ void SettingsCustomItem::handleOkAction()
 			// Update the display text on form item.
 			mTimeWidget->setText(newTime.toString(timeFormatString));
 			// Update the system time.
-			mTimezoneClient->setDateTime(QDateTime(QDate::currentDate(), newTime));
+			mTimezoneClient->setDateTime(
+					QDateTime(QDate::currentDate(), newTime));
 		}
 	} else if(mDatePickerDialog) {
 		// Get the time from the time picker.
@@ -288,7 +288,8 @@ void SettingsCustomItem::handleOkAction()
 			// Update the display text on form item.
 			mDateWidget->setText(newDate.toString(dateFormatString));
 			// Update the system date.
-			mTimezoneClient->setDateTime(QDateTime(newDate, QTime::currentTime()));
+			mTimezoneClient->setDateTime(
+					QDateTime(newDate, QTime::currentTime()));
 		}
 	}
 }
@@ -306,6 +307,7 @@ void SettingsCustomItem::launchDatePicker()
 	mDatePickerDialog = new HbDialog;
 	mDatePickerDialog->setTimeout(HbDialog::NoTimeout);
 	mDatePickerDialog->setDismissPolicy(HbDialog::NoDismiss);
+	mDatePickerDialog->setAttribute(Qt::WA_DeleteOnClose, true );
 
 	// Set the heading for the dialog.
 	HbLabel * timeLabel =
@@ -363,8 +365,11 @@ void SettingsCustomItem::updatePlaceItem(LocationInfo info)
 void SettingsCustomItem::launchRegSettingsView()
 {
 	ClockRegionalSettingsView *view =
-			new ClockRegionalSettingsView(*mSettingsUtility);
+			new ClockRegionalSettingsView();
+	connect(mTimezoneClient, SIGNAL(timechanged()),
+          view, SLOT(updateWeekStartOn()));
 	view->showView();
+	
 }
 
 /*!

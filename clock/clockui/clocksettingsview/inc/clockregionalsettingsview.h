@@ -23,9 +23,9 @@
 #include <QObject>
 #include <QPointer>
 #include <QModelIndex>
-
 // User includes
 #include "settingsutility.h"
+#include "clocksettingsdefines.h"
 
 // Forward declarations
 class HbView;
@@ -35,21 +35,23 @@ class HbDataFormModel;
 class HbDataFormModelItem;
 class HbListWidget;
 class HbComboBox;
-class QTranslator;
+class HbTranslator;
 class ClockSettingsDocLoader;
 class SettingsCustomItem;
+
 
 class ClockRegionalSettingsView : public QObject
 {
 	Q_OBJECT
 
 public:
-	ClockRegionalSettingsView(SettingsUtility &utility, QObject *parent = 0);
-	virtual ~ClockRegionalSettingsView();
+	CLOCKSETTINGSVIEW_EXPORT ClockRegionalSettingsView(QObject *parent = 0);
+	CLOCKSETTINGSVIEW_EXPORT virtual ~ClockRegionalSettingsView();
 
 public:
-	void showView();
-
+	CLOCKSETTINGSVIEW_EXPORT void showView();
+public slots:
+    void updateWeekStartOn();
 private slots:
 	void handleBackAction();
 	void handleItemDisplayed(const QModelIndex &index);
@@ -65,6 +67,8 @@ private:
 	void createModel();
 	void populateFormModel();
 	QStringList weekdayList();
+	void updateWeekDays();
+
 
 private:
 	QStringList mTimeFormatStringList;
@@ -73,8 +77,6 @@ private:
 	QStringList mDateSeparatorStringList;
 
 	HbView *mView;
-	HbAction *mBackAction;
-
 	QPointer<HbDataForm> mForm;
 	QPointer<HbDataFormModel> mFormModel;
 
@@ -86,9 +88,9 @@ private:
 	QPointer<HbListWidget> mWorkdaysItem;
 
 	ClockSettingsDocLoader *mLoader;
-	SettingsUtility &mSettingsUtility;
+	SettingsUtility *mSettingsUtility;
 	SettingsCustomItem *mCustomPrototype;
-    QTranslator *mTranslator;
+    HbTranslator *mTranslator;
 };
 
 #endif // CLOCKREGIONALSETTINGSVIEW_H

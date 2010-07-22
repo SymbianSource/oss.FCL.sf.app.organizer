@@ -30,6 +30,8 @@
 #include <HbAbstractItemView>
 #include <HbGroupBox>
 #include <HbListViewItem>
+#include <hbapplication> // hbapplication
+#include <hbactivitymanager> // hbactivitymanager
 
 // User includes
 #include "agendaeventviewer.h"
@@ -40,6 +42,7 @@
 #include "notesmodel.h"
 #include "notessortfilterproxymodel.h"
 #include "noteseditor.h"
+#include "notescommon.h" // NotesNamespace
 
 /*!
 	\class NotesMainView
@@ -58,7 +61,8 @@ NotesMainView::NotesMainView(QGraphicsWidget *parent)
 :HbView(parent),
  mSelectedItem(0),
  mDeleteAction(0),
- mIsLongTop(false)
+ mIsLongTop(false),
+ mIsScreenShotCapruted(false)
 {
 	// Nothing yet.
 }
@@ -122,10 +126,12 @@ void NotesMainView::setupView(
 			mNotesModel, SIGNAL(rowAdded(QModelIndex)),
 			this, SLOT(scrollTo(QModelIndex)));
 
-	// Get the view heading label
-/*	mViewHeading = static_cast<HbLabel *> (
-			mDocLoader->findWidget("viewHeading"));*/
+	// Get the empty list label.
+	mEmptyListLabel = static_cast<HbLabel *> (
+			mDocLoader->findWidget("emptyListLabel"));
+	mEmptyListLabel->hide();
 
+	// Get the view heading label
 	mSubTitle = static_cast<HbGroupBox *>(
 			mDocLoader->findWidget("viewHeading"));
 
@@ -139,7 +145,19 @@ void NotesMainView::setupView(
 	// Set the graphics size for the icons.
 	HbListViewItem *prototype = mListView->listItemPrototype();
 	prototype->setGraphicsSize(HbListViewItem::SmallIcon);
-}
+	
+    // Get a pointer to activity Manager
+    HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+  
+    // clean up any previous versions of this activity from the activity manager.
+    // ignore return value as the first boot would always return a false
+    // bool declared on for debugging purpose
+    bool ok = activityManager->removeActivity(notes);
+	
+	// connect main view for the first time to recieve aboutToQuit signal
+    connect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()), this, SLOT(saveActivity()));
+    
+ }
 
 void NotesMainView::setupAfterViewReady()
 {
@@ -209,6 +227,9 @@ void NotesMainView::createNewNote()
 			mNotesEditor, SIGNAL(editingCompleted(bool)),
 			this, SLOT(handleEditingCompleted(bool)));
 	mNotesEditor->create(NotesEditor::CreateNote);
+	// capture screenshot for future use, if application
+	// is exited/Quit from notesEditor
+	captureScreenShot(true);
 }
 
 /*!
@@ -263,6 +284,9 @@ void NotesMainView::handleItemReleased(const QModelIndex &index)
 			// Launch the notes editor with the obtained info.
 			mNotesEditor->edit(entry);
 		}
+		// capture screenshot for future use, if application
+		// is exited/Quit from eventViewer/notesEditor
+		captureScreenShot(true);
 	}
 }
 
@@ -408,7 +432,9 @@ void NotesMainView::handleEditingCompleted(bool status)
 
 	// Cleanup.
 	mNotesEditor->deleteLater();
-
+	// set captured screenshot as invalid as the control is returned back 
+	// to the main view
+	captureScreenShot(false);
 }
 
 /*!
@@ -416,7 +442,8 @@ void NotesMainView::handleEditingCompleted(bool status)
  */
 void NotesMainView::displayCollectionView()
 {
-
+    // no need to capture the screen shot for future use as 
+    // NotesViewManager::switchToView takes care of it
 	// Switch to collections view.
 	mAppControllerIf->switchToView(NotesNamespace::NotesCollectionViewId);
 
@@ -440,6 +467,9 @@ void NotesMainView::scrollTo(QModelIndex index)
 void NotesMainView::handleViewingCompleted()
 {
 	mAgendaEventViewer->deleteLater();
+	// set captured screenshot as invalid as the control is returned back 
+	// to the main view
+	captureScreenShot(false);
 }
 
 /*!
@@ -476,6 +506,9 @@ void NotesMainView::editTodo()
 
 	// Launch the to-do editor with the obtained info.
 	mNotesEditor->edit(todoId);
+	// capture screenshot for future use, if application
+	// is exited/Quit from notesEditor
+	captureScreenShot(true);
 
 }
 
@@ -509,7 +542,15 @@ void NotesMainView::updateSubTitle(ulong id)
 			(AgendaUtil::IncludeNotes
 			| AgendaUtil::IncludeCompletedTodos
 			| AgendaUtil::IncludeIncompletedTodos));
-	int c= entries.count();
+	
+	if (0 >= entries.count()) {
+		mEmptyListLabel->show();
+		mListView->hide();
+	} else {
+		mEmptyListLabel->hide();
+		mListView->show();
+	}
+	
 	mSubTitle->setHeading(
 			hbTrId("txt_notes_subhead_ln_notes",entries.count()));
 }
@@ -600,6 +641,9 @@ void NotesMainView::openNote()
 		mAgendaEventViewer->view(
 				entry, AgendaEventViewer::ActionEditDelete);
 	}
+	// capture screenshot for future use, if application
+	// is exited/Quit from notesEditor/eventViewer
+	captureScreenShot(true);
 }
 
 /*!
@@ -630,4 +674,44 @@ void NotesMainView::handleMenuClosed()
 	mIsLongTop = false;
 }
 
+/*!
+	CaptureScreenShot captures screen shot 
+	\param captureScreenShot bool to indicate if screenshot needs to be captured
+*/ 
+void NotesMainView::captureScreenShot(bool captureScreenShot)
+    {
+    if (captureScreenShot) // check if screen shot needs to be captured
+        {
+        mScreenShot.clear();
+        mScreenShot.insert("screenshot", QPixmap::grabWidget(mainWindow(), mainWindow()->rect()));
+        }
+    mIsScreenShotCapruted = captureScreenShot; // set mIsScreenShotCapruted set validity of screenshot
+    }
+
+/*!    
+	saveActivity saves main view as an activity 
+*/ 
+void NotesMainView::saveActivity()
+ {
+   // Get a pointer to activity Manager
+   HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+ 
+   if (!mIsScreenShotCapruted) // check if a valid screenshot is already captured
+       {
+       mScreenShot.clear();
+       mScreenShot.insert("screenshot", QPixmap::grabWidget(mainWindow(), mainWindow()->rect()));
+       }
+ 
+   // save any data necessary to save the state
+   QByteArray serializedActivity;
+   QDataStream stream(&serializedActivity, QIODevice::WriteOnly | QIODevice::Append);
+   stream << NotesNamespace::NotesMainViewId;
+ 
+   // add the activity to the activity manager
+   bool ok = activityManager->addActivity(notes, serializedActivity, mScreenShot);
+   if ( !ok )
+       {
+       qFatal("Add failed" );
+       }
+ }
 // End of file	--Don't remove this.

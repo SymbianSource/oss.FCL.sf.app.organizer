@@ -28,6 +28,9 @@
 #   define CLOCKVIEWS_EXPORT Q_DECL_IMPORT
 #endif
 
+const QString clockMainView = "ClockMainView"; // Activity Id for clock activity to be save
+// in Activity Manager DB
+
 #endif // CLOCKVIEWSDEFINES_H
 
 // End of file  --Don't remove this.

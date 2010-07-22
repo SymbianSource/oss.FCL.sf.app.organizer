@@ -19,6 +19,8 @@
 // System includes
 #include <HbMainWindow>
 #include <HbInstance>
+#include <hbapplication> // hbapplication
+#include <hbactivitymanager> // hbactivitymanager
 
 // User includes
 #include "clockviewmanager.h"
@@ -46,14 +48,44 @@ ClockViewManager::ClockViewManager(
  mAppControllerIf(controllerIf),
  mWorldClockView(0)
 {
-	// Load the main view at the start up.
-	loadMainView();
+    // Activity Reason from Activity Manager
+    int activityReason = qobject_cast<HbApplication*>(qApp)->activateReason();
+    
+    if (Hb::ActivationReasonActivity == activityReason) {
+        // Application is started from an activity
+		// extract activity data
+        QVariant data = qobject_cast<HbApplication*>(qApp)->activateData();
+        // restore state from activity data
+        QByteArray serializedModel = data.toByteArray();
+        QDataStream stream(&serializedModel, QIODevice::ReadOnly);
+        int activityId;
+        stream >> activityId;
+        
+        if (MainView == activityId) {
+            // Load the main view at the start up.
+            loadMainView();
+			// Delay loading of other views till main view is loaded.
+        	HbMainWindow *window = hbInstance->allMainWindows().first();
+        	connect(
+                window, SIGNAL(viewReady()),
+                this, SLOT(loadOtherViews()));
 
-	// Delay loading of other views till main view is loaded.
-	HbMainWindow *window = hbInstance->allMainWindows().first();
-	connect(
-			window, SIGNAL(viewReady()),
-			this, SLOT(loadOtherViews()));
+        }
+        else if (WorldClock == activityId) {
+            //no implentation yet, UI specs are not clear
+        }
+
+    }
+    else {
+        // Load the main view at the start up.
+        loadMainView();
+        // Delay loading of other views till main view is loaded.
+        HbMainWindow *window = hbInstance->allMainWindows().first();
+        connect(
+                window, SIGNAL(viewReady()),
+                this, SLOT(loadOtherViews()));
+    }
+
 }
 
 /*!
@@ -75,12 +107,21 @@ void ClockViewManager::showView(ClockViews view)
 
 	switch (view) {
 		case MainView:
+		    // set captured screenshot as invalid as main view 
+			// is the current view
+		    mMainView->captureScreenShot(false);
 			window->removeView(window->currentView());
 			window->addView(mMainView);
 			window->setCurrentView(mMainView);
 			break;
 
 		case WorldClock:
+		    if (mMainView) {
+				// capture main view as the screenshot for future use 
+				// to save the main view as an activity, if application is 
+				// exited/Quit from world view
+                mMainView->captureScreenShot(true);
+		    }
 			window->removeView(window->currentView());
 			window->addView(mWorldClockView);
 			window->setCurrentView(mWorldClockView);

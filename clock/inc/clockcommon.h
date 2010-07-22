@@ -27,16 +27,6 @@ const QString CLOCK_DEBUG_FILE("debug.txt");
 const QString PATH_TEXT("C:/");
 const int KMaximumCityListCount(50);
 
-const long int KCRUidNitz =  { 0x101F8876 };
-/** Active Protocol key */
-const long int KActiveProtocol = 0x00000001;
-/** Previous alarm time high */
-const long int KPreviousAlarmTime = 0x00000002;
-
-const long int KCRUidClockApp =  { 0x101F874D };
-/** Alarm snooze time key */
-const long int KClockAppSnoozeTime = 0x00000002;
-
 // Common definitions for docml.
 #define CLOCK_MAIN_VIEW_DOCML						":/xml/clockmainview.docml"
 #define CLOCK_MAIN_VIEW_PORTRAIT_SECTION			"portrait"

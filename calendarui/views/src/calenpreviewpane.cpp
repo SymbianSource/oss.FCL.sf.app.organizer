@@ -27,6 +27,8 @@
 #include <hbframedrawer.h>
 #include <hbfontspec.h>
 #include <hbcolorscheme.h>
+#include <hbtapgesture.h>
+#include <hbpangesture.h>
 #include <agendautil.h>
 #include <agendaentry.h>
 
@@ -42,7 +44,9 @@
 
 // Macros
 #define TWO_SECONDS_TIMER 2000 // millseconds
-#define SCROLLING_SPEED 50
+#define SCROLLING_SPEED 10
+#define MAX_PAN_DIRECTION_THRESHOLD 50
+#define MIN_PAN_DIRECTION_THRESHOLD 20
 
 static const QString EMPTYSTRING(" ");
 
@@ -59,6 +63,8 @@ CalenPreviewPane::CalenPreviewPane(MCalenServices& services,
 	mIsNoEntriesAdded = true;
 	mIsGestureHandled = false;
 	mNoEntriesLabel = 0;
+	mHtDiff = 0.0;
+	mScrollDuration = 0;
 	setAcceptDrops(true);
 	setScrollDirections(Qt::Vertical);
 	setVerticalScrollBarPolicy(HbScrollArea::ScrollBarAlwaysOff);
@@ -101,7 +107,7 @@ void CalenPreviewPane::populateLabel(QDateTime date)
 	GetInstanceListL();
 	
 	// Get the content of the scroll area
-	QGraphicsWidget* content = this->contentWidget();
+	QGraphicsWidget* content = contentWidget();
 	// Adjust the layout
 	QGraphicsLinearLayout* layout = static_cast<QGraphicsLinearLayout *>
 															(content->layout());
@@ -154,11 +160,16 @@ void CalenPreviewPane::populateLabel(QDateTime date)
 				// No summary display "No subject"
 				summary.append(hbTrId("txt_calendar_dblist_unnamed"));
 			}
-			QDateTime startTime = mInstanceArray[i].startTime();
-			HbExtendedLocale systemLocale =HbExtendedLocale::system();
-			QString start = systemLocale.format(startTime.time(), 
-			                                    r_qtn_time_usual_with_zero);
-			start.append(EMPTYSTRING);
+			// Chcek the entry type, based on the type display time field in
+			// preview pane.
+			QString start;
+			if(mInstanceArray[i].type() != AgendaEntry::TypeTodo ) {
+				QDateTime startTime = mInstanceArray[i].startTime();
+				HbExtendedLocale systemLocale =HbExtendedLocale::system();
+				start = systemLocale.format(startTime.time(), 
+				                                    r_qtn_time_usual_with_zero);
+				start.append(EMPTYSTRING);	
+			}
 			// Append summary to start time
 			QString text = start.append(summary);
 			label->setPlainText(text);
@@ -238,9 +249,6 @@ void CalenPreviewPane::startAutoScroll()
 {
 	if (mIsNoEntriesAdded) {
 		scrollContentsTo(QPointF(0.0,0.0));
-				
-		// Call pan gesture with zero delta just to stop the scfrolling 
-		HbScrollArea::panGesture(QPointF(0.0,0.0));
 		return;
 	}
 
@@ -259,17 +267,30 @@ void CalenPreviewPane::onTwoSecondsTimeout()
 	mTwoSecTimer->stop();
 	disconnect(mTwoSecTimer, SIGNAL(timeout()), 
 										   this, SLOT(onTwoSecondsTimeout()));
-	// Start the scrolling in the proper direction
+	
+	// Calculate the timer and the height difference of pane and its content
+	if (!mScrollDuration) {
+        qreal contentHeight = contentWidget()->size().height();
+        qreal paneHeight = size().height();
+        mHtDiff = contentHeight - paneHeight;
+        if (mHtDiff > 0) { // content is more than widget height, we need to scroll
+            mScrollDuration = mHtDiff / SCROLLING_SPEED;
+        }
+	}
+	
+    // Start the scrolling in the proper direction
 	if (mScrollDirection == up) {
 		// Start scrolling upwards
 		mScrollDirection = down;
 		mNumOfScrolls++;
-		upGesture(SCROLLING_SPEED);
+		QPointF targetPos(0.0, -mHtDiff);
+        scrollContentsTo(-targetPos, mScrollDuration * 1000);
 	} else if (mScrollDirection == down) {
 		mScrollDirection = up;
 		mNumOfScrolls++;
 		// Start scrolling downwards
-		downGesture(SCROLLING_SPEED);
+		QPointF targetPos(0.0, 0.0);
+        scrollContentsTo(targetPos, mScrollDuration * 1000);
 	}
 }
 
@@ -290,44 +311,59 @@ void CalenPreviewPane::scrollingFinished()
 }
 
 /*!
- Function to listen mouse press events
+    Function to listen for all gestures
  */
-void CalenPreviewPane::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void CalenPreviewPane::gestureEvent(QGestureEvent *event)
 {
-	mIsGestureHandled = false;
-	mPressedPos = event->pos();
-	event->accept();
-}
-
-/*!
- Function to listen mouse release events
- */
-void CalenPreviewPane::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
-{
-	qreal posDiff = mPressedPos.x()-event->pos().x();
-	if (abs(posDiff) < 50 && !mIsGestureHandled) {
-		// Preview pane tapped
-		mServices.IssueCommandL(ECalenDayView);
-	}
-	event->accept();
-}
-
-/*!
- Function to listen mouse move events
- */
-void CalenPreviewPane::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
-{
-	qreal posDiff = mPressedPos.x()-event->pos().x();
-	if (posDiff < -50) {
-		mIsGestureHandled = true;
-		// right gesture
-		mView->handlePreviewPaneGesture(true);
-	} else if (posDiff > 50) {
-		mIsGestureHandled = true;
-		// left gesture
-		mView->handlePreviewPaneGesture(false);
-	}
-	event->accept();
+    if(HbPanGesture *gesture = qobject_cast<HbPanGesture *>(event->gesture(Qt::PanGesture))) {
+        if (gesture->state() == Qt::GestureStarted) {
+            // TODO: This work aroung till framework provides an api
+            // to know the direciton of the pan, until then we need
+            // calculate the direction explicitly
+            // Get to know the direction of the gesture
+            QPointF delta = gesture->delta();
+            if (abs(delta.y()) > MAX_PAN_DIRECTION_THRESHOLD) {
+                // Now see if y coord diff has crossed threshold
+                if (delta.x() > MAX_PAN_DIRECTION_THRESHOLD) {
+                    mIsGestureHandled = true;
+                    // right gesture
+                    mView->handlePreviewPaneGesture(true);
+                    event->accept(Qt::PanGesture);
+                } else if (delta.x() < -MAX_PAN_DIRECTION_THRESHOLD){
+                    mIsGestureHandled = true;
+                    // left gesture
+                    mView->handlePreviewPaneGesture(false);
+                    event->accept(Qt::PanGesture);
+                } else {
+                    event->accept(Qt::PanGesture);
+                    return;
+                }
+            } else if (abs(delta.y()) < MAX_PAN_DIRECTION_THRESHOLD) {
+               if (delta.x() > MIN_PAN_DIRECTION_THRESHOLD) {
+                   mIsGestureHandled = true;
+                   // right gesture
+                   mView->handlePreviewPaneGesture(true);
+                   event->accept(Qt::PanGesture);
+               } else if (delta.x() < -MIN_PAN_DIRECTION_THRESHOLD){
+                   mIsGestureHandled = true;
+                   // left gesture
+                   mView->handlePreviewPaneGesture(false);
+                   event->accept(Qt::PanGesture);
+               }else {
+                   event->accept(Qt::PanGesture);
+                   return;
+               }
+            }
+        }
+    } else if(HbTapGesture *gesture = qobject_cast<HbTapGesture *>(event->gesture(Qt::TapGesture))) {
+        if (gesture->state() == Qt::GestureFinished) {
+            if (gesture->tapStyleHint() == HbTapGesture::Tap) {
+                // Preview pane tapped
+                mServices.IssueCommandL(ECalenAgendaView);
+                event->accept(Qt::TapGesture);
+            }
+        }
+    }
 }
 
 /*!

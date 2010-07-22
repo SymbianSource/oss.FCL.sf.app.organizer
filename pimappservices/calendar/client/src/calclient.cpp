@@ -35,8 +35,6 @@
 #include "calcalendarinfoimpl.h"
 #include "agmfilechangenotification.h"
 
-const TUint KDefaultMessageSlots = 3;
-
 _LIT(KAgendaMutex, "AgnMutex");
 
 //
@@ -205,7 +203,7 @@ This function must be called before the server can be used.
 	
 TInt RAgendaServ::DoConnect()
 	{
-	return CreateSession(KAgendaServerName,Version(), KDefaultMessageSlots);
+	return CreateSession(KAgendaServerName,Version());
 	}
 
 
@@ -1808,11 +1806,18 @@ void RAgendaServ::GetChangesSinceLastNotificationL(RArray<TCalChangeEntry>& aCha
 				{
 				if (type == CCalEntry::ETodo)
 					{
-					changeItem.iEntryType = MCalChangeCallBack2::EChangeEntryTodo;
+					changeItem.iEntryType =
+							MCalChangeCallBack2::EChangeEntryTodo;
+					}
+				else if (type == CCalEntry::ENote)
+					{
+					changeItem.iEntryType =
+							MCalChangeCallBack2::EChangeEntryNote;
 					}
 				else
 					{
-					changeItem.iEntryType = MCalChangeCallBack2::EChangeEntryEvent;
+					changeItem.iEntryType =
+							MCalChangeCallBack2::EChangeEntryEvent;
 					}
 				}
 			aChangeItems.AppendL(changeItem);

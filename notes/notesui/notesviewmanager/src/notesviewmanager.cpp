@@ -24,6 +24,8 @@
 #include <HbListView>
 #include <HbMessageBox>
 #include <HbAction>
+#include <hbapplication> // hbapplication
+#include <hbactivitymanager> // hbactivitymanager
 
 // User includes
 #include "notesviewmanager.h"
@@ -59,12 +61,40 @@ NotesViewManager::NotesViewManager(
 
 	mAgendaUtil = mAppControllerIf.agendaUtil();
 
+	// Check the Application Startup reason from Activity Manager
+	int activityReason = qobject_cast<HbApplication*>(qApp)->activateReason();
+
+	if (Hb::ActivationReasonActivity == activityReason) // Check if application is started 
+	    // from an application
+	    {
+        // Application is started from an activity
+		// extract activity data
+        QVariant data = qobject_cast<HbApplication*>(qApp)->activateData();
+        // Restore state from activity data
+        QByteArray serializedModel = data.toByteArray();
+        QDataStream stream(&serializedModel, QIODevice::ReadOnly);
+        int viewId;
+        stream >> viewId; // read stream into an int
+
+        if (NotesNamespace::NotesMainViewId == viewId) // Check if viewId is main view
+            {
+            // Load MainView
+            loadNotesMainView();
+            }
+        else if (NotesNamespace::NotesCollectionViewId == viewId) // Check if the viewId is collective view
+            {
+            //no implementation yet, UI Specs not available
+            }
+	    }
+	else // application started by either service framework or normally
+	    {
+        // Load the main view at the start up.
+        loadNotesMainView();
+	    }
+
 	connect(
 			mAgendaUtil, SIGNAL(instanceViewCreationCompleted(int)),
 			this,SLOT(handleInstanceViewCreationCompleted(int)));
-
-	// Load the main view at the start up.
-	loadNotesMainView();
 
 	// Delay loading of other views till main view is loaded.
 	connect(
@@ -94,27 +124,59 @@ void NotesViewManager::switchToView(NotesNamespace::NotesViewIds viewId)
 			window->removeView(window->currentView());
 			window->addView(mMainView);
 			window->setCurrentView(mMainView);
+			mMainView->captureScreenShot(false);
 			break;
 
 		case NotesNamespace::NotesCollectionViewId:
+		    if (mMainView)
+		        {
+                if (mMainView == window->currentView())
+                    {
+                    mMainView->captureScreenShot(true);
+                    }
+		        }
 			window->removeView(window->currentView());
 			window->addView(mCollectionView);
 			window->setCurrentView(mCollectionView);
 			break;
 
 		case NotesNamespace::NotesTodoViewId:
+		    if (mMainView)
+		        {
+                if (mMainView == window->currentView())
+                    {
+                    mMainView->captureScreenShot(true);
+                    }
+		        }
+
 			window->removeView(window->currentView());
 			window->addView(mTodoView);
 			window->setCurrentView(mTodoView);
 			break;
 
 		case NotesNamespace::NotesFavoritesViewId:
+	         if (mMainView)
+	             {
+                 if (mMainView == window->currentView())
+                     {
+	                 mMainView->captureScreenShot(true);
+	                 }
+	             }
+
 			window->removeView(window->currentView());
 			window->addView(mFavoriteView);
 			window->setCurrentView(mFavoriteView);
 			break;
 
 		case NotesNamespace::NotesNoteViewId:
+	         if (mMainView)
+	             {
+	             if (mMainView == window->currentView())
+	                 {
+	                 mMainView->captureScreenShot(true);
+	                 }
+	             }
+
 			window->removeView(window->currentView());
 			window->addView(mNoteView);
 			window->setCurrentView(mNoteView);
@@ -341,5 +403,11 @@ void NotesViewManager::handleInstanceViewCreationCompleted(int status)
 
 	// Update the title for to-do view.
 	mTodoView->updateTitle();
+	
+	// Update the plain notes view.
+	mNoteView->updateNoteView();
+	
+	// Update the favorites view.
+	mFavoriteView->updateFavoriteView();
 }
 // End of file	--Don't remove this.

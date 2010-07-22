@@ -23,7 +23,6 @@ DEPENDPATH += . \
 INCLUDEPATH += . \
 			   ./inc \
 			   ../inc
-INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 DEFINES += XQCALENDAR_LIBRARY
 
@@ -31,11 +30,13 @@ symbian: {
 	LIBS += -lcalinterimapi \
 			-lcalenImp \
 			-lestor \
-			-lefsrv
+			-lefsrv \
+			-lcaleninterimutils2
 	
 	TARGET.UID3 = 0x20029F7F
 	TARGET.CAPABILITY = ALL -TCB
 	TARGET.EPOCALLOWDLLDATA = 1
+	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 }
 
 HEADERS += ../inc/agendautil.h \

@@ -42,6 +42,10 @@ symbian: {
 	
 	LIBS += -lagendainterface \
 			-lcaleneditor
+	
+	BLD_INF_RULES.prj_exports += \
+		"./inc/noteseditor.h  |../../inc/noteseditor.h" \
+		"./inc/noteseditordefines.h  |../../inc/noteseditordefines.h
 }
 
 SOURCES += \
@@ -53,8 +57,8 @@ SOURCES += \
 		notestodoeditorcustomitem.cpp
 
 HEADERS += \
-		../../../inc/noteseditor.h \
-		../../../inc/noteseditordefines.h \
+		noteseditor.h \
+		noteseditordefines.h \
 		noteseditor_p.h \
 		noteseditordocloader.h \
 		noteseditorcommon.h \
@@ -64,5 +68,7 @@ HEADERS += \
 
 RESOURCES += \
 		noteseditor.qrc
+# TODO :need to use noteseditor.ts once it is released to platform		
+TRANSLATIONS += notes.ts		
 
 # End of file	--Don't remove this.

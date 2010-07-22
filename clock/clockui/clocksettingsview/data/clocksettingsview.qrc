@@ -3,7 +3,4 @@
 		<file alias="clocksettingsview.docml">xml/clocksettingsview.docml</file>
 		<file alias="clockregionalsettingsview.docml">xml/clockregionalsettingsview.docml</file>
 	</qresource>
-	<qresource prefix="/translations">
-		<file alias="clocksettingsview" >translations/clocksettingsview.qm</file>
-	</qresource>
 </RCC>

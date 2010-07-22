@@ -11,7 +11,8 @@
 *
 * Contributors:
 *
-* Description:   IBY file for localizable elements of Calendar.app
+* Description:
+* The iby file for calendar resources
 *
 */
 
@@ -22,8 +23,8 @@
 #include <data_caging_paths_for_iby.hrh>
 
 // Application resource file.
-data=DATAZ_\resource\apps\CALENDAR.RSC		APP_RESOURCE_DIR\CALENDAR.RSC
-data=DATAZ_\QT_TRANSLATIONS_DIR\calendar.qm			QT_TRANSLATIONS_DIR\calendar.qm
+S60_APP_RESOURCE(calendar)
+data=DATAZ_/QT_TRANSLATIONS_DIR/calendar.qm			QT_TRANSLATIONS_DIR/calendar.qm
 
 #endif // CALENDARRESOURCE_IBY
 

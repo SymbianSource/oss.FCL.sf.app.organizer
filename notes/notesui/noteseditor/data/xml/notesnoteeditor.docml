@@ -21,7 +21,7 @@
     <widget name="notesEditorView" type="HbView">
         <widget name="noteEditorWidget" role="HbView:widget" type="HbWidget">
             <widget name="notesEditorSubHeading" type="HbGroupBox">
-	        <string name="titleText" value=" "/>
+	        <string name="heading" value=" "/>
     	        <bool name="collapsable" value="FALSE"/>
             </widget>
             <widget name="editorHeading" type="HbLabel">
@@ -52,8 +52,8 @@
             </layout>
         </widget>
         <widget name="viewMenu" role="HbView:menu" type="HbMenu">
-            <ref object="makeAsTodoAction" role="HbMenu:addAction"/>
             <ref object="makeFavoriteAction" role="HbMenu:addAction"/>
+            <ref object="makeAsTodoAction" role="HbMenu:addAction"/>
         </widget>
         <widget name="viewToolbar" role="HbView:toolBar" type="HbToolBar">
             <enums name="orientation" value="Horizontal"/>

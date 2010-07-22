@@ -81,6 +81,9 @@ void CalenEditor::edit(const QFile &handle, bool launchCalendar)
  */
 void CalenEditor::edit(AgendaEntry entry, bool launchCalendar)
 {
+	if(entry.isNull()) {
+		return;
+	}
 	d_ptr->edit(entry, launchCalendar);
 }
 
@@ -118,6 +121,9 @@ void CalenEditor::create(QDateTime newEntryDateTime, bool launchCalendar,
 void CalenEditor::create(AgendaEntry entry, bool launchCalendar, 
                          CalenEditor::CreateType type)
 {
+	if(entry.isNull()) {
+		return;
+	}
 	d_ptr->create(type, entry, launchCalendar);
 }
 

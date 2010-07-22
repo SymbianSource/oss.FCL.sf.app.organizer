@@ -212,6 +212,7 @@ public:
 	TTime TzRulesLastModifiedDateL();
 	void CheckTzDbModificationL();
 	void HandleTzRulesChangeL(const TTime& aTime);
+	TBool IsIndexFileAvailableL();
 
 // Calendar file conversion operations
 	void LoadNewStreamStoreL(CStreamStore& aStore, const TStreamId& aModelStreamId, CAgnEntryManager& aEntryManager, CAgnTzRuleIndex& aTzRuleIndex);
@@ -229,7 +230,7 @@ public:
 	TBool GenerateIndexFileName(TFileName& aFileName);
 	TCalCollectionId CollectionId() const;
 	const CAgnServFile& AgnServFile();
-
+	void ResetDeleteRollbackArray();
 
 private:
 	void ConstructL(CAgnServFile* aAgnServerFile);

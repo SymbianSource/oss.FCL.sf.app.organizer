@@ -54,7 +54,7 @@ QList<CpSettingFormItemData*> DateTimeSettingsPlugin::
 						      createSettingFormItemData(
 							  CpItemDataHelper &itemDataHelper) const
 {
-	HbIcon* icon = new HbIcon();
+	HbIcon icon ;
 	HbExtendedLocale locale = HbExtendedLocale::system();
 	QString timeInfo = locale.format(
 			QTime::currentTime(), r_qtn_time_usual_with_zero);
@@ -68,7 +68,7 @@ QList<CpSettingFormItemData*> DateTimeSettingsPlugin::
 	QList<CpSettingFormItemData*> entryItemList;
 	CpSettingFormItemData *entryItem = new DateTimeSettingsView(
 			itemDataHelper,hbTrId("txt_cp_main_view_list_time_date"),
-			displayString,*icon);
+			displayString,icon);
 	entryItemList.append(entryItem);
 	return entryItemList;
 }

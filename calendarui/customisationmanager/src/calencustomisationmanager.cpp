@@ -27,8 +27,10 @@
 #include "calenservices.h"
 #include "calencustomisation.h"
 #include <ecom/ecom.h>
+#include <e32lang.h>
 #include "calenservices.h"
 #include "calenservicesfactory.h"
+#include "CalenUid.h"
 
 
 
@@ -183,38 +185,94 @@ void CCalenCustomisationManager::CreateActivePluginListL()
     iActivePlugins.Reset();
     iRomBasedPlugins.Reset();
 
-    //Added resolver for corolla release
-    // Set resolver params
-    TLanguage lang = User::Language();
-    TBuf8<40> langStr;
-    langStr.Format( _L8("language(%d)"), lang );
-
-    TEComResolverParams resolverParams;
-    resolverParams.SetDataType( langStr );
-    resolverParams.SetGenericMatch( ETrue );
-    
-   // REComSession::ListImplementationsL( KCalenCustomisationInterfaceUid, resolverParams, iPluginInfo );
     REComSession::ListImplementationsL( KCalenCustomisationInterfaceUid, iPluginInfo );
+    
+    LoadPluginsBasedOnVariantL();
+    
     TInt pluginCount = iPluginInfo.Count();
     
-    for ( TInt pluginIndex(0); pluginIndex < pluginCount; ++pluginIndex )
-        {
-        TUid pluginUid = iPluginInfo[pluginIndex]->ImplementationUid();
-        
-            // If the plugin can not be found or if it is enabled
-            // add it to the list of active plugins
-            iActivePlugins.AppendL( pluginUid );
-            
-            // If the plugin is rom-based, store its uid
-            if ( iPluginInfo[pluginIndex]->RomBased() )
-                {
-                iRomBasedPlugins.AppendL( pluginUid );
-                }
-            
-        }
+    if(pluginCount) 
+		{
+    	for ( TInt pluginIndex(0); pluginIndex < pluginCount; ++pluginIndex )
+			{
+    		TUid pluginUid = iPluginInfo[pluginIndex]->ImplementationUid();
+
+    		// If the plugin can not be found or if it is enabled
+    		// add it to the list of active plugins
+    		iActivePlugins.AppendL( pluginUid );
+
+    		// If the plugin is rom-based, store its uid
+    		if ( iPluginInfo[pluginIndex]->RomBased() )
+				{
+    			iRomBasedPlugins.AppendL( pluginUid );
+				}
+
+			}
+		}
 
     TRACE_EXIT_POINT;
     }
+
+// ----------------------------------------------------------------------------
+// CCalenCustomisationManager::LoadPluginsBasedOnVariantL
+// Loads the plugin based on the language variant
+// ----------------------------------------------------------------------------
+//
+void CCalenCustomisationManager::LoadPluginsBasedOnVariantL()
+{
+	TLanguage languge = User::Language();
+	RArray<TUid> needsToBeRemoved;
+	
+	switch(languge) 
+		{
+		case ELangTaiwanChinese:
+		case ELangPrcChinese:
+		case ELangHongKongChinese:
+			// TODO: Remove the other regional plugins Thai, Vietnamese etc.
+			break;
+		case ELangThai:
+		case ELangEnglish_Thailand:
+			needsToBeRemoved.Append(KCalenChineseImplUid);
+			// TODO: Remove the other regional plugin Vietnamese.
+			break;
+		case ELangVietnamese:
+			needsToBeRemoved.Append(KCalenChineseImplUid);
+			// TODO: Remove the other regional plugin Thai.
+			break;
+
+		default:
+			needsToBeRemoved.Append(KCalenChineseImplUid);
+			// TODO: Remove the other regional plugins Thai, Vietnamese etc.
+			break;
+		}
+	TInt count = needsToBeRemoved.Count();
+	if(count) 
+		{
+		for(TInt i=0; i< count; i++) 
+			{
+			TInt index = iPluginInfo.Find(needsToBeRemoved[i],
+								CCalenCustomisationManager::PluginInfoFinder);
+			if( index != KErrNotFound ) 
+				{
+				CImplementationInformation* impl = iPluginInfo[index];
+				iPluginInfo.Remove(index);
+				delete impl;
+				}
+			}
+		}
+	needsToBeRemoved.Close();
+}
+
+// ----------------------------------------------------------------------------
+// CCalenCustomisationManager::PluginInfoFinder(
+// Matches an uid in pluginInfo.
+// ----------------------------------------------------------------------------
+//
+TBool CCalenCustomisationManager::PluginInfoFinder( const TUid* aUid,
+								const CImplementationInformation&  aArrayItem )
+{
+	return (*aUid  == aArrayItem.ImplementationUid() );
+}
 
 // ----------------------------------------------------------------------------
 // CCalenCustomisationManager::SetPluginAvailabilityL
@@ -368,9 +426,17 @@ void CCalenCustomisationManager::HandleNotification(const TCalenNotification aNo
 // ----------------------------------------------------------------------------
 //
 void CCalenCustomisationManager::HandleNotificationL(TCalenNotification aNotification)
-    {
-    TRACE_ENTRY_POINT;
-	Q_UNUSED(aNotification);
+	{
+	TRACE_ENTRY_POINT;
+	switch( aNotification )
+		{
+		case ECalenNotifySystemLanguageChanged:
+			{
+			CreateActivePluginListL();
+			DoImmediatePluginLoadingL();
+			}
+			break;
+	}
 	TRACE_EXIT_POINT;
     }  
 
@@ -443,17 +509,19 @@ void CCalenCustomisationManager::LoadPluginL( TUid aPluginUid )
 
     // Get a new services object from global data
     MCalenServices* services = iServicesFactory.NewServicesL();
-
+    CleanupStack::PushL( services );
     // Creates the plugin and transfers ownership of the services
     // object to the plugin.
     CCalenCustomisation* plugin = 
         CCalenCustomisation::CreateImplementationL( aPluginUid, services );
-    
-   CleanupStack::PushL( plugin );
+    CleanupStack::PushL( plugin );
 
     // the plugin array takes ownership of the plugin
     AddPluginL( plugin, aPluginUid  );
+    
+    // Cleanup
     CleanupStack::Pop( plugin );
+    CleanupStack::Pop( services );
 
 
     TRACE_EXIT_POINT;

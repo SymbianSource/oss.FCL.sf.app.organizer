@@ -71,9 +71,13 @@ EXPORT_C CalenContextImpl::CalenContextImpl( const CalenContextImpl& aContext )
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CalenContextImpl::~CalenContextImpl()
-    {
-    }
+EXPORT_C CalenContextImpl::~CalenContextImpl()
+	{
+	if(mMutlipleContextIds.count())
+		{
+		mMutlipleContextIds.clear();
+		}
+	}
 
 // ----------------------------------------------------------------------------
 // CalenContextImpl::DefaultTimeForViews
@@ -111,23 +115,21 @@ QDateTime CalenContextImpl::defaultCalTimeForViewsL() const
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenContextImpl::setFocusDateAndTimeL( const QDateTime& focusDateTime,
-                                                   const int& viewId )
+void CalenContextImpl::setFocusDateAndTime( const QDateTime& focusDateTime)
     {
-
-    // If this fails you're using a context that was constructed yourself.
-    // Use the accessor from the global data instead, or don't try to set
-    // anything on this context.
-    ASSERT( mObserver );
 
     mFocusDate = focusDateTime;
     mFocusTime = focusDateTime.time().minute() + 1;
     
-    ASSERT( mFocusTime >= 0 );
+    if( mFocusTime < 0 )
+        mFocusTime = 0;
     mInstanceId = TCalenInstanceId::nullInstanceId();
-    mViewId = viewId;
 
-    mObserver->ContextChanged();
+    // If this fails you're using a context that was constructed yourself.
+    // Use the accessor from the global data instead, or don't try to set
+    // anything on this context.
+    if(mObserver)
+        mObserver->ContextChanged();
     }
 
 // ----------------------------------------------------------------------------
@@ -136,20 +138,17 @@ void CalenContextImpl::setFocusDateAndTimeL( const QDateTime& focusDateTime,
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenContextImpl::setFocusDateL( const QDateTime& focusDateTime,
-                                                const int& viewId )
+void CalenContextImpl::setFocusDate( const QDateTime& focusDateTime)
     {
-    // If this fails you're using a context that was constructed yourself.
-    // Use the accessor from the global data instead, or don't try to set
-    // anything on this context.
-    ASSERT( mObserver );
-
     mFocusDate = focusDateTime;
     mFocusTime = -1;
     mInstanceId = TCalenInstanceId::nullInstanceId();
-    mViewId = viewId;
 
-    mObserver->ContextChanged();
+    // If this fails you're using a context that was constructed yourself.
+    // Use the accessor from the global data instead, or don't try to set
+    // anything on this context.
+    if(mObserver)
+        mObserver->ContextChanged();
     }
 
 // ----------------------------------------------------------------------------
@@ -158,22 +157,19 @@ void CalenContextImpl::setFocusDateL( const QDateTime& focusDateTime,
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenContextImpl::setInstanceIdL( const TCalenInstanceId& aInstanceId,
-                                             const int& viewId )
+void CalenContextImpl::setInstanceId( const TCalenInstanceId& aInstanceId )
     {
 
-    // If this fails you're using a context that was constructed yourself.
-    // Use the accessor from the global data instead, or don't try to set
-    // anything on this context.
-    ASSERT( mObserver );
-    
     // Set the null date and time
     mFocusDate = QDateTime();
     mFocusTime = -1;
     mInstanceId = aInstanceId;
-    mViewId = viewId;
 
-    mObserver->ContextChanged();
+    // If this fails you're using a context that was constructed yourself.
+    // Use the accessor from the global data instead, or don't try to set
+    // anything on this context.
+    if(mObserver)
+        mObserver->ContextChanged();
     }
 
 // -----------------------------------------------------------------------------
@@ -182,23 +178,20 @@ void CalenContextImpl::setInstanceIdL( const TCalenInstanceId& aInstanceId,
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void CalenContextImpl::setFocusDateAndTimeAndInstanceL( const QDateTime& focusDateTime,
-                                                              const TCalenInstanceId& instanceId,
-                                                              const int& viewId )
+void CalenContextImpl::setFocusDateAndTimeAndInstance( const QDateTime& focusDateTime,
+                                                              const TCalenInstanceId& instanceId )
     {
+    mFocusDate = focusDateTime;
+    mFocusTime = focusDateTime.time().minute() + 1;
+    if( mFocusTime < 0 )
+		mFocusTime = 0;
+    mInstanceId = instanceId;
 
     // If this fails you're using a context that was constructed yourself.
     // Use the accessor from the global data instead, or don't try to set
     // anything on this context.
-    ASSERT( mObserver );
-
-    mFocusDate = focusDateTime;
-    mFocusTime = focusDateTime.time().minute() + 1;
-    ASSERT( mFocusTime >= 0 );
-    mInstanceId = instanceId;
-    mViewId = viewId;
-
-    mObserver->ContextChanged();
+    if(mObserver)
+        mObserver->ContextChanged();
     }
 
 // -----------------------------------------------------------------------------
@@ -207,7 +200,7 @@ void CalenContextImpl::setFocusDateAndTimeAndInstanceL( const QDateTime& focusDa
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-QDateTime CalenContextImpl::focusDateAndTimeL() const
+QDateTime CalenContextImpl::focusDateAndTime() const
     {
     QDateTime ret;
 
@@ -247,19 +240,6 @@ TCalenInstanceId CalenContextImpl::instanceId() const
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
     return mInstanceId;
-    }
-
-// -----------------------------------------------------------------------------
-// CalenContextImpl::ViewId
-// Returns the view id
-// (other items were commented in a header).
-// -----------------------------------------------------------------------------
-//
-int CalenContextImpl::viewId() const
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return mViewId;
     }
 
 // -----------------------------------------------------------------------------

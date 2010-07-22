@@ -26,6 +26,7 @@
 #include "CalendarVariant.hrh"
 #include "calendarui_debug.h"
 
+class QStringList;
 class CEikonEnv;
 class TCalenLunarInfo;
 class TChineseDate;
@@ -64,49 +65,40 @@ protected: // data
      * Localized names of lunar festivals
      * Own.
      */
-    CDesCArray* iFestivalNames;
-    
+    QStringList iFestivalNames;
+
     /**
      * Localized names of solar terms 
      * Own.
      */
-    CDesCArray* iSolarTermNames;
+    QStringList iSolarTermNames;
 
     /**
      * Localized names of animal years
      * Own.
      */
-    CDesCArray* iAnimalYearNames;
+    QStringList iAnimalYearNames;
 
     /**
      * Localized names of heavenly stems
      * Own.
      */
-    CDesCArray* iHeavenlyStemNames;
+    QStringList iHeavenlyStemNames;
 
     /**
      * Localized names of terrestial branches
      * Own.
      */
-    CDesCArray* iTerrestialBranchNames;
+    QStringList iTerrestialBranchNames;
 
-
-    /**
-     * Format string for western date.
-     * Own.
-     */
-    HBufC* iGregorianDateFormat;
 
     TBuf<1000> iLunarExtraRowText;
-
 
     /**
      * Language independent formatter of extra row information.
      */
     CCalenExtraRowFormatter* iRowFormatter;
     
-    TInt  iResourceFileOffset;
-
     };
 
 #endif // __CALENLUNARLOCALIZER_H__

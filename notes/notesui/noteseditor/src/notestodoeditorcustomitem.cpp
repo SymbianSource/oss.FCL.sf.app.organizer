@@ -181,6 +181,7 @@ void NotesTodoEditorCustomItem::launchTimePicker()
 	mTimePickerDialog = new HbDialog;
 	mTimePickerDialog->setTimeout(HbDialog::NoTimeout);
 	mTimePickerDialog->setDismissPolicy(HbDialog::NoDismiss);
+	mTimePickerDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 
 	// Set the heading for the dialog.
 	HbLabel * timeLabel = new HbLabel("Time", mTimePickerDialog);
@@ -221,7 +222,8 @@ void NotesTodoEditorCustomItem::launchDatePicker()
 	mDatePickerDialog = new HbDialog;
 	mDatePickerDialog->setTimeout(HbDialog::NoTimeout);
 	mDatePickerDialog->setDismissPolicy(HbDialog::NoDismiss);
-
+	mDatePickerDialog->setAttribute(Qt::WA_DeleteOnClose, true);
+	
 	// Set the heading for the dialog.
 	HbLabel * timeLabel = new HbLabel("Date", mDatePickerDialog);
 	mDatePickerDialog->setHeadingWidget(timeLabel);
@@ -274,7 +276,8 @@ void NotesTodoEditorCustomItem::selectDueDate()
 	mDatePickerDialog = new HbDialog;
 	mDatePickerDialog->setTimeout(HbDialog::NoTimeout);
 	mDatePickerDialog->setDismissPolicy(HbDialog::NoDismiss);
-
+	mDatePickerDialog->setAttribute(Qt::WA_DeleteOnClose, true);
+	
 	// Create date picker
 	HbDateTimePicker *datePicker = new HbDateTimePicker(mDatePickerDialog);
 	// Set the min/max date for the editor.

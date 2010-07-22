@@ -252,6 +252,8 @@ void NotesCollectionView::handleEditingCompleted(bool status)
 
 	// Cleanup.
 	mNotesEditor->deleteLater();
+	
+	mAppControllerIf->switchToView(NotesNamespace::NotesMainViewId);
 }
 
 /*!
@@ -334,14 +336,18 @@ void NotesCollectionView::updateFavouritesCount(
 	Q_UNUSED(index)
 	Q_UNUSED(start)
 	Q_UNUSED(end)
-
-	// Update the count of notes in the view.
-	QString countString(hbTrId("txt_notes_list_note_count"));
-	QModelIndex mdlIndex = mListView->model()->index(1, 0);
-	QStringList favStringList;
-	favStringList.append(hbTrId("txt_notes_list_favorites"));
-	favStringList.append(countString.arg(mFavouriteModel->rowCount()));
-	mListView->model()->setData(mdlIndex, favStringList, Qt::DisplayRole);
+	
+	// Check model is set for mListView  before update 	
+	if( mListView->model())
+	{
+		// Update the count of notes in the view.
+		QString countString(hbTrId("txt_notes_list_note_count"));
+		QModelIndex mdlIndex = mListView->model()->index(1, 0);
+		QStringList favStringList;
+		favStringList.append(hbTrId("txt_notes_list_favorites"));
+		favStringList.append(countString.arg(mFavouriteModel->rowCount()));
+		mListView->model()->setData(mdlIndex, favStringList, Qt::DisplayRole);
+	}
 }
 
 /*!

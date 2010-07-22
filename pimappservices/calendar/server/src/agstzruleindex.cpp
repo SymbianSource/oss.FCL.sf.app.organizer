@@ -592,7 +592,7 @@ void CAgnTzRuleIndex::AddTzRuleL(CAgnEntry& aEntry)
  @param aOldEntry reference to the original entry to be updated.
  @param aNewEntry reference to the entry containing updated content.
  */
-void CAgnTzRuleIndex::UpdateTzRuleL(CAgnEntry& aOldEntry, CAgnEntry& aNewEntry)
+void CAgnTzRuleIndex::UpdateTzRuleL(CAgnEntry& /*aOldEntry*/, CAgnEntry& aNewEntry)
 	{
 	CAgnTzRules* newTzZone = GetTzRulesFromEntry(aNewEntry);
 	if (newTzZone != NULL && newTzZone->HasValidTzZoneStreamId())
@@ -620,7 +620,6 @@ void CAgnTzRuleIndex::UpdateTzRuleL(CAgnEntry& aOldEntry, CAgnEntry& aNewEntry)
 		AddTzRuleL(aNewEntry);
 		}
 
-	RemoveTzRuleL(aOldEntry);
 	}
 
 void CAgnTzRuleIndex::UpdateItemsInStoreL(

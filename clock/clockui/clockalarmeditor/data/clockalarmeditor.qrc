@@ -1,8 +1,4 @@
 <!DOCTYPE RCC><RCC version="1.0">
-	<qresource prefix="/translations">
-		<file alias="clockalarmeditor" >translations/clockalarmeditor.qm</file>
-	</qresource>
-	
 	<qresource prefix="/xml">
 		<file alias="clockalarmeditor.docml">xml/clockalarmeditor.docml</file>
 	</qresource>

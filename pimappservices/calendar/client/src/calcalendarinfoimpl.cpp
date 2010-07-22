@@ -69,9 +69,9 @@ const TDesC8& CCalCalendarInfoImpl::PropertyValueL(const TDesC8& aKey) const
         {
         if (iProperties[position]->Value().Compare(KNullDesC8) == 0)
             {
-            __ASSERT_DEBUG(iProperties[position]->StreamId() != KNullStreamId, CalUtils::Panic(ECalendarInfoNullStreamId));
+            __ASSERT_DEBUG(iFileName && iProperties[position]->StreamId() != KNullStreamId, CalUtils::Panic(ECalendarInfoNullStreamId));
             // Get the property
-            HBufC8* value = iSessionImpl->Server().GetPropertyValueL(iSessionImpl->FileName(), iProperties[position]->StreamId());
+            HBufC8* value = iSessionImpl->Server().GetPropertyValueL(iFileName->Des(), iProperties[position]->StreamId());
             iProperties[position]->SetValue(value);
             }
         else if (iProperties[position]->State() == CAgnCalendarInfoProperty::EDeleted)

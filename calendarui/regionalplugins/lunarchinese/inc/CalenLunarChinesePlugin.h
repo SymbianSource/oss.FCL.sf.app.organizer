@@ -34,7 +34,7 @@
 
 //FORWARD DECLARE
 class QString;
-
+class HbTranslator;
 class HbWidget;
 class HbMenu;
 
@@ -78,7 +78,7 @@ class CCalenLunarChinesePlugin :public CCalenCustomisation,
     private:
         void FormatExtraRowStringL();
         void UpdateLocalizerInfoL();
-        void ExecuteMessageDialogL( TDesC& aMsgText );
+       void ExecuteMessageDialogL( QString aMsgText );
        
     public:
         void ShowDetailsL();
@@ -112,7 +112,7 @@ class CCalenLunarChinesePlugin :public CCalenCustomisation,
 		HBufC* iInfoBarText;
 	    TInt iStart;
 	    TInt iEnd;
-	    TInt  iResourceFileOffset;
+	    HbTranslator* iTranslator;
 	};
 	
 #endif //__CALENLUNARCHINESEPLUGIN_H__

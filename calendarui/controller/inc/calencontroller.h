@@ -25,6 +25,7 @@
 #include <apadef.h>                     // TApaCommand
 #include <qglobal.h>					// Q_DECL_EXPORT macro
 #include <agendautil.h>
+#include <qobject>
 #include "hb_calencommands.hrh"            // Calendar commands
 #include "calennotificationhandler.h"   // TCalenNotification
 #include "calenservices.h"
@@ -58,15 +59,21 @@ class HbMenu;
  * The controller handles events from the rest of Calendar and delegates
  * them to the appropriate place (i.e. the action ui classes).
  */
-class CALENCONTROLLER_EXPORT CCalenController : public MCalenServicesFactory
+class CALENCONTROLLER_EXPORT CCalenController : public QObject, public MCalenServicesFactory
     {
-  
+	Q_OBJECT
+	
     public:  // Construction and destruction
 		/**
 		 * C++ constructor
 		 */
-		CCalenController(bool isFromServiceFrmwrk);
+		CCalenController();
 		
+		/**
+		 * Second phase contruction for controller
+		 */
+		void constructController();
+
 		/**
 		 * Constructs CCalenController with existing CAknViewAppUi. If the
 		 * controller has been previously initialized with the same CAknViewAppUi,
@@ -212,6 +219,12 @@ class CALENCONTROLLER_EXPORT CCalenController : public MCalenServicesFactory
          */
         CCalenCustomisationManager& CustomisationManager();
         
+	    /**
+         * Filters the events eg. Locale/language change events
+         * @param event
+         */
+        bool eventFilter(QObject *object, QEvent *event);
+        
     private:  // Construction and destruction
         
         /**
@@ -229,7 +242,6 @@ class CALENCONTROLLER_EXPORT CCalenController : public MCalenServicesFactory
         CalenContextImpl* mContext; 
         AgendaUtil *mAgendaUtil; // Agenda interface provider 
         CalenServicesImpl* iServices;   // Services. 
-        HbMainWindow* iMainWindow;
         CalenNotifier*     iNotifier;   // Broadcasts calendar events
         CCalenStateMachine* iStateMachine;
         CCalenActionUi*     iActionUi;   // Default internal command handling

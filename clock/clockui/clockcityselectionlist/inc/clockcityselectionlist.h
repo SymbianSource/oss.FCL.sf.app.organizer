@@ -27,10 +27,9 @@
 #include "clockdatatypes.h"
 
 // Forward declarations
+class HbTranslator;
 class ClockCitySelectionListPrivate;
 class TimezoneClient;
-class QTranslator;
-
 
 class CLOCKCITYSELECTIONLIST_EXPORT ClockCitySelectionList : public QObject
 {
@@ -52,7 +51,7 @@ private:
 	ClockCitySelectionListPrivate *d_ptr;
 	Q_DECLARE_PRIVATE_D(d_ptr, ClockCitySelectionList)
 	Q_DISABLE_COPY(ClockCitySelectionList)
-	QTranslator *mTranslator;
+	HbTranslator *mTranslator;
 };
 
 #endif // CLOCKCITYSELECTIONLIST_H
