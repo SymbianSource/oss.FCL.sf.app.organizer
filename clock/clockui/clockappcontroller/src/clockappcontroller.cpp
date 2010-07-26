@@ -43,6 +43,7 @@ ClockAppController::ClockAppController(QObject *parent)
 	Q_ASSERT_X(
 			mViewManager, "clockappcontroller.cpp",
 			"ClockViewManager is 0");
+	connect(mViewManager, SIGNAL(appReady()), this, SLOT(handleAppReady()));
 }
 
 /*!
@@ -58,6 +59,15 @@ ClockAppController::~ClockAppController()
 		delete mIfImpl;
 		mIfImpl = 0;
 	}
+}
+
+/*!
+	Emits the appReday signal.
+ */
+void ClockAppController::handleAppReady()
+{
+	emit appReady();
+	disconnect(mViewManager, SIGNAL(appReady()), this, SLOT(handleAppReady()));
 }
 
 // End of file	--Don't remove this.

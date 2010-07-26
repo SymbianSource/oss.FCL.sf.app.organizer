@@ -34,15 +34,20 @@
 #include <hbactivitymanager> // hbactivitymanager
 
 // User includes
+#include <agendautil.h>
 #include "agendaeventviewer.h"
 #include "notesmainview.h"
 #include "notescommon.h"
 #include "notesdocloader.h"
-#include "agendautil.h"
 #include "notesmodel.h"
 #include "notessortfilterproxymodel.h"
 #include "noteseditor.h"
-#include "notescommon.h" // NotesNamespace
+#include "notescommon.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "notesmainviewTraces.h"
+#endif
+ // NotesNamespace
 
 /*!
 	\class NotesMainView
@@ -64,7 +69,9 @@ NotesMainView::NotesMainView(QGraphicsWidget *parent)
  mIsLongTop(false),
  mIsScreenShotCapruted(false)
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_NOTESMAINVIEW_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( NOTESMAINVIEW_NOTESMAINVIEW_EXIT );
 }
 
 /*!
@@ -72,11 +79,13 @@ NotesMainView::NotesMainView(QGraphicsWidget *parent)
  */
 NotesMainView::~NotesMainView()
 {
+	OstTraceFunctionEntry0( DUP1_NOTESMAINVIEW_NOTESMAINVIEW_ENTRY );
 	if (mDocLoader) {
 		delete mDocLoader;
 		mDocLoader = 0;
 	}
 
+	OstTraceFunctionExit0( DUP1_NOTESMAINVIEW_NOTESMAINVIEW_EXIT );
 }
 
 /*!
@@ -89,6 +98,7 @@ NotesMainView::~NotesMainView()
 void NotesMainView::setupView(
 		NotesAppControllerIf &controllerIf, NotesDocLoader *docLoader)
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_SETUPVIEW_ENTRY );
 
 	mDocLoader = docLoader;
 	mAppControllerIf = &controllerIf;
@@ -146,21 +156,26 @@ void NotesMainView::setupView(
 	HbListViewItem *prototype = mListView->listItemPrototype();
 	prototype->setGraphicsSize(HbListViewItem::SmallIcon);
 	
-    // Get a pointer to activity Manager
-    HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
-  
-    // clean up any previous versions of this activity from the activity manager.
-    // ignore return value as the first boot would always return a false
-    // bool declared on for debugging purpose
-    bool ok = activityManager->removeActivity(notes);
-	
+	// Get a pointer to activity Manager
+	HbActivityManager* activityManager =
+			qobject_cast<HbApplication*>(qApp)->activityManager();
+
+	// clean up any previous versions of this activity from the activity manager
+	// ignore return value as the first boot would always return a false
+	// bool declared on for debugging purpose
+	bool ok = activityManager->removeActivity(notes);
+
 	// connect main view for the first time to recieve aboutToQuit signal
-    connect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()), this, SLOT(saveActivity()));
-    
- }
+	connect(
+			qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()),
+			this, SLOT(saveActivity()));
+	
+	OstTraceFunctionExit0( NOTESMAINVIEW_SETUPVIEW_EXIT );
+}
 
 void NotesMainView::setupAfterViewReady()
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_SETUPAFTERVIEWREADY_ENTRY );
 	// Get the toolbar/menu actions.
 	mAddNoteAction = static_cast<HbAction *> (
 			mDocLoader->findObject("newNoteAction"));
@@ -204,6 +219,7 @@ void NotesMainView::setupAfterViewReady()
 	connect(
 			mAgendaUtil, SIGNAL(entryUpdated(ulong)),
 			this, SLOT(updateSubTitle(ulong)));
+	OstTraceFunctionExit0( NOTESMAINVIEW_SETUPAFTERVIEWREADY_EXIT );
 }
 
 /*
@@ -211,7 +227,9 @@ void NotesMainView::setupAfterViewReady()
  */
 void NotesMainView::updateTitle()
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_UPDATETITLE_ENTRY );
 	updateSubTitle();
+	OstTraceFunctionExit0( NOTESMAINVIEW_UPDATETITLE_EXIT );
 }
 
 /*!
@@ -220,6 +238,7 @@ void NotesMainView::updateTitle()
  */
 void NotesMainView::createNewNote()
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_CREATENEWNOTE_ENTRY );
 
 	// Here we Display an editor to the use to enter text.
 	mNotesEditor = new NotesEditor(mAgendaUtil, this);
@@ -230,6 +249,7 @@ void NotesMainView::createNewNote()
 	// capture screenshot for future use, if application
 	// is exited/Quit from notesEditor
 	captureScreenShot(true);
+	OstTraceFunctionExit0( NOTESMAINVIEW_CREATENEWNOTE_EXIT );
 }
 
 /*!
@@ -242,18 +262,21 @@ void NotesMainView::createNewNote()
  */
 void NotesMainView::handleItemReleased(const QModelIndex &index)
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_HANDLEITEMRELEASED_ENTRY );
 	if(!mIsLongTop) {
 		// Sanity check.
 		if (!index.isValid()) {
+			OstTraceFunctionExit0( NOTESMAINVIEW_HANDLEITEMRELEASED_EXIT );
 			return;
 		}
 
-		// First get the id of the note and get the corresponding information from
-		// agendautil.
+		// First get the id of the note and get the corresponding information
+		// from agendautil.
 		ulong noteId = index.data(NotesNamespace::IdRole).value<qulonglong>();
 
 		if (0 >= noteId) {
 			// Something wrong.
+			OstTraceFunctionExit0( DUP1_NOTESMAINVIEW_HANDLEITEMRELEASED_EXIT );
 			return;
 		}
 
@@ -261,6 +284,7 @@ void NotesMainView::handleItemReleased(const QModelIndex &index)
 		AgendaEntry entry = mAgendaUtil->fetchById(noteId);
 		if (entry.isNull()) {
 			// Entry invalid.
+			OstTraceFunctionExit0( DUP2_NOTESMAINVIEW_HANDLEITEMRELEASED_EXIT );
 			return;
 		}
 
@@ -288,6 +312,7 @@ void NotesMainView::handleItemReleased(const QModelIndex &index)
 		// is exited/Quit from eventViewer/notesEditor
 		captureScreenShot(true);
 	}
+	OstTraceFunctionExit0( DUP3_NOTESMAINVIEW_HANDLEITEMRELEASED_EXIT );
 }
 
 /*!
@@ -301,6 +326,7 @@ void NotesMainView::handleItemReleased(const QModelIndex &index)
 void NotesMainView::handleItemLongPressed(
 		HbAbstractViewItem *item, const QPointF &coords)
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_HANDLEITEMLONGPRESSED_ENTRY );
 	mIsLongTop = true;
 	mSelectedItem = item;
 
@@ -352,6 +378,7 @@ void NotesMainView::handleItemLongPressed(
 	// Show the menu.
 	contextMenu->open(this, SLOT(selectedMenuAction(HbAction*)));
 	contextMenu->setPreferredPos(coords);
+	OstTraceFunctionExit0( NOTESMAINVIEW_HANDLEITEMLONGPRESSED_EXIT );
 }
 
 /*!
@@ -359,16 +386,19 @@ void NotesMainView::handleItemLongPressed(
  */
 void NotesMainView::deleteNote()
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_DELETENOTE_ENTRY );
 	Q_ASSERT(mSelectedItem);
 
 	QModelIndex index = mSelectedItem->modelIndex();
 	if (!index.isValid()) {
+		OstTraceFunctionExit0( NOTESMAINVIEW_DELETENOTE_EXIT );
 		return;
 	}
 	ulong noteId =
 			index.data(NotesNamespace::IdRole).value<qulonglong>();
 	if (!noteId) {
 
+		OstTraceFunctionExit0( DUP1_NOTESMAINVIEW_DELETENOTE_EXIT );
 		return;
 	}
 
@@ -376,6 +406,7 @@ void NotesMainView::deleteNote()
 	emit deleteEntry(noteId);
 
 	mSelectedItem = 0;
+	OstTraceFunctionExit0( DUP2_NOTESMAINVIEW_DELETENOTE_EXIT );
 }
 
 /*!
@@ -387,6 +418,7 @@ void NotesMainView::deleteNote()
  */
 void NotesMainView::markTodoStatus()
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_MARKTODOSTATUS_ENTRY );
 	ulong noteId = mSelectedItem->modelIndex().data(
 			NotesNamespace::IdRole).value<qulonglong>();
 	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
@@ -399,6 +431,7 @@ void NotesMainView::markTodoStatus()
 		mAgendaUtil->setCompleted(entry, false, currentDateTime);
 	}
 
+	OstTraceFunctionExit0( NOTESMAINVIEW_MARKTODOSTATUS_EXIT );
 }
 
 /*!
@@ -406,6 +439,7 @@ void NotesMainView::markTodoStatus()
  */
 void NotesMainView::markNoteAsFavourite()
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_MARKNOTEASFAVOURITE_ENTRY );
 	ulong noteId = mSelectedItem->modelIndex().data(
 				NotesNamespace::IdRole).value<qulonglong>();
 	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
@@ -415,8 +449,9 @@ void NotesMainView::markNoteAsFavourite()
 	} else {
 		entry.setFavourite(1);
 	}
-	mAgendaUtil->updateEntry(entry);
+	mAgendaUtil->store(entry);
 
+	OstTraceFunctionExit0( NOTESMAINVIEW_MARKNOTEASFAVOURITE_EXIT );
 }
 
 /*!
@@ -428,6 +463,7 @@ void NotesMainView::markNoteAsFavourite()
  */
 void NotesMainView::handleEditingCompleted(bool status)
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_HANDLEEDITINGCOMPLETED_ENTRY );
 	Q_UNUSED(status)
 
 	// Cleanup.
@@ -435,6 +471,7 @@ void NotesMainView::handleEditingCompleted(bool status)
 	// set captured screenshot as invalid as the control is returned back 
 	// to the main view
 	captureScreenShot(false);
+	OstTraceFunctionExit0( NOTESMAINVIEW_HANDLEEDITINGCOMPLETED_EXIT );
 }
 
 /*!
@@ -442,11 +479,13 @@ void NotesMainView::handleEditingCompleted(bool status)
  */
 void NotesMainView::displayCollectionView()
 {
-    // no need to capture the screen shot for future use as 
-    // NotesViewManager::switchToView takes care of it
+	OstTraceFunctionEntry0( NOTESMAINVIEW_DISPLAYCOLLECTIONVIEW_ENTRY );
+	// no need to capture the screen shot for future use as 
+	// NotesViewManager::switchToView takes care of it
 	// Switch to collections view.
 	mAppControllerIf->switchToView(NotesNamespace::NotesCollectionViewId);
 
+	OstTraceFunctionExit0( NOTESMAINVIEW_DISPLAYCOLLECTIONVIEW_EXIT );
 }
 
 /*!
@@ -456,7 +495,9 @@ void NotesMainView::displayCollectionView()
  */
 void NotesMainView::scrollTo(QModelIndex index)
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_SCROLLTO_ENTRY );
 	mListView->scrollTo(index, HbAbstractItemView::EnsureVisible);
+	OstTraceFunctionExit0( NOTESMAINVIEW_SCROLLTO_EXIT );
 }
 
 /*!
@@ -466,10 +507,12 @@ void NotesMainView::scrollTo(QModelIndex index)
  */
 void NotesMainView::handleViewingCompleted()
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_HANDLEVIEWINGCOMPLETED_ENTRY );
 	mAgendaEventViewer->deleteLater();
 	// set captured screenshot as invalid as the control is returned back 
 	// to the main view
 	captureScreenShot(false);
+	OstTraceFunctionExit0( NOTESMAINVIEW_HANDLEVIEWINGCOMPLETED_EXIT );
 }
 
 /*!
@@ -477,7 +520,9 @@ void NotesMainView::handleViewingCompleted()
  */
 void NotesMainView::handleActionStateChanged()
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_HANDLEACTIONSTATECHANGED_ENTRY );
 	mAllNotesAction->setChecked(true);
+	OstTraceFunctionExit0( NOTESMAINVIEW_HANDLEACTIONSTATECHANGED_EXIT );
 }
 
 /*!
@@ -486,15 +531,18 @@ void NotesMainView::handleActionStateChanged()
 
 void NotesMainView::editTodo()
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_EDITTODO_ENTRY );
 	// Get the selected list item index
 	QModelIndex index = mSelectedItem->modelIndex();
 	if (!index.isValid()) {
+		OstTraceFunctionExit0( NOTESMAINVIEW_EDITTODO_EXIT );
 		return;
 	}
 	ulong todoId =
 			index.data(NotesNamespace::IdRole).value<qulonglong>();
 	if (!todoId) {
 
+		OstTraceFunctionExit0( DUP1_NOTESMAINVIEW_EDITTODO_EXIT );
 		return;
 	}
 
@@ -510,6 +558,7 @@ void NotesMainView::editTodo()
 	// is exited/Quit from notesEditor
 	captureScreenShot(true);
 
+	OstTraceFunctionExit0( DUP2_NOTESMAINVIEW_EDITTODO_EXIT );
 }
 
 /*!
@@ -520,6 +569,7 @@ void NotesMainView::editTodo()
  */
 void NotesMainView::handleOrientationChanged(Qt::Orientation orientation)
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_HANDLEORIENTATIONCHANGED_ENTRY );
 	HbListViewItem *prototype = mListView->listItemPrototype();
 
 	if (Qt::Horizontal == orientation) {
@@ -527,6 +577,7 @@ void NotesMainView::handleOrientationChanged(Qt::Orientation orientation)
 	} else {
 		prototype->setStretchingStyle(HbListViewItem::NoStretching);
 	}
+	OstTraceFunctionExit0( NOTESMAINVIEW_HANDLEORIENTATIONCHANGED_EXIT );
 }
 
 /*!
@@ -534,6 +585,7 @@ void NotesMainView::handleOrientationChanged(Qt::Orientation orientation)
  */
 void NotesMainView::updateSubTitle(ulong id)
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_UPDATESUBTITLE_ENTRY );
 	Q_UNUSED(id)
 
 	// Get the number of notes and to-do entries.
@@ -553,6 +605,7 @@ void NotesMainView::updateSubTitle(ulong id)
 	
 	mSubTitle->setHeading(
 			hbTrId("txt_notes_subhead_ln_notes",entries.count()));
+	OstTraceFunctionExit0( NOTESMAINVIEW_UPDATESUBTITLE_EXIT );
 }
 
 /*!
@@ -560,14 +613,17 @@ void NotesMainView::updateSubTitle(ulong id)
  */
 void NotesMainView::markNoteAsTodo()
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_MARKNOTEASTODO_ENTRY );
 	Q_ASSERT(mSelectedItem);
 
 	QModelIndex index = mSelectedItem->modelIndex();
 	if (!index.isValid()) {
+		OstTraceFunctionExit0( NOTESMAINVIEW_MARKNOTEASTODO_EXIT );
 		return;
 	}
 	ulong noteId = index.data(NotesNamespace::IdRole).value<qulonglong> ();
 	if (!noteId) {
+		OstTraceFunctionExit0( DUP1_NOTESMAINVIEW_MARKNOTEASTODO_EXIT );
 		return;
 	}
 	// Get the entry details.
@@ -575,6 +631,7 @@ void NotesMainView::markNoteAsTodo()
 
 	if (entry.isNull()) {
 		// Entry invalid.
+		OstTraceFunctionExit0( DUP2_NOTESMAINVIEW_MARKNOTEASTODO_EXIT );
 		return;
 	}
 
@@ -598,6 +655,9 @@ void NotesMainView::markNoteAsTodo()
 
 	// Remove favourite if marked so.
 	entry.setFavourite(0);
+	
+	// Set the priority of the to-do as normal
+	entry.setPriority(2);
 
 	// Set the status of the to-do.
 	entry.setStatus(AgendaEntry::TodoNeedsAction);
@@ -607,6 +667,7 @@ void NotesMainView::markNoteAsTodo()
 
 	// Delete the old entry.
 	mAgendaUtil->deleteEntry(entry.id());
+	OstTraceFunctionExit0( DUP3_NOTESMAINVIEW_MARKNOTEASTODO_EXIT );
 }
 
 
@@ -616,6 +677,7 @@ void NotesMainView::markNoteAsTodo()
  */
 void NotesMainView::openNote()
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_OPENNOTE_ENTRY );
 	ulong noteId = mSelectedItem->modelIndex().data(
 			NotesNamespace::IdRole).value<qulonglong>();
 	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
@@ -644,6 +706,7 @@ void NotesMainView::openNote()
 	// capture screenshot for future use, if application
 	// is exited/Quit from notesEditor/eventViewer
 	captureScreenShot(true);
+	OstTraceFunctionExit0( NOTESMAINVIEW_OPENNOTE_EXIT );
 }
 
 /*!
@@ -651,6 +714,7 @@ void NotesMainView::openNote()
  */
 void NotesMainView::selectedMenuAction(HbAction *action)
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_SELECTEDMENUACTION_ENTRY );
 	if (action == mOpenAction) {
 		openNote();
 	} else if (action == mEditTodoAction) {
@@ -664,6 +728,7 @@ void NotesMainView::selectedMenuAction(HbAction *action)
 	} else if (action == mTodoStatusAction) {
 		markTodoStatus();
 	}
+	OstTraceFunctionExit0( NOTESMAINVIEW_SELECTEDMENUACTION_EXIT );
 }
 
 /*!
@@ -671,7 +736,9 @@ void NotesMainView::selectedMenuAction(HbAction *action)
  */
 void NotesMainView::handleMenuClosed()
 {
+	OstTraceFunctionEntry0( NOTESMAINVIEW_HANDLEMENUCLOSED_ENTRY );
 	mIsLongTop = false;
+	OstTraceFunctionExit0( NOTESMAINVIEW_HANDLEMENUCLOSED_EXIT );
 }
 
 /*!
@@ -679,39 +746,51 @@ void NotesMainView::handleMenuClosed()
 	\param captureScreenShot bool to indicate if screenshot needs to be captured
 */ 
 void NotesMainView::captureScreenShot(bool captureScreenShot)
-    {
-    if (captureScreenShot) // check if screen shot needs to be captured
-        {
-        mScreenShot.clear();
-        mScreenShot.insert("screenshot", QPixmap::grabWidget(mainWindow(), mainWindow()->rect()));
-        }
-    mIsScreenShotCapruted = captureScreenShot; // set mIsScreenShotCapruted set validity of screenshot
-    }
+{
+	OstTraceFunctionEntry0( NOTESMAINVIEW_CAPTURESCREENSHOT_ENTRY );
+	// check if screen shot needs to be captured
+	if (captureScreenShot) {
+		mScreenShot.clear();
+		mScreenShot.insert(
+				"screenshot", QPixmap::grabWidget(
+						mainWindow(), mainWindow()->rect()));
+	}
+	// set mIsScreenShotCapruted set validity of screenshot
+	mIsScreenShotCapruted = captureScreenShot;
+	OstTraceFunctionExit0( NOTESMAINVIEW_CAPTURESCREENSHOT_EXIT );
+}
 
-/*!    
+/*!
 	saveActivity saves main view as an activity 
-*/ 
+*/
 void NotesMainView::saveActivity()
- {
-   // Get a pointer to activity Manager
-   HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
- 
-   if (!mIsScreenShotCapruted) // check if a valid screenshot is already captured
-       {
-       mScreenShot.clear();
-       mScreenShot.insert("screenshot", QPixmap::grabWidget(mainWindow(), mainWindow()->rect()));
-       }
- 
-   // save any data necessary to save the state
-   QByteArray serializedActivity;
-   QDataStream stream(&serializedActivity, QIODevice::WriteOnly | QIODevice::Append);
-   stream << NotesNamespace::NotesMainViewId;
- 
-   // add the activity to the activity manager
-   bool ok = activityManager->addActivity(notes, serializedActivity, mScreenShot);
-   if ( !ok )
-       {
-       qFatal("Add failed" );
-       }
- }
+{
+	OstTraceFunctionEntry0( NOTESMAINVIEW_SAVEACTIVITY_ENTRY );
+	// Get a pointer to activity Manager
+	HbActivityManager* activityManager =
+			qobject_cast<HbApplication*>(qApp)->activityManager();
+	
+	// check if a valid screenshot is already captured
+	if (!mIsScreenShotCapruted) {
+		mScreenShot.clear();
+		mScreenShot.insert(
+				"screenshot", QPixmap::grabWidget(
+						mainWindow(), mainWindow()->rect()));
+	}
+
+	// save any data necessary to save the state
+	QByteArray serializedActivity;
+	QDataStream stream(
+			&serializedActivity, QIODevice::WriteOnly | QIODevice::Append);
+	stream << NotesNamespace::NotesMainViewId;
+
+	// add the activity to the activity manager
+	bool ok = activityManager->addActivity(
+			notes, serializedActivity, mScreenShot);
+	if (!ok) {
+		qFatal("Add failed" );
+	}
+	OstTraceFunctionExit0( NOTESMAINVIEW_SAVEACTIVITY_EXIT );
+}
+
 // End of file	--Don't remove this.

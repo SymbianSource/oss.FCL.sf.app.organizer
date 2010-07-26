@@ -17,13 +17,11 @@
 
 // System includes
 #include <QtGui>
-#include <QScopedPointer>
 #include <HbTranslator>
-#include <HbApplication>
 #include <HbMainWindow>
 
 // User includes
-#include "clockappcontroller.h"
+#include "clockapplication.h"
 
 /*!
 	The main entry point of the clock application.
@@ -32,9 +30,10 @@
  */
 int main(int argc, char *argv[])
 {
-	// Initialization
-	HbApplication app(argc, argv);
-
+	// Create and initialize an ClockApplication instance
+	QScopedPointer<ClockApplication> application(
+				new ClockApplication(argc, argv));
+	
 	// Main window widget.
 	// Includes decorator such as signal strength and battery life indicator.
 	HbMainWindow window;
@@ -47,14 +46,13 @@ int main(int argc, char *argv[])
 	translator.loadCommon();
 	
 	// Construct the application controller.
-	QScopedPointer<ClockAppController> controller(new ClockAppController);
-	Q_UNUSED(controller)
+	application->createController();
 
 	// Show widget
 	window.show();
 
-	// Enter event loop
-	return app.exec();
+	// Start the event loop for the application
+	return application->execution();
 }
 
 // End of file	--Don't remove this.

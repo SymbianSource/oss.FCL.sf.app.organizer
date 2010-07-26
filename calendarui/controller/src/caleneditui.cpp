@@ -24,7 +24,7 @@
 #include "calencontroller.h"
 #include "hb_calencommands.hrh"
 #include "calenservicesimpl.h"
-#include "agendaentry.h"
+#include <agendaentry.h>
 #include "caleneditor.h"
 #include "calendateutils.h"
 #include "OstTraceDefinitions.h"
@@ -196,5 +196,13 @@ void CCalenEditUi::HandleNotification(const TCalenNotification aNotification )
     
     OstTraceFunctionExit0( CCALENEDITUI_HANDLENOTIFICATION_EXIT );
     }
-
+// ----------------------------------------------------------------------------
+// CCalenEditUi::saveEntry
+// save the entry from editor
+// ----------------------------------------------------------------------------
+//
+void CCalenEditUi::saveAndCloseEditor()
+    {
+    iEditor->saveAndCloseEditor();
+    }
 // End of file

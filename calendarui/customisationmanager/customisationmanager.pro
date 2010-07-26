@@ -22,7 +22,8 @@ CONFIG += hb
 
 DEFINES += CALENCUSTOMISATIONMANAGER_DLL
 
-INCLUDEPATH += ./inc ../inc
+INCLUDEPATH += ./inc ../inc \
+			   ./traces
 
 					   
 # Platforms

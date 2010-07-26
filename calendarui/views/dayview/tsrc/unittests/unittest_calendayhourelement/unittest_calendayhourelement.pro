@@ -11,7 +11,7 @@
 #  
 #  Contributors: 
 #  
-#  Description: calendaycontentwidget test project file
+#  Description: calendayhourelement test project file
 #
 
 TEMPLATE = app
@@ -22,22 +22,32 @@ MOC_DIR = moc
 CONFIG += qtestlib
 CONFIG += symbian_test
 CONFIG += hb
+
+#uncoment it if want to get images from test where it is posible.
+#it need folder in c:/unittest path
+#DEFINES += SAVE_IMAGES  
+
 				
 INCLUDEPATH += . \
                ../../../inc/ \
+               ./../../../../inc/ \
+               ./../../../../../inc/
 
 DEPENDPATH  += . \
                ../../../inc/ \
                ../../../src/  
 
 # Input
-HEADERS +=	calendayhourelement.h \
-            calendayhourscrollarea.h
+HEADERS +=	calendayhourelementtest.h \
+            calendayhourelement.h \
+            calendayhourscrollarea.h \
+            calendayutils.h
 			
 
 SOURCES +=	unittest_calendayhourelement.cpp \
 			calendayhourelement.cpp \
-			calendayhourscrollarea.cpp
+			calendayhourscrollarea.cpp \
+            calendayutils.cpp
 
 symbian : {
 	TARGET.CAPABILITY = CAP_APPLICATION
@@ -45,6 +55,11 @@ symbian : {
             
     BLD_INF_RULES.prj_testexports += \
         "./rom/unittest_calendayhourelement.iby        CORE_APP_LAYER_IBY_EXPORT_PATH(unittest_calendayhourelement.iby)"
+        
+    INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
+        
+    LIBS += -lagendainterface \
+            -lcalencommonutils
 }
 
 # End of file	--Don't remove this.

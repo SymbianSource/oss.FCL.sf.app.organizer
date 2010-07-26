@@ -25,7 +25,7 @@
 #include <QPointer>
 
 // User includes
-#include "agendaentry.h"
+#include <agendaentry.h>
 #include "noteseditor.h"
 
 // Forward declarations

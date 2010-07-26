@@ -11,8 +11,9 @@
 *
 * Contributors:
 *
-* Description:  Day view control of calendar
-*
+* Description:  Day view container - parent widget for events (CalenDayItem) and
+* hours area widgets (CalenDayEventsPane)
+* Responsible for positioning and resizing events widgets.
 */
 
 //System includes
@@ -38,28 +39,23 @@
 #include "calendayinfo.h"
 #include "calendayview.h"
 
-// -----------------------------------------------------------------------------
-// CalenDayContainer()
-// Constructor
-// -----------------------------------------------------------------------------
-//
+/*!
+ \brief Constructor
+ 
+ Sets container initial geometry, creates hours area widgets.
+ */
 CalenDayContainer::CalenDayContainer(QGraphicsItem *parent) :
     HbAbstractItemContainer(parent), mGeometryUpdated(false), mInfo(0)
 {
     getTimedEventLayoutValues(mLayoutValues);
     
-    // Get the height of element
-    qreal paneHeight = CalenDayUtils::instance()->hourElementHeight();
-    
     QGraphicsLinearLayout* timeLinesLayout = new QGraphicsLinearLayout(
         Qt::Vertical, this);
     for (int i = 0; i < 24; i++) {
         CalenDayEventsPane* element = new CalenDayEventsPane(this);
-        element->setPreferredHeight(paneHeight);
-        element->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 		// Draw top line at midnight
         if (i == 0) {
-            element->drawTopLine(true);
+            element->setDrawTopLine(true);
         }
         timeLinesLayout->addItem(element);
     }
@@ -69,20 +65,18 @@ CalenDayContainer::CalenDayContainer(QGraphicsItem *parent) :
     setLayout(timeLinesLayout);
 }
 
-// -----------------------------------------------------------------------------
-// ~CalenDayContainer()
-// Destructor
-// -----------------------------------------------------------------------------
-//
+
+/*!
+ \brief Destructor
+ */
 CalenDayContainer::~CalenDayContainer()
 {
 }
 
-// -----------------------------------------------------------------------------
-// itemAdded()
-// 
-// -----------------------------------------------------------------------------
-//
+
+/*
+    \reimp
+ */
 void CalenDayContainer::itemAdded( int index, HbAbstractViewItem *item, 
                                      bool animate )
 {
@@ -91,11 +85,10 @@ void CalenDayContainer::itemAdded( int index, HbAbstractViewItem *item,
     Q_UNUSED( animate )
 }
 
-// -----------------------------------------------------------------------------
-// reset()
-// 
-// -----------------------------------------------------------------------------
-//
+
+/*
+    \reimp
+ */
 void CalenDayContainer::reset()
 {
 	// remove absorbers if exist
@@ -114,22 +107,20 @@ void CalenDayContainer::reset()
     setPos( position );
 }
 
-// -----------------------------------------------------------------------------
-// itemRemoved()
-// 
-// -----------------------------------------------------------------------------
-//
+
+/*
+    \reimp
+ */
 void CalenDayContainer::itemRemoved( HbAbstractViewItem *item, bool animate )
 {
     Q_UNUSED( item )
     Q_UNUSED( animate )
 }
 
-// -----------------------------------------------------------------------------
-// viewResized()
-// 
-// -----------------------------------------------------------------------------
-//
+
+/*
+    \reimp
+ */
 void CalenDayContainer::viewResized (const QSizeF &size)
 {
     resize(size);
@@ -139,22 +130,20 @@ void CalenDayContainer::viewResized (const QSizeF &size)
     }
 }
 
-// -----------------------------------------------------------------------------
-// createDefaultPrototype()
-// 
-// -----------------------------------------------------------------------------
-//
+
+/*
+    \reimp
+ */
 HbAbstractViewItem * CalenDayContainer::createDefaultPrototype() const
 {
-    CalenDayItem *calendarViewItem = new CalenDayItem;
+    CalenDayItem *calendarViewItem = new CalenDayItem(this);
     return calendarViewItem;
 }
 
-// -----------------------------------------------------------------------------
-// setItemModelIndex()
-// 
-// -----------------------------------------------------------------------------
-//
+
+/*
+    \reimp
+ */
 void CalenDayContainer::setItemModelIndex(HbAbstractViewItem *item, 
                                             const QModelIndex &index)
 {
@@ -181,11 +170,15 @@ void CalenDayContainer::setItemModelIndex(HbAbstractViewItem *item,
     HbAbstractItemContainer::setItemModelIndex(item, index);
 }
 
-// -----------------------------------------------------------------------------
-// updateTimedEventGeometry()
-// Updates geometry of a timed event.
-// -----------------------------------------------------------------------------
-//
+
+// TODO: updateTimedEventGeometry and updateAllDayEventGeometry
+// methods are very similar and probably can be merged to avoid
+// code duplication
+/*!
+	\brief Set size and position of singe timed event widget (bubble)
+	\a item bubble widget
+	\a index pointing item data in model
+ */
 void CalenDayContainer::updateTimedEventGeometry(HbAbstractViewItem *item, 
                                                    const QModelIndex &index)
 {
@@ -272,14 +265,18 @@ void CalenDayContainer::updateTimedEventGeometry(HbAbstractViewItem *item,
     }
     
     QRectF eventGeometry( eventStartX, eventStartY, eventWidth, eventHeight );
-    item->setGeometry(eventGeometry);}
+    item->setGeometry(eventGeometry);
+}
 
 
-// -----------------------------------------------------------------------------
-// updateAllDayEventGeometry()
-// Updates geometry of a timed event.
-// -----------------------------------------------------------------------------
-//
+// TODO: updateTimedEventGeometry and updateAllDayEventGeometry
+// methods are very similar and probably can be merged to avoid
+// code duplication
+/*!
+	\brief Set size and position of singe all-day event widget (bubble)
+	\a item bubble widget
+	\a index pointing item data in model
+ */
 void CalenDayContainer::updateAllDayEventGeometry(HbAbstractViewItem *item, 
                                                    const QModelIndex &index)
 {
@@ -340,11 +337,10 @@ void CalenDayContainer::updateAllDayEventGeometry(HbAbstractViewItem *item,
 }
 
 
-// -----------------------------------------------------------------------------
-// movingBackwards()
-// 
-// -----------------------------------------------------------------------------
-//
+/*!
+	\brief Gets event layout values
+	\a layoutValues structure to be filled with layout data
+ */
 void CalenDayContainer::getTimedEventLayoutValues(LayoutValues& layoutValues)
 {
     // get the width of content area
@@ -355,8 +351,10 @@ void CalenDayContainer::getTimedEventLayoutValues(LayoutValues& layoutValues)
     layoutValues.unitInPixels = deviceProfile.unitValue();
     
     if ( mInfo && mInfo->AlldayCount())
-    	{ // 9.5 -> all-day area width 
-    	layoutValues.eventAreaX = 9.5 * layoutValues.unitInPixels;
+    	{
+    	// adccoriding to ui spec all-day event area should take
+		// 1/4 of content area
+    	layoutValues.eventAreaX = contentWidth / 4;
     	}
     else
     	{
@@ -375,24 +373,44 @@ void CalenDayContainer::getTimedEventLayoutValues(LayoutValues& layoutValues)
         CalenDayUtils::instance()->hourElementHeight() / 2;
     
     // 8.2 un (min. touchable event) from layout guide
+    // used to check should we create absorber over some overlapping region
     layoutValues.maxColumns = layoutValues.eventAreaWidth / (8.2 * layoutValues.unitInPixels);  
 }
 
-// -----------------------------------------------------------------------------
-// setDayInfo()
-// Sets day's info structer to the container.
-// -----------------------------------------------------------------------------
-//
+
+/*!
+	\brief Sets day's info structer to the container.
+	\a dayInfo day's info data
+ */
 void CalenDayContainer::setDayInfo( CalenDayInfo* dayInfo )
 {
     mInfo = dayInfo;
 }
 
 // -----------------------------------------------------------------------------
-// orientationChanged()
-// Slot handles layout switch.
+// setDate()
+// Sets date to the container. Changes according to model which is connected to given view.
 // -----------------------------------------------------------------------------
 //
+void CalenDayContainer::setDate(const QDate &date)
+{
+    mDate = date;
+}
+
+// -----------------------------------------------------------------------------
+// date()
+// Returns date of the container.
+// -----------------------------------------------------------------------------
+//
+const QDate &CalenDayContainer::date() const
+{
+    return mDate;
+}
+
+/*!
+	\brief Slot handles layout switch.
+	\a orientation current device orientation
+ */
 void CalenDayContainer::orientationChanged(Qt::Orientation orientation)
 {
 	getTimedEventLayoutValues(mLayoutValues);
@@ -414,11 +432,11 @@ void CalenDayContainer::orientationChanged(Qt::Orientation orientation)
     createTouchEventAbsorbers();
 }
 
-// -----------------------------------------------------------------------------
-// createTouchEventAbsorbers()
-// Creates absorbers which prevent touching to small items
-// -----------------------------------------------------------------------------
-//
+
+/*!
+	\brief Creates absorbers which prevent touching to small items
+	According to UI spec items smaller than 8.2 un are untouchable
+ */
 void CalenDayContainer::createTouchEventAbsorbers()
 {
 	// remove absorbers if exist
@@ -428,6 +446,19 @@ void CalenDayContainer::createTouchEventAbsorbers()
 		mAbsorbers.clear();
 		}
 	
+	//create absorber for all-day events
+	Qt::Orientation orientation = CalenDayUtils::instance()->orientation();
+	int allDayCount = mInfo->AlldayCount();
+	
+	if ((orientation == Qt::Vertical && allDayCount > 1) ||
+			(orientation == Qt::Horizontal && allDayCount > 2))
+		{
+		TouchEventAbsorber* absorber = crateAbsorberBetweenSlots(0, 0, true);
+		mAbsorbers.append(absorber);
+		}
+	
+	
+	// create absorbers for timed events
 	const QList<CalenTimeRegion>& regionList = mInfo->RegionList();
 	
 	for(int i=0; i < regionList.count(); i++)
@@ -435,7 +466,7 @@ void CalenDayContainer::createTouchEventAbsorbers()
 		if(regionList[i].iColumns.count() > mLayoutValues.maxColumns )
 			{
 			TouchEventAbsorber* absorber = 
-				crateAbsorberBetweenSlots(regionList[i].iStartSlot, regionList[i].iEndSlot);
+				crateAbsorberBetweenSlots(regionList[i].iStartSlot, regionList[i].iEndSlot, false);
 			
 			mAbsorbers.append(absorber);
 			}
@@ -443,33 +474,41 @@ void CalenDayContainer::createTouchEventAbsorbers()
 	
 }
 
-// -----------------------------------------------------------------------------
-// crateAbsorberBetweenSlots()
-// Creates single absorber in given location
-// -----------------------------------------------------------------------------
-//
+
+/*!
+	\brief Creates single absorber in given location
+	\a startSlot absorber area starts from there
+	\a endSlot absobrber area ends here
+	\a forAllDayEvents if true absorber in all-day events area is created
+ */
 TouchEventAbsorber *CalenDayContainer::crateAbsorberBetweenSlots
-												(int startSlot, int endSlot)
+												(int startSlot, int endSlot, bool forAllDayEvents)
 {
     TouchEventAbsorber *absorber = new TouchEventAbsorber(this);
     absorber->setZValue(1000);
     absorber->setVisible(true);
-    
-    absorber->setGeometry( mLayoutValues.eventAreaX,			// x
-			startSlot * mLayoutValues.slotHeight,				// y
-			mLayoutValues.eventAreaWidth,						// w
-			(endSlot-startSlot) * mLayoutValues.slotHeight ); 	// h
+    if (!forAllDayEvents)
+    	{
+		absorber->setGeometry( mLayoutValues.eventAreaX,			// x
+				startSlot * mLayoutValues.slotHeight,				// y
+				mLayoutValues.eventAreaWidth,						// w
+				(endSlot-startSlot) * mLayoutValues.slotHeight ); 	// h
+    	}
+    else
+    	{
+    	absorber->setGeometry(0, 0, mLayoutValues.eventAreaX,
+    			48 * mLayoutValues.slotHeight);
+    	}
     
     return absorber;
 }
 
 
-// -----------------------------------------------------------------------------
-// TouchEventAbsorber::gestureEvent()
-// Handles tap event on overlapping area (currently it leads to Agenda View - 
-// as described in UI spec)
-// -----------------------------------------------------------------------------
-//
+/*!
+	\brief Handles tap event on overlapping area
+	Currently it leads to Agenda View -  as described in UI spec
+	\a event qt gesture event
+ */
 void TouchEventAbsorber::gestureEvent(QGestureEvent *event)
 {
     QTapGesture *tapGesture = qobject_cast<QTapGesture*> (event->gesture(
@@ -484,11 +523,9 @@ void TouchEventAbsorber::gestureEvent(QGestureEvent *event)
     	}
 }
 
-// -----------------------------------------------------------------------------
-// TouchEventAbsorber()
-// default ctor
-// -----------------------------------------------------------------------------
-//
+/*!
+	 \brief Constructor
+ */
 TouchEventAbsorber::TouchEventAbsorber(QGraphicsItem *parent) : HbWidget(parent)
 {
 #ifdef _DEBUG
@@ -497,21 +534,23 @@ TouchEventAbsorber::TouchEventAbsorber(QGraphicsItem *parent) : HbWidget(parent)
     grabGesture(Qt::TapGesture);    	    
 }
 
-// -----------------------------------------------------------------------------
-// TouchEventAbsorber()
-// default dtor
-// -----------------------------------------------------------------------------
-//
+
+/*!
+ \brief Destructor
+ 
+ Sets container initial geometry, creates hours area widgets.
+ */
 TouchEventAbsorber::~TouchEventAbsorber()
 {
-	
+
 }
 
-// -----------------------------------------------------------------------------
-// TouchEventAbsorber::paint()
-// used for debugging purposes to see absorbers areas
-// -----------------------------------------------------------------------------
-//
+
+/*!
+	\brief Used for debugging purposes to see absorbers areas
+	Not active in release builds!
+ 
+ */
 #ifdef _DEBUG
 void TouchEventAbsorber::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 								QWidget *widget)

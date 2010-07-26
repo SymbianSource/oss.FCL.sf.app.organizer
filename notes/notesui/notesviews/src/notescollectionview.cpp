@@ -32,13 +32,18 @@
 #include <HbStyleLoader>
 
 // User includes
+#include <agendautil.h>
 #include "notescollectionview.h"
 #include "notescommon.h"
 #include "notesdocloader.h"
-#include "agendautil.h"
 #include "notesmodel.h"
 #include "noteseditor.h"
 #include "notessortfilterproxymodel.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "notescollectionviewTraces.h"
+#endif
+
 
 /*!
 	\class NotesCollectionView
@@ -56,7 +61,9 @@
 NotesCollectionView::NotesCollectionView(QGraphicsWidget *parent)
 :HbView(parent)
 {
+	OstTraceFunctionEntry0( NOTESCOLLECTIONVIEW_NOTESCOLLECTIONVIEW_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( NOTESCOLLECTIONVIEW_NOTESCOLLECTIONVIEW_EXIT );
 }
 
 /*!
@@ -64,10 +71,12 @@ NotesCollectionView::NotesCollectionView(QGraphicsWidget *parent)
  */
 NotesCollectionView::~NotesCollectionView()
 {
+	OstTraceFunctionEntry0( DUP1_NOTESCOLLECTIONVIEW_NOTESCOLLECTIONVIEW_ENTRY );
 	if (mDocLoader) {
 		delete mDocLoader;
 		mDocLoader = 0;
 	}
+	OstTraceFunctionExit0( DUP1_NOTESCOLLECTIONVIEW_NOTESCOLLECTIONVIEW_EXIT );
 }
 
 /*!
@@ -80,6 +89,7 @@ NotesCollectionView::~NotesCollectionView()
 void NotesCollectionView::setupView(
 		NotesAppControllerIf &controllerIf, NotesDocLoader *docLoader)
 {
+	OstTraceFunctionEntry0( NOTESCOLLECTIONVIEW_SETUPVIEW_ENTRY );
 	mDocLoader = docLoader;
 	mAppControllerIf = &controllerIf;
 	mNotesModel = mAppControllerIf->notesModel();
@@ -152,6 +162,7 @@ void NotesCollectionView::setupView(
 	connect(
 			mAddNoteAction, SIGNAL(triggered()),
 			this, SLOT(createNewNote()));
+	OstTraceFunctionExit0( NOTESCOLLECTIONVIEW_SETUPVIEW_EXIT );
 }
 
 /*!
@@ -159,6 +170,7 @@ void NotesCollectionView::setupView(
  */
 void NotesCollectionView::populateListView()
 {
+	OstTraceFunctionEntry0( NOTESCOLLECTIONVIEW_POPULATELISTVIEW_ENTRY );
 	QStandardItemModel *model = new QStandardItemModel(this);
 	model->setColumnCount(1);
 
@@ -192,6 +204,7 @@ void NotesCollectionView::populateListView()
 	HbStyleLoader::registerFilePath(":/style");
 	mListView->setLayoutName("custom");
 	mListView->setModel(model);
+	OstTraceFunctionExit0( NOTESCOLLECTIONVIEW_POPULATELISTVIEW_EXIT );
 }
 
 /*!
@@ -199,8 +212,10 @@ void NotesCollectionView::populateListView()
  */
 void NotesCollectionView::displayAllNotesView()
 {
+	OstTraceFunctionEntry0( NOTESCOLLECTIONVIEW_DISPLAYALLNOTESVIEW_ENTRY );
 	// Switch to collections view.
 	mAppControllerIf->switchToView(NotesNamespace::NotesMainViewId);
+	OstTraceFunctionExit0( NOTESCOLLECTIONVIEW_DISPLAYALLNOTESVIEW_EXIT );
 }
 
 /*!
@@ -208,6 +223,7 @@ void NotesCollectionView::displayAllNotesView()
  */
 void NotesCollectionView::resetCollectionView()
 {
+	OstTraceFunctionEntry0( NOTESCOLLECTIONVIEW_RESETCOLLECTIONVIEW_ENTRY );
 	QString countString(hbTrId("txt_notes_list_note_count"));
 
 	// Update the count of to-do's.
@@ -224,6 +240,7 @@ void NotesCollectionView::resetCollectionView()
 	notesStringList.append(
 			countString.arg(QString::number(recentNotesCount())));
 	mListView->model()->setData(mdlIndex, notesStringList, Qt::DisplayRole);
+	OstTraceFunctionExit0( NOTESCOLLECTIONVIEW_RESETCOLLECTIONVIEW_EXIT );
 }
 
 /*!
@@ -231,6 +248,7 @@ void NotesCollectionView::resetCollectionView()
  */
 void NotesCollectionView::createNewNote()
 {
+	OstTraceFunctionEntry0( NOTESCOLLECTIONVIEW_CREATENEWNOTE_ENTRY );
 	// Here we Display an editor to the use to enter text.
 	mNotesEditor = new NotesEditor(mAgendaUtil, this);
 	connect(
@@ -238,6 +256,7 @@ void NotesCollectionView::createNewNote()
 			this, SLOT(handleEditingCompleted(bool)));
 
 	mNotesEditor->create(NotesEditor::CreateNote);
+	OstTraceFunctionExit0( NOTESCOLLECTIONVIEW_CREATENEWNOTE_EXIT );
 }
 
 /*!
@@ -245,6 +264,7 @@ void NotesCollectionView::createNewNote()
  */
 void NotesCollectionView::handleEditingCompleted(bool status)
 {
+	OstTraceFunctionEntry0( NOTESCOLLECTIONVIEW_HANDLEEDITINGCOMPLETED_ENTRY );
 	Q_UNUSED(status)
 
 	// Refresh the content of the view.
@@ -254,6 +274,7 @@ void NotesCollectionView::handleEditingCompleted(bool status)
 	mNotesEditor->deleteLater();
 	
 	mAppControllerIf->switchToView(NotesNamespace::NotesMainViewId);
+	OstTraceFunctionExit0( NOTESCOLLECTIONVIEW_HANDLEEDITINGCOMPLETED_EXIT );
 }
 
 /*!
@@ -262,10 +283,12 @@ void NotesCollectionView::handleEditingCompleted(bool status)
  */
 void NotesCollectionView::updateData(ulong id)
 {
+	OstTraceFunctionEntry0( NOTESCOLLECTIONVIEW_UPDATEDATA_ENTRY );
 	Q_UNUSED(id)
 
 	// Refresh the content of the view.
 	resetCollectionView();
+	OstTraceFunctionExit0( NOTESCOLLECTIONVIEW_UPDATEDATA_EXIT );
 }
 
 /*!
@@ -274,10 +297,12 @@ void NotesCollectionView::updateData(ulong id)
  */
 void NotesCollectionView::updateData(QList<ulong> ids)
 {
+	OstTraceFunctionEntry0( DUP1_NOTESCOLLECTIONVIEW_UPDATEDATA_ENTRY );
 	Q_UNUSED(ids)
 
 	// Refresh the content of the view.
 	resetCollectionView();
+	OstTraceFunctionExit0( DUP1_NOTESCOLLECTIONVIEW_UPDATEDATA_EXIT );
 }
 
 /*!
@@ -288,6 +313,7 @@ void NotesCollectionView::updateData(QList<ulong> ids)
  */
 void NotesCollectionView::handleActivated(const QModelIndex &index)
 {
+	OstTraceFunctionEntry0( NOTESCOLLECTIONVIEW_HANDLEACTIVATED_ENTRY );
 
 	switch (index.row()) {
 		case 0: {
@@ -323,6 +349,7 @@ void NotesCollectionView::handleActivated(const QModelIndex &index)
 			// Nothing yet.
 			break;
 	}
+	OstTraceFunctionExit0( NOTESCOLLECTIONVIEW_HANDLEACTIVATED_EXIT );
 }
 
 /*!
@@ -333,6 +360,7 @@ void NotesCollectionView::handleActivated(const QModelIndex &index)
 void NotesCollectionView::updateFavouritesCount(
 		const QModelIndex &index, int start, int end)
 {
+	OstTraceFunctionEntry0( NOTESCOLLECTIONVIEW_UPDATEFAVOURITESCOUNT_ENTRY );
 	Q_UNUSED(index)
 	Q_UNUSED(start)
 	Q_UNUSED(end)
@@ -348,6 +376,7 @@ void NotesCollectionView::updateFavouritesCount(
 		favStringList.append(countString.arg(mFavouriteModel->rowCount()));
 		mListView->model()->setData(mdlIndex, favStringList, Qt::DisplayRole);
 	}
+	OstTraceFunctionExit0( NOTESCOLLECTIONVIEW_UPDATEFAVOURITESCOUNT_EXIT );
 }
 
 /*!
@@ -355,7 +384,9 @@ void NotesCollectionView::updateFavouritesCount(
  */
 void NotesCollectionView::handleActionStateChanged()
 {
+	OstTraceFunctionEntry0( NOTESCOLLECTIONVIEW_HANDLEACTIONSTATECHANGED_ENTRY );
 	mViewCollectionAction->setChecked(true);
+	OstTraceFunctionExit0( NOTESCOLLECTIONVIEW_HANDLEACTIONSTATECHANGED_EXIT );
 }
 
 
@@ -366,6 +397,7 @@ void NotesCollectionView::handleActionStateChanged()
  */
 int NotesCollectionView::todosCount()
 {
+	OstTraceFunctionEntry0( NOTESCOLLECTIONVIEW_TODOSCOUNT_ENTRY );
 	QList<ulong> entries = mAgendaUtil->entryIds(
 			(AgendaUtil::FilterFlags)
 			(AgendaUtil::IncludeCompletedTodos
@@ -380,6 +412,7 @@ int NotesCollectionView::todosCount()
  */
 int NotesCollectionView::recentNotesCount()
 {
+	OstTraceFunctionEntry0( NOTESCOLLECTIONVIEW_RECENTNOTESCOUNT_ENTRY );
 	QList<ulong> entries = mAgendaUtil->entryIds(AgendaUtil::IncludeNotes);
 	return entries.count();
 }

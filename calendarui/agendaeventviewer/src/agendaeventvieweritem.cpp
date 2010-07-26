@@ -26,6 +26,11 @@
 
 // User Includes.
 #include "agendaeventvieweritem.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "agendaeventvieweritemTraces.h"
+#endif
+
 
 /*!
  \class AgendaEventViewerItem
@@ -43,10 +48,12 @@ AgendaEventViewerItem::AgendaEventViewerItem(QGraphicsItem *parent) :
 	        mPrimaryIcon(NULL), mSecondaryIcon(NULL),mPrimaryRightIcon(NULL),
 	        mPrimaryLeftIcon(NULL)
 {
+    OstTraceFunctionEntry0( AGENDAEVENTVIEWERITEM_AGENDAEVENTVIEWERITEM_ENTRY );
 
 	// Path for widgetml and css files.
 	HbStyleLoader::registerFilePath(":/");
 
+	OstTraceFunctionExit0( AGENDAEVENTVIEWERITEM_AGENDAEVENTVIEWERITEM_EXIT );
 }
 
 /*!
@@ -54,8 +61,10 @@ AgendaEventViewerItem::AgendaEventViewerItem(QGraphicsItem *parent) :
  */
 AgendaEventViewerItem::~AgendaEventViewerItem()
 {
+	OstTraceFunctionEntry0( DUP1_AGENDAEVENTVIEWERITEM_AGENDAEVENTVIEWERITEM_ENTRY );
 	HbStyleLoader::unregisterFilePath(":/");
 
+	OstTraceFunctionExit0( DUP1_AGENDAEVENTVIEWERITEM_AGENDAEVENTVIEWERITEM_EXIT );
 }
 
 /*!
@@ -68,6 +77,7 @@ AgendaEventViewerItem::~AgendaEventViewerItem()
 void AgendaEventViewerItem::setEventViewerItemData(const QStringList &itemData,
                                                    int role)
 {
+	OstTraceFunctionEntry0( AGENDAEVENTVIEWERITEM_SETEVENTVIEWERITEMDATA_ENTRY );
 	if (!itemData.isEmpty()) {
 		QString firstItemData(QString::null);
 		QString secondItemData(QString::null);
@@ -163,6 +173,7 @@ void AgendaEventViewerItem::setEventViewerItemData(const QStringList &itemData,
 		}
 	}
 	repolish();
+	OstTraceFunctionExit0( AGENDAEVENTVIEWERITEM_SETEVENTVIEWERITEMDATA_EXIT );
 }
 
 // End of file	--Don't remove this.

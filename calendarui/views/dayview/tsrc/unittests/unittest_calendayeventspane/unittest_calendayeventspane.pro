@@ -17,6 +17,10 @@
 TEMPLATE = app
 TARGET = unittest_calendayeventspane
 
+#uncoment it if want to get images from test where it is posible.
+#it need folder in c:/unittest path
+#DEFINES += SAVE_IMAGES 
+
 MOC_DIR = moc
 
 CONFIG += qtestlib
@@ -36,6 +40,8 @@ HEADERS +=	calendayeventspane.h
 
 SOURCES +=	unittest_calendayeventspane.cpp \
 			calendayeventspane.cpp 
+
+RESOURCES += ../../../resources/calendaywidgets.qrc
 
 symbian : {
 	TARGET.CAPABILITY = CAP_APPLICATION

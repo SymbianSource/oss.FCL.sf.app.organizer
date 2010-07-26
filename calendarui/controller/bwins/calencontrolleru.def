@@ -37,4 +37,7 @@ EXPORTS
 	?GetCommandHandlerL@CCalenController@@QAEPAVMCalenCommandHandler@@H@Z @ 36 NONAME ; class MCalenCommandHandler * CCalenController::GetCommandHandlerL(int)
 	?RegisterForNotificationsL@CCalenController@@QAEXPAVMCalenNotificationHandler@@AAV?$RArray@W4TCalenNotification@@@@@Z @ 37 NONAME ; void CCalenController::RegisterForNotificationsL(class MCalenNotificationHandler *, class RArray<enum TCalenNotification> &)
 	?NewServicesL@CCalenController@@UAEPAVMCalenServices@@XZ @ 38 NONAME ; class MCalenServices * CCalenController::NewServicesL(void)
+	?emitAppReady@CCalenController@@QAEXXZ @ 39 NONAME ; void CCalenController::emitAppReady(void)
+	?appReady@CCalenController@@IAEXXZ @ 40 NONAME ; void CCalenController::appReady(void)
+	?raiseWindow@CCalenController@@AAEXXZ @ 41 NONAME ; void CCalenController::raiseWindow(void)
 

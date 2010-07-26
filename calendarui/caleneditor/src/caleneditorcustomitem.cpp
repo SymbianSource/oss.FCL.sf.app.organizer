@@ -61,12 +61,12 @@
  */
 CalenEditorCustomItem::CalenEditorCustomItem(QGraphicsItem *parent)
 :HbDataFormViewItem(parent),
- mPushButtonTime(NULL),
- mPushButtonDate(NULL),
- mRepeatUntilWidget(NULL),
- mReminderTimeWidget(NULL),
- mDatePicker(NULL),
- mTimePicker(NULL)
+ mPushButtonTime(0),
+ mPushButtonDate(0),
+ mRepeatUntilWidget(0),
+ mReminderTimeWidget(0),
+ mDatePicker(0),
+ mTimePicker(0)
 {
 	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_CALENEDITORCUSTOMITEM_ENTRY );
 	mMinDate = CalenDateUtils::minTime().date();
@@ -74,8 +74,8 @@ CalenEditorCustomItem::CalenEditorCustomItem(QGraphicsItem *parent)
 	mMinTime.setHMS(0,0,0,0);
 	mMaxTime.setHMS(23,59,59,999);
 	mLocale = HbExtendedLocale::system();
-	mLocationLineEdit = NULL;
-	mLocationPushButton = NULL;
+	mLocationLineEdit = 0;
+	mLocationPushButton = 0;
 	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_CALENEDITORCUSTOMITEM_EXIT );
 }
 /*!
@@ -365,7 +365,7 @@ void CalenEditorCustomItem::handleDate()
 	}
 	// Create a date picker
 	if(mDatePicker) {
-		mDatePicker = NULL;
+		mDatePicker = 0;
 	}
 	mDatePicker = new HbDateTimePicker(mDate, popUp);
 	mDatePicker->setMinimumDate(mMinDate);
@@ -402,7 +402,7 @@ void CalenEditorCustomItem::handleTime()
 	}
 	// Create a time picker.
 	if(mTimePicker) {
-		mTimePicker = NULL;
+		mTimePicker = 0;
 	}
 	mTimePicker = new HbDateTimePicker(mTime, popUp);
 	

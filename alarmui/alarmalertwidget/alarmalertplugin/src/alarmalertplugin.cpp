@@ -26,6 +26,10 @@
 #include "alarmalertwidget_p.h"
 #include "alarmalert.h"
 #include "alarmalertdocloader.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "alarmalertpluginTraces.h"
+#endif
 
 // Plugin export
 Q_EXPORT_PLUGIN2(alarmalertplugin, AlarmAlertPlugin);
@@ -37,7 +41,9 @@ Q_EXPORT_PLUGIN2(alarmalertplugin, AlarmAlertPlugin);
 //
 AlarmAlertPlugin::AlarmAlertPlugin()
 {
+	OstTraceFunctionEntry0( ALARMALERTPLUGIN_ALARMALERTPLUGIN_ENTRY );
 	// No implementation yet
+	OstTraceFunctionExit0( ALARMALERTPLUGIN_ALARMALERTPLUGIN_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -47,7 +53,9 @@ AlarmAlertPlugin::AlarmAlertPlugin()
 //
 AlarmAlertPlugin::~AlarmAlertPlugin()
 {
+    OstTraceFunctionEntry0( DUP1_ALARMALERTPLUGIN_ALARMALERTPLUGIN_ENTRY );
     // No implementation yet
+    OstTraceFunctionExit0( DUP1_ALARMALERTPLUGIN_ALARMALERTPLUGIN_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -59,11 +67,13 @@ bool AlarmAlertPlugin::accessAllowed(const QString &deviceDialogType,
                                              const QVariantMap &parameters,
                                              const QVariantMap &securityInfo) const
 {
+    OstTraceFunctionEntry0( ALARMALERTPLUGIN_ACCESSALLOWED_ENTRY );
     Q_UNUSED(securityInfo);
     Q_UNUSED(parameters);
     Q_UNUSED(deviceDialogType);
     
     // No implementation yet
+    OstTraceFunctionExit0( ALARMALERTPLUGIN_ACCESSALLOWED_EXIT );
     return true;
 }
 
@@ -76,12 +86,14 @@ bool AlarmAlertPlugin::deviceDialogInfo(const QString &deviceDialogType,
                                                 const QVariantMap &parameters,
                                                 DeviceDialogInfo *info) const
 {
+    OstTraceFunctionEntry0( ALARMALERTPLUGIN_DEVICEDIALOGINFO_ENTRY );
     Q_UNUSED(deviceDialogType);
     Q_UNUSED(parameters);
 
     info->group = CriticalGroup;
     info->priority = DefaultPriority;
     info->flags = NoDeviceDialogFlags;
+    OstTraceFunctionExit0( ALARMALERTPLUGIN_DEVICEDIALOGINFO_EXIT );
     return true;
 }
 
@@ -92,9 +104,11 @@ bool AlarmAlertPlugin::deviceDialogInfo(const QString &deviceDialogType,
 //
 QStringList AlarmAlertPlugin::deviceDialogTypes() const
 {
+    OstTraceFunctionEntry0( ALARMALERTPLUGIN_DEVICEDIALOGTYPES_ENTRY );
     // Return the device dialog type this plugin supports 
     QStringList dialogType;
     dialogType.append(ALARM_ALERT_PLUGIN);
+    OstTraceFunctionExit0( ALARMALERTPLUGIN_DEVICEDIALOGTYPES_EXIT );
     return dialogType;
 }
 
@@ -105,6 +119,8 @@ QStringList AlarmAlertPlugin::deviceDialogTypes() const
 //
 HbDeviceDialogPlugin::PluginFlags AlarmAlertPlugin::pluginFlags() const
 {
+    OstTraceFunctionEntry0( ALARMALERTPLUGIN_PLUGINFLAGS_ENTRY );
+    OstTraceFunctionExit0( ALARMALERTPLUGIN_PLUGINFLAGS_EXIT );
     return NoPluginFlags;
 }
 
@@ -115,7 +131,9 @@ HbDeviceDialogPlugin::PluginFlags AlarmAlertPlugin::pluginFlags() const
 //
 int AlarmAlertPlugin::error() const
 {
+    OstTraceFunctionEntry0( ALARMALERTPLUGIN_ERROR_ENTRY );
     // TODO: Need to handle any error that might occur
+    OstTraceFunctionExit0( ALARMALERTPLUGIN_ERROR_EXIT );
     return 0;
 }
 
@@ -127,6 +145,7 @@ int AlarmAlertPlugin::error() const
 HbDeviceDialogInterface *AlarmAlertPlugin::createDeviceDialog(const QString &deviceDialogType,
                                                               const QVariantMap &parameters)
 {
+	OstTraceFunctionEntry0( ALARMALERTPLUGIN_CREATEDEVICEDIALOG_ENTRY );
 	Q_UNUSED(deviceDialogType);
     
 	// Create and return the alarm alert dialog
@@ -157,5 +176,6 @@ HbDeviceDialogInterface *AlarmAlertPlugin::createDeviceDialog(const QString &dev
     AlarmAlertDialogPrivate *alertDialog = qobject_cast<AlarmAlertDialogPrivate*> (alertDocLoader->findWidget("dialog"));
     alertDialog->setupNormalUI(alertDocLoader);
     ret = alertDialog;
+    OstTraceFunctionExit0( ALARMALERTPLUGIN_CREATEDEVICEDIALOG_EXIT );
     return ret;
 }

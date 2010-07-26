@@ -148,5 +148,13 @@ void CalenEditor::create(AgendaEntry entry, bool launchCalendar,
 	d_ptr->create(type, entry, launchCalendar);
 	OstTraceFunctionExit0( DUP2_CALENEDITOR_CREATE_EXIT );
 }
+/*!
+    Save the entry from editor 
+    should be called only if  edit or create function of editor has called. 
+ */
+void CalenEditor::saveAndCloseEditor()
+{
+    d_ptr->forcedSaveEntry();
+}
 
 // End of file	--Don't remove this.

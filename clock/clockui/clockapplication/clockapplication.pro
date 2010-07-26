@@ -24,7 +24,8 @@ INCLUDEPATH += \
 
 DEPENDPATH += \
 		. \
-		./src
+		./src \
+		./inc
 
 symbian: {
 	TARGET.CAPABILITY = ALL -TCB
@@ -38,7 +39,12 @@ symbian: {
 	SKINICON = qtg_large_clock
 }
 
-SOURCES += main.cpp
+SOURCES += \
+		main.cpp \
+		clockapplication.cpp
+		
+HEADERS += \
+		clockapplication.h
 
 TRANSLATIONS += clock.ts
 dtplugin.sources = /epoc32/data/c/resource/qt/plugins/controlpanel/datetimesettingsplugin.qtplugin

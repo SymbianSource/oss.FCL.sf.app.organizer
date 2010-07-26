@@ -29,7 +29,7 @@
 #include <calcategory.h>
 
 // User includes
-#include "agendautil.h"
+#include <agendautil.h>
 
 // Forward declarations
 class CCalSession;
@@ -61,11 +61,8 @@ public:
 	AgendaUtilPrivate(AgendaUtil* calendar);
 	~AgendaUtilPrivate();
 
-	ulong addEntry(const AgendaEntry& entry);
+	ulong store(AgendaEntry &entry, AgendaUtil::RecurrenceRange range);
 	ulong cloneEntry(const AgendaEntry& entry, AgendaEntry::Type type);
-	bool updateEntry(const AgendaEntry& entry, bool isChild = false);
-	bool storeRepeatingEntry(const AgendaEntry& entry, bool copyToChildren);
-	bool createException(const AgendaEntry& entry, QDateTime instanceOriginalDateTime);
 	
 	bool deleteEntry(ulong id);
 	void deleteRepeatedEntry(
@@ -92,7 +89,6 @@ public:
 	AgendaUtil::Error error() const;
 	void setCompleted(AgendaEntry& entry, bool complete, QDateTime& dateTime);
 	AgendaEntry parentEntry(AgendaEntry& entry);
-	void clearRepeatingProperties(AgendaEntry& entry);
 	void getPreviousInstanceTimes(AgendaEntry& entry, QDateTime& startTime, 
 		                              QDateTime& endTime);
 	void getNextInstanceTimes(AgendaEntry& entry, QDateTime& startTime, 
@@ -114,6 +110,7 @@ protected:
 private:
 	AgendaEntry createAgendaEntryFromCalEntry(
 			CCalEntry& calEntry, CCalInstance* instance = NULL);
+	void createCCalEntryFromAgendaEntry(AgendaEntry &agendaEntry, CCalEntry &calEntry);
 	bool addAttendeesToEntry(
 			const QList<AgendaAttendee>& attendees, CCalEntry& entry);
 	bool addCategoriesToEntry(
@@ -142,17 +139,7 @@ private:
 									const CalCommon::TCalTimeRange& timeRange);
 	TTime getNextInstanceForRepeatOther(CCalEntry& aEntry, 
 								   const CalCommon::TCalTimeRange& timeRange);
-	bool haveRepeatPropertiesChanged(const CCalEntry& newEntry, 
-	                                  const CCalEntry& oldEntry);
-	void copyChildrenExceptionData( CCalEntry& editedEntry,
-								RPointerArray<CCalEntry>& oldEntries );
-	bool isFieldSame( CCalEntry& entryOne, CCalEntry& entryTwo,
-								DifferenceFlag flag);
-	void copyField( const CCalEntry& src, CCalEntry& dst,
-							DifferenceFlag field );
-	void storeEachChildEntry(CCalEntry &entry,
-							  RPointerArray<CCalEntry> &oldEntries,
-							  bool resetLocalUid);
+	
 	TCalTime generateRecurrenceIdFromEntry( CCalEntry& entry, 
 											TCalTime instanceDate );
 	
@@ -161,7 +148,7 @@ private:
 						  
 	AgendaRepeatRule createAgendaRRuleFromTCalRRule(TCalRRule &calRRule);
 	
-	TCalRRule createTCalRRuleFromAgendaRRule(AgendaRepeatRule &agendaRRule);
+	TCalRRule createTCalRRuleFromAgendaRRule(AgendaRepeatRule &agendaRRule, bool isNonFloating);
 
 
 private:

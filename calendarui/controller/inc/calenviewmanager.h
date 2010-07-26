@@ -36,6 +36,7 @@ class AgendaEventViewer;
 class CalenLandscapeDayView;
 class CalenSettingsView;
 class CalenDocLoader;
+class CalenDayView;
 
 /**
  * The action ui handles events passed from the controller and delegates
@@ -117,9 +118,15 @@ class  CalenViewManager :	public QObject,
          */
         void loadMonthView();
         /**
-		 * Loads day view frm the docml
+		 * Loads agenda view from the docml
 		 */
         void loadAgendaView();
+
+        /**
+         * Loads day view from the docml
+         */
+        void loadDayView();
+                
 	    /**
 	     * Activates the default view, as retrieved from settings.
 	     */
@@ -151,8 +158,8 @@ class  CalenViewManager :	public QObject,
 		void handleDeletingCompleted();
 		void handleInstanceViewCreation(int status);
 		void handleEntryViewCreation(int status);
-		void handleDayViewReady();
 		void handleEntriesChanged(QList<ulong>);
+		void handleEntryUpdation(ulong id);
 		
     private:  // Data        
 
@@ -166,7 +173,7 @@ class  CalenViewManager :	public QObject,
 		CalenDocLoader			*mMonthViewDocLoader;
 		CalenAgendaView         *mCalenAgendaViewAlt;
 		CalenDocLoader          *mAgendaViewAltDocLoader;
-		CalenNativeView			*mCalenDayView;
+		CalenDayView			*mCalenDayView;
         
 		int  mCurrentViewId;
 		int  mPreviousViewsId;

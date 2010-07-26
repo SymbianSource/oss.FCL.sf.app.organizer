@@ -125,12 +125,14 @@ void CalenDayItemView::modelReset()
     }
     //reset day info
     mInfo->Reset();
-    
+
     CalenDayModel* model(0);
     model = static_cast<CalenDayModel*>(this->model());
     if ( !model ) {
         return;
     }
+    
+    mContainer->setDate(model->modelDate().date());
     int rowCount = model->rowCount( );
     SCalenApptInfo apptInfo; 
     for( int row = 0; row < rowCount; row++ ) {

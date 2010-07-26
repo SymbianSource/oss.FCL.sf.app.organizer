@@ -103,6 +103,17 @@ public:
      */
     void createNewEvent();
     
+    
+    bool hasAllDayIcon();
+    void checkEntryIcons();
+    bool isAllDayIcon();
+    bool isExceptionIcon();
+    bool isAlarmIcon();
+    bool isRepeatingIcon();
+        
+    
+    
+    
 private:
     
     /**
@@ -353,6 +364,14 @@ private:
 	 * @brief Holds notes editor plugin load info.
 	 */
 	bool mNotesPluginLoaded;
+	int mIndex;
+	bool mIconCheck; 
+	bool mNextEntry;
+	bool mAllDayLeftIcon;
+	bool mRightAlarmIcon;
+	bool mRightRepeatIcon;
+	bool mRightExceptionIcon;
+	bool mLeftAllDayIcon;
 
 };
 

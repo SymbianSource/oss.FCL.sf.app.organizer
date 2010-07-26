@@ -20,7 +20,8 @@ TARGET = calenlunarchineseplugin
 
 DEPENDPATH +=  ./inc ./src
 INCLUDEPATH +=  ./inc 
-INCLUDEPATH += ../inc ../../inc
+INCLUDEPATH += ../inc ../../inc \
+				./traces
 
 
 # Input
@@ -90,7 +91,7 @@ MMP_RULES +=mmpRules
 MMP_RULES -= "OPTION_REPLACE ARMCC --export_all_vtbl -D__QT_NOEFFECTMACRO_DONOTUSE"
 
 }
-# TODO: uncomment below line once ts file is released to platform
-#TRANSLATIONS += calenregional.ts
+
+TRANSLATIONS += calenregional.ts
 
 # End of file	--Don't remove this.

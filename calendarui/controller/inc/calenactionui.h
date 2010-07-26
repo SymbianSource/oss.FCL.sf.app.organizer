@@ -60,6 +60,11 @@ class CCalenActionUi : public CBase,
          * Gets a command handler or NULL.
          */
         MCalenCommandHandler* GetCommandHandlerL( TInt aCommand );
+        /**
+        * This Function saves the entries
+        * should only calls after edit or create function has called 
+        */
+        void saveAndCloseEditor();
 
     private:  // Construction and destruction
         /**

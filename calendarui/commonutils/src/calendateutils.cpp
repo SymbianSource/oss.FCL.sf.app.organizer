@@ -21,7 +21,7 @@
 #include "calendarui_debug.h"
 
 #include "calendateutils.h"
-#include "agendautil.h"
+#include <agendautil.h>
 
 //  LOCAL CONSTANTS AND MACROS
 const int KDefaultStartTime(8);    // 8 am ( 0 to 23 hour scale)

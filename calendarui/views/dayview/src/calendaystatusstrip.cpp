@@ -263,7 +263,7 @@ CalenDayStatusStrip::diagonalLine(QPointF startPoint, qreal dx, qreal dy)
     if (endTime.minute() == 0) {
         end = endTime;
     }
-    else if (endTime.hour() == 23) {
+    else if (endTime.hour() == 23 and endTime.minute() > 30) {
         end = QTime(endTime.hour(), 59);
     }
     else if (endTime.minute() <= 30) {

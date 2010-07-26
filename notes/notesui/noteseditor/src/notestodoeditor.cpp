@@ -45,7 +45,12 @@
 #include "noteseditor_p.h"
 #include "noteseditorcommon.h"
 #include "noteseditordocloader.h"
-#include "agendaentry.h"
+#include <agendaentry.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "notestodoeditorTraces.h"
+#endif
+
 
 /*!
 	\class NotesTodoEditor
@@ -69,6 +74,7 @@ NotesTodoEditor::NotesTodoEditor(
  mDescriptionItemIndex(5),
  mDiscardChangesActive(false)
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_NOTESTODOEDITOR_ENTRY );
 	mDocLoader = new NotesEditorDocLoader;
 	Q_ASSERT(mDocLoader);
 
@@ -101,6 +107,7 @@ NotesTodoEditor::NotesTodoEditor(
 	QList <HbAbstractViewItem*> prototypes = mDataForm->itemPrototypes();
 	prototypes.append(customItem);
 	mDataForm->setItemPrototypes(prototypes);
+	OstTraceFunctionExit0( NOTESTODOEDITOR_NOTESTODOEDITOR_EXIT );
 }
 
 /*!
@@ -108,12 +115,14 @@ NotesTodoEditor::NotesTodoEditor(
  */
 NotesTodoEditor::~NotesTodoEditor()
 {
+	OstTraceFunctionEntry0( DUP1_NOTESTODOEDITOR_NOTESTODOEDITOR_ENTRY );
 	if (mFormModel) {
 		delete mFormModel;
 	}
 
 	mDocLoader->reset();
 	delete mDocLoader;
+	OstTraceFunctionExit0( DUP1_NOTESTODOEDITOR_NOTESTODOEDITOR_EXIT );
 }
 
 /*!
@@ -121,8 +130,10 @@ NotesTodoEditor::~NotesTodoEditor()
  */
 void NotesTodoEditor::updateSummaryText(const QString &text)
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_UPDATESUMMARYTEXT_ENTRY );
 	mOwner->mModifiedNote.setSummary(text);
 	addDiscardChangesAction();
+	OstTraceFunctionExit0( NOTESTODOEDITOR_UPDATESUMMARYTEXT_EXIT );
 }
 
 /*!
@@ -132,8 +143,10 @@ void NotesTodoEditor::updateSummaryText(const QString &text)
  */
 void NotesTodoEditor::updatePriority(int index)
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_UPDATEPRIORITY_ENTRY );
 	mOwner->mModifiedNote.setPriority(index + 1);
 	addDiscardChangesAction();
+	OstTraceFunctionExit0( NOTESTODOEDITOR_UPDATEPRIORITY_EXIT );
 }
 
 /*!
@@ -143,8 +156,10 @@ void NotesTodoEditor::updatePriority(int index)
  */
 void NotesTodoEditor::updateDescription(const QString &text)
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_UPDATEDESCRIPTION_ENTRY );
 	mOwner->mModifiedNote.setDescription(text);
 	addDiscardChangesAction();
+	OstTraceFunctionExit0( NOTESTODOEDITOR_UPDATEDESCRIPTION_EXIT );
 }
 
 /*!
@@ -155,6 +170,7 @@ void NotesTodoEditor::updateDescription(const QString &text)
  */
 bool NotesTodoEditor::validAlarmSet()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_VALIDALARMSET_ENTRY );
 	bool alarmSet(true);
 
 	// Sanity Check.
@@ -179,6 +195,7 @@ bool NotesTodoEditor::validAlarmSet()
 		}else {
 			HbNotificationDialog::launchDialog(tr("Alarm time is not valid"));
 			alarmSet = false;
+			OstTraceFunctionExit0( NOTESTODOEDITOR_VALIDALARMSET_EXIT );
 			return alarmSet;
 		}
 
@@ -198,6 +215,7 @@ bool NotesTodoEditor::validAlarmSet()
 		}else {
 			HbNotificationDialog::launchDialog(tr("Alarm date is not valid"));
 			alarmSet = false;
+			OstTraceFunctionExit0( DUP1_NOTESTODOEDITOR_VALIDALARMSET_EXIT );
 			return alarmSet;
 		}
 
@@ -229,8 +247,10 @@ bool NotesTodoEditor::validAlarmSet()
 	} else {
 		AgendaAlarm dummyAlarm;
 		mOwner->mModifiedNote.setAlarm(dummyAlarm);
+		OstTraceFunctionExit0( DUP2_NOTESTODOEDITOR_VALIDALARMSET_EXIT );
 		return alarmSet;
 	}
+	OstTraceFunctionExit0( DUP3_NOTESTODOEDITOR_VALIDALARMSET_EXIT );
 	return alarmSet;
 }
 
@@ -239,6 +259,7 @@ bool NotesTodoEditor::validAlarmSet()
  */
 void NotesTodoEditor::addDiscardChangesAction()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_ADDDISCARDCHANGESACTION_ENTRY );
 	if(!mDiscardChangesActive) {
 		mDiscardAction = new HbAction(hbTrId("txt_notes_opt_discard_changes"));
 
@@ -250,6 +271,7 @@ void NotesTodoEditor::addDiscardChangesAction()
 
 		mDiscardChangesActive = true;
 	}
+	OstTraceFunctionExit0( NOTESTODOEDITOR_ADDDISCARDCHANGESACTION_EXIT );
 }
 
 /*!
@@ -259,7 +281,8 @@ void NotesTodoEditor::addDiscardChangesAction()
  */
 void NotesTodoEditor::execute(AgendaEntry entry)
 {
-	Q_UNUSED(entry)
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_EXECUTE_ENTRY );
+
 
 	HbMenu *viewMenu = mEditor->menu();
 	if (!mDescriptionAction) {
@@ -302,6 +325,7 @@ void NotesTodoEditor::execute(AgendaEntry entry)
 			this, SLOT(saveTodo()));
 	window->addView(mEditor);
 	window->setCurrentView(mEditor);
+	OstTraceFunctionExit0( NOTESTODOEDITOR_EXECUTE_EXIT );
 }
 
 /*!
@@ -311,14 +335,17 @@ void NotesTodoEditor::execute(AgendaEntry entry)
  */
 void NotesTodoEditor::create(AgendaEntry entry)
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_CREATE_ENTRY );
 	Q_UNUSED(entry)
 
+	OstTraceFunctionExit0( NOTESTODOEDITOR_CREATE_EXIT );
 }
 /*!
 	Initializes the data form model.
  */
 void NotesTodoEditor::initFormModel()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_INITFORMMODEL_ENTRY );
 	// Delete the model if already there.
 	if (mFormModel) {
 		delete mFormModel;
@@ -340,6 +367,7 @@ void NotesTodoEditor::initFormModel()
 
 	// Set the model to the form.
 	mDataForm->setModel(mFormModel);
+	OstTraceFunctionExit0( NOTESTODOEDITOR_INITFORMMODEL_EXIT );
 }
 
 /*!
@@ -347,6 +375,7 @@ void NotesTodoEditor::initFormModel()
  */
 void NotesTodoEditor::insertSubjectItem()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_INSERTSUBJECTITEM_ENTRY );
 	mSubjectItem = mFormModel->appendDataFormItem(
 			HbDataFormModelItem::TextItem,
 			QString(""), mFormModel->invisibleRootItem());
@@ -357,6 +386,7 @@ void NotesTodoEditor::insertSubjectItem()
 	mDataForm->addConnection(
 			mSubjectItem , SIGNAL(textChanged(const QString &)),
 			this, SLOT(updateSummaryText(const QString &)));
+	OstTraceFunctionExit0( NOTESTODOEDITOR_INSERTSUBJECTITEM_EXIT );
 }
 
 /*!
@@ -364,6 +394,7 @@ void NotesTodoEditor::insertSubjectItem()
  */
 void NotesTodoEditor::insertDueDateItem()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_INSERTDUEDATEITEM_ENTRY );
 	HbDataFormModelItem::DataItemType itemType =
 			static_cast<HbDataFormModelItem::DataItemType>
 			(HbDataFormModelItem::CustomItemBase + DueDateItemOffset);
@@ -386,12 +417,14 @@ void NotesTodoEditor::insertDueDateItem()
 	}
 	mDueDateItem->setContentWidgetData("text",dueDateText);
 
+	OstTraceFunctionExit0( NOTESTODOEDITOR_INSERTDUEDATEITEM_EXIT );
 }
 /*!
 	 Inserts the reminder enabler item into the model.
  */
 void NotesTodoEditor::insertReminderToggle()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_INSERTREMINDERTOGGLE_ENTRY );
 	mReminderEnabler = mFormModel->appendDataFormItem(
 			HbDataFormModelItem::CheckBoxItem,
 			tr(""), mFormModel->invisibleRootItem());
@@ -408,6 +441,7 @@ void NotesTodoEditor::insertReminderToggle()
 	mDataForm->addConnection(
 			mReminderEnabler, SIGNAL(stateChanged(int)),
 			this, SLOT(handleReminderItem(int)));
+	OstTraceFunctionExit0( NOTESTODOEDITOR_INSERTREMINDERTOGGLE_EXIT );
 }
 
 /*!
@@ -415,6 +449,7 @@ void NotesTodoEditor::insertReminderToggle()
  */
 void NotesTodoEditor::handleReminderItem(int checked)
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_HANDLEREMINDERITEM_ENTRY );
 	if (Qt::Checked == checked) {
 		HbDataFormModelItem::DataItemType itemType =
 			static_cast<HbDataFormModelItem::DataItemType>
@@ -484,6 +519,7 @@ void NotesTodoEditor::handleReminderItem(int checked)
 			mReminderItem = 0;
 		}
 	}
+	OstTraceFunctionExit0( NOTESTODOEDITOR_HANDLEREMINDERITEM_EXIT );
 }
 
 /*!
@@ -491,6 +527,7 @@ void NotesTodoEditor::handleReminderItem(int checked)
  */
 void NotesTodoEditor::insertPriorityItem()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_INSERTPRIORITYITEM_ENTRY );
 	mPriorityItem = mFormModel->appendDataFormItem(
 			HbDataFormModelItem::ComboBoxItem,
 			hbTrId("txt_notes_setlabel_priority"),
@@ -513,6 +550,7 @@ void NotesTodoEditor::insertPriorityItem()
 	mDataForm->addConnection(
 			mPriorityItem, SIGNAL(currentIndexChanged(int)),
 			this, SLOT(updatePriority(int)));
+	OstTraceFunctionExit0( NOTESTODOEDITOR_INSERTPRIORITYITEM_EXIT );
 }
 
 /*!
@@ -520,6 +558,7 @@ void NotesTodoEditor::insertPriorityItem()
  */
 void NotesTodoEditor::insertDescriptionItem()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_INSERTDESCRIPTIONITEM_ENTRY );
 	mDescriptionItem = mFormModel->appendDataFormItem(
 			HbDataFormModelItem::TextItem,
 			hbTrId("txt_notes_formlabel_val_description"),
@@ -534,6 +573,7 @@ void NotesTodoEditor::insertDescriptionItem()
 	mDataForm->addConnection(
 			mDescriptionItem, SIGNAL(textChanged(const QString)),
 			this, SLOT(updateDescription(const QString)));
+	OstTraceFunctionExit0( NOTESTODOEDITOR_INSERTDESCRIPTIONITEM_EXIT );
 }
 
 /*!
@@ -541,10 +581,12 @@ void NotesTodoEditor::insertDescriptionItem()
  */
 void NotesTodoEditor::addMenu()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_ADDMENU_ENTRY );
 	mDeleteAction = mEditor->menu()->addAction(hbTrId("txt_common_opt_delete"));
 	connect(
 			mDeleteAction, SIGNAL(triggered()),
 			this, SLOT(handleDeleteAction()));
+	OstTraceFunctionExit0( NOTESTODOEDITOR_ADDMENU_EXIT );
 }
 
 /*!
@@ -552,6 +594,7 @@ void NotesTodoEditor::addMenu()
  */
 void NotesTodoEditor::saveTodo()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_SAVETODO_ENTRY );
 	// Here we check if the user has set the appropriate alarm time.
 	// And save only if its fine to do so. Else we note a discrete notification
 	// asking the user to check for the alarm time.
@@ -571,6 +614,7 @@ void NotesTodoEditor::saveTodo()
 
 		mOwner->editingCompleted(status);
 	}
+	OstTraceFunctionExit0( NOTESTODOEDITOR_SAVETODO_EXIT );
 }
 
 /*!
@@ -579,10 +623,12 @@ void NotesTodoEditor::saveTodo()
  */
 void NotesTodoEditor::close()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_CLOSE_ENTRY );
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 	// Now close the editor.
 	window->removeView(mEditor);
 
+	OstTraceFunctionExit0( NOTESTODOEDITOR_CLOSE_EXIT );
 }
 
 /*!
@@ -591,6 +637,7 @@ void NotesTodoEditor::close()
  */
 void NotesTodoEditor::handleAddDescriptionAction()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_HANDLEADDDESCRIPTIONACTION_ENTRY );
 	// Now we add the description item here.
 	insertDescriptionItem();
 
@@ -604,6 +651,7 @@ void NotesTodoEditor::handleAddDescriptionAction()
 	connect(
 			mDescriptionAction, SIGNAL(triggered()),
 			this, SLOT(handleRemoveDescriptionAction()));
+	OstTraceFunctionExit0( NOTESTODOEDITOR_HANDLEADDDESCRIPTIONACTION_EXIT );
 }
 
 /*!
@@ -612,6 +660,7 @@ void NotesTodoEditor::handleAddDescriptionAction()
  */
 void NotesTodoEditor::handleRemoveDescriptionAction()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_HANDLEREMOVEDESCRIPTIONACTION_ENTRY );
 	// Here we firstset the description text in the entry to empty.
 	mOwner->mModifiedNote.setDescription("");
 
@@ -629,6 +678,7 @@ void NotesTodoEditor::handleRemoveDescriptionAction()
 			mDescriptionAction, SIGNAL(triggered()),
 			this, SLOT(handleAddDescriptionAction()));
 
+	OstTraceFunctionExit0( NOTESTODOEDITOR_HANDLEREMOVEDESCRIPTIONACTION_EXIT );
 }
 
 /*!
@@ -636,6 +686,7 @@ void NotesTodoEditor::handleRemoveDescriptionAction()
  */
 void NotesTodoEditor::handleDeleteAction()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_HANDLEDELETEACTION_ENTRY );
 	HbMessageBox *confirmationQuery = new HbMessageBox(
 			HbMessageBox::MessageTypeQuestion);
 	confirmationQuery->setDismissPolicy(HbDialog::NoDismiss);
@@ -663,6 +714,7 @@ void NotesTodoEditor::handleDeleteAction()
 	confirmationQuery->addAction((mCancelDeleteAction));
 
 	confirmationQuery->open(this, SLOT(selectedAction(HbAction*)));
+	OstTraceFunctionExit0( NOTESTODOEDITOR_HANDLEDELETEACTION_EXIT );
 }
 
 /*!
@@ -670,8 +722,10 @@ void NotesTodoEditor::handleDeleteAction()
  */
 void NotesTodoEditor::handleDiscardChangesAction()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_HANDLEDISCARDCHANGESACTION_ENTRY );
 	// Close the to-do editor
 	close();
+	OstTraceFunctionExit0( NOTESTODOEDITOR_HANDLEDISCARDCHANGESACTION_EXIT );
 }
 
 /*!
@@ -679,6 +733,7 @@ void NotesTodoEditor::handleDiscardChangesAction()
  */
 void NotesTodoEditor::selectedAction(HbAction *action)
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITOR_SELECTEDACTION_ENTRY );
 	if (action==mDeleteTodoAction) {
 		// Delete the to-do entry.
 		mOwner->deleteNote();
@@ -686,6 +741,7 @@ void NotesTodoEditor::selectedAction(HbAction *action)
 		// Close the to-do editor.
 		close();
 	}
+	OstTraceFunctionExit0( NOTESTODOEDITOR_SELECTEDACTION_EXIT );
 }
 
 // End of file	--Don't remove this.

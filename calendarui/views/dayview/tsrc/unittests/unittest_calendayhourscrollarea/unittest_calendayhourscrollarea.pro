@@ -17,6 +17,10 @@
 TEMPLATE = app
 TARGET = unittest_calendayhourscrollarea
 
+#uncoment it if want to get images from test where it is posible.
+#it need folder in c:/unittest path
+#DEFINES += SAVE_IMAGES 
+
 MOC_DIR = moc
 
 CONFIG += qtestlib
@@ -44,6 +48,8 @@ SOURCES +=	unittest_calendayhourscrollarea.cpp \
 			calendayhourelement.cpp \
 			calendayhourscrollarea.cpp \
 			calendayutils.cpp
+
+RESOURCES += ../../../resources/calendaywidgets.qrc
 
 symbian : {
 	TARGET.CAPABILITY = CAP_APPLICATION

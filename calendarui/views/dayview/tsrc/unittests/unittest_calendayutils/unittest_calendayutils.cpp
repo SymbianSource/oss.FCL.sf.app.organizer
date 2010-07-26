@@ -18,79 +18,129 @@
 #include <QtTest/QtTest>
 
 #include "calendayutils.h"
+#include "hbdeviceprofile.h"
 #include "calendaycommonheaders.h"
 
 // Test variables
 QRectF gTestWindowRect = QRectF(0, 0, 10, 20);
 Qt::Orientation gTestOrientation = Qt::Horizontal;
+qreal param_value = 10;
 
 class TestCalenDayUtils : public QObject
-{
+	{
 Q_OBJECT
 
 public:
-    TestCalenDayUtils();
-    virtual ~TestCalenDayUtils();
+	TestCalenDayUtils();
+	virtual ~TestCalenDayUtils();
 
 private slots:
-    void initTestCase();
-    void cleanupTestCase();
-    void init();
-    void cleanup();
+	void initTestCase();
+	void cleanupTestCase();
+	void init();
+	void cleanup();
 
-    void testConstructors();
-    void testHorizontalSwipe();
-    void testOrientation();
+	void testInstance();
+	void testScreenWidth();
+	void testHourElementWidth();
+	void testHourElementHeight();
+	void testContentWidth();
+
+	void testConstructors();
+	void testHorizontalSwipe();
+	void testOrientation();
 
 private:
-    CalenDayUtils *mUtils;
-};
+	CalenDayUtils *mUtils;
+	qreal mUnit;
+	};
 
 /*!
  Constructor
  */
 TestCalenDayUtils::TestCalenDayUtils() :
-   mUtils(NULL)
-{
-
-}
+	mUtils(NULL)
+	{
+		HbDeviceProfile s;
+		mUnit = s.unitValue();
+	}
 
 /*!
  Destructor
  */
 TestCalenDayUtils::~TestCalenDayUtils()
-{
+	{
 
-}
+	}
 
 /*!
  Called before testcase
  */
 void TestCalenDayUtils::initTestCase()
-{
-}
+	{
+	}
 
 /*!
  Called after testcase
  */
 void TestCalenDayUtils::cleanupTestCase()
-{
-
-}
+	{
+	}
 
 /*!
  Called before every function
  */
 void TestCalenDayUtils::init()
-{
-}
+	{
+		mUtils = CalenDayUtils::instance();
+	}
 
 /*!
  Called after everyfunction
  */
 void TestCalenDayUtils::cleanup()
-{
-}
+	{
+		//delete mUtils;
+	}
+
+void TestCalenDayUtils::testInstance()
+	{
+		CalenDayUtils* utils = CalenDayUtils::instance();
+		QVERIFY(utils);
+	}
+
+void TestCalenDayUtils::testScreenWidth()
+	{
+		qreal sw = mUtils->screenWidth();
+		QVERIFY(sw == gTestWindowRect.width());
+	}
+
+void TestCalenDayUtils::testHourElementWidth()
+	{
+		qreal hEW = mUtils->hourElementWidth();
+		qreal myWidth = mUnit * 8.04 + param_value * 2;
+		
+		QCOMPARE(hEW, myWidth);
+		
+	}
+
+void TestCalenDayUtils::testHourElementHeight()
+	{
+		
+		qreal hEH = mUtils->hourElementHeight();	
+		qreal myHeight = mUnit * 3 + param_value * 4;
+				
+		QCOMPARE(hEH, myHeight);
+	}
+
+void TestCalenDayUtils::testContentWidth()
+	{
+		qreal cW = mUtils->contentWidth();
+		qreal myWidth = gTestWindowRect.width() - (mUnit * 8.04 + param_value * 2);
+		
+		QCOMPARE(cW, myWidth);
+	}
+
 
 /*!
  Test function for constructors
@@ -98,47 +148,48 @@ void TestCalenDayUtils::cleanup()
  2. Test if content widget is correcty created
  */
 void TestCalenDayUtils::testConstructors()
-{
-    //1)
-    CalenDayUtils *testUtils = 0;
-    QVERIFY(!testUtils);
-    
-    //2)
-    testUtils = CalenDayUtils::instance();
-    QVERIFY(testUtils);
-}
+	{
+	//1)
+	CalenDayUtils *testUtils = 0;
+	QVERIFY(!testUtils);
+
+	//2)
+	testUtils = CalenDayUtils::instance();
+	QVERIFY(testUtils);
+	}
 
 /*!
-   Test function for checking if swipe is horizontal or not
-   1)test Horizontal swipe
-   2)test no horizontal swipe
+ Test function for checking if swipe is horizontal or not
+ 1)test Horizontal swipe
+ 2)test no horizontal swipe
  */
 void TestCalenDayUtils::testHorizontalSwipe()
-{
-    //1)
-    QCOMPARE(CalenDayUtils::instance()->isHorizontalSwipe(KCalenSwipeAngle-5), 
-        true);
-    
-    //2)
-    QCOMPARE(CalenDayUtils::instance()->isHorizontalSwipe(KCalenSwipeAngle+5),
-        false);
-}
+	{
+	//1)
+	QCOMPARE(CalenDayUtils::instance()->isHorizontalSwipe(KCalenSwipeAngle-5),
+			true);
+
+	//2)
+	QCOMPARE(CalenDayUtils::instance()->isHorizontalSwipe(KCalenSwipeAngle+5),
+			false);
+	}
 
 /*!
-   Test function for getting main window's orientation
-   1)test if horizontal orientation is returned
-   2)test if vertical orientation is returned
+ Test function for getting main window's orientation
+ 1)test if horizontal orientation is returned
+ 2)test if vertical orientation is returned
  */
 void TestCalenDayUtils::testOrientation()
-{
-    //1)
-    gTestOrientation = Qt::Horizontal;
-    QCOMPARE(CalenDayUtils::instance()->orientation(), Qt::Horizontal);
-    
-    //2)
-    gTestOrientation = Qt::Vertical;
-    QCOMPARE(CalenDayUtils::instance()->orientation(), Qt::Vertical);
-}
+	{
+	//1)
+	gTestOrientation = Qt::Horizontal;
+	QCOMPARE(CalenDayUtils::instance()->orientation(), Qt::Horizontal);
+
+	//2)
+	gTestOrientation = Qt::Vertical;
+	QCOMPARE(CalenDayUtils::instance()->orientation(), Qt::Vertical);
+	}
+
 
 QTEST_MAIN(TestCalenDayUtils);
 #include "unittest_calendayutils.moc"

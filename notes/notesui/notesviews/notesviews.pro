@@ -27,7 +27,8 @@ INCLUDEPATH += \
 		../noteseditor/inc \
 		../notesappcontroller/inc \
 		../../inc \
-		../../../inc
+		../../../inc \
+		./traces
 		
 DEPENDPATH += \
 		. \
@@ -39,8 +40,7 @@ symbian: {
 	TARGET.EPOCALLOWDLLDATA = 1
 	TARGET.UID3 = 0x20029F83
 	
-	INCLUDEPATH += ../../../agendainterface/inc \
-	               $$APP_LAYER_SYSTEMINCLUDE
+	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 	LIBS += \
 		-lagendainterface \

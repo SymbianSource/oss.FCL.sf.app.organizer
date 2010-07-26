@@ -28,28 +28,28 @@ class QTimer;
 
 class AnalogClockWidget : public HbWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    AnalogClockWidget(QGraphicsItem *parent = 0);
-    virtual ~AnalogClockWidget();
+	AnalogClockWidget(QGraphicsItem *parent = 0);
+	virtual ~AnalogClockWidget();
 
 public slots:
-    void tick();
+	void tick();
 
-protected:
-    void resizeEvent(QGraphicsSceneResizeEvent *event);
-    void polish(HbStyleParameters& params);
-
-private:    
-    void updatePrimitives();
+public:
+	void setGeometry(const QRectF &rect);
 
 private:
-    QPointer<QTimer>     mTimer;
-    QPointer<HbIconItem> mClockBackground;
-    QPointer<HbIconItem> mClockHourHand;
-    QPointer<HbIconItem> mClockMinuteHand;
-    QPointer<HbIconItem> mClockSecondHand;
+	void constructPrimitives();
+	void updatePrimitives();
+
+private:
+	QPointer<QTimer> mTimer;
+	QPointer<HbIconItem> mClockBackground;
+	QPointer<HbIconItem> mClockHourHand;
+	QPointer<HbIconItem> mClockMinuteHand;
+	QPointer<HbIconItem> mClockSecondHand;
 };
 
 #endif

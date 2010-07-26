@@ -31,6 +31,7 @@ INCLUDEPATH += ./inc \
 
 							
 CONFIG += hb
+HB += hbfeedback
 
 symbian: { 
     LIBS += -leuser \

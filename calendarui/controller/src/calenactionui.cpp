@@ -158,4 +158,13 @@ TBool CCalenActionUi::HandleCommandL( const TCalenCommand& aCommand )
     return continueCommand; 
     }
 
+// ----------------------------------------------------------------------------
+// CCalenActionUi::saveEntry
+// save the entry from editor
+// ----------------------------------------------------------------------------
+//
+void CCalenActionUi::saveAndCloseEditor()
+    {
+    iEditUi->saveAndCloseEditor();
+    }
 // End of file

@@ -63,8 +63,7 @@ const QString reminderIcon("qtg_mono_alarm");
 const QString locationIcon("qtg_mono_location");
 const QString repeatIcon("qtg_mono_repeat");
 // TODO: Replace with actual image name once its available
-//const QString allDayIcon("qtg_small_allday");
-const QString allDayIcon(":/qgn_indi_cdr_meeting_layer0.svg"); 
+const QString allDayIcon("qtg_small_day");
 const QString exceptionIcon("qtg_mono_repeat_exception");
 const int singleColumn(1);
 
@@ -79,7 +78,9 @@ mServices(services),
 mDocLoader(docLoader),
 mRegionalInfoGroupBox(NULL),
 mLongTapEventFlag(false),
-mNotesPluginLoaded(false)
+mNotesPluginLoaded(false),
+mIndex(0),
+mIconCheck(false)
 {
     OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_CALENAGENDAVIEWWIDGET_ENTRY );
     
@@ -372,8 +373,10 @@ void CalenAgendaViewWidget::populateListWidget()
         // of items in the list. Remove the extra rows
         mListModel->removeRows(0, mListModel->rowCount() - mInstanceArray.count());
     }
+    mIndex = 0; 
+    mIconCheck = false;
     mListModel->setColumnCount(singleColumn);
-    
+    mIconCheck = true;
     // Add all the events to the list
     for (int index = 0; index < mInstanceArray.count(); index++) {
         // Get each of the entry details
@@ -626,7 +629,9 @@ void CalenAgendaViewWidget::addTimedEventToList(int index, AgendaEntry entry)
     }
     // Get the list model index and set the text and icon data
     QModelIndex listIndex = mListModel->index(index, 0);
+    mNextEntry = false;
     mListModel->setData(listIndex, textData, Qt::DisplayRole);
+    mNextEntry = true;
     mListModel->setData(listIndex, iconData, Qt::DecorationRole);
     
     // Disable item stretching by removing the dynamic property
@@ -707,6 +712,9 @@ void CalenAgendaViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
         // Check if the entry is recurring
         if (entry.isRepeating()) {
             iconData << HbIcon(repeatIcon);
+        } else if (!entry.recurrenceId().isNull()) {
+            // This is an exceptional entry
+            iconData << HbIcon(exceptionIcon);
         } else {
         	// put the blank icon only when both reminder and repeating icons 
         	// are not there
@@ -787,7 +795,9 @@ void CalenAgendaViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
     
     // Get the list model index and set the text and icon data
     QModelIndex listIndex = mListModel->index(index, 0);
+    mNextEntry = false;
     mListModel->setData(listIndex, textData, Qt::DisplayRole);
+    mNextEntry = true;
     mListModel->setData(listIndex, iconData, Qt::DecorationRole);
     
     // Enable item stretching by adding the dynamic property
@@ -1013,7 +1023,8 @@ void CalenAgendaViewWidget::viewEntry()
     
     // Set the context
     setContextFromHighlight(entry);
-        
+     
+    mIconCheck = false;
     // Launch the event viewer.
     mServices.IssueCommandL(ECalenEventView);
     
@@ -1255,6 +1266,69 @@ void CalenAgendaViewWidget::clearListModel()
     mListModel->clear();
     
     OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_CLEARLISTMODEL_EXIT );
+    }
+
+bool CalenAgendaViewWidget::hasAllDayIcon()
+    {
+    return mIconCheck;
+    }
+
+
+
+void CalenAgendaViewWidget::checkEntryIcons()
+    {
+    //  return allDayLeftIcon;
+    int index = 0;
+    //check the number of entries
+    index  = mInstanceArray.count(); 
+    // Get each of the entry details
+    AgendaEntry entry;
+     if(mIndex < index )   
+     entry = mInstanceArray[mIndex];
+     
+     mRightAlarmIcon = false;
+     mRightRepeatIcon = false;
+     mRightExceptionIcon = false;
+     mLeftAllDayIcon = false;
+     
+     if(!entry.alarm().isNull()){
+         mRightAlarmIcon = true;
+         }
+     if (entry.isRepeating()){
+         mRightRepeatIcon = true; 
+         }
+     if (!entry.recurrenceId().isNull()){
+         mRightExceptionIcon = true;
+         }
+
+     if(!entry.isTimedEntry()){
+         //all day icon is not there if its a timed entry
+         mLeftAllDayIcon = true;
+         } 
+     //check if shift to next entry
+    if(mNextEntry)
+        mIndex++;     
+
+    }
+
+bool CalenAgendaViewWidget::isAllDayIcon()
+    {
+    return mLeftAllDayIcon;
+    }
+
+bool CalenAgendaViewWidget::isExceptionIcon()
+    {
+    return mRightExceptionIcon;
+    }
+
+bool CalenAgendaViewWidget::isAlarmIcon()
+    {
+    return mRightAlarmIcon;
+    }
+
+bool CalenAgendaViewWidget::isRepeatingIcon()
+    {
+    return mRightRepeatIcon;
     }
 
 // End of file	--Don't remove this.

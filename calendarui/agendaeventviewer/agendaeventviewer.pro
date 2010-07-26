@@ -24,7 +24,8 @@ INCLUDEPATH += \
 		. \
 		./src \
 		./inc \
-		../inc
+		../inc \
+		./traces 
 		
 		
 		

@@ -131,7 +131,7 @@ void ClockWorldView::setupView(
 	HbStyleLoader::registerFilePath(":/style/hblistviewitem.css");
 	HbStyleLoader::registerFilePath(":/style/hblistviewitem.widgetml");
 	HbStyleLoader::registerFilePath(":/style/hblistviewitem_color.css");
-	mCityListView->setLayoutName("citylist-portrait");
+	mCityListView->setLayoutName("citylist");
 	mCityListView->setModel(mCityListModel);
 	
 	// Get the toolbar/menu actions.
@@ -233,7 +233,7 @@ void ClockWorldView::updateCurrentLocationInfo(int networkTime)
 		QString value;
 		QDateTime dateTime = QDateTime::currentDateTime();
 
-		// Show the date. If date is current date then show 'today'.
+		// Show the date.
 		QString dateInfo = dateTime.toString(
 				mSettingsUtility->dateFormatString());
 		itemList.insert(value.setNum(ClockHomeCityItem::Date), dateInfo);
@@ -260,10 +260,12 @@ void ClockWorldView::updateCurrentLocationInfo(int networkTime)
 				ClockHomeCityItem::DayNightIndicator), dayNightIconPath);
 
 		// Show dst icon when needed.
+		QString dstIconPath = " ";
 		if (homeCity.dstOn) {
-			QString dstIconPath = "qtg_mono_day_light_saving_time";
-			itemList.insert(value.setNum(ClockHomeCityItem::Dst), dstIconPath);
+			dstIconPath = "qtg_mono_day_light_saving_time";
 		}
+		itemList.insert(value.setNum(ClockHomeCityItem::Dst), dstIconPath);
+		
 		mHomeCityWidget->setHomeCityItemData(itemList);
 	}
 }
@@ -618,7 +620,7 @@ QVariantList ClockWorldView::getCityListDisplayString(
 	}
 	else if ( hours ){
 		if(hours == 1 ) {
-			displayFormat = hbTrId("txt_clock_dblist_val_1_hr");
+			displayFormat = hbTrId("txt_clock_dblist_daily_val_ln_hr");
 			offsetString = displayFormat.arg(hours);
 			offsetDifference += offsetString;
 		}
@@ -629,7 +631,7 @@ QVariantList ClockWorldView::getCityListDisplayString(
 		}
 	}
 	else if (minutes){
-		displayFormat = hbTrId("txt_clock_dblist_val_1_mins");
+		displayFormat = hbTrId("txt_clock_dblist_daily_val_ln_mins");
 		offsetString = displayFormat.arg(minutes);
 		offsetDifference += offsetString;
 	} else {
@@ -660,7 +662,6 @@ QVariantList ClockWorldView::getCityListDecorationString(
 	dateTime = dateTime.addSecs(locationInfo.zoneOffset * 60);
 
 	// Display day/night indicators.
-	// TODO: change the icon name for night when available.
 	QString dayNightIconPath = "";
 	if (isDay(dateTime)) {
 		dayNightIconPath = "qtg_large_clock";
@@ -670,10 +671,12 @@ QVariantList ClockWorldView::getCityListDecorationString(
 	decorationString.append(HbIcon(dayNightIconPath));
 
 	// Show dst icon when needed.
+	QString dstIconPath = "";
 	if (locationInfo.dstOn) {
-		QString dstIconPath = "qtg_mono_day_light_saving_time";
-		decorationString.append(HbIcon(dstIconPath));
+		dstIconPath = "qtg_mono_day_light_saving_time";
 	}
+	decorationString.append(HbIcon(dstIconPath));
+	
 	return decorationString;
 	
 }
@@ -687,8 +690,10 @@ void ClockWorldView::updateCityList()
 
 	if (cityInfoCount) {
 		bool deletion = false;
+		bool valueUpdated = false;
 		int index;
 		LocationInfo currentCity = mTimezoneClient->getCurrentZoneInfoL();
+		// Remove the new home city if it is already added to the list.
 		for (index = 0; index < cityInfoCount; index++) {
 			if (currentCity.timezoneId == mCityInfoList.at(index).timezoneId
 					&& (currentCity.cityName ==
@@ -720,6 +725,21 @@ void ClockWorldView::updateCityList()
 			}
 			
 		}
+		
+		for (int index = 0; index < cityInfoCount; ++index) {
+			int tzid = mCityInfoList[index].timezoneId;
+			bool dst = mTimezoneClient->isDSTOnL(tzid);
+			if (dst != mCityInfoList[index].dstOn) {
+				mCityInfoList[index].dstOn = dst;
+				valueUpdated = true;
+			}
+
+		}
+		
+		if (valueUpdated) {
+			// Update the data file.
+			mTimezoneClient->saveLocations(mCityInfoList);
+        }
 	}
 }
 

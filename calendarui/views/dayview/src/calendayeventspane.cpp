@@ -62,9 +62,17 @@ CalenDayEventsPane::~CalenDayEventsPane()
  
  \param drawTopLine Flag to be set if top line should be drawn.
  */
-void CalenDayEventsPane::drawTopLine(bool drawTopLine)
+void CalenDayEventsPane::setDrawTopLine(bool drawTopLine)
 {
     mDrawTopLine = drawTopLine;
+}
+
+/*!
+   \brief It return if top line is drawed.
+ */
+bool CalenDayEventsPane::isTopLineDrawed() const
+{
+    return mDrawTopLine;
 }
 
 /*!

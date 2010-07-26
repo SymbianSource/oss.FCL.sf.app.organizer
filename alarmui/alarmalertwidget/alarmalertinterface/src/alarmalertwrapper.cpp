@@ -19,6 +19,10 @@
 // User includes
 #include "alarmalertwrapper.h"
 #include "alarmalertwidget.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "alarmalertwrapperTraces.h"
+#endif
 
 // ---------------------------------------------------------
 // AlarmAlert::AlarmAlert
@@ -27,8 +31,10 @@
 //
 EXPORT_C AlarmAlert::AlarmAlert(AlarmAlertObserver *observer)
 {
+	OstTraceFunctionEntry0( ALARMALERT_ALARMALERT_ENTRY );
 	// Construct the client interface
     mAlarmWidget = new AlarmAlertWidget(observer);
+    OstTraceFunctionExit0( ALARMALERT_ALARMALERT_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -38,10 +44,12 @@ EXPORT_C AlarmAlert::AlarmAlert(AlarmAlertObserver *observer)
 //
 EXPORT_C AlarmAlert::~AlarmAlert()
 {
+    OstTraceFunctionEntry0( DUP1_ALARMALERT_ALARMALERT_ENTRY );
     // Cleanup
 	if (mAlarmWidget) {
 		delete mAlarmWidget;
 	}
+	OstTraceFunctionExit0( DUP1_ALARMALERT_ALARMALERT_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -51,6 +59,7 @@ EXPORT_C AlarmAlert::~AlarmAlert()
 //
 EXPORT_C bool AlarmAlert::showAlarmAlert(SAlarmInfo *alarmInfo)
 {
+    OstTraceFunctionEntry0( ALARMALERT_SHOWALARMALERT_ENTRY );
     // Forward the call to the client
 	return mAlarmWidget->showAlarmDialog(alarmInfo);
 }
@@ -62,8 +71,10 @@ EXPORT_C bool AlarmAlert::showAlarmAlert(SAlarmInfo *alarmInfo)
 //
 EXPORT_C void AlarmAlert::dismissAlarmAlert()
 {
+    OstTraceFunctionEntry0( ALARMALERT_DISMISSALARMALERT_ENTRY );
     // Forward the call to the client
 	mAlarmWidget->dismissAlarmDialog();
+	OstTraceFunctionExit0( ALARMALERT_DISMISSALARMALERT_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -73,6 +84,7 @@ EXPORT_C void AlarmAlert::dismissAlarmAlert()
 //
 EXPORT_C bool AlarmAlert::updateAlarmAlert(SAlarmInfo *alarmInfo)
 {
+    OstTraceFunctionEntry0( ALARMALERT_UPDATEALARMALERT_ENTRY );
     // Forward the call to the client
 	return mAlarmWidget->updateAlarmDialog(alarmInfo);
 }

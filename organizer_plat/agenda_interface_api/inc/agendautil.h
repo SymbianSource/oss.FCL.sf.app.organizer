@@ -72,14 +72,11 @@ public:
 	AgendaUtil(QObject* parent = 0);
 	~AgendaUtil();
 
-	ulong addEntry(const AgendaEntry& entry);
+	ulong store(AgendaEntry &entry, AgendaUtil::RecurrenceRange range = ThisAndAll);
 	ulong cloneEntry(const AgendaEntry& entry, AgendaEntry::Type type);
 	bool deleteEntry(ulong id);
 	void deleteRepeatedEntry(
 			AgendaEntry& entry, AgendaUtil::RecurrenceRange range);
-	bool updateEntry(const AgendaEntry& entry, bool isChild = false);
-	bool storeRepeatingEntry(const AgendaEntry& entry, bool copyToChildren);
-	bool createException(const AgendaEntry& entry,QDateTime instanceOriginalDateTime);
 	QList<ulong> entryIds(
 			AgendaUtil::FilterFlags filter = AgendaUtil::IncludeAll);
 	QList<AgendaEntry> fetchAllEntries(
@@ -101,7 +98,6 @@ public:
 			QDateTime& start, QDateTime& end,
 			AgendaUtil::FilterFlags filter = AgendaUtil::IncludeAll);
 	AgendaEntry parentEntry(AgendaEntry& entry);
-	void clearRepeatingProperties(AgendaEntry& entry);
 	void getPreviousInstanceTimes(AgendaEntry& entry, QDateTime& startTime, 
 	                              QDateTime& endTime);
 	void getNextInstanceTimes(AgendaEntry& entry, QDateTime& startTime, 

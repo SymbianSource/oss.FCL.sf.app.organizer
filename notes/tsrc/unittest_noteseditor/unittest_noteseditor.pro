@@ -26,7 +26,8 @@ DEPENDPATH += \
 		. \
 		./src
 
-INCLUDEPATH += .
+INCLUDEPATH += . \
+                ..\..\notesui\noteseditor\inc
 
 
 symbian: {

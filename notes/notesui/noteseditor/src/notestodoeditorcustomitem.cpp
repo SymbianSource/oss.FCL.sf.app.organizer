@@ -32,6 +32,11 @@
 #include "notestodoeditorcustomitem.h"
 #include "noteseditor_p.h"
 #include "noteseditorcommon.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "notestodoeditorcustomitemTraces.h"
+#endif
+
 
 /*!
  \class NotesTodoEditorCustomItem
@@ -53,7 +58,9 @@ NotesTodoEditorCustomItem::NotesTodoEditorCustomItem(
  mNotesTodoeditorPvt(noteseditorPvt),
  mDueDatePickerIsActive(false)
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITORCUSTOMITEM_NOTESTODOEDITORCUSTOMITEM_ENTRY );
 
+	OstTraceFunctionExit0( NOTESTODOEDITORCUSTOMITEM_NOTESTODOEDITORCUSTOMITEM_EXIT );
 }
 
 /*!
@@ -61,6 +68,8 @@ NotesTodoEditorCustomItem::NotesTodoEditorCustomItem(
  */
 NotesTodoEditorCustomItem::~NotesTodoEditorCustomItem()
 {
+	OstTraceFunctionEntry0( DUP1_NOTESTODOEDITORCUSTOMITEM_NOTESTODOEDITORCUSTOMITEM_ENTRY );
+	OstTraceFunctionExit0( DUP1_NOTESTODOEDITORCUSTOMITEM_NOTESTODOEDITORCUSTOMITEM_EXIT );
 }
 
 /*!
@@ -70,6 +79,7 @@ NotesTodoEditorCustomItem::~NotesTodoEditorCustomItem()
  */
 HbAbstractViewItem* NotesTodoEditorCustomItem::createItem()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITORCUSTOMITEM_CREATEITEM_ENTRY );
 	return new NotesTodoEditorCustomItem(*this);
 }
 
@@ -80,6 +90,7 @@ HbAbstractViewItem* NotesTodoEditorCustomItem::createItem()
  */
 HbWidget* NotesTodoEditorCustomItem::createCustomWidget()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITORCUSTOMITEM_CREATECUSTOMWIDGET_ENTRY );
 	HbDataFormModelItem::DataItemType itemType =
 		static_cast<HbDataFormModelItem::DataItemType>(modelIndex()
 		.data(HbDataFormModelItem::ItemTypeRole).toInt());
@@ -91,6 +102,7 @@ HbWidget* NotesTodoEditorCustomItem::createCustomWidget()
 			connect(
 					mDueDateItem, SIGNAL(clicked()),
 					this, SLOT(selectDueDate()));
+			OstTraceFunctionExit0( NOTESTODOEDITORCUSTOMITEM_CREATECUSTOMWIDGET_EXIT );
 			return mDueDateItem;
 		}
 
@@ -114,6 +126,7 @@ HbWidget* NotesTodoEditorCustomItem::createCustomWidget()
 			connect(
 					mDateWidget, SIGNAL(clicked()),
 					this, SLOT(launchDatePicker()));
+			OstTraceFunctionExit0( DUP1_NOTESTODOEDITORCUSTOMITEM_CREATECUSTOMWIDGET_EXIT );
 			return widget;
 		}
 		case HbDataFormModelItem::CustomItemBase + ItemOffsetUnKnown:
@@ -127,14 +140,17 @@ HbWidget* NotesTodoEditorCustomItem::createCustomWidget()
  */
 bool NotesTodoEditorCustomItem::canSetModelIndex(const QModelIndex &index) const
 	{
+	OstTraceFunctionEntry0( NOTESTODOEDITORCUSTOMITEM_CANSETMODELINDEX_ENTRY );
 	HbDataFormModelItem::DataItemType itemType =
 			static_cast<HbDataFormModelItem::DataItemType>(
 					index.data(HbDataFormModelItem::ItemTypeRole).toInt());
 
 	if( itemType == (HbDataFormModelItem::CustomItemBase + DueDateItemOffset) ||
 	itemType == (HbDataFormModelItem::CustomItemBase + AlarmDateItemOffset)) {
+		OstTraceFunctionExit0( NOTESTODOEDITORCUSTOMITEM_CANSETMODELINDEX_EXIT );
 		return true;
 	} else {
+		OstTraceFunctionExit0( DUP1_NOTESTODOEDITORCUSTOMITEM_CANSETMODELINDEX_EXIT );
 		return false;
 	}
 }
@@ -145,6 +161,7 @@ bool NotesTodoEditorCustomItem::canSetModelIndex(const QModelIndex &index) const
  */
 void NotesTodoEditorCustomItem::restore()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITORCUSTOMITEM_RESTORE_ENTRY );
 	HbDataFormModelItem::DataItemType itemType =
 			static_cast<HbDataFormModelItem::DataItemType>(
 			modelIndex().data(HbDataFormModelItem::ItemTypeRole).toInt());
@@ -169,6 +186,7 @@ void NotesTodoEditorCustomItem::restore()
 		default:
 		break;
 	}
+	OstTraceFunctionExit0( NOTESTODOEDITORCUSTOMITEM_RESTORE_EXIT );
 }
 
 /*!
@@ -176,6 +194,7 @@ void NotesTodoEditorCustomItem::restore()
  */
 void NotesTodoEditorCustomItem::launchTimePicker()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITORCUSTOMITEM_LAUNCHTIMEPICKER_ENTRY );
 	if (mTimePickerDialog) {
 		delete mTimePickerDialog;
 	}
@@ -210,6 +229,7 @@ void NotesTodoEditorCustomItem::launchTimePicker()
 	mTimePickerDialog->addAction(mCancelAction);
 
 	mTimePickerDialog->open(this, SLOT(selectedAction(HbAction *)));
+	OstTraceFunctionExit0( NOTESTODOEDITORCUSTOMITEM_LAUNCHTIMEPICKER_EXIT );
 }
 
 /*!
@@ -217,6 +237,7 @@ void NotesTodoEditorCustomItem::launchTimePicker()
  */
 void NotesTodoEditorCustomItem::launchDatePicker()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITORCUSTOMITEM_LAUNCHDATEPICKER_ENTRY );
 	if (mDatePickerDialog) {
 		delete mDatePickerDialog;
 	}
@@ -257,6 +278,7 @@ void NotesTodoEditorCustomItem::launchDatePicker()
 	mDatePickerDialog->addAction(mCancelAction);
 
 	mDatePickerDialog->open(this, SLOT(selectedAction(HbAction *)));
+	OstTraceFunctionExit0( NOTESTODOEDITORCUSTOMITEM_LAUNCHDATEPICKER_EXIT );
 }
 
 /*
@@ -264,8 +286,10 @@ void NotesTodoEditorCustomItem::launchDatePicker()
  */
 void NotesTodoEditorCustomItem::selectDueDate()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITORCUSTOMITEM_SELECTDUEDATE_ENTRY );
 	if( mDueDateItem->isDown()) {
 		mDueDateItem->setDown(false);
+		OstTraceFunctionExit0( NOTESTODOEDITORCUSTOMITEM_SELECTDUEDATE_EXIT );
 		return;
 	}
 
@@ -310,6 +334,7 @@ void NotesTodoEditorCustomItem::selectDueDate()
 	mDatePickerDialog->addAction(mCancelAction);
 
 	mDatePickerDialog->open(this, SLOT(selectedAction(HbAction *)));
+	OstTraceFunctionExit0( DUP1_NOTESTODOEDITORCUSTOMITEM_SELECTDUEDATE_EXIT );
 }
 
 /*!
@@ -317,9 +342,11 @@ void NotesTodoEditorCustomItem::selectDueDate()
  */
 void NotesTodoEditorCustomItem::selectedAction(HbAction *action)
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITORCUSTOMITEM_SELECTEDACTION_ENTRY );
 	if (action == mOkAction) {
 		handleOkAction();
 	}
+	OstTraceFunctionExit0( NOTESTODOEDITORCUSTOMITEM_SELECTEDACTION_EXIT );
 }
 
 /*!
@@ -327,6 +354,7 @@ void NotesTodoEditorCustomItem::selectedAction(HbAction *action)
  */
 void NotesTodoEditorCustomItem::handleOkAction()
 {
+	OstTraceFunctionEntry0( NOTESTODOEDITORCUSTOMITEM_HANDLEOKACTION_ENTRY );
 	HbExtendedLocale locale =  HbExtendedLocale::system();
 
 	HbDataFormModelItem *modelItem =
@@ -397,6 +425,7 @@ void NotesTodoEditorCustomItem::handleOkAction()
 			alarmDateItem->setContentWidgetData("alarmDate",dueDateText);
 		}
 	}
+	OstTraceFunctionExit0( NOTESTODOEDITORCUSTOMITEM_HANDLEOKACTION_EXIT );
 }
 
 // End of file	--Don't delete.

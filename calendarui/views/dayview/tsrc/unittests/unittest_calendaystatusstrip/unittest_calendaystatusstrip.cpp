@@ -277,6 +277,10 @@ void TestCalenStatusStrip::testCalculateStartEndTimePosition_data()
                                              <<  QTime(23,35,00)
                                              <<  QTime(20,30,00)
                                              <<  QTime(23,59,00);
+    QTest::newRow("time start < 30m and end > 23h00m") <<  QTime(11,19,00)
+                                             <<  QTime(23,10,00)
+                                             <<  QTime(11,00,00)
+                                             <<  QTime(23,30,00);
 }
 
 /*!

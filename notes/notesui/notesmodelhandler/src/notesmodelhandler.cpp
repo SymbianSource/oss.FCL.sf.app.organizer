@@ -19,8 +19,13 @@
 #include <QtGui>
 // User includes
 #include "notesmodelhandler.h"
-#include "agendautil.h"
+#include <agendautil.h>
 #include "notesmodel.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "notesmodelhandlerTraces.h"
+#endif
+
 
 /*!
 	\class NotesModelHandler
@@ -36,11 +41,13 @@ NotesModelHandler::NotesModelHandler(QObject *parent)
  mAgendaUtil(0),
  mNotesModel(0)
 {
+	OstTraceFunctionEntry0( NOTESMODELHANDLER_NOTESMODELHANDLER_ENTRY );
 	QT_TRAP_THROWING(mAgendaUtil = new AgendaUtil(this));
 	Q_ASSERT_X(mAgendaUtil, "notesviewmanager.cpp", "mAgendaUtil is 0");
 
 	// Construct the source model here.
 	mNotesModel = new NotesModel(mAgendaUtil, this);
+	OstTraceFunctionExit0( NOTESMODELHANDLER_NOTESMODELHANDLER_EXIT );
 }
 
 /*!
@@ -48,6 +55,7 @@ NotesModelHandler::NotesModelHandler(QObject *parent)
  */
 NotesModelHandler::~NotesModelHandler()
 {
+	OstTraceFunctionEntry0( DUP1_NOTESMODELHANDLER_NOTESMODELHANDLER_ENTRY );
 	if (mAgendaUtil) {
 		delete mAgendaUtil;
 		mAgendaUtil = 0;
@@ -56,6 +64,7 @@ NotesModelHandler::~NotesModelHandler()
 		delete mNotesModel;
 		mNotesModel = 0;
 	}
+	OstTraceFunctionExit0( DUP1_NOTESMODELHANDLER_NOTESMODELHANDLER_EXIT );
 }
 
 /*!
@@ -65,8 +74,10 @@ NotesModelHandler::~NotesModelHandler()
  */
 AgendaUtil *NotesModelHandler::agendaInterface()
 {
+	OstTraceFunctionEntry0( NOTESMODELHANDLER_AGENDAINTERFACE_ENTRY );
 	Q_ASSERT(mAgendaUtil);
 
+	OstTraceFunctionExit0( NOTESMODELHANDLER_AGENDAINTERFACE_EXIT );
 	return mAgendaUtil;
 }
 
@@ -77,8 +88,10 @@ AgendaUtil *NotesModelHandler::agendaInterface()
  */
 NotesModel *NotesModelHandler::notesModel()
 {
+	OstTraceFunctionEntry0( NOTESMODELHANDLER_NOTESMODEL_ENTRY );
 	Q_ASSERT(mNotesModel);
 
+	OstTraceFunctionExit0( NOTESMODELHANDLER_NOTESMODEL_EXIT );
 	return mNotesModel;
 }
 

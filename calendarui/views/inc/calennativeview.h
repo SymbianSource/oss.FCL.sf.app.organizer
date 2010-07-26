@@ -84,6 +84,7 @@ class  CalenNativeView : public CalenView,
         MCalenServices	&mServices; // not owned.
         int             mActivityId; // Recent Activity ID, currently it holdes wither of ECalenMonthView or ECalenAgendaView
         QVariantHash    mScreenShotMetadata; // Screenshot
+        bool mEntriesInDataBase;
     private:
         HbDateTimePicker	*mDatePicker;
         bool                mIsCapturedScreenShotValid; // to check if the captured screenshot is valid

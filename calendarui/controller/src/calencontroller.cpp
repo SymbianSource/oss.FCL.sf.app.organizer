@@ -649,20 +649,32 @@ void CCalenController::handleServiceManagerSlot(int view, const QDateTime& dateT
 		// or deleting state or sending state, then dont do anything as
 		// user might loose the data
 		CCalenStateMachine::TCalenStateIndex currentState = iStateMachine->CurrentState();
-		if ((currentState == CCalenStateMachine::ECalenEditingState) ||
-			(currentState == CCalenStateMachine::ECalenDeletingState) ||
+		if ((currentState == CCalenStateMachine::ECalenDeletingState) ||
 			(currentState == CCalenStateMachine::ECalenPrintingState) ||
 			(currentState == CCalenStateMachine::ECalenSendingState)) {
 			// simply return - we dont have anything to do
-		} else {
-			// Set the context properly
-			mContext->setFocusDateAndTime(dateTime);
-			IssueCommandL(view);
-		}
+		} 
+		else if (currentState == CCalenStateMachine::ECalenEditingState) {
+			// close the editor and save the entry
+            //and launch the desired view
+            iActionUi->saveAndCloseEditor();
+		} 
+		// Set the context properly
+		mContext->setFocusDateAndTime(dateTime);
+		IssueCommandL(view);
+            
+		// connect to raise the window to foreground once the view is ready
+		connect(&MainWindow(), SIGNAL(viewReady()), 
+		        this, SLOT(raiseWindow()));
 	}
-	OstTraceFunctionExit0( CCALENCONTROLLER_HANDLESERVICEMANAGERSLOT_EXIT );
-}
 
+}
+void CCalenController::raiseWindow()
+    {
+    MainWindow().raise();
+    disconnect(&MainWindow(), SIGNAL(viewReady()), 
+                        this, SLOT(raiseWindow()));
+    }
 // ----------------------------------------------------------------------------
 // CCalenController::getFirstView
 // returns the first view with which calendar has been launched
@@ -705,4 +717,13 @@ bool CCalenController::eventFilter(QObject *object, QEvent *event)
 
     return QObject::eventFilter(object, event);
 }
-// End of file
+
+/*
+ * Emits the appReady signal.
+ */
+void CCalenController::emitAppReady()
+{
+	emit appReady();
+}
+
+// End of file	--Don't remove this.

@@ -1,4 +1,4 @@
-CalenEventListViewItem[layoutName="custom"]{
+CalenEventListViewItem[layoutName="custom"]:portrait{
 	layout: custom;
 }
 
@@ -7,6 +7,7 @@ CalenEventListViewItem[layoutName="custom"][modelItemType="StandardItem"][stretc
 }
 
 CalenEventListViewItem::icon-1[layoutName="custom"]{
+	top: -var(hb-param-margin-gene-top);
     left: -var(hb-param-margin-gene-left);
     right: var(hb-param-margin-gene-middle-horizontal);
     fixed-width: var(hb-param-graphic-size-primary-small);
@@ -28,6 +29,7 @@ CalenEventListViewItem::icon-3{
 }
 
 CalenEventListViewItem::icon-4{
+	top: -var(hb-param-margin-gene-top);
     right: var(hb-param-margin-gene-right);
     fixed-width: var(hb-param-graphic-size-secondary);
     fixed-height: var(hb-param-graphic-size-secondary);
@@ -42,12 +44,110 @@ CalenEventListViewItem::text-1{
 
 }
 
-CalenEventListViewItem::text-2{
+CalenEventListViewItem[leftAllDayIcon="true"][alarmIcon="false"][repeatingIcon="false"]::text-2[layoutName="custom"]:portrait{
     top: -var(hb-param-margin-gene-top);
     font-variant: primary;
-    text-height: var(hb-param-text-height-secondary);
+    text-height: var(hb-param-text-height-primary);
+    text-align: left;
+    fixed-width: 43un;
+}
+
+
+CalenEventListViewItem[leftAllDayIcon="true"][alarmIcon="false"][repeatingIcon="true"]::text-2[layoutName="custom"]:portrait{
+    top: -var(hb-param-margin-gene-top);
+    font-variant: primary;
+    text-height: var(hb-param-text-height-primary);
+    text-align: left;
+    fixed-width: 39un;
+}
+
+
+CalenEventListViewItem[leftAllDayIcon="true"][alarmIcon="true"][repeatingIcon="true"]::text-2[layoutName="custom"]:portrait{
+    top: -var(hb-param-margin-gene-top);
+    font-variant: primary;
+    text-height: var(hb-param-text-height-primary);
+    text-align: left;
+    fixed-width: 35un;
+}
+
+
+CalenEventListViewItem[leftAllDayIcon="true"][alarmIcon="false"][exceptionIcon="true"]::text-2[layoutName="custom"]:portrait{
+    top: -var(hb-param-margin-gene-top);
+    font-variant: primary;
+    text-height: var(hb-param-text-height-primary);
+    text-align: left;
+    fixed-width: 38un;
+}
+
+
+CalenEventListViewItem[leftAllDayIcon="true"][alarmIcon="true"][exceptionIcon="true"]::text-2[layoutName="custom"]:portrait{
+    top: -var(hb-param-margin-gene-top);
+    font-variant: primary;
+    text-height: var(hb-param-text-height-primary);
+    text-align: left;
+    fixed-width: 33un;
+}
+
+
+CalenEventListViewItem[leftAllDayIcon="true"][alarmIcon="true"][exceptionIcon="false"][repeatingIcon="false"]::text-2[layoutName="custom"]:portrait{
+    top: -var(hb-param-margin-gene-top);
+    font-variant: primary;
+    text-height: var(hb-param-text-height-primary);
+    text-align: left;
+    fixed-width: 38un;
+}
+
+
+CalenEventListViewItem[leftAllDayIcon="false"][alarmIcon="false"][repeatingIcon="false"]::text-2[layoutName="custom"]:portrait{
+    top: -var(hb-param-margin-gene-top);
+    font-variant: primary;
+    text-height: var(hb-param-text-height-primary);
+    text-align: left;
+    fixed-width: 38un;
+}
+
+
+CalenEventListViewItem[leftAllDayIcon="false"][alarmIcon="false"][repeatingIcon="true"]::text-2[layoutName="custom"]:portrait{
+    top: -var(hb-param-margin-gene-top);
+    font-variant: primary;
+    text-height: var(hb-param-text-height-primary);
+    text-align: left;
+    fixed-width: 34un;
+}
+
+
+CalenEventListViewItem[leftAllDayIcon="false"][alarmIcon="true"][repeatingIcon="true"]::text-2[layoutName="custom"]:portrait{
+    top: -var(hb-param-margin-gene-top);
+    font-variant: primary;
+    text-height: var(hb-param-text-height-primary);
     text-align: left;
     fixed-width: 29un;
+}
+
+
+CalenEventListViewItem[leftAllDayIcon="false"][alarmIcon="false"][exceptionIcon="true"]::text-2[layoutName="custom"]:portrait{
+    top: -var(hb-param-margin-gene-top);
+    font-variant: primary;
+    text-height: var(hb-param-text-height-primary);
+    text-align: left;
+    fixed-width: 34un;
+}
+
+
+CalenEventListViewItem[leftAllDayIcon="false"][alarmIcon="true"][exceptionIcon="true"]::text-2[layoutName="custom"]:portrait{
+    top: -var(hb-param-margin-gene-top);
+    font-variant: primary;
+    text-height: var(hb-param-text-height-primary);
+    text-align: left;
+    fixed-width: 29un;
+}
+
+CalenEventListViewItem[leftAllDayIcon="false"][alarmIcon="true"][exceptionIcon="false"][repeatingIcon="false"]::text-2[layoutName="custom"]:portrait{
+    top: -var(hb-param-margin-gene-top);
+    font-variant: primary;
+    text-height: var(hb-param-text-height-primary);
+    text-align: left;
+    fixed-width: 34un;
 }
 
 CalenEventListViewItem::text-3{

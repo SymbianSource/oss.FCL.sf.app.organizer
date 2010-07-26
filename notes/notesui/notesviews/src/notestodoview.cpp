@@ -32,14 +32,19 @@
 #include <HbListViewItem>
 
 // User includes
+#include <agendautil.h>
 #include "agendaeventviewer.h"
 #include "notestodoview.h"
 #include "notescommon.h"
 #include "notesdocloader.h"
-#include "agendautil.h"
 #include "notesmodel.h"
 #include "notessortfilterproxymodel.h"
 #include "noteseditor.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "notestodoviewTraces.h"
+#endif
+
 
 /*!
 	\class NotesTodoView
@@ -60,7 +65,9 @@ NotesTodoView::NotesTodoView(QGraphicsWidget *parent)
  mDeleteAction(0),
  mIsLongTop(false)
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_NOTESTODOVIEW_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( NOTESTODOVIEW_NOTESTODOVIEW_EXIT );
 }
 
 /*!
@@ -68,10 +75,12 @@ NotesTodoView::NotesTodoView(QGraphicsWidget *parent)
  */
 NotesTodoView::~NotesTodoView()
 {
+	OstTraceFunctionEntry0( DUP1_NOTESTODOVIEW_NOTESTODOVIEW_ENTRY );
 	if (mDocLoader) {
-	    delete mDocLoader;
-	    mDocLoader = 0;
-    }
+		delete mDocLoader;
+		mDocLoader = 0;
+	}
+	OstTraceFunctionExit0( DUP1_NOTESTODOVIEW_NOTESTODOVIEW_EXIT );
 }
 
 /*!
@@ -84,6 +93,7 @@ NotesTodoView::~NotesTodoView()
 void NotesTodoView::setupView(
 		NotesAppControllerIf &controllerIf, NotesDocLoader *docLoader)
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_SETUPVIEW_ENTRY );
 	mDocLoader = docLoader;
 	mAppControllerIf = &controllerIf;
 	mNotesModel = mAppControllerIf->notesModel();
@@ -166,6 +176,7 @@ void NotesTodoView::setupView(
 	// Set the graphics size for the icons.
 	HbListViewItem *prototype = mListView->listItemPrototype();
 	prototype->setGraphicsSize(HbListViewItem::SmallIcon);
+	OstTraceFunctionExit0( NOTESTODOVIEW_SETUPVIEW_EXIT );
 }
 
 /*
@@ -173,7 +184,9 @@ void NotesTodoView::setupView(
  */
 void NotesTodoView::updateTitle()
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_UPDATETITLE_ENTRY );
 	updateSubTitle();
+	OstTraceFunctionExit0( NOTESTODOVIEW_UPDATETITLE_EXIT );
 }
 
 /*!
@@ -181,12 +194,14 @@ void NotesTodoView::updateTitle()
  */
 void NotesTodoView::createNewTodo()
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_CREATENEWTODO_ENTRY );
 	mNotesEditor = new NotesEditor(mAgendaUtil, this);
 	connect(
 			mNotesEditor, SIGNAL(editingCompleted(bool)),
 			this, SLOT(handleEditingCompleted(bool)));
 
 	mNotesEditor->create(NotesEditor::CreateTodo);
+	OstTraceFunctionExit0( NOTESTODOVIEW_CREATENEWTODO_EXIT );
 }
 
 /*!
@@ -199,9 +214,11 @@ void NotesTodoView::createNewTodo()
  */
 void NotesTodoView::handleItemReleased(const QModelIndex &index)
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_HANDLEITEMRELEASED_ENTRY );
 	if(!mIsLongTop) {
 		// Sanity check.
 		if (!index.isValid()) {
+			OstTraceFunctionExit0( NOTESTODOVIEW_HANDLEITEMRELEASED_EXIT );
 			return;
 		}
 
@@ -211,6 +228,7 @@ void NotesTodoView::handleItemReleased(const QModelIndex &index)
 
 		if (0 >= toDoId) {
 			// Something wrong.
+			OstTraceFunctionExit0( DUP1_NOTESTODOVIEW_HANDLEITEMRELEASED_EXIT );
 			return;
 		}
 
@@ -223,6 +241,7 @@ void NotesTodoView::handleItemReleased(const QModelIndex &index)
 		// Launch agenda event viewer
 		mAgendaEventViewer->view(toDoId, AgendaEventViewer::ActionEditDelete);
 	}
+	OstTraceFunctionExit0( DUP2_NOTESTODOVIEW_HANDLEITEMRELEASED_EXIT );
 }
 
 /*!
@@ -236,6 +255,7 @@ void NotesTodoView::handleItemReleased(const QModelIndex &index)
 void NotesTodoView::handleItemLongPressed(
 		HbAbstractViewItem *item, const QPointF &coords)
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_HANDLEITEMLONGPRESSED_ENTRY );
 	mSelectedItem = item;
 	mIsLongTop = true;
 
@@ -274,6 +294,7 @@ void NotesTodoView::handleItemLongPressed(
 	// Show the menu.
 	contextMenu->open(this, SLOT(selectedMenuAction(HbAction*)));
 	contextMenu->setPreferredPos(coords);
+	OstTraceFunctionExit0( NOTESTODOVIEW_HANDLEITEMLONGPRESSED_EXIT );
 }
 
 /*!
@@ -281,15 +302,18 @@ void NotesTodoView::handleItemLongPressed(
  */
 void NotesTodoView::deleteTodo()
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_DELETETODO_ENTRY );
 	Q_ASSERT(mSelectedItem);
 
 	QModelIndex index = mSelectedItem->modelIndex();
 	if (!index.isValid()) {
+		OstTraceFunctionExit0( NOTESTODOVIEW_DELETETODO_EXIT );
 		return;
 	}
 	ulong entryId =
 			index.data(NotesNamespace::IdRole).value<qulonglong>();
 	if (!entryId) {
+		OstTraceFunctionExit0( DUP1_NOTESTODOVIEW_DELETETODO_EXIT );
 		return;
 	}
 
@@ -297,6 +321,7 @@ void NotesTodoView::deleteTodo()
 	emit deleteEntry(entryId);
 
 	mSelectedItem = 0;
+	OstTraceFunctionExit0( DUP2_NOTESTODOVIEW_DELETETODO_EXIT );
 }
 
 /*!
@@ -304,6 +329,7 @@ void NotesTodoView::deleteTodo()
  */
 void NotesTodoView::markTodoStatus()
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_MARKTODOSTATUS_ENTRY );
 	ulong entryId = mSelectedItem->modelIndex().data(
 			NotesNamespace::IdRole).value<qulonglong>();
 	AgendaEntry entry = mAgendaUtil->fetchById(entryId);
@@ -315,6 +341,7 @@ void NotesTodoView::markTodoStatus()
 	} else if (AgendaEntry::TodoCompleted == entry.status()) {
 		mAgendaUtil->setCompleted(entry, false, currentDateTime);
 	}
+	OstTraceFunctionExit0( NOTESTODOVIEW_MARKTODOSTATUS_EXIT );
 }
 
 /*!
@@ -322,10 +349,12 @@ void NotesTodoView::markTodoStatus()
  */
 void NotesTodoView::editTodo()
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_EDITTODO_ENTRY );
 	QModelIndex index = mSelectedItem->modelIndex();
 
 	// Sanity check.
 	if (!index.isValid()) {
+		OstTraceFunctionExit0( NOTESTODOVIEW_EDITTODO_EXIT );
 		return;
 	}
 
@@ -335,6 +364,7 @@ void NotesTodoView::editTodo()
 
 	if (0 >= noteId) {
 		// Something wrong.
+		OstTraceFunctionExit0( DUP1_NOTESTODOVIEW_EDITTODO_EXIT );
 		return;
 	}
 
@@ -343,6 +373,7 @@ void NotesTodoView::editTodo()
 
 	if (entry.isNull()) {
 		// Entry invalid.
+		OstTraceFunctionExit0( DUP2_NOTESTODOVIEW_EDITTODO_EXIT );
 		return;
 	}
 
@@ -352,6 +383,7 @@ void NotesTodoView::editTodo()
 			mNotesEditor, SIGNAL(editingCompleted(bool)),
 			this, SLOT(handleEditingCompleted(bool)));
 	mNotesEditor->edit(entry);
+	OstTraceFunctionExit0( DUP3_NOTESTODOVIEW_EDITTODO_EXIT );
 }
 
 /*!
@@ -363,10 +395,12 @@ void NotesTodoView::editTodo()
  */
 void NotesTodoView::handleEditingCompleted(bool status)
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_HANDLEEDITINGCOMPLETED_ENTRY );
 	Q_UNUSED(status)
 
 	// Cleanup.
 	mNotesEditor->deleteLater();
+	OstTraceFunctionExit0( NOTESTODOVIEW_HANDLEEDITINGCOMPLETED_EXIT );
 }
 
 /*!
@@ -374,8 +408,10 @@ void NotesTodoView::handleEditingCompleted(bool status)
  */
 void NotesTodoView::displayCollectionView()
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_DISPLAYCOLLECTIONVIEW_ENTRY );
 	// Switch to collections view.
 	mAppControllerIf->switchToView(NotesNamespace::NotesCollectionViewId);
+	OstTraceFunctionExit0( NOTESTODOVIEW_DISPLAYCOLLECTIONVIEW_EXIT );
 }
 
 /*!
@@ -383,8 +419,10 @@ void NotesTodoView::displayCollectionView()
  */
 void NotesTodoView::displayAllNotesView()
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_DISPLAYALLNOTESVIEW_ENTRY );
 	// Switch to collections view.
 	mAppControllerIf->switchToView(NotesNamespace::NotesMainViewId);
+	OstTraceFunctionExit0( NOTESTODOVIEW_DISPLAYALLNOTESVIEW_EXIT );
 }
 
 /*!
@@ -392,8 +430,10 @@ void NotesTodoView::displayAllNotesView()
  */
 void NotesTodoView::handleEditingCompleted()
 {
+	OstTraceFunctionEntry0( DUP1_NOTESTODOVIEW_HANDLEEDITINGCOMPLETED_ENTRY );
 	// Cleanup.
 	mNotesEditor->deleteLater();
+	OstTraceFunctionExit0( DUP1_NOTESTODOVIEW_HANDLEEDITINGCOMPLETED_EXIT );
 }
 
 /*!
@@ -401,8 +441,10 @@ void NotesTodoView::handleEditingCompleted()
  */
 void NotesTodoView::handleViewingCompleted()
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_HANDLEVIEWINGCOMPLETED_ENTRY );
 	// Cleanup.
 	mAgendaEventViewer->deleteLater();
+	OstTraceFunctionExit0( NOTESTODOVIEW_HANDLEVIEWINGCOMPLETED_EXIT );
 }
 
 /*!
@@ -410,7 +452,9 @@ void NotesTodoView::handleViewingCompleted()
  */
 void NotesTodoView::handleActionStateChanged()
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_HANDLEACTIONSTATECHANGED_ENTRY );
 	mAllNotesAction->setChecked(true);
+	OstTraceFunctionExit0( NOTESTODOVIEW_HANDLEACTIONSTATECHANGED_EXIT );
 }
 
 /*!
@@ -421,6 +465,7 @@ void NotesTodoView::handleActionStateChanged()
  */
 void NotesTodoView::handleOrientationChanged(Qt::Orientation orientation)
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_HANDLEORIENTATIONCHANGED_ENTRY );
 	HbListViewItem *prototype = mListView->listItemPrototype();
 
 	if (Qt::Horizontal == orientation) {
@@ -428,6 +473,7 @@ void NotesTodoView::handleOrientationChanged(Qt::Orientation orientation)
 	} else {
 		prototype->setStretchingStyle(HbListViewItem::NoStretching);
 	}
+	OstTraceFunctionExit0( NOTESTODOVIEW_HANDLEORIENTATIONCHANGED_EXIT );
 }
 
 /*!
@@ -435,6 +481,7 @@ void NotesTodoView::handleOrientationChanged(Qt::Orientation orientation)
  */
 void NotesTodoView::updateSubTitle(ulong id)
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_UPDATESUBTITLE_ENTRY );
 	Q_UNUSED(id)
 
 	// Get the number of notes and to-do entries.
@@ -450,6 +497,7 @@ void NotesTodoView::updateSubTitle(ulong id)
 		mEmptyListLabel->hide();
 		mListView->show();
 	}
+	OstTraceFunctionExit0( NOTESTODOVIEW_UPDATESUBTITLE_EXIT );
 }
 
 /*
@@ -457,6 +505,7 @@ void NotesTodoView::updateSubTitle(ulong id)
  */
 void NotesTodoView::openTodo()
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_OPENTODO_ENTRY );
 	ulong noteId = mSelectedItem->modelIndex().data(
 			NotesNamespace::IdRole).value<qulonglong>();
 	AgendaEntry entry = mAgendaUtil->fetchById(noteId);
@@ -471,6 +520,7 @@ void NotesTodoView::openTodo()
 	// Launch agenda event viewer
 	mAgendaEventViewer->view(
 			entry, AgendaEventViewer::ActionEditDelete);
+	OstTraceFunctionExit0( NOTESTODOVIEW_OPENTODO_EXIT );
 }
 
 /*
@@ -478,6 +528,7 @@ void NotesTodoView::openTodo()
  */
 void NotesTodoView::selectedMenuAction(HbAction *action)
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_SELECTEDMENUACTION_ENTRY );
 	if (action == mOpenAction) {
 		openTodo();
 	} else if (action == mEditAction) {
@@ -487,6 +538,7 @@ void NotesTodoView::selectedMenuAction(HbAction *action)
 	} else if (action == mTodoStatusAction) {
 		markTodoStatus();
 	}
+	OstTraceFunctionExit0( NOTESTODOVIEW_SELECTEDMENUACTION_EXIT );
 }
 
 
@@ -495,6 +547,9 @@ void NotesTodoView::selectedMenuAction(HbAction *action)
  */
 void NotesTodoView::handleMenuClosed()
 {
+	OstTraceFunctionEntry0( NOTESTODOVIEW_HANDLEMENUCLOSED_ENTRY );
 	mIsLongTop = false;
+	OstTraceFunctionExit0( NOTESTODOVIEW_HANDLEMENUCLOSED_EXIT );
 }
+
 // End of file	--Don't remove this.

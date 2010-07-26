@@ -28,8 +28,14 @@
 //forward declarations
 class CalenDayHourElement;
 
+#ifdef  CALENVIEWS_DLL
+#define CALENDAYHOURSCROLLAREA_EXPORT Q_DECL_EXPORT
+#else
+#define CALENDAYHOURSCROLLAREA_EXPORT Q_DECL_IMPORT
+#endif
+
 // Class declaration
-class CalenDayHourScrollArea : public HbScrollArea
+class CALENDAYHOURSCROLLAREA_EXPORT CalenDayHourScrollArea : public HbScrollArea
 {
 Q_OBJECT
 

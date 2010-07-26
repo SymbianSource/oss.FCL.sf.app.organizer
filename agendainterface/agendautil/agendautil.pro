@@ -39,9 +39,9 @@ symbian: {
 	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 }
 
-HEADERS += ../inc/agendautil.h \
+HEADERS += ../../organizer_plat/agenda_interface_api/inc/agendautil.h \
 		   agendautil_p.h \
-		   ../inc/agendaentry.h \
+		   ../../organizer_plat/agenda_interface_api/inc/agendaentry.h \
 		   agendaentry_p.h
 
 SOURCES += agendautil.cpp \

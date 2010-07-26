@@ -22,6 +22,11 @@
 // User includes
 #include "notessortfilterproxymodel.h"
 #include "notescommon.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "notessortfilterproxymodelTraces.h"
+#endif
+
 
 /*!
 	\class NotesSortFilterProxyModel
@@ -43,7 +48,9 @@ NotesSortFilterProxyModel::NotesSortFilterProxyModel(
 :QSortFilterProxyModel(parent),
  mAgendaUtil(agendaUtil)
 {
+	OstTraceFunctionEntry0( NOTESSORTFILTERPROXYMODEL_NOTESSORTFILTERPROXYMODEL_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( NOTESSORTFILTERPROXYMODEL_NOTESSORTFILTERPROXYMODEL_EXIT );
 }
 
 /*!
@@ -51,7 +58,9 @@ NotesSortFilterProxyModel::NotesSortFilterProxyModel(
  */
 NotesSortFilterProxyModel::~NotesSortFilterProxyModel()
 {
+	OstTraceFunctionEntry0( DUP1_NOTESSORTFILTERPROXYMODEL_NOTESSORTFILTERPROXYMODEL_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( DUP1_NOTESSORTFILTERPROXYMODEL_NOTESSORTFILTERPROXYMODEL_EXIT );
 }
 
 /*!
@@ -62,6 +71,7 @@ NotesSortFilterProxyModel::~NotesSortFilterProxyModel()
 bool NotesSortFilterProxyModel::lessThan(
 		const QModelIndex &left, const QModelIndex &right) const
 {
+	OstTraceFunctionEntry0( NOTESSORTFILTERPROXYMODEL_LESSTHAN_ENTRY );
 	return QSortFilterProxyModel::lessThan(left, right);
 }
 
@@ -74,6 +84,7 @@ bool NotesSortFilterProxyModel::filterAcceptsRow(
 		int sourceRow,
 		const QModelIndex &sourceParent) const
 {
+	OstTraceFunctionEntry0( NOTESSORTFILTERPROXYMODEL_FILTERACCEPTSROW_ENTRY );
 	// Get the model index of the source model.
 	QModelIndex modelIndex = sourceModel()->index(
 			sourceRow, filterKeyColumn(), sourceParent);
@@ -90,11 +101,14 @@ bool NotesSortFilterProxyModel::filterAcceptsRow(
 							modelIndex, filterRole()).value<int>());
 			if (AgendaEntry::TypeNote == type
 					&& QString("note").contains(filterRegExp())) {
+				OstTraceFunctionExit0( NOTESSORTFILTERPROXYMODEL_FILTERACCEPTSROW_EXIT );
 				return true;
 			} else if (AgendaEntry::TypeTodo == type
 					&& QString("todo").contains(filterRegExp())) {
+				OstTraceFunctionExit0( DUP1_NOTESSORTFILTERPROXYMODEL_FILTERACCEPTSROW_EXIT );
 				return true;
 			}
+			OstTraceFunctionExit0( DUP2_NOTESSORTFILTERPROXYMODEL_FILTERACCEPTSROW_EXIT );
 			return false;
 		}
 
@@ -105,8 +119,10 @@ bool NotesSortFilterProxyModel::filterAcceptsRow(
 
 			if (1 == favouriteStatus
 					&& QString("favourites").contains(filterRegExp())) {
+				OstTraceFunctionExit0( DUP3_NOTESSORTFILTERPROXYMODEL_FILTERACCEPTSROW_EXIT );
 				return true;
 			}
+			OstTraceFunctionExit0( DUP4_NOTESSORTFILTERPROXYMODEL_FILTERACCEPTSROW_EXIT );
 			return false;
 		}
 
@@ -122,10 +138,12 @@ bool NotesSortFilterProxyModel::filterAcceptsRow(
 					QString string = dataList.value(i).toString();
 
 					if (string.contains(filterRegExp())) {
+						OstTraceFunctionExit0( DUP5_NOTESSORTFILTERPROXYMODEL_FILTERACCEPTSROW_EXIT );
 						return true;
 					}
 				}
 
+				OstTraceFunctionExit0( DUP6_NOTESSORTFILTERPROXYMODEL_FILTERACCEPTSROW_EXIT );
 				return false;
 			}
 		}

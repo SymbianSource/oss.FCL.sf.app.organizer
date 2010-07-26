@@ -50,7 +50,7 @@ public:
      * @param currentDate [in] current date
      */
     void getEventValidStartEndTime( QDateTime& start, QDateTime& end,
-                                   AgendaEntry& entry, QDateTime& currentDate );
+                                   const AgendaEntry& entry, QDateTime& currentDate );
     
 protected:
     CalenDayUtils();

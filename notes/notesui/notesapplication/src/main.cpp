@@ -16,23 +16,30 @@
 */
 
 // System includes
-#include <QScopedPointer>
-#include <hbapplication.h>
 #include <hbmainwindow.h>
 #include <hbtranslator.h>
+
 // User includes
-#include "notesappcontroller.h"
+#include "notesapplication.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "mainTraces.h"
+#endif
+
 
 /*!
 	The main() function.
 
-	Responsible for constructing the NotesAppController object and showing the
+	Responsible for constructing the NotesApplication object and showing the
 	main window.
  */
 int main(int argc, char *argv[])
 {
-	// Create and initialize an HbApplication instance
-	HbApplication app(argc, argv);
+	OstTraceFunctionEntry0( _MAIN_ENTRY );
+	// Create and initialize an NotesApplication instance
+	QScopedPointer<NotesApplication> application(
+			new NotesApplication(argc, argv));
+	//NotesApplication *application = new NotesApplication(argc, argv);
 
 	// Main window for providing the scene context
 	HbMainWindow window;
@@ -45,13 +52,13 @@ int main(int argc, char *argv[])
 	notesViewsTranslator.loadCommon();
 
 	// Construct the application controller.
-	QScopedPointer<NotesAppController> controller(new NotesAppController);
-	Q_UNUSED(controller)
-
+	application->createController();
+	
 	// Show the main window.
 	window.show();
+	
 	// Start the event loop for the application
-	return app.exec();
+	return application->execution();
 }
 
 // End of file	--Don't remove this.

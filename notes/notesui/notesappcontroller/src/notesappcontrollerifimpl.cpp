@@ -21,6 +21,11 @@
 #include "notesmodelhandler.h"
 #include "notesappcontroller.h"
 #include "notesviewmanager.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "notesappcontrollerifimplTraces.h"
+#endif
+
 
 /*!
 	\class NotesAppControllerIfImpl
@@ -41,7 +46,9 @@ NotesAppControllerIfImpl::NotesAppControllerIfImpl(
 :QObject(controller),
  mAppController(controller)
 {
-	// Nothing yet.
+	OstTraceFunctionEntry0( NOTESAPPCONTROLLERIFIMPL_NOTESAPPCONTROLLERIFIMPL_ENTRY );
+	Q_UNUSED(parent);
+	OstTraceFunctionExit0( NOTESAPPCONTROLLERIFIMPL_NOTESAPPCONTROLLERIFIMPL_EXIT );
 }
 
 /*!
@@ -49,7 +56,9 @@ NotesAppControllerIfImpl::NotesAppControllerIfImpl(
  */
 NotesAppControllerIfImpl::~NotesAppControllerIfImpl()
 {
+	OstTraceFunctionEntry0( DUP1_NOTESAPPCONTROLLERIFIMPL_NOTESAPPCONTROLLERIFIMPL_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( DUP1_NOTESAPPCONTROLLERIFIMPL_NOTESAPPCONTROLLERIFIMPL_EXIT );
 }
 
 /*!
@@ -61,6 +70,7 @@ NotesAppControllerIfImpl::~NotesAppControllerIfImpl()
  */
 AgendaUtil *NotesAppControllerIfImpl::agendaUtil()
 {
+	OstTraceFunctionEntry0( NOTESAPPCONTROLLERIFIMPL_AGENDAUTIL_ENTRY );
 	return mAppController->mNotesModelHandler->agendaInterface();
 }
 
@@ -73,6 +83,7 @@ AgendaUtil *NotesAppControllerIfImpl::agendaUtil()
  */
 NotesModel *NotesAppControllerIfImpl::notesModel()
 {
+	OstTraceFunctionEntry0( NOTESAPPCONTROLLERIFIMPL_NOTESMODEL_ENTRY );
 	return mAppController->mNotesModelHandler->notesModel();
 }
 
@@ -85,7 +96,9 @@ NotesModel *NotesAppControllerIfImpl::notesModel()
  */
 void NotesAppControllerIfImpl::switchToView(NotesNamespace::NotesViewIds viewId)
 {
+	OstTraceFunctionEntry0( NOTESAPPCONTROLLERIFIMPL_SWITCHTOVIEW_ENTRY );
 	mAppController->mViewManager->switchToView(viewId);
+	OstTraceFunctionExit0( NOTESAPPCONTROLLERIFIMPL_SWITCHTOVIEW_EXIT );
 }
 
 // End of file	--Don't remove this.

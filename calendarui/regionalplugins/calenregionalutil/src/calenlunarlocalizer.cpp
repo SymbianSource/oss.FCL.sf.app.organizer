@@ -33,6 +33,11 @@
 #include "CalenLunarInfo.h"
 #include "CalenLunarLocalizedInfo.h"
 #include "CalenExtraRowFormatter.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenlunarlocalizerTraces.h"
+#endif
+
 //CONSTANTS
 const TInt KCharMonth = 0x6708;
 const TInt KCharFirstMonth = 0x6b63;
@@ -50,14 +55,13 @@ _LIT(KChineseDigits,
 //
 EXPORT_C CCalenLunarLocalizer* CCalenLunarLocalizer::NewL()
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_NEWL_ENTRY );
     CCalenLunarLocalizer* self = new (ELeave) CCalenLunarLocalizer;
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop(self);
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZER_NEWL_EXIT );
     return self;
     }
 
@@ -67,10 +71,9 @@ EXPORT_C CCalenLunarLocalizer* CCalenLunarLocalizer::NewL()
 //
 EXPORT_C CCalenLunarLocalizer::~CCalenLunarLocalizer()
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_CCALENLUNARLOCALIZER_ENTRY );
     delete iRowFormatter;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZER_CCALENLUNARLOCALIZER_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -79,8 +82,8 @@ EXPORT_C CCalenLunarLocalizer::~CCalenLunarLocalizer()
 //
 EXPORT_C CCalenLunarLocalizer::CCalenLunarLocalizer() : iEikEnv( CEikonEnv::Static() )
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENLUNARLOCALIZER_CCALENLUNARLOCALIZER_ENTRY );
+    OstTraceFunctionExit0( DUP1_CCALENLUNARLOCALIZER_CCALENLUNARLOCALIZER_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -89,6 +92,7 @@ EXPORT_C CCalenLunarLocalizer::CCalenLunarLocalizer() : iEikEnv( CEikonEnv::Stat
 //
 EXPORT_C void CCalenLunarLocalizer::ConstructL()
 {
+	OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_CONSTRUCTL_ENTRY );
 	iRowFormatter = CCalenExtraRowFormatter::NewL();
 
 	iFestivalNames.append(hbTrId("txt_calendar_preview_title_spring_fest"));
@@ -163,6 +167,7 @@ EXPORT_C void CCalenLunarLocalizer::ConstructL()
 	iAnimalYearNames.append(hbTrId("txt_calendar_preview_title_year_of_the_dog"));
 	iAnimalYearNames.append(hbTrId("txt_calendar_preview_title_year_of_the_pig"));
 	
+	OstTraceFunctionExit0( CCALENLUNARLOCALIZER_CONSTRUCTL_EXIT );
 }
 
 // -----------------------------------------------------------------------------
@@ -171,6 +176,7 @@ EXPORT_C void CCalenLunarLocalizer::ConstructL()
 //
 EXPORT_C CCalenLunarLocalizedInfo* CCalenLunarLocalizer::LocalizeL( TCalenLunarInfo& aInfo )
 {
+	OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_LOCALIZEL_ENTRY );
 	CCalenLunarLocalizedInfo* localized = CCalenLunarLocalizedInfo::NewL();
 	CleanupStack::PushL( localized );
 
@@ -213,6 +219,7 @@ EXPORT_C CCalenLunarLocalizedInfo* CCalenLunarLocalizer::LocalizeL( TCalenLunarI
 
 	CleanupStack::Pop( localized );
 	
+	OstTraceFunctionExit0( CCALENLUNARLOCALIZER_LOCALIZEL_EXIT );
 	return localized;
 }
 
@@ -224,8 +231,7 @@ EXPORT_C CCalenLunarLocalizedInfo* CCalenLunarLocalizer::LocalizeL( TCalenLunarI
 EXPORT_C TPtrC CCalenLunarLocalizer::GetExtraRowTextL( 
 											CCalenLunarLocalizedInfo& aLocInfo )
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_GETEXTRAROWTEXTL_ENTRY );
     RArray<CCalenLunarLocalizedInfo::TField> fields;
     CleanupClosePushL( fields );
     fields.AppendL( CCalenLunarLocalizedInfo::EFestival );
@@ -236,9 +242,8 @@ EXPORT_C TPtrC CCalenLunarLocalizer::GetExtraRowTextL(
     
     TPtrC text = iRowFormatter->FormatExtraRowInformationL( aLocInfo, fields );
     CleanupStack::PopAndDestroy( &fields );
-    
-    
-    TRACE_EXIT_POINT;
+
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZER_GETEXTRAROWTEXTL_EXIT );
     return text;
     }
 
@@ -249,6 +254,7 @@ EXPORT_C TPtrC CCalenLunarLocalizer::GetExtraRowTextL(
 void CCalenLunarLocalizer::LocalizeMonthAndDayL(CCalenLunarLocalizedInfo* aLocInfo,
                                                 TCalenLunarInfo& aInfo)
 {
+	OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_LOCALIZEMONTHANDDAYL_ENTRY );
 	TBuf<10> month;
 	TBuf<10> day;
 	GetChineseMonth(aInfo.iLunarDate, month);
@@ -268,6 +274,7 @@ void CCalenLunarLocalizer::LocalizeMonthAndDayL(CCalenLunarLocalizedInfo* aLocIn
 	}
 	aLocInfo->iLunarMonthAndDay = static_cast<const TUint16*> (
 							formattedString.utf16()), formattedString.length();
+	OstTraceFunctionExit0( CCALENLUNARLOCALIZER_LOCALIZEMONTHANDDAYL_EXIT );
 }
 
 // -----------------------------------------------------------------------------
@@ -277,8 +284,7 @@ void CCalenLunarLocalizer::LocalizeMonthAndDayL(CCalenLunarLocalizedInfo* aLocIn
 void CCalenLunarLocalizer::GetChineseMonth(const TChineseDate& aChineseDate,
                                            TDes& aDes)
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_GETCHINESEMONTH_ENTRY );
     if (aChineseDate.iMonth == 1)
         {
         aDes.Append(KCharFirstMonth); // Special character for first month
@@ -289,8 +295,7 @@ void CCalenLunarLocalizer::GetChineseMonth(const TChineseDate& aChineseDate,
         }
     
     aDes.Append(KCharMonth);
-    
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZER_GETCHINESEMONTH_EXIT );
     }
     
 // -----------------------------------------------------------------------------
@@ -300,16 +305,14 @@ void CCalenLunarLocalizer::GetChineseMonth(const TChineseDate& aChineseDate,
 void CCalenLunarLocalizer::GetChineseDay(const TChineseDate& aChineseDate,
                                          TDes& aDes)
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_GETCHINESEDAY_ENTRY );
     if (aChineseDate.iDay <= 10) // day
         {
         aDes.Append(KCharChu); 
         }
     
     GetChineseDigits(aChineseDate.iDay, aDes);
-    
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZER_GETCHINESEDAY_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -318,8 +321,7 @@ void CCalenLunarLocalizer::GetChineseDay(const TChineseDate& aChineseDate,
 //
 void CCalenLunarLocalizer::GetChineseDigits(TInt aNum, TDes& aDes)
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_GETCHINESEDIGITS_ENTRY );
     ASSERT( 0 < aNum && aNum <= 30 );
     TInt tens = aNum / 10;
     TInt ones = aNum % 10;
@@ -355,8 +357,7 @@ void CCalenLunarLocalizer::GetChineseDigits(TInt aNum, TDes& aDes)
         {
         __ASSERT_DEBUG(EFalse, User::Invariant());
         }
-    
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZER_GETCHINESEDIGITS_EXIT );
     }
 
 //EOF

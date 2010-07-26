@@ -15,45 +15,45 @@
 *
 */
 
-
+// system includes
 #include <QtGui>
-#include <xqserviceutil.h>
-#include <hbapplication.h>
 #include <hbmainwindow.h>
 #include <hbtranslator.h>
-#include "calencontroller.h"
-#include "calenserviceprovider.h"
 
+// user includes
+#include "calenapplication.h"
 
- int main(int argc, char *argv[])
-    {
-    HbApplication app(argc, argv);
-    
-    // Main window for providing the scene context
+/*!
+	The main() function.
+
+	Responsible for constructing the CalenApplication object and showing the
+	main window.
+ */
+int main(int argc, char *argv[])
+{
+	// Create and initialize an CalenApplication instance
+	QScopedPointer<CalenApplication> application(
+				new CalenApplication(argc, argv));
+	//CalenApplication *application = new CalenApplication(argc, argv);
+
+	// Main window for providing the scene context
 	HbMainWindow window;
 	
-    //For translation, loading and installing translator
+	//For translation, loading and installing translator
 	HbTranslator translator("calendar");
 	translator.loadCommon();
 	
-    // Backup and restore code need to write here.
+	// Backup and restore code need to write here.
 	
-    CCalenController *controller = new CCalenController();
+	application->createController();
 
 	int retValue = 0;
-	if (controller) {
-	    controller->constructController();
-    	// Create the Calendar service provider
-	    CalenServiceProvider service(controller);
-    
-    	retValue = app.exec();
-    
-	    // delete the controller
-    	controller->ReleaseCustomisations();
-	    controller->Release();
-	}
-    return retValue;
-    }
+	
+	retValue = application->execution();
+	application->releaseController();
+	
+	return retValue;
+}
 
+//End of file
 
- //End of file

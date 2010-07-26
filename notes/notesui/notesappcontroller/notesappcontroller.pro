@@ -29,7 +29,8 @@ INCLUDEPATH += \
 		../notesviewmanager/inc \
 		../notesmodelhandler/inc \
 		../inc \
-		../../inc
+		../../inc \
+		./traces
 
 symbian: {
 	TARGET.CAPABILITY = ALL -TCB

@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: Definition file for class NotesDocLoader.
+* Description: Definition file for class NotesViewManager.
 *
 */
 
@@ -38,7 +38,12 @@
 #include "notescommon.h"
 #include "notesmodel.h"
 #include "notessortfilterproxymodel.h"
-#include "agendautil.h"
+#include <agendautil.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "notesviewmanagerTraces.h"
+#endif
+
 
 /*!
 	\class NotesViewManager
@@ -57,40 +62,38 @@ NotesViewManager::NotesViewManager(
 :QObject(parent),
  mAppControllerIf(controllerIf)
 {
+	OstTraceFunctionEntry0( NOTESVIEWMANAGER_NOTESVIEWMANAGER_ENTRY );
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 
 	mAgendaUtil = mAppControllerIf.agendaUtil();
 
 	// Check the Application Startup reason from Activity Manager
 	int activityReason = qobject_cast<HbApplication*>(qApp)->activateReason();
-
-	if (Hb::ActivationReasonActivity == activityReason) // Check if application is started 
-	    // from an application
-	    {
-        // Application is started from an activity
+	
+	// Check if application is started from an application
+	if (Hb::ActivationReasonActivity == activityReason) {
+		// Application is started from an activity
 		// extract activity data
-        QVariant data = qobject_cast<HbApplication*>(qApp)->activateData();
-        // Restore state from activity data
-        QByteArray serializedModel = data.toByteArray();
-        QDataStream stream(&serializedModel, QIODevice::ReadOnly);
-        int viewId;
-        stream >> viewId; // read stream into an int
+		QVariant data = qobject_cast<HbApplication*>(qApp)->activateData();
+		// Restore state from activity data
+		QByteArray serializedModel = data.toByteArray();
+		QDataStream stream(&serializedModel, QIODevice::ReadOnly);
+		int viewId;
+		stream >> viewId; // read stream into an int
 
-        if (NotesNamespace::NotesMainViewId == viewId) // Check if viewId is main view
-            {
-            // Load MainView
-            loadNotesMainView();
-            }
-        else if (NotesNamespace::NotesCollectionViewId == viewId) // Check if the viewId is collective view
-            {
-            //no implementation yet, UI Specs not available
-            }
-	    }
-	else // application started by either service framework or normally
-	    {
-        // Load the main view at the start up.
-        loadNotesMainView();
-	    }
+		// Check if viewId is main view.
+		if (NotesNamespace::NotesMainViewId == viewId) {
+			// Load MainView
+			loadNotesMainView();
+		} else if (NotesNamespace::NotesCollectionViewId == viewId) {
+			// Check if the viewId is collective view
+			//no implementation yet, UI Specs not available
+		} 
+	} else {
+			// application started by either service framework or normally
+			// Load the main view at the start up.
+			loadNotesMainView();
+		}
 
 	connect(
 			mAgendaUtil, SIGNAL(instanceViewCreationCompleted(int)),
@@ -100,6 +103,7 @@ NotesViewManager::NotesViewManager(
 	connect(
 			window, SIGNAL(viewReady()),
 			this, SLOT(loadOtherViews()));
+	OstTraceFunctionExit0( NOTESVIEWMANAGER_NOTESVIEWMANAGER_EXIT );
 }
 
 /*!
@@ -107,7 +111,9 @@ NotesViewManager::NotesViewManager(
  */
 NotesViewManager::~NotesViewManager()
 {
+	OstTraceFunctionEntry0( DUP1_NOTESVIEWMANAGER_NOTESVIEWMANAGER_ENTRY );
 	// No implementation yet
+	OstTraceFunctionExit0( DUP1_NOTESVIEWMANAGER_NOTESVIEWMANAGER_EXIT );
 }
 
 /*!
@@ -117,74 +123,70 @@ NotesViewManager::~NotesViewManager()
  */
 void NotesViewManager::switchToView(NotesNamespace::NotesViewIds viewId)
 {
+	OstTraceFunctionEntry0( NOTESVIEWMANAGER_SWITCHTOVIEW_ENTRY );
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 
 	switch (viewId) {
 		case NotesNamespace::NotesMainViewId:
+		{
 			window->removeView(window->currentView());
 			window->addView(mMainView);
 			window->setCurrentView(mMainView);
 			mMainView->captureScreenShot(false);
 			break;
-
+		}
 		case NotesNamespace::NotesCollectionViewId:
-		    if (mMainView)
-		        {
-                if (mMainView == window->currentView())
-                    {
-                    mMainView->captureScreenShot(true);
-                    }
-		        }
+		{
+			if (mMainView) {
+				if (mMainView == window->currentView()) {
+					mMainView->captureScreenShot(true);
+				}
+			}
 			window->removeView(window->currentView());
 			window->addView(mCollectionView);
 			window->setCurrentView(mCollectionView);
 			break;
-
+		}
 		case NotesNamespace::NotesTodoViewId:
-		    if (mMainView)
-		        {
-                if (mMainView == window->currentView())
-                    {
-                    mMainView->captureScreenShot(true);
-                    }
-		        }
-
+		{
+			if (mMainView) {
+				if (mMainView == window->currentView()) {
+					mMainView->captureScreenShot(true);
+				}
+			}
 			window->removeView(window->currentView());
 			window->addView(mTodoView);
 			window->setCurrentView(mTodoView);
 			break;
-
+		}
 		case NotesNamespace::NotesFavoritesViewId:
-	         if (mMainView)
-	             {
-                 if (mMainView == window->currentView())
-                     {
-	                 mMainView->captureScreenShot(true);
-	                 }
-	             }
-
+		{
+			if (mMainView) {
+				if (mMainView == window->currentView()) {
+					mMainView->captureScreenShot(true);
+				}
+			}
 			window->removeView(window->currentView());
 			window->addView(mFavoriteView);
 			window->setCurrentView(mFavoriteView);
 			break;
-
+		}
 		case NotesNamespace::NotesNoteViewId:
-	         if (mMainView)
-	             {
-	             if (mMainView == window->currentView())
-	                 {
-	                 mMainView->captureScreenShot(true);
-	                 }
-	             }
-
+		{
+			if (mMainView) {
+				if (mMainView == window->currentView()) {
+					mMainView->captureScreenShot(true);
+				}
+			}
 			window->removeView(window->currentView());
 			window->addView(mNoteView);
 			window->setCurrentView(mNoteView);
 			break;
-
+		}
 		default:
 			break;
 	}
+	OstTraceFunctionExit0( NOTESVIEWMANAGER_SWITCHTOVIEW_EXIT );
 }
 
 /*!
@@ -192,6 +194,7 @@ void NotesViewManager::switchToView(NotesNamespace::NotesViewIds viewId)
  */
 void NotesViewManager::loadNotesMainView()
 {
+	OstTraceFunctionEntry0( NOTESVIEWMANAGER_LOADNOTESMAINVIEW_ENTRY );
 	bool loadSuccess;
 
 	// Construct the document loader instance
@@ -218,6 +221,7 @@ void NotesViewManager::loadNotesMainView()
 
 	// Set the main view to the window
 	hbInstance->allMainWindows().first()->addView(mMainView);
+	OstTraceFunctionExit0( NOTESVIEWMANAGER_LOADNOTESMAINVIEW_EXIT );
 }
 
 /*!
@@ -225,6 +229,7 @@ void NotesViewManager::loadNotesMainView()
  */
 void NotesViewManager::loadNotesCollectionView()
 {
+	OstTraceFunctionEntry0( NOTESVIEWMANAGER_LOADNOTESCOLLECTIONVIEW_ENTRY );
 	bool loadSuccess;
 
 	// Construct the document loader instance
@@ -238,6 +243,7 @@ void NotesViewManager::loadNotesCollectionView()
 			docLoader->findWidget(NOTES_COLLECTION_VIEW));
 	// Setup the view.
 	mCollectionView->setupView(mAppControllerIf, docLoader);
+	OstTraceFunctionExit0( NOTESVIEWMANAGER_LOADNOTESCOLLECTIONVIEW_EXIT );
 }
 
 /*!
@@ -245,6 +251,7 @@ void NotesViewManager::loadNotesCollectionView()
  */
 void NotesViewManager::loadTodoView()
 {
+	OstTraceFunctionEntry0( NOTESVIEWMANAGER_LOADTODOVIEW_ENTRY );
 
 	bool loadSuccess;
 
@@ -263,6 +270,7 @@ void NotesViewManager::loadTodoView()
 	connect (
 			mTodoView, SIGNAL(deleteEntry(ulong)),
 			this, SLOT(deleteEntryFromView(ulong)));
+	OstTraceFunctionExit0( NOTESVIEWMANAGER_LOADTODOVIEW_EXIT );
 }
 
 /*!
@@ -270,6 +278,7 @@ void NotesViewManager::loadTodoView()
  */
 void NotesViewManager::loadFavoritesView()
 {
+	OstTraceFunctionEntry0( NOTESVIEWMANAGER_LOADFAVORITESVIEW_ENTRY );
 	bool loadSuccess;
 
 	// Construct the document loader instance
@@ -288,6 +297,7 @@ void NotesViewManager::loadFavoritesView()
 	connect (
 			mFavoriteView, SIGNAL(deleteEntry(ulong)),
 			this, SLOT(deleteEntryFromView(ulong)));
+	OstTraceFunctionExit0( NOTESVIEWMANAGER_LOADFAVORITESVIEW_EXIT );
 }
 
 /*!
@@ -295,6 +305,7 @@ void NotesViewManager::loadFavoritesView()
  */
 void NotesViewManager::loadNoteView()
 {
+	OstTraceFunctionEntry0( NOTESVIEWMANAGER_LOADNOTEVIEW_ENTRY );
 	bool loadSuccess;
 
 	// Construct the document loader instance
@@ -312,6 +323,7 @@ void NotesViewManager::loadNoteView()
 	connect(
 			mNoteView, SIGNAL(deleteEntry(ulong)),
 			this, SLOT(deleteEntryFromView(ulong)));
+	OstTraceFunctionExit0( NOTESVIEWMANAGER_LOADNOTEVIEW_EXIT );
 }
 
 /*!
@@ -319,6 +331,7 @@ void NotesViewManager::loadNoteView()
  */
 void NotesViewManager::loadOtherViews()
 {
+	OstTraceFunctionEntry0( NOTESVIEWMANAGER_LOADOTHERVIEWS_ENTRY );
 	mMainView->setupAfterViewReady();
 
 	// Load the collection view.
@@ -335,6 +348,7 @@ void NotesViewManager::loadOtherViews()
 	disconnect(
 			window, SIGNAL(viewReady()),
 			this, SLOT(loadOtherViews()));
+	OstTraceFunctionExit0( NOTESVIEWMANAGER_LOADOTHERVIEWS_EXIT );
 }
 
 /*!
@@ -342,6 +356,7 @@ void NotesViewManager::loadOtherViews()
  */
 void NotesViewManager::deleteEntryFromView(ulong entryId)
 {
+	OstTraceFunctionEntry0( NOTESVIEWMANAGER_DELETEENTRYFROMVIEW_ENTRY );
 	mEntryId = entryId;
 	HbMessageBox *confirmationQuery = new HbMessageBox(
 			HbMessageBox::MessageTypeQuestion);
@@ -375,6 +390,7 @@ void NotesViewManager::deleteEntryFromView(ulong entryId)
 	confirmationQuery->addAction(mCancelAction);
 
 	confirmationQuery->open(this, SLOT(selectedAction(HbAction*)));
+	OstTraceFunctionExit0( NOTESVIEWMANAGER_DELETEENTRYFROMVIEW_EXIT );
 }
 
 /*!
@@ -382,10 +398,12 @@ void NotesViewManager::deleteEntryFromView(ulong entryId)
  */
 void NotesViewManager::selectedAction(HbAction *action)
 {
+	OstTraceFunctionEntry0( NOTESVIEWMANAGER_SELECTEDACTION_ENTRY );
 	if (action == mDeleteAction) {
 		// Delete the given note.
 		mAgendaUtil->deleteEntry(mEntryId);
 	}
+	OstTraceFunctionExit0( NOTESVIEWMANAGER_SELECTEDACTION_EXIT );
 }
 
 /*!
@@ -393,6 +411,7 @@ void NotesViewManager::selectedAction(HbAction *action)
  */
 void NotesViewManager::handleInstanceViewCreationCompleted(int status)
 {
+	OstTraceFunctionEntry0( NOTESVIEWMANAGER_HANDLEINSTANCEVIEWCREATIONCOMPLETED_ENTRY );
 	Q_UNUSED(status)
 
 	// Update the title for main view.
@@ -409,5 +428,13 @@ void NotesViewManager::handleInstanceViewCreationCompleted(int status)
 	
 	// Update the favorites view.
 	mFavoriteView->updateFavoriteView();
+	
+	// Need to emit this signal after the view is fully constructed & populated
+	// with actual data and ready to be used. So entry view & instance view
+	// needs to be created so that a new entry can also be created. Finally
+	// NotesApplication object needs to emit applicationReady Signal.
+	emit appReady();
+	OstTraceFunctionExit0( NOTESVIEWMANAGER_HANDLEINSTANCEVIEWCREATIONCOMPLETED_EXIT );
 }
+
 // End of file	--Don't remove this.

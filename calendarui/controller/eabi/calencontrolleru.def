@@ -38,4 +38,7 @@ EXPORTS
 	_ZTI16CCalenController @ 37 NONAME
 	_ZTV16CCalenController @ 38 NONAME
 	_ZThn8_N16CCalenController12NewServicesLEv @ 39 NONAME
+	_ZN16CCalenController12emitAppReadyEv @ 40 NONAME
+	_ZN16CCalenController8appReadyEv @ 41 NONAME
+	_ZN16CCalenController11raiseWindowEv @ 42 NONAME
 

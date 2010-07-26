@@ -32,6 +32,7 @@
 // User Included
 #include "caleneditorrepeatfield.h"
 #include "caleneditorcustomitem.h"
+#include "calendateutils.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "caleneditorrepeatfieldTraces.h"
@@ -44,6 +45,39 @@ const int userRole = Qt::UserRole + 100;
 /*!
 	\class CalenEditorRepeatField
  */
+/*!
+    \enum CalenEditorRepeatField::RepeatTypes
+    This enum defines the different repeat types of an entry
+ */
+/*!
+    \var CalenEditorRepeatField::RepeatTypes CalenEditorRepeatField::RepeatOnce
+    No repeating type.
+ */
+/*!
+    \var CalenEditorRepeatField::RepeatTypes CalenEditorRepeatField::RepeatDaily
+    Daily repeating type.
+ */
+/*!
+    \var CalenEditorRepeatField::RepeatTypes CalenEditorRepeatField::RepeatWorkdays
+    Workdays repeating type.
+ */
+/*!
+    \var CalenEditorRepeatField::RepeatTypes CalenEditorRepeatField::RepeatWeekly
+    Weekly repeating type.
+ */
+/*!
+    \var CalenEditorRepeatField::RepeatTypes CalenEditorRepeatField::RepeatBiWeekly
+    Fortnightly repeating type.
+ */
+/*!
+    \var CalenEditorRepeatField::RepeatTypes CalenEditorRepeatField::RepeatMonthly
+    Monthly repeating type.
+ */
+/*!
+    \var CalenEditorRepeatField::RepeatTypes CalenEditorRepeatField::RepeatYearly
+    Yearly repeating type.
+ */
+
 /*!
 	Constructor.
 
@@ -58,9 +92,9 @@ CalenEditorRepeatField::CalenEditorRepeatField(CalenEditorPrivate* calenEditor,
     mCalenEditor(calenEditor), 
 	mEditorForm(form), 
 	mCalenEditorModel(model), 
-	mRepeatItem(NULL),
-	mRepeatComboBox(NULL),
-	mCustomRepeatUntilItem(NULL),
+	mRepeatItem(0),
+	mRepeatComboBox(0),
+	mCustomRepeatUntilItem(0),
 	mIsBiWeekly(false),
 	mIsWorkdays(false),
 	mRepeatUntilItemAdded(false)
@@ -157,31 +191,31 @@ void CalenEditorRepeatField::populateRepeatItem(int index)
 	if (mCalenEditor->editedEntry()->isRepeating()) {
 		switch (mCalenEditor->editedEntry()->repeatRule().type()) {
 			case AgendaRepeatRule::DailyRule: {
-				mRepeatComboBox->setCurrentIndex(1);
+				mRepeatComboBox->setCurrentIndex(DailyRole);
 			}
 				break;
 			case AgendaRepeatRule::WeeklyRule: {
 				bool isWorkdays = AgendaUtil::isWorkdaysRepeatingEntry(
 						mCalenEditor->editedEntry()->repeatRule());
 				if (isWorkdays) {
-					mRepeatComboBox->setCurrentIndex(2);
+					mRepeatComboBox->setCurrentIndex(WorkdaysRole);
 					mIsWorkdays = true;
 				} else {
 					if (mCalenEditor->editedEntry()->repeatRule().interval() == 1) {
-						mRepeatComboBox->setCurrentIndex(3);
+						mRepeatComboBox->setCurrentIndex(WeeklyRole);
 					} else {
-						mRepeatComboBox->setCurrentIndex(4);
+						mRepeatComboBox->setCurrentIndex(BiWeeklyRole);
 						mIsBiWeekly = true;
 					}
 				}
 			}
 				break;
 			case AgendaRepeatRule::MonthlyRule: {
-				mRepeatComboBox->setCurrentIndex(5);
+				mRepeatComboBox->setCurrentIndex(MonthlyRole);
 			}
 				break;
 			case AgendaRepeatRule::YearlyRule: {
-				mRepeatComboBox->setCurrentIndex(6);
+				mRepeatComboBox->setCurrentIndex(YearlyRole);
 			}
 				break;
 			default:
@@ -220,11 +254,12 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 	QVariant role = mRepeatComboBox->itemData(index, userRole);
 	int value = role.toInt();
 	switch (value) {
-		case 1: {
+		case DailyRole: {
 			if (!mRepeatUntilItemAdded) {
 				insertRepeatUntilItem();
 			}
 			if (mCustomRepeatUntilItem) {
+				// Show default repeat until date till one year for daily rule 
 				mRepeatUntilDate = mCalenEditor->editedEntry()->startTime().date().addYears(1);
 				mCustomRepeatUntilItem->setContentWidgetData( "text", 
 												locale.format( mRepeatUntilDate,
@@ -233,11 +268,12 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 			mRepeatRuleType = AgendaRepeatRule::DailyRule;
 		}
 		break;
-		case 2: {
+		case WorkdaysRole: {
 			if (!mRepeatUntilItemAdded) {
 				insertRepeatUntilItem();
 			}
 			if (mCustomRepeatUntilItem) {
+				// Show default repeat until date till one year for workdays rule
 				mRepeatUntilDate = mCalenEditor->editedEntry()->startTime().date().addYears(1);
 				mCustomRepeatUntilItem->setContentWidgetData( "text",
 												locale.format( mRepeatUntilDate,
@@ -247,11 +283,12 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 			mIsWorkdays = true;
 		}
 		break;
-		case 3: {
+		case WeeklyRole: {
 			if (!mRepeatUntilItemAdded) {
 				insertRepeatUntilItem();
 			}
 			if (mCustomRepeatUntilItem) {
+				// Show default repeat until date till one year for weekly rule
 				mRepeatUntilDate = mCalenEditor->editedEntry()->startTime().date().addYears(1);
 				mCustomRepeatUntilItem->setContentWidgetData( "text",
 												locale.format( mRepeatUntilDate,
@@ -261,11 +298,12 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 			mRepeatRuleType = AgendaRepeatRule::WeeklyRule;
 		}
 		break;
-		case 4: {
+		case BiWeeklyRole: {
 			if (!mRepeatUntilItemAdded) {
 				insertRepeatUntilItem();
 			}
 			if (mCustomRepeatUntilItem) {
+				// Show default repeat until date till one year for bi-weekly rule
 				mRepeatUntilDate = mCalenEditor->editedEntry()->startTime().date().addYears(1);
 				mCustomRepeatUntilItem->setContentWidgetData( "text",
 												locale.format( mRepeatUntilDate,
@@ -275,12 +313,13 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 			mIsBiWeekly = true;
 		}
 		break;
-		case 5: {
+		case MonthlyRole: {
 			if (!mRepeatUntilItemAdded) {
 				insertRepeatUntilItem();
 			}
 			if (mCustomRepeatUntilItem) {
-				mRepeatUntilDate = mCalenEditor->editedEntry()->startTime().date().addYears(5);
+				// Show default repeat until date till one year for monthly rule
+				mRepeatUntilDate = mCalenEditor->editedEntry()->startTime().date().addYears(1);
 				mCustomRepeatUntilItem->setContentWidgetData( "text",
 												locale.format( mRepeatUntilDate,
 												r_qtn_date_usual_with_zero));
@@ -288,11 +327,12 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 			mRepeatRuleType = AgendaRepeatRule::MonthlyRule;
 		}
 		break;
-		case 6: {
+		case YearlyRole: {
 			if (!mRepeatUntilItemAdded) {
 				insertRepeatUntilItem();
 			}
 			if (mCustomRepeatUntilItem) {
+				// Show default repeat until date till ten years for yearly rule
 				mRepeatUntilDate = mCalenEditor->editedEntry()->startTime().date().addYears(10);
 				mCustomRepeatUntilItem->setContentWidgetData( "text",
 												locale.format( mRepeatUntilDate,
@@ -310,7 +350,7 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 				                              mCalenEditorModel->index(
 				                              repeatIndex.row()+ 1, 0));
 				mRepeatUntilItemAdded = false;
-				mCustomRepeatUntilItem = NULL;
+				mCustomRepeatUntilItem = 0;
 			}
 		}
 		break;
@@ -363,7 +403,8 @@ void CalenEditorRepeatField::insertRepeatUntilItem()
 				r_qtn_date_usual_with_zero);
 		mCustomRepeatUntilItem->setContentWidgetData("text", dateString);
 	}
-	//TODO: Scroll to functionality has to be implemented	
+	//Scroll to repeat until item added
+	mEditorForm->scrollTo(mCalenEditorModel->index(index, 0), HbAbstractItemView::EnsureVisible);
 	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_INSERTREPEATUNTILITEM_EXIT );
 }
 
@@ -392,13 +433,13 @@ void CalenEditorRepeatField::launchRepeatUntilDatePicker()
 	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
 	
 	if (mDatePicker) {
-		mDatePicker = NULL;
+		mDatePicker = 0;
 	}
 	if (mRepeatRuleType == AgendaRepeatRule::DailyRule) {
 		QDate minDate = mCalenEditor->editedEntry()->endTime().date().addDays(1);
 		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
 		mDatePicker->setMinimumDate(minDate);
-		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
+		mDatePicker->setMaximumDate(CalenDateUtils::maxTime().date());
 		mDatePicker->setDate(mRepeatUntilDate);
 	} else if (mRepeatRuleType == AgendaRepeatRule::WeeklyRule) {
 		QDate minDate;
@@ -409,19 +450,19 @@ void CalenEditorRepeatField::launchRepeatUntilDatePicker()
 		}
 		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
 		mDatePicker->setMinimumDate(minDate);
-		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
+		mDatePicker->setMaximumDate(CalenDateUtils::maxTime().date());
 		mDatePicker->setDate(mRepeatUntilDate);
 	} else if (mRepeatRuleType == AgendaRepeatRule::MonthlyRule) {
 		QDate minDate = mCalenEditor->editedEntry()->endTime().date().addMonths(1);
 		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
 		mDatePicker->setMinimumDate(minDate);
-		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
+		mDatePicker->setMaximumDate(CalenDateUtils::maxTime().date());
 		mDatePicker->setDate(mRepeatUntilDate);
 	} else if (mRepeatRuleType == AgendaRepeatRule::YearlyRule) {
 		QDate minDate = mCalenEditor->editedEntry()->endTime().date().addYears(1);
 		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
 		mDatePicker->setMinimumDate(minDate);
-		mDatePicker->setMaximumDate(QDate(31, 12, 2100));
+		mDatePicker->setMaximumDate(CalenDateUtils::maxTime().date());
 		mDatePicker->setDate(mRepeatUntilDate);
 	}
 	popUp->setContentWidget(mDatePicker);
@@ -647,19 +688,17 @@ void CalenEditorRepeatField::saveRepeatRule()
 			}
 		} else if (mRepeatRuleType == AgendaRepeatRule::MonthlyRule) {
 			QList<int> monthDays;
-			//TODO :
 			int dayNoInMonth = mCalenEditor->editedEntry()->startTime().date().day();
 			monthDays.append(dayNoInMonth);
 			repeatRule.setByMonthDay(monthDays);
 		} else if (mRepeatRuleType == AgendaRepeatRule::YearlyRule) {
-			//TODO : Add yearly rule.Check if required.
 		}
 		mCalenEditor->editedEntry()->setRepeatRule(repeatRule);
 	} else {
 		mCalenEditor->editedEntry()->setRepeatRule( AgendaRepeatRule(
 											AgendaRepeatRule::InvalidRule));
 	}
-	// TODO: Need to update rDates here
+	// TODO: Need to update rDates here for 10.2 if required
 	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_SAVEREPEATRULE_EXIT );
 }
 

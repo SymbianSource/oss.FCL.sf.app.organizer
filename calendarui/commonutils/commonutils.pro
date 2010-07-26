@@ -30,8 +30,8 @@ symbian : {
 		"./inc/calenagendautils.h  |../inc/calenagendautils.h" \
 		"./inc/calendateutils.h  |../inc/calendateutils.h"   
 
-  TARGET.UID3 = 0x10207199					 						 						  
-  TARGET.CAPABILITY = CAP_GENERAL_DLL    	
+  TARGET.UID3 = 0x10207199
+  TARGET.CAPABILITY = CAP_GENERAL_DLL
   TARGET.EPOCALLOWDLLDATA=1
   
   INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE

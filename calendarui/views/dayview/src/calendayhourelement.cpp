@@ -136,8 +136,25 @@ void CalenDayHourElement::paint(
 
         }
     }
+    
 
     painter->restore();
+}
+
+/*!
+   \brief It set time for hour element.
+ */
+void CalenDayHourElement::setTime(const QTime &time)
+{
+    mHour = time;
+}
+
+/*!
+   \brief It return time of hour element.
+ */
+QTime CalenDayHourElement::time() const
+{
+    return mHour;
 }
 
 // End of File

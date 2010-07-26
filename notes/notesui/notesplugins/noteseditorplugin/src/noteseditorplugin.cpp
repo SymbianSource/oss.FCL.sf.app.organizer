@@ -24,6 +24,11 @@
 // User includes.
 #include "noteseditorplugin.h"
 #include "noteseditor.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "noteseditorpluginTraces.h"
+#endif
+
 
 /*!
 	\class NotesEditorPlugin
@@ -49,7 +54,9 @@
  */
 NotesEditorPlugin::NotesEditorPlugin(QObject *parent)
 {
+	OstTraceFunctionEntry0( NOTESEDITORPLUGIN_NOTESEDITORPLUGIN_ENTRY );
 	Q_UNUSED(parent)
+	OstTraceFunctionExit0( NOTESEDITORPLUGIN_NOTESEDITORPLUGIN_EXIT );
 }
 
 /*!
@@ -57,6 +64,8 @@ NotesEditorPlugin::NotesEditorPlugin(QObject *parent)
  */
 NotesEditorPlugin::~NotesEditorPlugin()
 {
+	OstTraceFunctionEntry0( DUP1_NOTESEDITORPLUGIN_NOTESEDITORPLUGIN_ENTRY );
+	OstTraceFunctionExit0( DUP1_NOTESEDITORPLUGIN_NOTESEDITORPLUGIN_EXIT );
 }
 
 
@@ -67,11 +76,13 @@ NotesEditorPlugin::~NotesEditorPlugin()
  */
 void NotesEditorPlugin::edit(const QString &string, AgendaUtil *agendaUtil)
 {
+	OstTraceFunctionEntry0( NOTESEDITORPLUGIN_EDIT_ENTRY );
 	if (!mNotesEditor) {
 		createNotesEditor(agendaUtil);
 	}
 
 	mNotesEditor->edit(string);
+	OstTraceFunctionExit0( NOTESEDITORPLUGIN_EDIT_EXIT );
 }
 
 /*!
@@ -82,11 +93,13 @@ void NotesEditorPlugin::edit(const QString &string, AgendaUtil *agendaUtil)
  */
 void NotesEditorPlugin::edit(const QFile &handle, AgendaUtil *agendaUtil)
 {
+	OstTraceFunctionEntry0( DUP1_NOTESEDITORPLUGIN_EDIT_ENTRY );
 	if (!mNotesEditor) {
 		createNotesEditor(agendaUtil);
 	}
 
 	mNotesEditor->edit(handle);
+	OstTraceFunctionExit0( DUP1_NOTESEDITORPLUGIN_EDIT_EXIT );
 }
 
 /*!
@@ -96,11 +109,13 @@ void NotesEditorPlugin::edit(const QFile &handle, AgendaUtil *agendaUtil)
  */
 void NotesEditorPlugin::edit(AgendaEntry entry, AgendaUtil *agendaUtil)
 {
+	OstTraceFunctionEntry0( DUP2_NOTESEDITORPLUGIN_EDIT_ENTRY );
 	if (!mNotesEditor) {
 		createNotesEditor(agendaUtil);
 	}
 
 	mNotesEditor->edit(entry);
+	OstTraceFunctionExit0( DUP2_NOTESEDITORPLUGIN_EDIT_EXIT );
 }
 
 /*!
@@ -110,11 +125,13 @@ void NotesEditorPlugin::edit(AgendaEntry entry, AgendaUtil *agendaUtil)
  */
 void NotesEditorPlugin::edit(ulong id, AgendaUtil *agendaUtil)
 {
+	OstTraceFunctionEntry0( DUP3_NOTESEDITORPLUGIN_EDIT_ENTRY );
 	if (!mNotesEditor) {
 		createNotesEditor(agendaUtil);
 	}
 
 	mNotesEditor->edit(id);
+	OstTraceFunctionExit0( DUP3_NOTESEDITORPLUGIN_EDIT_EXIT );
 }
 
 /*!
@@ -126,11 +143,13 @@ void NotesEditorPlugin::edit(ulong id, AgendaUtil *agendaUtil)
 void NotesEditorPlugin::create( NotesEditorInterface::CreateType type,
 							AgendaUtil *agendaUtil)
 {
+	OstTraceFunctionEntry0( NOTESEDITORPLUGIN_CREATE_ENTRY );
 	if (!mNotesEditor) {
 		createNotesEditor(agendaUtil);
 	}
 
 	mNotesEditor->create(static_cast<NotesEditor::CreateType>(type));
+	OstTraceFunctionExit0( NOTESEDITORPLUGIN_CREATE_EXIT );
 }
 
 /*!
@@ -141,6 +160,7 @@ void NotesEditorPlugin::create( NotesEditorInterface::CreateType type,
 ulong NotesEditorPlugin::close( NotesEditorInterface::CloseType type,
 							AgendaUtil *agendaUtil)
 {
+	OstTraceFunctionEntry0( NOTESEDITORPLUGIN_CLOSE_ENTRY );
 	if (!mNotesEditor) {
 		createNotesEditor(agendaUtil);
 	}
@@ -153,6 +173,7 @@ ulong NotesEditorPlugin::close( NotesEditorInterface::CloseType type,
  */
 void NotesEditorPlugin::createNotesEditor(AgendaUtil *agendaUtil)
 {
+	OstTraceFunctionEntry0( NOTESEDITORPLUGIN_CREATENOTESEDITOR_ENTRY );
 	if (agendaUtil) {
 		mNotesEditor = new NotesEditor(agendaUtil, this);
 	} else {
@@ -164,6 +185,7 @@ void NotesEditorPlugin::createNotesEditor(AgendaUtil *agendaUtil)
 				mNotesEditor, SIGNAL(editingCompleted(bool)),
 				this, SLOT(handleEditingCompleted(bool)));
 	}
+	OstTraceFunctionExit0( NOTESEDITORPLUGIN_CREATENOTESEDITOR_EXIT );
 }
 
 /*!
@@ -171,6 +193,7 @@ void NotesEditorPlugin::createNotesEditor(AgendaUtil *agendaUtil)
  */
 void NotesEditorPlugin::handleEditingCompleted(bool status)
 {
+	OstTraceFunctionEntry0( NOTESEDITORPLUGIN_HANDLEEDITINGCOMPLETED_ENTRY );
 	// Emits the signal.
 	emit editingCompleted(status);
 
@@ -178,6 +201,7 @@ void NotesEditorPlugin::handleEditingCompleted(bool status)
 	if (mNotesEditor) {
 		mNotesEditor->deleteLater();
 	}
+	OstTraceFunctionExit0( NOTESEDITORPLUGIN_HANDLEEDITINGCOMPLETED_EXIT );
 }
 
 // Exports plugin class NotesEditorPlugin for the target
@@ -185,4 +209,3 @@ void NotesEditorPlugin::handleEditingCompleted(bool status)
 Q_EXPORT_PLUGIN2(noteseditorplugin, NotesEditorPlugin)
 
 // End of file	--Don't remove this.
-

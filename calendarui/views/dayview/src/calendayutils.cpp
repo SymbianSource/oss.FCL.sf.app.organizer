@@ -152,7 +152,7 @@ bool CalenDayUtils::isHorizontalSwipe(qreal angle) const
  \brief Get event's valid start/end time from agenda entry.
  */
 void CalenDayUtils::getEventValidStartEndTime( QDateTime& start, QDateTime& end, 
-                                    AgendaEntry& entry, QDateTime& currentDate )
+                                    const AgendaEntry& entry, QDateTime& currentDate )
 {
     start = entry.startTime();
     end = entry.endTime();

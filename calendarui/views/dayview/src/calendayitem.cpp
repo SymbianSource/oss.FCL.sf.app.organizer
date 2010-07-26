@@ -28,14 +28,16 @@
 #include "calendayitem.h"
 #include "calendaystatusstrip.h"
 #include "calendaymodel.h"
+#include "calendayutils.h"
+#include "calendaycontainer.h"
 
 // -----------------------------------------------------------------------------
 // CalenDayItem()
 // Constructor.
 // -----------------------------------------------------------------------------
 //
-CalenDayItem::CalenDayItem():
-    mUpdated(false), mBg(0), mEventDesc(0), mColorStripe(0), 
+CalenDayItem::CalenDayItem(const CalenDayContainer *container):
+    mContainer(container), mUpdated(false), mBg(0), mEventDesc(0), mColorStripe(0), 
     mEventDescMinWidth(0.0), mFrameMinWidth(0.0)
 {
 }
@@ -46,7 +48,7 @@ CalenDayItem::CalenDayItem():
 // -----------------------------------------------------------------------------
 //
 CalenDayItem::CalenDayItem(const CalenDayItem & source) :
-    HbAbstractViewItem(source), mUpdated(false), mBg(0), mEventDesc(0), 
+    HbAbstractViewItem(source), mContainer(source.container()), mUpdated(false), mBg(0), mEventDesc(0), 
     mColorStripe(0), mEventDescMinWidth(0.0), mFrameMinWidth(0.0)
 {	
     // TODO: "qtg_fr_btn_pressed" need to replaced with qtg_fr_cal_meeting_bg
@@ -82,6 +84,7 @@ CalenDayItem::CalenDayItem(const CalenDayItem & source) :
     //Minimum width is assured by widgetml and css
     //additionally called here to prevent minimum size hint caching inside effectiveSizeHint
     setMinimumWidth(stripeWidth);
+
 }
 
 // -----------------------------------------------------------------------------
@@ -186,16 +189,24 @@ void CalenDayItem::setStatusStrip(const AgendaEntry &entry, bool allDayEvent)
     mColorStripe->setColor(color);
     
     if (!allDayEvent) {
-    	mColorStripe->setStartEndTime(entry.startTime().time(),
-                                  entry.endTime().time());
-    } else {
-    	// This is workaround for displaying all-day events.
-    	// Now for MS Outlook compability all-day events' start and end time is
-    	// 00:00:00 and 00:00:00 next day respectively.
-    	// To draw it correctly we need times like those visible for user in
-    	// editor: 00:00:00 to 23:59:59 (the same day)
-    	mColorStripe->setStartEndTime(entry.startTime().time(),
-    	                                  entry.endTime().time().addSecs(-1));
+
+        QDateTime startTime;
+        QDateTime endTime;
+        QDateTime currentDateTime;
+        currentDateTime.setDate(container()->date());
+
+        CalenDayUtils::instance()->getEventValidStartEndTime(startTime, endTime, entry,
+            currentDateTime);
+
+        mColorStripe->setStartEndTime(startTime.time(), endTime.time());
+    }
+    else {
+        // This is workaround for displaying all-day events.
+        // Now for MS Outlook compability all-day events' start and end time is
+        // 00:00:00 and 00:00:00 next day respectively.
+        // To draw it correctly we need times like those visible for user in
+        // editor: 00:00:00 to 23:59:59 (the same day)
+        mColorStripe->setStartEndTime(entry.startTime().time(), entry.endTime().time().addSecs(-1));
     }
     
     switch (entry.status()) {

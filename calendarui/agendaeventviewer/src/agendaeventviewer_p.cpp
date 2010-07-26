@@ -25,6 +25,11 @@
 #include "agendaeventviewer_p.h"
 #include "agendaeventviewer.h"
 #include "agendaeventview.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "agendaeventviewer_pTraces.h"
+#endif
+
 
 /*!
 	\class AgendaEventViewerPrivate
@@ -42,8 +47,9 @@
  */
 AgendaEventViewerPrivate::AgendaEventViewerPrivate(
 		AgendaUtil *agendaUtil, QObject *parent)
-: QObject(parent),mShowEventViewById(false),mShowEventViewByFileHandle(false),mFileName(NULL),mAction(AgendaEventViewer::ActionNothing)
+: QObject(parent),mAction(AgendaEventViewer::ActionNothing),mShowEventViewById(false),mShowEventViewByFileHandle(false),mFileName(NULL)
 {
+    OstTraceFunctionEntry0( AGENDAEVENTVIEWERPRIVATE_AGENDAEVENTVIEWERPRIVATE_ENTRY );
 
 	// Get the q-pointer.from parent
 	q_ptr = static_cast<AgendaEventViewer *> (parent);
@@ -69,6 +75,7 @@ AgendaEventViewerPrivate::AgendaEventViewerPrivate(
 	        mAgendaUtil, SIGNAL(entryViewCreationCompleted(int)),
 	        this, SLOT(viewCreationCompleted(int)));
 
+	OstTraceFunctionExit0( AGENDAEVENTVIEWERPRIVATE_AGENDAEVENTVIEWERPRIVATE_EXIT );
 }
 
 /*!
@@ -76,12 +83,14 @@ AgendaEventViewerPrivate::AgendaEventViewerPrivate(
  */
 AgendaEventViewerPrivate::~AgendaEventViewerPrivate()
 {
+    OstTraceFunctionEntry0( DUP1_AGENDAEVENTVIEWERPRIVATE_AGENDAEVENTVIEWERPRIVATE_ENTRY );
 
 	if (mViewerOwnsAgendaUtil) {
 		delete mAgendaUtil;
 		mAgendaUtil = 0;
 	}
 
+	OstTraceFunctionExit0( DUP1_AGENDAEVENTVIEWERPRIVATE_AGENDAEVENTVIEWERPRIVATE_EXIT );
 }
 
 /*!
@@ -93,6 +102,7 @@ AgendaEventViewerPrivate::~AgendaEventViewerPrivate()
 void AgendaEventViewerPrivate::view(const ulong id, 
                                     AgendaEventViewer::Actions action)
 {
+	OstTraceFunctionEntry0( AGENDAEVENTVIEWERPRIVATE_VIEW_ENTRY );
 	
 	AgendaEntry entry = mAgendaUtil->fetchById(id);
 	
@@ -103,12 +113,14 @@ void AgendaEventViewerPrivate::view(const ulong id,
         mId =id;
         //to avoid view creation multiple times
         mShowEventViewById = true;
+		OstTraceFunctionExit0( AGENDAEVENTVIEWERPRIVATE_VIEW_EXIT );
 		return;
 	}
 	// Construct the agenda event view
 	mAgendaEventView = new AgendaEventView(this);
 	mAgendaEventView->execute(entry, action);
 
+	OstTraceFunctionExit0( DUP1_AGENDAEVENTVIEWERPRIVATE_VIEW_EXIT );
 }
 
 /*!
@@ -120,6 +132,7 @@ void AgendaEventViewerPrivate::view(const ulong id,
 void AgendaEventViewerPrivate::view(const QFile &fileHandle, 
                                     AgendaEventViewer::Actions action)
 {
+    OstTraceFunctionEntry0( DUP1_AGENDAEVENTVIEWERPRIVATE_VIEW_ENTRY );
 
 	// Using calendar importer read the filehandle and generate agenda entry
 	QString filePath = fileHandle.fileName();
@@ -136,6 +149,7 @@ void AgendaEventViewerPrivate::view(const QFile &fileHandle,
         mShowEventViewByFileHandle = true;
         q_ptr->viewingCompleted(QDateTime::currentDateTime().date());
 	}
+	OstTraceFunctionExit0( DUP2_AGENDAEVENTVIEWERPRIVATE_VIEW_EXIT );
 }
 
 /*!
@@ -145,14 +159,17 @@ void AgendaEventViewerPrivate::view(const QFile &fileHandle,
 void AgendaEventViewerPrivate::view(AgendaEntry entry, 
                                     AgendaEventViewer::Actions action)
 {
+    OstTraceFunctionEntry0( DUP2_AGENDAEVENTVIEWERPRIVATE_VIEW_ENTRY );
 
 	if (entry.isNull()) {
+			OstTraceFunctionExit0( DUP3_AGENDAEVENTVIEWERPRIVATE_VIEW_EXIT );
 			return;
 		}
 	// Construct the agenda event view
 	mAgendaEventView = new AgendaEventView(this);
 	mAgendaEventView->execute(entry, action);
 
+	OstTraceFunctionExit0( DUP4_AGENDAEVENTVIEWERPRIVATE_VIEW_EXIT );
 }
 
 /*!
@@ -162,6 +179,7 @@ void AgendaEventViewerPrivate::view(AgendaEntry entry,
  */
 void AgendaEventViewerPrivate::viewingCompleted(const QDate date)
 {
+    OstTraceFunctionEntry0( AGENDAEVENTVIEWERPRIVATE_VIEWINGCOMPLETED_ENTRY );
 
 	emit q_ptr->viewingCompleted(date);
 
@@ -170,6 +188,7 @@ void AgendaEventViewerPrivate::viewingCompleted(const QDate date)
 		mAgendaEventView->deleteLater();
 	}
 
+	OstTraceFunctionExit0( AGENDAEVENTVIEWERPRIVATE_VIEWINGCOMPLETED_EXIT );
 }
 
 /*!
@@ -177,9 +196,11 @@ void AgendaEventViewerPrivate::viewingCompleted(const QDate date)
  */
 void AgendaEventViewerPrivate::editingStarted()
 {
+    OstTraceFunctionEntry0( AGENDAEVENTVIEWERPRIVATE_EDITINGSTARTED_ENTRY );
 
 	emit q_ptr->editingStarted();
 
+	OstTraceFunctionExit0( AGENDAEVENTVIEWERPRIVATE_EDITINGSTARTED_EXIT );
 }
 
 /*!
@@ -187,9 +208,11 @@ void AgendaEventViewerPrivate::editingStarted()
  */
 void AgendaEventViewerPrivate::editingCompleted()
 {
+    OstTraceFunctionEntry0( AGENDAEVENTVIEWERPRIVATE_EDITINGCOMPLETED_ENTRY );
 
 	emit q_ptr->editingCompleted();
 
+	OstTraceFunctionExit0( AGENDAEVENTVIEWERPRIVATE_EDITINGCOMPLETED_EXIT );
 }
 
 /*!
@@ -197,9 +220,11 @@ void AgendaEventViewerPrivate::editingCompleted()
  */
 void AgendaEventViewerPrivate::deletingStarted()
 {
+    OstTraceFunctionEntry0( AGENDAEVENTVIEWERPRIVATE_DELETINGSTARTED_ENTRY );
 
 	emit q_ptr->deletingStarted();
 
+	OstTraceFunctionExit0( AGENDAEVENTVIEWERPRIVATE_DELETINGSTARTED_EXIT );
 }
 
 /*!
@@ -207,9 +232,11 @@ void AgendaEventViewerPrivate::deletingStarted()
  */
 void AgendaEventViewerPrivate::deletingCompleted()
 {
+    OstTraceFunctionEntry0( AGENDAEVENTVIEWERPRIVATE_DELETINGCOMPLETED_ENTRY );
 
 	emit q_ptr->deletingCompleted();
 
+	OstTraceFunctionExit0( AGENDAEVENTVIEWERPRIVATE_DELETINGCOMPLETED_EXIT );
 }
 
 
@@ -219,6 +246,7 @@ void AgendaEventViewerPrivate::deletingCompleted()
  */
 void AgendaEventViewerPrivate::viewCreationCompleted(int error)
     {
+    OstTraceFunctionEntry0( AGENDAEVENTVIEWERPRIVATE_VIEWCREATIONCOMPLETED_ENTRY );
     
     if((KErrNone == error))
         {
@@ -245,5 +273,6 @@ void AgendaEventViewerPrivate::viewCreationCompleted(int error)
     mShowEventViewById = false;
     mShowEventViewByFileHandle = false;
     mAction = AgendaEventViewer::ActionNothing;
+	OstTraceFunctionExit0( AGENDAEVENTVIEWERPRIVATE_VIEWCREATIONCOMPLETED_EXIT );
 	}
 // End of file

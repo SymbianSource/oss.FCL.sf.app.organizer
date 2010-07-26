@@ -18,6 +18,11 @@
 
 // User includes
 #include "noteseditordocloader.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "noteseditordocloaderTraces.h"
+#endif
+
 
 /*!
 	\class NotesEditorDocLoader
@@ -36,6 +41,7 @@
 */
 QObject* NotesEditorDocLoader::createObject(const QString &type, const QString &name)
 {
+	OstTraceFunctionEntry0( NOTESEDITORDOCLOADER_CREATEOBJECT_ENTRY );
 	return HbDocumentLoader::createObject(type, name);
 }
 

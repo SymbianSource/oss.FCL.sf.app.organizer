@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hbdocument version="1.0">
+<hbdocument version="1.1">
     <object name="snoozeAction" type="HbAction">
-        <string name="role" value="HbDialog:primaryAction"/>
         <string locid="txt_calendar_button_alarm_snooze" name="text" value="Snooze"/>
     </object>
     <object name="stopAction" type="HbAction">
-        <string name="role" value="HbDialog:secondaryAction"/>
-        <string locid="txt_calendar_button_alarm_dialog_snooze" name="text" value="Stop"/>
+        <string locid="txt_calendar_button_alarm_stop" name="text" value="Stop"/>
     </object>
     <widget name="dialog" type="HbDialog">
         <widget name="heading" role="HbDialog:headingWidget" type="HbLabel">
@@ -18,8 +16,8 @@
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                 <real name="z" value="1"/>
                 <sizehint height="10un" type="MINIMUM"/>
-            	<fontspec name="fontSpec" role="Primary" textheight="9.8un"/>
-                <string locid="txt_calendar_info_alarm_start_time" name="plainText" value="9:00 am"/>
+                <fontspec name="fontSpec" role="Primary" textheight="9.8un"/>
+                <string name="plainText" value="9:00 am"/>
             </widget>
             <widget name="alarmDescription" type="HbLabel">
                 <enums name="textWrapping" value="TextWordWrap"/>
@@ -32,7 +30,7 @@
             </widget>
             <widget name="alarmIcon" type="HbLabel">
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-                <icon iconName=":/image/clockAlarm.svg" name="icon"/>
+                <icon iconName="qtg_large_bell" name="icon"/>
                 <real name="z" value="5"/>
                 <sizehint height="15un" type="PREFERRED" width="15un"/>
             </widget>
@@ -48,8 +46,8 @@
                 <anchoritem dst="alarmIcon" dstEdge="BOTTOM" spacing="-var(hb-param-margin-gene-popup)" src="" srcEdge="BOTTOM"/>
             </layout>
         </widget>
-        <ref object="snoozeAction" role="HbDialog:primaryAction"/>
-        <ref object="stopAction" role="HbDialog:secondaryAction"/>
+        <ref object="snoozeAction" role="HbWidget:addAction"/>
+        <ref object="stopAction" role="HbWidget:addAction"/>
     </widget>
     <metadata activeUIState="Common ui state" display="NHD portrait" unit="un">
         <uistate name="Common ui state" sections="#common"/>

@@ -26,8 +26,8 @@
 #endif
 
 
-CalenEventListViewItem::CalenEventListViewItem(QGraphicsItem *parent) :
-HbListViewItem(parent)
+CalenEventListViewItem::CalenEventListViewItem(CalenAgendaViewWidget *parent) :
+HbListViewItem(parent),mAllDayIcon(false),mParent(parent)
 {
     OstTraceFunctionEntry0( CALENEVENTLISTVIEWITEM_CALENEVENTLISTVIEWITEM_ENTRY );
     
@@ -53,10 +53,52 @@ HbAbstractViewItem* CalenEventListViewItem::createItem()
 void CalenEventListViewItem::updateChildItems()
 {
     OstTraceFunctionEntry0( CALENEVENTLISTVIEWITEM_UPDATECHILDITEMS_ENTRY );
+    if(mParent->hasAllDayIcon())
+        {
+        mParent->checkEntryIcons();
+        mAllDayIcon = mParent->isAllDayIcon();
+        mExceptionIcon = mParent->isExceptionIcon();
+        mAlarmIcon = mParent->isAlarmIcon();
+        mRepeatingIcon = mParent->isRepeatingIcon();
+        }
     
     HbListViewItem::updateChildItems();
     
     OstTraceFunctionExit0( CALENEVENTLISTVIEWITEM_UPDATECHILDITEMS_EXIT );
 }
 
+bool CalenEventListViewItem::hasAllDayIcon()
+    {
+    return mAllDayIcon ;
+    }
+
+void CalenEventListViewItem::setAllDayLeftIcon(bool icon)
+    {
+    mAllDayIcon = icon;
+    }
+bool CalenEventListViewItem::hasRepeatingIcon()
+    {
+    return  mRepeatingIcon;
+    }
+
+void CalenEventListViewItem::setRepeatingIcon(bool icon)
+    {
+    mRepeatingIcon = icon;
+    }
+bool CalenEventListViewItem::hasAlarmIcon()
+    {
+    return mAlarmIcon;
+    }
+void CalenEventListViewItem::setAlarmIcon(bool icon )
+    {
+    mAlarmIcon = icon  ;
+    }
+bool CalenEventListViewItem::hasExceptionIcon()
+    {
+    return mExceptionIcon; 
+    }
+void CalenEventListViewItem::setExceptionIcon(bool icon )
+    {
+    mExceptionIcon = icon ;
+    }
 // End of file

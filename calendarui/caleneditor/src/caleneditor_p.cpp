@@ -67,6 +67,9 @@
 #include "caleneditor_pTraces.h"
 #endif
 
+// Constants
+const int SecsInOneYear( 3600 );
+
 
 /*!
 	\class CalenEditorPrivate
@@ -197,20 +200,19 @@
 CalenEditorPrivate::CalenEditorPrivate(AgendaUtil *agendaUtil, 
                                        QObject *parent) :
 									QObject(parent),
-									mAgendaUtil(NULL),
-									mEditorDocLoader(NULL),
-									mEditorView(NULL),
+									mEditorDocLoader(0),
+									mEditorView(0),
 									mDataHandler(NULL),
-									mCalenEditorForm(NULL),
-									mCalenEditorModel(NULL),
-									mSubjectItem(NULL),
-									mViewFromItem(NULL),
-									mViewToItem(NULL),
-                                    mViewLocationItem(NULL),
-									mAllDayCheckBoxItem(NULL),		                            
-									mReminderField(NULL),
-									mRepeatField(NULL),
-									mDescriptionItem(NULL),
+									mCalenEditorForm(0),
+									mCalenEditorModel(0),
+									mSubjectItem(0),
+									mViewFromItem(0),
+									mViewToItem(0),
+                                    mViewLocationItem(0),
+									mAllDayCheckBoxItem(0),		                            
+									mReminderField(0),
+									mRepeatField(0),
+									mDescriptionItem(0),
 									mEditRange(ThisAndAll),
 									mOriginalEntry(NULL),
 									mEditedEntry(NULL),
@@ -225,7 +227,7 @@ CalenEditorPrivate::CalenEditorPrivate(AgendaUtil *agendaUtil,
 	OstTraceFunctionEntry0( CALENEDITORPRIVATE_CALENEDITORPRIVATE_ENTRY );
 	// First get the q-pointer.
 	q_ptr = static_cast<CalenEditor *> (parent);
-	mMainWindow = NULL;
+	mMainWindow = 0;
 	mTranslator->loadCommon();
 	
 	if (!agendaUtil) {
@@ -246,7 +248,7 @@ CalenEditorPrivate::~CalenEditorPrivate()
 	OstTraceFunctionEntry0( DUP1_CALENEDITORPRIVATE_CALENEDITORPRIVATE_ENTRY );
 	if(mOwnsAgendaUtil) {
 		delete mAgendaUtil;
-		mAgendaUtil = NULL;
+		mAgendaUtil = 0;
 	}
 	if (mOriginalEntry) {
 		delete mOriginalEntry;
@@ -258,23 +260,23 @@ CalenEditorPrivate::~CalenEditorPrivate()
 	}
 	if(mEditorDocLoader) {
 		delete mEditorDocLoader;
-		mEditorDocLoader = NULL;
+		mEditorDocLoader = 0;
 	}
 	if(mReminderField) {
 		delete mReminderField;
-		mReminderField = NULL;
+		mReminderField = 0;
 	}
 	if(mRepeatField) {
 		delete mRepeatField;
-		mRepeatField = NULL;
+		mRepeatField = 0;
 	}
 	if(mDataHandler) {
 		delete mDataHandler;
-		mDataHandler = NULL;
+		mDataHandler = 0;
 	}
 	if (mCalenEditorModel) {
 		delete mCalenEditorModel;
-		mCalenEditorModel = NULL;
+		mCalenEditorModel = 0;
 	}
 	// Remove the translator
 	if (mTranslator) {
@@ -285,7 +287,7 @@ CalenEditorPrivate::~CalenEditorPrivate()
 	// delete the mainwindow object if created any
 	if (mMainWindow) {
 		delete mMainWindow;
-		mMainWindow = NULL;
+		mMainWindow = 0;
 	}
 	OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_CALENEDITORPRIVATE_EXIT );
 }
@@ -421,7 +423,7 @@ void CalenEditorPrivate::showEditOccurencePopup()
 
 	// Create cancel action
 	HbAction *cancelAction =
-	        new HbAction(hbTrId("txt_calendar_button_softkey1_cancel"));
+	        new HbAction(hbTrId("txt_common_button_cancel_singledialog"));
 	popUp->addAction(cancelAction);
 	connect(editButtonList, SIGNAL(itemSelected(int)), popUp, SLOT(close()));
 	connect(editButtonList, SIGNAL(itemSelected(int)), this,
@@ -579,8 +581,7 @@ void CalenEditorPrivate::setUpView()
 		if( entryType == AgendaEntry::TypeAppoinment) {
 			headingWidget->setHeading(hbTrId("txt_calendar_subhead_meeting"));
 		}else if(entryType == AgendaEntry::TypeEvent) {
-			//TODO: Add the text id once available
-			headingWidget->setHeading(hbTrId("All-day event"));
+			headingWidget->setHeading(hbTrId("txt_calendar_subhead_all_day_event"));
 		}else if (entryType == AgendaEntry::TypeTodo) {
 			headingWidget->setHeading(hbTrId("txt_calendar_subhead_to_do"));
 		}
@@ -775,6 +776,8 @@ void CalenEditorPrivate::handleDescriptionAction()
 	OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLEDESCRIPTIONACTION_ENTRY );
 	if (!mDescriptionItemAdded) {
 		populateDescriptionItem();
+		//Scroll to the description item added
+		mCalenEditorForm->scrollTo(mCalenEditorModel->indexFromItem(mDescriptionItem), HbAbstractItemView::EnsureVisible);
 		mDescriptionAction->setText(
 							hbTrId("txt_calendar_opt_remove_description"));
 	} else {
@@ -849,6 +852,62 @@ void CalenEditorPrivate::populateAllDayItem()
 }
 
 /*!
+	Calculates default time when Event is on same day.
+ */
+QTime CalenEditorPrivate::defaultTimeSameDay()
+{
+	QTime currentTime = QTime::currentTime();
+	
+	//Start time should be one hour more than current time.
+	currentTime = currentTime.addSecs(SecsInOneYear);
+
+	int hour = currentTime.hour();
+	int minutes = currentTime.minute();
+	bool addHour = 0;
+
+	//If the current time is within 15 mins after adding one hour, minutes will be rounded off to 0.
+	// Like if current time is 7:14 am, plus one hour is 8:14 am and it will be rounded off to 8:00am
+	//For time between 15 and 45 mins, its rounded off to 30 mins 
+	//and anything more than that we round it to the next hour.
+	if (minutes >= 0 && minutes <= 15) {
+		minutes = 0;
+	} else if (minutes > 15 && minutes <= 45) { 
+		minutes = 30;
+	}else {
+		minutes = 0;
+		addHour = 1;
+	}
+	currentTime.setHMS(hour, minutes, 0, 0);
+	if (addHour) {
+		currentTime = currentTime.addSecs(SecsInOneYear);
+	}
+	return currentTime;
+}
+
+/*!
+	Sets to default time, when AllDay is unchecked
+ */
+void CalenEditorPrivate::refreshTimeForUncheckAllDay()
+{
+	//Get the default time as 8:00 am from CalenDateUtils.
+	QDateTime fromDateTime = CalenDateUtils::defaultTime(mEditedEntry->startTime());
+	QDateTime toDateTime;
+	
+	// The default time will be 8.00 am only if its not on current day
+	// else the time is calculated accordingly
+	bool isSameDay = CalenDateUtils::isOnToday(fromDateTime);
+	if (isSameDay) {
+		fromDateTime.setDate(fromDateTime.date());
+		fromDateTime.setTime(defaultTimeSameDay());
+	}
+	mNewEntryDateTime = fromDateTime;
+	toDateTime = fromDateTime.addSecs(SecsInOneYear);
+
+	// Set the default start time to the event.
+	mEditedEntry->setStartAndEndTime(fromDateTime, toDateTime);
+}	
+
+/*!
 	Populates the start and end time of the event item.
  */
 void CalenEditorPrivate::populateCustomItemDateTime()
@@ -871,7 +930,6 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 										SLOT(saveFromDateTime(QDateTime &)));
 	// Pass the start time of the event according to new or existing event.
 	QDateTime fromDateTime = mNewEntryDateTime;
-	QTime currentTime = QTime::currentTime();
 	if (!mNewEntry) {
 		// Check if we are going to create an exception here
 		if (mEditRange == ThisOnly) {
@@ -892,21 +950,9 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 	} else {
 		// Check if it is on same day and set the default time and date accordingly.
 		bool isSameDay = CalenDateUtils::isOnToday(fromDateTime);
-		int minutes = 0;
-		int hour = currentTime.hour();
 		if (isSameDay) {
-			minutes = currentTime.minute();
-			if (minutes > 0 && minutes < 31) {
-				minutes = 30;
-			} else {
-				minutes = 0;
-			}
-			currentTime.setHMS(hour, minutes, 0, 0);
-			if (minutes == 0) {
-				currentTime = currentTime.addSecs(60 * 60);
-			}
 			fromDateTime.setDate(fromDateTime.date());
-			fromDateTime.setTime(currentTime);
+			fromDateTime.setTime(defaultTimeSameDay());
 		}
 	}
 	mViewFromItem->populateDateTime(fromDateTime, true);
@@ -976,7 +1022,7 @@ void CalenEditorPrivate::populateCustomItemDateTime()
 			}
 		}
 	} else {
-		toDateTime = fromDateTime.addSecs(60 * 60);
+		toDateTime = fromDateTime.addSecs(SecsInOneYear);
 	}
 	mViewToItem->populateDateTime(toDateTime, false);
 
@@ -993,6 +1039,8 @@ void CalenEditorPrivate::populateCustomItemDateTime()
         // For all-day, we need to substratc 1 minute to get the actual end time
         // as we store all-day as 12.00AM to 12.00 AM next day
         QDateTime actualEndTime = mEditedEntry->endTime().addSecs(-60);
+        // Set it back to mEditedEntry
+        mEditedEntry->setStartAndEndTime(mEditedEntry->startTime(), actualEndTime);
         mViewToItem->populateDateTime(actualEndTime, false);
         
 		// If the all day option is checked, we need to
@@ -1048,7 +1096,7 @@ void CalenEditorPrivate::saveFromDateTime(QDateTime& fromDateTime)
 	// Update the end time accordingly on UI - duration will be 60 mins
 	// bydefault only while creating new entry and if it crossed the endtime
 	if (mNewEntry && fromDateTime > endTime) {
-		endTime = fromDateTime.addSecs(3600);
+		endTime = fromDateTime.addSecs(SecsInOneYear);
 	} else { // for existing entry
 		// we need to see if user has moved start time beyond the end time
 		// then add the duration of the meeting that was saved earlier to the 
@@ -1128,7 +1176,7 @@ void CalenEditorPrivate::saveToDateTime(QDateTime& toDateTime)
 	// Update the start time accordingly on UI - duration will be 60 mins
 	// bydefault for new entry and if it crosses the starttime
 	if (mNewEntry && toDateTime < startTime) {
-		startTime = toDateTime.addSecs(-3600);
+		startTime = toDateTime.addSecs(-SecsInOneYear);
 		fromDateChanged = true;
 	} else { 
 		// for exisitng entry
@@ -1217,8 +1265,6 @@ void CalenEditorPrivate::populateDescriptionItem()
 								SIGNAL(textChanged(const QString)), this,
 								SLOT(handleDescriptionChange(const QString)));
 	mDescriptionItemAdded = true;
-    //Scroll to the description item added.
-	mCalenEditorForm->scrollTo(mCalenEditorModel->index(descIndex, 0), HbAbstractItemView::EnsureVisible);
 	OstTraceFunctionExit0( CALENEDITORPRIVATE_POPULATEDESCRIPTIONITEM_EXIT );
 }
 
@@ -1249,7 +1295,7 @@ void CalenEditorPrivate::removeDescriptionItem()
 	// Remove the description from the entry
 	mEditedEntry->setDescription("");
 
-	mDescriptionItem = NULL;
+	mDescriptionItem = 0;
 	mDescriptionItemAdded = false;
 	OstTraceFunctionExit0( CALENEDITORPRIVATE_REMOVEDESCRIPTIONITEM_EXIT );
 }
@@ -1301,6 +1347,8 @@ void CalenEditorPrivate::handleAllDayChange(int state)
 		tempEndTime.setTime(tempEndQTime);
 
 		enableFromTotimeFileds(false, tempSartTime, tempEndTime);
+		mEditedEntry->setStartAndEndTime(tempSartTime, tempEndTime);
+		
 		QDate referenceDate;
 		if (mRepeatField->isRepeatUntilItemAdded()) {
 			referenceDate = mRepeatField->repeatUntilDate();
@@ -1320,22 +1368,12 @@ void CalenEditorPrivate::handleAllDayChange(int state)
 		}
 	} else {
 		// AllDayCheckBox in un-checked
+		// then we need to refresh the Time to show default time
+		refreshTimeForUncheckAllDay();
 		// Set From/To times buttons editable
 		// Update Start/End Times with Edited entry values
 		enableFromTotimeFileds(true, mEditedEntry->startTime(),
 		                       mEditedEntry->endTime());
-		// If original entry was an All-day, then we need to save the date that
-		// is shown on the "To" date push button
-		if (mOriginalEntry->type() == AgendaEntry::TypeEvent) {
-            mEditedEntry->setStartAndEndTime(mViewFromItem->getDateTime(),
-                                    mViewToItem->getDateTime());
-		}
-		int index;
-		if (mIsAllDayItemAdded) {
-			index = ReminderTimeForAllDayItem;
-		} else {
-			index = ReminderTimeForAllDayItem - 1;
-		}
 		mReminderField->removeReminderTimeField();
 		mReminderField->setReminderChoices();
 		updateReminderChoices();
@@ -1396,7 +1434,7 @@ void CalenEditorPrivate::handleLocationEditingFinished()
            confirmationQuery->setIconVisible(true);  
            
            QString displayText;
-           displayText = displayText.append("Location changed. Keep existing location on Map?");
+           displayText = displayText.append(hbTrId("txt_calendar_info_location_updated_keep_existing"));
            
            confirmationQuery->setText(displayText);
            
@@ -1408,9 +1446,8 @@ void CalenEditorPrivate::handleLocationEditingFinished()
            }
            
            defaultActions.clear();
-           
-           confirmationQuery->addAction(new HbAction("Yes"));
-           confirmationQuery->addAction(new HbAction("No"));
+           confirmationQuery->addAction(new HbAction(hbTrId("txt_common_button_yes")));
+           confirmationQuery->addAction(new HbAction(hbTrId("txt_common_button_no")));
            confirmationQuery->open(this, SLOT(selectEditingFinishedAction(HbAction*)));
        }
     }       
@@ -1559,7 +1596,7 @@ void CalenEditorPrivate::showDeleteConfirmationQuery(bool closeEditor)
         {
         popup->removeAction(list[i]);
         }
-	HbAction *deleteAction = new HbAction(hbTrId("txt_calendar_button_dialog_delete"),
+	HbAction *deleteAction = new HbAction(hbTrId("txt_common_button_delete"),
 										popup);
 	popup->addAction(deleteAction);
 	connect(deleteAction, SIGNAL(triggered()), this, 
@@ -1604,6 +1641,20 @@ CalenEditorPrivate::Action CalenEditorPrivate::handleDone()
 	if (mEditRange == ThisAndAll) {
 		mRepeatField->saveRepeatRule();
 	}
+	
+ 	// Set back the all day endtime back 
+	 if(mOriginalEntry->type() == AgendaEntry::TypeEvent) { 
+		 // The time has to be set for the allday exceptional entries and 
+		 // while editing all the instances of a repeating all day entry 
+		 if(mEditRange == ThisOnly || 
+		 	(mAllDayCheckBoxItem && 
+		 	mAllDayCheckBoxItem->contentWidgetData("checkState") == Qt::Checked)) {
+ 			// Set EndTime of AllDay event to 00:00:00 of next day
+			QDateTime actualEndTime = mEditedEntry->endTime().addSecs(60);
+			mEditedEntry->setStartAndEndTime(mEditedEntry->startTime(), actualEndTime);
+		}
+	}
+	
 	// TODO: Need to check entry status here. EntryStillExistsL
 	switch (mDataHandler->shouldSaveOrDeleteOrDoNothing(mLaunchCalendar)) {
 		case CalenEditorPrivate::ActionSave:
@@ -1633,63 +1684,29 @@ CalenEditorPrivate::Action CalenEditorPrivate::handleDone()
 bool CalenEditorPrivate::saveEntry()
 {
 	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SAVEENTRY_ENTRY );
-	// check if we are editing child
-	if (mIsChild && (mEditRange == ThisOnly)) {
-		// Add the entry
-		mAgendaUtil->updateEntry(*mEditedEntry, true);
-		// TODO: Add the text id once available
-		if(mEditedEntry->type() == AgendaEntry::TypeAppoinment) {
-			HbNotificationDialog::launchDialog(hbTrId("Meeting updated"));
-		}else if(mEditedEntry->type() == AgendaEntry::TypeEvent) {
-			HbNotificationDialog::launchDialog(hbTrId("All day event updated"));
-		}
-		emit q_ptr->entrySaved();
-		OstTraceFunctionExit0( CALENEDITORPRIVATE_SAVEENTRY_EXIT );
-		return true;
-	} else if ((mEditRange == ThisOnly)) {
-		// If we are editing only this occurence, then 
-		// clear the repeating properties of it
-		mAgendaUtil->clearRepeatingProperties(*mEditedEntry);
-	}
 
-	CalenEditorPrivate::Error error = CalenEditorPrivate::CalenEditorErrorNone;
-	error = mDataHandler->checkErrorsForThisAndAll();
-	if (CalenEditorPrivate::CalenEditorErrorNone == error) {
-		if (!handleAllDayToSave()) {
-			if (mNewEntry) {
-				mAgendaUtil->addEntry(*mEditedEntry);
-			} else if (mEditRange == ThisAndAll && mOriginalEntry->isRepeating()) {
-				mAgendaUtil->storeRepeatingEntry(*mEditedEntry, true);
-			} else if (!mIsChild && (mEditRange == ThisOnly)) {
-				// Create the new exception
-				mAgendaUtil->createException(*mEditedEntry, 
-												mOriginalEntry->startTime());
-			} else {
-				// Normal entry updation
-				mAgendaUtil->updateEntry(*mEditedEntry, false);
-			}
-		}
-		if (mNewEntry) {
-			// TODO: Add the text id once available
-			if(mEditedEntry->type() == AgendaEntry::TypeAppoinment) {
-				HbNotificationDialog::launchDialog(hbTrId("New meeting saved"));
-			} else if(mEditedEntry->type() == AgendaEntry::TypeEvent) {
-				HbNotificationDialog::launchDialog(hbTrId("New all-day saved"));
-			}
+	if (!handleAllDayToSave()) {
+		// creating an exceptional entry
+		if (!mIsChild && (mEditRange == ThisOnly)) {
+			mAgendaUtil->store(*mEditedEntry, AgendaUtil::ThisOnly);
 		} else {
-			// TODO: Add the text id once available
-			if(mEditedEntry->type() == AgendaEntry::TypeAppoinment) {
-				HbNotificationDialog::launchDialog(hbTrId("Meeting updated"));
-			} else if(mEditedEntry->type() == AgendaEntry::TypeEvent) {
-				HbNotificationDialog::launchDialog(hbTrId("All day event updated"));
-			}
+			mAgendaUtil->store(*mEditedEntry);
 		}
-		emit q_ptr->entrySaved();
-	} else if (error) {
-		mDataHandler->displayErrorMsg(error);
-		OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_SAVEENTRY_EXIT );
-		return false;
 	}
+	if (mNewEntry) {
+		if(mEditedEntry->type() == AgendaEntry::TypeAppoinment) {
+			HbNotificationDialog::launchDialog(hbTrId("txt_calendar_dpopinfo_new_meeting_saved"));
+		} else if(mEditedEntry->type() == AgendaEntry::TypeEvent) {
+			HbNotificationDialog::launchDialog(hbTrId("txt_calendar_dpopinfo_new_all_day_event_saved"));
+		}
+	} else {
+		if(mEditedEntry->type() == AgendaEntry::TypeAppoinment) {
+			HbNotificationDialog::launchDialog(hbTrId("txt_calendar_dpopinfo_meeting_updated"));
+		} else if(mEditedEntry->type() == AgendaEntry::TypeEvent) {
+			HbNotificationDialog::launchDialog(hbTrId("txt_calendar_dpopinfo_all_day_event_updated"));
+		}
+	}
+	emit q_ptr->entrySaved();
 	OstTraceFunctionExit0( DUP2_CALENEDITORPRIVATE_SAVEENTRY_EXIT );
 	return true;
 
@@ -1728,26 +1745,29 @@ void CalenEditorPrivate::deleteEntry(bool close)
  */
 bool CalenEditorPrivate::handleAllDayToSave()
 {
-	OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLEALLDAYTOSAVE_ENTRY );
-	if (!mIsAllDayItemAdded) {
-		// All day item was not added, return true
+    OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLEALLDAYTOSAVE_ENTRY );
+
+    QDateTime tempSartTime =
+            CalenDateUtils::beginningOfDay(mEditedEntry->startTime());
+
+    // Set EndTime of AllDay event to 00:00:00 of next day
+    QDateTime tempEndTime = mEditedEntry->endTime().addDays(1);
+    QTime tempEndQTime = tempEndTime.time();
+    tempEndQTime.setHMS(0, 0, 0);
+    tempEndTime.setTime(tempEndQTime);
+	
+    // Check the state of AllDay checkBox and 
+    // Check whether allday event is exceptional or not.
+	if (!mIsAllDayItemAdded && (mOriginalEntry->type() == AgendaEntry::TypeEvent)) {
+		
+	    // All day item was not added, return false
+	    mEditedEntry->setStartAndEndTime(tempSartTime, tempEndTime);
 		OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLEALLDAYTOSAVE_EXIT );
 		return false;
 	}
-	// Check the state of AllDay checkBox
 
 	// If Creating new Entry and AllDay Box is checked.
 	// Clone the entry to AllDay 
-
-	QDateTime tempSartTime =
-	        CalenDateUtils::beginningOfDay(mEditedEntry->startTime());
-
-	// Set EndTime of AllDay event to 00:00:00 of next day
-	QDateTime tempEndTime = mEditedEntry->endTime().addDays(1);
-	QTime tempEndQTime = tempEndTime.time();
-	tempEndQTime.setHMS(0, 0, 0);
-	tempEndTime.setTime(tempEndQTime);
-
 	if (mNewEntry && (mAllDayCheckBoxItem->contentWidgetData("checkState")
 	        == Qt::Checked)) {
 		// changes Start/End times of entry to Beginning ot the day
@@ -1945,4 +1965,11 @@ bool CalenEditorPrivate::isAllDayFieldAdded()
 	return mIsAllDayItemAdded;
 }
 
+/*!
+    save the entry from other views.
+ */
+void CalenEditorPrivate::forcedSaveEntry()
+{
+    saveAndCloseEditor();   
+}
 // End of file	--Don't remove this.

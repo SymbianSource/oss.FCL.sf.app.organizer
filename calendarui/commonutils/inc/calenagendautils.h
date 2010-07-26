@@ -23,7 +23,7 @@
 
 //  INCLUDES
 
-#include "agendaentry.h"
+#include <agendaentry.h>
 #include <qglobal.h> // Q_DECL_EXPORT macro
 
 #ifdef  CALENDATEUTILS_DLL

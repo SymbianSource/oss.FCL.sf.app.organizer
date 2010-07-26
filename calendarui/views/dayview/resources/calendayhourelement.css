@@ -1,5 +1,7 @@
-CalenDayHourElement{
-    layout: customCalendarLayout;
+CalenDayHourElement {
+	layout: customCalendarLayout;
+	pref-height: expr(2*var(hb-param-text-height-secondary) + 2*var(hb-param-margin-gene-middle-vertical) + 3un);
+	size-policy-vertical: fixed;
 }
 
 CalenDayHourElement::time {

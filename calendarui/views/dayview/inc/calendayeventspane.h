@@ -24,11 +24,14 @@
 
 class CalenDayEventsPane : public HbWidget
 {
+    Q_OBJECT
+	
 public:
     CalenDayEventsPane(HbWidget *parent=0);
     virtual ~CalenDayEventsPane();
     
-    void drawTopLine(bool drawTopLine = false);
+    void setDrawTopLine(bool drawTopLine = false);
+    bool isTopLineDrawed() const;
     
 protected:
     void paint(QPainter * painter, const QStyleOptionGraphicsItem * option, 

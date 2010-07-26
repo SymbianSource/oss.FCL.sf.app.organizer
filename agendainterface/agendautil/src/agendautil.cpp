@@ -14,7 +14,7 @@
 * Description: 
 *
 */
-#include "agendautil.h"
+#include <agendautil.h>
 #include "agendautil_p.h"
 
 #include <QList>
@@ -94,16 +94,17 @@ AgendaUtil::~AgendaUtil()
 */
 
 /*!
-	Adds new enty.
+	To store the new entry or update the entry in the Calendar db.
 
-	\param entry The entry to be added
-	\return id of the added entry on success; otherwise returns 0.
-	\sa deleteEntry(), updateEntry()
+	\param entry The entry to be added/updated
+	\param range The recurrence range of entry
+	\return ulong The local uid of the entry added/updated in the db.
 */
-ulong AgendaUtil::addEntry(const AgendaEntry& entry)
+ulong AgendaUtil::store(AgendaEntry &entry, AgendaUtil::RecurrenceRange range)
 {
-	return d->addEntry(entry);
+	return d->store(entry, range);
 }
+
 /*!
 	Clones the `entry' passed in the argument and saves it as type `type'.
 
@@ -133,7 +134,7 @@ ulong AgendaUtil::cloneEntry(const AgendaEntry& entry, AgendaEntry::Type type)
     \param id The id of the entry to be deleted
     \return If false is returned, an error has occurred. Call error() to get a value of
     AgendaUtil::Error that indicates which error occurred
-    \sa addEntry(), updateEntry()
+    \sa store()
 */
 bool AgendaUtil::deleteEntry(ulong id)
 {
@@ -148,7 +149,7 @@ bool AgendaUtil::deleteEntry(ulong id)
 				only specific instances
 	\return If false is returned, an error has occurred. Call error() to get a value of
 	AgendaUtil::Error that indicates which error occurred
-	\sa addEntry(), updateEntry()
+	\sa store()
  */
 void AgendaUtil::deleteRepeatedEntry(
 		AgendaEntry& entry,
@@ -157,47 +158,6 @@ void AgendaUtil::deleteRepeatedEntry(
 	d->deleteRepeatedEntry(entry, range);
 }
 
-/*!
-	Updates the entry
-
-	\param entry The entry to be updated
-	\return If false is returned, an error has occurred. Call error() to get a value of
-	AgendaUtil::Error that indicates which error occurred
-	\sa addEntry(), deleteEntry()
- */
-bool AgendaUtil::updateEntry(const AgendaEntry& entry, bool isChild)
-{
-	return d->updateEntry(entry, isChild);
-}
-
-/*!
-	Store the repeating entry. This needs to be called only when alreay existing
-	repeating entry is getting modified and saved. This function takes care of
-	copying the relevant fields to its child also
-
-	\param entry The entry to be stored
-	\return If false is returned, an error has occurred. Call error() to get a value of
-	AgendaUtil::Error that indicates which error occurred
-	\sa addEntry(), deleteEntry()
- */
-bool AgendaUtil::storeRepeatingEntry(const AgendaEntry& entry,
-                                     bool copyToChildren)
-{
-	return d->storeRepeatingEntry(entry, copyToChildren);
-}
-
-/*!
-	Creates an exceptional entry
-
-	\param entry The entry to be stored
-	\return If false is returned, an error has occurred. Call error() to get a value of
-	AgendaUtil::Error that indicates which error occurred
-	\sa addEntry(), deleteEntry()
- */
-bool AgendaUtil::createException(const AgendaEntry& entry,QDateTime instanceOriginalDateTime)
-{
-	return d->createException(entry, instanceOriginalDateTime);
-}
 /*!
 	Fetches the entry which of id is equal to given \a id.
 
@@ -341,21 +301,6 @@ AgendaEntry AgendaUtil::parentEntry(AgendaEntry& entry)
     return d->parentEntry(entry);
     }
     return AgendaEntry();
-}
-
-/*!
-	Clears the repeating properties of the entry. This means
-	It will delete all the instances and stores a single entry
-	which is non repeating
-
-	\param entry The entry for which repeating properties to be cleared
-	\return None
- */
-void AgendaUtil::clearRepeatingProperties(AgendaEntry& entry)
-{
-	 if(d) {
-		return d->clearRepeatingProperties(entry);
-	 }
 }
 
 /*!

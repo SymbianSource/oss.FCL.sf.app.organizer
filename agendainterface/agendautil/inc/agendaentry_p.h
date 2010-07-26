@@ -23,7 +23,7 @@
 #include <QTime>
 
 // User includes
-#include "agendaentry.h"
+#include <agendaentry.h>
 
 class AgendaAttendeePrivate
 {

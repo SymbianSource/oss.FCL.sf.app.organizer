@@ -7,7 +7,8 @@ TARGET = alarmalertwidget
 
 INCLUDEPATH  += ./inc \
 				../alarmalertplugin/inc \
-				../../inc
+				../../inc \
+				./traces
 
 DEPENDPATH += ./inc \
 			  ./src \

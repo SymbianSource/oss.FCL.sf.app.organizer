@@ -23,7 +23,6 @@
 #include <QPointer>
 #include <HbDataFormViewItem>
 #include <HbDialog>
-#include <HbPushButton>
 
 // User includes
 #include "clockdatatypes.h"
@@ -32,6 +31,8 @@
 class SettingsUtility;
 class ClockCitySelectionList;
 class TimezoneClient;
+class HbPushButton;
+class HbListWidget;
 
 class SettingsCustomItem : public HbDataFormViewItem
 {
@@ -68,6 +69,8 @@ private:
 	QPointer<HbPushButton> mTimeWidget;
 	QPointer<HbPushButton> mDateWidget;
 	QPointer<HbPushButton> mPlaceWidget;
+	QPointer<HbPushButton> mRegSettingsWidget;
+	QPointer<HbListWidget> mWorkdaysWidget;
 
 	HbAction *mOkAction;
 	HbAction *mCancelAction;

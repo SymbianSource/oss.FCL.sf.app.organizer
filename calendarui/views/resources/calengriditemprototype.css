@@ -15,8 +15,8 @@ CalenGridItemPrototype[layoutName="calendarCustomGridItem"]:landscape{
 }
 
 CalenGridItemPrototype::eventIconItem[layoutName="calendarCustomGridItem"] {
-	fixed-height: 1un;
-	fixed-width: 1un;
+	fixed-height: 1.5un;
+	fixed-width: 1.5un;
 }
 
 CalenGridItemPrototype::focusIconItem[layoutName="calendarCustomGridItem"] {

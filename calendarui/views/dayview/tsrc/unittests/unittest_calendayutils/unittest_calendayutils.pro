@@ -35,8 +35,10 @@ DEPENDPATH  += . \
                ./../../../../../inc/
 
 # Input
-HEADERS +=	calendayutils.h \
-            calendaycommonheaders.h
+HEADERS +=	hbdeviceprofile.h \
+			hbinstance.h \
+			calendayutils.h \
+			calendaycommonheaders.h
 			
 
 SOURCES +=	unittest_calendayutils.cpp \

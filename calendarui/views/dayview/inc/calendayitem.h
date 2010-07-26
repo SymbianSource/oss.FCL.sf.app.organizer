@@ -19,6 +19,7 @@
 #define CALENDAYITEM_H
 
 //System includes
+#include <QDateTime>
 #include <hbabstractviewitem.h>
 #include <hbtextitem.h>
 #include <hbframeitem.h>
@@ -26,6 +27,7 @@
 //Forward declarations
 class AgendaEntry;
 class CalenDayStatusStrip;
+class CalenDayContainer;
 
 
 class CalenDayItem : public HbAbstractViewItem
@@ -35,13 +37,14 @@ class CalenDayItem : public HbAbstractViewItem
     Q_PROPERTY( bool backgroundFrame READ hasBackgroundFrame )
     
 public:
-    CalenDayItem();
+    CalenDayItem(const CalenDayContainer *container);
     virtual ~CalenDayItem();
     HbAbstractViewItem * createItem();
     void updateChildItems();
-    bool hasEventDescription() const { return mEventDesc->isVisible();}
-    bool hasBackgroundFrame() const { return mBg->isVisible();}
-
+    bool hasEventDescription() const { return mEventDesc->isVisible(); }
+    bool hasBackgroundFrame() const { return mBg->isVisible(); }
+    const CalenDayContainer *container() const { return mContainer; }
+    
 protected:
     void resizeEvent(QGraphicsSceneResizeEvent *event);
 
@@ -55,8 +58,8 @@ private:
     HbTextItem *mEventDesc;
     CalenDayStatusStrip *mColorStripe;
     qreal mEventDescMinWidth;
-    qreal mFrameMinWidth; 
-    
+    qreal mFrameMinWidth;
+    const CalenDayContainer *mContainer;
 };
 
 #endif // CALENDAYITEM_H

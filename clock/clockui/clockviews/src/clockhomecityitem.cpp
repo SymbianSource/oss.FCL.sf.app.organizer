@@ -49,7 +49,7 @@ HbWidget(parent)
 	// Set the frame to the homecity widget.
 	HbFrameItem *frame = new HbFrameItem(this);
 	frame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
-	frame->frameDrawer().setFrameGraphicsName("qtg_fr_groupbox");
+	frame->frameDrawer().setFrameGraphicsName("qtg_fr_groupbox_normal");
 	setBackgroundItem(frame->graphicsItem(), -2);
 
 }

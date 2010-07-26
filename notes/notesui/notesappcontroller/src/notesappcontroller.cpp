@@ -20,6 +20,11 @@
 #include "notesappcontrollerifimpl.h"
 #include "notesviewmanager.h"
 #include "notesmodelhandler.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "notesappcontrollerTraces.h"
+#endif
+
 
 /*!
 	\class NotesAppController
@@ -37,6 +42,7 @@ NotesAppController::NotesAppController(QObject *parent)
  mNotesModelHandler(0),
  mIfImpl(0)
 {
+	OstTraceFunctionEntry0( NOTESAPPCONTROLLER_NOTESAPPCONTROLLER_ENTRY );
 	// Construct the interface implementation.
 	mIfImpl = new NotesAppControllerIfImpl(this);
 
@@ -51,6 +57,8 @@ NotesAppController::NotesAppController(QObject *parent)
 	Q_ASSERT_X(
 			mViewManager, "notesappcontroller.cpp",
 			"NotesViewManager is 0");
+	connect(mViewManager, SIGNAL(appReady()), this, SLOT(handleAppReady()));
+	OstTraceFunctionExit0( NOTESAPPCONTROLLER_NOTESAPPCONTROLLER_EXIT );
 }
 
 /*!
@@ -58,6 +66,7 @@ NotesAppController::NotesAppController(QObject *parent)
  */
 NotesAppController::~NotesAppController()
 {
+	OstTraceFunctionEntry0( DUP1_NOTESAPPCONTROLLER_NOTESAPPCONTROLLER_ENTRY );
 	if (mViewManager) {
 		delete mViewManager;
 		mViewManager = 0;
@@ -70,6 +79,18 @@ NotesAppController::~NotesAppController()
 		delete mIfImpl;
 		mIfImpl = 0;
 	}
+	OstTraceFunctionExit0( DUP1_NOTESAPPCONTROLLER_NOTESAPPCONTROLLER_EXIT );
+}
+
+/*!
+	Emits the appReday signal.
+ */
+void NotesAppController::handleAppReady()
+{
+	OstTraceFunctionEntry0( NOTESAPPCONTROLLER_HANDLEAPPREADY_ENTRY );
+	emit appReady();
+	disconnect(mViewManager, SIGNAL(appReady()), this, SLOT(handleAppReady()));
+	OstTraceFunctionExit0( NOTESAPPCONTROLLER_HANDLEAPPREADY_EXIT );
 }
 
 // End of file	--Don't remove this.

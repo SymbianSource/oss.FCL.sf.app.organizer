@@ -44,12 +44,7 @@
 CalenDayContentScrollArea::CalenDayContentScrollArea(QGraphicsItem *parent) :
     HbScrollArea(parent), mPanDayDirection(ECalenPanNotSet), mIsMoving(false),
     mMoveDirection(ECalenScrollNoDayChange)
-{
-    // Set scroll settings
-    setScrollDirections(Qt::Horizontal);
-    setClampingStyle(StrictClamping);
-    setHorizontalScrollBarPolicy(HbScrollArea::ScrollBarAlwaysOff);
-    
+{ 
 #ifdef CALENDAYVIEW_PANNING_ENABLED
     grabGesture(Qt::PanGesture);
     ungrabGesture(Qt::SwipeGesture);
@@ -61,6 +56,10 @@ CalenDayContentScrollArea::CalenDayContentScrollArea(QGraphicsItem *parent) :
     // Get the width of content area and orientation of screen
     mContentWidth = CalenDayUtils::instance()->contentWidth();
     mOrientation = CalenDayUtils::instance()->orientation();
+    
+    // Fix the width of scroll area
+    setMinimumWidth(mContentWidth);
+    setMaximumWidth(mContentWidth);
 
     // Connect to main window's orientationChanged SIGNAL to handle orientation
     // switching
@@ -402,7 +401,13 @@ void CalenDayContentScrollArea::orientationChanged(Qt::Orientation orientation)
     // Update the width of content area
     mContentWidth = CalenDayUtils::instance()->contentWidth();
     mOrientation = orientation;
-    
+
+    // Fix the width of scroll area
+    setMinimumWidth(mContentWidth);
+    setMaximumWidth(mContentWidth);
+
+    scrollToMiddleWidget();
+
     // Reset flag related to moving
     mPanDayDirection = ECalenPanNotSet;
     mMoveDirection = ECalenScrollNoDayChange;

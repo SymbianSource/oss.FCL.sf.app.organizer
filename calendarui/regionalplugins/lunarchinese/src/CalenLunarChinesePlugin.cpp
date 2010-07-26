@@ -38,6 +38,11 @@
 #include "CalendarPrivateCRKeys.h"
 #include "calenRegionalInfoData.h"
 #include "hb_calencommands.hrh"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "CalenLunarChinesePluginTraces.h"
+#endif
+
 
 //CONSTANTS
 static const QString fieldSeparator("\n");
@@ -58,9 +63,8 @@ CCalenLunarChinesePlugin::CCalenLunarChinesePlugin(MCalenServices* aServices)
 	 iServices(aServices),
 	 iInfoBarText(NULL)
 	{
-	TRACE_ENTRY_POINT;
-	
-	TRACE_EXIT_POINT;
+	OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_CCALENLUNARCHINESEPLUGIN_ENTRY );
+	OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_CCALENLUNARCHINESEPLUGIN_EXIT );
 	}
 
 // -----------------------------------------------------------------------------
@@ -70,13 +74,14 @@ CCalenLunarChinesePlugin::CCalenLunarChinesePlugin(MCalenServices* aServices)
 CCalenLunarChinesePlugin* CCalenLunarChinesePlugin::NewL( 
 													MCalenServices* aServices )
 	{
-	TRACE_ENTRY_POINT;
+	OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_NEWL_ENTRY );
 	CCalenLunarChinesePlugin* self = new( ELeave ) 
 										CCalenLunarChinesePlugin( aServices);
 	CleanupStack::PushL( self );
 	self->ConstructL();
     CleanupStack::Pop(self);
 	TRACE_EXIT_POINT;
+	OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_NEWL_EXIT );
 	return self;
 	}
 	
@@ -86,9 +91,7 @@ CCalenLunarChinesePlugin* CCalenLunarChinesePlugin::NewL(
 //
 CCalenLunarChinesePlugin::~CCalenLunarChinesePlugin()
 	{
-	TRACE_ENTRY_POINT;
-	
-	
+	OstTraceFunctionEntry0( DUP1_CCALENLUNARCHINESEPLUGIN_CCALENLUNARCHINESEPLUGIN_ENTRY );
 	//Deregister services
 	if ( iServices )
         {
@@ -117,7 +120,7 @@ CCalenLunarChinesePlugin::~CCalenLunarChinesePlugin()
 		delete iTranslator;
 		iTranslator = 0;
 	}
-	TRACE_EXIT_POINT;
+	OstTraceFunctionExit0( DUP1_CCALENLUNARCHINESEPLUGIN_CCALENLUNARCHINESEPLUGIN_EXIT );
 	}
 	
 // -----------------------------------------------------------------------------
@@ -126,7 +129,7 @@ CCalenLunarChinesePlugin::~CCalenLunarChinesePlugin()
 //
 void CCalenLunarChinesePlugin::ConstructL()
 	{
-	TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_CONSTRUCTL_ENTRY );
     iServices->RegisterForNotificationsL( this, ECalenNotifyContextChanged );
 	iServices->GetCommandRange( iStart, iEnd );
 	
@@ -140,7 +143,7 @@ void CCalenLunarChinesePlugin::ConstructL()
     //Qt class having a slot ,calls when user clicked show lunar data option
 	iRegionalInfo = new CalenRegionalInfo(*this);
 	
-    TRACE_EXIT_POINT;	
+	OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_CONSTRUCTL_EXIT );
 	}
 
 // -----------------------------------------------------------------------------
@@ -150,8 +153,7 @@ void CCalenLunarChinesePlugin::ConstructL()
 void CCalenLunarChinesePlugin::FormatExtraRowStringL()
 
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_FORMATEXTRAROWSTRINGL_ENTRY );
     if ( iLocInfo )
         {
         iExtraRowText.Set( iLocalizer->GetExtraRowTextL( *iLocInfo) );
@@ -160,8 +162,7 @@ void CCalenLunarChinesePlugin::FormatExtraRowStringL()
         {
         iExtraRowText.Set( KNullDesC );
         }
-    
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_FORMATEXTRAROWSTRINGL_EXIT );
     }
 	
 // -----------------------------------------------------------------------------
@@ -170,8 +171,8 @@ void CCalenLunarChinesePlugin::FormatExtraRowStringL()
 //	
 HbWidget* CCalenLunarChinesePlugin::InfobarL( )
 	{
-	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;
+	OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_INFOBARL_ENTRY );
+	OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_INFOBARL_EXIT );
 	return NULL;
 	}
 
@@ -182,7 +183,7 @@ HbWidget* CCalenLunarChinesePlugin::InfobarL( )
 //
 QString* CCalenLunarChinesePlugin::InfobarTextL( )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_INFOBARTEXTL_ENTRY );
     if(iInfoBarText)
         {
         delete iInfoBarText;
@@ -195,7 +196,6 @@ QString* CCalenLunarChinesePlugin::InfobarTextL( )
     iInfoBarText = iExtraRowText.AllocLC();
     CleanupStack::Pop();
     
-    TRACE_EXIT_POINT;
     return  (new QString((QChar*)iInfoBarText->Des().Ptr(),iInfoBarText->Length()));
     }
 
@@ -207,6 +207,7 @@ QString* CCalenLunarChinesePlugin::InfobarTextL( )
 
 void CCalenLunarChinesePlugin::CustomiseMenu(HbMenu* aHbMenu)
     {
+    OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_CUSTOMISEMENU_ENTRY );
     HbAction* lunarAction = new HbAction("Show Lunar Data");
     QList<QAction*> actionList = aHbMenu->actions();     
     TInt count = actionList.count() - 1;  //To show the option "show lunar data"
@@ -216,6 +217,7 @@ void CCalenLunarChinesePlugin::CustomiseMenu(HbMenu* aHbMenu)
     aHbMenu->insertAction(actionList[count], lunarAction);
     //calls a slot whenever user clicked "show lunar data" option
     QObject::connect(lunarAction,SIGNAL(triggered()), iRegionalInfo,SLOT(showRegionalDetails()));
+    OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_CUSTOMISEMENU_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -224,14 +226,13 @@ void CCalenLunarChinesePlugin::CustomiseMenu(HbMenu* aHbMenu)
 //
 TBool CCalenLunarChinesePlugin::HandleCommandL( const TCalenCommand&  aCommand )
 	{
-	TRACE_ENTRY_POINT;
-	
+	OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_HANDLECOMMANDL_ENTRY );
 	const TInt commandId = aCommand.Command();
 	if(ECalenRegionalPluginTapEvent == commandId)
 		{
 		ShowDetailsL();	
 		}
-	TRACE_EXIT_POINT;	
+	OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_HANDLECOMMANDL_EXIT );
 	return EFalse;	
 	}
 
@@ -243,8 +244,8 @@ TBool CCalenLunarChinesePlugin::HandleCommandL( const TCalenCommand&  aCommand )
 TAny* CCalenLunarChinesePlugin::CalenCommandHandlerExtensionL( 
 														TUid /*aExtensionUid*/ )
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_CALENCOMMANDHANDLEREXTENSIONL_ENTRY );
+    OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_CALENCOMMANDHANDLEREXTENSIONL_EXIT );
     return NULL;
     }
 
@@ -254,8 +255,7 @@ TAny* CCalenLunarChinesePlugin::CalenCommandHandlerExtensionL(
 //
 MCalenCommandHandler* CCalenLunarChinesePlugin::CommandHandlerL( TInt aCommand )
 	{
-	TRACE_ENTRY_POINT;
-	
+	OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_COMMANDHANDLERL_ENTRY );
 	MCalenCommandHandler*  commandHandler = NULL;	
 		
 	if(ECalenRegionalPluginTapEvent == aCommand)
@@ -263,8 +263,8 @@ MCalenCommandHandler* CCalenLunarChinesePlugin::CommandHandlerL( TInt aCommand )
 		commandHandler = this;	
 		}
    
+    OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_COMMANDHANDLERL_EXIT );
     return commandHandler;
-	TRACE_EXIT_POINT;	
 	}
  	
 // -----------------------------------------------------------------------------
@@ -273,7 +273,7 @@ MCalenCommandHandler* CCalenLunarChinesePlugin::CommandHandlerL( TInt aCommand )
 //	
 void CCalenLunarChinesePlugin::UpdateLocalizerInfoL()
 	{
-	TRACE_ENTRY_POINT;
+	OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_UPDATELOCALIZERINFOL_ENTRY );
 	QDateTime focusDateTime= iServices->Context().focusDateAndTime();
 	TDateTime tempDateTime(
 					focusDateTime.date().year(),
@@ -288,7 +288,7 @@ void CCalenLunarChinesePlugin::UpdateLocalizerInfoL()
 		{
 		iLocInfo = iLocalizer->LocalizeL( lunarInfo );	
 		}
-	TRACE_EXIT_POINT;
+	OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_UPDATELOCALIZERINFOL_EXIT );
 	}
 
 // -----------------------------------------------------------------------------
@@ -298,12 +298,12 @@ void CCalenLunarChinesePlugin::UpdateLocalizerInfoL()
 void CCalenLunarChinesePlugin::HandleNotification( 
 										const TCalenNotification aNotification )
 	{
-	TRACE_ENTRY_POINT;
+	OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_HANDLENOTIFICATION_ENTRY );
 	if (aNotification == ECalenNotifyContextChanged)
         {
         TRAP_IGNORE(UpdateLocalizerInfoL());
         }
-	TRACE_EXIT_POINT;	
+	OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_HANDLENOTIFICATION_EXIT );
 	}
 
 // -----------------------------------------------------------------------------
@@ -313,6 +313,7 @@ void CCalenLunarChinesePlugin::HandleNotification(
 //	
 void CCalenLunarChinesePlugin::ShowDetailsL( )
 {
+	OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_SHOWDETAILSL_ENTRY );
 	QString msgText;
 	if(iLocInfo) {
 		QStringList headerIds;
@@ -349,6 +350,7 @@ void CCalenLunarChinesePlugin::ShowDetailsL( )
 		}
 	}
 	ExecuteMessageDialogL(msgText);
+OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_SHOWDETAILSL_EXIT );
 }
 
 // -----------------------------------------------------------------------------
@@ -357,7 +359,7 @@ void CCalenLunarChinesePlugin::ShowDetailsL( )
 //
 void CCalenLunarChinesePlugin::ExecuteMessageDialogL(QString aMsgText)
 	{
-	TRACE_ENTRY_POINT;	
+	OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_EXECUTEMESSAGEDIALOGL_ENTRY );
 	// Instantiate a popup
 	HbMessageBox *popup = new HbMessageBox();
 	popup->setDismissPolicy(HbDialog::NoDismiss);
@@ -375,11 +377,11 @@ void CCalenLunarChinesePlugin::ExecuteMessageDialogL(QString aMsgText)
 		popup->removeAction(list[i]);
 	}
 	// Sets the primary action
-	popup->addAction(new HbAction(hbTrId("txt_calendar_button_close"), popup));
+	popup->addAction(new HbAction(hbTrId("txt_common_button_close_singledialog"), popup));
 
 	// Launch popup
 	popup->open();
-   	TRACE_EXIT_POINT;
+	OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_EXECUTEMESSAGEDIALOGL_EXIT );
 	}
 //EOF
 

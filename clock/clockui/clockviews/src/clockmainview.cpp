@@ -520,7 +520,7 @@ void ClockMainView::updatePlaceLabel(int autoTimeUpdate)
 	gmtOffset += tr(" ");
 
 	// Append GMT sting.
-	gmtOffset += hbTrId("txt_common_common_gmt");
+	gmtOffset += hbTrId("txt_clock_main_view_setlabel_gmt");
 
 	// Append space.
 	gmtOffset += tr(" ");

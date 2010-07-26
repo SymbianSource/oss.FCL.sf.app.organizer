@@ -14,7 +14,7 @@
 * Description: 
 *
 */
-#include "agendaentry.h"
+#include <agendaentry.h>
 #include "agendaentry_p.h"
 
 #include <calalarm.h>

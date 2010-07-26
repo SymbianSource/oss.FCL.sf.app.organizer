@@ -44,7 +44,7 @@
             <ref object="addCityAction" role="HbToolBar:addAction"/>
         </widget>
         <widget name="viewMenu" role="HbView:menu" type="HbMenu"/>
-        <string locid="txt_common_common_clock" name="title" value="Clock"/>
+        <string locid="txt_clock_main_view_title_clock" name="title" value="Clock"/>
     </widget>
     <section name="portrait-homecity">
         <widget name="worldClockViewWidget" role="HbView:widget" type="HbWidget">

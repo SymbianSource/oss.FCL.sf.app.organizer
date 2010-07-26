@@ -15,10 +15,11 @@
  *
  */
 
-//system includes
+// System includes
 #include <QDateTime>
 #include <QGraphicsLinearLayout>
 #include <xqsettingsmanager.h>
+#include <HbWidget>
 #include <hbaction.h>
 #include <hbmenu.h>
 #include <hbmainwindow.h>
@@ -27,8 +28,10 @@
 #include <hbgroupbox.h>
 #include <hbextendedlocale.h>
 #include <agendautil.h>
-//user includes
+
+// User includes
 #include "calendayview.h"
+#include "calencommon.h"
 #include "calencontext.h"
 #include "calenservices.h"
 #include "calendocloader.h"
@@ -51,56 +54,18 @@
 //
 CalenDayView::CalenDayView(MCalenServices &services) :
     CalenNativeView(services), mContentScrollArea(NULL), mContentWidget(NULL),
-    mHourScrollArea(NULL), mSettingsManager(NULL),
-    mRegionalInfo(XQSettingsKey::TargetCentralRepository, KCRUidCalendar, 
-            KCalendarShowRegionalInfo), 
-    mServices(services), mRegionalInfoGroupBox(NULL), mGoToTodayMenuAction(NULL)
+        mHourScrollArea(NULL), mVLayout(NULL), mDocLoader(NULL), mIsLaunching(
+            true), mSettingsManager(NULL), mRegionalInfo(
+            XQSettingsKey::TargetCentralRepository, KCRUidCalendar,
+            KCalendarShowRegionalInfo), mServices(services),
+        mRegionalInfoGroupBox(NULL), mGoToTodayMenuAction(NULL)
 {
     setupMenu();
-    
+
     // Create model manager
-    mModelManager = new CalenDayModelManager(mServices, true, this);   
-    
-    mVLayout = new QGraphicsLinearLayout(Qt::Vertical, NULL);
-    mVLayout->setContentsMargins(0.0, 0.0, 0.0, 0.0);
-    mVLayout->setSpacing(0.0);    
-      
-    // Create heading label and insert into layout
-    mHeadingLabel = new HbGroupBox();
-    HbEffect::add(mHeadingLabel, ":/fade_out.fxml", "fadeOut");
-    HbEffect::add(mHeadingLabel, ":/fade_in.fxml", "fadeIn");
-    
+    mModelManager = new CalenDayModelManager(mServices, true, this);
     mSettingsManager = new XQSettingsManager(this);
-
-    // Add day info
-    mVLayout->addItem(mHeadingLabel);
-    
-    //show regional info if set so
-    showRegionalInformationFadeIn();
     mSettingsManager->startMonitoring(mRegionalInfo);
-    
-    // Put hour scroll area and content scroll area into horizontal layout
-    QGraphicsLinearLayout *hLayout = new QGraphicsLinearLayout(Qt::Horizontal, NULL);
-    hLayout->setContentsMargins(0.0, 0.0, 0.0, 0.0);
-    hLayout->setSpacing(0.0);
-    
-    // Create scroll area for content (events)
-    mContentScrollArea = new CalenDayContentScrollArea(this);
-
-    // Create and apply central widget for scroll area
-    mContentWidget = new CalenDayContentWidget(*mModelManager, mContentScrollArea);
-    mContentScrollArea->setContentWidget(mContentWidget);
-    
-    // Create scroll area for hour elements
-    mHourScrollArea = new CalenDayHourScrollArea(this);
-        
-    hLayout->addItem(mHourScrollArea);
-    hLayout->addItem(mContentScrollArea);
-    
-    mVLayout->addItem(hLayout);
-    setLayout(mVLayout);
-    
-    setupSlots();
 
     //setup Back functionality
     if (ECalenDayView != mServices.getFirstView()) {
@@ -114,6 +79,7 @@ CalenDayView::CalenDayView(MCalenServices &services) :
     HbStyleLoader::registerFilePath(":/calendayhourelement.widgetml");
     HbStyleLoader::registerFilePath(":/calendayitem.css");
     HbStyleLoader::registerFilePath(":/calendayitem.widgetml");
+    HbStyleLoader::registerFilePath(":/calendayeventspane.css");
 }
 
 // -----------------------------------------------------------------------------
@@ -123,7 +89,11 @@ CalenDayView::CalenDayView(MCalenServices &services) :
 //
 CalenDayView::~CalenDayView()
 {
-	mSettingsManager->stopMonitoring(mRegionalInfo);
+    mSettingsManager->stopMonitoring(mRegionalInfo);
+    if (mDocLoader) {
+        delete mDocLoader;
+        mDocLoader = NULL;
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -162,7 +132,13 @@ void CalenDayView::doPopulation()
         mGoToTodayMenuAction->setVisible(true);
     }
     
-	setupViewport();
+    // Call async. if the view is loaded first time (fix to ou1cimx1#482516)
+    if (mIsLaunching) {
+        mIsLaunching = false;
+        QMetaObject::invokeMethod(this, "setupViewport", Qt::QueuedConnection);
+    } else {
+        setupViewport();
+    }
 	
     populationComplete();
 }
@@ -196,7 +172,34 @@ void CalenDayView::HandleNotification(const TCalenNotification notification)
 //
 void CalenDayView::setupView(CalenDocLoader* docLoader)
 {
-    Q_UNUSED( docLoader )
+    // Store document loader for further use
+    mDocLoader = docLoader;
+
+    // Get vertical layout from day view
+    mVLayout = static_cast<QGraphicsLinearLayout *> (this->layout());
+
+    // Set up day info
+    mHeadingLabel = qobject_cast<HbGroupBox *> (mDocLoader->findWidget(
+        CALEN_DAYVIEW_DAYINFO));
+    HbEffect::add(mHeadingLabel, ":/fade_out.fxml", "fadeOut");
+    HbEffect::add(mHeadingLabel, ":/fade_in.fxml", "fadeIn");
+
+    // Set up hour scroll area
+    mHourScrollArea
+        = static_cast<CalenDayHourScrollArea *> (mDocLoader->findWidget(
+            CALEN_DAYVIEW_HOURSCROLLAREA));
+
+    // Set up content scroll area
+    mContentScrollArea
+        = static_cast<CalenDayContentScrollArea *> (mDocLoader->findWidget(
+            CALEN_DAYVIEW_CONTENTSCROLLAREA));
+    mContentWidget = new CalenDayContentWidget(*mModelManager, NULL);
+    mContentScrollArea->setContentWidget(mContentWidget);
+
+    // Set up regional info if variant is correct
+    showRegionalInformationFadeIn();
+
+    setupSlots();
 }
 
 //private slots
@@ -341,7 +344,7 @@ void CalenDayView::runNewMeeting()
         dateTime.setTime(mServices.Context().defaultCalTimeForViewsL().time());
         mServices.Context().setFocusDateAndTime(dateTime);
         mServices.IssueCommandL(ECalenNewMeeting)
-            );
+    );
 }
 
 // -----------------------------------------------------------------------------
@@ -418,73 +421,48 @@ void CalenDayView::showRegionalInformationFadeIn()
 // To Show and hide regional plugin label depends upon settings
 // ----------------------------------------------------------------------------
 //
-void CalenDayView::showHideRegionalInformationChanged(const XQSettingsKey& key, const QVariant&)
-	{
-	if (key.key() == mRegionalInfo.key())
-		{
-		int showRegionalInfo =
-				mSettingsManager->readItemValue(mRegionalInfo).toUInt();
+void CalenDayView::showHideRegionalInformationChanged(
+    const XQSettingsKey& key,
+    const QVariant&)
+{
+    if (key.key() == mRegionalInfo.key()) {
+        int showRegionalInfo =
+            mSettingsManager->readItemValue(mRegionalInfo).toUInt();
 
-		if (showRegionalInfo)
-			{
-			QString *pluginString = pluginText();
-			if (pluginString)
-				{
-				if (!mRegionalInfoGroupBox)
-					{
-					mRegionalInfoGroupBox = new HbGroupBox();
-					CalenPluginLabel *regionalInfo = new CalenPluginLabel(
-							mServices, this);
-					HbEffect::add(mRegionalInfoGroupBox, ":/fade_out.fxml",
-							"fadeOut");
-					HbEffect::add(mRegionalInfoGroupBox, ":/fade_in.fxml", "fadeIn");
+        if (showRegionalInfo) {
+            QString *pluginString = pluginText();
+            if (pluginString) {
+                if (!mRegionalInfoGroupBox) {
+                    mRegionalInfoGroupBox = qobject_cast<HbGroupBox *> (
+                        mDocLoader->findWidget(CALEN_DAYVIEW_REGIONALINFO));
+                    CalenPluginLabel *regionalInfo = new CalenPluginLabel(
+                        mServices, this);
+                    HbEffect::add(mRegionalInfoGroupBox, ":/fade_out.fxml",
+                        "fadeOut");
+                    HbEffect::add(mRegionalInfoGroupBox, ":/fade_in.fxml",
+                        "fadeIn");
+                    regionalInfo->setContentsMargins(1, 1, 1, 1);
+                    mRegionalInfoGroupBox->setContentWidget(regionalInfo);
+                }
 
-					// add margins to calenpluginlabel
+                if (pluginEnabled()) {
+                    HbLabel *pluginInfoLabel = qobject_cast<HbLabel *> (
+                        mRegionalInfoGroupBox->contentWidget());
 
-					HbStyle style;
-					HbDeviceProfile deviceProfile;
-					qreal marginLeft = 0.0;
-					qreal marginRight = 0.0;
-					qreal marginTop = 0.0;
-					qreal marginBottom = 0.0;
-					style.parameter(QString("hb-param-margin-gene-left"), marginLeft, deviceProfile);
-					style.parameter(QString("hb-param-margin-gene-right"), marginRight, deviceProfile);
-					style.parameter(QString("hb-param-margin-gene-top"), marginTop, deviceProfile);
-					style.parameter(QString("hb-param-margin-gene-bottom"), marginBottom, deviceProfile);
-
-					regionalInfo->setContentsMargins(1, 1, 1, 1);
-
-					//	qreal width = mRegionalInfoGroupBox->size().width();
-					//	qreal height = mRegionalInfoGroupBox->size().height() + marginTop + marginBottom;
-
-					//	mRegionalInfoGroupBox->resize(width, height);
-
-					mRegionalInfoGroupBox->setContentWidget(regionalInfo);
-					}
-
-				if (pluginEnabled())
-					{
-					HbLabel *pluginInfoLabel = qobject_cast<HbLabel *> (
-							mRegionalInfoGroupBox->contentWidget());
-
-					pluginInfoLabel->setPlainText(*pluginString);
-
-					mVLayout->insertItem(1, mRegionalInfoGroupBox);
-					}
-				}
-			}
-		else
-			{
-
-			if (mRegionalInfoGroupBox)
-				{
-				mVLayout->removeItem(mRegionalInfoGroupBox);
-				delete mRegionalInfoGroupBox;
-				mRegionalInfoGroupBox = NULL;
-				}
-			}
-		}
-	}
+                    pluginInfoLabel->setPlainText(*pluginString);
+                    mVLayout->insertItem(1, mRegionalInfoGroupBox);
+                }
+            }
+        }
+        else {
+            if (mRegionalInfoGroupBox) {
+                mVLayout->removeItem(mRegionalInfoGroupBox);
+                delete mRegionalInfoGroupBox;
+                mRegionalInfoGroupBox = NULL;
+            }
+        }
+    }
+}
 
 // ----------------------------------------------------------------------------
 // CalenDayView::setupViewport
@@ -494,20 +472,28 @@ void CalenDayView::showHideRegionalInformationChanged(const XQSettingsKey& key, 
 void CalenDayView::setupViewport()
 {
     QDateTime currentTime = QDateTime::currentDateTime();
-    
-    //Filter flags (only timed events)
-	AgendaUtil::FilterFlags filter = AgendaUtil::FilterFlags(
-			AgendaUtil::IncludeAppointments );
-	QList<AgendaEntry> list;
-	// Fetch the instance list from the agenda interface
-	list = mServices.agendaInterface()->fetchEntriesInRange(currentTime, currentTime, filter);
-    
+
     // If we have event in current day and hour, scroll to this event
-    if(mDate.date() == currentTime.date() && !list.isEmpty()){
-    	int hourToScrollTo(list.first().startTime().time().hour());
-        mHourScrollArea->scrollToHour(hourToScrollTo);
+    if (mDate.date() == currentTime.date()){
+
+        QDateTime midnight = currentTime;
+        midnight.setTime(QTime(23, 59));
+
+        //Filter flags (only timed events)
+        AgendaUtil::FilterFlags filter = AgendaUtil::FilterFlags(AgendaUtil::IncludeAppointments);
+        QList<AgendaEntry> list;
+        // Fetch the instance list from the agenda interface
+        list = mServices.agendaInterface()->fetchEntriesInRange(currentTime, midnight, filter);
+
+        if(!list.isEmpty()){
+            int hourToScrollTo(list.first().startTime().time().hour());
+            mHourScrollArea->scrollToHour(hourToScrollTo);           
+        }
+        else{
+            mHourScrollArea->scrollToHour(currentTime.time().hour());
+        }
     }
-    else{
+    else {
         //Scroll view to 7am
         mHourScrollArea->scrollToHour(7);
     }

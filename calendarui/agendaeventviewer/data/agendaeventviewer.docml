@@ -16,7 +16,7 @@
 					<widget name="repeatWidget" type="HbWidget"/>
 					<widget name="descriptionWidget" type="HbWidget"/>
                     <widget name="maptileWidget" type="HbLabel">
-                        <contentsmargins bottom="var(hb-param-margin-gene-bottom)" left="var(hb-param-margin-gene-left)" right="var(hb-param-margin-gene-right)" top="0un"/>
+                        <contentsmargins bottom="var(hb-param-margin-gene-bottom)" left="var(hb-param-margin-gene-left)" top="0un"/>
                     </widget>
                     <layout orientation="Vertical" type="linear">
                         <contentsmargins bottom="0un" left="0un" top="0un"/>

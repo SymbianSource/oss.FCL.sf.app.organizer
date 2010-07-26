@@ -23,6 +23,10 @@
 
 #include "calendarui_debug.h"
 #include "CalenExtraRowFormatter.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenextrarowformatterTraces.h"
+#endif
 
 // Constants
 const TInt KZero( 0 );
@@ -33,11 +37,11 @@ const TInt KZero( 0 );
 //
 void CollapseDuplicatesL( TDes& aStr, TInt aPos, const TDesC& aSub )
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( _COLLAPSEDUPLICATESL_ENTRY );
     const TInt sublen = aSub.Length();
     if (aStr.Length() == KZero || sublen == KZero || aPos < KZero || (aPos >aStr.Length()))
         {
+        OstTraceFunctionExit0( _COLLAPSEDUPLICATESL_EXIT );
         return;
         }
 
@@ -70,16 +74,17 @@ void CollapseDuplicatesL( TDes& aStr, TInt aPos, const TDesC& aSub )
         // 3) No second substring found -> nothing to collapse
         else             
             {
-            TRACE_EXIT_POINT; 
+            OstTraceFunctionExit0( DUP1__COLLAPSEDUPLICATESL_EXIT );
             return;
             }
         }
     // No substring found 
     else
         {
-        TRACE_EXIT_POINT;
+        OstTraceFunctionExit0( DUP2__COLLAPSEDUPLICATESL_EXIT );
         return;
         }
+    OstTraceFunctionExit0( DUP3__COLLAPSEDUPLICATESL_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -88,8 +93,7 @@ void CollapseDuplicatesL( TDes& aStr, TInt aPos, const TDesC& aSub )
 //
 void RemoveLeadingAndTrailingL( TDes& aStr, const TDesC& aSub )
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( _REMOVELEADINGANDTRAILINGL_ENTRY );
     // Trailing
     const TInt sublen = aSub.Length();
     if ( aStr.Right( sublen ).Find( aSub ) == KZero )
@@ -103,7 +107,7 @@ void RemoveLeadingAndTrailingL( TDes& aStr, const TDesC& aSub )
         aStr.Replace( KZero, sublen, KNullDesC );
         }
         
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( _REMOVELEADINGANDTRAILINGL_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -112,14 +116,13 @@ void RemoveLeadingAndTrailingL( TDes& aStr, const TDesC& aSub )
 //
 EXPORT_C CCalenExtraRowFormatter* CCalenExtraRowFormatter::NewL()
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENEXTRAROWFORMATTER_NEWL_ENTRY );
     CCalenExtraRowFormatter* self = new (ELeave) CCalenExtraRowFormatter;
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop(self);
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENEXTRAROWFORMATTER_NEWL_EXIT );
     return self;
     }
 
@@ -129,8 +132,8 @@ EXPORT_C CCalenExtraRowFormatter* CCalenExtraRowFormatter::NewL()
 //
 EXPORT_C CCalenExtraRowFormatter::~CCalenExtraRowFormatter()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENEXTRAROWFORMATTER_CCALENEXTRAROWFORMATTER_ENTRY );
+    OstTraceFunctionExit0( CCALENEXTRAROWFORMATTER_CCALENEXTRAROWFORMATTER_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -139,8 +142,8 @@ EXPORT_C CCalenExtraRowFormatter::~CCalenExtraRowFormatter()
 //
 CCalenExtraRowFormatter::CCalenExtraRowFormatter()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENEXTRAROWFORMATTER_CCALENEXTRAROWFORMATTER_ENTRY );
+    OstTraceFunctionExit0( DUP1_CCALENEXTRAROWFORMATTER_CCALENEXTRAROWFORMATTER_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -149,8 +152,8 @@ CCalenExtraRowFormatter::CCalenExtraRowFormatter()
 //
 void CCalenExtraRowFormatter::ConstructL()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENEXTRAROWFORMATTER_CONSTRUCTL_ENTRY );
+    OstTraceFunctionExit0( CCALENEXTRAROWFORMATTER_CONSTRUCTL_EXIT );
     }
 
 
@@ -162,14 +165,12 @@ EXPORT_C TPtrC CCalenExtraRowFormatter::FormatExtraRowInformationL(
     CCalenLunarLocalizedInfo& aLocInfo, 
     RArray<CCalenLunarLocalizedInfo::TField>& aPrioritizedFields )
 {
-	TRACE_ENTRY_POINT;
-
-
+	OstTraceFunctionEntry0( CCALENEXTRAROWFORMATTER_FORMATEXTRAROWINFORMATIONL_ENTRY );
 	if ( aPrioritizedFields.Count() == KZero)
 	{
 		iText = KNullDesC;
 
-		TRACE_EXIT_POINT;
+		OstTraceFunctionExit0( CCALENEXTRAROWFORMATTER_FORMATEXTRAROWINFORMATIONL_EXIT );
 		return iText;
 	}
 
@@ -247,8 +248,8 @@ EXPORT_C TPtrC CCalenExtraRowFormatter::FormatExtraRowInformationL(
 	// CleanUp
 	CleanupStack::PopAndDestroy( subs );
 	CleanupStack::PopAndDestroy( &subLabels );
-	TRACE_EXIT_POINT;
 	
+	OstTraceFunctionExit0( DUP1_CCALENEXTRAROWFORMATTER_FORMATEXTRAROWINFORMATIONL_EXIT );
 	return iText;
 }
 

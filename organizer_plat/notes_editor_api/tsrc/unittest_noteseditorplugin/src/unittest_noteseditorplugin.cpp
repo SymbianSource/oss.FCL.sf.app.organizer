@@ -233,7 +233,7 @@ void TestNotesEditorPlugin::testEditingNoteWithId()
 	entry.setDescription(
 			QString("Test Editing of Note by providing entry local Id"));
 
-	ulong id = agendaUtil->addEntry(entry);
+	ulong id = agendaUtil->store(entry);
 
 	interface->edit(id);
 
@@ -301,7 +301,7 @@ void TestNotesEditorPlugin::testEditingTodoWithAgendaEntry()
 	entry.setStatus(AgendaEntry::TodoNeedsAction);
 	entry.setPriority(2);
 
-	ulong id = agendaUtil->addEntry(entry);
+	ulong id = agendaUtil->store(entry);
 
 	AgendaEntry storedEntry = agendaUtil->fetchById(id);
 
@@ -365,7 +365,7 @@ void TestNotesEditorPlugin::testEditingTodoWithId()
 	entry.setStatus(AgendaEntry::TodoNeedsAction);
 	entry.setPriority(2);
 
-	ulong id = agendaUtil->addEntry(entry);
+	ulong id = agendaUtil->store(entry);
 	AgendaEntry storedEntry = agendaUtil->fetchById(id);
 
 	// Call edit on agenda entry
@@ -589,7 +589,7 @@ void TestNotesEditorPlugin::testClosingOfTodoEditorWithSave()
 	entry.setStatus(AgendaEntry::TodoNeedsAction);
 	entry.setPriority(2);
 
-	ulong id = agendaUtil->addEntry(entry);
+	ulong id = agendaUtil->store(entry);
 
 	AgendaEntry storedEntry = agendaUtil->fetchById(id);
 	// Call edit on agenda entry
@@ -651,7 +651,7 @@ void TestNotesEditorPlugin::testClosingOfTodoEditorWithoutSave()
 	entry.setStatus(AgendaEntry::TodoNeedsAction);
 	entry.setPriority(2);
 
-	ulong id = agendaUtil->addEntry(entry);
+	ulong id = agendaUtil->store(entry);
 
 	AgendaEntry storedEntry = agendaUtil->fetchById(id);
 	// Call edit on agenda entry
@@ -756,7 +756,7 @@ void TestNotesEditorPlugin::testAgendaUtilEditingTodoWithId()
 	entry.setDescription(
 			QString("Test Editing of Note by providing entry local Id"));
 
-	ulong id = agendaUtil->addEntry(entry);
+	ulong id = agendaUtil->store(entry);
 
 	// Edits to-do entry by providing entry id and agendautil.
 	interface->edit(id, agendaUtil);

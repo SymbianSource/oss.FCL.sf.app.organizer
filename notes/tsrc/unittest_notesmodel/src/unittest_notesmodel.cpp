@@ -23,8 +23,8 @@
 #include <e32base.h>
 
 // User includes
+#include <agendautil.h>
 #include "notesmodel.h"
-#include "agendautil.h"
 
 class TestNotesModel : public QObject
 {
@@ -155,7 +155,7 @@ void TestNotesModel::test_sourceModelAddNote()
 	entry.setDescription("Hello");
 	entry.setLastModifiedDateTime(
 			QDateTime(QDate::currentDate(), QTime::currentTime()));
-	QVERIFY(mAgendaUtil->addEntry(entry));
+	QVERIFY(mAgendaUtil->store(entry));
 	
 	// Now check the count in the model.
 	startTimer(1000);
@@ -191,7 +191,7 @@ void TestNotesModel::test_sourceModelDeleteNote()
 	entry.setLastModifiedDateTime(
 			QDateTime(QDate::currentDate(), QTime::currentTime()));
 	ulong id;
-	QVERIFY(id = mAgendaUtil->addEntry(entry));
+	QVERIFY(id = mAgendaUtil->store(entry));
 
 	// Now check the count in the model.
 	startTimer(1000);
@@ -240,7 +240,7 @@ void TestNotesModel::test_sourceModelUpdateNote()
 	entry.setLastModifiedDateTime(
 			QDateTime(QDate::currentDate(), QTime::currentTime()));
 	ulong id;
-	QVERIFY(id = mAgendaUtil->addEntry(entry));
+	QVERIFY(id = mAgendaUtil->store(entry));
 	// Now check the count in the model.
 	startTimer(1000);
 	QVERIFY(model->rowCount());
@@ -250,7 +250,7 @@ void TestNotesModel::test_sourceModelUpdateNote()
 	entry = mAgendaUtil->fetchById(id);
 	QVERIFY(!entry.isNull());
 	entry.setDescription("Hello world");
-	QVERIFY(mAgendaUtil->updateEntry(entry));
+	QVERIFY(mAgendaUtil->store(entry));
 
 	// Verify if the model has the updated content.
 	startTimer(1000);

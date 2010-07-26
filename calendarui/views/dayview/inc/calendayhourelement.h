@@ -45,6 +45,10 @@ public:
      */
     virtual ~CalenDayHourElement();
 
+    void setTime(const QTime &time);
+    
+    QTime time() const;
+    
     /**
      * 
      */

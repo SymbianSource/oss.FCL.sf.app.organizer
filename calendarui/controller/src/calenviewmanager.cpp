@@ -39,7 +39,7 @@
 #include "calendarui_debug.h"
 #include "calencommon.h"
 #include "calendayview.h"
-#include "agendautil.h"
+#include <agendautil.h>
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "calenviewmanagerTraces.h"
@@ -75,6 +75,10 @@ CalenViewManager::CalenViewManager( CCalenController& aController)
 		        this, SLOT(handleEntryViewCreation(int)));
 	connect(mController.agendaInterface(), SIGNAL(entriesChanged(QList<ulong>)),
 								this, SLOT(handleEntriesChanged(QList<ulong>)));
+    connect(mController.agendaInterface(), SIGNAL(entryUpdated(ulong)),
+                                this, SLOT(handleEntryUpdation(ulong)));
+    connect(mController.agendaInterface(), SIGNAL(entryAdded(ulong)),
+                                this, SLOT(handleEntryUpdation(ulong)));
 	OstTraceFunctionExit0( CALENVIEWMANAGER_CALENVIEWMANAGER_EXIT );
 }
 
@@ -297,6 +301,35 @@ void CalenViewManager::loadAgendaView()
 }
 
 // ----------------------------------------------------------------------------
+// CalenViewManager::loadDayView
+// Loads day view from the docml
+// ----------------------------------------------------------------------------
+void CalenViewManager::loadDayView()
+{
+    bool loadSuccess = false;
+    
+    // Create the docloader object
+    CalenDocLoader *docLoader = new CalenDocLoader(mController);
+    
+    if (docLoader) {
+        docLoader->load(CALEN_DAYVIEW_DOCML, &loadSuccess);
+        if (!loadSuccess) {
+            qFatal("calenviewmanager.cpp : Unable to load day view XML");
+        }
+        
+        // Get the CalenDayView object from the loader
+        mCalenDayView = static_cast<CalenDayView *>
+            (docLoader->findWidget(CALEN_DAYVIEW));
+        if (!mCalenDayView) {
+            qFatal("calenviewmanager.cpp : Unable to find day view");
+        }
+        
+        // Set up the day view - day view takes the ownership
+        mCalenDayView->setupView(docLoader);
+    }
+}
+
+// ----------------------------------------------------------------------------
 // CalenViewManager::handleMainViewReady
 // Slot to handle viewReady() signal from mainwindow
 // (other items were commented in a header).
@@ -349,7 +382,7 @@ void CalenViewManager::constructOtherViews()
 		loadAgendaView();
 		
 		if (!mCalenDayView) {
-			mCalenDayView = new CalenDayView(mController.Services());
+		    loadDayView();
 		}
 	}
 	else //agenda view was launched as first view
@@ -681,11 +714,17 @@ TBool CalenViewManager::HandleCommandL(const TCalenCommand& command)
 			break;
 		case ECalenDayView:
             {
-            // First add new view and use QueuedConnection to assure that
-            // view is ready before setting it as the current view
+            // First add new view
 			mController.MainWindow().addView(mCalenDayView);
-			QMetaObject::invokeMethod(this, "handleDayViewReady", 
-			    Qt::QueuedConnection);
+			
+			// Removes current view
+		    // Notice: removing view should be done after new view is set as current to
+		    // avoid situation that there is no current view in application
+		    removePreviousView();
+    
+		    // Sets and activates day view
+		    mCurrentViewId = ECalenDayView;
+		    activateCurrentView();
 			}
 			break;
 		case ECalenEventView:
@@ -725,13 +764,20 @@ void CalenViewManager::HandleNotification(
 		case ECalenNotifyInstanceDeleted:
 		case ECalenNotifyEntryClosed:
 		case ECalenNotifySystemLocaleChanged:
+		case ECalenNotifySystemTimeChanged:
 		case ECalenNotifySystemLanguageChanged: {
-            activateCurrentView(); 
-            if (mCalenMonthView) {
-                mCalenMonthView->captureScreenshot();
-            } else if (mCalenAgendaView) {
-                mCalenAgendaView->captureScreenshot();
-            }
+
+			if (notification == ECalenNotifySystemTimeChanged) {
+				MCalenContext &context = mController.context();
+				QDateTime defaultTime = context.defaultCalTimeForViewsL();
+				context.setFocusDateAndTime(defaultTime);
+			}
+			activateCurrentView();
+			if (mCalenMonthView) {
+				mCalenMonthView->captureScreenshot();
+			} else if (mCalenAgendaView) {
+				mCalenAgendaView->captureScreenshot();
+			}
 		}
 		    break;
 		case ECalenNotifySettingsClosed: {
@@ -776,10 +822,14 @@ CalenSettingsView* CalenViewManager::settingsView()
 //
 void CalenViewManager::handleViewingCompleted(const QDate date)
 {
+	Q_UNUSED(date);
 	OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEVIEWINGCOMPLETED_ENTRY );
 	
 	// Cleanup.
 	mCalenEventViewer->deleteLater();
+	if (!date.isNull() && date.isValid()) {
+	    mController.Services().Context().setFocusDate(QDateTime(date));
+	}
 	mController.Services().IssueNotificationL(ECalenNotifyEntryClosed);
 	
 	// invalidate captured screenshots as either agenda view is activated now
@@ -882,6 +932,12 @@ void CalenViewManager::handleInstanceViewCreation(int status)
 	else if (mCalenAgendaView) {
 		mCalenAgendaView->doPopulation();
 	}
+	// Calls the emitAppReady function of CalenController. Need to emit this
+	// signal after the view is fully constructed & populated
+	// with actual data and ready to be used. So entry view & instance view
+	// needs to be created so that a new entry can also be created. Finally
+	// NotesApplication object needs to emit applicationReady Signal.
+	mController.emitAppReady();
 	
 	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEINSTANCEVIEWCREATION_EXIT );
 }
@@ -903,34 +959,37 @@ void CalenViewManager::handleEntryViewCreation(int status)
 }
 
 // ----------------------------------------------------------------------------
-// CalenViewManager::handleDayViewReady
-// Launches day view when it is added to MainWindow and ready to be displayed
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::handleDayViewReady() 
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEDAYVIEWREADY_ENTRY );
-    
-    // Removes current view
-    // Notice: removing view should be done after new view is set as current to
-    // avoid situation that there is no current view in application
-    removePreviousView();
-    
-    // Sets and activates day view
-    mCurrentViewId = ECalenDayView;
-    activateCurrentView();
-	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEDAYVIEWREADY_EXIT );
-}
-
-// ----------------------------------------------------------------------------
 // CalenViewManager::handleEntriesChanged
 // this function will be called when someone else has changed the database
 // ----------------------------------------------------------------------------
 //
 void CalenViewManager::handleEntriesChanged(QList<ulong> ids)
 {
+	Q_UNUSED(ids);
 	// Update and refresh the view.
 	activateCurrentView();
+}
+
+// ----------------------------------------------------------------------------
+// CalenViewManager::handleEntryUpdation
+// this function will be called when any entry is updated or added into database
+// Here we need to set the context to the entry updated or added.
+// ----------------------------------------------------------------------------
+//
+void CalenViewManager::handleEntryUpdation(ulong id)
+{
+    AgendaEntry updatedEntry = mController.agendaInterface()->fetchById(id);
+
+    // Agenda entry is not null then refresh the view else close event viewer
+    if (!updatedEntry.isNull()) {
+        if (AgendaEntry::TypeTodo != updatedEntry.type()) {
+            QDate date = updatedEntry.startTime().date();
+            if (!date.isNull() && date.isValid()) {
+                mController.Services().Context().setFocusDate(QDateTime(date));
+            }
+        }
+    }
+
 }
 
 // ----------------------------------------------------------------------------

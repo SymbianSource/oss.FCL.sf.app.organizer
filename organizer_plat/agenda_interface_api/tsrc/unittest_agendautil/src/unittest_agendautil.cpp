@@ -39,11 +39,11 @@ private slots:
 	void cleanupTestCase();
 
 	// Test cases.
-	void test_addEntry();
+	void test_storeWithNewEntry();
 	void test_deleteEntry();
 	void test_deleteRepeatedEntry();
 	void test_fetchById();
-	void test_updateEntry();
+	void test_storeWithExistingEntry();
 	void test_createEntryIdListForDay();
 	void test_entryIds();
 	void test_fetchAllEntries();
@@ -140,9 +140,9 @@ void TestAgendaUtil::cleanupTestCase()
 	}
 }
 /*
-	Tests the AgendaUtil::addEntry.
+	Tests the AgendaUtil::store.
  */
-void TestAgendaUtil::test_addEntry()
+void TestAgendaUtil::test_storeWithNewEntry()
 {
 	// Test case setup.
 	AgendaEntry entry;
@@ -154,7 +154,7 @@ void TestAgendaUtil::test_addEntry()
 	entry.setStartAndEndTime(dateTimeSet, dateTimeSet);
 
 	// Run the case.
-	ulong id = mAgendaUtil->addEntry(entry);
+	ulong id = mAgendaUtil->store(entry);
 
 	// Verify.
 	AgendaEntry newEntry = mAgendaUtil->fetchById(id);
@@ -180,7 +180,7 @@ void TestAgendaUtil::test_deleteEntry()
 	entry.setStartAndEndTime(
 			QDateTime::currentDateTime(),
 			QDateTime::currentDateTime());
-	ulong id = mAgendaUtil->addEntry(entry);
+	ulong id = mAgendaUtil->store(entry);
 
 	// Run the case.
 	QVERIFY(mAgendaUtil->deleteEntry(id));
@@ -210,7 +210,7 @@ void TestAgendaUtil::test_deleteRepeatedEntry()
 	repeatRule.setInterval(1);
 	entry.setRepeatRule(repeatRule);
 
-	ulong id = mAgendaUtil->addEntry(entry);
+	ulong id = mAgendaUtil->store(entry);
 	AgendaEntry savedEntry = mAgendaUtil->fetchById(id);
 	QVERIFY(!savedEntry.isNull());
 	QVERIFY(savedEntry.isRepeating());
@@ -237,7 +237,7 @@ void TestAgendaUtil::test_fetchById()
 	entry.setStartAndEndTime(dateTimeSet, dateTimeSet);
 
 	// Run the case.
-	ulong id = mAgendaUtil->addEntry(entry);
+	ulong id = mAgendaUtil->store(entry);
 
 	// Verify.
 	AgendaEntry retrievedEntry = mAgendaUtil->fetchById(id);
@@ -257,22 +257,22 @@ void TestAgendaUtil::test_fetchById()
 }
 
 /*!
-    Test the api AgendaUtil::updateEntry.
+    Test the api AgendaUtil::store.
  */
-void TestAgendaUtil::test_updateEntry()
+void TestAgendaUtil::test_storeWithExistingEntry()
 {
 	// Test case setup.
 	AgendaEntry entry;
 	entry.setType(AgendaEntry::TypeAppoinment);
 	entry.setSummary("Test case");
-	entry.setDescription("Entry to test the updateEntry API");
+	entry.setDescription("Entry to test the store API");
 	entry.setLocation("Nokia");
 	entry.setStartAndEndTime(
 			QDateTime::currentDateTime(),
 			QDateTime::currentDateTime());
 
 	// Save the entry
-	ulong id = mAgendaUtil->addEntry(entry);
+	ulong id = mAgendaUtil->store(entry);
 
 	// Fetch the same entry
 	AgendaEntry savedEntry = mAgendaUtil->fetchById(id);
@@ -284,7 +284,7 @@ void TestAgendaUtil::test_updateEntry()
 			QDateTime::currentDateTime().addDays(1));
 
 	// Update the entry
-	bool success = mAgendaUtil->updateEntry(savedEntry);
+	ulong success = mAgendaUtil->store(savedEntry);
 	QVERIFY(success);
 
 	// Fetch the updated entry again
@@ -321,7 +321,7 @@ void TestAgendaUtil::test_createEntryIdListForDay()
 	futureEntry.setStartAndEndTime(futureDay, futureDay);
 	futureEntry.setType(AgendaEntry::TypeEvent);
 	futureEntry.setSummary("Test case");
-	ulong id = mAgendaUtil->addEntry(futureEntry);
+	ulong id = mAgendaUtil->store(futureEntry);
 	// Run the test case
 	QList<AgendaEntry> entriesList;
 	entriesList.append(mAgendaUtil->createEntryIdListForDay(futureDay));
@@ -380,7 +380,7 @@ void TestAgendaUtil::test_entryIds()
 	QDateTime firstEntryStart(QDate(2020, 05, 01), QTime(9, 0, 0, 0));
 	QDateTime firstEntryEnd(QDate(2020, 05, 01), QTime(10, 0, 0, 0));
 	firstEntry.setStartAndEndTime(firstEntryStart, firstEntryEnd);
-	ulong id = mAgendaUtil->addEntry(firstEntry);
+	ulong id = mAgendaUtil->store(firstEntry);
 	numOfEntries++;
 
 	// ToDo.
@@ -390,7 +390,7 @@ void TestAgendaUtil::test_entryIds()
 	QDateTime firstToDoStart(QDate(2026, 05, 01), QTime(10, 0, 0, 0));
 	QDateTime firstToDoEnd(QDate(2026, 05, 01), QTime(10, 0, 0, 0));
 	firstToDo.setStartAndEndTime(firstToDoStart, firstToDoEnd);
-	id = mAgendaUtil->addEntry(firstToDo);
+	id = mAgendaUtil->store(firstToDo);
 	numOfEntries++;
 
 	// Run the test case
@@ -454,7 +454,7 @@ void TestAgendaUtil::test_fetchAllEntries()
 	QDateTime firstEntryStart(QDate(2020, 05, 01), QTime(9, 0, 0, 0));
 	QDateTime firstEntryEnd(QDate(2020, 05, 01), QTime(10, 0, 0, 0));
 	firstEntry.setStartAndEndTime(firstEntryStart, firstEntryEnd);
-	ulong id = mAgendaUtil->addEntry(firstEntry);
+	ulong id = mAgendaUtil->store(firstEntry);
 	numOfEntries++;
 
 	// ToDo.
@@ -464,7 +464,7 @@ void TestAgendaUtil::test_fetchAllEntries()
 	QDateTime firstToDoStart(QDate(2026, 05, 01), QTime(10, 0, 0, 0));
 	QDateTime firstToDoEnd(QDate(2026, 05, 01), QTime(10, 0, 0, 0));
 	firstToDo.setStartAndEndTime(firstToDoStart, firstToDoEnd);
-	id = mAgendaUtil->addEntry(firstToDo);
+	id = mAgendaUtil->store(firstToDo);
 	numOfEntries++;
 
 	// Run the test case
@@ -563,7 +563,7 @@ void TestAgendaUtil::test_fetchEntriesInRange()
 	QDateTime firstEntryEnd(
 			QDate(2020, 05, 01), QTime(10, 0, 0, 0));
 	firstEntry.setStartAndEndTime(firstEntryStart, firstEntryEnd);
-	ulong id = mAgendaUtil->addEntry(firstEntry);
+	ulong id = mAgendaUtil->store(firstEntry);
 
 	// Create the range for which entries are needed
 	QDateTime fromRange(
@@ -646,7 +646,7 @@ int TestAgendaUtil::createMultipleEntries()
 	QDateTime firstEntryEnd(
 			QDate(2020, 05, 01), QTime(10, 0, 0, 0));
 	firstEntry.setStartAndEndTime(firstEntryStart, firstEntryEnd);
-	ulong id = mAgendaUtil->addEntry(firstEntry);
+	ulong id = mAgendaUtil->store(firstEntry);
 	numOfEntries++;
 
 	// Events.
@@ -658,7 +658,7 @@ int TestAgendaUtil::createMultipleEntries()
 	QDateTime firstEventEnd(
 			QDate(2023, 05, 01), QTime(12, 0, 0, 0));
 	firstEvent.setStartAndEndTime(firstEventStart, firstEventEnd);
-	id = mAgendaUtil->addEntry(firstEvent);
+	id = mAgendaUtil->store(firstEvent);
 	numOfEntries++;
 
 	// ToDos.
@@ -670,7 +670,7 @@ int TestAgendaUtil::createMultipleEntries()
 	QDateTime firstToDoEnd(
 				QDate(2026, 05, 01), QTime(10, 0, 0, 0));
 	firstToDo.setStartAndEndTime(firstToDoStart, firstToDoEnd);
-	id = mAgendaUtil->addEntry(firstToDo);
+	id = mAgendaUtil->store(firstToDo);
 	numOfEntries++;
 
 	return numOfEntries;
@@ -691,7 +691,7 @@ void TestAgendaUtil::cloneNoteToTodo()
 	// Shouldn't clone the entry as AgendaEntry is not yet saved.
 	QVERIFY(!notSavedEntryId);
 
-	long noteId = mAgendaUtil->addEntry(noteEntry);
+	long noteId = mAgendaUtil->store(noteEntry);
 	QVERIFY(noteId);
 
 	// Fetch the saved note entry for cloning
@@ -718,7 +718,7 @@ void TestAgendaUtil::cloneNoteToMeeting()
 	AgendaEntry noteEntry(AgendaEntry::TypeNote);
 	noteEntry.setDescription(QString("test cloning of note to meeting"));
 
-	long noteId = mAgendaUtil->addEntry(noteEntry);
+	long noteId = mAgendaUtil->store(noteEntry);
 	QVERIFY(noteId);
 
 	// Fetch the saved note entry for cloning
@@ -745,7 +745,7 @@ void TestAgendaUtil::cloneTodoToNote()
 	todoEntry.setDescription(QString("test cloning of todo to note"));
 	QDateTime dueDate(QDate(2011, 06, 01), QTime(10, 0, 0, 0));
 	todoEntry.setStartAndEndTime(dueDate, dueDate);
-	long todoId = mAgendaUtil->addEntry(todoEntry);
+	long todoId = mAgendaUtil->store(todoEntry);
 	QVERIFY(todoId);
 
 	// Fetch the saved note entry for cloning
@@ -774,7 +774,7 @@ void TestAgendaUtil::cloneTodoToMeeting()
 	todoEntry.setSummary(QString("test cloning of todo to meeting"));
 	QDateTime dueDate(QDate(2011, 06, 01), QTime(10, 0, 0, 0));
 	todoEntry.setStartAndEndTime(dueDate, dueDate);
-	long todoId = mAgendaUtil->addEntry(todoEntry);
+	long todoId = mAgendaUtil->store(todoEntry);
 	QVERIFY(todoId);
 
 	// Fetch the saved note entry for cloning
@@ -805,7 +805,7 @@ void TestAgendaUtil::cloneMeetingToNote()
 	QDateTime startDate(QDate(2011, 06, 01), QTime(10, 0, 0, 0));
 	QDateTime endDate(QDate(2011, 06, 01), QTime(12, 0, 0, 0));
 	appointment.setStartAndEndTime(startDate, endDate);
-	long appointmentId = mAgendaUtil->addEntry(appointment);
+	long appointmentId = mAgendaUtil->store(appointment);
 	QVERIFY(appointmentId);
 
 	// Fetch the saved note entry for cloning
@@ -834,7 +834,7 @@ void TestAgendaUtil::cloneMeetingToTodo()
 	QDateTime startDate(QDate(2011, 06, 01), QTime(10, 0, 0, 0));
 	QDateTime endDate(QDate(2011, 06, 01), QTime(12, 0, 0, 0));
 	appointment.setStartAndEndTime(startDate, endDate);
-	long appointmentId = mAgendaUtil->addEntry(appointment);
+	long appointmentId = mAgendaUtil->store(appointment);
 	QVERIFY(appointmentId);
 
 	// Fetch the saved note entry for cloning
@@ -864,7 +864,7 @@ void TestAgendaUtil::completeTodo()
 	QDateTime dueDate(QDate(2011, 06, 01), QTime(0, 0, 0, 0));
 	todoEntry.setStartAndEndTime(dueDate, dueDate);
 
-	ulong todoId = mAgendaUtil->addEntry(todoEntry);
+	ulong todoId = mAgendaUtil->store(todoEntry);
 	QVERIFY(todoId);
 
 	// Complete the to-do.
@@ -888,7 +888,7 @@ void TestAgendaUtil::unCompletedTodo()
 	QDateTime dueDate(QDate(2011, 06, 01), QTime(0, 0, 0, 0));
 	todoEntry.setStartAndEndTime(dueDate, dueDate);
 
-	ulong todoId = mAgendaUtil->addEntry(todoEntry);
+	ulong todoId = mAgendaUtil->store(todoEntry);
 	QVERIFY(todoId);
 
 	// Complete the to-do.

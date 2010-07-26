@@ -17,7 +17,15 @@
 #include <QGraphicsItem>
 #include <QtTest/QtTest>
 
+#include <QPainter>
+#include <QImage>
+#include <QGraphicsScene>
+#include <hbstyleloader.h>
+
 #include "calendayhourscrollarea.h"
+
+const qreal WIDGET_WIDTH = 300;
+const qreal WIDGET_HEIGHT = 1000;
 
 class TestCalenDayHourScrollArea : public QObject
 {
@@ -34,6 +42,9 @@ private slots:
     void cleanup();
 
     void testConstructors();
+    void testSetGetDateTime();
+    void testScrollToHour();
+    void testscrollVertically();
 
 private:
     CalenDayHourScrollArea *mHourScrollArea;
@@ -61,6 +72,11 @@ TestCalenDayHourScrollArea::~TestCalenDayHourScrollArea()
  */
 void TestCalenDayHourScrollArea::initTestCase()
 {
+    HbStyleLoader::registerFilePath(":/calendayhourelement.css");
+    HbStyleLoader::registerFilePath(":/calendayhourelement.widgetml");
+    HbStyleLoader::registerFilePath(":/calendayitem.css");
+    HbStyleLoader::registerFilePath(":/calendayitem.widgetml");
+    HbStyleLoader::registerFilePath(":/calendayeventspane.css");
 }
 
 /*!
@@ -106,6 +122,143 @@ void TestCalenDayHourScrollArea::testConstructors()
     QVERIFY(testHourScrollArea);
     
     delete testHourScrollArea;
+}
+
+/*!
+   \brief It test seting and geting datetime.
+   1. Test first setting datetime
+   2. Test datetime after change 
+ */
+void TestCalenDayHourScrollArea::testSetGetDateTime()
+{
+    QDateTime testValue(QDate(2010,06,29),QTime(8,42,10));
+    //1)
+    mHourScrollArea->setDateTime(testValue);
+    QCOMPARE(mHourScrollArea->dateTime(),testValue);
+    
+    //2)
+    testValue = QDateTime(QDate(2011,7,30),QTime(9,43,11));
+    mHourScrollArea->setDateTime(testValue);
+    QCOMPARE(mHourScrollArea->dateTime(),testValue);
+}
+
+/*!
+   \brief It test scrolling to given hour.
+   To draw result on image uncomment SAVE_IMAGES in pro file
+   1. Test scroll to 0h
+   2. Test scroll to 12h
+   3. Test scroll to 20h
+ */
+void TestCalenDayHourScrollArea::testScrollToHour()
+{
+    mHourScrollArea->resize(WIDGET_WIDTH,WIDGET_HEIGHT);
+    QGraphicsScene scene;
+    scene.addItem(mHourScrollArea);
+    QDateTime testValue(QDate(2010,06,29),QTime(8,42,10));
+    mHourScrollArea->setDateTime(testValue);
+    //resize widget to be bigger than (0,0)
+    QSize size = mHourScrollArea->size().toSize();
+    
+    //create image that will simulate widget where painting should be done
+    QPixmap img(size);
+    //create painter which will be used to paint
+    QPainter painter;    
+    
+    //0
+    mHourScrollArea->scrollToHour(0);
+    painter.begin(&img);
+    painter.setRenderHint(QPainter::Antialiasing);
+    //fill image with white color to have better filings with look of "paper"
+    painter.fillRect(0,0,size.width(),size.height(),QColor(Qt::gray));
+    scene.render(&painter);
+    painter.end();
+#ifdef SAVE_IMAGES
+    //save drawed image
+    img.save("c:/unittest/TestCalenDayHourScrollArea_testScrollToHour_0.png");
+#endif
+    //1
+    
+    mHourScrollArea->scrollToHour(12);
+    painter.begin(&img);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.fillRect(0,0,size.width(),size.height(),QColor(Qt::gray));
+    scene.render(&painter);
+    painter.end();
+#ifdef SAVE_IMAGES
+    //save drawed image
+    img.save("c:/unittest/TestCalenDayHourScrollArea_testScrollToHour_12.png");
+#endif    
+    //2
+    
+    mHourScrollArea->scrollToHour(20);
+    painter.begin(&img);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.fillRect(0,0,size.width(),size.height(),QColor(Qt::gray));
+    scene.render(&painter);
+    painter.end();
+#ifdef SAVE_IMAGES
+    //save drawed image
+    img.save("c:/unittest/TestCalenDayHourScrollArea_testScrollToHour_20.png");
+#endif
+    scene.removeItem(mHourScrollArea);
+}
+
+/*!
+   \brief It test scrolling to vertical position.
+   To draw result on image uncomment SAVE_IMAGES in pro file
+   1. Test scroll to QPoint(0,250)
+   2. Test scroll to QPoint(0,500)
+   3. Test scroll to QPoint(0,2000)
+ */
+void TestCalenDayHourScrollArea::testscrollVertically()
+{
+    mHourScrollArea->resize(WIDGET_WIDTH,WIDGET_HEIGHT);
+    QGraphicsScene scene;
+    scene.addItem(mHourScrollArea);
+    QDateTime testValue(QDate(2010,06,29),QTime(8,42,10));
+    mHourScrollArea->setDateTime(testValue);
+    //resize widget to be bigger than (0,0)
+    QSize size = mHourScrollArea->size().toSize();
+    
+    //create image that will simulate widget where painting should be done
+    QPixmap img(size);
+    //create painter which will be used to paint
+    QPainter painter;
+
+    //0
+    mHourScrollArea->scrollVertically(QPoint(10,250));
+    painter.begin(&img);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.fillRect(0,0,size.width(),size.height(),QColor(Qt::gray));
+    scene.render(&painter);
+    painter.end();
+#ifdef SAVE_IMAGES
+    //save drawed image
+    img.save("c:/unittest/TestCalenDayHourScrollArea_testscrollVertically_250.png");
+#endif
+    //1
+    mHourScrollArea->scrollVertically(QPoint(10,500));
+    painter.begin(&img);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.fillRect(0,0,size.width(),size.height(),QColor(Qt::gray));
+    scene.render(&painter);
+    painter.end();
+#ifdef SAVE_IMAGES
+    //save drawed image
+    img.save("c:/unittest/TestCalenDayHourScrollArea_testscrollVertically_500.png");
+#endif    
+    //2
+    mHourScrollArea->scrollVertically(QPoint(10,2000));
+    painter.begin(&img);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.fillRect(0,0,size.width(),size.height(),QColor(Qt::gray));
+    scene.render(&painter);
+    painter.end();
+#ifdef SAVE_IMAGES
+    //save drawed image
+    img.save("c:/unittest/TestCalenDayHourScrollArea_testscrollVertically_2000.png");
+#endif
+    scene.removeItem(mHourScrollArea);
 }
 
 QTEST_MAIN(TestCalenDayHourScrollArea);

@@ -66,7 +66,7 @@ private:
 	void addRepeatData();
 	void addDescriptionData();
 	void getPriorityIcon(int priority, QString& priorityIcon);
-	QString repeatRule() const;
+	QString repeatRule();
 	QString alarmTimeText() const;
 	void removeWidget();
 	void updateCompletedReminderData();

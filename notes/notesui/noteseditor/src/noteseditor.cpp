@@ -19,8 +19,13 @@
 // User includes
 #include "noteseditor.h"
 #include "noteseditor_p.h"
-#include "agendautil.h"
-#include "agendaentry.h"
+#include <agendautil.h>
+#include <agendaentry.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "noteseditorTraces.h"
+#endif
+
 
 /*!
 	\class NotesEditor
@@ -46,7 +51,9 @@
 NotesEditor::NotesEditor(QObject *parent)
 :QObject(parent),d_ptr(new NotesEditorPrivate(0, this))
 {
+	OstTraceFunctionEntry0( NOTESEDITOR_NOTESEDITOR_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( NOTESEDITOR_NOTESEDITOR_EXIT );
 }
 
 
@@ -59,7 +66,9 @@ NotesEditor::NotesEditor(QObject *parent)
 NotesEditor::NotesEditor(AgendaUtil *agendaUtil, QObject *parent)
 :QObject(parent), d_ptr(new NotesEditorPrivate(agendaUtil, this))
 {
+	OstTraceFunctionEntry0( DUP1_NOTESEDITOR_NOTESEDITOR_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( DUP1_NOTESEDITOR_NOTESEDITOR_EXIT );
 }
 
 /*!
@@ -67,9 +76,11 @@ NotesEditor::NotesEditor(AgendaUtil *agendaUtil, QObject *parent)
  */
 NotesEditor::~NotesEditor()
 {
+	OstTraceFunctionEntry0( DUP2_NOTESEDITOR_NOTESEDITOR_ENTRY );
 	if (d_ptr) {
 		delete d_ptr;
 	}
+	OstTraceFunctionExit0( DUP2_NOTESEDITOR_NOTESEDITOR_EXIT );
 }
 
 /*!
@@ -79,7 +90,9 @@ NotesEditor::~NotesEditor()
  */
 void NotesEditor::edit(const QString &string)
 {
+	OstTraceFunctionEntry0( NOTESEDITOR_EDIT_ENTRY );
 	d_ptr->edit(string);
+	OstTraceFunctionExit0( NOTESEDITOR_EDIT_EXIT );
 }
 
 /*!
@@ -90,7 +103,9 @@ void NotesEditor::edit(const QString &string)
  */
 void NotesEditor::edit(const QFile &handle)
 {
+	OstTraceFunctionEntry0( DUP1_NOTESEDITOR_EDIT_ENTRY );
 	d_ptr->edit(handle);
+	OstTraceFunctionExit0( DUP1_NOTESEDITOR_EDIT_EXIT );
 }
 
 /*!
@@ -100,7 +115,9 @@ void NotesEditor::edit(const QFile &handle)
  */
 void NotesEditor::edit(AgendaEntry entry)
 {
+	OstTraceFunctionEntry0( DUP2_NOTESEDITOR_EDIT_ENTRY );
 	d_ptr->edit(entry);
+	OstTraceFunctionExit0( DUP2_NOTESEDITOR_EDIT_EXIT );
 }
 
 /*!
@@ -110,7 +127,9 @@ void NotesEditor::edit(AgendaEntry entry)
  */
 void NotesEditor::edit(ulong id)
 {
+	OstTraceFunctionEntry0( DUP3_NOTESEDITOR_EDIT_ENTRY );
 	d_ptr->edit(id);
+	OstTraceFunctionExit0( DUP3_NOTESEDITOR_EDIT_EXIT );
 }
 
 /*!
@@ -121,7 +140,9 @@ void NotesEditor::edit(ulong id)
  */
 void NotesEditor::create(NotesEditor::CreateType type)
 {
+	OstTraceFunctionEntry0( NOTESEDITOR_CREATE_ENTRY );
 	d_ptr->create(type);
+	OstTraceFunctionExit0( NOTESEDITOR_CREATE_EXIT );
 }
 
 /*!
@@ -131,6 +152,7 @@ void NotesEditor::create(NotesEditor::CreateType type)
  */
 ulong NotesEditor::close(NotesEditor::CloseType type)
 {
+	OstTraceFunctionEntry0( NOTESEDITOR_CLOSE_ENTRY );
 	return d_ptr->close(type);
 }
 

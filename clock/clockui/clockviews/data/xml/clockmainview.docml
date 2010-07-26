@@ -88,7 +88,7 @@
         <widget name="viewMenu" role="HbView:menu" type="HbMenu">
             <ref object="settingsAction" role="HbWidget:addAction"/>
         </widget>
-        <string locid="txt_common_common_clock" name="title" value="Clock"/>
+        <string locid="txt_clock_main_view_title_clock" name="title" value="Clock"/>
     </widget>
     <section name="portrait">
         <widget name="alarmListView" type="HbListView">
@@ -103,7 +103,7 @@
                 <anchoritem dst="clockWidget" dstEdge="CENTERH" spacing="0un" src="" srcEdge="CENTERH"/>
                 <anchoritem dst="dateLabel" dstEdge="LEFT" spacing="expr(var(hb-param-margin-gene-left) )" src="" srcEdge="LEFT"/>
                 <anchoritem dst="dateLabel" dstEdge="TOP" spacing="expr(var(hb-param-margin-gene-top) )" src="clockWidget" srcEdge="BOTTOM"/>
-                <anchoritem dst="dateLabel" dstEdge="RIGHT" spacing="expr(-var(hb-param-margin-gene-right) )" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="dateLabel" dstEdge="RIGHT" spacing="-expr(var(hb-param-margin-gene-right) )" src="" srcEdge="RIGHT"/>
                 <anchoritem dst="noAlarmLabel" dstEdge="LEFT" spacing="expr(var(hb-param-margin-gene-left) )" src="" srcEdge="LEFT"/>
                 <anchoritem dst="noAlarmLabel" dstEdge="CENTERV" spacing="0un" src="alarmListView" srcEdge="CENTERV"/>
                 <anchoritem dst="alarmListView" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
@@ -117,7 +117,7 @@
                 <anchoritem dst="horizontalDivider" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
                 <anchoritem dst="placeLabel" dstEdge="LEFT" spacing="expr(var(hb-param-margin-gene-left) )" src="" srcEdge="LEFT"/>
                 <anchoritem dst="placeLabel" dstEdge="TOP" spacing="expr(var(hb-param-margin-gene-middle-vertical) )" src="dateLabel" srcEdge="BOTTOM"/>
-                <anchoritem dst="placeLabel" dstEdge="RIGHT" spacing="expr(-var(hb-param-margin-gene-right) )" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="placeLabel" dstEdge="RIGHT" spacing="-expr(var(hb-param-margin-gene-right) )" src="" srcEdge="RIGHT"/>
             </layout>
         </widget>
         <widget name="placeLabel" type="HbLabel">
@@ -154,7 +154,7 @@
                 <anchoritem dst="clockWidget" dstEdge="CENTERH" spacing="0un" src="dateLabel" srcEdge="CENTERH"/>
                 <anchoritem dst="dateLabel" dstEdge="LEFT" spacing="expr(var(hb-param-margin-gene-left) )" src="" srcEdge="LEFT"/>
                 <anchoritem dst="dateLabel" dstEdge="TOP" spacing="expr(var(hb-param-margin-gene-bottom) )" src="clockWidget" srcEdge="BOTTOM"/>
-                <anchoritem dst="dateLabel" dstEdge="RIGHT" spacing="expr(-var(hb-param-margin-gene-right) )" src="verticalDivider" srcEdge="LEFT"/>
+                <anchoritem dst="dateLabel" dstEdge="RIGHT" spacing="-expr(var(hb-param-margin-gene-right) )" src="verticalDivider" srcEdge="LEFT"/>
                 <anchoritem dst="verticalDivider" dstEdge="TOP" spacing="0un" src="" srcEdge="TOP"/>
                 <anchoritem dst="verticalDivider" dstEdge="RIGHT" spacing="0un" src="alarmListView" srcEdge="LEFT"/>
                 <anchoritem dst="verticalDivider" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
@@ -162,8 +162,8 @@
                 <anchoritem dst="horizontalDivider" dstEdge="BOTTOM" spacing="-7.17164un" src="" srcEdge="BOTTOM"/>
                 <anchoritem dst="placeLabel" dstEdge="LEFT" spacing="expr(var(hb-param-margin-gene-left) )" src="" srcEdge="LEFT"/>
                 <anchoritem dst="placeLabel" dstEdge="TOP" spacing="expr(var(hb-param-margin-gene-middle-vertical) )" src="dateLabel" srcEdge="BOTTOM"/>
-                <anchoritem dst="placeLabel" dstEdge="RIGHT" spacing="expr(-var(hb-param-margin-gene-right) )" src="alarmListView" srcEdge="LEFT"/>
-                <anchoritem dst="placeLabel" dstEdge="BOTTOM" spacing="expr(-var(hb-param-margin-gene-bottom) )" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="placeLabel" dstEdge="RIGHT" spacing="-expr(var(hb-param-margin-gene-right) )" src="alarmListView" srcEdge="LEFT"/>
+                <anchoritem dst="placeLabel" dstEdge="BOTTOM" spacing="-expr(var(hb-param-margin-gene-bottom) )" src="" srcEdge="BOTTOM"/>
             </layout>
         </widget>
         <widget name="placeLabel" type="HbLabel">

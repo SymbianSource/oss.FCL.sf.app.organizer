@@ -88,6 +88,16 @@ public:
     {
         Q_UNUSED(dayInfo);
     }
+	
+	void setDate( const QDate &date )
+    {
+        Q_UNUSED(date);
+    }
+	
+	const QDate &date() const
+    {
+        return QDate();
+    }
     
 public slots:
 

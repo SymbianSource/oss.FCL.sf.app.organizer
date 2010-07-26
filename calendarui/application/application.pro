@@ -62,9 +62,11 @@ symbian: {
 }
 
 # Input
-HEADERS += calenserviceprovider.h
+HEADERS += calenserviceprovider.h \
+			calenapplication.h
 
 SOURCES += main.cpp \
+		 calenapplication.cpp \
 	     calenserviceprovider.cpp	
 
 RESOURCES += calendar.qrc

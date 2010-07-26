@@ -50,7 +50,8 @@
  Default constructor.
  */
 CalenNativeView::CalenNativeView(MCalenServices &services) :
-	mServices(services), mIsCapturedScreenShotValid(false)
+	mServices(services), mIsCapturedScreenShotValid(false),
+    mEntriesInDataBase(false)
 {
     OstTraceFunctionEntry0( CALENNATIVEVIEW_CALENNATIVEVIEW_ENTRY );
     
@@ -114,6 +115,7 @@ void CalenNativeView::deleteAllEntries()
     OstTraceFunctionEntry0( CALENNATIVEVIEW_DELETEALLENTRIES_ENTRY );
     
 	mServices.IssueCommandL(ECalenDeleteAllEntries);
+	mEntriesInDataBase = false;
 	
 	OstTraceFunctionExit0( CALENNATIVEVIEW_DELETEALLENTRIES_EXIT );
 }
@@ -224,7 +226,11 @@ void CalenNativeView::HandleNotification(const TCalenNotification notification)
 		case ECalenNotifySystemLocaleChanged: {
 			onLocaleChanged(EChangesLocale);
 		}
-			break;
+		break;
+		case ECalenNotifySystemTimeChanged: {
+			onLocaleChanged(EChangesSystemTime);
+		}
+		break;
 		case ECalenNotifyContextChanged: {
 			onContextChanged();
 		}

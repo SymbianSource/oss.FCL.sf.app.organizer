@@ -24,7 +24,8 @@ DEPENDPATH +=  ./inc \
 							 
 INCLUDEPATH +=  ./inc 
 INCLUDEPATH += ../inc \
-			   ../../inc
+			   ../../inc \
+			   ./traces
 
 # Input
 HEADERS += 	./inc/calenextrarowformatter.h \

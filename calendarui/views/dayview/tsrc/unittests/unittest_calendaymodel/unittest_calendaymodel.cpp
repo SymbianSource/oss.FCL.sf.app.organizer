@@ -35,6 +35,11 @@ private slots:
 
     void testConstructors();
 
+	void testRowCount();
+    void testData();
+	void testRefreshModel();
+	void testModelDate();
+    
 private:
     QDateTime mDateTime;
     MCalenServices *mServices;
@@ -113,6 +118,44 @@ void TestCalenDayModel::testConstructors()
     
     delete testModel;
 }
+
+void TestCalenDayModel::testRowCount()
+	{
+		mModel->refreshModel(QDateTime());
+		QCOMPARE(mModel->rowCount(QModelIndex()), 1);
+	}
+
+void TestCalenDayModel::testData()
+	{
+		mModel->refreshModel(QDateTime());
+		
+		QVariant var = mModel->data(QModelIndex(), Qt::UserRole + 1);
+		QString typeName(var.typeName());
+		QCOMPARE(typeName, QString());
+		mModel->refreshModel(QDateTime());
+		
+		var = mModel->data(QModelIndex(), Qt::UserRole + 1);
+		typeName = QString(var.typeName());
+		QCOMPARE(typeName, QString(""));
+		
+	}
+
+void TestCalenDayModel::testRefreshModel()
+	{
+		QDateTime date(QDate(2001, 1, 2), QTime(1, 0, 0));
+		mModel->refreshModel(date);
+	
+		QCOMPARE(date, mModel->modelDate());
+	}
+
+void TestCalenDayModel::testModelDate()
+	{
+		QDateTime date(QDate(2001, 1, 1), QTime(0, 0, 0));
+		mModel->refreshModel(date);
+		
+		QCOMPARE(date, mModel->modelDate());
+	}
+
 
 QTEST_MAIN(TestCalenDayModel);
 #include "unittest_calendaymodel.moc"

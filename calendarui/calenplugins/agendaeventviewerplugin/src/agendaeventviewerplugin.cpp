@@ -17,7 +17,7 @@
 
 // User Includes.
 #include "agendaeventviewerplugin.h"
-#include "agendaentry.h"
+#include <agendaentry.h>
 
 /*!
 	\class AgendaEventViewerPlugin

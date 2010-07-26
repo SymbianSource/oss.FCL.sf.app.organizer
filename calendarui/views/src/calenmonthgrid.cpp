@@ -24,6 +24,7 @@
 #include <hbswipegesture.h>
 #include <hbtapgesture.h>
 #include <hbdeviceprofile.h>
+#include <hbinstance.h>
 
 // User includes
 #include "calenmonthgrid.h"
@@ -262,7 +263,6 @@ void CalenMonthGrid::updateMonthGridModel(QList<CalenMonthData> &monthDataArray,
 		QModelIndex lastVisibleIndex = mModel->index(indexToBeScrolled, 0);
 		scrollTo(lastVisibleIndex);
 	}
-	mMonthDataArray = monthDataArray;
 	
 	OstTraceFunctionExit0( CALENMONTHGRID_UPDATEMONTHGRIDMODEL_EXIT );
 }
@@ -275,8 +275,6 @@ void CalenMonthGrid::updateMonthGridWithInActiveMonths(
 										QList<CalenMonthData> &monthDataArray)
 {	
     OstTraceFunctionEntry0( CALENMONTHGRID_UPDATEMONTHGRIDWITHINACTIVEMONTHS_ENTRY );
-    
-	mMonthDataArray = monthDataArray;
 		
 	// Prepend the required rows
 	handlePrependingRows(monthDataArray);
@@ -318,7 +316,6 @@ void CalenMonthGrid::updateMonthGridWithEventIndicators(
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_UPDATEMONTHGRIDWITHEVENTINDICATORS_ENTRY );
     
-	mMonthDataArray = monthDataArray;
 	int count(monthDataArray.count());
 	for(int i = 0; i < count; i++) {
 		// Check if the day has events
@@ -436,13 +433,24 @@ void CalenMonthGrid::gestureEvent(QGestureEvent *event)
                 // frm orbit side is made clever enough not to scroll in other direction
                 // apart frm the registered scroll direction
                 QPointF delta = gesture->delta();
-                if (abs(delta.x()) > MAX_PAN_DIRECTION_THRESHOLD) {
+                // Check the current orientation of the device and
+                // swap the vertical and horizontal distances in landscape
+                qreal horizontalDiff = 0.0;
+                qreal verticalDiff = 0.0;
+                if (hbInstance->allMainWindows().at(0)->orientation() == Qt::Vertical) {
+                    horizontalDiff = delta.x();
+                    verticalDiff = delta.y();
+                } else {
+                    horizontalDiff = delta.y();
+                    verticalDiff = delta.x();
+                }
+                if (abs(horizontalDiff) > MAX_PAN_DIRECTION_THRESHOLD) {
                     // Now see if y coord diff has crossed threshold
-                    if (delta.y() > MAX_PAN_DIRECTION_THRESHOLD) {
+                    if (verticalDiff > MAX_PAN_DIRECTION_THRESHOLD) {
                         mIsPanGesture = true;
                         mIgnoreItemActivated = true;
                         mDirection = down;
-                    } else if (delta.y() < -MAX_PAN_DIRECTION_THRESHOLD){
+                    } else if (verticalDiff < -MAX_PAN_DIRECTION_THRESHOLD){
                         mIsPanGesture = true;
                         mIgnoreItemActivated = true;
                         mDirection = up;
@@ -451,12 +459,12 @@ void CalenMonthGrid::gestureEvent(QGestureEvent *event)
                         OstTraceFunctionExit0( CALENMONTHGRID_GESTUREEVENT_EXIT );
                         return;
                     }
-                } else if (abs(delta.x()) < MAX_PAN_DIRECTION_THRESHOLD) {
-                   if (delta.y() > MIN_PAN_DIRECTION_THRESHOLD) {
+                } else if (abs(horizontalDiff) < MAX_PAN_DIRECTION_THRESHOLD) {
+                   if (verticalDiff > MIN_PAN_DIRECTION_THRESHOLD) {
                         mIsPanGesture = true;
                         mIgnoreItemActivated = true;
                         mDirection = down;
-                   } else if (delta.y() < -MIN_PAN_DIRECTION_THRESHOLD){
+                   } else if (verticalDiff < -MIN_PAN_DIRECTION_THRESHOLD){
                         mIsPanGesture = true;
                         mIgnoreItemActivated = true;
                         mDirection = up;
@@ -551,7 +559,8 @@ void CalenMonthGrid::handlePanGestureFinished()
 	QModelIndex modelIndex = item->modelIndex();
 	
 	// Get the date which is visible at the above row
-	QDateTime date = mMonthDataArray[modelIndex.row()].Day();
+	QList<CalenMonthData>& monthDataArray = mView->monthDataList();
+	QDateTime date = monthDataArray[modelIndex.row()].Day();
 	
 	// Check if this date belong to current active month or 
 	// previous month else future month
@@ -643,8 +652,7 @@ void CalenMonthGrid::prependRows()
 	
 	// Get the updated dates from the view
 	mView->updateModelWithPrevMonth();
-	QList<CalenMonthData > monthDataList = mView->monthDataList();
-	mMonthDataArray = monthDataList;
+	QList<CalenMonthData >& monthDataList = mView->monthDataList();
 	
 	// Prepend the required rows
 	handlePrependingRows(monthDataList);
@@ -769,8 +777,7 @@ void CalenMonthGrid::appendRows()
 		
 	// Get the updated dates from the view
 	mView->updateModelWithFutureMonth();
-	QList<CalenMonthData > monthDataList = mView->monthDataList();
-	mMonthDataArray = monthDataList;
+	QList<CalenMonthData >& monthDataList = mView->monthDataList();
 	
 	// Get the model count before we add any rows into the mode
 	int rowCount = mModel->rowCount();
@@ -913,10 +920,11 @@ void CalenMonthGrid::itemActivated(const QModelIndex &index)
 		// Check if inactive date is tapped
 		QDateTime activeMonth = mView->getActiveDay();
 		int month = activeMonth.date().month();
-		if(month != mMonthDataArray[mCurrentRow].Day().date().month()){
+		QList<CalenMonthData >& monthDataList = mView->monthDataList();
+		if(month != monthDataList[mCurrentRow].Day().date().month()){
 			// Set the flag
 			mIsNonActiveDayFocused = true;
-			mNonActiveFocusedDay = mMonthDataArray[mCurrentRow].Day();
+			mNonActiveFocusedDay = monthDataList[mCurrentRow].Day();
 			
 			// Add one month to active month
 			activeMonth = activeMonth.addMonths(1);
@@ -999,7 +1007,8 @@ void CalenMonthGrid::setActiveDates(QDate activeDate)
 	// and stop the loop where it the current month ends
 	
 	int start = 0;
-	int end = mMonthDataArray.count();
+	QList<CalenMonthData >& monthDataList = mView->monthDataList();
+	int end = monthDataList.count();
 	
 	// Calculate the start and end values
 	QDate firstDateInGrid = mView->firstDayOfGrid().date();

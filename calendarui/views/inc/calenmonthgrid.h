@@ -89,7 +89,6 @@ public slots:
 
 private:
 	QStandardItemModel *mModel;
-	QList<CalenMonthData> mMonthDataArray;
 	scrollDirection mDirection;
 	bool mIsPanGesture;
 	bool mIsAtomicScroll;

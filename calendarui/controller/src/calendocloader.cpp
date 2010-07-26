@@ -15,6 +15,8 @@
  *
 */
 
+// System includes
+#include <HbGroupBox>
 
 // User includes
 #include "calendocloader.h"
@@ -27,6 +29,9 @@
 #include "calenthicklinesdrawer.h"
 #include "calencommon.h"
 #include "calenpluginlabel.h"
+#include "calendayview.h"
+#include "calendayhourscrollarea.h"
+#include "calendaycontentscrollarea.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "calendocloaderTraces.h"
@@ -140,6 +145,30 @@ QObject *CalenDocLoader::createObject(const QString &type,
 		calenNextRegionalLabel->setObjectName(name);
 		OstTraceFunctionExit0( DUP11_CALENDOCLOADER_CREATEOBJECT_EXIT );
 		return calenNextRegionalLabel;
+	} else if (name == QString(CALEN_DAYVIEW)) {
+        QObject *calenDayView = new CalenDayView(services);
+        calenDayView->setObjectName(name);
+        return calenDayView;
+	} else if (name == QString(CALEN_DAYVIEW_DAYINFO)) {
+	        QObject *calenDayInfo = new HbGroupBox();
+	        calenDayInfo->setObjectName(name);
+	        return calenDayInfo;
+	} else if (name == QString(CALEN_DAYVIEW_REGIONALINFO)) {
+        QObject *calenRegionalInfo = new HbGroupBox();
+        calenRegionalInfo->setObjectName(name);
+        return calenRegionalInfo;
+    } else if (name == QString(CALEN_DAYVIEW_CONTENTWIDGET)) {
+        QObject *calenContentWidget = new HbWidget();
+        calenContentWidget->setObjectName(name);
+        return calenContentWidget;
+    } else if (name == QString(CALEN_DAYVIEW_HOURSCROLLAREA)) {
+            QObject *hourScrollArea = new CalenDayHourScrollArea();
+            hourScrollArea->setObjectName(name);
+            return hourScrollArea;
+    } else if (name == QString(CALEN_DAYVIEW_CONTENTSCROLLAREA)) {
+            QObject *contentScrollArea = new CalenDayContentScrollArea();
+            contentScrollArea->setObjectName(name);
+            return contentScrollArea;
 	} else {
         OstTraceFunctionExit0( DUP12_CALENDOCLOADER_CREATEOBJECT_EXIT );
 		return HbDocumentLoader::createObject(type, name);

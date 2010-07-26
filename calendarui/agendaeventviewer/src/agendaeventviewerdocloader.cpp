@@ -19,6 +19,11 @@
 #include "agendaeventviewerdocloader.h"
 #include "agendaeventvieweritem.h"
 #include "agendaeventviewercommon.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "agendaeventviewerdocloaderTraces.h"
+#endif
+
 
 /*!
 	\class AgendaEventViewerDocLoader
@@ -38,6 +43,7 @@
 QObject* AgendaEventViewerDocLoader::createObject(const QString &type,
                                                   const QString &name)
 {
+	OstTraceFunctionEntry0( AGENDAEVENTVIEWERDOCLOADER_CREATEOBJECT_ENTRY );
 	if (name == QString(AGENDA_EVENT_VIEWER_SUBJECT_WIDGET) 
 			|| name == QString(AGENDA_EVENT_VIEWER_DATE_TIME_WIDGET) 
 			|| name == QString(AGENDA_EVENT_VIEWER_LOCATION_WIDGET)
@@ -47,8 +53,10 @@ QObject* AgendaEventViewerDocLoader::createObject(const QString &type,
 		
 		QObject *agendaEventViewerItem = new AgendaEventViewerItem();
 		agendaEventViewerItem->setObjectName(name);
+		OstTraceFunctionExit0( AGENDAEVENTVIEWERDOCLOADER_CREATEOBJECT_EXIT );
 		return agendaEventViewerItem;
 	} else {
+	    OstTraceFunctionExit0( DUP1_AGENDAEVENTVIEWERDOCLOADER_CREATEOBJECT_EXIT );
 		return HbDocumentLoader::createObject(type, name);
 	}
 }

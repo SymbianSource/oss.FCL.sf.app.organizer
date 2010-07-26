@@ -1,7 +1,4 @@
 <!DOCTYPE RCC><RCC version="1.0">
-	<qresource prefix="/image">
-		<file alias="clockAlarm.svg">icons/pri_small_bell.svg</file>
-	</qresource>
 	<qresource prefix="/xml">
 		<file alias="alarmalert_calendar_unlocked.docml">xml/alarmalert_calendar_unlocked.docml</file>
 		<file alias="alarmalert_clock_unlocked.docml">xml/alarmalert_clock_unlocked.docml</file>

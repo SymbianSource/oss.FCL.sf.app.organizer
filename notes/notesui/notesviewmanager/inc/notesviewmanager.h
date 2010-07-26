@@ -49,6 +49,9 @@ public:
 	NOTESVIEWMANAGER_EXPORT void switchToView(
 			NotesNamespace::NotesViewIds viewId);
 
+signals:
+	void appReady();
+	
 private:
 	void loadNotesMainView();
 	void loadNotesCollectionView();

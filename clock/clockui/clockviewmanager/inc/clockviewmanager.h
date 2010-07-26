@@ -43,6 +43,9 @@ public:
 public:
 	CLOCKVIEWMANAGER_EXPORT void showView(ClockViews view);
 
+signals:
+		void appReady();
+
 private:
 	void loadMainView();
 	void loadWorldClockView();

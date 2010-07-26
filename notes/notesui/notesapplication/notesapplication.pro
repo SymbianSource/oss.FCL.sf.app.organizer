@@ -20,11 +20,13 @@ TARGET = notes
 INCLUDEPATH += \
 		. \
 		../notesappcontroller/inc \
-		../../inc
+		../../inc \
+		./traces
 
 DEPENDPATH += \
 		. \
 		./src \
+		./inc \
 		../../data
 
 symbian: {
@@ -51,7 +53,12 @@ symbian: {
 	SKINICON = qtg_large_notes
 }
 
-SOURCES += main.cpp
+SOURCES += \
+		main.cpp \
+		notesapplication.cpp
+
+HEADERS += \
+		notesapplication.h
 
 RESOURCES += notes.qrc
 

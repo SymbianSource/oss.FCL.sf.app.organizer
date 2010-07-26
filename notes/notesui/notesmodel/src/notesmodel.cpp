@@ -26,9 +26,14 @@
 
 // User includes
 #include "notesmodel.h"
-#include "agendautil.h"
-#include "agendaentry.h"
+#include <agendautil.h>
+#include <agendaentry.h>
 #include "notescommon.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "notesmodelTraces.h"
+#endif
+
 
 /*!
 	\class NotesModel
@@ -48,6 +53,7 @@ NotesModel::NotesModel(AgendaUtil *agendaUtil, QObject *parent)
 :QObject(parent),
  mAgendaUtil(agendaUtil)
 {
+	OstTraceFunctionEntry0( NOTESMODEL_NOTESMODEL_ENTRY );
 	// Construct the source model.
 	mSourceModel = new QStandardItemModel(0, 1, this);
 
@@ -72,6 +78,7 @@ NotesModel::NotesModel(AgendaUtil *agendaUtil, QObject *parent)
 	connect(
 			mAgendaUtil, SIGNAL(instanceViewCreationCompleted(int)),
 			this,SLOT(handleInstanceViewCreationCompleted(int)));
+	OstTraceFunctionExit0( NOTESMODEL_NOTESMODEL_EXIT );
 }
 
 /*!
@@ -79,7 +86,9 @@ NotesModel::NotesModel(AgendaUtil *agendaUtil, QObject *parent)
  */
 NotesModel::~NotesModel()
 {
+	OstTraceFunctionEntry0( DUP1_NOTESMODEL_NOTESMODEL_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( DUP1_NOTESMODEL_NOTESMODEL_EXIT );
 }
 
 /*!
@@ -90,7 +99,9 @@ NotesModel::~NotesModel()
  */
 QAbstractItemModel *NotesModel::sourceModel()
 {
+	OstTraceFunctionEntry0( NOTESMODEL_SOURCEMODEL_ENTRY );
 	Q_ASSERT(mSourceModel);
+	OstTraceFunctionExit0( NOTESMODEL_SOURCEMODEL_EXIT );
 	return mSourceModel;
 }
 
@@ -99,6 +110,7 @@ QAbstractItemModel *NotesModel::sourceModel()
  */
 void NotesModel::populateSourceModel()
 {
+	OstTraceFunctionEntry0( NOTESMODEL_POPULATESOURCEMODEL_ENTRY );
 	// Clear the model if it has any data already
 	mSourceModel->clear();
 	mSourceModel->setColumnCount(1);
@@ -128,6 +140,7 @@ void NotesModel::populateSourceModel()
 
 	// Add the completed to-dos to the model.
 	appendCompTodosToModel(agendaEntyList);
+	OstTraceFunctionExit0( NOTESMODEL_POPULATESOURCEMODEL_EXIT );
 }
 
 /*!
@@ -139,8 +152,10 @@ void NotesModel::populateSourceModel()
  */
 void NotesModel::updateSourceModel(ulong id)
 {
+	OstTraceFunctionEntry0( NOTESMODEL_UPDATESOURCEMODEL_ENTRY );
 	AgendaEntry entry = mAgendaUtil->fetchById(id);
 	if (entry.isNull()) {
+		OstTraceFunctionExit0( NOTESMODEL_UPDATESOURCEMODEL_EXIT );
 		return;
 	}
 
@@ -234,6 +249,7 @@ void NotesModel::updateSourceModel(ulong id)
 			}
 		}
 	}
+	OstTraceFunctionExit0( DUP1_NOTESMODEL_UPDATESOURCEMODEL_EXIT );
 }
 
 /*!
@@ -244,9 +260,11 @@ void NotesModel::updateSourceModel(ulong id)
  */
 void NotesModel::populateSourceModel(QList<ulong> ids)
 {
+	OstTraceFunctionEntry0( DUP1_NOTESMODEL_POPULATESOURCEMODEL_ENTRY );
 	Q_UNUSED(ids)
 
 	QTimer::singleShot(1, this, SLOT(populateSourceModel()));
+	OstTraceFunctionExit0( DUP1_NOTESMODEL_POPULATESOURCEMODEL_EXIT );
 }
 
 /*!
@@ -257,10 +275,12 @@ void NotesModel::populateSourceModel(QList<ulong> ids)
  */
 void NotesModel::addEntryToModel(ulong id)
 {
+	OstTraceFunctionEntry0( NOTESMODEL_ADDENTRYTOMODEL_ENTRY );
 	// We have different logic for adding a note or an incompleted to-do or a
 	// completed to-do.
 	AgendaEntry entry = mAgendaUtil->fetchById(id);
 	if (entry.isNull()) {
+		OstTraceFunctionExit0( NOTESMODEL_ADDENTRYTOMODEL_EXIT );
 		return;
 	}
 	bool notify = false;
@@ -285,6 +305,7 @@ void NotesModel::addEntryToModel(ulong id)
 	if (notify) {
 		emit rowAdded(indexToNotify);
 	}
+	OstTraceFunctionExit0( DUP1_NOTESMODEL_ADDENTRYTOMODEL_EXIT );
 }
 
 /*!
@@ -294,10 +315,12 @@ void NotesModel::addEntryToModel(ulong id)
  */
 void NotesModel::removeEntryFromModel(ulong id)
 {
+	OstTraceFunctionEntry0( NOTESMODEL_REMOVEENTRYFROMMODEL_ENTRY );
 	for (int iter = 0; iter < mSourceModel->rowCount(); iter++) {
 		QModelIndex mdlIndex = mSourceModel->index(iter, 0);
 
 		if (!mdlIndex.isValid()) {
+			OstTraceFunctionExit0( NOTESMODEL_REMOVEENTRYFROMMODEL_EXIT );
 			return;
 		}
 
@@ -324,6 +347,7 @@ void NotesModel::removeEntryFromModel(ulong id)
 			break;
 		}
 	}
+	OstTraceFunctionExit0( DUP1_NOTESMODEL_REMOVEENTRYFROMMODEL_EXIT );
 }
 
 /*!
@@ -331,8 +355,10 @@ void NotesModel::removeEntryFromModel(ulong id)
  */
 void NotesModel::handleInstanceViewCreationCompleted(int status)
 {
+	OstTraceFunctionEntry0( NOTESMODEL_HANDLEINSTANCEVIEWCREATIONCOMPLETED_ENTRY );
 	Q_UNUSED(status);
 	populateSourceModel();
+	OstTraceFunctionExit0( NOTESMODEL_HANDLEINSTANCEVIEWCREATIONCOMPLETED_EXIT );
 }
 
 /*!
@@ -344,6 +370,7 @@ void NotesModel::handleInstanceViewCreationCompleted(int status)
  */
 void NotesModel::modifyEntryInModel(ulong id, int row)
 {
+	OstTraceFunctionEntry0( NOTESMODEL_MODIFYENTRYINMODEL_ENTRY );
 	// Get the model index.
 	QModelIndex modelIndex = mSourceModel->index(row, 0);
 	Q_ASSERT(modelIndex.isValid());
@@ -443,6 +470,7 @@ void NotesModel::modifyEntryInModel(ulong id, int row)
 		// Set the icons.
 		mSourceModel->setData(modelIndex, iconList, Qt::DecorationRole);
 	}
+	OstTraceFunctionExit0( NOTESMODEL_MODIFYENTRYINMODEL_EXIT );
 }
 
 /*!
@@ -452,6 +480,7 @@ void NotesModel::modifyEntryInModel(ulong id, int row)
  */
 void NotesModel::appendNotesToModel(QList<AgendaEntry> &agendaEntryList)
 {
+	OstTraceFunctionEntry0( NOTESMODEL_APPENDNOTESTOMODEL_ENTRY );
 	int entriesCount = agendaEntryList.count();
 	// Iterate and add notes to the model.
 	mSourceModel->insertRows(mSourceModel->rowCount(), entriesCount);
@@ -544,6 +573,7 @@ void NotesModel::appendNotesToModel(QList<AgendaEntry> &agendaEntryList)
 		// Update the notes count.
 		mNotesCount++;
 	}
+	OstTraceFunctionExit0( NOTESMODEL_APPENDNOTESTOMODEL_EXIT );
 }
 
 /*!
@@ -553,6 +583,7 @@ void NotesModel::appendNotesToModel(QList<AgendaEntry> &agendaEntryList)
  */
 void NotesModel::appendInCompTodosToModel(QList<AgendaEntry> &agendaEntryList)
 {
+	OstTraceFunctionEntry0( NOTESMODEL_APPENDINCOMPTODOSTOMODEL_ENTRY );
 	int entriesCount = agendaEntryList.count();
 	// Iterate and add incomplete to-do to the model.
 	mSourceModel->insertRows(mSourceModel->rowCount(), entriesCount);
@@ -624,6 +655,7 @@ void NotesModel::appendInCompTodosToModel(QList<AgendaEntry> &agendaEntryList)
 		// Update the incompleted to-do count.
 		mInCompTodoCount++;
 	}
+	OstTraceFunctionExit0( NOTESMODEL_APPENDINCOMPTODOSTOMODEL_EXIT );
 }
 
 /*!
@@ -633,6 +665,7 @@ void NotesModel::appendInCompTodosToModel(QList<AgendaEntry> &agendaEntryList)
  */
 void NotesModel::appendCompTodosToModel(QList<AgendaEntry> &agendaEntryList)
 {
+	OstTraceFunctionEntry0( NOTESMODEL_APPENDCOMPTODOSTOMODEL_ENTRY );
 	int entriesCount = agendaEntryList.count();
 	// Iterate and add complete to-do to the model.
 	mSourceModel->insertRows(mSourceModel->rowCount(), entriesCount);
@@ -696,6 +729,7 @@ void NotesModel::appendCompTodosToModel(QList<AgendaEntry> &agendaEntryList)
 		// Update the completed to-do count.
 		mCompTodoCount++;
 	}
+	OstTraceFunctionExit0( NOTESMODEL_APPENDCOMPTODOSTOMODEL_EXIT );
 }
 
 /*!
@@ -707,8 +741,10 @@ void NotesModel::appendCompTodosToModel(QList<AgendaEntry> &agendaEntryList)
  */
 bool NotesModel::insertNoteToModel(QModelIndex &index, ulong id)
 {
+	OstTraceFunctionEntry0( NOTESMODEL_INSERTNOTETOMODEL_ENTRY );
 	AgendaEntry entry = mAgendaUtil->fetchById(id);
 	if (entry.isNull()) {
+		OstTraceFunctionExit0( NOTESMODEL_INSERTNOTETOMODEL_EXIT );
 		return false;
 	}
 
@@ -791,6 +827,7 @@ bool NotesModel::insertNoteToModel(QModelIndex &index, ulong id)
 
 	index = mdlIndex;
 
+	OstTraceFunctionExit0( DUP1_NOTESMODEL_INSERTNOTETOMODEL_EXIT );
 	return true;
 }
 
@@ -804,12 +841,14 @@ bool NotesModel::insertNoteToModel(QModelIndex &index, ulong id)
  */
 bool NotesModel::insertInCompTodoToModel(QModelIndex &index, ulong id)
 {
+	OstTraceFunctionEntry0( NOTESMODEL_INSERTINCOMPTODOTOMODEL_ENTRY );
 
 	bool success = false;
 
 	// Fetch the entry first.
 	AgendaEntry entry = mAgendaUtil->fetchById(id);
 	if (entry.isNull()) {
+		OstTraceFunctionExit0( NOTESMODEL_INSERTINCOMPTODOTOMODEL_EXIT );
 		return success;
 	}
 
@@ -896,6 +935,7 @@ bool NotesModel::insertInCompTodoToModel(QModelIndex &index, ulong id)
 		}
 	}
 
+	OstTraceFunctionExit0( DUP1_NOTESMODEL_INSERTINCOMPTODOTOMODEL_EXIT );
 	return success;
 }
 
@@ -909,11 +949,13 @@ bool NotesModel::insertInCompTodoToModel(QModelIndex &index, ulong id)
  */
 bool NotesModel::insertCompTodoToModel(QModelIndex &index, ulong id)
 {
+	OstTraceFunctionEntry0( NOTESMODEL_INSERTCOMPTODOTOMODEL_ENTRY );
 	bool success = false;
 
 	// Fetch the entry first.
 	AgendaEntry entry = mAgendaUtil->fetchById(id);
 	if (entry.isNull()) {
+		OstTraceFunctionExit0( NOTESMODEL_INSERTCOMPTODOTOMODEL_EXIT );
 		return success;
 	}
 
@@ -996,6 +1038,7 @@ bool NotesModel::insertCompTodoToModel(QModelIndex &index, ulong id)
 		}
 	}
 
+	OstTraceFunctionExit0( DUP1_NOTESMODEL_INSERTCOMPTODOTOMODEL_EXIT );
 	return success;
 }
 
@@ -1006,6 +1049,7 @@ bool NotesModel::insertCompTodoToModel(QModelIndex &index, ulong id)
  */
 QString NotesModel::dateFormatString()
 {
+	OstTraceFunctionEntry0( NOTESMODEL_DATEFORMATSTRING_ENTRY );
 	HbExtendedLocale locale = HbExtendedLocale::system();
 
 	QString dateFormat;
@@ -1035,6 +1079,7 @@ QString NotesModel::dateFormatString()
 			break;
 	}
 
+	OstTraceFunctionExit0( NOTESMODEL_DATEFORMATSTRING_EXIT );
 	return dateFormat;
 }
 
@@ -1045,6 +1090,7 @@ QString NotesModel::dateFormatString()
  */
 QString NotesModel::timeFormatString()
 {
+	OstTraceFunctionEntry0( NOTESMODEL_TIMEFORMATSTRING_ENTRY );
 	QString timeFormat;
 
 	HbExtendedLocale locale = HbExtendedLocale::system();
@@ -1060,6 +1106,7 @@ QString NotesModel::timeFormatString()
 		timeFormat.append("mm");
 	}
 
+	OstTraceFunctionExit0( NOTESMODEL_TIMEFORMATSTRING_EXIT );
 	return timeFormat;
 }
 

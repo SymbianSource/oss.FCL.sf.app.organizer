@@ -68,6 +68,7 @@ void TimezoneClient::deleteInstance()
 	if (mReferenceCount) {
 		delete mTimezoneClient;
 		mTimezoneClient = 0;
+		mReferenceCount = false;
 	}
 }
 
@@ -466,6 +467,17 @@ int TimezoneClient::getStandardOffset(int timezoneId)
 
 	tzHandle.GetOffsetsForTimeZoneIdsL(idArray, offsetArray);
 	int stdOffset = offsetArray[0];
+	
+	if (isDSTOnL(timezoneId)) {
+		CTzId* tzId = CTzId::NewL( timezoneId );
+		CleanupStack::PushL( tzId );
+		
+		// Get the offset with DST enabled.
+		getUtcDstOffsetL(stdOffset, *tzId);
+		
+		CleanupStack::PopAndDestroy(tzId);
+		
+    }
 
 	offsetArray.Close();
 	idArray.Close();

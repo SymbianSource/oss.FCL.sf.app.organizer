@@ -21,7 +21,8 @@ DEPENDPATH += ./ \
 		  				./src
 DEFINES += CALENCONTROLLER_DLL
 INCLUDEPATH += ./inc \
-						   ../inc \ 
+						   ../inc \
+						   ../application/inc \
 						   ../views/inc \
 						   ../views/dayview/inc \
 						   ../globaldata/inc \
@@ -106,7 +107,7 @@ SOURCES += calenactionui.cpp \
            calenviewingstate.cpp	\
            caleneditui.cpp \
            calendocloader.cpp
-
+		   
 RESOURCES += ./data/calendar.qrc
 
 # End of file	--Don't remove this.   

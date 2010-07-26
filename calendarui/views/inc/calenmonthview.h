@@ -78,7 +78,7 @@ public:  // From CCalenView
 	void populatePrevMonth();
 	void populateNextMonth();
 	void onLocaleChanged(int reason);
-	QList<CalenMonthData> monthDataList();
+	QList<CalenMonthData>& monthDataList();
 	void updateModelWithPrevMonth();
 	void updateModelWithFutureMonth();
 	void populatePreviewPane(QDateTime &dateTime);

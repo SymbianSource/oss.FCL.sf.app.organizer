@@ -23,6 +23,7 @@
             <widget name="monthViewExceptPreviewPane" type="HbWidget">
                 <widget name="monthTitle" type="HbLabel">
                     <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+					<string name="textColor" value="qtc_cal_monthgrid_title"/>
 					<fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                     <real name="z" value="6"/>
                     <sizehint height="expr(var(hb-param-text-height-secondary) + 0.75un + 0.75un)" type="PREFERRED" width="52un"/>
@@ -33,64 +34,50 @@
                 <widget name="dayNamesWidget" type="HbWidget">
                     <widget name="firstDayLabel" type="HbLabel">
                         <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+						<string name="textColor" value="qtc_cal_week_day"/>
                         <real name="z" value="6"/>
-                        <sizehint height="3un" type="PREFERRED" width="3.41604un"/>
-                        <sizehint height="3un" type="MINIMUM" width="3.41604un"/>
-                        <sizehint height="3un" type="MAXIMUM" width="10.54104un"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
                     <widget name="secondDayLabel" type="HbLabel">
                         <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+						<string name="textColor" value="qtc_cal_week_day"/>
                         <real name="z" value="6"/>
-                        <sizehint height="3un" type="PREFERRED" width="3.41604un"/>
-                        <sizehint height="3un" type="MINIMUM" width="3.41604un"/>
-                        <sizehint height="3un" type="MAXIMUM" width="10.54104un"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
                     <widget name="thirdDayLabel" type="HbLabel">
                         <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+						<string name="textColor" value="qtc_cal_week_day"/>
                         <real name="z" value="6"/>
-                        <sizehint height="3un" type="PREFERRED" width="3.41604un"/>
-                        <sizehint height="3un" type="MINIMUM" width="3.41604un"/>
-                        <sizehint height="3un" type="MAXIMUM" width="10.54104un"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
                     <widget name="fourthDayLabel" type="HbLabel">
                         <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+						<string name="textColor" value="qtc_cal_week_day"/>
                         <real name="z" value="6"/>
-                        <sizehint height="3un" type="PREFERRED" width="3.41604un"/>
-                        <sizehint height="3un" type="MINIMUM" width="3.41604un"/>
-                        <sizehint height="3un" type="MAXIMUM" width="10.54104un"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
                     <widget name="fifthDayLabel" type="HbLabel">
                         <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+						<string name="textColor" value="qtc_cal_week_day"/>
                         <real name="z" value="6"/>
-                        <sizehint height="3un" type="PREFERRED" width="3.41604un"/>
-                        <sizehint height="3un" type="MINIMUM" width="3.41604un"/>
-                        <sizehint height="3un" type="MAXIMUM" width="10.54104un"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
                     <widget name="sixthDayLabel" type="HbLabel">
                         <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+						<string name="textColor" value="qtc_cal_week_day"/>
                         <real name="z" value="6"/>
-                        <sizehint height="3un" type="PREFERRED" width="3.41604un"/>
-                        <sizehint height="3un" type="MINIMUM" width="3.41604un"/>
-                        <sizehint height="3un" type="MAXIMUM" width="10.54104un"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
                     <widget name="seventhDayLabel" type="HbLabel">
                         <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+						<string name="textColor" value="qtc_cal_week_day"/>
                         <real name="z" value="6"/>
-                        <sizehint height="3un" type="PREFERRED" width="3.41604un"/>
-                        <sizehint height="3un" type="MINIMUM" width="3.41604un"/>
-                        <sizehint height="3un" type="MAXIMUM" width="10.54104un"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
                     <real name="z" value="6"/>
-                    <sizehint height="3un" type="PREFERRED" width="52un"/>
-                    <sizehint height="3un" type="MINIMUM" width="52un"/>
-                    <sizehint height="3un" type="MAXIMUM" width="52un"/>
+                        <sizehint height="expr(var(hb-param-text-height-tiny))" type="PREFERRED" width="52un"/>
+                        <sizehint height="expr(var(hb-param-text-height-tiny))" type="MINIMUM" width="52un"/>
+                        <sizehint height="expr(var(hb-param-text-height-tiny))" type="MAXIMUM" width="52un"/>
                     <layout orientation="Horizontal" spacing="0un" type="linear">
                         <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
                         <linearitem itemname="firstDayLabel"/>
@@ -149,7 +136,7 @@
                     <sizehint height="43.77612un" type="PREFERRED" width="6.41604un"/>
                     <sizehint height="43.77612un" type="MINIMUM" width="6.41604un"/>
                     <sizehint height="62.77612un" type="MAXIMUM" width="6.41604un"/>
-                    <layout orientation="Vertical" type="linear">
+                    <layout orientation="Vertical" spacing="0un" type="linear">
                         <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
                         <linearitem itemname="firstWeekLabel"/>
                         <linearitem itemname="secondWeekLabel"/>
@@ -202,7 +189,9 @@
 								<bool name="frictionEnabled" value="TRUE"/>
 	                        </widget>
 	                        <widget name="NoEntriesLabelPrev" type="HbLabel">
-	                            <string locid="txt_calendar_empty_list_no_entries" name="plainText"/>
+	                            <string locid="txt_calendar_preview_no_entries" name="plainText"/>
+								<fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+								<enums name="textWrapping" value="TextWordWrap"/>
 								<enums name="alignment" value="AlignVCenter|AlignHCenter"/>
 								<enums name="elideMode" value="ElideNone"/>
 	                        </widget>
@@ -257,7 +246,9 @@
 								<bool name="frictionEnabled" value="TRUE"/>
                             </widget>
                             <widget name="NoEntriesLabelCurr" type="HbLabel">
-                                <string locid="txt_calendar_empty_list_no_entries" name="plainText"/>
+                                <string locid="txt_calendar_preview_no_entries" name="plainText"/>
+								<fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+								<enums name="textWrapping" value="TextWordWrap"/>
 								<enums name="alignment" value="AlignVCenter|AlignHCenter"/>
 								<enums name="elideMode" value="ElideNone"/>
                             </widget>
@@ -312,7 +303,9 @@
 								<bool name="frictionEnabled" value="TRUE"/>
                             </widget>
                             <widget name="NoEntriesLabelNext" type="HbLabel">
-                                <string locid="txt_calendar_empty_list_no_entries" name="plainText"/>
+                                <string locid="txt_calendar_preview_no_entries" name="plainText"/>
+								<fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
+								<enums name="textWrapping" value="TextWordWrap"/>
 								<enums name="alignment" value="AlignVCenter|AlignHCenter"/>
 								<enums name="elideMode" value="ElideNone"/>
                             </widget>

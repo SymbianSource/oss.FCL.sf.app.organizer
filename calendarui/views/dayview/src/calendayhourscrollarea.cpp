@@ -42,14 +42,9 @@ CalenDayHourScrollArea::CalenDayHourScrollArea(QGraphicsItem *parent) :
     HbScrollArea(parent),
     mDateTime(QDateTime())
 {
-    // Set scroll settings
-    setScrollDirections(Qt::Vertical);
-    setScrollingStyle(HbScrollArea::PanWithFollowOn);
-    setVerticalScrollBarPolicy(HbScrollArea::ScrollBarAlwaysOff);
-    grabGesture(Qt::PanGesture, Qt::ReceivePartialGestures);
+    grabGesture(Qt::PanGesture);
     
-    // Get height and width of hour elements and set fixed size policy
-    qreal hourElementHeight = CalenDayUtils::instance()->hourElementHeight();
+    // Get width of hour elements and fix its size
     qreal hourElementWidth = CalenDayUtils::instance()->hourElementWidth();
 
     // Create widget for hour elements
@@ -61,15 +56,9 @@ CalenDayHourScrollArea::CalenDayHourScrollArea(QGraphicsItem *parent) :
     for (int i = 0; i < 24; i++) {
         CalenDayHourElement* element = new CalenDayHourElement(QTime(i, 0),
             this);
-        element->setPreferredWidth(hourElementWidth);
-        element->setPreferredHeight(hourElementHeight);
-        element->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, 
-            QSizePolicy::Fixed));
         hourLayout->addItem(element);
-        
         mHourElements.append(element);
     }
-    
     hourLayout->setContentsMargins(0.0, 0.0, 0.0, 0.0);
     hourLayout->setSpacing(0.0);
     
@@ -87,6 +76,7 @@ CalenDayHourScrollArea::CalenDayHourScrollArea(QGraphicsItem *parent) :
  */
 CalenDayHourScrollArea::~CalenDayHourScrollArea()
 {
+    mHourElements.clear();
 }
 
 /*!

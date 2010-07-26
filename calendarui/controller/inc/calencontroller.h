@@ -19,15 +19,17 @@
 #ifndef CALENCONTROLLER_H
 #define CALENCONTROLLER_H
 
-// INCLUDES
-#include <e32base.h>                    // CAsyncCallBack
-#include <vwsdef.h>                     // TVwsViewId
-#include <apadef.h>                     // TApaCommand
-#include <qglobal.h>					// Q_DECL_EXPORT macro
+// System includes
+#include <e32base.h>// CAsyncCallBack
+#include <vwsdef.h>// TVwsViewId
+#include <apadef.h>// TApaCommand
+#include <qglobal.h>// Q_DECL_EXPORT macro
 #include <agendautil.h>
 #include <qobject>
-#include "hb_calencommands.hrh"            // Calendar commands
-#include "calennotificationhandler.h"   // TCalenNotification
+
+// User includes
+#include "hb_calencommands.hrh"// Calendar commands
+#include "calennotificationhandler.h"// TCalenNotification
 #include "calenservices.h"
 #include "calenservicesfactory.h"       // MCalenServicesFactory
 
@@ -100,7 +102,10 @@ class CALENCONTROLLER_EXPORT CCalenController : public QObject, public MCalenSer
 		 * destructor
 		 */
 		~CCalenController(); 
-           
+
+	signals:
+		void appReady();
+		
     public:  // New functions
         /**
          * Adds the passed command to the command queue. Command are handled
@@ -225,6 +230,11 @@ class CALENCONTROLLER_EXPORT CCalenController : public QObject, public MCalenSer
          */
         bool eventFilter(QObject *object, QEvent *event);
         
+        /**
+         * Emits appReady signal.
+         */
+        void emitAppReady();
+        
     private:  // Construction and destruction
         
         /**
@@ -236,6 +246,8 @@ class CALENCONTROLLER_EXPORT CCalenController : public QObject, public MCalenSer
 		*/
         void checkMultipleCreation();
         
+private slots:
+    void raiseWindow();
    
     private:  // Data
         CalenViewManager*  iViewManager;// Activate / deactivate views

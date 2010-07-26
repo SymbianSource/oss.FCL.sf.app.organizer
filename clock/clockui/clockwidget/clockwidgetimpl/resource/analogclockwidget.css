@@ -9,7 +9,7 @@ AnalogClockWidget::clock_background {
 
 AnalogClockWidget::clock_minute_hand {
   size-policy:expanding expanding;
-  zvalue: 1;
+  zvalue: 2;
 }
 
 AnalogClockWidget::clock_hour_hand {
@@ -19,5 +19,5 @@ AnalogClockWidget::clock_hour_hand {
 
 AnalogClockWidget::clock_second_hand {
   size-policy:expanding expanding;
-  zvalue: 3;
+  zvalue: 1;
 }

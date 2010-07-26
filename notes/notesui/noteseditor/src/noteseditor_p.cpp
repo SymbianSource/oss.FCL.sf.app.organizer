@@ -30,8 +30,13 @@
 #include "noteseditor_p.h"
 #include "notesnoteeditor.h"
 #include "notestodoeditor.h"
-#include "agendautil.h"
-#include "agendaentry.h"
+#include <agendautil.h>
+#include <agendaentry.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "noteseditor_pTraces.h"
+#endif
+
 
 /*!
 	\class NotesEditorPrivate
@@ -51,10 +56,11 @@ NotesEditorPrivate::NotesEditorPrivate(AgendaUtil *agendaUtil, QObject *parent)
  mTranslator(0),
  mNoteId(0)
 {
+	OstTraceFunctionEntry0( NOTESEDITORPRIVATE_NOTESEDITORPRIVATE_ENTRY );
 	// First get the q-pointer.
 	q_ptr = static_cast<NotesEditor *> (parent);
 	
-	mTranslator = new HbTranslator("notes");
+	mTranslator = new HbTranslator("noteseditor");
 	mTranslator->loadCommon();
 
 	// Here we check if the agendautil passed by the client is 0. If so, then we
@@ -72,6 +78,7 @@ NotesEditorPrivate::NotesEditorPrivate(AgendaUtil *agendaUtil, QObject *parent)
 			mAgendaUtil, SIGNAL(entriesChanged(QList<ulong> )),
 			this, SLOT(handleEntriesChanged(QList<ulong> )));
 
+OstTraceFunctionExit0( NOTESEDITORPRIVATE_NOTESEDITORPRIVATE_EXIT );
 }
 
 /*!
@@ -79,6 +86,7 @@ NotesEditorPrivate::NotesEditorPrivate(AgendaUtil *agendaUtil, QObject *parent)
  */
 NotesEditorPrivate::~NotesEditorPrivate()
 {
+	OstTraceFunctionEntry0( DUP1_NOTESEDITORPRIVATE_NOTESEDITORPRIVATE_ENTRY );
 	if (mOwnsAgendaUtil) {
 		delete mAgendaUtil;
 		mAgendaUtil = 0;
@@ -88,6 +96,7 @@ NotesEditorPrivate::~NotesEditorPrivate()
 		delete mTranslator;
 		mTranslator = 0;
 	}
+OstTraceFunctionExit0( DUP1_NOTESEDITORPRIVATE_NOTESEDITORPRIVATE_EXIT );
 }
 
 
@@ -98,6 +107,7 @@ NotesEditorPrivate::~NotesEditorPrivate()
  */
 void NotesEditorPrivate::edit(const QString &string)
 {
+	OstTraceFunctionEntry0( NOTESEDITORPRIVATE_EDIT_ENTRY );
 	// Create a agenda entry by setting the text as description for the note.
 	AgendaEntry newNote;
 	newNote.setType(AgendaEntry::TypeNote);
@@ -111,6 +121,7 @@ void NotesEditorPrivate::edit(const QString &string)
 
 	// launch note editor
 	mNoteEditor->execute(newNote);
+OstTraceFunctionExit0( NOTESEDITORPRIVATE_EDIT_EXIT );
 }
 
 /*!
@@ -121,7 +132,9 @@ void NotesEditorPrivate::edit(const QString &string)
  */
 void NotesEditorPrivate::edit(const QFile &handle)
 {
+	OstTraceFunctionEntry0( DUP1_NOTESEDITORPRIVATE_EDIT_ENTRY );
 	Q_UNUSED(handle)
+OstTraceFunctionExit0( DUP1_NOTESEDITORPRIVATE_EDIT_EXIT );
 }
 
 /*!
@@ -131,6 +144,7 @@ void NotesEditorPrivate::edit(const QFile &handle)
  */
 void NotesEditorPrivate::edit(AgendaEntry entry)
 {
+	OstTraceFunctionEntry0( DUP2_NOTESEDITORPRIVATE_EDIT_ENTRY );
 	// Check if its a new note or a note being edited.
 	if (0 < entry.id()) {
 		mNewEntry = false;
@@ -158,8 +172,10 @@ void NotesEditorPrivate::edit(AgendaEntry entry)
 		mTodoEditor->execute(entry);
 	} else {
 		// Invalid entry type.
+		OstTraceFunctionExit0( DUP2_NOTESEDITORPRIVATE_EDIT_EXIT );
 		return;
 	}
+OstTraceFunctionExit0( DUP3_NOTESEDITORPRIVATE_EDIT_EXIT );
 }
 
 /*!
@@ -169,6 +185,7 @@ void NotesEditorPrivate::edit(AgendaEntry entry)
  */
 void NotesEditorPrivate::edit(ulong id)
 {
+	OstTraceFunctionEntry0( DUP3_NOTESEDITORPRIVATE_EDIT_ENTRY );
 	// Fetch the entry using the id provided
 	AgendaEntry entry = mAgendaUtil->fetchById(id);
 	if (!entry.isNull()) {
@@ -176,9 +193,11 @@ void NotesEditorPrivate::edit(ulong id)
 		edit(entry);
 	} else {
 		// Invalid entry.
+		OstTraceFunctionExit0( DUP4_NOTESEDITORPRIVATE_EDIT_EXIT );
 		return;
 	}
 
+OstTraceFunctionExit0( DUP5_NOTESEDITORPRIVATE_EDIT_EXIT );
 }
 
 /*!
@@ -189,6 +208,7 @@ void NotesEditorPrivate::edit(ulong id)
  */
 void NotesEditorPrivate::create(NotesEditor::CreateType type)
 {
+OstTraceFunctionEntry0( NOTESEDITORPRIVATE_CREATE_ENTRY );
 
 	switch(type) {
 		case NotesEditor::CreateNote: {
@@ -238,6 +258,7 @@ void NotesEditorPrivate::create(NotesEditor::CreateType type)
 		break;
 	}
 
+OstTraceFunctionExit0( NOTESEDITORPRIVATE_CREATE_EXIT );
 }
 
 
@@ -248,6 +269,7 @@ void NotesEditorPrivate::create(NotesEditor::CreateType type)
  */
 ulong NotesEditorPrivate::close(NotesEditor::CloseType type)
 {
+OstTraceFunctionEntry0( NOTESEDITORPRIVATE_CLOSE_ENTRY );
 
 	switch (type) {
 		case NotesEditor::CloseWithSave: {
@@ -286,6 +308,7 @@ ulong NotesEditorPrivate::close(NotesEditor::CloseType type)
 			mNoteId = 0;
 		break;
 	}
+	OstTraceFunctionExit0( NOTESEDITORPRIVATE_CLOSE_EXIT );
 	return mNoteId;
 }
 
@@ -296,6 +319,7 @@ ulong NotesEditorPrivate::close(NotesEditor::CloseType type)
  */
 QString NotesEditorPrivate::dateFormatString()
 {
+	OstTraceFunctionEntry0( NOTESEDITORPRIVATE_DATEFORMATSTRING_ENTRY );
 	HbExtendedLocale locale = HbExtendedLocale::system();
 
 	QString dateFormat;
@@ -325,6 +349,7 @@ QString NotesEditorPrivate::dateFormatString()
 			break;
 	}
 
+	OstTraceFunctionExit0( NOTESEDITORPRIVATE_DATEFORMATSTRING_EXIT );
 	return dateFormat;
 }
 
@@ -335,6 +360,7 @@ QString NotesEditorPrivate::dateFormatString()
  */
 QString NotesEditorPrivate::timeFormatString()
 {
+	OstTraceFunctionEntry0( NOTESEDITORPRIVATE_TIMEFORMATSTRING_ENTRY );
 	QString timeFormat;
 
 	HbExtendedLocale locale = HbExtendedLocale::system();
@@ -350,6 +376,7 @@ QString NotesEditorPrivate::timeFormatString()
 		timeFormat.append("mm");
 	}
 
+	OstTraceFunctionExit0( NOTESEDITORPRIVATE_TIMEFORMATSTRING_EXIT );
 	return timeFormat;
 }
 
@@ -358,11 +385,13 @@ QString NotesEditorPrivate::timeFormatString()
  */
 void NotesEditorPrivate::handleEntriesChanged(QList<ulong> ids)
 {
+	OstTraceFunctionEntry0( NOTESEDITORPRIVATE_HANDLEENTRIESCHANGED_ENTRY );
 	if (!mNewEntry) {
 		if (ids.contains(mModifiedNote.id())) {
 			mSaveEntry = false;
 		}
 	}
+OstTraceFunctionExit0( NOTESEDITORPRIVATE_HANDLEENTRIESCHANGED_EXIT );
 }
 
 /*!
@@ -370,9 +399,11 @@ void NotesEditorPrivate::handleEntriesChanged(QList<ulong> ids)
  */
 void NotesEditorPrivate::markNoteAsTodo()
 {
+	OstTraceFunctionEntry0( NOTESEDITORPRIVATE_MARKNOTEASTODO_ENTRY );
 	// This function should not be called by any other function except the
 	// noteeditor.
 	if (mModifiedNote.type() != AgendaEntry::TypeNote) {
+		OstTraceFunctionExit0( NOTESEDITORPRIVATE_MARKNOTEASTODO_EXIT );
 		return;
 	}
 
@@ -411,6 +442,7 @@ void NotesEditorPrivate::markNoteAsTodo()
 	window->removeView(mNoteEditor->mEditor);
 	mNoteEditor->deleteLater();
 
+OstTraceFunctionExit0( DUP1_NOTESEDITORPRIVATE_MARKNOTEASTODO_EXIT );
 }
 
 /*!
@@ -419,9 +451,11 @@ void NotesEditorPrivate::markNoteAsTodo()
  */
 void NotesEditorPrivate::updateNoteText()
 {
+OstTraceFunctionEntry0( NOTESEDITORPRIVATE_UPDATENOTETEXT_ENTRY );
 
 	mModifiedNote.setDescription(mNoteEditor->getDescription());
 
+OstTraceFunctionExit0( NOTESEDITORPRIVATE_UPDATENOTETEXT_EXIT );
 }
 
 /*!
@@ -429,6 +463,7 @@ void NotesEditorPrivate::updateNoteText()
  */
 void NotesEditorPrivate::deleteNote()
 {
+OstTraceFunctionEntry0( NOTESEDITORPRIVATE_DELETENOTE_ENTRY );
 
 	if (!mNewEntry) {
 		// Delete the note. All the changes are discarded.
@@ -444,6 +479,7 @@ void NotesEditorPrivate::deleteNote()
 		mTodoEditor->deleteLater();
 	}
 
+OstTraceFunctionExit0( NOTESEDITORPRIVATE_DELETENOTE_EXIT );
 }
 
 /*!
@@ -451,6 +487,7 @@ void NotesEditorPrivate::deleteNote()
  */
 bool NotesEditorPrivate::saveNote()
 {
+OstTraceFunctionEntry0( NOTESEDITORPRIVATE_SAVENOTE_ENTRY );
 
 	bool status = false;
 	QString description = mNoteEditor->getDescription();
@@ -474,7 +511,7 @@ bool NotesEditorPrivate::saveNote()
 				mModifiedNote.setStatus(AgendaEntry::TodoNeedsAction);
 			}
 			// Now save the entry.
-			mNoteId = mAgendaUtil->addEntry(mModifiedNote);
+			mNoteId = mAgendaUtil->store(mModifiedNote);
 			if (mNoteId) {
 				showNotification(
 						hbTrId("txt_notes_dpopinfo_new_note_saved"));
@@ -492,7 +529,7 @@ bool NotesEditorPrivate::saveNote()
 					mModifiedNote.setDescription(description);
 
 					// Now save the entry.
-					mNoteId = mAgendaUtil->addEntry(mModifiedNote);
+					mNoteId = mAgendaUtil->store(mModifiedNote);
 				}
 			} else {
 				mModifiedNote.setDescription(description);
@@ -500,7 +537,7 @@ bool NotesEditorPrivate::saveNote()
 						QDateTime(QDate::currentDate(), QTime::currentTime()));
 
 				if (isNoteEdited()) {
-					bool updateStatus = mAgendaUtil->updateEntry(mModifiedNote);
+					ulong updateStatus = mAgendaUtil->store(mModifiedNote);
 					if (updateStatus) {
 						showNotification(
 								hbTrId("txt_notes_dpopinfo_note_saved"));
@@ -514,6 +551,7 @@ bool NotesEditorPrivate::saveNote()
 		mNoteId = 0;
 	}
 
+	OstTraceFunctionExit0( NOTESEDITORPRIVATE_SAVENOTE_EXIT );
 	return status;
 }
 
@@ -522,9 +560,11 @@ bool NotesEditorPrivate::saveNote()
  */
 bool NotesEditorPrivate::saveTodo()
 {
+OstTraceFunctionEntry0( NOTESEDITORPRIVATE_SAVETODO_ENTRY );
 
 	if (AgendaEntry::TypeTodo != mModifiedNote.type()) {
 		// This should never happen.
+		OstTraceFunctionExit0( NOTESEDITORPRIVATE_SAVETODO_EXIT );
 		return false;
 	}
 	bool status = false;
@@ -532,7 +572,7 @@ bool NotesEditorPrivate::saveTodo()
 	if (mNewEntry) {
 		if (isTodoEdited()) {
 			// Add the new to-do.
-			mNoteId = mAgendaUtil->addEntry(mModifiedNote);
+			mNoteId = mAgendaUtil->store(mModifiedNote);
 			if (mNoteId) {
 				status = true;
 				showNotification(
@@ -560,8 +600,10 @@ bool NotesEditorPrivate::saveTodo()
 			}
 		} else {
 			if (isTodoEdited()) {
-				status = mAgendaUtil->updateEntry(mModifiedNote);
-				mNoteId = mModifiedNote.id();
+				mNoteId = mAgendaUtil->store(mModifiedNote);
+				if (mNoteId) {
+					status = true;
+				}
 			}
 		}
 		if (status) {
@@ -570,6 +612,7 @@ bool NotesEditorPrivate::saveTodo()
 		}
 	}
 
+	OstTraceFunctionExit0( DUP1_NOTESEDITORPRIVATE_SAVETODO_EXIT );
 	return status;
 }
 
@@ -580,6 +623,7 @@ bool NotesEditorPrivate::saveTodo()
  */
 void NotesEditorPrivate::editingCompleted(bool status)
 {
+OstTraceFunctionEntry0( NOTESEDITORPRIVATE_EDITINGCOMPLETED_ENTRY );
 
 	if(mNoteEditor) {
 		mNoteEditor->deleteLater();
@@ -589,6 +633,7 @@ void NotesEditorPrivate::editingCompleted(bool status)
 	}
 	emit q_ptr->editingCompleted(status);
 
+OstTraceFunctionExit0( NOTESEDITORPRIVATE_EDITINGCOMPLETED_EXIT );
 }
 
 /*!
@@ -598,14 +643,18 @@ void NotesEditorPrivate::editingCompleted(bool status)
  */
 bool NotesEditorPrivate::isNoteEdited()
 {
+OstTraceFunctionEntry0( NOTESEDITORPRIVATE_ISNOTEEDITED_ENTRY );
 
 	if (mModifiedNote.description().compare(mOriginalNote.description())) {
+		OstTraceFunctionExit0( NOTESEDITORPRIVATE_ISNOTEEDITED_EXIT );
 		return ETrue;
 	}
 	if (mModifiedNote.favourite() != mOriginalNote.favourite()) {
+		OstTraceFunctionExit0( DUP1_NOTESEDITORPRIVATE_ISNOTEEDITED_EXIT );
 		return ETrue;
 	}
 
+	OstTraceFunctionExit0( DUP2_NOTESEDITORPRIVATE_ISNOTEEDITED_EXIT );
 	return EFalse;
 }
 
@@ -616,26 +665,34 @@ bool NotesEditorPrivate::isNoteEdited()
  */
 bool NotesEditorPrivate::isTodoEdited()
 {
+OstTraceFunctionEntry0( NOTESEDITORPRIVATE_ISTODOEDITED_ENTRY );
 
 	if ( mModifiedNote.summary().compare(mOriginalNote.summary())) {
+		OstTraceFunctionExit0( NOTESEDITORPRIVATE_ISTODOEDITED_EXIT );
 		return ETrue;
 	}
 	if (mModifiedNote.status() != mOriginalNote.status()) {
+		OstTraceFunctionExit0( DUP1_NOTESEDITORPRIVATE_ISTODOEDITED_EXIT );
 		return ETrue;
 	}
 	if (mModifiedNote.priority() != mOriginalNote.priority()) {
+		OstTraceFunctionExit0( DUP2_NOTESEDITORPRIVATE_ISTODOEDITED_EXIT );
 		return ETrue;
 	}
 	if (mModifiedNote.endTime() != mOriginalNote.endTime()) {
+		OstTraceFunctionExit0( DUP3_NOTESEDITORPRIVATE_ISTODOEDITED_EXIT );
 		return ETrue;
 	}
 	if (mModifiedNote.description().compare(mOriginalNote.description())) {
+		OstTraceFunctionExit0( DUP4_NOTESEDITORPRIVATE_ISTODOEDITED_EXIT );
 		return ETrue;
 	}
 	if (mModifiedNote.alarm() != mOriginalNote.alarm()) {
+		OstTraceFunctionExit0( DUP5_NOTESEDITORPRIVATE_ISTODOEDITED_EXIT );
 		return ETrue;
 	}
 
+	OstTraceFunctionExit0( DUP6_NOTESEDITORPRIVATE_ISTODOEDITED_EXIT );
 	return EFalse;
 }
 
@@ -646,10 +703,12 @@ bool NotesEditorPrivate::isTodoEdited()
  */
 void NotesEditorPrivate::showNotification(QString text)
 {
+	OstTraceFunctionEntry0( NOTESEDITORPRIVATE_SHOWNOTIFICATION_ENTRY );
 	HbNotificationDialog *notificationDialog = new HbNotificationDialog();
 	notificationDialog->setTimeout(
 			HbNotificationDialog::ConfirmationNoteTimeout);
 	notificationDialog->setTitle(text);
 	notificationDialog->show();
+OstTraceFunctionExit0( NOTESEDITORPRIVATE_SHOWNOTIFICATION_EXIT );
 }
 // End of file	--Don't remove this.

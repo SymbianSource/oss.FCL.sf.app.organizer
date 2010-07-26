@@ -23,6 +23,9 @@
 
 S60_APP_RESOURCE(clock)
 data=DATAZ_/QT_TRANSLATIONS_DIR/clock.qm QT_TRANSLATIONS_DIR/clock.qm
+data=DATAZ_/QT_TRANSLATIONS_DIR/clockalarmeditor.qm QT_TRANSLATIONS_DIR/clockalarmeditor.qm
+data=DATAZ_/QT_TRANSLATIONS_DIR/clockcityselectionlist.qm QT_TRANSLATIONS_DIR/clockcityselectionlist.qm
+data=DATAZ_/QT_TRANSLATIONS_DIR/clocksettingsview.qm QT_TRANSLATIONS_DIR/clocksettingsview.qm
 
 #endif			// __CLOCKRESOURCES_IBY__
 

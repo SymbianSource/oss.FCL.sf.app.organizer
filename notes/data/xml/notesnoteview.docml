@@ -26,7 +26,8 @@
             </widget>
             <widget name="emptyListLabel" type="HbLabel">
                 <real name="z" value="1"/>
-				<string locid="txt_notes_list_no_notes_available" name="plainText" value="No notes available"/>                <enums name="textWrapping" value="TextWordWrap"/>
+		<string locid="txt_notes_list_no_notes_available" name="plainText" value="No notes available"/>
+                <enums name="textWrapping" value="TextWordWrap"/>
                 <enums name="textWrapping" value="TextWordWrap"/>
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                 <sizehint height="expr(var(hb-param-text-height-primary) )" type="PREFERRED"/>
@@ -39,8 +40,8 @@
                 <anchoritem dst="noteListView" dstEdge="TOP" spacing="0un" src="subtitleGroupBox" srcEdge="BOTTOM"/>
                 <anchoritem dst="noteListView" dstEdge="RIGHT" spacing="0un" src="" srcEdge="RIGHT"/>
                 <anchoritem dst="noteListView" dstEdge="BOTTOM" spacing="0un" src="" srcEdge="BOTTOM"/>
-                <anchoritem dst="emptyListLabel" dstEdge="LEFT" spacing="expr(var(hb-param-margin-gene-left) )" src="noteListView" srcEdge="LEFT"/>
-                <anchoritem dst="emptyListLabel" dstEdge="RIGHT" spacing="expr(-var(hb-param-margin-gene-right) )" src="noteListView" srcEdge="RIGHT"/>
+                <anchoritem dst="emptyListLabel" dstEdge="LEFT" spacing="expr(var(hb-param-margin-gene-left))" src="noteListView" srcEdge="LEFT"/>
+                <anchoritem dst="emptyListLabel" dstEdge="RIGHT" spacing="-expr(var(hb-param-margin-gene-right))" src="noteListView" srcEdge="RIGHT"/>
                 <anchoritem dst="emptyListLabel" dstEdge="CENTERV" spacing="0un" src="noteListView" srcEdge="CENTERV"/>
             </layout>
         </widget>

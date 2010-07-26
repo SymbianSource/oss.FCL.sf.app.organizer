@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hbdocument version="1.0">
+<hbdocument version="1.1">
     <object name="snoozeAction" type="HbAction">
-        <string name="role" value="HbDialog:primaryAction"/>
         <string locid="txt_calendar_button_alarm_snooze" name="text" value="Snooze"/>
     </object>
     <object name="stopAction" type="HbAction">
-        <string name="role" value="HbDialog:secondaryAction"/>
-        <string locid="txt_calendar_button_alarm_dialog_snooze" name="text" value="Stop"/>
+        <string locid="txt_calendar_button_alarm_stop" name="text" value="Stop"/>
     </object>
     <widget name="dialog" type="HbDialog">
         <widget name="heading" role="HbDialog:headingWidget" type="HbLabel">
@@ -18,13 +16,13 @@
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                 <real name="z" value="1"/>
                 <sizehint height="var(hb-param-text-height-primary)" type="MINIMUM"/>
-                <string locid="txt_calendar_info_alarm_start_time" name="plainText" value="9:00 am"/>
+                <string name="plainText" value="9:00 am"/>
             </widget>
             <widget name="alarmDate" type="HbLabel">
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                 <real name="z" value="2"/>
                 <sizehint height="var(hb-param-text-height-secondary)" type="PREFERRED"/>
-                <string locid="txt_calendar_info_alarm_start_date" name="plainText" value="01/01/2010"/>
+                <string name="plainText" value="01/01/2010"/>
             </widget>
             <widget name="alarmDescription" type="HbLabel">
                 <enums name="textWrapping" value="TextWordWrap"/>
@@ -50,7 +48,7 @@
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                 <real name="z" value="1"/>
                 <sizehint height="var(hb-param-text-height-primary)" type="MINIMUM"/>
-                <string locid="txt_calendar_info_alarm_start_date" name="plainText" value="01/01/2010"/>
+                <string name="plainText" value="01/01/2010"/>
             </widget>
             <layout type="anchor">
                 <anchoritem dst="alarmTime" dstEdge="LEFT" spacing="var(hb-param-margin-gene-popup)" src="" srcEdge="LEFT"/>
@@ -70,8 +68,8 @@
                 <anchoritem dst="alarmIcon" dstEdge="BOTTOM" spacing="-var(hb-param-margin-gene-popup)" src="" srcEdge="BOTTOM"/>
             </layout>
         </widget>
-        <ref object="snoozeAction" role="HbDialog:primaryAction"/>
-        <ref object="stopAction" role="HbDialog:secondaryAction"/>
+        <ref object="snoozeAction" role="HbWidget:addAction"/>
+        <ref object="stopAction" role="HbWidget:addAction"/>
     </widget>
     <section name="calendarTimed"/>
     <section name="nonTimedAlarm">
@@ -82,7 +80,7 @@
             <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
             <real name="z" value="1"/>
             <sizehint height="var(hb-param-text-height-primary)" type="MINIMUM"/>
-            <string locid="txt_calendar_info_alarm_start_date" name="plainText" value="01/01/2010"/>
+            <string name="plainText" value="01/01/2010"/>
         </widget>
         <widget name="container" role="HbDialog:contentWidget" type="HbWidget">
             <layout type="anchor">

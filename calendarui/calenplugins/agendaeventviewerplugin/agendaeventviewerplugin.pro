@@ -61,6 +61,6 @@ BLD_INF_RULES.prj_exports += \
 SOURCES += agendaeventviewerplugin.cpp
 		
 HEADERS += agendaeventviewerplugin.h \
-		eventviewerplugininterface.h
+           ../../../organizer_plat/eventviewer_plugin_api/inc/eventviewerplugininterface.h
 
 # End of file	--Don't remove this.

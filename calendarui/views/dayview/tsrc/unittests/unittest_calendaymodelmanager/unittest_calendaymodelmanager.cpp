@@ -17,6 +17,7 @@
 #include <QtTest/QtTest>
 
 #include "calenservices.h"
+#include "calendaymodel.h"
 #include "calendaymodelmanager.h"
 
 class TestCalenDayModelManager : public QObject
@@ -33,9 +34,14 @@ private slots:
     void init();
     void cleanup();
 
+    void testGetModel();
+    void testRefreshAllModels();
+    void testRefreshSingleModel();
+    
     void testConstructors();
 
 private:
+	MCalenServices services;
     CalenDayModelManager *mManager;
 };
 
@@ -76,7 +82,7 @@ void TestCalenDayModelManager::cleanupTestCase()
  */
 void TestCalenDayModelManager::init()
 {
-	//mManager = new CalenDayModelManager();
+	mManager = new CalenDayModelManager(services, false);
 }
 
 /*!
@@ -84,10 +90,10 @@ void TestCalenDayModelManager::init()
  */
 void TestCalenDayModelManager::cleanup()
 {
-   // if (mManager) {
-   //     delete mManager;
-   //     mManager = NULL;
-   // }
+    if (mManager) {
+        delete mManager;
+        mManager = NULL;
+    }
 }
 
 /*!
@@ -114,6 +120,29 @@ void TestCalenDayModelManager::testConstructors()
     delete testManager;
     delete testManager2;
 }
+
+void TestCalenDayModelManager::testGetModel()
+	{
+		MCalenServices services;
+		CalenDayModel* model = static_cast<CalenDayModel*>(&(mManager->getModel(CalenDayModelManager::CurrentDay)));
+		QCOMPARE(model->modelDate(), services.Context().focusDateAndTime());
+	}
+
+void TestCalenDayModelManager::testRefreshAllModels()
+	{
+		
+	}
+
+void TestCalenDayModelManager::testRefreshSingleModel()
+	{
+		mManager->refreshSingleModel(CalenDayModelManager::CurrentDay);
+		QVERIFY(mManager);
+		mManager->refreshSingleModel(CalenDayModelManager::PreviousDay);
+		QVERIFY(mManager);
+		mManager->refreshSingleModel(CalenDayModelManager::NextDay);
+		QVERIFY(mManager);
+	}
+
 
 QTEST_MAIN(TestCalenDayModelManager);
 #include "unittest_calendaymodelmanager.moc"

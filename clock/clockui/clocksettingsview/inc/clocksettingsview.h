@@ -83,6 +83,7 @@ private:
 	HbDataFormModelItem *mTimeDataFormItem;
 	HbDataFormModelItem *mDateDataFormItem;
 	HbDataFormModelItem *mPlaceDataFormItem;
+	HbDataFormModelItem *mRegionalDataFormItem;
 	HbDataFormModelItem *mClockTypeItem;
 	HbDataFormModelItem *mAlarmSnoozeItem;
 	ClockSettingsDocLoader *mDocLoader;

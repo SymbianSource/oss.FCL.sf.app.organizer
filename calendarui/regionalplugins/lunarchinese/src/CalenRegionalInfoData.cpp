@@ -18,6 +18,11 @@
 //  User includes
 #include "CalenRegionalInfoData.h"
 #include "CalenLunarChinesePlugin.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "CalenRegionalInfoDataTraces.h"
+#endif
+
 
 
 // ============================ MEMBER FUNCTIONS ===============================
@@ -28,7 +33,9 @@
 //
 CalenRegionalInfo::CalenRegionalInfo(CCalenLunarChinesePlugin &plugin): mPlugin(plugin)
     {
+	OstTraceFunctionEntry0( CALENREGIONALINFO_CALENREGIONALINFO_ENTRY );
 
+    OstTraceFunctionExit0( CALENREGIONALINFO_CALENREGIONALINFO_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -37,7 +44,9 @@ CalenRegionalInfo::CalenRegionalInfo(CCalenLunarChinesePlugin &plugin): mPlugin(
 //
 CalenRegionalInfo::~CalenRegionalInfo()
     {
+	OstTraceFunctionEntry0( DUP1_CALENREGIONALINFO_CALENREGIONALINFO_ENTRY );
 
+    OstTraceFunctionExit0( DUP1_CALENREGIONALINFO_CALENREGIONALINFO_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -47,5 +56,7 @@ CalenRegionalInfo::~CalenRegionalInfo()
 //
 void CalenRegionalInfo::showRegionalDetails()
     {
+    OstTraceFunctionEntry0( CALENREGIONALINFO_SHOWREGIONALDETAILS_ENTRY );
     mPlugin.ShowDetailsL();
+    OstTraceFunctionExit0( CALENREGIONALINFO_SHOWREGIONALDETAILS_EXIT );
     }

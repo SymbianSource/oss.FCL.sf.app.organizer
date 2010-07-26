@@ -91,6 +91,8 @@ void ClockAlarmCustomItem::restore()
 				static_cast<HbAbstractViewItem*>(this)->itemView()->model());
 		HbDataFormModelItem* modlItem = model->itemFromIndex(modelIndex()); 
 		mCustomButton->setProperty("text", modlItem->contentWidgetData("text"));
+		mCustomButton->setProperty(
+				"objectName", modlItem->contentWidgetData("objectName"));
 	}
 
 }

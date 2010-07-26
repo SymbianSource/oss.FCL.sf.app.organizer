@@ -19,6 +19,11 @@
 #include "agendaeventviewer.h"
 #include "agendaeventviewer_p.h"
 #include "agendaeventview.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "agendaeventviewerTraces.h"
+#endif
+
 
 /*!
 	\class AgendaEventViewer
@@ -72,7 +77,9 @@
 AgendaEventViewer::AgendaEventViewer(QObject *parent)
 :QObject(parent), d_ptr(new AgendaEventViewerPrivate(0, this))
 {
+    OstTraceFunctionEntry0( AGENDAEVENTVIEWER_AGENDAEVENTVIEWER_ENTRY );
 
+    OstTraceFunctionExit0( AGENDAEVENTVIEWER_AGENDAEVENTVIEWER_EXIT );
 }
 
 /*!
@@ -84,7 +91,9 @@ AgendaEventViewer::AgendaEventViewer(QObject *parent)
 AgendaEventViewer::AgendaEventViewer(AgendaUtil *agendaUtil, QObject *parent)
 : QObject(parent), d_ptr(new AgendaEventViewerPrivate(agendaUtil, this))
 {
+	OstTraceFunctionEntry0( DUP1_AGENDAEVENTVIEWER_AGENDAEVENTVIEWER_ENTRY );
 	// Nothing
+	OstTraceFunctionExit0( DUP1_AGENDAEVENTVIEWER_AGENDAEVENTVIEWER_EXIT );
 }
 
 /*!
@@ -92,9 +101,11 @@ AgendaEventViewer::AgendaEventViewer(AgendaUtil *agendaUtil, QObject *parent)
  */
 AgendaEventViewer::~AgendaEventViewer()
 {
+	OstTraceFunctionEntry0( DUP2_AGENDAEVENTVIEWER_AGENDAEVENTVIEWER_ENTRY );
 	if (d_ptr) {
 		delete d_ptr;
 	}
+	OstTraceFunctionExit0( DUP2_AGENDAEVENTVIEWER_AGENDAEVENTVIEWER_EXIT );
 }
 
 /*!
@@ -105,7 +116,9 @@ AgendaEventViewer::~AgendaEventViewer()
  */
 void AgendaEventViewer::view(const ulong id, Actions action)
 {
+	OstTraceFunctionEntry0( AGENDAEVENTVIEWER_VIEW_ENTRY );
 	d_ptr->view(id, action);
+	OstTraceFunctionExit0( AGENDAEVENTVIEWER_VIEW_EXIT );
 }
 
 /*!
@@ -116,7 +129,9 @@ void AgendaEventViewer::view(const ulong id, Actions action)
  */
 void AgendaEventViewer::view(const QFile &fileHandle, Actions action)
 {
+	OstTraceFunctionEntry0( DUP1_AGENDAEVENTVIEWER_VIEW_ENTRY );
 	d_ptr->view(fileHandle, action);
+	OstTraceFunctionExit0( DUP1_AGENDAEVENTVIEWER_VIEW_EXIT );
 }
 
 /*!
@@ -127,7 +142,9 @@ void AgendaEventViewer::view(const QFile &fileHandle, Actions action)
  */
 void AgendaEventViewer::view(AgendaEntry entry, Actions action)
 {
+	OstTraceFunctionEntry0( DUP2_AGENDAEVENTVIEWER_VIEW_ENTRY );
 	d_ptr->view(entry, action);
+	OstTraceFunctionExit0( DUP2_AGENDAEVENTVIEWER_VIEW_EXIT );
 }
 
 // End of file

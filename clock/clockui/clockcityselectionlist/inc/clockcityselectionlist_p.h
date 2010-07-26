@@ -36,6 +36,7 @@ class HbSearchPanel;
 class HbLineEdit;
 class HbDialog;
 class HbComboBox;
+class HbShrinkingVkbHost;
 class ClockCitySelectionList;
 class ClockCityListProxyModel;
 class TimezoneClient;
@@ -61,6 +62,7 @@ private slots:
 	void handleTimeZoneSelection(int index);
 	void selectedAction(HbAction *action);
 	void loadSection(Qt::Orientation orientation);
+	void cancelSearch();
 
 private:
 	void showCityList();
@@ -68,6 +70,7 @@ private:
 	void addCityNameField();
 	void addTimeZoneField();
 	void addCountryListField();
+	void focusLineEdit();
 	
 private:
 	QPointer<QStandardItemModel> mListModel;
@@ -83,6 +86,8 @@ private:
 	QPointer<HbLineEdit> mCityNameEdit;
 	QPointer<HbComboBox> mTimeZoneComboBox;
 	QPointer<HbComboBox> mCountryComboBox;
+	
+	QPointer<HbShrinkingVkbHost> mVirtualKeyboard;
 
 	HbAction *mOkAction;
 	HbAction *mCancelAction;

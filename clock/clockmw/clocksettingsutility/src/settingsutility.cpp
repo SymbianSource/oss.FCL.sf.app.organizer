@@ -106,9 +106,9 @@ void SettingsUtility::setClockType(const QString &type)
 	TLocale locale;
 
 	if (type == mClockTypeList.at(0)) {
-	    locale.SetClockFormat(EClockAnalog);
-    } else if (type == mClockTypeList.at(1)) {
 	    locale.SetClockFormat(EClockDigital);
+    } else if (type == mClockTypeList.at(1)) {
+	    locale.SetClockFormat(EClockAnalog);
     } else {
     	// Nothing to do.
     }
@@ -124,9 +124,9 @@ int SettingsUtility::clockType(QStringList &list)
 	int value = -1;
 
 	if (EClockAnalog == locale.ClockFormat()) {
-	    value = 0;
+	    value = 1;
     } else if (EClockDigital == locale.ClockFormat()){
-    	value = 1;
+    	value = 0;
     } else {
     	// Nothing to do.
     }

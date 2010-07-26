@@ -25,7 +25,6 @@ DEPENDPATH += \
 INCLUDEPATH += \
 		. \
 		../../notesui/notesmodel/inc \
-		../../../agendainterface/agendautil/inc \
 		../../inc
 
 symbian: {

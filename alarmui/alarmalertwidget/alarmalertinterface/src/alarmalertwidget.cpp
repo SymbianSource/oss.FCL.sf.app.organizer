@@ -23,6 +23,10 @@
 #include "alarmalertwidget.h"
 #include "alarmalert.h"
 #include "alarmalertobserver.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "alarmalertwidgetTraces.h"
+#endif
 
 // Constants.
 const TInt KMaxlength=30;
@@ -35,6 +39,8 @@ const TInt KMaxlength=30;
 AlarmAlertWidget::AlarmAlertWidget(AlarmAlertObserver *observer) :
     mObserver(observer)
 {
+	OstTraceFunctionEntry0( ALARMALERTWIDGET_ALARMALERTWIDGET_ENTRY );
+	OstTraceFunctionExit0( ALARMALERTWIDGET_ALARMALERTWIDGET_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -44,6 +50,7 @@ AlarmAlertWidget::AlarmAlertWidget(AlarmAlertObserver *observer) :
 //
 AlarmAlertWidget::~AlarmAlertWidget()
 {
+	OstTraceFunctionEntry0( DUP1_ALARMALERTWIDGET_ALARMALERTWIDGET_ENTRY );
 	// Cleanup
 	
 	if (mAlarmSubject) {
@@ -85,6 +92,7 @@ AlarmAlertWidget::~AlarmAlertWidget()
 	if (mDeviceDialog) {
 		delete mDeviceDialog;
 	}
+	OstTraceFunctionExit0( DUP1_ALARMALERTWIDGET_ALARMALERTWIDGET_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -94,6 +102,7 @@ AlarmAlertWidget::~AlarmAlertWidget()
 //
 bool AlarmAlertWidget::showAlarmDialog(SAlarmInfo *alarmInfo)
 {
+	OstTraceFunctionEntry0( ALARMALERTWIDGET_SHOWALARMDIALOG_ENTRY );
 	// Get the alarm date and time
     TBuf<KMaxlength> timeString;
     TBuf<KMaxlength> dateString;
@@ -174,8 +183,10 @@ bool AlarmAlertWidget::showAlarmDialog(SAlarmInfo *alarmInfo)
 //
 void AlarmAlertWidget::dismissAlarmDialog()
 {
+    OstTraceFunctionEntry0( ALARMALERTWIDGET_DISMISSALARMDIALOG_ENTRY );
     // Dismiss the dialog
     mDeviceDialog->Cancel();
+    OstTraceFunctionExit0( ALARMALERTWIDGET_DISMISSALARMDIALOG_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -185,10 +196,12 @@ void AlarmAlertWidget::dismissAlarmDialog()
 //
 bool AlarmAlertWidget::updateAlarmDialog(SAlarmInfo* /*alarmInfo*/)
 {
+    OstTraceFunctionEntry0( ALARMALERTWIDGET_UPDATEALARMDIALOG_ENTRY );
     // Update the dialog with any new information
     // TODO: Pass the updated information sent by the observer
     /*CHbSymbianVariantMap params;
     mDeviceDialog->Update(params);*/
+    OstTraceFunctionExit0( ALARMALERTWIDGET_UPDATEALARMDIALOG_EXIT );
     return false;
 }
 
@@ -199,11 +212,14 @@ bool AlarmAlertWidget::updateAlarmDialog(SAlarmInfo* /*alarmInfo*/)
 //
 void AlarmAlertWidget::DataReceived(CHbSymbianVariantMap& aData)
 {
+    OstTraceFunctionEntry0( ALARMALERTWIDGET_DATARECEIVED_ENTRY );
     if (!aData.Keys().MdcaCount()) {
+        OstTraceFunctionExit0( ALARMALERTWIDGET_DATARECEIVED_EXIT );
         return;
     }
     
     triggerAction(aData.Get(alarmCommandSymbian));
+    OstTraceFunctionExit0( DUP1_ALARMALERTWIDGET_DATARECEIVED_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -213,7 +229,9 @@ void AlarmAlertWidget::DataReceived(CHbSymbianVariantMap& aData)
 //
 void AlarmAlertWidget::DeviceDialogClosed(TInt /*aCompletionCode*/)
 {
+  OstTraceFunctionEntry0( ALARMALERTWIDGET_DEVICEDIALOGCLOSED_ENTRY );
   
+  OstTraceFunctionExit0( ALARMALERTWIDGET_DEVICEDIALOGCLOSED_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -223,6 +241,7 @@ void AlarmAlertWidget::DeviceDialogClosed(TInt /*aCompletionCode*/)
 //
 void AlarmAlertWidget::triggerAction(const CHbSymbianVariant* source)
 {
+       OstTraceFunctionEntry0( ALARMALERTWIDGET_TRIGGERACTION_ENTRY );
        AlarmCommand command(AlarmCmdLast);
        
        if (*source->Value<TInt>() == Stop) {    
@@ -234,6 +253,7 @@ void AlarmAlertWidget::triggerAction(const CHbSymbianVariant* source)
        } else if (*source->Value<TInt>() == Shown) {
        command = AlarmShown;
        mObserver->alertDisplayed(command);
+       OstTraceFunctionExit0( ALARMALERTWIDGET_TRIGGERACTION_EXIT );
        return;
        } else {
        command = AlarmCmdLast;
@@ -243,6 +263,7 @@ void AlarmAlertWidget::triggerAction(const CHbSymbianVariant* source)
        // Notify the observer with the command
        mObserver->alertCompleted(command);
        }
+       OstTraceFunctionExit0( DUP1_ALARMALERTWIDGET_TRIGGERACTION_EXIT );
 }
 
 // End of file  --Don't remove this.

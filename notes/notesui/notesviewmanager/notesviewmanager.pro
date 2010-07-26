@@ -32,14 +32,15 @@ INCLUDEPATH += \
 		../notesmodel/inc \
 		../notesviews/inc \
 		../notesappcontroller/inc \
-		../../inc
+		../../inc \
+		./traces
 
 symbian: {
 	TARGET.CAPABILITY = ALL -TCB
 	TARGET.EPOCALLOWDLLDATA = 1
 	TARGET.UID3 = 0x20029F84
 	
-	INCLUDEPATH += ../../../agendainterface/inc
+	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 	
 	LIBS += \
 		-lagendainterface \

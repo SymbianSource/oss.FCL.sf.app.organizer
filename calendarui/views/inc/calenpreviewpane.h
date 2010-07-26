@@ -57,6 +57,7 @@ protected:
 	
 private:
 	void GetInstanceListL();
+	void checkStartTimeOfEvent(QDateTime &dateTime);
 
 public slots:
 	void onTwoSecondsTimeout();

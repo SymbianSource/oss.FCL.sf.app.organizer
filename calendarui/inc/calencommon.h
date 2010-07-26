@@ -78,6 +78,13 @@
 #define CALEN_MONTVIEW_FIFTH_WEEK_LABEL "fifthWeekLabel"
 #define CALEN_MONTVIEW_SIXTH_WEEK_LABEL "sixthWeekLabel"
 
+#define CALEN_DAYVIEW_DOCML ":/xml/calendayview.docml"
+#define CALEN_DAYVIEW "dayView"
+#define CALEN_DAYVIEW_DAYINFO "dayViewDayInfo"
+#define CALEN_DAYVIEW_REGIONALINFO "dayViewRegionalInfo"
+#define CALEN_DAYVIEW_CONTENTWIDGET "dayViewContentWidget"
+#define CALEN_DAYVIEW_HOURSCROLLAREA "dayViewHourScrollArea"
+#define CALEN_DAYVIEW_CONTENTSCROLLAREA "dayViewContentScrollArea"
 
 /*!
 	\class CalendarNamespace

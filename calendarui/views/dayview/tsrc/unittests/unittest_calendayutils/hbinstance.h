@@ -41,6 +41,11 @@ public:
     Qt::Orientation orientation() const {
         return gTestOrientation;
     }
+    
+    QList<HbMainWindow*> allMainWindows(){
+		QList<HbMainWindow*> list;
+		return list;
+    }
 };
 
 #endif // HBMAINWINDOW_H

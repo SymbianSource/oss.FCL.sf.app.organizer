@@ -65,14 +65,22 @@ private slots:
 	
 private:
 	enum RepeatTypes {
-			RepeatOnce,
-			RepeatDaily,
-			RepeatWorkdays,
-			RepeatWeekly,
-			RepeatBiWeekly,
-			RepeatMonthly,
-			RepeatYearly
-		};
+		RepeatOnce,
+		RepeatDaily,
+		RepeatWorkdays,
+		RepeatWeekly,
+		RepeatBiWeekly,
+		RepeatMonthly,
+		RepeatYearly
+	};
+	enum RepeatRoles {
+		DailyRole = 1,
+		WorkdaysRole,
+		WeeklyRole,
+		BiWeeklyRole,
+		MonthlyRole,
+		YearlyRole
+	};
 	CalenEditorPrivate* mCalenEditor;
 	HbDataForm* mEditorForm;
 	HbDataFormModel* mCalenEditorModel;

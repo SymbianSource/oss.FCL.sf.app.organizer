@@ -23,7 +23,7 @@
 // User Includes
 #include "caleneditordatahandler.h"
 #include "calendateutils.h"
-#include "agendaentry.h"
+#include <agendaentry.h>
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
 #include "caleneditordatahandlerTraces.h"
@@ -247,10 +247,7 @@ bool CalenEditorDataHandler::isRepeatRuleEdited() const
 		OstTraceFunctionExit0( CALENEDITORDATAHANDLER_ISREPEATRULEEDITED_EXIT );
 		return false;
 	} else {
-		return ((mOriginalEntry->repeatRule().type() != 
-				mEditedEntry->repeatRule().type())
-				|| (mOriginalEntry->repeatRule().until().date() != 
-				mEditedEntry->repeatRule().until().date()));
+		return (mOriginalEntry->repeatRule() != mEditedEntry->repeatRule());
 	}
 }
 

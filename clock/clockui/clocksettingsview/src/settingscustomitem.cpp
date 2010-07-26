@@ -107,19 +107,43 @@ void SettingsCustomItem::restore()
 
 	switch (itemType) {
 		case (TimeItemOffset + HbDataFormModelItem::CustomItemBase):
-		mTimeWidget->setProperty("text", modlItem->contentWidgetData("text"));
-		break;
-
+		{
+			mTimeWidget->setProperty(
+					"text", modlItem->contentWidgetData("text"));
+			mTimeWidget->setProperty(
+					"objectName", modlItem->contentWidgetData("objectName"));
+			break;
+		}
 		case (DateItemOffset + HbDataFormModelItem::CustomItemBase):
-		mDateWidget->setProperty("text", modlItem->contentWidgetData("text"));
-		break;
-
+		{
+			mDateWidget->setProperty(
+					"text", modlItem->contentWidgetData("text"));
+			mDateWidget->setProperty(
+					"objectName", modlItem->contentWidgetData("objectName"));
+			break;
+		}
 		case (PlaceItemOffset + HbDataFormModelItem::CustomItemBase):
-		mPlaceWidget->setProperty("text", modlItem->contentWidgetData("text"));
-		break;
+		{
+			mPlaceWidget->setProperty(
+					"text", modlItem->contentWidgetData("text"));
+			mPlaceWidget->setProperty(
+					"objectName", modlItem->contentWidgetData("objectName"));
+			break;
+		}
+		case (RegionalItemOffset + HbDataFormModelItem::CustomItemBase):
+		{
+			mRegSettingsWidget->setProperty(
+					"text", modlItem->contentWidgetData("text"));
+			mRegSettingsWidget->setProperty(
+					"objectName", modlItem->contentWidgetData("objectName"));
+			break;
+		}
 		case (50 + HbDataFormModelItem::CustomItemBase):
-
-		break;
+		{
+			mWorkdaysWidget->setProperty(
+					"objectName", modlItem->contentWidgetData("objectName"));
+			break;
+		}
 		default:
 		break;
 	}
@@ -170,23 +194,24 @@ HbWidget* SettingsCustomItem::createCustomWidget()
 
 		case (RegionalItemOffset + HbDataFormModelItem::CustomItemBase):
 		{
-			HbPushButton *regSettingsItem = new HbPushButton(this);
-			regSettingsItem->setText(
-				QString(hbTrId("txt_clock_button_regional_date_time_settings")));
+			mRegSettingsWidget = new HbPushButton(this);
 			connect(
-					regSettingsItem, SIGNAL(clicked()),
+					mRegSettingsWidget, SIGNAL(clicked()),
 					this, SLOT(launchRegSettingsView()));
-			return regSettingsItem;
+			return mRegSettingsWidget;
 		}
 
 		case (50 + HbDataFormModelItem::CustomItemBase):
 		{
-			HbListWidget *workdaysItem = new HbListWidget();
-			workdaysItem->setSelectionMode(HbAbstractItemView::MultiSelection);
+			mWorkdaysWidget = new HbListWidget(this);
+			mWorkdaysWidget->setSelectionMode(HbAbstractItemView::MultiSelection);
+			mWorkdaysWidget->setScrollDirections(0);
+			mWorkdaysWidget->ungrabGesture(Qt::PanGesture);
+			
 			QItemSelectionModel *model = 0;
-			model = workdaysItem->selectionModel();
+			model = mWorkdaysWidget->selectionModel();
 			for (int index = 0; index < mWeekdaysList.count(); ++index) {
-				workdaysItem->addItem(mWeekdaysList.at(index));
+				mWorkdaysWidget->addItem(mWeekdaysList.at(index));
 			}
 
 			QString workdaysString = workdaysSetting();
@@ -205,7 +230,7 @@ HbWidget* SettingsCustomItem::createCustomWidget()
 				}
 			}
 
-			return workdaysItem;
+			return mWorkdaysWidget;
 		}
 
 		default:
@@ -339,7 +364,7 @@ void SettingsCustomItem::launchDatePicker()
  */
 void SettingsCustomItem::launchCitySelectionList()
 {
-	mCitySelectionList = new ClockCitySelectionList(this);
+	mCitySelectionList = new ClockCitySelectionList(mTimezoneClient, this);
 	connect(
 			mCitySelectionList, SIGNAL(citySelected(LocationInfo)),
 			this, SLOT(updatePlaceItem(LocationInfo)));

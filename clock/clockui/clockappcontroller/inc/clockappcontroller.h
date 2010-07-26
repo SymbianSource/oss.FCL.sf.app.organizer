@@ -30,10 +30,18 @@ class ClockAppControllerIfImpl;
 
 class ClockAppController : public QObject
 {
+	Q_OBJECT
+	
 public:
 	CLOCKAPPCONTROLLER_EXPORT explicit ClockAppController(QObject *parent = 0);
 	CLOCKAPPCONTROLLER_EXPORT virtual ~ClockAppController();
 
+signals:
+	void appReady();
+
+private slots:
+	void handleAppReady();
+	
 private:
 	ClockViewManager *mViewManager;
 	ClockAppControllerIfImpl *mIfImpl;

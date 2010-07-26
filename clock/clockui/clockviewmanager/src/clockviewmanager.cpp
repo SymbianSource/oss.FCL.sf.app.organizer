@@ -19,8 +19,9 @@
 // System includes
 #include <HbMainWindow>
 #include <HbInstance>
-#include <hbapplication> // hbapplication
-#include <hbactivitymanager> // hbactivitymanager
+#include <HbApplication>
+#include <HbActivityManager>
+#include <HbToolBar>
 
 // User includes
 #include "clockviewmanager.h"
@@ -148,6 +149,9 @@ void ClockViewManager::loadMainView()
 	// Find the main view.
 	mMainView = static_cast<ClockMainView *> (
 			docLoader->findWidget(CLOCK_MAIN_VIEW));
+	
+	// Disable animation effect on toolbar.
+	HbEffect::disable(mMainView->toolBar()->graphicsItem());
 
 	// Setup the view.
 	mMainView->setupView(mAppControllerIf, docLoader);
@@ -172,6 +176,9 @@ void ClockViewManager::loadWorldClockView()
 	// Get the world list view.
 	mWorldClockView = static_cast<ClockWorldView *> (
 			docLoader->findWidget(CLOCK_WORLD_VIEW));
+	
+	// Disable animation effect on toolbar.
+	HbEffect::disable(mWorldClockView->toolBar()->graphicsItem());
 
 	mWorldClockView->setupView(mAppControllerIf, docLoader);
 }
@@ -191,6 +198,12 @@ void ClockViewManager::loadOtherViews()
 	disconnect(
 			window, SIGNAL(viewReady()),
 			this, SLOT(loadOtherViews()));
+	
+	// Need to emit this signal after the view is fully constructed & populated
+	// with actual data and ready to be used. So entry view & instance view
+	// needs to be created so that a new entry can also be created. Finally
+	// NotesApplication object needs to emit applicationReady Signal.
+	emit appReady();
 }
 
 // End of file	--Don't remove this.

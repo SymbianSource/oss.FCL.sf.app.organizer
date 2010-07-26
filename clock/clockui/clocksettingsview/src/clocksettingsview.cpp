@@ -391,8 +391,11 @@ void ClockSettingsView::populateModel()
 	HbDataFormModelItem::DataItemType regionalSettingsItem =
 			static_cast<HbDataFormModelItem::DataItemType>
 			(HbDataFormModelItem::CustomItemBase + RegionalSettingsItem);
-	(mSettingsModel->appendDataFormItem(
-			regionalSettingsItem))->setContentWidgetData(
+	mRegionalDataFormItem = mSettingsModel->appendDataFormItem(
+			regionalSettingsItem);
+	mRegionalDataFormItem->setContentWidgetData(
+			"text", hbTrId("txt_clock_button_regional_date_time_settings"));
+	mRegionalDataFormItem->setContentWidgetData(
 					"objectName", "regionalSettings");
     
 	// Add the clock type item.
@@ -421,10 +424,10 @@ void ClockSettingsView::populateModel()
 			HbDataFormModelItem::ComboBoxItem,
 			hbTrId("txt_clock_setlabel_alarm_snooze_time"));
 	QStringList alramSnoozeTimes;
-	alramSnoozeTimes << hbTrId("txt_clock_set_ln_mins", 5)
-			<< hbTrId("txt_clock_set_ln_mins", 10)
-			<< hbTrId("txt_clock_set_ln_mins", 15)
-			<< hbTrId("txt_clock_set_ln_mins", 30);
+	alramSnoozeTimes << hbTrId("txt_clock_setlabel_ln_mins", 5)
+			<< hbTrId("txt_clock_setlabel_ln_mins", 10)
+			<< hbTrId("txt_clock_setlabel_ln_mins", 15)
+			<< hbTrId("txt_clock_setlabel_ln_mins", 30);
 	
 	// Build the hash map for the reminder.
 	mAlarmSnoozeTimeHash[0] = 5;

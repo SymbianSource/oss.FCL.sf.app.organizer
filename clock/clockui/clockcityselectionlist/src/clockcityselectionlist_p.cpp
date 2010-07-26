@@ -19,6 +19,8 @@
 // System includes
 #include <QStandardItemModel>
 #include <QModelIndex>
+#include <QGraphicsScene>
+#include <QTimer>
 #include <HbDocumentLoader>
 #include <HbView>
 #include <HbListView>
@@ -34,6 +36,7 @@
 #include <HbComboBox>
 #include <HbExtendedLocale>
 #include <HbAbstractItemView>
+#include <HbShrinkingVkbHost>
 
 // User includes
 #include "clockcityselectionlist_p.h"
@@ -94,6 +97,9 @@ ClockCitySelectionListPrivate::~ClockCitySelectionListPrivate()
 	if(mCountryList.count()) {
 		mCountryList.clear();
 	}
+	if (mVirtualKeyboard) {
+	    delete mVirtualKeyboard;
+    }
 
 }
 
@@ -366,6 +372,56 @@ void ClockCitySelectionListPrivate::loadSection(Qt::Orientation orientation)
 }
 
 /*!
+	Slot to handle close action of search panel.
+	This slot cancels the search and dismisses the vkb.
+ */
+void ClockCitySelectionListPrivate::cancelSearch()
+{
+	// Clear the search criteria.
+	mSearchBox->setCriteria(QString(""));
+	
+	// Hide the virtual keyborad.	
+	QInputContext *ic = qApp->inputContext();
+	if (ic) {
+		QEvent *event = new QEvent(QEvent::CloseSoftwareInputPanel);
+		ic->filterEvent(event);
+		delete event;
+	}
+	
+	// Set focus to the first city in the list.
+	mListView->scrollTo(mProxyModel->index(0, 0));
+}
+
+/*!
+    Focuses the line edit when the city selection list is opened.
+ */
+void ClockCitySelectionListPrivate::focusLineEdit()
+{
+	if (mSearchBox) {
+		// mView->scene()->setFocusItem(mSearchBox);
+		HbLineEdit *searchBoxEditor = 0;
+		searchBoxEditor = static_cast<HbLineEdit*>(
+				mSearchBox->primitive("lineedit"));
+
+		if (searchBoxEditor) {
+			searchBoxEditor->setInputMethodHints(Qt::ImhNoPredictiveText);
+/*			HbMainWindow *window = hbInstance->allMainWindows().at(0);
+			window->scene()->setFocusItem(searchBoxEditor);*/
+
+			// searchBoxEditor->setCursorPosition(0);
+			searchBoxEditor->setFocus();
+		}
+		
+		QInputContext *ic = qApp->inputContext();
+		if (ic) {
+			QEvent *event = new QEvent(QEvent::RequestSoftwareInputPanel);
+			ic->filterEvent(event);
+			delete event;
+		}
+	}
+}
+
+/*!
 	Displays the city selection list.
  */
 void ClockCitySelectionListPrivate::showCityList()
@@ -383,7 +439,9 @@ void ClockCitySelectionListPrivate::showCityList()
 	if (!mView) {
 		qFatal("Unable to get the selection view.");
 	}
-
+	// Set the shrinking vkb host to prevent pushing of the list.
+	mVirtualKeyboard = new HbShrinkingVkbHost(mView);
+	
 	// Get the list view.
 	mListView = static_cast<HbListView *> (mLoader->findWidget(CITYLISTVIEW));
 	if (!mListView) {
@@ -401,7 +459,9 @@ void ClockCitySelectionListPrivate::showCityList()
 	connect(
 			mSearchBox, SIGNAL(criteriaChanged(QString)),
 			this, SLOT(updateSearchCriteria(QString)));
-
+	connect(mSearchBox, SIGNAL(exitClicked()),
+	        this, SLOT(cancelSearch()));
+	
 	// Construct the source model.
 	if (!mListModel) {
 		mListModel = new QStandardItemModel(0, 1, this);
@@ -442,6 +502,9 @@ void ClockCitySelectionListPrivate::showCityList()
 
 	window->addView(mView);
 	window->setCurrentView(mView);
+	
+	// Focus the search box.
+	focusLineEdit();
 
 }
 

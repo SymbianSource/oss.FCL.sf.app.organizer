@@ -35,6 +35,11 @@
 #include "alarmalertwidget_p.h"
 #include "alarmalert.h"
 #include "alarmalertdocloader.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "alarmalertwidget_pTraces.h"
+#endif
+
 
 // ---------------------------------------------------------
 // AlarmAlertDialogPrivate::AlarmAlertDialogPrivate
@@ -46,6 +51,7 @@ AlarmAlertDialogPrivate::AlarmAlertDialogPrivate(const QVariantMap &parameters):
 	mClosedByClient(false),
 	mIsSilenceKey(false)
 	{
+	OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_ALARMALERTDIALOGPRIVATE_ENTRY );
 	// Extract all the parameters sent by the client
 	parseAndFetchParams(parameters);
 
@@ -61,6 +67,7 @@ AlarmAlertDialogPrivate::AlarmAlertDialogPrivate(const QVariantMap &parameters):
 
 	// TODO: Gestures not working. Integrate once support is available from Qt
 	grabGesture(Qt::SwipeGesture);
+	OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_ALARMALERTDIALOGPRIVATE_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -70,6 +77,7 @@ AlarmAlertDialogPrivate::AlarmAlertDialogPrivate(const QVariantMap &parameters):
 //
 AlarmAlertDialogPrivate::~AlarmAlertDialogPrivate()
 {
+    OstTraceFunctionEntry0( DUP1_ALARMALERTDIALOGPRIVATE_ALARMALERTDIALOGPRIVATE_ENTRY );
     // Cleanup
 	if (mAlertDocLoader) {
 		delete mAlertDocLoader;
@@ -86,6 +94,7 @@ AlarmAlertDialogPrivate::~AlarmAlertDialogPrivate()
 		delete mTranslator;
 		mTranslator = 0;
 	}
+	OstTraceFunctionExit0( DUP1_ALARMALERTDIALOGPRIVATE_ALARMALERTDIALOGPRIVATE_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -95,9 +104,11 @@ AlarmAlertDialogPrivate::~AlarmAlertDialogPrivate()
 //
 bool AlarmAlertDialogPrivate::setDeviceDialogParameters(const QVariantMap &parameters)
 {
+    OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_SETDEVICEDIALOGPARAMETERS_ENTRY );
     Q_UNUSED(parameters);
     
     //TODO: Handle parameters to be set
+    OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_SETDEVICEDIALOGPARAMETERS_EXIT );
     return 0;
 }
 
@@ -108,7 +119,9 @@ bool AlarmAlertDialogPrivate::setDeviceDialogParameters(const QVariantMap &param
 //
 int AlarmAlertDialogPrivate::deviceDialogError() const
 {
+    OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_DEVICEDIALOGERROR_ENTRY );
     // TODO: Return any errors that might have occured
+    OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_DEVICEDIALOGERROR_EXIT );
     return 0;
 }
 
@@ -119,9 +132,11 @@ int AlarmAlertDialogPrivate::deviceDialogError() const
 //
 void AlarmAlertDialogPrivate::closeDeviceDialog(bool byClient)
 {
+    OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_CLOSEDEVICEDIALOG_ENTRY );
     Q_UNUSED(byClient);
     mClosedByClient = byClient;
 	close();
+	OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_CLOSEDEVICEDIALOG_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -131,6 +146,7 @@ void AlarmAlertDialogPrivate::closeDeviceDialog(bool byClient)
 //
 HbDialog *AlarmAlertDialogPrivate::deviceDialogWidget() const
 {
+    OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_DEVICEDIALOGWIDGET_ENTRY );
     return const_cast<AlarmAlertDialogPrivate*> (this);
 }
 
@@ -141,10 +157,12 @@ HbDialog *AlarmAlertDialogPrivate::deviceDialogWidget() const
 //
 void AlarmAlertDialogPrivate::showEvent(QShowEvent *event)
 {
+	OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_SHOWEVENT_ENTRY );
 	HbDialog::showEvent(event);
 	QVariantMap param;
 	param.insert(alarmCommand, mUserResponse);
 	emit deviceDialogData(param);
+	OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_SHOWEVENT_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -154,6 +172,7 @@ void AlarmAlertDialogPrivate::showEvent(QShowEvent *event)
 //
 void AlarmAlertDialogPrivate::closeEvent(QCloseEvent *event)
 {
+    OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_CLOSEEVENT_ENTRY );
     
 	// Do not notify the client back if the close was initiated by client itself
 	if(!mClosedByClient) {
@@ -167,6 +186,7 @@ void AlarmAlertDialogPrivate::closeEvent(QCloseEvent *event)
 	
 	// Forward the call to the base class
 	HbDialog::closeEvent(event);
+	OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_CLOSEEVENT_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -176,7 +196,9 @@ void AlarmAlertDialogPrivate::closeEvent(QCloseEvent *event)
 //
 void AlarmAlertDialogPrivate::handleOrientationChange ()
 {
+    OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_HANDLEORIENTATIONCHANGE_ENTRY );
     // TODO: Need to change this as per the UI concept
+    OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_HANDLEORIENTATIONCHANGE_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -186,8 +208,10 @@ void AlarmAlertDialogPrivate::handleOrientationChange ()
 //
 void AlarmAlertDialogPrivate::snoozed()
 {
+	OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_SNOOZED_ENTRY );
 	mUserResponse = Snooze;
 	close();
+	OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_SNOOZED_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -197,6 +221,7 @@ void AlarmAlertDialogPrivate::snoozed()
 //
 void AlarmAlertDialogPrivate::silenced()
 {
+	OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_SILENCED_ENTRY );
 	if (mIsSilenceKey) {
 		mUserResponse = Silence;
 		mSnoozeAction->setText(hbTrId("txt_calendar_button_alarm_snooze"));
@@ -208,6 +233,7 @@ void AlarmAlertDialogPrivate::silenced()
 		mUserResponse = Snooze;
 		close();
 	}
+	OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_SILENCED_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -217,10 +243,12 @@ void AlarmAlertDialogPrivate::silenced()
 //
 void AlarmAlertDialogPrivate::aboutToDisplay()
     {
+    OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_ABOUTTODISPLAY_ENTRY );
     mUserResponse = Shown;
     QVariantMap param;
     param.insert(alarmCommand, mUserResponse);
     emit deviceDialogData(param);
+    OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_ABOUTTODISPLAY_EXIT );
     }
 	
 // ---------------------------------------------------------
@@ -230,8 +258,10 @@ void AlarmAlertDialogPrivate::aboutToDisplay()
 //
 void AlarmAlertDialogPrivate::dismissed()
 {
+	OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_DISMISSED_ENTRY );
 	mUserResponse = Stop;
 	close();
+	OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_DISMISSED_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -241,6 +271,7 @@ void AlarmAlertDialogPrivate::dismissed()
 //
 void AlarmAlertDialogPrivate::parseAndFetchParams(const QVariantMap &parameters)
 {
+    OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_PARSEANDFETCHPARAMS_ENTRY );
     // Iterate thru the list and extract all relevant parameters
     QVariantMap::const_iterator iter = parameters.constBegin();
     int count = parameters.size();
@@ -267,6 +298,7 @@ void AlarmAlertDialogPrivate::parseAndFetchParams(const QVariantMap &parameters)
         }
         iter++;
     }
+    OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_PARSEANDFETCHPARAMS_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -277,8 +309,10 @@ void AlarmAlertDialogPrivate::parseAndFetchParams(const QVariantMap &parameters)
 
 void AlarmAlertDialogPrivate::setupNormalUI(AlarmAlertDocLoader *alertDocLoader)
     {
+	OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_SETUPNORMALUI_ENTRY );
 	if(!alertDocLoader) {
 		// Nothing can be done. Simply return
+		OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_SETUPNORMALUI_EXIT );
 		return;
 	}
 	mAlertDocLoader = alertDocLoader;
@@ -290,6 +324,7 @@ void AlarmAlertDialogPrivate::setupNormalUI(AlarmAlertDocLoader *alertDocLoader)
     }else if(mAlarmAlertType == CalendarAlarm) {
     	handleCalendarAlarms();
     }
+	OstTraceFunctionExit0( DUP1_ALARMALERTDIALOGPRIVATE_SETUPNORMALUI_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -299,6 +334,7 @@ void AlarmAlertDialogPrivate::setupNormalUI(AlarmAlertDocLoader *alertDocLoader)
 //
 void AlarmAlertDialogPrivate::handleClockAlarms()
 {
+	OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_HANDLECLOCKALARMS_ENTRY );
 	QGraphicsWidget *headingWidget = mAlertDocLoader->findWidget("heading");
 	if (!headingWidget) {
 		qFatal("Unable to load the heading Widget");
@@ -310,9 +346,9 @@ void AlarmAlertDialogPrivate::handleClockAlarms()
 		qFatal("Unable to load the alarmTime label");
 	}
 	HbExtendedLocale locale = HbExtendedLocale::system();
-	mAlarmDateTime->setPlainText(
-			hbTrId("txt_calendar_info_alarm_start_time").arg(mAlarmTime));
 
+	mAlarmDateTime->setPlainText(mAlarmTime);
+	
 	mAlarmDescription = qobject_cast<HbLabel*> (
 			mAlertDocLoader->findWidget("alarmDescription"));
 	if (!mAlarmDescription) {
@@ -325,8 +361,6 @@ void AlarmAlertDialogPrivate::handleClockAlarms()
 	if (!mAlarmIcon) {
 		qFatal("Unable to load the alarm icon");
 	}
-	//TODO: Add the proper icon for clock alarms in the docml
-	mAlarmIcon->setIcon(HbIcon(":/image/clockAlarm.svg"));
 
 	HbAction *snoozeAction = qobject_cast<HbAction*> (
 			mAlertDocLoader->findObject("snoozeAction"));
@@ -349,6 +383,7 @@ void AlarmAlertDialogPrivate::handleClockAlarms()
 	if (!mCanSnooze) {
 		snoozeAction->setVisible(false);
 	}
+	OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_HANDLECLOCKALARMS_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -358,6 +393,7 @@ void AlarmAlertDialogPrivate::handleClockAlarms()
 //
 void AlarmAlertDialogPrivate::handleCalendarAlarms()
 {
+	OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_HANDLECALENDARALARMS_ENTRY );
 	bool success = false;
 	HbExtendedLocale locale = HbExtendedLocale::system();
 	// Check if the alarm has the time info or not.
@@ -374,15 +410,13 @@ void AlarmAlertDialogPrivate::handleCalendarAlarms()
 		if (!mAlarmDateTime) {
 			qFatal("Unable to find the alarmTime label");
 		}
-		mAlarmDateTime->setPlainText(
-				hbTrId("txt_calendar_info_alarm_start_time").arg(mAlarmTime));
+		mAlarmDateTime->setPlainText(mAlarmTime);
 		HbLabel *alarmDate = qobject_cast<HbLabel*> (
 				mAlertDocLoader->findWidget("alarmDate"));
 		if (!alarmDate) {
 			qFatal("Unable to find the alarmDate label");
 		}
-		alarmDate->setPlainText(
-				hbTrId("txt_calendar_info_alarm_start_date").arg(mAlarmDate));
+		alarmDate->setPlainText(mAlarmDate);
 		HbLabel *alarmDateNonTimed = qobject_cast<HbLabel*> (
 				mAlertDocLoader->findWidget("nonTimedAlarmDate"));
 		if (!alarmDateNonTimed) {
@@ -412,8 +446,7 @@ void AlarmAlertDialogPrivate::handleCalendarAlarms()
 		if (!alarmDateNonTimed) {
 			qFatal("Unable to find the alarmDateNonTimed label");
 		}
-		alarmDateNonTimed->setPlainText(
-				hbTrId("txt_calendar_info_alarm_start_date").arg(mAlarmDate));
+		alarmDateNonTimed->setPlainText(mAlarmDate);
 	}
 
 	QGraphicsWidget *headingWidget = mAlertDocLoader->findWidget("heading");
@@ -466,6 +499,7 @@ void AlarmAlertDialogPrivate::handleCalendarAlarms()
 	stopAction->setText(hbTrId("txt_calendar_button_alarm_dialog_snooze"));
 	disconnect(stopAction, SIGNAL(triggered()), this, SLOT(close()));
 	connect(stopAction, SIGNAL(triggered()), this, SLOT(dismissed()));
+	OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_HANDLECALENDARALARMS_EXIT );
 }
 
 // ---------------------------------------------------------
@@ -475,6 +509,7 @@ void AlarmAlertDialogPrivate::handleCalendarAlarms()
 //
 void AlarmAlertDialogPrivate::handleToDoAlarms()
 {
+	OstTraceFunctionEntry0( ALARMALERTDIALOGPRIVATE_HANDLETODOALARMS_ENTRY );
 	QGraphicsWidget *headingWidget = mAlertDocLoader->findWidget("heading");
 	if (!headingWidget) {
 		qFatal("Unable to load the heading widget");
@@ -486,8 +521,7 @@ void AlarmAlertDialogPrivate::handleToDoAlarms()
 	if (!alarmDate) {
 		qFatal("Unable to load the alarmDate label");
 	}
-	alarmDate->setPlainText(
-			hbTrId("txt_calendar_info_alarm_start_date").arg(mAlarmDate));
+	alarmDate->setPlainText(mAlarmDate);
 	
 	mAlarmDescription = qobject_cast<HbLabel*> (
 							mAlertDocLoader->findWidget("alarmDescription"));
@@ -527,6 +561,7 @@ void AlarmAlertDialogPrivate::handleToDoAlarms()
 	stopAction->setText(hbTrId("txt_calendar_button_alarm_dialog_snooze"));
 	disconnect(stopAction, SIGNAL(triggered()), this, SLOT(close()));
 	connect(stopAction, SIGNAL(triggered()), this, SLOT(dismissed()));
+	OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_HANDLETODOALARMS_EXIT );
 }
 
 // End of file  --Don't remove this.

@@ -173,10 +173,10 @@ void CCalenEditingState::HandleNotificationL(const TCalenNotification& aNotifica
             }
             break;
         default:
-           CCalenState::HandleNotificationL( aNotification, aStateMachine );
-            break;
+        	iOutstandingNotifications.InsertL(aNotification);
+			break;
         }
-        
+    	
     OstTraceFunctionExit0( CCALENEDITINGSTATE_HANDLENOTIFICATIONL_EXIT );
     }
 

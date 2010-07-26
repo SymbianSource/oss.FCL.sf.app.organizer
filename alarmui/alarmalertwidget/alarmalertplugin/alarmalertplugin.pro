@@ -5,6 +5,8 @@
 TEMPLATE = lib
 TARGET = alarmalertplugin
 
+INCLUDEPATH  += ./traces
+
 DEPENDPATH += ./inc \
 			   ./src \
 			   ./data
@@ -29,6 +31,8 @@ HEADERS +=  alarmalertplugin.h \
 SOURCES +=  alarmalertplugin.cpp \
 			alarmalertwidget_p.cpp \
 			alarmalertdocloader.cpp
+
+
 
 RESOURCES += alarmalert.qrc
 

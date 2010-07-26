@@ -37,7 +37,12 @@
 #include "noteseditorcommon.h"
 #include "noteseditor.h"
 #include "noteseditor_p.h"
-#include "agendautil.h"
+#include <agendautil.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "notesnoteeditorTraces.h"
+#endif
+
 
 /*!
 	\class NotesNoteEditor
@@ -64,6 +69,7 @@ NotesNoteEditor::NotesNoteEditor(NotesEditorPrivate *owner, QObject *parent)
  mDiscardChangesActionActive(false),
  mIgnoreFirstContentChange(false)
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_NOTESNOTEEDITOR_ENTRY );
 	mDocLoader = new NotesEditorDocLoader;
 	Q_ASSERT(mDocLoader);
 
@@ -162,6 +168,7 @@ NotesNoteEditor::NotesNoteEditor(NotesEditorPrivate *owner, QObject *parent)
 	if (!mFavouriteIcon) {
 		qFatal("Unable to get widget from document");
 	}
+	OstTraceFunctionExit0( NOTESNOTEEDITOR_NOTESNOTEEDITOR_EXIT );
 }
 
 /*!
@@ -169,8 +176,10 @@ NotesNoteEditor::NotesNoteEditor(NotesEditorPrivate *owner, QObject *parent)
  */
 NotesNoteEditor::~NotesNoteEditor()
 {
+	OstTraceFunctionEntry0( DUP1_NOTESNOTEEDITOR_NOTESNOTEEDITOR_ENTRY );
 	mDocLoader->reset();
 	delete mDocLoader;
+	OstTraceFunctionExit0( DUP1_NOTESNOTEEDITOR_NOTESNOTEEDITOR_EXIT );
 }
 
 /*!
@@ -181,6 +190,7 @@ NotesNoteEditor::~NotesNoteEditor()
  */
 void NotesNoteEditor::execute(AgendaEntry entry)
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_EXECUTE_ENTRY );
 	Q_UNUSED(entry)
 
 	HbExtendedLocale locale = HbExtendedLocale::system();
@@ -237,6 +247,7 @@ void NotesNoteEditor::execute(AgendaEntry entry)
 			this, SLOT(saveNote()));
 	window->addView(mEditor);
 	window->setCurrentView(mEditor);
+	OstTraceFunctionExit0( NOTESNOTEEDITOR_EXECUTE_EXIT );
 }
 
 /*!
@@ -246,6 +257,7 @@ void NotesNoteEditor::execute(AgendaEntry entry)
  */
 QString NotesNoteEditor::getDescription()
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_GETDESCRIPTION_ENTRY );
 	return mTextEditor->toPlainText();
 }
 
@@ -254,7 +266,9 @@ QString NotesNoteEditor::getDescription()
  */
 void NotesNoteEditor::markNoteAsTodo()
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_MARKNOTEASTODO_ENTRY );
 	mOwner->markNoteAsTodo();
+	OstTraceFunctionExit0( NOTESNOTEEDITOR_MARKNOTEASTODO_EXIT );
 }
 
 /*!
@@ -264,6 +278,7 @@ void NotesNoteEditor::markNoteAsTodo()
  */
 void NotesNoteEditor::saveNote()
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_SAVENOTE_ENTRY );
 	bool status = false;
 
 	if (!mOwner->mSaveEntry) {
@@ -288,6 +303,7 @@ void NotesNoteEditor::saveNote()
 			this, SLOT(saveNote()));
 
 	mOwner->editingCompleted(status);
+	OstTraceFunctionExit0( NOTESNOTEEDITOR_SAVENOTE_EXIT );
 }
 
 /*!
@@ -295,6 +311,7 @@ void NotesNoteEditor::saveNote()
  */
 void NotesNoteEditor::deleteNote()
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_DELETENOTE_ENTRY );
 	HbMessageBox *confirmationQuery = new HbMessageBox(
 			HbMessageBox::MessageTypeQuestion);
 	confirmationQuery->setDismissPolicy(HbDialog::NoDismiss);
@@ -322,6 +339,7 @@ void NotesNoteEditor::deleteNote()
 	confirmationQuery->addAction(mCancelDeleteAction);
 
 	confirmationQuery->open(this, SLOT(selectedAction(HbAction*)));
+	OstTraceFunctionExit0( NOTESNOTEEDITOR_DELETENOTE_EXIT );
 }
 
 /*!
@@ -330,9 +348,11 @@ void NotesNoteEditor::deleteNote()
  */
 void NotesNoteEditor::close()
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_CLOSE_ENTRY );
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 	// Now close the editor.
 	window->removeView(mEditor);
+	OstTraceFunctionExit0( NOTESNOTEEDITOR_CLOSE_EXIT );
 }
 
 /*!
@@ -340,6 +360,7 @@ void NotesNoteEditor::close()
  */
 void NotesNoteEditor::updateNoteText()
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_UPDATENOTETEXT_ENTRY );
 	// mIgnoreFirstContentChange  is used since updateNoteText
 	// slot is called before the cursor is pressed
 	if(!mIgnoreFirstContentChange) {
@@ -367,6 +388,7 @@ void NotesNoteEditor::updateNoteText()
 	}
 
 	mOwner->updateNoteText();
+	OstTraceFunctionExit0( NOTESNOTEEDITOR_UPDATENOTETEXT_EXIT );
 }
 
 /*!
@@ -375,6 +397,7 @@ void NotesNoteEditor::updateNoteText()
 void NotesNoteEditor::checkOrientatioAndLoadSection(
 		Qt::Orientation screenOrientation)
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_CHECKORIENTATIOANDLOADSECTION_ENTRY );
 	bool success;
 
 	// If horizontal, load the landscape section.
@@ -393,6 +416,7 @@ void NotesNoteEditor::checkOrientatioAndLoadSection(
 				success, "NotesNoteEditor.cpp",
 				"Unable to load landscape section");
 	}
+	OstTraceFunctionExit0( NOTESNOTEEDITOR_CHECKORIENTATIOANDLOADSECTION_EXIT );
 }
 
 /*!
@@ -400,6 +424,7 @@ void NotesNoteEditor::checkOrientatioAndLoadSection(
  */
 void NotesNoteEditor::markNoteAsFavourite()
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_MARKNOTEASFAVOURITE_ENTRY );
 	if (mOwner->mModifiedNote.favourite()) {
 		mOwner->mModifiedNote.setFavourite(0);
 
@@ -419,6 +444,7 @@ void NotesNoteEditor::markNoteAsFavourite()
 		mMarkFavouriteAction->setText(
 				hbTrId("txt_notes_opt_remove_from_favorites"));
 	}
+	OstTraceFunctionExit0( NOTESNOTEEDITOR_MARKNOTEASFAVOURITE_EXIT );
 }
 
 /*!
@@ -426,8 +452,10 @@ void NotesNoteEditor::markNoteAsFavourite()
  */
 void NotesNoteEditor::handleDiscardChangesAction()
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_HANDLEDISCARDCHANGESACTION_ENTRY );
 	// Close the note editor
 	close();
+	OstTraceFunctionExit0( NOTESNOTEEDITOR_HANDLEDISCARDCHANGESACTION_EXIT );
 }
 
 /*!
@@ -435,6 +463,7 @@ void NotesNoteEditor::handleDiscardChangesAction()
  */
 void NotesNoteEditor::handleAddToCalendarAction()
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_HANDLEADDTOCALENDARACTION_ENTRY );
 	mCalenEditor = new CalenEditor(mOwner->mAgendaUtil);
 
 	connect (
@@ -459,6 +488,7 @@ void NotesNoteEditor::handleAddToCalendarAction()
 	mCalenEditor->create(
 			calendarEntry, 1, CalenEditor::TypeAppointment);
 
+	OstTraceFunctionExit0( NOTESNOTEEDITOR_HANDLEADDTOCALENDARACTION_EXIT );
 }
 
 /*!
@@ -466,12 +496,14 @@ void NotesNoteEditor::handleAddToCalendarAction()
  */
 void NotesNoteEditor::handleEntrySaveFromCalendar()
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_HANDLEENTRYSAVEFROMCALENDAR_ENTRY );
 	mEntrySavedInCalendar = true;
 	// Delete the old note and go back to the previous view.
 	if (!mOwner->mNewEntry) {
 		// Delete the note. All the changes are discarded.
 		mOwner->mAgendaUtil->deleteEntry(mOwner->mOriginalNote.id());
 	}
+	OstTraceFunctionExit0( NOTESNOTEEDITOR_HANDLEENTRYSAVEFROMCALENDAR_EXIT );
 }
 
 /*!
@@ -479,6 +511,7 @@ void NotesNoteEditor::handleEntrySaveFromCalendar()
  */
 void NotesNoteEditor::handleCalendarEditorClosed()
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_HANDLECALENDAREDITORCLOSED_ENTRY );
 	if (mEntrySavedInCalendar) {
 		mOwner->close(NotesEditor::CloseWithoutSave);
 
@@ -501,6 +534,7 @@ void NotesNoteEditor::handleCalendarEditorClosed()
 
 	// Delete the calendar editor.
 	mCalenEditor->deleteLater();
+	OstTraceFunctionExit0( NOTESNOTEEDITOR_HANDLECALENDAREDITORCLOSED_EXIT );
 }
 
 /*!
@@ -508,8 +542,9 @@ void NotesNoteEditor::handleCalendarEditorClosed()
  */
 void NotesNoteEditor::handleNewNoteAction()
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_HANDLENEWNOTEACTION_ENTRY );
 	if (mOwner->isNoteEdited()) {
-		mOwner->mAgendaUtil->updateEntry(mOwner->mModifiedNote);
+		mOwner->mAgendaUtil->store(mOwner->mModifiedNote);
 	}
 
 	AgendaEntry entry;
@@ -537,6 +572,7 @@ void NotesNoteEditor::handleNewNoteAction()
 		mDiscardChangesActionActive = false;
 	}
 	mEditor->menu()->removeAction(mNewNoteAction);
+	OstTraceFunctionExit0( NOTESNOTEEDITOR_HANDLENEWNOTEACTION_EXIT );
 }
 
 /* !
@@ -544,6 +580,7 @@ void NotesNoteEditor::handleNewNoteAction()
  */
 void NotesNoteEditor::selectedAction(HbAction *action)
 {
+	OstTraceFunctionEntry0( NOTESNOTEEDITOR_SELECTEDACTION_ENTRY );
 	if (action == mDeleteNoteAction) {
 		mOwner->deleteNote();
 
@@ -555,6 +592,7 @@ void NotesNoteEditor::selectedAction(HbAction *action)
 
 		mOwner->editingCompleted(status);
 	}
+	OstTraceFunctionExit0( NOTESNOTEEDITOR_SELECTEDACTION_EXIT );
 }
 
 // End of file	--Don't remove this.

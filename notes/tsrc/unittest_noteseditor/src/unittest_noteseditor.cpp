@@ -18,12 +18,12 @@
 // System include
 #include <QtTest/QtTest>
 #include <HbMainWindow>
-#include <NotesEditor>
 #include <AgendaUtil>
 #include <AgendaEntry>
 
 // User includes
 #include "unittest_noteseditor.h"
+#include "noteseditor.h"
 
 
 /*!
@@ -211,7 +211,7 @@ void TestNotesEditor::testEditingNoteWithId()
 	entry.setType(AgendaEntry::TypeNote);
 	entry.setDescription("A simple note");
 
-	ulong id = agendaUtil->addEntry(entry);
+	ulong id = agendaUtil->store(entry);
 
 	notesEditor->edit(id);
 
@@ -260,7 +260,7 @@ void TestNotesEditor::testEditingTodoWithAgendaEntry()
 	entry.setStatus(AgendaEntry::TodoNeedsAction);
 	entry.setPriority(2);
 	
-	ulong id = agendaUtil->addEntry(entry);
+	ulong id = agendaUtil->store(entry);
 
 	// Call edit on agenda entry
 	notesEditor->edit(entry);
@@ -303,7 +303,7 @@ void TestNotesEditor::testEditingTodoWithId()
 	entry.setStatus(AgendaEntry::TodoNeedsAction);
 	entry.setPriority(2);
 
-	ulong id = agendaUtil->addEntry(entry);
+	ulong id = agendaUtil->store(entry);
 
 	// Call edit using the id
 	notesEditor->edit(id);
@@ -452,7 +452,7 @@ void TestNotesEditor::testClosingOfTodoEditorWithSave()
 	entry.setStatus(AgendaEntry::TodoNeedsAction);
 	entry.setPriority(2);
 	
-	ulong id = agendaUtil->addEntry(entry);
+	ulong id = agendaUtil->store(entry);
 
 	// Call edit on agenda entry
 	notesEditor->edit(entry);
@@ -495,7 +495,7 @@ void TestNotesEditor::testClosingOfTodoEditorWithoutSave()
 	entry.setStatus(AgendaEntry::TodoNeedsAction);
 	entry.setPriority(2);
 			
-	ulong id = agendaUtil->addEntry(entry);
+	ulong id = agendaUtil->store(entry);
 
 	// Call edit on agenda entry
 	notesEditor->edit(entry);

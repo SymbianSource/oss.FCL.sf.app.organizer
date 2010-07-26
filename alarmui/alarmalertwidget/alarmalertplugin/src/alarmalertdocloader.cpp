@@ -21,25 +21,35 @@
 // User includes
 #include "alarmalertdocloader.h"
 #include "alarmalertwidget_p.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "alarmalertdocloaderTraces.h"
+#endif
 
 AlarmAlertDocLoader::AlarmAlertDocLoader(const QVariantMap &parameters):
 mParameters(parameters)
 {
+	OstTraceFunctionEntry0( ALARMALERTDOCLOADER_ALARMALERTDOCLOADER_ENTRY );
 	
+	OstTraceFunctionExit0( ALARMALERTDOCLOADER_ALARMALERTDOCLOADER_EXIT );
 }
 
 AlarmAlertDocLoader::~AlarmAlertDocLoader()
 {
+	OstTraceFunctionEntry0( DUP1_ALARMALERTDOCLOADER_ALARMALERTDOCLOADER_ENTRY );
 
+	OstTraceFunctionExit0( DUP1_ALARMALERTDOCLOADER_ALARMALERTDOCLOADER_EXIT );
 }
 
 QObject* AlarmAlertDocLoader::createObject(const QString &type, 
 															const QString &name)
 {
+	OstTraceFunctionEntry0( ALARMALERTDOCLOADER_CREATEOBJECT_ENTRY );
 	if (name == "dialog"){ 
 		QObject *alarmAlertDialogPrivate = new AlarmAlertDialogPrivate(
 																	mParameters);
 		alarmAlertDialogPrivate->setObjectName(name);
+		OstTraceFunctionExit0( ALARMALERTDOCLOADER_CREATEOBJECT_EXIT );
 		return alarmAlertDialogPrivate;
 	}else {
 		return HbDocumentLoader::createObject(type, name);

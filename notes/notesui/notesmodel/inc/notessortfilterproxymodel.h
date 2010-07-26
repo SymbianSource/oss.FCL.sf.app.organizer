@@ -24,7 +24,7 @@
 
 // User includes
 #include "notesmodeldefines.h"
-#include "agendautil.h"
+#include <agendautil.h>
 
 class NOTESMODEL_EXPORT NotesSortFilterProxyModel : public QSortFilterProxyModel
 {

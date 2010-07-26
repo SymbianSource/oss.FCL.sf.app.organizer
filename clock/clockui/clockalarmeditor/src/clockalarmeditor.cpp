@@ -327,8 +327,7 @@ void ClockAlarmEditor:: handleOccurenceChanged(int index)
 			// Show the alarm days field to select the day.
 			mAlarmDayItem = new HbDataFormModelItem(
 					HbDataFormModelItem::ComboBoxItem,
-					QString(hbTrId("txt_clock_formlabel_day")),
-					mAlarmEditorModel->invisibleRootItem());
+					QString(hbTrId("txt_clock_formlabel_day")));
 
 			// Add the alarm days beginning from the start of week.
 			QStringList alarmDays;

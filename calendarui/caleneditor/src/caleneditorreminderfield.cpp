@@ -57,7 +57,7 @@ CalenEditorReminderField::CalenEditorReminderField(
 	 mCalenEditor(calenEditor), 
 	 mEditorForm(form), 
 	 mCalenEditorModel(model),
-	 mCustomReminderTimeItem(NULL),
+	 mCustomReminderTimeItem(0),
 	 mReminderTimeAdded(false)
 {
 	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_CALENEDITORREMINDERFIELD_ENTRY );
@@ -350,7 +350,7 @@ void CalenEditorReminderField::setDefaultAlarmForAllDay()
 		AgendaAlarm reminder;
 		QDate defaultDate
 				(mCalenEditor->editedEntry()->startTime().date().addDays(-1));
-		// Set default time.
+		// Set default time as 6pm of the previous day.
 		mReminderTimeForAllDay.setHMS(18, 0, 0, 0);
 		setDisplayTime();
 		QDateTime startDateTimeForAllDay(
@@ -474,7 +474,7 @@ void CalenEditorReminderField::removeReminderTimeField()
 		mCalenEditorModel->removeItem(
 				mCalenEditorModel->index(
 						reminderIndex.row(), 0));
-		mCustomReminderTimeItem = NULL;
+		mCustomReminderTimeItem = 0;
 	}
 	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_REMOVEREMINDERTIMEFIELD_EXIT );
 }

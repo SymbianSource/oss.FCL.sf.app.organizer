@@ -56,6 +56,9 @@
 #include "calenmonthviewTraces.h"
 #endif
 
+// CONSTANTS
+#define WEEKNUMWIDTH 6.41604 // in units, need to update this value if it 
+								// is changed in the docml
 /*!
  \class CalenMonthView
 
@@ -369,20 +372,26 @@ void CalenMonthView::addWeekNumbers()
 	        static_cast<QGraphicsLinearLayout *> (mDayNameWidget->layout());
 
 	if (KCalenDaysInWeek == dayNamesLayout->count()) {
-		// Add one item with text "Wk" in the day name grid
+		// Add one empty label in the day name grid
 		HbLabel *label = new HbLabel(mDayNameWidget);
 
 		// Set the attributes same as that of other day names to make it
 		// look similar to the day names
-		label->setPlainText(hbTrId("txt_calendar_grid_day_wk"));
+		label->setPlainText("");
 		label->setFont(mFirstDayLabel->font());
 		label->setFontSpec(mFirstDayLabel->fontSpec());
 		label->setAlignment(mFirstDayLabel->alignment());
 		label->setElideMode(mFirstDayLabel->elideMode());
 		label->setZValue(mFirstDayLabel->zValue());
-		label->setPreferredHeight(mFirstDayLabel->preferredHeight());
-		label->setMinimumHeight(mFirstDayLabel->minimumHeight());
-		label->setMaximumHeight(mFirstDayLabel->maximumHeight());
+		// Set the proper width to this empty label so that
+		// day names are dislayed against the correct columns
+		HbDeviceProfile deviceProf;
+        qreal unitValue = deviceProf.unitValue();
+        qreal widthInPixels = WEEKNUMWIDTH * unitValue;
+        label->setPreferredWidth(widthInPixels);
+        label->setMinimumWidth(widthInPixels);
+        label->setMaximumWidth(widthInPixels);
+        label->setContentsMargins(0,0,0,0);
 		
 		// Add this label into layout
 		dayNamesLayout->insertItem(0, label);
@@ -677,13 +686,15 @@ void CalenMonthView::addRemoveActionsInMenu()
 {
     OstTraceFunctionEntry0( CALENMONTHVIEW_ADDREMOVEACTIONSINMENU_ENTRY );
 	HbAction* menuAction = mDeleteSubMenu->menuAction();
-	// Check if there are no entries in the database
-	if (mAgendaUtil->areNoEntriesInCalendar() && menuAction) {
-		// hide the delete entries option
-		menuAction->setVisible(false);
-	} else if (menuAction) {
-		// Show the option to delete
-		menuAction->setVisible(true);
+	if (menuAction) {
+        if (!mEntriesInDataBase && mAgendaUtil->areNoEntriesInCalendar()) {
+            // hide the delete entries option
+            menuAction->setVisible(false);
+        } else {
+            mEntriesInDataBase = true;
+            // Show the option to delete
+            menuAction->setVisible(true);
+        }
 	}
 	
 	// Check if we are population for current day, if yes then disable the
@@ -702,7 +713,7 @@ void CalenMonthView::addRemoveActionsInMenu()
 void CalenMonthView::doPopulation()
 {
     OstTraceFunctionEntry0( CALENMONTHVIEW_DOPOPULATION_ENTRY );
-
+    
  	// Get the layout and add the preview pane layout.
 	QGraphicsLinearLayout* viewLayout = static_cast<QGraphicsLinearLayout *>
 														(widget()->layout());
@@ -935,7 +946,7 @@ QDateTime CalenMonthView::getActiveDay()
 /*!
  Returns the array of CalenMonthData items
  */
-QList<CalenMonthData> CalenMonthView::monthDataList()
+QList<CalenMonthData>& CalenMonthView::monthDataList()
 {
     OstTraceFunctionEntry0( CALENMONTHVIEW_MONTHDATALIST_ENTRY );
     
@@ -1238,8 +1249,11 @@ void CalenMonthView::populateWithInstanceView()
 		int offset = mFirstDayOfGrid.date().daysTo(datesWithEvents.at(i));
 		mMonthDataArray[offset].SetHasEvents(true);
 	}
-
 	datesWithEvents.clear();
+	
+	if (datesEventsCount) {
+        mEntriesInDataBase = true;
+	}
 	
 	OstTraceFunctionExit0( CALENMONTHVIEW_POPULATEWITHINSTANCEVIEW_EXIT );
 }
@@ -1272,6 +1286,10 @@ void CalenMonthView::populatePrevMonth()
 	}
 	datesWithEvents.clear();
 	
+	if (datesEventsCount) {
+        mEntriesInDataBase = true;
+    }
+	
 	OstTraceFunctionExit0( CALENMONTHVIEW_POPULATEPREVMONTH_EXIT );
 }
 
@@ -1302,6 +1320,10 @@ void CalenMonthView::populateNextMonth()
 		mMonthDataArray[offset].SetHasEvents(true);
 	}
 	datesWithEvents.clear();
+	
+	if (datesEventsCount) {
+        mEntriesInDataBase = true;
+    }
 	OstTraceFunctionExit0( CALENMONTHVIEW_POPULATENEXTMONTH_EXIT );
 }
 
@@ -1478,12 +1500,13 @@ void CalenMonthView::setDateToLabel()
     OstTraceFunctionEntry0( CALENMONTHVIEW_SETDATETOLABEL_ENTRY );
     
 	// Get the localised string for month name from system locale
-	QString monthString = mLocale.monthName(mDate.date().month(), HbExtendedLocale::LongFormat);
+	QString dateString = mLocale.monthName(mDate.date().month(), HbExtendedLocale::LongFormat);
 	// Append a single space
-	monthString.append(" ");
+	dateString.append(" ");
 	mLocale.setNumberOptions(QLocale::OmitGroupSeparator);
-	QString yearString = mLocale.toString(mDate.date().year());
-	mTitleLabel->setPlainText(hbTrId("txt_calendar_month_label_title_12").arg(monthString).arg(yearString));
+	// Append the year string also
+	dateString.append(mLocale.toString(mDate.date().year()));
+	mTitleLabel->setPlainText(dateString);
 	
 	OstTraceFunctionExit0( CALENMONTHVIEW_SETDATETOLABEL_EXIT );
 }
@@ -1577,7 +1600,10 @@ void CalenMonthView::onLocaleChanged(int reason)
 {
     OstTraceFunctionEntry0( CALENMONTHVIEW_ONLOCALECHANGED_ENTRY );
     
-	Q_UNUSED(reason);
+    if ((reason & EChangesSystemTime) 
+    		|| (reason & EChangesMidnightCrossover)) {
+		mCurrentDay = CalenDateUtils::today();
+	}
 	OstTraceFunctionExit0( CALENMONTHVIEW_ONLOCALECHANGED_EXIT );
 }
 

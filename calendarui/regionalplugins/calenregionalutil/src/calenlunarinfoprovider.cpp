@@ -22,6 +22,11 @@
 #include "CalenSolarTerms.h"
 
 #include <calendarconverter.h>
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenlunarinfoproviderTraces.h"
+#endif
+
 
 
 // ---------------------------------------------------------
@@ -33,8 +38,7 @@ static void CelestialIndex(const TChineseDate& aChineseDate,
                            TInt& aCelestialIndex, 
                            TInt& aTerrestrialIndex)
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( _CELESTIALINDEX_ENTRY );
     aCelestialIndex = aChineseDate.iYear % 10;
     
     if (aCelestialIndex == 0)
@@ -56,7 +60,7 @@ static void CelestialIndex(const TChineseDate& aChineseDate,
         aTerrestrialIndex--;
         }
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( _CELESTIALINDEX_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -67,8 +71,7 @@ static TCalenLunarInfo::TFestival ChineseFestival(
     const TChineseDate& aChineseDate, 
     const TChineseDate& aNextDate)
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( _CHINESEFESTIVAL_ENTRY );
     TCalenLunarInfo::TFestival index = TCalenLunarInfo::ENoFestival;
 
     if (!aChineseDate.iLeapMonth)
@@ -116,7 +119,7 @@ static TCalenLunarInfo::TFestival ChineseFestival(
         index = TCalenLunarInfo::EFestivalNewYearEve;
         }
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( _CHINESEFESTIVAL_EXIT );
     return index;
     }
 
@@ -126,14 +129,13 @@ static TCalenLunarInfo::TFestival ChineseFestival(
 //
 EXPORT_C CCalenLunarInfoProvider* CCalenLunarInfoProvider::NewL(RFs& aFs)
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENLUNARINFOPROVIDER_NEWL_ENTRY );
     CCalenLunarInfoProvider* self = new (ELeave) CCalenLunarInfoProvider();
     CleanupStack::PushL(self);
     self->ConstructL(aFs);
     CleanupStack::Pop(self);
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENLUNARINFOPROVIDER_NEWL_EXIT );
     return self;
     }
 
@@ -143,12 +145,10 @@ EXPORT_C CCalenLunarInfoProvider* CCalenLunarInfoProvider::NewL(RFs& aFs)
 //
 EXPORT_C CCalenLunarInfoProvider::~CCalenLunarInfoProvider()
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENLUNARINFOPROVIDER_CCALENLUNARINFOPROVIDER_ENTRY );
     delete iSolarTerms; 
     delete iConverter;
-    
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENLUNARINFOPROVIDER_CCALENLUNARINFOPROVIDER_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -157,8 +157,8 @@ EXPORT_C CCalenLunarInfoProvider::~CCalenLunarInfoProvider()
 //
 CCalenLunarInfoProvider::CCalenLunarInfoProvider()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENLUNARINFOPROVIDER_CCALENLUNARINFOPROVIDER_ENTRY );
+    OstTraceFunctionExit0( DUP1_CCALENLUNARINFOPROVIDER_CCALENLUNARINFOPROVIDER_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -167,12 +167,11 @@ CCalenLunarInfoProvider::CCalenLunarInfoProvider()
 //
 void CCalenLunarInfoProvider::ConstructL(RFs& aFs)
     {
-    TRACE_ENTRY_POINT;
+OstTraceFunctionEntry0( CCALENLUNARINFOPROVIDER_CONSTRUCTL_ENTRY );
 
     iConverter = CChineseCalendarConverter::NewL();
     iSolarTerms = CCalenSolarTerms::NewL(aFs);
-    
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENLUNARINFOPROVIDER_CONSTRUCTL_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -181,8 +180,7 @@ void CCalenLunarInfoProvider::ConstructL(RFs& aFs)
 //
 EXPORT_C TCalenLunarInfo CCalenLunarInfoProvider::GetLunarInfoL( const TTime& aDay ) 
     {
-    TRACE_ENTRY_POINT;
-       
+    OstTraceFunctionEntry0( CCALENLUNARINFOPROVIDER_GETLUNARINFOL_ENTRY );
     TDateTime dayDt = aDay.DateTime();
 
     TTime nextDay = aDay + TTimeIntervalDays(1);
@@ -201,6 +199,6 @@ EXPORT_C TCalenLunarInfo CCalenLunarInfoProvider::GetLunarInfoL( const TTime& aD
     info.iSolarTerm = iSolarTerms->CheckSolarTermDateL( dayDt );
     CelestialIndex( chineseDate, info.iHeavenlyStem, info.iTerrestialBranch );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENLUNARINFOPROVIDER_GETLUNARINFOL_EXIT );
     return info;
     }

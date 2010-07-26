@@ -68,6 +68,12 @@ class CCalenEditUi : public QObject,
          * @param aNotification Nofication to be handled
          */
         void HandleNotification(const TCalenNotification aNotification );
+        
+        /**
+        * This Function saves the entries
+        * should only calls after edit or create function has called 
+        */
+        void saveAndCloseEditor();
 
     private: // own methods
         /**

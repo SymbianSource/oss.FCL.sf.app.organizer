@@ -19,6 +19,7 @@
 
 
 #include "calendayitem.h"
+#include "calendaycontainer.h"
 
 class TestCalenDayItem : public QObject
 {
@@ -39,6 +40,7 @@ private slots:
 
 private:
     CalenDayItem *mItem;
+    CalenDayContainer *mContainer;
 };
 
 /*!
@@ -78,7 +80,8 @@ void TestCalenDayItem::cleanupTestCase()
  */
 void TestCalenDayItem::init()
 {
-    mItem = new CalenDayItem();
+    mContainer = new CalenDayContainer();
+    mItem = new CalenDayItem(mContainer);
 }
 
 /*!
@@ -89,6 +92,11 @@ void TestCalenDayItem::cleanup()
     if (mItem) {
         delete mItem;
         mItem = NULL;
+    }
+    
+    if (mContainer) {
+       delete mContainer;
+       mContainer = NULL;
     }
 }
 
@@ -104,7 +112,7 @@ void TestCalenDayItem::testConstructors()
     QVERIFY(!testItem);
     
     //2)
-    testItem = new CalenDayItem();
+    testItem = new CalenDayItem(mContainer);
     QVERIFY(testItem);
     delete testItem;
 }

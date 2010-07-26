@@ -144,6 +144,12 @@ private slots:
 
 public slots:
 	void changeView(TCalenCommandId viewId);
+	
+    /**
+     * Scrolls content to correct position after view repopulation
+     */
+    void setupViewport();
+
 private:
     /**
      * 
@@ -159,25 +165,20 @@ private:
      * Connects view's slots.
      */
     void setupSlots();
-
-    /**
-     * Scrolls content to correct position after view repopulation
-     */
-    void setupViewport();
-
+    
 private: // members related to view management and gesture handling
-    
-    CalenDayContentScrollArea* mContentScrollArea;  //!< Scroll area for content (events)
-    
-    CalenDayContentWidget* mContentWidget;    //!< Content widget
-    
-    CalenDayHourScrollArea* mHourScrollArea;  //!< Scroll area for hour elements
     
     CalenDayModelManager* mModelManager;
     
-    QGraphicsLinearLayout* mVLayout;
+    CalenDayContentScrollArea* mContentScrollArea;  //!< Scroll area for content
+    CalenDayContentWidget* mContentWidget;    //!< Content widget
+    CalenDayHourScrollArea* mHourScrollArea;  //!< Scroll area for hour elements
+    QGraphicsLinearLayout* mVLayout;    //!< Vertical layout for day view
     
-   
+    CalenDocLoader* mDocLoader; //!< Document loader for day view
+    
+    bool mIsLaunching;  //!< Indicates that view is launching first time
+    
 private:    
 
     XQSettingsManager* mSettingsManager;

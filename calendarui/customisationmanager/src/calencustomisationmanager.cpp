@@ -31,6 +31,11 @@
 #include "calenservices.h"
 #include "calenservicesfactory.h"
 #include "CalenUid.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calencustomisationmanagerTraces.h"
+#endif
+
 
 
 
@@ -46,8 +51,7 @@
                                     MCalenServices& aServices
                                     )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_NEWL_ENTRY );
     CCalenCustomisationManager* self = new( ELeave ) CCalenCustomisationManager(
                                                                  aFactory,
                                                                  aServices );
@@ -55,7 +59,7 @@
     self->ConstructL();
     CleanupStack::Pop( self );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_NEWL_EXIT );
     return self;
     }
 
@@ -70,8 +74,8 @@ CCalenCustomisationManager::CCalenCustomisationManager( MCalenServicesFactory& a
     : iServicesFactory( aFactory ),       
       iServices( aServices )
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_CCALENCUSTOMISATIONMANAGER_ENTRY );
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_CCALENCUSTOMISATIONMANAGER_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -82,14 +86,14 @@ CCalenCustomisationManager::CCalenCustomisationManager( MCalenServicesFactory& a
 //
 void CCalenCustomisationManager::ConstructL()
     {
-    TRACE_ENTRY_POINT;
+	OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_CONSTRUCTL_ENTRY );
 
     CreateActivePluginListL();
 
     // Load any enabled plugins
     DoImmediatePluginLoadingL();
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_CONSTRUCTL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -100,7 +104,7 @@ void CCalenCustomisationManager::ConstructL()
 //
  CCalenCustomisationManager::~CCalenCustomisationManager()
     {
-    TRACE_ENTRY_POINT;
+	OstTraceFunctionEntry0( DUP1_CCALENCUSTOMISATIONMANAGER_CCALENCUSTOMISATIONMANAGER_ENTRY );
 
     // Reset and destroy the contents of the owned arrays,
     // this will delete the plugins.
@@ -116,7 +120,7 @@ void CCalenCustomisationManager::ConstructL()
     
     iDefferedUnloadPluginList.Reset();
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CCALENCUSTOMISATIONMANAGER_CCALENCUSTOMISATIONMANAGER_EXIT );
     }
  // ----------------------------------------------------------------------------
  // CCalenCustomisationManager::GetCommandHandlerL
@@ -125,7 +129,7 @@ void CCalenCustomisationManager::ConstructL()
  // ----------------------------------------------------------------------------
  MCalenCommandHandler* CCalenCustomisationManager::GetCommandHandlerL( TInt aCommand )
      {
-     TRACE_ENTRY_POINT;
+	OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_GETCOMMANDHANDLERL_ENTRY );
 
      MCalenCommandHandler* handler( NULL );
      
@@ -153,7 +157,7 @@ void CCalenCustomisationManager::ConstructL()
              }
          }
      
-     TRACE_EXIT_POINT;
+     OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_GETCOMMANDHANDLERL_EXIT );
      return handler;
      }
 
@@ -166,9 +170,8 @@ void CCalenCustomisationManager::ConstructL()
 //
  const RArray<TUid>& CCalenCustomisationManager::ActivePlugins() const
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_ACTIVEPLUGINS_ENTRY );
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_ACTIVEPLUGINS_EXIT );
     return iActivePlugins;
     }
 
@@ -179,8 +182,7 @@ void CCalenCustomisationManager::ConstructL()
 //
 void CCalenCustomisationManager::CreateActivePluginListL()
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_CREATEACTIVEPLUGINLISTL_ENTRY );
     iPluginInfo.ResetAndDestroy();
     iActivePlugins.Reset();
     iRomBasedPlugins.Reset();
@@ -210,7 +212,7 @@ void CCalenCustomisationManager::CreateActivePluginListL()
 			}
 		}
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_CREATEACTIVEPLUGINLISTL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -220,6 +222,7 @@ void CCalenCustomisationManager::CreateActivePluginListL()
 //
 void CCalenCustomisationManager::LoadPluginsBasedOnVariantL()
 {
+	OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_LOADPLUGINSBASEDONVARIANTL_ENTRY );
 	TLanguage languge = User::Language();
 	RArray<TUid> needsToBeRemoved;
 	
@@ -261,6 +264,7 @@ void CCalenCustomisationManager::LoadPluginsBasedOnVariantL()
 			}
 		}
 	needsToBeRemoved.Close();
+	OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_LOADPLUGINSBASEDONVARIANTL_EXIT );
 }
 
 // ----------------------------------------------------------------------------
@@ -271,6 +275,7 @@ void CCalenCustomisationManager::LoadPluginsBasedOnVariantL()
 TBool CCalenCustomisationManager::PluginInfoFinder( const TUid* aUid,
 								const CImplementationInformation&  aArrayItem )
 {
+	OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_PLUGININFOFINDER_ENTRY );
 	return (*aUid  == aArrayItem.ImplementationUid() );
 }
 
@@ -282,8 +287,7 @@ TBool CCalenCustomisationManager::PluginInfoFinder( const TUid* aUid,
  void CCalenCustomisationManager::SetPluginAvailabilityL( TUid aPluginUid,
                                                                   TBool aEnabled )
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_SETPLUGINAVAILABILITYL_ENTRY );
     if ( aEnabled )
         {
         EnablePluginL( aPluginUid );
@@ -293,7 +297,7 @@ TBool CCalenCustomisationManager::PluginInfoFinder( const TUid* aUid,
         DisablePluginL( aPluginUid );
         }
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_SETPLUGINAVAILABILITYL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -303,8 +307,7 @@ TBool CCalenCustomisationManager::PluginInfoFinder( const TUid* aUid,
 //  
  void CCalenCustomisationManager::DisablePluginL( TUid aPluginUid )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_DISABLEPLUGINL_ENTRY );
     // Find the plugins
     TInt index = iPlugins.Find( aPluginUid, CPluginInfo::Identifier );
     if ( index != KErrNotFound )
@@ -331,7 +334,7 @@ TBool CCalenCustomisationManager::PluginInfoFinder( const TUid* aUid,
             }
         
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_DISABLEPLUGINL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -343,7 +346,7 @@ TBool CCalenCustomisationManager::PluginInfoFinder( const TUid* aUid,
 //
  void CCalenCustomisationManager::UnloadPluginsL( const RArray<TUid>& aPlugins )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_UNLOADPLUGINSL_ENTRY );
     // Check plugin isn't already enabled
     TInt count = aPlugins.Count();
     for (TInt index = 0; index < count; ++index )
@@ -364,7 +367,7 @@ TBool CCalenCustomisationManager::PluginInfoFinder( const TUid* aUid,
 		        	}
 		   }
         }
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_UNLOADPLUGINSL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -375,8 +378,7 @@ TBool CCalenCustomisationManager::PluginInfoFinder( const TUid* aUid,
 //
 void CCalenCustomisationManager::EnablePluginL( TUid aPluginUid )
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_ENABLEPLUGINL_ENTRY );
     // Check plugin isn't already enabled
     TInt index = iPlugins.Find( aPluginUid, CPluginInfo::Identifier);
     
@@ -397,7 +399,7 @@ void CCalenCustomisationManager::EnablePluginL( TUid aPluginUid )
         iServices.IssueNotificationL( ECalenNotifyPluginEnabledDisabled );
         }
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_ENABLEPLUGINL_EXIT );
     }
     
 // ----------------------------------------------------------------------------
@@ -408,11 +410,9 @@ void CCalenCustomisationManager::EnablePluginL( TUid aPluginUid )
 //
 void CCalenCustomisationManager::HandleNotification(const TCalenNotification aNotification )
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_HANDLENOTIFICATION_ENTRY );
     PIM_TRAPD_HANDLE( HandleNotificationL(aNotification) );
-    
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_HANDLENOTIFICATION_EXIT );
     }
     
 // ----------------------------------------------------------------------------
@@ -427,7 +427,7 @@ void CCalenCustomisationManager::HandleNotification(const TCalenNotification aNo
 //
 void CCalenCustomisationManager::HandleNotificationL(TCalenNotification aNotification)
 	{
-	TRACE_ENTRY_POINT;
+	OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_HANDLENOTIFICATIONL_ENTRY );
 	switch( aNotification )
 		{
 		case ECalenNotifySystemLanguageChanged:
@@ -437,7 +437,7 @@ void CCalenCustomisationManager::HandleNotificationL(TCalenNotification aNotific
 			}
 			break;
 	}
-	TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_HANDLENOTIFICATIONL_EXIT );
     }  
 
 
@@ -449,8 +449,8 @@ void CCalenCustomisationManager::HandleNotificationL(TCalenNotification aNotific
 //
  const RImplInfoPtrArray& CCalenCustomisationManager::PluginInfoArray() const
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_PLUGININFOARRAY_ENTRY );
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_PLUGININFOARRAY_EXIT );
     return iPluginInfo;
     }
 
@@ -465,9 +465,7 @@ void CCalenCustomisationManager::HandleNotificationL(TCalenNotification aNotific
 //
 void CCalenCustomisationManager::DoImmediatePluginLoadingL()
     {
-    TRACE_ENTRY_POINT;
-
-    
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_DOIMMEDIATEPLUGINLOADINGL_ENTRY );
     for(TInt i = 0 ; i < iPlugins.Count() ; i++)
         {
         RArray<TUid> pluginArray;
@@ -494,7 +492,7 @@ void CCalenCustomisationManager::DoImmediatePluginLoadingL()
             }
         }
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_DOIMMEDIATEPLUGINLOADINGL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -505,8 +503,7 @@ void CCalenCustomisationManager::DoImmediatePluginLoadingL()
 //
 void CCalenCustomisationManager::LoadPluginL( TUid aPluginUid )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_LOADPLUGINL_ENTRY );
     // Get a new services object from global data
     MCalenServices* services = iServicesFactory.NewServicesL();
     CleanupStack::PushL( services );
@@ -524,7 +521,7 @@ void CCalenCustomisationManager::LoadPluginL( TUid aPluginUid )
     CleanupStack::Pop( services );
 
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_LOADPLUGINL_EXIT );
     }
 
  
@@ -537,8 +534,7 @@ void CCalenCustomisationManager::LoadPluginL( TUid aPluginUid )
 // ----------------------------------------------------------------------------
  HbWidget* CCalenCustomisationManager::Infobar( )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_INFOBAR_ENTRY );
     iInfoBarProviderUid = TUid::Uid(0);
        
     HbWidget* infoBar =NULL;
@@ -573,7 +569,7 @@ void CCalenCustomisationManager::LoadPluginL( TUid aPluginUid )
         	}
         }
         
-    TRACE_EXIT_POINT;   
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_INFOBAR_EXIT );
     return infoBar;
     }
 
@@ -584,47 +580,46 @@ void CCalenCustomisationManager::LoadPluginL( TUid aPluginUid )
  // ----------------------------------------------------------------------------
  //
  QString* CCalenCustomisationManager::InfobarTextL()
-     {
-     TRACE_ENTRY_POINT;
-
-         iInfoBarProviderUid = TUid::Uid(0);
-            
-         QString* infoBarText =NULL;
-         // Loop though all the command handlers, within two interlinked
-         // for loops. If GetInfoBarL leaves for one plugin, a plugin
-         // error message will be displayed and the loop will continue with
-         // the next command handler. If none of the plugins leave, there will
-         // be only one TRAP used.
-         TInt count = iPlugins.Count();
-         /*if(count > 0)
-             {
-             infoBar = iPlugins[0]->Plugin().InfobarL();
-             iInfoBarProviderUid = iPlugins[0]->Uid();
-             }*/
-         
-         for ( TInt index = 0; index < count && !infoBarText; ++index )
-             {
-             TRAPD( error,
-                 // Loop though until an infobar is found
-                 for (; index < count && !infoBarText; ++index )
-                     {
-                     //if ( !iPlugins[index]->IsDisabled() )
-                         {
-                         infoBarText = iPlugins[index]->Plugin().InfobarTextL();
-                         iInfoBarProviderUid = iPlugins[index]->Uid();
-                         }
-                     }
-                  );
-             if(error)
-		        	{
-		        		// Need to handle the error case
-		        	}
-             
-             }
-             
-         TRACE_EXIT_POINT;   
-         return infoBarText;
-     }
+    {
+	OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_INFOBARTEXTL_ENTRY );
+	iInfoBarProviderUid = TUid::Uid(0);
+		
+	QString* infoBarText =NULL;
+	// Loop though all the command handlers, within two interlinked
+	// for loops. If GetInfoBarL leaves for one plugin, a plugin
+	// error message will be displayed and the loop will continue with
+	// the next command handler. If none of the plugins leave, there will
+	// be only one TRAP used.
+	TInt count = iPlugins.Count();
+	/*if(count > 0)
+		{
+		infoBar = iPlugins[0]->Plugin().InfobarL();
+		iInfoBarProviderUid = iPlugins[0]->Uid();
+		}*/
+	
+	for ( TInt index = 0; index < count && !infoBarText; ++index )
+		 {
+		 TRAPD( error,
+			 // Loop though until an infobar is found
+			 for (; index < count && !infoBarText; ++index )
+				 {
+				 //if ( !iPlugins[index]->IsDisabled() )
+					 {
+					 infoBarText = iPlugins[index]->Plugin().InfobarTextL();
+					 iInfoBarProviderUid = iPlugins[index]->Uid();
+					 }
+				 }
+			  );
+		 if(error)
+				{
+					// Need to handle the error case
+				}
+		 
+		 }
+		 
+	OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_INFOBARTEXTL_EXIT );
+	return infoBarText;
+    }
 
 // ----------------------------------------------------------------------------
 // CCalenCustomisationManager::FindPluginL
@@ -635,8 +630,7 @@ void CCalenCustomisationManager::LoadPluginL( TUid aPluginUid )
 //
 CCalenCustomisation* CCalenCustomisationManager::FindPluginL( TUid aUid )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_FINDPLUGINL_ENTRY );
     TInt index = iPlugins.Find( aUid, CPluginInfo::Identifier );
     
     CCalenCustomisation* plugin = NULL;
@@ -645,7 +639,7 @@ CCalenCustomisation* CCalenCustomisationManager::FindPluginL( TUid aUid )
         plugin = &( iPlugins[index]->Plugin() );
         }
 
-    TRACE_EXIT_POINT; 
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_FINDPLUGINL_EXIT );
     return plugin;
     }
 
@@ -661,8 +655,8 @@ CCalenCustomisationManager::CPluginInfo::CPluginInfo(
     : iPlugin( aPlugin ),
       iUid( aUid )
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CPLUGININFO_CPLUGININFO_ENTRY );
+    OstTraceFunctionExit0( CPLUGININFO_CPLUGININFO_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -673,11 +667,10 @@ CCalenCustomisationManager::CPluginInfo::CPluginInfo(
 //
 CCalenCustomisationManager::CPluginInfo::~CPluginInfo() 
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( DUP1_CPLUGININFO_CPLUGININFO_ENTRY );
     delete iPlugin;
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CPLUGININFO_CPLUGININFO_EXIT );
     }
     
 // ----------------------------------------------------------------------------
@@ -688,9 +681,9 @@ CCalenCustomisationManager::CPluginInfo::~CPluginInfo()
 //
 CCalenCustomisation& CCalenCustomisationManager::CPluginInfo::Plugin()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+OstTraceFunctionEntry0( CPLUGININFO_PLUGIN_ENTRY );
 
+    OstTraceFunctionExit0( CPLUGININFO_PLUGIN_EXIT );
     return *iPlugin;
     }
 
@@ -702,9 +695,8 @@ CCalenCustomisation& CCalenCustomisationManager::CPluginInfo::Plugin()
 // 
 TUid CCalenCustomisationManager::CPluginInfo::Uid() const 
     {
-    TRACE_ENTRY_POINT; 
-    TRACE_EXIT_POINT;
-
+    OstTraceFunctionEntry0( CPLUGININFO_UID_ENTRY );
+    OstTraceFunctionExit0( CPLUGININFO_UID_EXIT );
     return iUid;
     }
    
@@ -716,11 +708,10 @@ TUid CCalenCustomisationManager::CPluginInfo::Uid() const
 //  
 void CCalenCustomisationManager::CPluginInfo::Disable( TBool aDisable)
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CPLUGININFO_DISABLE_ENTRY );
     iDisabled = aDisable;
      
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CPLUGININFO_DISABLE_EXIT );
     }
     
 // ----------------------------------------------------------------------------
@@ -731,11 +722,9 @@ void CCalenCustomisationManager::CPluginInfo::Disable( TBool aDisable)
 //  
 TBool CCalenCustomisationManager::CPluginInfo::IsDisabled()
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CPLUGININFO_ISDISABLED_ENTRY );
+    OstTraceFunctionExit0( CPLUGININFO_ISDISABLED_EXIT );
     return iDisabled;
-     
-    TRACE_EXIT_POINT;
     }
     
   
@@ -749,14 +738,12 @@ TBool CCalenCustomisationManager::CPluginInfo::IsDisabled()
 void CCalenCustomisationManager::AddPluginL( CCalenCustomisation* aPlugin,
                                              TUid aUid ) 
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_ADDPLUGINL_ENTRY );
     CPluginInfo* newPlugin = new ( ELeave ) CPluginInfo( aPlugin, aUid);
     CleanupStack::PushL( newPlugin );
     iPlugins.AppendL( newPlugin );
     CleanupStack::Pop( newPlugin );
-
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_ADDPLUGINL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -769,9 +756,7 @@ void CCalenCustomisationManager::AddPluginL( CCalenCustomisation* aPlugin,
 TBool CCalenCustomisationManager::CPluginInfo::Identifier( const TUid* aUid,
                                                            const CPluginInfo& aArray )
     {
-    TRACE_ENTRY_POINT; 
-    TRACE_EXIT_POINT;
-
+    OstTraceFunctionEntry0( CPLUGININFO_IDENTIFIER_ENTRY );
     return ( *aUid == aArray.Uid() ); 
     }
 
@@ -786,9 +771,9 @@ TBool CCalenCustomisationManager::CPluginInfo::Identifier( const TUid* aUid,
 TBool CCalenCustomisationManager::PluginAvailabilityFinder( const TUid* aUid, 
                                  const TCalenPluginAvailability& aArrayItem )
     {
-    TRACE_ENTRY_POINT; 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_PLUGINAVAILABILITYFINDER_ENTRY );
     
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_PLUGINAVAILABILITYFINDER_EXIT );
     return ( *aUid == aArrayItem.iUid); 
     }   
 
@@ -801,8 +786,7 @@ TBool CCalenCustomisationManager::PluginAvailabilityFinder( const TUid* aUid,
 //
 void CCalenCustomisationManager::OfferMenu(HbMenu* aHbMenu )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENCUSTOMISATIONMANAGER_OFFERMENU_ENTRY );
     // Get the number of command handlers
     //   TInt count = iCommandHandlers.Count();
     const TInt count = iPlugins.Count();
@@ -830,7 +814,7 @@ void CCalenCustomisationManager::OfferMenu(HbMenu* aHbMenu )
             }
         }
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCUSTOMISATIONMANAGER_OFFERMENU_EXIT );
     }
 
 // End of File

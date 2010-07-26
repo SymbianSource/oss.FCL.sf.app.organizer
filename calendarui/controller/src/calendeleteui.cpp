@@ -400,7 +400,7 @@ void CalenDeleteUi::dateQuery()
 
 	popUp->setContentWidget(mDatePicker);  
 	mDeleteAction = new HbAction(
-						hbTrId("txt_calendar_button_dialog_delete"), popUp);
+						hbTrId("txt_common_button_delete"), popUp);
 	popUp->addAction(mDeleteAction);
 	mCancelAction = new HbAction(hbTrId("txt_common_button_cancel"),popUp);
 	popUp->addAction(mCancelAction);
@@ -490,7 +490,7 @@ void CalenDeleteUi::showRepeatingEntryDeleteQuery()
 
     // Add cancel action
     HbAction *cancelAction = new HbAction(
-							hbTrId("txt_calendar_button_softkey1_cancel"));
+							hbTrId("txt_common_button_cancel_singledialog"));
     popUp->addAction(cancelAction);
     connect(editButtonList, SIGNAL(itemSelected(int)), this,
 										SLOT(handleRepeatedEntryDelete(int)));
@@ -602,7 +602,7 @@ void CalenDeleteUi::showDeleteQuery(const TDeleteConfirmationType type,
         popup->removeAction(list[i]);
         }
     mDeleteAction = new HbAction(
-						hbTrId("txt_calendar_button_dialog_delete"), popup);
+						hbTrId("txt_common_button_delete"), popup);
     popup->addAction(mDeleteAction);
     mCancelAction = new HbAction(hbTrId("txt_common_button_cancel"), popup); 
     popup->addAction(mCancelAction);
@@ -746,7 +746,9 @@ void CalenDeleteUi::DeleteDayRangeL( const QDateTime& aStart,
     	                | AgendaUtil::IncludeAppointments
     	                | AgendaUtil::IncludeEvents
     	                | AgendaUtil::IncludeReminders
-    	                | AgendaUtil::IncludeIncompletedTodos);
+    	                | AgendaUtil::IncludeIncompletedTodos
+    	                | AgendaUtil::IncludeCompletedTodos
+    	                | AgendaUtil::IncludeAnniversaries);
     // 1: First pass, delete all entries.
     iController.agendaInterface()->deleteEntries(iStartTime, iEndTime, filter);
 

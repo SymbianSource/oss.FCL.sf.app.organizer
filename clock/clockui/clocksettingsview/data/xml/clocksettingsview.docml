@@ -23,7 +23,7 @@
             </layout>
         </widget>
         <widget name="viewMenu" role="HbView:menu" type="HbMenu"/>
-        <string locid="txt_common_common_clock" name="title" value="Clock"/>
+        <string locid="txt_clock_title_clock2" name="title" value="Clock"/>
     </widget>
     <section name="landscape">
         <widget name="clockSettingsViewWidget" role="HbView:widget" type="HbWidget">

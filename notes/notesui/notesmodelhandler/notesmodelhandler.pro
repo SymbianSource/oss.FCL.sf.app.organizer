@@ -26,14 +26,15 @@ DEPENDPATH += \
 
 INCLUDEPATH += \
 		../notesmodel/inc \
-		../../inc
+		../../inc \
+		./traces
 
 symbian: {
 	TARGET.CAPABILITY = ALL -TCB
 	TARGET.EPOCALLOWDLLDATA = 1
 	TARGET.UID3 = 0x2002BCDC
 	
-	INCLUDEPATH += ../../../agendainterface/inc
+	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 	
 	LIBS += \
 		-lnotesmodel \

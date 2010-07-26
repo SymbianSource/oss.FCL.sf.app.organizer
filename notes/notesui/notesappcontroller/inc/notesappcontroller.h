@@ -31,10 +31,18 @@ class NotesAppControllerIfImpl;
 
 class NOTESAPPCONTROLLER_EXPORT NotesAppController : public QObject
 {
+	Q_OBJECT
+	
 public:
 	explicit NotesAppController(QObject *parent = 0);
 	virtual ~NotesAppController();
 
+signals:
+	void appReady();
+
+private slots:
+	void handleAppReady();
+	
 private:
 	NotesViewManager *mViewManager;
 	NotesModelHandler *mNotesModelHandler;

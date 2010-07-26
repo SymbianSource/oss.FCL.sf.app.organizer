@@ -24,7 +24,8 @@ INCLUDEPATH += \
 		. \
 		./src \
 		./inc \
-		../../../inc
+		../../../inc \
+		./traces
 		
 DEPENDPATH += \
 		. \
@@ -37,8 +38,7 @@ symbian: {
 	TARGET.EPOCALLOWDLLDATA = 1
 	TARGET.UID3 = 0x20029F82
 	
-	INCLUDEPATH += ../../../agendainterface/inc \
-					$$APP_LAYER_SYSTEMINCLUDE
+	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 	
 	LIBS += -lagendainterface \
 			-lcaleneditor
@@ -68,7 +68,7 @@ HEADERS += \
 
 RESOURCES += \
 		noteseditor.qrc
-# TODO :need to use noteseditor.ts once it is released to platform		
-TRANSLATIONS += notes.ts		
+		
+TRANSLATIONS += noteseditor.ts		
 
 # End of file	--Don't remove this.

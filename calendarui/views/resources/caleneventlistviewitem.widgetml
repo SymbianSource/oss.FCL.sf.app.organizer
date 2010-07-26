@@ -1,9 +1,10 @@
-<hbwidget version="0.1" type="listviewitem">
+<hbwidget type="CalenEventListViewItem" version="0.1">
 	<layout name="custom" type="mesh">
-		<meshitem src="text-1" srcEdge="TOP" dst="" dstEdge="TOP"/>
+
 		<meshitem src="text-1" srcEdge="LEFT" dst="" dstEdge="LEFT"/>
     	<meshitem src="text-1" srcEdge="RIGHT" dst="text-2" dstEdge="LEFT"/>
-		
+		    <meshitem src="text-1" srcEdge="CENTERV" dst="text-2" dstEdge="CENTERV"/>
+		    
 		<meshitem src="text-2" srcEdge="TOP" dst="" dstEdge="TOP"/>
 		<meshitem src="text-2" srcEdge="BOTTOM" dst="text-3" dstEdge="TOP"/>
 		

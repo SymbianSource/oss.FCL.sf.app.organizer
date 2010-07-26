@@ -24,8 +24,14 @@
 // User includes
 #include "calendaycommonheaders.h"
 
+#ifdef  CALENVIEWS_DLL
+#define CALENDAYCONTENTSCROLLAREA_EXPORT Q_DECL_EXPORT
+#else
+#define CALENDAYCONTENTSCROLLAREA_EXPORT Q_DECL_IMPORT
+#endif
+
 // Class declaration
-class CalenDayContentScrollArea : public HbScrollArea
+class CALENDAYCONTENTSCROLLAREA_EXPORT CalenDayContentScrollArea : public HbScrollArea
 {
 Q_OBJECT
 

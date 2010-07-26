@@ -25,8 +25,8 @@
 #include <QPointer>
 
 // User includes
-#include "agendautil.h"
-#include "agendaentry.h"
+#include <agendautil.h>
+#include <agendaentry.h>
 
 // Forward declarations
 class HbView;

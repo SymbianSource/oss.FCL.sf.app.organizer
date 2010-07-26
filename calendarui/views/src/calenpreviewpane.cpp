@@ -29,6 +29,8 @@
 #include <hbcolorscheme.h>
 #include <hbtapgesture.h>
 #include <hbpangesture.h>
+#include <hbinstance.h>
+#include <hbinstantfeedback.h>
 #include <agendautil.h>
 #include <agendaentry.h>
 
@@ -51,7 +53,7 @@
 #define TWO_SECONDS_TIMER 2000 // millseconds
 #define SCROLLING_SPEED 10
 #define MAX_PAN_DIRECTION_THRESHOLD 50
-#define MIN_PAN_DIRECTION_THRESHOLD 20
+#define MIN_PAN_DIRECTION_THRESHOLD 10
 
 static const QString EMPTYSTRING(" ");
 
@@ -80,6 +82,9 @@ CalenPreviewPane::CalenPreviewPane(MCalenServices& services,
 	connect(this, SIGNAL(scrollingEnded()), this,
 				SLOT(scrollingFinished()));
 	
+	grabGesture(Qt::TapGesture);
+	grabGesture(Qt::PanGesture);
+
 	OstTraceFunctionExit0( CALENPREVIEWPANE_CALENPREVIEWPANE_EXIT );
 }
 
@@ -176,15 +181,18 @@ void CalenPreviewPane::populateLabel(QDateTime date)
 			}
 			QString summary = mInstanceArray[i].summary();
 			if(!summary.length()) {
-				// No summary display "No subject"
-				summary.append(hbTrId("txt_calendar_dblist_unnamed"));
+				// No summary display "Unnamed"
+				summary.append(hbTrId("txt_calendar_preview_unnamed"));
 			}
 			// Check the entry type, based on the type display time field in
 			// preview pane.
 			QString start;
 			if(mInstanceArray[i].type() != AgendaEntry::TypeTodo && 
-					mInstanceArray[i].type() != AgendaEntry::TypeAnniversary) {
+					mInstanceArray[i].type() != AgendaEntry::TypeAnniversary && 
+					mInstanceArray[i].type() != AgendaEntry::TypeEvent) {
 				QDateTime startTime = mInstanceArray[i].startTime();
+				// Check if event starts in past
+				checkStartTimeOfEvent(startTime);
 				HbExtendedLocale systemLocale =HbExtendedLocale::system();
 				start = systemLocale.format(startTime.time(), 
 				                                    r_qtn_time_usual_with_zero);
@@ -361,20 +369,31 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
     OstTraceFunctionEntry0( CALENPREVIEWPANE_GESTUREEVENT_ENTRY );
     
     if(HbPanGesture *gesture = qobject_cast<HbPanGesture *>(event->gesture(Qt::PanGesture))) {
-        if (gesture->state() == Qt::GestureStarted) {
-            // TODO: This work aroung till framework provides an api
+        if (gesture->state() == Qt::GestureUpdated) {
+            // TODO: This work around till framework provides an api
             // to know the direciton of the pan, until then we need
             // calculate the direction explicitly
             // Get to know the direction of the gesture
             QPointF delta = gesture->delta();
-            if (abs(delta.y()) > MAX_PAN_DIRECTION_THRESHOLD) {
-                // Now see if y coord diff has crossed threshold
-                if (delta.x() > MAX_PAN_DIRECTION_THRESHOLD) {
+            // Check the current orientation of the device and
+            // swap the vertical and horizontal distances in landscape
+            qreal horizontalDiff = 0.0;
+            qreal verticalDiff = 0.0;
+            if (hbInstance->allMainWindows().at(0)->orientation() == Qt::Vertical) {
+                horizontalDiff = delta.x();
+                verticalDiff = delta.y();
+            } else {
+                horizontalDiff = delta.y();
+                verticalDiff = delta.x();
+            }
+            if (abs(verticalDiff) > MAX_PAN_DIRECTION_THRESHOLD) {
+                // Now see if x coord diff has crossed threshold
+                if (horizontalDiff > MAX_PAN_DIRECTION_THRESHOLD) {
                     mIsGestureHandled = true;
                     // right gesture
                     mView->handlePreviewPaneGesture(true);
                     event->accept(Qt::PanGesture);
-                } else if (delta.x() < -MAX_PAN_DIRECTION_THRESHOLD){
+                } else if (horizontalDiff < -MAX_PAN_DIRECTION_THRESHOLD){
                     mIsGestureHandled = true;
                     // left gesture
                     mView->handlePreviewPaneGesture(false);
@@ -384,13 +403,13 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
                     OstTraceFunctionExit0( CALENPREVIEWPANE_GESTUREEVENT_EXIT );
                     return;
                 }
-            } else if (abs(delta.y()) < MAX_PAN_DIRECTION_THRESHOLD) {
-               if (delta.x() > MIN_PAN_DIRECTION_THRESHOLD) {
+            } else if (abs(verticalDiff) < MAX_PAN_DIRECTION_THRESHOLD) {
+               if (horizontalDiff > MIN_PAN_DIRECTION_THRESHOLD) {
                    mIsGestureHandled = true;
                    // right gesture
                    mView->handlePreviewPaneGesture(true);
                    event->accept(Qt::PanGesture);
-               } else if (delta.x() < -MIN_PAN_DIRECTION_THRESHOLD){
+               } else if (horizontalDiff < -MIN_PAN_DIRECTION_THRESHOLD){
                    mIsGestureHandled = true;
                    // left gesture
                    mView->handlePreviewPaneGesture(false);
@@ -402,13 +421,12 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
                }
             }
         }
-    } else if(HbTapGesture *gesture = qobject_cast<HbTapGesture *>(event->gesture(Qt::TapGesture))) {
-        if (gesture->state() == Qt::GestureFinished) {
-            if (gesture->tapStyleHint() == HbTapGesture::Tap) {
+    } else if(QTapGesture *tapGesture = qobject_cast<QTapGesture *>(event->gesture(Qt::TapGesture))) {
+        if (tapGesture && tapGesture->state() == Qt::GestureFinished) {
+            	HbInstantFeedback::play(HbFeedback::Basic);
                 // Preview pane tapped
                 mServices.IssueCommandL(ECalenAgendaView);
                 event->accept(Qt::TapGesture);
-            }
         }
     }
     
@@ -443,6 +461,21 @@ void CalenPreviewPane::stopScrolling()
 	}
 	
 	OstTraceFunctionExit0( CALENPREVIEWPANE_STOPSCROLLING_EXIT );
+}
+
+/*!
+ Checks if the start time of the event falls on the date for which preview
+ pane is being shown. If start time is in past, then time will be 12:00AM
+ */
+void CalenPreviewPane::checkStartTimeOfEvent(QDateTime &dateTime)
+{
+    // If event start time is in past
+    if (dateTime.date() < mDate.date()) {
+        // Set the time to 12:00AM of mDate
+        dateTime.setDate(mDate.date());
+        QTime time(0,0,0,0); // 0 means 12:00 AM
+        dateTime.setTime(time);
+    }
 }
 
 // End of file  --Don't remove this.

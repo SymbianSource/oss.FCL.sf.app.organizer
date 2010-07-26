@@ -114,6 +114,7 @@ public:
 	void setReminderChoices();
 	bool isEditRangeThisOnly();
 	bool isAllDayFieldAdded();
+	void forcedSaveEntry();
 private:
 	void edit(const QFile &handle, bool launchCalendar);
 	void edit(AgendaEntry entry, bool launchCalendar);
@@ -153,6 +154,8 @@ private:
 	void deleteEntry(bool close = false);
 	bool handleAllDayToSave();
 	void enableFromTotimeFileds(bool, QDateTime, QDateTime);
+	QTime defaultTimeSameDay();
+	void refreshTimeForUncheckAllDay();
 	
 private slots:
 	void handleSubjectChange(const QString subject);
