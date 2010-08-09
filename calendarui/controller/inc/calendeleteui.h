@@ -40,7 +40,8 @@ enum TDeleteConfirmationType
 	EDeleteEntry = 1,
 	EDeleteToDo,
 	EDeleteToDos,
-	EDeleteAll
+	EDeleteAll,
+	EDeleteEvent
 };
 
 // CLASS DECLARATION

@@ -51,6 +51,10 @@
 #include "notestodoeditorTraces.h"
 #endif
 
+// Constants
+const int MaxRowsInTextItem(10);
+const int MaxCharacterLimit(255);
+
 
 /*!
 	\class NotesTodoEditor
@@ -381,6 +385,8 @@ void NotesTodoEditor::insertSubjectItem()
 			QString(""), mFormModel->invisibleRootItem());
 
 	mSubjectItem->setContentWidgetData("text", mOwner->mModifiedNote.summary());
+	mSubjectItem->setContentWidgetData("maxRows", MaxRowsInTextItem);
+	mSubjectItem->setContentWidgetData("maxLength", MaxCharacterLimit);
 	mSubjectItem->setContentWidgetData("objectName", "subjectItem");
 
 	mDataForm->addConnection(
@@ -567,6 +573,7 @@ void NotesTodoEditor::insertDescriptionItem()
 	mDescriptionItemIndex =
 			mFormModel->indexFromItem(mDescriptionItem).row();
 
+	mDescriptionItem->setContentWidgetData("maxRows", MaxRowsInTextItem);
 	mDescriptionItem->setContentWidgetData(
 			QString("text"), mOwner->mModifiedNote.description());
 

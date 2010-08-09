@@ -25,6 +25,11 @@
 #include "clockcityselectionlist_p.h"
 #include "clockdatatypes.h"
 #include "timezoneclient.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockcityselectionlistTraces.h"
+#endif
+
 
 /*!
 	\class ClockCitySelectionList
@@ -53,9 +58,11 @@ ClockCitySelectionList::ClockCitySelectionList(
 :QObject(parent),
  d_ptr(new ClockCitySelectionListPrivate(client, this))
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLIST_CLOCKCITYSELECTIONLIST_ENTRY );
 	// Load the translation file and install the editor specific translator
 	mTranslator = new HbTranslator("clockcityselectionlist");
 	mTranslator->loadCommon();
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLIST_CLOCKCITYSELECTIONLIST_EXIT );
 }
 
 /*!
@@ -67,18 +74,22 @@ ClockCitySelectionList::ClockCitySelectionList(QObject *parent)
 :QObject(parent),
  d_ptr(new ClockCitySelectionListPrivate(0, this))
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKCITYSELECTIONLIST_CLOCKCITYSELECTIONLIST_ENTRY );
 	// Load the translation file and install the editor specific translator
 	mTranslator = new HbTranslator("clockcityselectionlist");
 	mTranslator->loadCommon();
+	OstTraceFunctionExit0( DUP1_CLOCKCITYSELECTIONLIST_CLOCKCITYSELECTIONLIST_EXIT );
 }
 
 ClockCitySelectionList::~ClockCitySelectionList()
 {
+    OstTraceFunctionEntry0( DUP2_CLOCKCITYSELECTIONLIST_CLOCKCITYSELECTIONLIST_ENTRY );
     // Remove the translator
     if (mTranslator) {
         delete mTranslator;
          mTranslator = 0;
     }
+    OstTraceFunctionExit0( DUP2_CLOCKCITYSELECTIONLIST_CLOCKCITYSELECTIONLIST_EXIT );
 }
 
 /*!
@@ -87,7 +98,9 @@ ClockCitySelectionList::~ClockCitySelectionList()
  */
 void ClockCitySelectionList::showCityList()
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLIST_SHOWCITYLIST_ENTRY );
 	d_ptr->showCityList();
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLIST_SHOWCITYLIST_EXIT );
 }
 
 /*!
@@ -96,7 +109,9 @@ void ClockCitySelectionList::showCityList()
  */
 void ClockCitySelectionList::closeCityList()
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLIST_CLOSECITYLIST_ENTRY );
 	d_ptr->closeCityList();
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLIST_CLOSECITYLIST_EXIT );
 }
 
 // End of file	--Don't remove this.

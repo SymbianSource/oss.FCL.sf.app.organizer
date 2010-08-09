@@ -19,25 +19,35 @@
 // User includes
 #include "alarmlistener.h"
 #include "alarmclient.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "alarmlistenerTraces.h"
+#endif
+
 
 AlarmListener::AlarmListener(AlarmClient* client, RASCliSession& session)
 :CActive(EPriorityStandard),
 mClient(client),
 mSession(session)
 {
+		OstTraceFunctionEntry0( ALARMLISTENER_ALARMLISTENER_ENTRY );
 		// Nothing to do.
+OstTraceFunctionExit0( ALARMLISTENER_ALARMLISTENER_EXIT );
 }
 
 AlarmListener::~AlarmListener()
 {
+	OstTraceFunctionEntry0( DUP1_ALARMLISTENER_ALARMLISTENER_ENTRY );
 	if (IsActive()) {
 		Cancel();
 	}
 
+OstTraceFunctionExit0( DUP1_ALARMLISTENER_ALARMLISTENER_EXIT );
 }
 
 void AlarmListener::start()
 {
+	OstTraceFunctionEntry0( ALARMLISTENER_START_ENTRY );
 	// Add the AO to the scheduler.
 	CActiveScheduler::Add(this);
 
@@ -47,17 +57,21 @@ void AlarmListener::start()
 	// Set the AO active.
 	SetActive();
 
+OstTraceFunctionExit0( ALARMLISTENER_START_EXIT );
 }
 
 void AlarmListener::stop()
 {
+	OstTraceFunctionEntry0( ALARMLISTENER_STOP_ENTRY );
 	if (IsActive()) {
 		Cancel();
 	}
+OstTraceFunctionExit0( ALARMLISTENER_STOP_EXIT );
 }
 
 void AlarmListener::RunL()
 {
+	OstTraceFunctionEntry0( ALARMLISTENER_RUNL_ENTRY );
 	if (iStatus != KRequestPending) {
 		// We get notification for various changes with the alarm server.
 		// Only the required Events are used to emit a signal.
@@ -77,13 +91,16 @@ void AlarmListener::RunL()
 
 		SetActive();
 	}
+OstTraceFunctionExit0( ALARMLISTENER_RUNL_EXIT );
 }
 
 void AlarmListener::DoCancel()
 {
+	OstTraceFunctionEntry0( ALARMLISTENER_DOCANCEL_ENTRY );
 	// Cancel async request.
 	mSession.NotifyChangeCancel();
 
+OstTraceFunctionExit0( ALARMLISTENER_DOCANCEL_EXIT );
 }
 
 // End of file

@@ -81,6 +81,7 @@ private:
 
 private:
 	QTimer *mTickTimer;
+	QColor mLabelColorGroup;
 
 	HbAction *mRefreshMainView;
 	HbAction *mDisplayWorldClockView;
@@ -90,6 +91,7 @@ private:
 
 	HbLabel *mDayLabel;
 	HbLabel *mPlaceLabel;
+	HbLabel *mDstIcon;
 	HbLabel *mHorizontalDivider;
 	HbLabel *mVerticalDivider;
 	ClockWidget *mClockWidget;

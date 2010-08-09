@@ -38,6 +38,11 @@
 #include "timezoneclient.h"
 #include "settingsdatatypes.h"
 #include "settingscustomitem.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clocksettingsviewTraces.h"
+#endif
+
 
 /*!
 	\class ClockSettingsView
@@ -54,6 +59,7 @@
 ClockSettingsView::ClockSettingsView(QObject *parent)
 :QObject(parent)
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_CLOCKSETTINGSVIEW_ENTRY );
 	
 	// Load the translation file and install the editor specific translator
     mTranslator = new HbTranslator("clocksettingsview");
@@ -102,6 +108,7 @@ ClockSettingsView::ClockSettingsView(QObject *parent)
 	connect(
 			mSettingsManager, SIGNAL(valueChanged(XQSettingsKey, QVariant)),
 			this, SLOT(eventMonitor(XQSettingsKey, QVariant)));
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_CLOCKSETTINGSVIEW_EXIT );
 }
 
 /*!
@@ -109,6 +116,7 @@ ClockSettingsView::ClockSettingsView(QObject *parent)
  */
 ClockSettingsView::~ClockSettingsView()
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKSETTINGSVIEW_CLOCKSETTINGSVIEW_ENTRY );
 	if (mDocLoader) {
 		delete mDocLoader;
 	}
@@ -127,6 +135,7 @@ ClockSettingsView::~ClockSettingsView()
 	}
 		
 
+	OstTraceFunctionExit0( DUP1_CLOCKSETTINGSVIEW_CLOCKSETTINGSVIEW_EXIT );
 }
 
 /*!
@@ -134,6 +143,7 @@ ClockSettingsView::~ClockSettingsView()
  */
 void ClockSettingsView::loadSettingsView()
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_LOADSETTINGSVIEW_ENTRY );
 	bool loadSuccess;
 
 	// Construct the document loader instance
@@ -172,6 +182,7 @@ void ClockSettingsView::loadSettingsView()
 	// Setup the view.
 	setupView();
 
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_LOADSETTINGSVIEW_EXIT );
 }
 
 /*!
@@ -179,9 +190,11 @@ void ClockSettingsView::loadSettingsView()
  */
 void ClockSettingsView::handleBackAction()
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_HANDLEBACKACTION_ENTRY );
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 	window->removeView(mSettingsView);
 	deleteLater();
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_HANDLEBACKACTION_EXIT );
 }
 
 /*!
@@ -189,6 +202,7 @@ void ClockSettingsView::handleBackAction()
  */
 void ClockSettingsView::updatePlaceItem()
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_UPDATEPLACEITEM_ENTRY );
 	// Get the current zone info.
 	LocationInfo currentZoneInfo = mTimezoneClient->getCurrentZoneInfoL();
 
@@ -200,6 +214,7 @@ void ClockSettingsView::updatePlaceItem()
 				+ tr(", ") + currentZoneInfo.countryName;
 		mPlaceDataFormItem->setContentWidgetData("text", placeInfo);
 	}
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_UPDATEPLACEITEM_EXIT );
 }
 
 /*!
@@ -207,7 +222,9 @@ void ClockSettingsView::updatePlaceItem()
  */
 void ClockSettingsView::updateDateItem()
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_UPDATEDATEITEM_ENTRY );
 	mDateDataFormItem->setContentWidgetData("text", mSettingsUtility->date());
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_UPDATEDATEITEM_EXIT );
 }
 
 /*!
@@ -215,6 +232,7 @@ void ClockSettingsView::updateDateItem()
  */
 void ClockSettingsView::updateTimeItem()
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_UPDATETIMEITEM_ENTRY );
 	if (!mTickTimer->isActive()) {
 		mTickTimer->stop();
     }
@@ -222,6 +240,7 @@ void ClockSettingsView::updateTimeItem()
 
 	// Start the timer again.
 	mTickTimer->start(60000 - 1000 * QTime::currentTime().second());
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_UPDATETIMEITEM_EXIT );
 }
 
 /*!
@@ -229,6 +248,7 @@ void ClockSettingsView::updateTimeItem()
  */
 void ClockSettingsView::handleOrientationChanged(Qt::Orientation orientation)
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_HANDLEORIENTATIONCHANGED_ENTRY );
 	bool success; 
 	// If horizontal, load the landscape section. 
 	if (Qt::Horizontal == orientation) { 
@@ -242,10 +262,12 @@ void ClockSettingsView::handleOrientationChanged(Qt::Orientation orientation)
 				CLOCK_SETTINGS_VIEW_PORTRAIT_SECTION,
 				&success); 
 	} 
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_HANDLEORIENTATIONCHANGED_EXIT );
 }
 
 void ClockSettingsView::handleNetworkTimeStateChange(int state)
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_HANDLENETWORKTIMESTATECHANGE_ENTRY );
 	bool cenrepValue = mTimezoneClient->timeUpdateOn();
 	if ((Qt::Checked == state && !cenrepValue)
 			|| (Qt::Unchecked == state && cenrepValue)) {
@@ -258,6 +280,7 @@ void ClockSettingsView::handleNetworkTimeStateChange(int state)
 			mTimezoneClient->setTimeUpdateOn(false);
 		}
 	}
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_HANDLENETWORKTIMESTATECHANGE_EXIT );
 }
 
 /*!
@@ -268,6 +291,7 @@ void ClockSettingsView::handleNetworkTimeStateChange(int state)
  */
 void ClockSettingsView::setupView()
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_SETUPVIEW_ENTRY );
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 	window->addView(mSettingsView);
 	window->setCurrentView(mSettingsView);
@@ -294,6 +318,7 @@ void ClockSettingsView::setupView()
 	updatePlaceItem();
 
 	mTickTimer->start(60000 - 1000 * QTime::currentTime().second());
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_SETUPVIEW_EXIT );
 }
 
 /*!
@@ -301,6 +326,7 @@ void ClockSettingsView::setupView()
  */
 void ClockSettingsView::createModel()
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_CREATEMODEL_ENTRY );
 	// Remove the model.
 	if (mSettingsForm->model()) {
 		delete mSettingsForm->model();
@@ -312,6 +338,7 @@ void ClockSettingsView::createModel()
 	// Add the items to the view.
 	populateModel();
 	mSettingsForm->setModel(mSettingsModel);
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_CREATEMODEL_EXIT );
 }
 
 /*!
@@ -319,6 +346,7 @@ void ClockSettingsView::createModel()
  */
 void ClockSettingsView::populateModel()
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_POPULATEMODEL_ENTRY );
 	if (!mSettingsModel) {
 		createModel();
 	}
@@ -451,6 +479,7 @@ void ClockSettingsView::populateModel()
 			mAlarmSnoozeItem, SIGNAL(currentIndexChanged(int)),
 			this, SLOT(handleAlarmSnoozeTimeChanged(int)));
 
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_POPULATEMODEL_EXIT );
 }
 
 /*!
@@ -460,6 +489,7 @@ void ClockSettingsView::populateModel()
  */
 void ClockSettingsView::handleAutoTimeUpdateChange(int value)
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_HANDLEAUTOTIMEUPDATECHANGE_ENTRY );
 	int state = (mNetworkTimeItem->contentWidgetData("checkState")).toInt();
 	
 	if (value) {
@@ -494,6 +524,7 @@ void ClockSettingsView::handleAutoTimeUpdateChange(int value)
 		}
 	}
 	updatePlaceItem();
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_HANDLEAUTOTIMEUPDATECHANGE_EXIT );
 }
 
 /*!
@@ -503,10 +534,12 @@ void ClockSettingsView::handleAutoTimeUpdateChange(int value)
  */
 void ClockSettingsView::handleAlarmSnoozeTimeChanged(int index)
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_HANDLEALARMSNOOZETIMECHANGED_ENTRY );
 	if (mAlarmSnoozeTimeHash.value(index)) {
 		mSettingsManager->writeItemValue(
 				*mAlarmSnoozeTimeKey, mAlarmSnoozeTimeHash.value(index));
 	}
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_HANDLEALARMSNOOZETIMECHANGED_EXIT );
 }
 
 /*!
@@ -514,8 +547,10 @@ void ClockSettingsView::handleAlarmSnoozeTimeChanged(int index)
  */
 void ClockSettingsView::handleClockTypeChanged()
 {
-    mSettingsUtility->setClockType(
-                mClockTypeItem->contentWidgetData("text").toString());
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_HANDLECLOCKTYPECHANGED_ENTRY );
+	mSettingsUtility->setClockType(
+			mClockTypeItem->contentWidgetData("text").toString());
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_HANDLECLOCKTYPECHANGED_EXIT );
 }
 
 /*!
@@ -527,6 +562,7 @@ void ClockSettingsView::handleClockTypeChanged()
 void ClockSettingsView::eventMonitor(
 		const XQSettingsKey& key, const QVariant& value)
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_EVENTMONITOR_ENTRY );
 	if (key.uid() == KCRUidClockApp && key.key() == KClockAppSnoozeTime) {
 		if (mSettingsManager->error() == XQSettingsManager::NoError) {
 
@@ -540,6 +576,7 @@ void ClockSettingsView::eventMonitor(
 			}
 		}
 	}
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_EVENTMONITOR_EXIT );
 }
 
 // End of file	--Don't remove this.

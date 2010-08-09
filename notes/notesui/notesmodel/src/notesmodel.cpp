@@ -1023,8 +1023,13 @@ bool NotesModel::insertCompTodoToModel(QModelIndex &index, ulong id)
 			// Set the to-do done icon.
 			QList<QVariant> iconList;
 			iconList.append(HbIcon("qtg_small_todo_done"));
-			// To-do is already completed. No need to set alarm.
-			iconList.append(QVariant(QVariant::Invalid));
+			if (1 == entry.priority()) {
+				// Set the High Priority icon if priority is high or else not.
+				iconList.append(HbIcon("qtg_small_priority_high"));
+			} else {
+				// To-do is already completed. No need to set alarm.
+				iconList.append(QVariant(QVariant::Invalid));
+			}
 
 			// Set the icons.
 			mSourceModel->setData(

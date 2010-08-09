@@ -38,6 +38,18 @@ Q_OBJECT
 public:
     CalenDayContentScrollArea(QGraphicsItem *parent = 0);
     virtual ~CalenDayContentScrollArea();
+    
+public:
+    /*!
+     \enum CalenPanDirection
+     \brief Enumeration identifies pan gesture directions.
+     */
+    enum CalenPanDirection
+    {
+        ECalenPanNotSet = 0,
+        ECalenPanVertical,
+        ECalenPanHorizontal
+    };
 
 signals:
     void scrollAreaMoveStarted(CalenScrollDirection scrollTo);
@@ -56,6 +68,7 @@ protected:
 private:	// private functions
     void checkPanDirection(QPanGesture *panGesture);
     void moveTo(const QPointF &newPosition, int time = 0);
+    bool isHorizontalSwipe(qreal angle) const;
     
 private slots:
     void moveFinished();

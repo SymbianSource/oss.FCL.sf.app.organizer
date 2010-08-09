@@ -23,6 +23,11 @@
 
 // User includes
 #include "analogclockwidget.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "analogclockwidgetTraces.h"
+#endif
+
 
 // Constants
 const int clockUpdateInterval  (1000); // msec
@@ -41,6 +46,7 @@ const int clockUpdateInterval  (1000); // msec
 AnalogClockWidget::AnalogClockWidget(QGraphicsItem *parent) : 
 		HbWidget(parent)
 {
+	OstTraceFunctionEntry0( ANALOGCLOCKWIDGET_ANALOGCLOCKWIDGET_ENTRY );
 	bool result = HbStyleLoader::registerFilePath(
 			":/resource/analogclockwidget.widgetml");
 	result = HbStyleLoader::registerFilePath(
@@ -49,6 +55,7 @@ AnalogClockWidget::AnalogClockWidget(QGraphicsItem *parent) :
 	constructPrimitives();
 	mTimer = new QTimer(this);
 	connect(mTimer, SIGNAL(timeout()), SLOT(tick()));
+OstTraceFunctionExit0( ANALOGCLOCKWIDGET_ANALOGCLOCKWIDGET_EXIT );
 }
 
 /*!
@@ -56,9 +63,11 @@ AnalogClockWidget::AnalogClockWidget(QGraphicsItem *parent) :
  */
 AnalogClockWidget::~AnalogClockWidget()
 {
+	OstTraceFunctionEntry0( DUP1_ANALOGCLOCKWIDGET_ANALOGCLOCKWIDGET_ENTRY );
 	mTimer->stop(); 
 	HbStyleLoader::unregisterFilePath(":/resource/analogclockwidget.widgetml");
 	HbStyleLoader::unregisterFilePath(":/resource/analogclockwidget.css");
+OstTraceFunctionExit0( DUP1_ANALOGCLOCKWIDGET_ANALOGCLOCKWIDGET_EXIT );
 }
 
 /*!
@@ -66,6 +75,7 @@ AnalogClockWidget::~AnalogClockWidget()
  */
 void AnalogClockWidget::constructPrimitives()
 {
+	OstTraceFunctionEntry0( ANALOGCLOCKWIDGET_CONSTRUCTPRIMITIVES_ENTRY );
 	if (!mClockBackground) {
 		mClockBackground = new HbIconItem(
 				QLatin1String("qtg_graf_clock_day_bg"), this);
@@ -93,6 +103,7 @@ void AnalogClockWidget::constructPrimitives()
 		HbStyle::setItemName(
 				mClockSecondHand, QLatin1String("clock_second_hand"));
 	}
+OstTraceFunctionExit0( ANALOGCLOCKWIDGET_CONSTRUCTPRIMITIVES_EXIT );
 }
 
 /*!
@@ -101,6 +112,7 @@ void AnalogClockWidget::constructPrimitives()
  */
 void AnalogClockWidget::updatePrimitives()
 {
+	OstTraceFunctionEntry0( ANALOGCLOCKWIDGET_UPDATEPRIMITIVES_ENTRY );
 	if (!mClockBackground) {
 		mClockBackground = new HbIconItem(
 				QLatin1String("qtg_graf_clock_day_bg"), this);
@@ -161,6 +173,7 @@ void AnalogClockWidget::updatePrimitives()
 	if (!mTimer->isActive()) {
 		mTimer->start(clockUpdateInterval);
 	}
+OstTraceFunctionExit0( ANALOGCLOCKWIDGET_UPDATEPRIMITIVES_EXIT );
 }
 
 /*!
@@ -168,8 +181,10 @@ void AnalogClockWidget::updatePrimitives()
  */
 void AnalogClockWidget::tick()
 {
+	OstTraceFunctionEntry0( ANALOGCLOCKWIDGET_TICK_ENTRY );
 	updatePrimitives();
 	update();
+OstTraceFunctionExit0( ANALOGCLOCKWIDGET_TICK_EXIT );
 }
 
 /*!
@@ -177,8 +192,10 @@ void AnalogClockWidget::tick()
  */
 void AnalogClockWidget::setGeometry(const QRectF &rect)
 {
+	OstTraceFunctionEntry0( ANALOGCLOCKWIDGET_SETGEOMETRY_ENTRY );
 	HbWidget::setGeometry(rect);
 	updatePrimitives();
+OstTraceFunctionExit0( ANALOGCLOCKWIDGET_SETGEOMETRY_EXIT );
 }
 
 // End of file  --Don't remove this.

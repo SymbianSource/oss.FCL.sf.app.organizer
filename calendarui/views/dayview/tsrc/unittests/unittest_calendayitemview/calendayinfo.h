@@ -1,214 +1,143 @@
 /*
- * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
- * All rights reserved.
- * This component and the accompanying materials are made available
- * under the terms of "Eclipse Public License v1.0"
- * which accompanies this distribution, and is available
- * at the URL "http://www.eclipse.org/legal/epl-v10.html".
- *
- * Initial Contributors:
- * Nokia Corporation - initial contribution.
- *
- * Contributors:
- *
- * Description:
- *
- */
+* Copyright (c) 2007-2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Mocked classes for testing CalenDayItemView class
+*
+*/
 
 #ifndef  CALENDAYINFO_H
 #define  CALENDAYINFO_H
 
-#include <QtGlobal>
+#include <calinstance.h>
 #include "caleninstanceid.h"
-#include <QtGui>
+#include <hb_calencommands.hrh>
 
-//from hb_calencommands.hrh
+const int KFSCalMaxDescriptionLength = 100;
 
-enum TCalenCommandId
-    {
-    ECalenMonthView,
-    ECalenWeekView,
-    ECalenAgendaView,
-    ECalenDayView,
-    ECalenTodoEditor,
-    ECalenTodoEditorDone,
-    ECalenForwardsToDayView,
-    ECalenNextView,
-    ECalenPrevView,
-    ECalenSwitchView,
-    ECalenShowToolbar,
-    ECalenHideToolbar,
-    ECalenUpdateToolbar,
-    ECalenHidePreview,
-    ECalenShowPreview,
-    ECalenStartActiveStep,
-    ECalenGotoToday,
-    ECalenGotoDate,
-    ECalenEventView,
-    ECalenCmdPromptThenEdit,    
-    ECalenFasterAppExit,
-    ECalenShowNextDay,
-    ECalenShowPrevDay,
-    ECalenNewMeeting,
-    ECalenNewAnniv,
-    ECalenNewDayNote,
-    ECalenNewReminder,
-    ECalenNewMeetingRequest,
-    ECalenNewEntry, 
-    ECalenEditCurrentEntry,
-    ECalenEditSeries,
-    ECalenEditOccurrence,
-    ECalenEditEntryFromViewer,
-    ECalenViewCurrentEntry,
-    ECalenNotifyFocusChange,
-    ECalenCompleteTodo,
-    ECalenRestoreTodo,
-    ECalenSend,
-    ECalenDeleteCurrentEntry,
-    ECalenDeleteEntryWithoutQuery,
-    ECalenDeleteSeries,
-    ECalenDeleteCurrentOccurrence,
-    ECalenDeleteAllEntries,
-    ECalenDeleteEntriesBeforeDate,
-    ECalenCancelDelete,
-    ECalenDeleteEntryFromViewer,
-    ECalenShowSettings,
-    ECalenGetLocation,
-    ECalenShowLocation,
-    ECalenGetLocationAndSave,
-    ECalenMissedAlarmsView,
-    ECalenMissedEventView,
-    ECalenCmdClear,
-    ECalenCmdClearAll,                          
-    ECalenCmdGotoCalendar,
-    ECalenMissedAlarmsViewFromIdle,
-    ECalenMissedEventViewFromIdle,
-    ECalenLastCommand,
-    ECalenRegionalPluginTapEvent
-    };
-
-//////////////////end of hb_calencommands.hrh
-
+/*!
+ Mocked struct SCalenApptInfo
+ */
 struct SCalenApptInfo
-    {
+{
     QModelIndex iIndex;
     QDateTime iStartTime;
     QDateTime iEndTime;
     bool iAllDay;
     TCalenInstanceId iId;
-//    AgendaEntry::Status iStatus;
-//    AgendaEntry::TReplicationStatus iReplicationStatus;
- //   TBufC<KFSCalMaxDescriptionLength> iSummary;
+    AgendaEntry::Status iStatus;
+    TBufC<KFSCalMaxDescriptionLength> iSummary;
     TUint32 iColor;
-    };
+};
 
+/*!
+ Mocked class CalenTimeColumn
+ */
+class CalenTimeColumn
+{
+public:
+    CalenTimeColumn() {
+        
+    }
+    
+    ~CalenTimeColumn() {
+        
+    }
+};
+
+/*!
+ Mocked class CalenTimeRegion
+ */
+class CalenTimeRegion
+{
+public:
+    CalenTimeRegion() {
+        
+    }
+    
+    ~CalenTimeRegion() {
+        
+    }
+    
+    QList<CalenTimeColumn> iColumns;
+    
+    int iStartSlot;
+    int iEndSlot;
+};
+
+/*!
+ Mocked class CalenDayInfo
+ */
 class CalenDayInfo
 {
 public:
-
     enum TSlotsInHour
-        {
-        EOne = 1,
-        ETwo,
-        EThree,
-        EFour
-        };
+    {
+        EOne = 1, ETwo, EThree, EFour
+    };
 
-public:  // Constructors and destructor
+public:
 
-    /**
-     * C++ default constructor.
-     */
-    CalenDayInfo( TSlotsInHour aSlotsInHour ) {Q_UNUSED(aSlotsInHour);}
-    
-public:     
+    CalenDayInfo(TSlotsInHour aSlotsInHour) 
+    {
+        Q_UNUSED(aSlotsInHour)
+    }
+    virtual ~CalenDayInfo()
+    {
+        
+    }
 
     void Reset() {}
 
     void InsertTimedEvent( const SCalenApptInfo& aItemInfo ) {Q_UNUSED(aItemInfo);}
-
-    //void InsertUntimedEvent( AgendaEntry::Type aType,
-    //                         const TCalenInstanceId& aId );
-
-    void InsertAlldayEvent( const SCalenApptInfo& aItemInfo ){Q_UNUSED(aItemInfo);}
-
-    //static bool IsAlldayEvent( QDateTime aStart, QDateTime aEnd );
-
-
-    //int SuggestedUntimedSlotPos();
-
-    //int NeededUntimedSlotCount();
-
-    //int UpdateUntimedPos( int aSlot = -1, int aUntimedCount = 0 );
-
-    //int FirstOccupiedSlot();
-
-    //int LastOccupiedSlot();
-
-    //int EarliestEndSlot();
-    //int LastStartSlot();
-
-
-    //int SlotIndexForStartTime( QDateTime aStartTime );
-
-    //int SlotIndexForEndTime( QDateTime aStartTime );
-
-    //void GetLocation( const SCalenApptInfo& aItemInfo,
-    //                  int& aStartSlot,
-    //                  int& aEndSlot,
-    //                  int& aColumnIndex,
-    //                  int& aColumns );
-
-    //int AlldayCount();
-
-    //int TodoCount();
-
-    //bool IsHourStartSlot( const int& aSlotIndex ) const;
-
-    //bool IsExtraSlot( const int& aSlotIndex ) const;
-
-    //int HourFromSlotIndex( const int& aSlotIndex ) const;
-
-    //int SlotIndexFromHour( int aHour );
-
-    //int RoundHourUp( int aSlot );
-
-    //int RoundHourDown( int aSlot );
-
-    //void GetSelectedSlot( int& aSlot, int& aRegion, int& aColumnIndex, int& aColumns );
-
-    //bool MoveSelection( TScrollDirection aDirection );
-
-    //void MoveSelectionInEvent( TScrollDirection aDirection );
-
-    //void UpdateSelectionInEvent();
-
-    //bool IsEventSelected() const;
-
-   // bool IsMultipleEventsSelected() const;
-
-    //bool IsAlldayEventSelected() const;
-
-    //TCalenInstanceId SelectedEvent();
-
-    //int SelectEvent( const TCalenInstanceId& aId );
-
-    //TCalenInstanceId UntimedEvent( int aIndex );
-
-    //const CalenTimedEventInfo& AlldayEvent( int aIndex );
-
-    //void SelectSlot( int aSlot );
-
-
-    //const QList<CalenTimeRegion>& RegionList() const;
-
-
-    //void GetEventIntervals( QList<CalenEventInterval>& aArray ) const;
-
-
-   // CalenSlotInterval SelectedInterval();
+	
+	
+    void GetLocation( const SCalenApptInfo& aItemInfo, int& aStartSlot,
+        int& aEndSlot, int& aColumnIndex, int& aColumns ) 
+    {
+        Q_UNUSED(aItemInfo)
+        Q_UNUSED(aStartSlot)
+        Q_UNUSED(aEndSlot)
+        Q_UNUSED(aColumnIndex)
+        Q_UNUSED(aColumns)
+    }
     
-   // bool SetSelectionInRegion( int aRegion, int aColumn, int aSlot );
+    int AlldayCount() 
+    {
+        return 0;
+    }
+    
+    const QList<CalenTimeRegion>& RegionList() const 
+    {
+       return mList; 
+    }
+    
+    void InsertAlldayEvent( const SCalenApptInfo& aItemInfo )
+    {
+        Q_UNUSED(aItemInfo)
+            
+        CalenTimeRegion region;
+        
+        region.iStartSlot = 10;
+        region.iEndSlot = 13;
+        region.iColumns << CalenTimeColumn();
+        
+        mList  << region;
+    }
+    
+public:
+    QList<CalenTimeRegion> mList;
 };
 
-#endif
+#endif // CALENDAYINFO_H
+
+// End of File

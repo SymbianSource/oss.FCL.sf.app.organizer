@@ -54,11 +54,13 @@ private:
     void setStatusStrip(const AgendaEntry &entry, bool allDayEvent);
 
     bool mUpdated;
-    HbFrameItem *mBg;
-    HbTextItem *mEventDesc;
-    CalenDayStatusStrip *mColorStripe;
     qreal mEventDescMinWidth;
     qreal mFrameMinWidth;
+
+    HbFrameItem *mBg;
+    HbTextItem *mEventDesc;
+
+    CalenDayStatusStrip *mColorStripe;
     const CalenDayContainer *mContainer;
 };
 

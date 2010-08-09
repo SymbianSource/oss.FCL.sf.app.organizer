@@ -37,6 +37,7 @@ class HbAction;
 class HbDateTimePicker;
 class HbDialog;
 class HbTranslator;
+class HbAbstractVkbHost;
 class XQSettingsManager;
 class XQSettingsKey;
 class AlarmClient;
@@ -58,16 +59,19 @@ public:
 public:
 	CLOCKALARMEDITOR_EXPORT void showAlarmEditor();
 
-public slots:
+private slots:
 	void handleDoneAction();
 	void handleDeleteAction();
-	void handleDiscardAction();
 	void handleTimeChange(const QString &text);
 	void handleOccurenceChanged(int index);
 	void handleOkAction();
 	void launchTimePicker();
 	void handleAlarmSoundChanged(int checkedState);
 	void selectedAction(HbAction *action);
+	void handleDayChanged(int index);
+	void handleDescriptionChanged(const QString &text);
+	void handleKeypadOpen();
+	void handleKeypadClosed();
 
 signals:
 	void alarmSet();
@@ -94,7 +98,9 @@ private:
 	int mAlarmId;
 	int mStartOfWeek;
 	bool mAlarmDayItemInserted;
+	bool mIsQuickAlarm;
 	QString mTimeFormat;
+	QTime mOldAlarmTime;
 
 	HbDataForm *mAlarmEditorForm;
 	HbDataFormModel *mAlarmEditorModel;
@@ -104,14 +110,14 @@ private:
 	HbDataFormModelItem *mAlarmSoundItem;
 	HbDataFormModelItem *mAlarmDescription;
 
-	HbView *mAlarmEditorView;
-	HbAction *mDiscardAction;
+	QPointer<HbView> mAlarmEditorView;
 	HbAction *mDeleteAction;
 	HbAction *mDoneAction;
 	HbAction *mOkAction;
 	HbAction *mCancelAction;
 
 	QPointer<HbDialog> mTimePickerDialog;
+	QPointer<HbAbstractVkbHost> mVirtualKeyboard;
 
 	XQSettingsManager *mSettingsManager;
 	XQSettingsKey *mPreviosAlarmTime;

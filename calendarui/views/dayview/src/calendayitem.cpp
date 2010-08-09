@@ -29,28 +29,25 @@
 #include "calendaystatusstrip.h"
 #include "calendaymodel.h"
 #include "calendayutils.h"
+#include "calenagendautils.h"
 #include "calendaycontainer.h"
 
-// -----------------------------------------------------------------------------
-// CalenDayItem()
-// Constructor.
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Constructor.
+*/
 CalenDayItem::CalenDayItem(const CalenDayContainer *container):
     mContainer(container), mUpdated(false), mBg(0), mEventDesc(0), mColorStripe(0), 
     mEventDescMinWidth(0.0), mFrameMinWidth(0.0)
 {
 }
 
-// -----------------------------------------------------------------------------
-// CalenBCDayView()
-// Copy constructor.
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Constructor.
+*/
 CalenDayItem::CalenDayItem(const CalenDayItem & source) :
     HbAbstractViewItem(source), mContainer(source.container()), mUpdated(false), mBg(0), mEventDesc(0), 
     mColorStripe(0), mEventDescMinWidth(0.0), mFrameMinWidth(0.0)
-{	
+{
     // TODO: "qtg_fr_btn_pressed" need to replaced with qtg_fr_cal_meeting_bg
 	// when available
     mBg = new HbFrameItem("qtg_fr_btn_pressed", HbFrameDrawer::NinePieces, this);
@@ -87,19 +84,18 @@ CalenDayItem::CalenDayItem(const CalenDayItem & source) :
 
 }
 
-// -----------------------------------------------------------------------------
-// ~CalenDayItem()
-// Destructor.
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Destructor.
+*/
 CalenDayItem::~CalenDayItem()
 {
 }
 
-// -----------------------------------------------------------------------------
-// 
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Creates new instance of day item.
+   
+   \return New instance of day item.
+*/
 HbAbstractViewItem * CalenDayItem::createItem()
 {
     CalenDayItem* newItem = new CalenDayItem(*this);
@@ -107,36 +103,36 @@ HbAbstractViewItem * CalenDayItem::createItem()
 }
 
 
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Sets data to be displayed on item.
+*/
 void CalenDayItem::updateChildItems()
 {
-	// there is no need to update items after creation
-	if (!mUpdated)
-		{
-		AgendaEntry entry;
-		entry = modelIndex().data( CalenDayEntry ).value<AgendaEntry>();
-		
-		bool isAllDayEvent = (entry.type() == AgendaEntry::TypeEvent)
-								&& !entry.isTimedEntry(); 
-		
-		setDescription(entry, isAllDayEvent);
-		setStatusStrip(entry, isAllDayEvent);
-		
-		mUpdated = true;
-		}
-	
-	//TODO: check if needed
-	//repolish(); 
-	//HbAbstractViewItem::updateChildItems();
+    // there is no need to update items after creation
+    if (!mUpdated) {
+        AgendaEntry entry;
+        entry = modelIndex().data(CalenDayEntry).value<AgendaEntry>();
+
+		bool isAllDayEvent = CalenAgendaUtils::isAlldayEvent(entry); 
+
+        setDescription(entry, isAllDayEvent);
+        setStatusStrip(entry, isAllDayEvent);
+
+        mUpdated = true;
+    }
+
+    //TODO: check if needed
+    //repolish(); 
+    //HbAbstractViewItem::updateChildItems();
 }
 
 
-// -----------------------------------------------------------------------------
-// setDescription()
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Adds event description for the item.
+   
+   \param entry An for which description needs to be displayed.
+   \param allDayEvent Flag that indicates whether an item is all day event
+*/
 void CalenDayItem::setDescription(const AgendaEntry &entry, bool allDayEvent)
 {
 	QString description(entry.summary());
@@ -182,7 +178,7 @@ void CalenDayItem::setDescription(const AgendaEntry &entry, bool allDayEvent)
    \brief It set all needed things for status strip from Agenda Entry.
    
    \param entry Status Strip is created from Agenda Entry
- */
+*/
 void CalenDayItem::setStatusStrip(const AgendaEntry &entry, bool allDayEvent)
 {
     QColor color = HbColorScheme::color("qtc_cal_month_current_day");
@@ -225,6 +221,11 @@ void CalenDayItem::setStatusStrip(const AgendaEntry &entry, bool allDayEvent)
     }
 }
 
+/*!
+   \brief Reimplemented from HbWidget. Handles resize event.
+   
+   \param event Instance of an event to be handled.
+*/
 void CalenDayItem::resizeEvent(QGraphicsSceneResizeEvent *event)
 {
     Q_UNUSED(event)

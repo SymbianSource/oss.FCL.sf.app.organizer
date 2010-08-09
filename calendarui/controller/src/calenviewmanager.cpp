@@ -66,6 +66,7 @@ CalenViewManager::CalenViewManager( CCalenController& aController)
 	mCalenAgendaViewAlt = NULL;
 	mSettingsView = NULL;
 	mCalenDayView = NULL;
+	mInstanceViewCreated = false;
 	
 	// Connect to instance view and entry view creation signals from agenda
 	// interface
@@ -219,6 +220,7 @@ void CalenViewManager::constructAndActivateView(int view)
 		// Add agenda view to mainwindow.
 		mController.MainWindow().addView(mCalenAgendaView);
 		mController.MainWindow().setCurrentView(mCalenAgendaView);
+		mController.MainWindow().addView(mCalenAgendaViewAlt);
 	}
 	OstTraceFunctionExit0( CALENVIEWMANAGER_CONSTRUCTANDACTIVATEVIEW_EXIT );
 }
@@ -340,8 +342,17 @@ void CalenViewManager::handleMainViewReady()
     OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEMAINVIEWREADY_ENTRY );
     
 	// Construct the month view part that is kept for lazy loading
-	if (mCalenMonthView) {
+    if (mCalenMonthView) {
 		mCalenMonthView->doLazyLoading();
+
+		if (mInstanceViewCreated) {
+			// populate entries for the month view if the month view is launched 
+			// from the service APIs. Otherwise the month view is not populated with 
+			// the entries as CalenViewManager::handleInstanceViewCreation is called 
+			// before the month view creation so the model array is not populated.
+			mCalenMonthView->fetchEntriesAndUpdateModel();
+		}
+
 	}
 	
 	// Construct other views
@@ -919,6 +930,13 @@ void CalenViewManager::handleInstanceViewCreation(int status)
     OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEINSTANCEVIEWCREATION_ENTRY );
     
 	Q_UNUSED(status);
+	
+	// This flag is needed if mCalenMonthView and mCalenAgendaview is not created
+	// and before that this slot is getting called.
+	// if we launch views through services then this slot is getting called 
+	// before the view construction.
+	mInstanceViewCreated = true;
+	
 	// handleInstanceViewCreation function is called only once. Now that the instance
 	// view creation is successfull. Events need to be populated on screen
 	// Ideal colution should be to call a uniform function, e.g. PopulateEvents
@@ -966,8 +984,12 @@ void CalenViewManager::handleEntryViewCreation(int status)
 void CalenViewManager::handleEntriesChanged(QList<ulong> ids)
 {
 	Q_UNUSED(ids);
-	// Update and refresh the view.
-	activateCurrentView();
+	HbView *currentview = mController.MainWindow().currentView();
+	if((mCalenMonthView == currentview)||(mCalenDayView == currentview)||
+                                            (mCalenAgendaView == currentview ))
+	    {
+        activateCurrentView();
+	    }
 }
 
 // ----------------------------------------------------------------------------

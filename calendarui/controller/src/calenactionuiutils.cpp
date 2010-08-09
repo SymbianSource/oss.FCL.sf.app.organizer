@@ -48,8 +48,14 @@ AgendaEntry CalenActionUiUtils::findPossibleInstanceL(const TCalenInstanceId& id
     {
     OstTraceFunctionEntry0( CALENACTIONUIUTILS_FINDPOSSIBLEINSTANCEL_ENTRY );
     
-    QList<AgendaEntry> instances = agendaUtil->createEntryIdListForDay(id.mInstanceTime,
-                                                                       AgendaUtil::FilterFlags(AgendaUtil::IncludeAll));
+    AgendaUtil::FilterFlags filter = 
+    		AgendaUtil::FilterFlags(AgendaUtil::IncludeAnniversaries |
+									 AgendaUtil::IncludeAppointments | 
+									 AgendaUtil::IncludeEvents |
+									 AgendaUtil::IncludeReminders |
+									 AgendaUtil::IncludeIncompletedTodos);
+    QList<AgendaEntry> instances = 
+				agendaUtil->createEntryIdListForDay(id.mInstanceTime, filter);
     AgendaEntry result;
 
     // For instances finishing the next day (now possible with unified DateTime editor),

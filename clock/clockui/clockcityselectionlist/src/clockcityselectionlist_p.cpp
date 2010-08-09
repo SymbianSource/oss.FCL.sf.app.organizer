@@ -1,4 +1,4 @@
-/*
+	/*
 * Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
@@ -46,6 +46,11 @@
 
 #include "timezoneclient.h"
 #include "clockdatatypes.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockcityselectionlist_pTraces.h"
+#endif
+
 
 /*!
 	\class ClockCitySelectionListPrivate
@@ -65,6 +70,7 @@ ClockCitySelectionListPrivate::ClockCitySelectionListPrivate(
  mLoader(0),
  mOwnsClient(false)
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_CLOCKCITYSELECTIONLISTPRIVATE_ENTRY );
 	// First get the q-pointer.
 	q_ptr = static_cast<ClockCitySelectionList *> (parent);
 
@@ -73,6 +79,7 @@ ClockCitySelectionListPrivate::ClockCitySelectionListPrivate(
 		mClient = TimezoneClient::getInstance();
 		mOwnsClient = true;
 	}
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_CLOCKCITYSELECTIONLISTPRIVATE_EXIT );
 }
 
 /*!
@@ -80,6 +87,7 @@ ClockCitySelectionListPrivate::ClockCitySelectionListPrivate(
  */
 ClockCitySelectionListPrivate::~ClockCitySelectionListPrivate()
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKCITYSELECTIONLISTPRIVATE_CLOCKCITYSELECTIONLISTPRIVATE_ENTRY );
 	if (mOwnsClient) {
 		mClient->deleteInstance();
 	}
@@ -101,6 +109,7 @@ ClockCitySelectionListPrivate::~ClockCitySelectionListPrivate()
 	    delete mVirtualKeyboard;
     }
 
+	OstTraceFunctionExit0( DUP1_CLOCKCITYSELECTIONLISTPRIVATE_CLOCKCITYSELECTIONLISTPRIVATE_EXIT );
 }
 
 /*!
@@ -108,6 +117,7 @@ ClockCitySelectionListPrivate::~ClockCitySelectionListPrivate()
  */
 void ClockCitySelectionListPrivate::populateListModel()
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_POPULATELISTMODEL_ENTRY );
 	// First get the data from the timezone client.
 	QList<LocationInfo> &infoList = mClient->getLocations();
 
@@ -145,6 +155,7 @@ void ClockCitySelectionListPrivate::populateListModel()
 
 	// Cleanup.
 	infoList.clear();
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_POPULATELISTMODEL_EXIT );
 }
 
 /*!
@@ -155,6 +166,7 @@ void ClockCitySelectionListPrivate::populateListModel()
 void ClockCitySelectionListPrivate::handleItemActivated(
 		const QModelIndex &index)
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_HANDLEITEMACTIVATED_ENTRY );
 	LocationInfo selectedInfo;
 	selectedInfo.timezoneId = index.data(Qt::UserRole + 101).value<int>();
 	selectedInfo.cityGroupId = index.data(Qt::UserRole + 102).value<int>();
@@ -169,6 +181,7 @@ void ClockCitySelectionListPrivate::handleItemActivated(
 
 	// Close the list.
 	closeCityList();
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_HANDLEITEMACTIVATED_EXIT );
 }
 
 /*!
@@ -176,6 +189,7 @@ void ClockCitySelectionListPrivate::handleItemActivated(
  */
 void ClockCitySelectionListPrivate::handleBackAction()
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_HANDLEBACKACTION_ENTRY );
 	LocationInfo info;
 	info.timezoneId = -1;
 
@@ -193,6 +207,7 @@ void ClockCitySelectionListPrivate::handleBackAction()
 
 	// Close the list.
 	closeCityList();
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_HANDLEBACKACTION_EXIT );
 }
 
 /*!
@@ -200,6 +215,7 @@ void ClockCitySelectionListPrivate::handleBackAction()
  */
 void ClockCitySelectionListPrivate::closeCityList()
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_CLOSECITYLIST_ENTRY );
 	// We are done, lets remove the view off the main window.
 	HbMainWindow *window = hbInstance->allMainWindows().at(0);
 	window->removeView(mView);
@@ -213,6 +229,7 @@ void ClockCitySelectionListPrivate::closeCityList()
 	if (mListModel) {
 		delete mListModel;
 	}
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_CLOSECITYLIST_EXIT );
 }
 
 /*!
@@ -223,6 +240,7 @@ void ClockCitySelectionListPrivate::closeCityList()
 void ClockCitySelectionListPrivate::updateSearchCriteria(
 		const QString &criteria)
 {
+     OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_UPDATESEARCHCRITERIA_ENTRY );
      int originalMask  = mListView->enabledAnimations();
      mListView->setEnabledAnimations(HbAbstractItemView::TouchDown);
 
@@ -236,6 +254,7 @@ void ClockCitySelectionListPrivate::updateSearchCriteria(
 
 	mProxyModel->setFilterRegExp(searchExp);
 	mProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_UPDATESEARCHCRITERIA_EXIT );
 }
 
 /*!
@@ -243,6 +262,7 @@ void ClockCitySelectionListPrivate::updateSearchCriteria(
  */
 void ClockCitySelectionListPrivate::handleAddOwnCityAction()
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_HANDLEADDOWNCITYACTION_ENTRY );
 	if (mAddOwnCityDialog) {
 		delete mAddOwnCityDialog;
 	}
@@ -283,6 +303,7 @@ void ClockCitySelectionListPrivate::handleAddOwnCityAction()
 	mOkAction = static_cast<HbAction *> (mAddCityDocloader->findObject("okAction"));
 	
 	mAddOwnCityDialog->open(this, SLOT(selectedAction(HbAction*)));
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_HANDLEADDOWNCITYACTION_EXIT );
 }
 
 /*!
@@ -290,6 +311,7 @@ void ClockCitySelectionListPrivate::handleAddOwnCityAction()
  */
 void ClockCitySelectionListPrivate::handleOkAction()
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_HANDLEOKACTION_ENTRY );
 	QString cityName = mCityNameEdit->text();
 
 	// Add the city if city name is not empty
@@ -317,6 +339,7 @@ void ClockCitySelectionListPrivate::handleOkAction()
 			populateListModel();
 		}
 	}
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_HANDLEOKACTION_EXIT );
 }
 
 /*!
@@ -325,6 +348,7 @@ void ClockCitySelectionListPrivate::handleOkAction()
  */
 void ClockCitySelectionListPrivate::handleTimeZoneSelection(int index)
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_HANDLETIMEZONESELECTION_ENTRY );
 	// Get the selected time zone offset.
 	int selectedTimeZoneOffset = mTimeZoneOffsetList.at(index);
 
@@ -342,6 +366,7 @@ void ClockCitySelectionListPrivate::handleTimeZoneSelection(int index)
 	qSort(countries);
 	mCountryComboBox->setItems(countries);
 	}
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_HANDLETIMEZONESELECTION_EXIT );
 }
 
 /*!
@@ -349,9 +374,11 @@ void ClockCitySelectionListPrivate::handleTimeZoneSelection(int index)
  */
 void ClockCitySelectionListPrivate::selectedAction(HbAction *action)
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_SELECTEDACTION_ENTRY );
 	if (action==mOkAction) {
 		handleOkAction();
 	}
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_SELECTEDACTION_EXIT );
 }
 
 /*!
@@ -359,6 +386,7 @@ void ClockCitySelectionListPrivate::selectedAction(HbAction *action)
  */
 void ClockCitySelectionListPrivate::loadSection(Qt::Orientation orientation)
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_LOADSECTION_ENTRY );
 	bool loadSuccess;
 	if (mAddOwnCityDialog) {
 		if (Qt::Horizontal == orientation) {
@@ -369,6 +397,7 @@ void ClockCitySelectionListPrivate::loadSection(Qt::Orientation orientation)
 					"portrait", &loadSuccess);
 		}
 	}
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_LOADSECTION_EXIT );
 }
 
 /*!
@@ -377,6 +406,7 @@ void ClockCitySelectionListPrivate::loadSection(Qt::Orientation orientation)
  */
 void ClockCitySelectionListPrivate::cancelSearch()
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_CANCELSEARCH_ENTRY );
 	// Clear the search criteria.
 	mSearchBox->setCriteria(QString(""));
 	
@@ -390,6 +420,7 @@ void ClockCitySelectionListPrivate::cancelSearch()
 	
 	// Set focus to the first city in the list.
 	mListView->scrollTo(mProxyModel->index(0, 0));
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_CANCELSEARCH_EXIT );
 }
 
 /*!
@@ -397,6 +428,7 @@ void ClockCitySelectionListPrivate::cancelSearch()
  */
 void ClockCitySelectionListPrivate::focusLineEdit()
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_FOCUSLINEEDIT_ENTRY );
 	if (mSearchBox) {
 		// mView->scene()->setFocusItem(mSearchBox);
 		HbLineEdit *searchBoxEditor = 0;
@@ -419,6 +451,7 @@ void ClockCitySelectionListPrivate::focusLineEdit()
 			delete event;
 		}
 	}
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_FOCUSLINEEDIT_EXIT );
 }
 
 /*!
@@ -426,6 +459,7 @@ void ClockCitySelectionListPrivate::focusLineEdit()
  */
 void ClockCitySelectionListPrivate::showCityList()
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_SHOWCITYLIST_ENTRY );
 	// Construct the document loader.
 	bool success = false;
 	mLoader = new HbDocumentLoader;
@@ -506,6 +540,7 @@ void ClockCitySelectionListPrivate::showCityList()
 	// Focus the search box.
 	focusLineEdit();
 
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_SHOWCITYLIST_EXIT );
 }
 
 /*!
@@ -513,6 +548,7 @@ void ClockCitySelectionListPrivate::showCityList()
  */
 QStringList ClockCitySelectionListPrivate::getOffsetTexts()
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_GETOFFSETTEXTS_ENTRY );
 	int offsetCount(mTimeZoneOffsetList.count());
 
 	// Get all the time zone offsets
@@ -545,6 +581,7 @@ QStringList ClockCitySelectionListPrivate::getOffsetTexts()
 	offsetTextList.append(offsetText);
 	offsetText.clear();
 	}
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_GETOFFSETTEXTS_EXIT );
 	return offsetTextList;
 }
 
@@ -553,8 +590,10 @@ QStringList ClockCitySelectionListPrivate::getOffsetTexts()
  */
 void ClockCitySelectionListPrivate::addCityNameField()
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_ADDCITYNAMEFIELD_ENTRY );
 	mCityNameEdit = new HbLineEdit();
 	mCityNameEdit->setFocus(Qt::MouseFocusReason);
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_ADDCITYNAMEFIELD_EXIT );
 }
 
 /*!
@@ -562,6 +601,7 @@ void ClockCitySelectionListPrivate::addCityNameField()
  */
 void ClockCitySelectionListPrivate::addTimeZoneField()
 {
+OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_ADDTIMEZONEFIELD_ENTRY );
 //	mTimeZoneComboBox = new HbComboBox();
 
 	QStringList texts = getOffsetTexts();
@@ -576,6 +616,7 @@ void ClockCitySelectionListPrivate::addTimeZoneField()
 	connect(
 			mTimeZoneComboBox, SIGNAL(currentIndexChanged(int)),
 			this, SLOT(handleTimeZoneSelection(int)));
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_ADDTIMEZONEFIELD_EXIT );
 }
 
 /*!
@@ -583,8 +624,10 @@ void ClockCitySelectionListPrivate::addTimeZoneField()
  */
 void ClockCitySelectionListPrivate::addCountryListField()
 {
+	OstTraceFunctionEntry0( CLOCKCITYSELECTIONLISTPRIVATE_ADDCOUNTRYLISTFIELD_ENTRY );
 	// Populate the country list based on the current TZ offset selected.
 	handleTimeZoneSelection(mCurrentTZOffsetIndex);
+	OstTraceFunctionExit0( CLOCKCITYSELECTIONLISTPRIVATE_ADDCOUNTRYLISTFIELD_EXIT );
 }
 
 // End of file	--Don't remove this.

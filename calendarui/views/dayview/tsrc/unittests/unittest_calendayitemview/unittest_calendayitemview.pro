@@ -45,13 +45,20 @@ HEADERS +=	calencontext.h \
             calendaycontainer.h \
             calendayutils.h \
             hbinstance.h \
-            calendaymodel.h
-			
+            calendaymodel.h \
+            calendayeventspane.h \
+            calendayitem.h 	\
+            calendayview.h \
+            calendaystatusstrip.h	
 
 SOURCES +=	unittest_calendayitemview.cpp \
 			calendayitemview.cpp \
-            calendayutils.cpp 
-
+            calendayutils.cpp \
+            calendaycontainer.cpp  \
+            calendayeventspane.cpp \
+            calendayitem.cpp \
+            calendaystatusstrip.cpp
+            
 symbian : {
 	TARGET.CAPABILITY = CAP_APPLICATION
     MMP_RULES += "USERINCLUDE ."

@@ -15,14 +15,10 @@
 *
 */
 
-
-
-// INCLUDE FILES
+// User includes.
 #include "alarmutils.h"
-
 #include "AlmAlertVariant.hrh"
 #include "pim_trace.h"
-
 #include "AlmAlarmPlayer.h"
 #include "AlmAlarmControl.h"
 #include "AlmAlarmInfo.h"
@@ -31,9 +27,9 @@
 #ifdef RD_ALMALERT__SENSOR_SUPPORT
 #include "alarmcontextfwsupport.h"
 #endif // RD_ALMALERT__SENSOR_SUPPORT
-
 #include "alarmalertwrapper.h"
 
+// System includes.
 // #include <almconst.h>
 #include <eikenv.h>
 #include <AknCapServer.h>
@@ -45,12 +41,9 @@
 #include <ProfileEngineDomainConstants.h>
 #include <sbdefs.h>
 #include <coreapplicationuisdomainpskeys.h>
-// #include <clockdomaincrkeys.h>
-// #include <CalendarInternalCRKeys.h>
 #include <wakeupalarm.h>
 #include <calalarm.h> // KUidAgendaModelAlarmCategory - the alarm category id for calendar alarms
 #include <AknUtils.h>
-
 #ifndef SYMBIAN_CALENDAR_V2
 #include <agmalarm.h> // deprecated, use CalAlarm.h when SYMBIAN_CALENDAR_V2 flag is enabled
 #endif // SYMBIAN_CALENDAR_V2
@@ -58,37 +51,31 @@
 #include <calentryview.h>
 #include <clockdomaincrkeys.h>
 #include <calendardomaincrkeys.h>
-// #include <calenlauncher.h>  // for launching calendar entry view
 
-
-
-// CONSTANTS AND MACROS
+// Constants
 const TInt KAlmAlertMinSnooze( 100 );
 const TInt KAlmAlertMaxSnooze( 104 );
-
-const TInt KDefaultSnoozeTime( 5 ); // 5 minutes
-
-const TUint KAlarmAutoHide( 60000000 );  // 60 s
-const TUint KAlarmAutoHideCalendar( 30000000 );  // 30 s
-const TUint KKeyBlockTime( 500000 );  // 0.5 s
-const TUint KShutdownTime( 1500000 ); // 1.5 s
-const TUint KAlarmDelayTime( 1000000 ); // 1.0 s
-const TUint KInactivityResetInterval( 1000000 ); // 1.0 s
-
+const TInt KDefaultSnoozeTime( 5 ); 
+const TUint KAlarmAutoHide( 60000000 );
+const TUint KAlarmAutoHideCalendar( 30000000 );
+const TUint KKeyBlockTime( 500000 );
+const TUint KShutdownTime( 1500000 );
+const TUint KAlarmDelayTime( 1000000 );
+const TUint KInactivityResetInterval( 1000000 );
 const TInt KMaxProfileVolume( 10 );
-const TInt KVolumeRampPeriod( 3000000 );  // 3 seconds
-_LIT( KRngMimeType, "application/vnd.nokia.ringing-tone" );
-//const TUint32 KCalendarSoundFile = 0x00000004;
-//const TUint32 KClockAppSoundFile = 0x00000000;
+const TInt KNoVolume(0);
+const TInt KVolumeRampPeriod( 3000000 );
 const TUid KAlarmClockOne = { 0x101F793A };
-
 const TUid KCRUidProfileEngine = {0x101F8798};
 //const TUint32 KProEngActiveReminderTone     = 0x7E00001C;
-//const TUint32 KProEngActiveClockAlarmTone  = 0x7E00001D;
+const TUint32 KProEngActiveClockAlarmTone  = 0x7E00001D;
 //const TUint32 KProEngActiveAlertVibra           = 0x7E00001E;
-const TUint32 KProEngActiveRingingType = 0x7E000002;
-const TUint32 KProEngActiveRingingVolume = 0x7E000008;
+const TUint32 KProEngSilenceMode = {0x80000202};
+const TUint32 KProEngActiveRingingType = {0x7E000002};
+const TUint32 KProEngActiveRingingVolume = {0x7E000008};
 
+// Literals
+_LIT( KRngMimeType, "application/vnd.nokia.ringing-tone" );
 
 // ==========================================================
 // ================= MEMBER FUNCTIONS =======================
@@ -467,10 +454,7 @@ void CAlarmUtils::GetAlarmSoundFilenames()
 		}
 		if( profileRepository )
 		{
-			// TODO: Need to use KProEngActiveReminderTone once its released
-			//PIM_ASSERT( profileRepository->Get( KProEngActiveReminderTone, iAlarmData.iAlarmTone ); )
-			PIM_ASSERT( repository->Get( KCalendarDefaultSoundFile,
-													iAlarmData.iAlarmTone ); )
+			PIM_ASSERT( profileRepository->Get( KProEngActiveClockAlarmTone, iAlarmData.iAlarmTone ); )
 		}
 	}
 	delete repository;
@@ -533,8 +517,20 @@ void CAlarmUtils::GetProfileSettings()
     	repository->Get( KProEngActiveRingingType , ringType);
     	iAlarmData.iRingType = static_cast< TProfileRingingType >( ringType );
     	
+    	TBool silentMode;
     	TInt ringingVolume;
-    	repository->Get( KProEngActiveRingingVolume , ringingVolume);
+    	repository->Get( KProEngSilenceMode, silentMode);
+    	if(silentMode)
+    	    {
+    	    ringingVolume = KNoVolume;
+    	    }
+    	else
+    	    {
+			// It seems the wrong key has been associated with calendar alarm tone
+			// settings. It would be changed once it's rectified by profile team.
+    	    repository->Get( KProEngActiveRingingVolume , ringingVolume );
+    	    }
+    	
     	iAlarmData.iVolume = ringingVolume;
     	
     	iAlarmData.iVolumeRampTime = 0;
@@ -542,7 +538,7 @@ void CAlarmUtils::GetProfileSettings()
     	TInt volumeOn = iAlarmData.iAlarm.ClientData2();
     	if (!volumeOn) {
     		iAlarmData.iRingType = EProfileRingingTypeSilent;
-    		iAlarmData.iVolume = 0;
+    		iAlarmData.iVolume = KNoVolume;
     	}
     }
     TRACE_EXIT_POINT;

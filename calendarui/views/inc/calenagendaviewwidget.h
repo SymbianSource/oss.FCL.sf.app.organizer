@@ -103,13 +103,26 @@ public:
      */
     void createNewEvent();
     
-    
+    /**
+     * @brief check if property has to set
+     */ 
     bool hasAllDayIcon();
+    
+    /**
+     * @brief check if all day icon is present
+     */
     void checkEntryIcons();
+    
+    /**
+     * @brief return true if all day icon is present
+     */
     bool isAllDayIcon();
-    bool isExceptionIcon();
-    bool isAlarmIcon();
-    bool isRepeatingIcon();
+    
+    /**
+    * @brief return true if location is present
+    */
+   bool isLocationData();
+
         
     
     
@@ -367,11 +380,8 @@ private:
 	int mIndex;
 	bool mIconCheck; 
 	bool mNextEntry;
-	bool mAllDayLeftIcon;
-	bool mRightAlarmIcon;
-	bool mRightRepeatIcon;
-	bool mRightExceptionIcon;
 	bool mLeftAllDayIcon;
+	bool mLocationData;
 
 };
 

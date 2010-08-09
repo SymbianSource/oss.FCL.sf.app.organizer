@@ -205,7 +205,7 @@ void NotesNoteEditor::execute(AgendaEntry entry)
 			mMarkFavouriteAction->setText(
 					hbTrId("txt_notes_opt_remove_from_favorites"));
 		} else {
-			iconName = "";
+			iconName = " ";
 
 			mMarkFavouriteAction->setText(
 					hbTrId("txt_notes_opt_mark_as_favorite"));
@@ -220,7 +220,7 @@ void NotesNoteEditor::execute(AgendaEntry entry)
 		// Set the sub heading
 		mViewHeading->setPlainText(hbTrId("txt_notes_subhead_note"));
 	} else {
-		mFavouriteIcon->setIcon(HbIcon(""));
+		mFavouriteIcon->setIcon(HbIcon(" "));
 
 		// For handling the edit of note when text is given as input
 		mTextEditor->setPlainText(mOwner->mModifiedNote.description());
@@ -429,7 +429,7 @@ void NotesNoteEditor::markNoteAsFavourite()
 		mOwner->mModifiedNote.setFavourite(0);
 
 		// Update the icon.
-		mFavouriteIcon->setIcon(HbIcon(""));
+		mFavouriteIcon->setIcon(HbIcon(" "));
 
 		// Change the text on the action.
 		mMarkFavouriteAction->setText(
@@ -553,7 +553,7 @@ void NotesNoteEditor::handleNewNoteAction()
 	mOwner->mModifiedNote = mOwner->mOriginalNote = entry;
 	mOwner->mNewEntry = true;
 
-	mFavouriteIcon->setIcon(HbIcon(""));
+	mFavouriteIcon->setIcon(HbIcon(" "));
 
 	// For handling the edit of note when text is given as input
 	mTextEditor->setPlainText(mOwner->mModifiedNote.description());

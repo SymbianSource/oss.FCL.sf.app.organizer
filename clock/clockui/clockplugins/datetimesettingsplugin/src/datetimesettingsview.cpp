@@ -26,6 +26,11 @@
 #include "datetimesettingsview.h"
 #include "clocksettingsview.h"
 #include "timezoneclient.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "datetimesettingsviewTraces.h"
+#endif
+
 
 /*!
 	\class DateTimeSettingsView
@@ -49,6 +54,7 @@ DateTimeSettingsView::DateTimeSettingsView(
 		CpSettingFormEntryItemData(
 				itemDataHelper, text, description, icon, parent)
 {
+	OstTraceFunctionEntry0( DATETIMESETTINGSVIEW_DATETIMESETTINGSVIEW_ENTRY );
 	// Construct the timezone client.
 	mTimezoneClient = TimezoneClient::getInstance();
 	connect(
@@ -62,6 +68,7 @@ DateTimeSettingsView::DateTimeSettingsView(
 	connect(
 			mTickTimer, SIGNAL(timeout()),
 			this, SLOT(updateDisplayTime()));
+	OstTraceFunctionExit0( DATETIMESETTINGSVIEW_DATETIMESETTINGSVIEW_EXIT );
 }
 
 /*!
@@ -69,6 +76,7 @@ DateTimeSettingsView::DateTimeSettingsView(
  */
 DateTimeSettingsView::~DateTimeSettingsView()
 {
+	OstTraceFunctionEntry0( DUP1_DATETIMESETTINGSVIEW_DATETIMESETTINGSVIEW_ENTRY );
 	if (mTickTimer) {
 		mTickTimer->stop();
 		delete mTickTimer;
@@ -78,6 +86,7 @@ DateTimeSettingsView::~DateTimeSettingsView()
 	if (!mTimezoneClient->isNull()) {
 		mTimezoneClient->deleteInstance();
 	}
+	OstTraceFunctionExit0( DUP1_DATETIMESETTINGSVIEW_DATETIMESETTINGSVIEW_EXIT );
 }
 
 /*!
@@ -85,8 +94,10 @@ DateTimeSettingsView::~DateTimeSettingsView()
  */
 void DateTimeSettingsView::onLaunchView()
 {
+	OstTraceFunctionEntry0( DATETIMESETTINGSVIEW_ONLAUNCHVIEW_ENTRY );
 	ClockSettingsView *settingsView = new ClockSettingsView(this);
 	settingsView->loadSettingsView();
+	OstTraceFunctionExit0( DATETIMESETTINGSVIEW_ONLAUNCHVIEW_EXIT );
 }
 
 /*!
@@ -94,6 +105,7 @@ void DateTimeSettingsView::onLaunchView()
  */
 void DateTimeSettingsView::updateDisplayTime()
 {
+	OstTraceFunctionEntry0( DATETIMESETTINGSVIEW_UPDATEDISPLAYTIME_ENTRY );
 	HbExtendedLocale locale = HbExtendedLocale::system();
 	QString timeInfo = locale.format(
 			QTime::currentTime(), r_qtn_time_usual_with_zero);
@@ -106,6 +118,7 @@ void DateTimeSettingsView::updateDisplayTime()
 	setDescription(displayString);
 	// Start the Timer for 1 minute.
 	mTickTimer->start(60000);
+	OstTraceFunctionExit0( DATETIMESETTINGSVIEW_UPDATEDISPLAYTIME_EXIT );
 }
 
 /*!
@@ -113,6 +126,8 @@ void DateTimeSettingsView::updateDisplayTime()
  */
 CpBaseSettingView *DateTimeSettingsView::createSettingView() const
 {
+	OstTraceFunctionEntry0( DATETIMESETTINGSVIEW_CREATESETTINGVIEW_ENTRY );
+	OstTraceFunctionExit0( DATETIMESETTINGSVIEW_CREATESETTINGVIEW_EXIT );
 	return 0;
 }
 

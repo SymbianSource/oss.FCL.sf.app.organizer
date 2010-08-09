@@ -18,29 +18,28 @@
 #ifndef  HBMAINWINDOW_H
 #define  HBMAINWINDOW_H
 
-#include <QObject>
-#include <QtGlobal>
-#include <QRectF>
+#include <HbView>
 
 // Test variables
 extern QRectF gTestWindowRect;
 extern Qt::Orientation gTestOrientation;
 
-
-
 /*!
  Mocked class HbMainWindow (simulating window in unittests)
  */
-class HbMainWindow
-: public QObject
-{
+class HbMainWindow : public QObject
+{   
     Q_OBJECT
 public:
-    HbMainWindow(QObject *parent = 0) : QObject(parent){
-        Q_UNUSED(parent);
+    HbMainWindow() {
+        mView = new HbView();
     }
     
     ~HbMainWindow() {
+        if (mView) {
+            delete mView;
+            mView = 0;
+        }
     }
     
     QRectF layoutRect() const {
@@ -50,8 +49,12 @@ public:
     Qt::Orientation orientation() const {
         return gTestOrientation;
     }
-signals:
-    void orientationChanged(Qt::Orientation);
+    
+    HbView *HbMainWindow::currentView() const {
+        return mView;
+    }
+
+    HbView *mView;
 };
 
 #endif // HBMAINWINDOW_H

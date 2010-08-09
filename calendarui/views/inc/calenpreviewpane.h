@@ -51,6 +51,8 @@ public:
 	void startAutoScroll();
 	void setView(CalenMonthView* view);
 	void stopScrolling();
+	void effectStarted();
+	void effectFinished();
 	
 protected:
 	void gestureEvent(QGestureEvent *event);

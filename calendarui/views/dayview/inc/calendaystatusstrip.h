@@ -77,16 +77,16 @@ protected:
     qreal calculateMinuteHeight(const QTime &start, const QTime &end);
     
 private:
-    qreal mRange; //!<Distanse beatween lines
+    qreal mRange; //!<Distance between lines
     QColor mColor;//!<Color of status stripe
     CalenDayStatusStrip::DrawingStyle mDrawingStyle;//!<Specify style of drawing
     /*!
-       Orginal start and end time of event
+       Original start and end time of event
      */
     QPair<QTime,QTime> mStartEndEventTime;
     
-    static const qreal mMinute;//!<It keep info how much seconds are in minute
-    static const qreal mMinimumTime;//!<It keep info about minimum timeline in minutes
+    static const qreal mMinute;//!<It keeps info how much seconds are in minute
+    static const qreal mMinimumTime;//!<It keeps info about minimum timeline in minutes
 };
 
 Q_DECLARE_METATYPE(CalenDayStatusStrip::DrawingStyle)

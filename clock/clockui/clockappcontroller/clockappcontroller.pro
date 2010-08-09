@@ -31,6 +31,7 @@ INCLUDEPATH += \
 		../../clockmw/clocktimezone/inc \
 		../../clockmw/clocksettingsutility/inc \
 		../../clockmw/clockalarms/inc \
+		./traces
 
 symbian: {
 	TARGET.CAPABILITY = ALL -TCB

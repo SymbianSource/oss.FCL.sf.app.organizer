@@ -50,4 +50,38 @@
     return result;
     }
 
+ // ---------------------------------------------------------------------------
+ // CalenAgendaUtils::IsAllDayEvent
+ // Allday event is an event  with a duration of n*24h.
+ // ---------------------------------------------------------------------------
+ //
+ bool CalenAgendaUtils::isAlldayEvent( const AgendaEntry& entry )
+     {
+     
+     TRACE_ENTRY_POINT;
+
+     bool allDayEvent( false );
+     if (AgendaEntry::TypeAppoinment == entry.type() ||
+             AgendaEntry::TypeEvent == entry.type()) {    
+         QDateTime startTime = entry.startTime();
+         QDateTime stopTime  = entry.endTime();
+     
+         int differenceInDays = startTime.daysTo(stopTime);
+         if( startTime != stopTime && 
+                 startTime == CalenDateUtils::beginningOfDay( startTime ) && 
+                 stopTime == CalenDateUtils::beginningOfDay( stopTime ) && 
+                 differenceInDays >= 1 )
+             {
+             allDayEvent = true;
+             }
+         else
+             {
+             allDayEvent = false;
+             }
+     }
+     
+     TRACE_EXIT_POINT;
+     return allDayEvent;
+     }
+
 //  End of File

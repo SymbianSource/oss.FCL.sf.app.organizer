@@ -103,27 +103,6 @@ void TestCalenDayView::testConstructors()
     delete testView;
 }
 
-int main(int argc, char ** argv)
+QTEST_MAIN(TestCalenDayView);
 
-{
-
-argc++;
-
-argc++;
-
-char * argvNew[3];
-
-argvNew[0]= argv[0];
-
-argvNew[1]= const_cast<char*>("-o");
-
-argvNew[2]= const_cast<char*>("c:\\unittest\\TestCalenDayView.txt");//set place where //output chould be
-
-QApplication app(argc, argvNew);
-
-TestCalenDayView testFile;//file with class containing unit tests
-
-QTest::qExec(&testFile,argc,argvNew);
-
-}
 #include "unittest_calendayview.moc"

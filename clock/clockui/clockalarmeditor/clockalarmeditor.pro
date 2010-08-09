@@ -23,7 +23,8 @@ INCLUDEPATH += \
 		../../clockmw/clockalarms/inc \
         ../../clockmw/clocksettingsutility/inc \
 		../../clockmw/clocktimezone/inc \
-        ../../inc
+        ../../inc \
+        ./traces
 
 DEPENDPATH += \
 		./inc \

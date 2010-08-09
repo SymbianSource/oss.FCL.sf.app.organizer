@@ -99,6 +99,8 @@ void CalenThickLinesDrawer::paint(QPainter* painter,
 		// Calculate the seperation to be added so that line coincides with 
 		// top border of the grid
 		qreal seperation = CALENDAYNAMEANDGRIDSEPERATOR * unitValue;
+		// Adjust the seperation with the thickness of the line
+		seperation = seperation - widthInPixels;
 		// Get the start point and end point to draw the line
 		QPointF startPoint(controlRect.bottomLeft().x(), controlRect.bottomLeft().y() + seperation);
 		QPointF endPoint(controlRect.bottomRight().x(), controlRect.bottomRight().y() + seperation);

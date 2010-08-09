@@ -18,9 +18,9 @@
 #include <hbmainwindow.h>
 
 #include <CalenLauncher>
+#include <CalenEditor>
 
 #include "calencontroller.h"
-#include "caleneditor.h"
 #include "calenserviceprovider.h"
 
 CalenServiceProvider::CalenServiceProvider(CCalenController *controller, QObject* parent) :

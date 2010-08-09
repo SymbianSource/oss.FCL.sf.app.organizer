@@ -319,11 +319,6 @@ void CalenMonthView::doLazyLoading()
 	// in all views
 	mServices.OfferMenu(menu());
 	
-	// populate entries for the month view if the month view is launched 
-	// from the service APIs. Otherwise the month view is not populated with 
-	// the entries as CalenViewManager::handleInstanceViewCreation is called 
-	// before the month view creation so the model array is not populated.
-	fetchEntriesAndUpdateModel();	
 	OstTraceFunctionExit0( CALENMONTHVIEW_DOLAZYLOADING_EXIT );
 }
 
@@ -1520,6 +1515,12 @@ void CalenMonthView::handlePreviewPaneGesture(bool rightGesture)
     
 	QGraphicsLinearLayout* viewLayout = static_cast<QGraphicsLinearLayout *>
 												(widget()->layout());
+	
+	// Set the effect in progress flags for next and previous panes
+	// For current pane, we would have set it in gestureEvent() function
+	mPrevPreviewPane->effectStarted();
+	mNextPreviewPane->effectStarted();
+	
 	if(rightGesture) {
 		// Need to bring up the previous day preview pane
 		// Create the effect on mCurrPreviewPane to slide to right side
@@ -1636,6 +1637,11 @@ void CalenMonthView::handleLeftEffectCompleted(
 	mPrevPaneParent = paneParent;
 	mPrevPaneLayoutWidget = paneLayoutWidget;
 	
+	// Reset the effect in progress flag
+	mCurrPreviewPane->effectFinished();
+    mPrevPreviewPane->effectFinished();
+    mNextPreviewPane->effectFinished();
+    
 	// Set the focus to proper date
 	setCurrGridIndex(index);
 	// Start the auto scroll on current preview pane
@@ -1674,6 +1680,11 @@ void CalenMonthView::handleRightEffectCompleted(
 	mNextPaneParent = paneParent;
 	mNextPaneLayoutWidget = paneLayoutWidget;
 	
+	// Reset the effect in progress flag
+	mCurrPreviewPane->effectFinished();
+    mNextPreviewPane->effectFinished();
+    mPrevPreviewPane->effectFinished();
+    
 	// Set the focus to proper date
 	setCurrGridIndex(index);
 	// Start the auto scroll on current preview pane

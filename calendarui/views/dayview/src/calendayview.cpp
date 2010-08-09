@@ -47,11 +47,10 @@
 
 //constants
 
-// -----------------------------------------------------------------------------
-// CalenDayView()
-// Constructor.
-// -----------------------------------------------------------------------------
-//
+
+/*!
+ \brief Constructor
+*/
 CalenDayView::CalenDayView(MCalenServices &services) :
     CalenNativeView(services), mContentScrollArea(NULL), mContentWidget(NULL),
         mHourScrollArea(NULL), mVLayout(NULL), mDocLoader(NULL), mIsLaunching(
@@ -80,13 +79,12 @@ CalenDayView::CalenDayView(MCalenServices &services) :
     HbStyleLoader::registerFilePath(":/calendayitem.css");
     HbStyleLoader::registerFilePath(":/calendayitem.widgetml");
     HbStyleLoader::registerFilePath(":/calendayeventspane.css");
+    HbStyleLoader::registerFilePath(":/calendayhourscrollarea.css");
 }
 
-// -----------------------------------------------------------------------------
-// ~CalenDayView()
-// Destructor.
-// -----------------------------------------------------------------------------
-//
+/*!
+ \brief Destructor
+*/
 CalenDayView::~CalenDayView()
 {
     mSettingsManager->stopMonitoring(mRegionalInfo);
@@ -96,22 +94,19 @@ CalenDayView::~CalenDayView()
     }
 }
 
-// -----------------------------------------------------------------------------
-// onLocaleChanged()
-// Handles locale change.
-// -----------------------------------------------------------------------------
-//
+/*!
+ \brief Handles locale change.
+ 
+ \param reason the reason of a change
+*/
 void CalenDayView::onLocaleChanged(int reason)
 {
     Q_UNUSED( reason )
 }
 
-// -----------------------------------------------------------------------------
-// From CalenView
-// doPopulation()
-// Handles view (re)population.
-// -----------------------------------------------------------------------------
-//
+/*!
+ \brief Reimplemented from CalenView. Handles view (re)population
+*/
 void CalenDayView::doPopulation()
 {
     // Triggers fading effect for heading label
@@ -143,33 +138,30 @@ void CalenDayView::doPopulation()
     populationComplete();
 }
 
-// -----------------------------------------------------------------------------
-// From CalenView
-// populationComplete()
-// Informs the organizer that the view's population is complete.
-// -----------------------------------------------------------------------------
-//
+/*!
+ \brief Reimplemented from CalenView. Informs the organizer that the view's population is complete.
+*/
 void CalenDayView::populationComplete()
 {
     CalenNativeView::populationComplete();
 }
 
-// -----------------------------------------------------------------------------
-// From MCalenNotificationHandler
-// HandleNotification()
-// The function handles calendar notifications.
-// -----------------------------------------------------------------------------
-//
+/*!
+ \brief Reimplemented from MCalenNotificationHandler. The function handles calendar notifications
+ 
+ \param notification notification type
+*/
 void CalenDayView::HandleNotification(const TCalenNotification notification)
 {
     Q_UNUSED( notification )
 }
 
-// -----------------------------------------------------------------------------
-// setupView()
-// Sets up the view accroding to the 'xml'
-// -----------------------------------------------------------------------------
-//
+
+/*!
+ \brief Sets up the view accroding to the 'xml'
+ 
+ \param docLoader Pointer to document loader
+*/
 void CalenDayView::setupView(CalenDocLoader* docLoader)
 {
     // Store document loader for further use
@@ -204,20 +196,19 @@ void CalenDayView::setupView(CalenDocLoader* docLoader)
 
 //private slots
 
-// -----------------------------------------------------------------------------
-// onBack()
-// Handles 'back' functionality;
-// -----------------------------------------------------------------------------
-//
+/*!
+ \brief Handles 'back' functionality
+*/
 void CalenDayView::onBack()
 {
     TRAP_IGNORE(mServices.IssueCommandL(ECalenMonthView));
 }
 
-// -----------------------------------------------------------------------------
-// dayChange()
-// -----------------------------------------------------------------------------
-//
+/*!
+ \brief Slot that handles first phase of day change
+ 
+ \param direction indicates to which day view needs to be scrolled (previous or next day)
+*/
 void CalenDayView::dayChangeStarted(CalenScrollDirection direction)
 {
     if (direction == ECalenScrollToNext) {
@@ -243,29 +234,28 @@ void CalenDayView::dayChangeStarted(CalenScrollDirection direction)
     mServices.Context().setFocusDate(mDate);
 }
 
-// -----------------------------------------------------------------------------
-// dayChanged()
-// -----------------------------------------------------------------------------
-//
+/*!
+ \brief Slot that is triggered when operation of day change is completed
+ 
+ \param direction ndicates to which day view was scrolled (previous or next day)
+*/
 void CalenDayView::dayChanged(CalenScrollDirection direction)
 {
     mModelManager->viewsScrollingFinished(direction);
 	mHourScrollArea->setDateTime(mDate);
 }
 
-// -----------------------------------------------------------------------------
-// getCurrentDate()
-// -----------------------------------------------------------------------------
-//
+/*!
+ \brief Gets current date from context
+*/
 void CalenDayView::getCurrentDate()
 {
     mDate = CalenNativeView::mServices.Context().focusDateAndTime();
 }
 
-// -----------------------------------------------------------------------------
-// setupMenu()
-// -----------------------------------------------------------------------------
-//
+/*!
+ \brief Sets the menu for day view
+*/
 void CalenDayView::setupMenu()
 {
     menu()->addAction(hbTrId("txt_calendar_opt_new_event"), this, SLOT(runNewMeeting()));
@@ -285,7 +275,7 @@ void CalenDayView::setupMenu()
 }
 
 /*!
-   \brief Ot change Day view to Agenda View
+   \brief To change Day view to Agenda View
  */
 void CalenDayView::runChangeToAgendaView()
 {
@@ -300,10 +290,9 @@ void CalenDayView::runLunarData()
 	TRAP_IGNORE(mServices.IssueCommandL(ECalenRegionalPluginTapEvent));
 }
 
-// -----------------------------------------------------------------------------
-// setupSlots()
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief This is a helper function to established connections between signals and slots
+*/
 void CalenDayView::setupSlots()
 {
     // Connecting other view-related signals/slots
@@ -333,10 +322,9 @@ void CalenDayView::setupSlots()
         this, SLOT(showHideRegionalInformationChanged(XQSettingsKey, QVariant)));
 }
 
-// -----------------------------------------------------------------------------
-// runNewMeeting()
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief This slot triggers new meeting creation view
+*/
 void CalenDayView::runNewMeeting()
 {
     QDateTime dateTime(mDate);
@@ -347,10 +335,9 @@ void CalenDayView::runNewMeeting()
     );
 }
 
-// -----------------------------------------------------------------------------
-// runGoToToday()
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief This slot switches current view to today
+*/
 void CalenDayView::runGoToToday()
 {
     mServices.Context().setFocusDateAndTime(CalenDateUtils::today());
@@ -359,21 +346,23 @@ void CalenDayView::runGoToToday()
 }
 
 
-// -----------------------------------------------------------------------------
-// changeView()
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief This slot switches current view to the given by id
+   
+   \param viewId id of the view that needs to be displayed
+*/
 void CalenDayView::changeView(TCalenCommandId viewId)
 {
     TRAP_IGNORE(mServices.IssueCommandL(viewId));
 }
 
-// ----------------------------------------------------------------------------
-// CalenDayView::setHeadingText
-// Sets heading text according to date from model and locale.
-// It's connected to modelReset signal
-// ----------------------------------------------------------------------------
-//
+/*!
+   \brief Sets heading text according to date from model and locale.
+          It's connected to modelReset signal.
+   
+   \param status Parameter required in order to call this slot autmatically
+                 when an effect is complete.
+*/
 void CalenDayView::setHeadingText(const HbEffect::EffectStatus &status)
 {   
     Q_UNUSED(status)
@@ -394,33 +383,30 @@ void CalenDayView::setHeadingText(const HbEffect::EffectStatus &status)
     HbEffect::start(mHeadingLabel, "fadeIn");
 }
 
-// ----------------------------------------------------------------------------
-// CalenDayView::showHideRegionalInformation
-// To run effect on lunar data label
-// ----------------------------------------------------------------------------
-//
+/*!
+   \brief Displays regional information
+   
+   \param status Parameter required in order to call this slot autmatically
+                 when an effect is complete.
+*/
 void CalenDayView::showRegionalInformation(const HbEffect::EffectStatus &status)
 {
 	Q_UNUSED(status);
 	showRegionalInformationFadeIn();
 }
 
-// ----------------------------------------------------------------------------
-// CalenDayView::showRegionalInformationFadeIn
-// To run effect on lunar data label and change text according to date change
-// ----------------------------------------------------------------------------
-//
+/*!
+   \brief Runs effect on lunar data label and change text according to date change.
+*/
 void CalenDayView::showRegionalInformationFadeIn()
-	{
+{
 	showHideRegionalInformationChanged(mRegionalInfo, 3);
 	HbEffect::start(mRegionalInfoGroupBox, "fadeIn");
-	}
+}
 
-// ----------------------------------------------------------------------------
-// CalenDayView::showHideRegionalInformationChanged
-// To Show and hide regional plugin label depends upon settings
-// ----------------------------------------------------------------------------
-//
+/*!
+   \brief To Show and hide regional plugin label depends upon settings.
+*/
 void CalenDayView::showHideRegionalInformationChanged(
     const XQSettingsKey& key,
     const QVariant&)
@@ -464,11 +450,9 @@ void CalenDayView::showHideRegionalInformationChanged(
     }
 }
 
-// ----------------------------------------------------------------------------
-// CalenDayView::setupViewport
-// Scrolls view according to current day and events
-// ----------------------------------------------------------------------------
-//
+/*!
+   \brief Scrolls view according to current day and events.
+*/
 void CalenDayView::setupViewport()
 {
     QDateTime currentTime = QDateTime::currentDateTime();

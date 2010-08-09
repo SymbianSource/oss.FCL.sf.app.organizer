@@ -190,6 +190,7 @@
 	                        </widget>
 	                        <widget name="NoEntriesLabelPrev" type="HbLabel">
 	                            <string locid="txt_calendar_preview_no_entries" name="plainText"/>
+								<bool name="visible" value="FALSE"/>
 								<fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
 								<enums name="textWrapping" value="TextWordWrap"/>
 								<enums name="alignment" value="AlignVCenter|AlignHCenter"/>
@@ -247,6 +248,7 @@
                             </widget>
                             <widget name="NoEntriesLabelCurr" type="HbLabel">
                                 <string locid="txt_calendar_preview_no_entries" name="plainText"/>
+								<bool name="visible" value="FALSE"/>
 								<fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
 								<enums name="textWrapping" value="TextWordWrap"/>
 								<enums name="alignment" value="AlignVCenter|AlignHCenter"/>
@@ -304,6 +306,7 @@
                             </widget>
                             <widget name="NoEntriesLabelNext" type="HbLabel">
                                 <string locid="txt_calendar_preview_no_entries" name="plainText"/>
+								<bool name="visible" value="FALSE"/>
 								<fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
 								<enums name="textWrapping" value="TextWordWrap"/>
 								<enums name="alignment" value="AlignVCenter|AlignHCenter"/>

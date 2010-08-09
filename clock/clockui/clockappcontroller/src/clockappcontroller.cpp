@@ -19,6 +19,11 @@
 #include "clockappcontroller.h"
 #include "clockappcontrollerifimpl.h"
 #include "clockviewmanager.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockappcontrollerTraces.h"
+#endif
+
 
 /*!
 	\class ClockAppController
@@ -35,6 +40,7 @@ ClockAppController::ClockAppController(QObject *parent)
  mViewManager(0),
  mIfImpl(0)
 {
+	OstTraceFunctionEntry0( CLOCKAPPCONTROLLER_CLOCKAPPCONTROLLER_ENTRY );
 	// Construct the interface implementation.
 	mIfImpl = new ClockAppControllerIfImpl(this, this);
 
@@ -44,6 +50,7 @@ ClockAppController::ClockAppController(QObject *parent)
 			mViewManager, "clockappcontroller.cpp",
 			"ClockViewManager is 0");
 	connect(mViewManager, SIGNAL(appReady()), this, SLOT(handleAppReady()));
+	OstTraceFunctionExit0( CLOCKAPPCONTROLLER_CLOCKAPPCONTROLLER_EXIT );
 }
 
 /*!
@@ -51,6 +58,7 @@ ClockAppController::ClockAppController(QObject *parent)
  */
 ClockAppController::~ClockAppController()
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKAPPCONTROLLER_CLOCKAPPCONTROLLER_ENTRY );
 	if (mViewManager) {
 		delete mViewManager;
 		mViewManager = 0;
@@ -59,6 +67,7 @@ ClockAppController::~ClockAppController()
 		delete mIfImpl;
 		mIfImpl = 0;
 	}
+	OstTraceFunctionExit0( DUP1_CLOCKAPPCONTROLLER_CLOCKAPPCONTROLLER_EXIT );
 }
 
 /*!
@@ -66,8 +75,10 @@ ClockAppController::~ClockAppController()
  */
 void ClockAppController::handleAppReady()
 {
+	OstTraceFunctionEntry0( CLOCKAPPCONTROLLER_HANDLEAPPREADY_ENTRY );
 	emit appReady();
 	disconnect(mViewManager, SIGNAL(appReady()), this, SLOT(handleAppReady()));
+	OstTraceFunctionExit0( CLOCKAPPCONTROLLER_HANDLEAPPREADY_EXIT );
 }
 
 // End of file	--Don't remove this.

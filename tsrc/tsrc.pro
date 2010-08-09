@@ -22,8 +22,7 @@ SUBDIRS +=  ../agendainterface/tsrc \
 			../clock/tsrc \
 			../notes/tsrc \
 			../organizer_plat/tsrc \
-			../organizer_pub/tsrc \
-			../pimappsupport/tsrc
+			../organizer_pub/tsrc
 
 CONFIG += ordered
 

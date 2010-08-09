@@ -38,8 +38,6 @@ public:
     
     HbMainWindow* mainWindow();
     
-    bool isHorizontalSwipe(qreal angle) const;
-    
     /**
      * Get event's start/end time fromm agenda entry.
      * Start/end time are validated to be within the current day (the case of

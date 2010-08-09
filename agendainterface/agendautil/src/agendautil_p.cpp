@@ -1031,8 +1031,8 @@ QList<AgendaEntry> AgendaUtilPrivate::createEntryIdListForDay( QDateTime day,
             iCalInstanceView->FindInstanceL(instanceList, filters, dayRange);
             }
         
-        // In this list, check if any all day events are there
-        // As all day events end at 12.00AM of next day, we should not show it again on next day
+        // In this list, check if any events are there that end at the start of the day
+        // we should not show it again on next day
         TCalTime calTime;
         TDateTime dateTime(
                 day.date().year(),
@@ -1041,9 +1041,8 @@ QList<AgendaEntry> AgendaUtilPrivate::createEntryIdListForDay( QDateTime day,
                 day.time().minute(), 0, 0);
         TTime time(dateTime);
         for (int i(0); i < instanceList.Count(); i++) {
-            if ((endsAtStartOfDay(instanceList[i], time)) &&
-                    instanceList[i]->Entry().EntryTypeL() == CCalEntry::EEvent) {
-                // Previous day all-day event has been found, we are not supposed to
+            if ((endsAtStartOfDay(instanceList[i], time))) {
+                // Previous day event has been found, we are not supposed to
                 // show it on current day, hence remove it from the instance list
                 CCalInstance *instance = instanceList[i];
                 instanceList.Remove(i);
@@ -1318,8 +1317,15 @@ void AgendaUtilPrivate::getPreviousInstanceTimes(AgendaEntry& entry,
 	
 	TTime instStartTime(instStartDateTime);
 	TTime instEndTime(instEndDateTime);
-	instanceStartCalTime.SetTimeLocalL(instStartTime);
-	instanceEndCalTime.SetTimeLocalL(instEndTime);
+	// For nontimed entries set the floating time
+	if(entry.isTimedEntry()) {
+		instanceStartCalTime.SetTimeLocalL(instStartTime);
+		instanceEndCalTime.SetTimeLocalL(instEndTime);					    					    
+	}else {
+		instanceStartCalTime.SetTimeLocalFloatingL(instStartTime);
+		instanceEndCalTime.SetTimeLocalFloatingL(instEndTime);
+	}
+	
 	calEntry->SetStartAndEndTimeL(instanceStartCalTime,instanceEndCalTime);
 	
 	// Get the parent entry of this instance
@@ -1519,8 +1525,14 @@ void AgendaUtilPrivate::getNextInstanceTimes(AgendaEntry& entry,
 	
 	TTime instStartTime(instStartDateTime);
 	TTime instEndTime(instEndDateTime);
-	instanceStartCalTime.SetTimeLocalL(instStartTime);
-	instanceEndCalTime.SetTimeLocalL(instEndTime);
+	// For nontimed entries set the floating time
+	if (entry.isTimedEntry()) {
+		instanceStartCalTime.SetTimeLocalL(instStartTime);
+		instanceEndCalTime.SetTimeLocalL(instEndTime);
+	}else {
+		instanceStartCalTime.SetTimeLocalFloatingL(instStartTime);
+		instanceEndCalTime.SetTimeLocalFloatingL(instEndTime);
+	}
 	calEntry->SetStartAndEndTimeL(instanceStartCalTime,instanceEndCalTime);
 	
 	// Get the parent entry of this instance
@@ -2374,7 +2386,13 @@ CCalInstance* AgendaUtilPrivate::findPossibleInstance(AgendaEntry& entry)
 	getDayRange(entry.startTime(), entry.startTime(), dayRange);
 	RPointerArray<CCalInstance> instances;
 	CleanupResetAndDestroyPushL(instances);
-	iCalInstanceView->FindInstanceL(instances, CalCommon::EIncludeAll, dayRange);
+	CalCommon::TCalViewFilter filter = 
+				CalCommon::TCalViewFilter(CalCommon::EIncludeAnnivs |
+										CalCommon::EIncludeAppts | 
+										CalCommon::EIncludeEvents |
+										CalCommon::EIncludeReminder |
+										CalCommon::EIncludeIncompletedTodos);
+	iCalInstanceView->FindInstanceL(instances, filter, dayRange);
 	TTime entryStartTime(dayRange.StartTime().TimeLocalL());
 
 	CCalInstance* result = 0;

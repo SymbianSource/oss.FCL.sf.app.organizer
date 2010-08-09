@@ -26,6 +26,11 @@
 
 // User Includes.
 #include "clockhomecityitem.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockhomecityitemTraces.h"
+#endif
+
 
 /*!
 	\class ClockHomeCityItem
@@ -41,6 +46,7 @@
 ClockHomeCityItem::ClockHomeCityItem(QGraphicsItem *parent) :
 HbWidget(parent)
 {
+	OstTraceFunctionEntry0( CLOCKHOMECITYITEM_CLOCKHOMECITYITEM_ENTRY );
 	// Path for widgetml and css files.
 	HbStyleLoader::registerFilePath(":/style/clockhomecityitem.css");
 	HbStyleLoader::registerFilePath(":/style/clockhomecityitem.widgetml");
@@ -52,6 +58,7 @@ HbWidget(parent)
 	frame->frameDrawer().setFrameGraphicsName("qtg_fr_groupbox_normal");
 	setBackgroundItem(frame->graphicsItem(), -2);
 
+	OstTraceFunctionExit0( CLOCKHOMECITYITEM_CLOCKHOMECITYITEM_EXIT );
 }
 
 /*!
@@ -59,9 +66,11 @@ HbWidget(parent)
  */
 ClockHomeCityItem::~ClockHomeCityItem()
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKHOMECITYITEM_CLOCKHOMECITYITEM_ENTRY );
 	HbStyleLoader::unregisterFilePath(":/style/clockhomecityitem.css");
 	HbStyleLoader::unregisterFilePath(":/style/clockhomecityitem.widgetml");
 	HbStyleLoader::unregisterFilePath(":/style/clockhomecityitem_color.css");
+	OstTraceFunctionExit0( DUP1_CLOCKHOMECITYITEM_CLOCKHOMECITYITEM_EXIT );
 }
 
 /*!
@@ -72,6 +81,7 @@ ClockHomeCityItem::~ClockHomeCityItem()
  */
 void ClockHomeCityItem::setHomeCityItemData(const QVariantMap &itemData)
 {
+	OstTraceFunctionEntry0( CLOCKHOMECITYITEM_SETHOMECITYITEMDATA_ENTRY );
 	if (!itemData.isEmpty()) {
 		QMapIterator<QString, QVariant> iter(itemData);
 		while (iter.hasNext()) {
@@ -121,6 +131,7 @@ void ClockHomeCityItem::setHomeCityItemData(const QVariantMap &itemData)
 		}
 		repolish();
 	}
+	OstTraceFunctionExit0( CLOCKHOMECITYITEM_SETHOMECITYITEMDATA_EXIT );
 }
 
 // End of file	--Don't remove this.

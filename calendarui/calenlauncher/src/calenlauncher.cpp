@@ -18,7 +18,7 @@
 #include <xqservicerequest.h>
 
 // User includes
-#include "calenlauncher.h"
+#include <calenlauncher.h>
 
 /*!
 	\class CalenLauncher

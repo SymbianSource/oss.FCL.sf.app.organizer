@@ -21,6 +21,8 @@ TARGET = unittest_calendayhourscrollarea
 #it need folder in c:/unittest path
 #DEFINES += SAVE_IMAGES 
 
+DEFINES += CALENVIEWS_DLL
+
 MOC_DIR = moc
 
 CONFIG += qtestlib

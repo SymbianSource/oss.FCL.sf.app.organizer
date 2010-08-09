@@ -1,62 +1,76 @@
 /*
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
-* This component and the accompanying materials are made available
-* under the terms of "Eclipse Public License v1.0"
-* which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
-*
-* Initial Contributors:
-* Nokia Corporation - initial contribution.
-*
-* Contributors:
-*
-* Description:  Day view control of calendar
-*
-*/
+ * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+ * All rights reserved.
+ * This component and the accompanying materials are made available
+ * under the terms of "Eclipse Public License v1.0"
+ * which accompanies this distribution, and is available
+ * at the URL "http://www.eclipse.org/legal/epl-v10.html".
+ *
+ * Initial Contributors:
+ * Nokia Corporation - initial contribution.
+ *
+ * Contributors:
+ *
+ * Description:  Day view control of calendar
+ *
+ */
 
-//System includes
+// System includes
 #include <QGraphicsLinearLayout>
 #include <QPainter>
-#include <hbtextitem.h>
-#include <hbstyle.h>
-#include <hbcolorscheme.h>
-#include <hbfontspec.h>
-#include <hbextendedlocale.h>
+#include <HbTextItem>
+#include <HbStyle>
+#include <HbColorScheme>
+#include <HbFontSpec>
+#include <HbExtendedLocale>
 
-//User includes
+// User includes
 #include "calendayhourelement.h"
 #include "calendaycontainer.h"
 #include "calendayhourscrollarea.h"
 
 // Constants
+/*!
+ \brief Time format is: [0-9][0-9]:[0-9][0-9]
+ */
+const int KCalenTimeFormatLength = 5;
 
 /*!
- \brief CalenDayHourElement()
- Constructor
-*/
-CalenDayHourElement::CalenDayHourElement(const QTime &time, QGraphicsItem *parent) :
+ \class CalenDayHourElement
+ \brief Hour element widget for Calendar's Day View
+ */
+
+/*!
+ \brief Constructor
+ 
+ \param time Time assigned to widget
+ \param parent Widget's parent
+ */
+CalenDayHourElement::CalenDayHourElement(
+    const QTime &time,
+    QGraphicsItem *parent) :
     HbWidget(parent), mHour(time)
 {
     // Necessary when widget implements own paint method
-    setFlag(QGraphicsItem::ItemHasNoContents, false); 
+    setFlag(QGraphicsItem::ItemHasNoContents, false);
 
     HbDeviceProfile deviceProfile;
     mUnitInPixels = deviceProfile.unitValue();
-    
-    mHourLineColor = HbColorScheme::color("qtc_cal_day_hour_lines");
 
-    //Create text items
+    // Initialize hour line color
+    mHourLineColor = HbColorScheme::color(KCalenHourLineColor);
+
+    // Create text items
     HbExtendedLocale systemLocale = HbExtendedLocale::system();
 
-    //Get current time format and (if there's a need) separate time from am/pm text
+    // Get current time format and (if there's a need) separate time from am/pm text
     QChar timeSeparator = ' ';
-    QStringList timeTextList = systemLocale.format(time, r_qtn_time_usual_with_zero).split(
-        timeSeparator);
+    QStringList timeTextList = systemLocale.format(time,
+        r_qtn_time_usual_with_zero).split(timeSeparator);
 
-    //prepend 0 if needed to achieve format - 01:00
+    // If needed, prepend '0' to get proper time format: [0-9][0-9]:[0-9][0-9]
     QString timeString = timeTextList[0];
-    if (timeString.length() < 5) {
+    if (timeString.length() < KCalenTimeFormatLength) {
         timeString.prepend('0');
     }
 
@@ -71,78 +85,77 @@ CalenDayHourElement::CalenDayHourElement(const QTime &time, QGraphicsItem *paren
     HbStyle::setItemName(timeTextItem, QLatin1String("time"));
     HbStyle::setItemName(ampmTextItem, QLatin1String("ampm"));
 
+    // Parent container is needed to update widget's time
     mContainer = static_cast<CalenDayHourScrollArea*> (parent);
-
 }
 
 /*!
- \brief CalenDayHourElement()
- Destructor
-*/
+ \brief Destructor
+ */
 CalenDayHourElement::~CalenDayHourElement()
 {
 
 }
 
 /*!
- \brief CalenDayHourElement()
- paint
-*/
+ \brief Customized paint() function
+ 
+ \param painter Painter
+ \param option Style option
+ \param widget
+ */
 void CalenDayHourElement::paint(
-    QPainter * painter,
-    const QStyleOptionGraphicsItem * option,
-    QWidget * widget)
+    QPainter *painter,
+    const QStyleOptionGraphicsItem *option,
+    QWidget *widget)
 {
     Q_UNUSED(widget);
+
+    painter->save();
     
     QRectF drawArea = option->rect;
 
-    const qreal hourLineThickness = 0.15; //un (according to UI spec)
-    const qreal timeLineThickness = 0.75; //un (according to UI spec)
-
-    painter->save();
-
-    //Draw full hour line
-    QPen linePen = QPen(mHourLineColor, hourLineThickness * mUnitInPixels);
+    // Draw full hour line
+    QPen linePen = QPen(mHourLineColor, KCalenHourLineThickness * mUnitInPixels);
     painter->setPen(linePen);
+    
     QLineF fullHourLine(drawArea.bottomLeft(), drawArea.bottomRight());
-
     painter->drawLine(fullHourLine);
 
-    //Draw extra line on top for midnight
+    // Draw extra line on top for midnight
     if (mHour.hour() == 0) {
         fullHourLine = QLineF(drawArea.topLeft(), drawArea.topRight());
         painter->drawLine(fullHourLine);
-    }    
-    
+    }
+
     QDateTime currentDateTime = QDateTime::currentDateTime();
 
-    //Draw the time line in theme color
+    // Draw the time line in theme color
     if (mContainer) {
         QDateTime containersDateTime = mContainer->dateTime();
-        
-        if (currentDateTime.date() == containersDateTime.date() && currentDateTime.time().hour()
-            == mHour.hour()) {
 
-            qreal currentTimeY = drawArea.height() * currentDateTime.time().minute() / 60;
-            
-            QColor color = HbColorScheme::color("qtc_cal_month_current_day");
-            
-            painter->setPen(QPen(color, timeLineThickness * mUnitInPixels, Qt::SolidLine,
-                Qt::FlatCap));
-            QLineF currentTimeline(drawArea.left(), drawArea.top() + currentTimeY, drawArea.right(), drawArea.top()
-                + currentTimeY);
+        if (currentDateTime.date() == containersDateTime.date()
+            && currentDateTime.time().hour() == mHour.hour()) {
+
+            qreal currentTimeY = drawArea.height()
+                * currentDateTime.time().minute() / 60;
+
+            QColor color = HbColorScheme::color(KCalenTimeLineColor);
+            painter->setPen(QPen(color, KCalenTimeLineThickness * mUnitInPixels,
+                Qt::SolidLine, Qt::FlatCap));
+            QLineF currentTimeline(drawArea.left(), drawArea.top() + currentTimeY,
+                    drawArea.right(), drawArea.top() + currentTimeY);
             painter->drawLine(currentTimeline);
-
         }
     }
-    
 
     painter->restore();
 }
 
 /*!
-   \brief It set time for hour element.
+ \brief Sets time for hour element.
+ 
+ \param time Time to be set for hour element
  */
 void CalenDayHourElement::setTime(const QTime &time)
 {
@@ -150,7 +163,9 @@ void CalenDayHourElement::setTime(const QTime &time)
 }
 
 /*!
-   \brief It return time of hour element.
+ \brief Returns time of hour element.
+ 
+ \return Time of hour element
  */
 QTime CalenDayHourElement::time() const
 {

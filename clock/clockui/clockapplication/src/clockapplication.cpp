@@ -19,6 +19,11 @@
 // User includes
 #include "clockapplication.h"
 #include "clockappcontroller.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockapplicationTraces.h"
+#endif
+
 
 /*!
 	\class ClockApplication
@@ -31,6 +36,8 @@
 ClockApplication::ClockApplication(int &argc, char *argv[]):
  HbApplication(argc, argv)
 {
+OstTraceFunctionEntry0( CLOCKAPPLICATION_CLOCKAPPLICATION_ENTRY );
+OstTraceFunctionExit0( CLOCKAPPLICATION_CLOCKAPPLICATION_EXIT );
 }
 
 /*!
@@ -38,10 +45,12 @@ ClockApplication::ClockApplication(int &argc, char *argv[]):
  */
 ClockApplication::~ClockApplication()
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKAPPLICATION_CLOCKAPPLICATION_ENTRY );
 	if (mController) {
 		delete mController;
 		mController = 0;
 	}
+OstTraceFunctionExit0( DUP1_CLOCKAPPLICATION_CLOCKAPPLICATION_EXIT );
 }
 
 /*!
@@ -49,8 +58,10 @@ ClockApplication::~ClockApplication()
 */
 void ClockApplication::createController()
 {
+	OstTraceFunctionEntry0( CLOCKAPPLICATION_CREATECONTROLLER_ENTRY );
 	mController = new ClockAppController;
 	connect(mController, SIGNAL(appReady()), this, SLOT(handleAppReady()));
+OstTraceFunctionExit0( CLOCKAPPLICATION_CREATECONTROLLER_EXIT );
 }
 
 /*!
@@ -58,8 +69,10 @@ void ClockApplication::createController()
 */
 bool ClockApplication::execution()
 {
+	OstTraceFunctionEntry0( CLOCKAPPLICATION_EXECUTION_ENTRY );
 	int ret = 0;
 	ret = exec();
+	OstTraceFunctionExit0( CLOCKAPPLICATION_EXECUTION_EXIT );
 	return ret;
 }
 
@@ -68,8 +81,10 @@ bool ClockApplication::execution()
  */
 void ClockApplication::handleAppReady()
 {
+	OstTraceFunctionEntry0( CLOCKAPPLICATION_HANDLEAPPREADY_ENTRY );
 	emit applicationReady();
 	disconnect(mController, SIGNAL(appReady()), this, SLOT(handleAppReady()));
+OstTraceFunctionExit0( CLOCKAPPLICATION_HANDLEAPPREADY_EXIT );
 }
 
 // End of file	--Don't remove this.

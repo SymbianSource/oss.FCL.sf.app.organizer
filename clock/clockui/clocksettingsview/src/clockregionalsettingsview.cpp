@@ -31,6 +31,7 @@
 #include <HbComboBox>
 #include <HbListWidgetItem>
 #include <HbTranslator>
+#include <QLocale>
 
 // User includes
 #include "clockregionalsettingsview.h"
@@ -38,6 +39,11 @@
 #include "clocksettingsdefines.h"
 #include "settingsdatatypes.h"
 #include "settingscustomitem.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockregionalsettingsviewTraces.h"
+#endif
+
 
 /*!
 	\class ClockRegionalSettingsView
@@ -53,6 +59,7 @@ ClockRegionalSettingsView::ClockRegionalSettingsView(QObject *parent)
  mView(0),
  mLoader(0)
 {
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_CLOCKREGIONALSETTINGSVIEW_ENTRY );
 	// Construct the document loader.
 	mLoader = new ClockSettingsDocLoader;
 	
@@ -65,6 +72,7 @@ ClockRegionalSettingsView::ClockRegionalSettingsView(QObject *parent)
     
 	// Create the custom prototype.
 	mCustomPrototype = new SettingsCustomItem();
+	OstTraceFunctionExit0( CLOCKREGIONALSETTINGSVIEW_CLOCKREGIONALSETTINGSVIEW_EXIT );
 }
 
 /*!
@@ -72,6 +80,7 @@ ClockRegionalSettingsView::ClockRegionalSettingsView(QObject *parent)
  */
 ClockRegionalSettingsView::~ClockRegionalSettingsView()
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKREGIONALSETTINGSVIEW_CLOCKREGIONALSETTINGSVIEW_ENTRY );
 	if (mLoader) {
 		delete mLoader;
 		mLoader = 0;
@@ -89,6 +98,7 @@ ClockRegionalSettingsView::~ClockRegionalSettingsView()
         delete mTranslator;
         mTranslator = 0;
     }
+    OstTraceFunctionExit0( DUP1_CLOCKREGIONALSETTINGSVIEW_CLOCKREGIONALSETTINGSVIEW_EXIT );
 }
 
 /*!
@@ -96,6 +106,7 @@ ClockRegionalSettingsView::~ClockRegionalSettingsView()
  */
 void ClockRegionalSettingsView::showView()
 {
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_SHOWVIEW_ENTRY );
 	bool success;
 
 	// Load the application xml.
@@ -141,6 +152,7 @@ void ClockRegionalSettingsView::showView()
 	connect(
 			backAction, SIGNAL(triggered()),
 			this, SLOT(handleBackAction()));
+	OstTraceFunctionExit0( CLOCKREGIONALSETTINGSVIEW_SHOWVIEW_EXIT );
 }
 
 /*!
@@ -148,10 +160,11 @@ void ClockRegionalSettingsView::showView()
  */
 void ClockRegionalSettingsView::handleBackAction()
 {
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_HANDLEBACKACTION_ENTRY );
 	HbExtendedLocale locale = HbExtendedLocale::system();
 	HbExtendedLocale::WeekDay startOfWeekIndex =
 				HbExtendedLocale::system().startOfWeek();
-	// TODO: Save workdays settings.
+	// Save workdays settings.
 	QItemSelectionModel *model = 0;
 	model = mWorkdaysItem->selectionModel();
 	QModelIndexList selectedModelIndex = model->selectedIndexes();
@@ -185,6 +198,7 @@ void ClockRegionalSettingsView::handleBackAction()
 	// Cleanup.
 	window->removeView(mView);
 	deleteLater();
+	OstTraceFunctionExit0( CLOCKREGIONALSETTINGSVIEW_HANDLEBACKACTION_EXIT );
 }
 
 /*!
@@ -195,7 +209,9 @@ void ClockRegionalSettingsView::handleBackAction()
  */
 void ClockRegionalSettingsView::handleItemDisplayed(const QModelIndex &index)
 {
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_HANDLEITEMDISPLAYED_ENTRY );
 	if (!index.isValid()) {
+		OstTraceFunctionExit0( CLOCKREGIONALSETTINGSVIEW_HANDLEITEMDISPLAYED_EXIT );
 		return;
 	}
 
@@ -227,6 +243,7 @@ void ClockRegionalSettingsView::handleItemDisplayed(const QModelIndex &index)
 		default:
 			break;
 	}
+	OstTraceFunctionExit0( DUP1_CLOCKREGIONALSETTINGSVIEW_HANDLEITEMDISPLAYED_EXIT );
 }
 
 /*!
@@ -235,9 +252,10 @@ void ClockRegionalSettingsView::handleItemDisplayed(const QModelIndex &index)
  */
 void ClockRegionalSettingsView::handleTimeFormatChange()
 {
-//	mSettingsUtility->setTimeFormat(mTimeFormatItem->text());
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_HANDLETIMEFORMATCHANGE_ENTRY );
 	mSettingsUtility->setTimeFormat(
 			mTimeFormatItem->contentWidgetData("text").toString());
+	OstTraceFunctionExit0( CLOCKREGIONALSETTINGSVIEW_HANDLETIMEFORMATCHANGE_EXIT );
 }
 
 /*!
@@ -246,16 +264,19 @@ void ClockRegionalSettingsView::handleTimeFormatChange()
  */
 void ClockRegionalSettingsView::handleTimeSeparatorChange()
 {
-//	mSettingsUtility->setTimeSeparator(mTimeSeparatorItem->text());
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_HANDLETIMESEPARATORCHANGE_ENTRY );
 	mSettingsUtility->setTimeSeparator(
 			mTimeSeparatorItem->contentWidgetData("text").toString());
+	OstTraceFunctionExit0( CLOCKREGIONALSETTINGSVIEW_HANDLETIMESEPARATORCHANGE_EXIT );
 }
 
 /*!
  */
 void ClockRegionalSettingsView::handleDateFormatChange(QString text)
 {
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_HANDLEDATEFORMATCHANGE_ENTRY );
 	mSettingsUtility->setDateFormat(text);
+	OstTraceFunctionExit0( CLOCKREGIONALSETTINGSVIEW_HANDLEDATEFORMATCHANGE_EXIT );
 }
 
 /*!
@@ -264,7 +285,9 @@ void ClockRegionalSettingsView::handleDateFormatChange(QString text)
  */
 void ClockRegionalSettingsView::handleDateSeparatorChange(QString text)
 {
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_HANDLEDATESEPARATORCHANGE_ENTRY );
 	mSettingsUtility->setDateSeparator(text);
+	OstTraceFunctionExit0( CLOCKREGIONALSETTINGSVIEW_HANDLEDATESEPARATORCHANGE_EXIT );
 }
 
 /*!
@@ -273,6 +296,7 @@ void ClockRegionalSettingsView::handleDateSeparatorChange(QString text)
 void ClockRegionalSettingsView::handleDataChanged(
 		const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_HANDLEDATACHANGED_ENTRY );
 	Q_UNUSED(bottomRight)
 
 
@@ -293,6 +317,7 @@ void ClockRegionalSettingsView::handleDataChanged(
 		default:
 		break;
 	}
+	OstTraceFunctionExit0( CLOCKREGIONALSETTINGSVIEW_HANDLEDATACHANGED_EXIT );
 }
 
 /*!
@@ -300,6 +325,7 @@ void ClockRegionalSettingsView::handleDataChanged(
  */
 void ClockRegionalSettingsView::createModel()
 {
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_CREATEMODEL_ENTRY );
 	if (mForm->model()) {
 		delete mForm->model();
 		mForm->setModel(0);
@@ -317,6 +343,7 @@ void ClockRegionalSettingsView::createModel()
 			SIGNAL(dataChanged(const QModelIndex, const QModelIndex)),
 			this,
 			SLOT(handleDataChanged(const QModelIndex, const QModelIndex)));
+	OstTraceFunctionExit0( CLOCKREGIONALSETTINGSVIEW_CREATEMODEL_EXIT );
 }
 
 /*!
@@ -324,6 +351,7 @@ void ClockRegionalSettingsView::createModel()
  */
 void ClockRegionalSettingsView::populateFormModel()
 {
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_POPULATEFORMMODEL_ENTRY );
 	if (!mFormModel) {
 		createModel();
 	}
@@ -397,14 +425,15 @@ void ClockRegionalSettingsView::populateFormModel()
 	HbDataFormModelItem *item = 0;
 	// Create the weekday list based on start of week.
 	QStringList weekdaysList;
+	QLocale qLocale;
 	weekdaysList
-			<< hbTrId("txt_clk_setlabel_val_monday")
-			<< hbTrId("txt_clk_setlabel_val_tuesday")
-			<< hbTrId("txt_clk_setlabel_val_wednesday")
-			<< hbTrId("txt_clk_setlabel_val_thursday")
-			<< hbTrId("txt_clk_setlabel_val_friday")
-			<< hbTrId("txt_clk_setlabel_val_saturday")
-			<< hbTrId("txt_clk_setlabel_val_sunday");
+			<< qLocale.dayName(1)
+			<< qLocale.dayName(2)
+			<< qLocale.dayName(3)
+			<< qLocale.dayName(4)
+			<< qLocale.dayName(5)
+			<< qLocale.dayName(6)
+			<< qLocale.dayName(7);
 	
 	HbDataFormModelItem::DataItemType workdaysItemType =
 			static_cast<HbDataFormModelItem::DataItemType>
@@ -422,6 +451,7 @@ void ClockRegionalSettingsView::populateFormModel()
 	item->setContentWidgetData("items", weekdaysList);
 	item->setContentWidgetData("currentIndex", startOfWeek);
 	item->setContentWidgetData("objectName", "startOfWeek");
+	OstTraceFunctionExit0( CLOCKREGIONALSETTINGSVIEW_POPULATEFORMMODEL_EXIT );
 }
 
 /*!
@@ -430,16 +460,18 @@ void ClockRegionalSettingsView::populateFormModel()
 
 QStringList ClockRegionalSettingsView::weekdayList()
 {
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_WEEKDAYLIST_ENTRY );
 	QStringList weekDays;
 	QStringList daysList;
+	QLocale qLocale;
 	daysList
-			<< hbTrId("txt_clk_setlabel_val_monday")
-			<< hbTrId("txt_clk_setlabel_val_tuesday")
-			<< hbTrId("txt_clk_setlabel_val_wednesday")
-			<< hbTrId("txt_clk_setlabel_val_thursday")
-			<< hbTrId("txt_clk_setlabel_val_friday")
-			<< hbTrId("txt_clk_setlabel_val_saturday")
-			<< hbTrId("txt_clk_setlabel_val_sunday");
+			<< qLocale.dayName(1)
+			<< qLocale.dayName(2)
+			<< qLocale.dayName(3)
+			<< qLocale.dayName(4)
+			<< qLocale.dayName(5)
+			<< qLocale.dayName(6)
+			<< qLocale.dayName(7);
 	
 	HbExtendedLocale::WeekDay startOfWeekIndex =
 			HbExtendedLocale::system().startOfWeek();
@@ -453,6 +485,7 @@ QStringList ClockRegionalSettingsView::weekdayList()
 		}
 	}
 	
+	OstTraceFunctionExit0( CLOCKREGIONALSETTINGSVIEW_WEEKDAYLIST_EXIT );
 	return weekDays;
 }
 
@@ -463,21 +496,26 @@ QStringList ClockRegionalSettingsView::weekdayList()
 
 void ClockRegionalSettingsView::updateWeekStartOn()
 {
-if (mStartOfWeekItem != 0)
-    {
-    HbExtendedLocale locale;
-    HbExtendedLocale::WeekDay weekdDayStart = locale.startOfWeek();
-    int currentDay = mStartOfWeekItem->currentIndex();
-    if(currentDay == weekdDayStart )
-        {
-        return;
-        }
-    else
-        {
-        mStartOfWeekItem->setCurrentIndex(weekdDayStart);
-        updateWeekDays();
-        }
-    }
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_UPDATEWEEKSTARTON_ENTRY );
+	if (mStartOfWeekItem != 0)
+	{
+		HbExtendedLocale locale;
+		HbExtendedLocale::WeekDay weekdDayStart = locale.startOfWeek();
+		int currentDay = mStartOfWeekItem->currentIndex();
+		if(currentDay == weekdDayStart )
+		{
+			OstTraceFunctionExit0(
+					CLOCKREGIONALSETTINGSVIEW_UPDATEWEEKSTARTON_EXIT );
+			return;
+		}
+		else
+		{
+			mStartOfWeekItem->setCurrentIndex(weekdDayStart);
+			updateWeekDays();
+		}
+	}
+	OstTraceFunctionExit0(
+			DUP1_CLOCKREGIONALSETTINGSVIEW_UPDATEWEEKSTARTON_EXIT );
 }
 
 /*!
@@ -485,31 +523,33 @@ if (mStartOfWeekItem != 0)
  */
 void ClockRegionalSettingsView::updateWeekDays()
 {
-QStringList weekdays = weekdayList();
-QString workdays = mCustomPrototype->workdaysSetting();
-QItemSelectionModel *model = 0;
-model = mWorkdaysItem->selectionModel();
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_UPDATEWEEKDAYS_ENTRY );
+	QStringList weekdays = weekdayList();
+	QString workdays = mCustomPrototype->workdaysSetting();
+	QItemSelectionModel *model = 0;
+	model = mWorkdaysItem->selectionModel();
 
-for (int i = 0, index = workdays.size() - 1;
-        i < mWorkdaysItem->count(); ++i, index--)
-    {
-    QString str = weekdays[i];
-    mWorkdaysItem->item(i)->setText(str);
+	for (int i = 0, index = workdays.size() - 1;
+			i < mWorkdaysItem->count(); ++i, index--)
+	{
+		QString str = weekdays[i];
+		mWorkdaysItem->item(i)->setText(str);
 
-    QChar ch = workdays.at(index);
-    if ( ch == QChar('0')) 
-        {
-        // Not a workday.
-        model->select(
-        model->model()->index(i,0),
-        QItemSelectionModel::Deselect);
-        }
-    else
-        {
-        // Workday.
-        model->select(
-        model->model()->index(i,0),
-        QItemSelectionModel::Select);}
-        }
+		QChar ch = workdays.at(index);
+		if ( ch == QChar('0')) 
+		{
+			// Not a workday.
+			model->select(
+					model->model()->index(i,0),
+					QItemSelectionModel::Deselect);
+		}
+		else
+		{
+			// Workday.
+			model->select(
+					model->model()->index(i,0),
+					QItemSelectionModel::Select);}
+	}
+	OstTraceFunctionExit0( CLOCKREGIONALSETTINGSVIEW_UPDATEWEEKDAYS_EXIT );
 }
 // End of file	--Don't remove this.

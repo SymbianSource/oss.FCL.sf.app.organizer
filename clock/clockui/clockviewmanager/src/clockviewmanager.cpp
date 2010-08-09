@@ -30,6 +30,11 @@
 #include "clockcommon.h"
 #include "clockdatatypes.h"
 #include "clockworldview.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockviewmanagerTraces.h"
+#endif
+
 
 /*!
 	\class ClockViewManager
@@ -49,6 +54,7 @@ ClockViewManager::ClockViewManager(
  mAppControllerIf(controllerIf),
  mWorldClockView(0)
 {
+    OstTraceFunctionEntry0( CLOCKVIEWMANAGER_CLOCKVIEWMANAGER_ENTRY );
     // Activity Reason from Activity Manager
     int activityReason = qobject_cast<HbApplication*>(qApp)->activateReason();
     
@@ -87,6 +93,7 @@ ClockViewManager::ClockViewManager(
                 this, SLOT(loadOtherViews()));
     }
 
+OstTraceFunctionExit0( CLOCKVIEWMANAGER_CLOCKVIEWMANAGER_EXIT );
 }
 
 /*!
@@ -94,7 +101,9 @@ ClockViewManager::ClockViewManager(
  */
 ClockViewManager::~ClockViewManager()
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKVIEWMANAGER_CLOCKVIEWMANAGER_ENTRY );
 	// No implementation yet.
+OstTraceFunctionExit0( DUP1_CLOCKVIEWMANAGER_CLOCKVIEWMANAGER_EXIT );
 }
 
 /*!
@@ -104,6 +113,7 @@ ClockViewManager::~ClockViewManager()
  */
 void ClockViewManager::showView(ClockViews view)
 {
+	OstTraceFunctionEntry0( CLOCKVIEWMANAGER_SHOWVIEW_ENTRY );
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 
 	switch (view) {
@@ -131,6 +141,7 @@ void ClockViewManager::showView(ClockViews view)
 		default:
 			break;
 	}
+OstTraceFunctionExit0( CLOCKVIEWMANAGER_SHOWVIEW_EXIT );
 }
 
 /*!
@@ -138,6 +149,7 @@ void ClockViewManager::showView(ClockViews view)
  */
 void ClockViewManager::loadMainView()
 {
+	OstTraceFunctionEntry0( CLOCKVIEWMANAGER_LOADMAINVIEW_ENTRY );
 	bool loadSuccess;
 
 	// Construct the document loader instance
@@ -158,6 +170,7 @@ void ClockViewManager::loadMainView()
 
 	// Set the main view to the window
 	hbInstance->allMainWindows().first()->addView(mMainView);
+OstTraceFunctionExit0( CLOCKVIEWMANAGER_LOADMAINVIEW_EXIT );
 }
 
 /*!
@@ -165,6 +178,7 @@ void ClockViewManager::loadMainView()
  */
 void ClockViewManager::loadWorldClockView()
 {
+	OstTraceFunctionEntry0( CLOCKVIEWMANAGER_LOADWORLDCLOCKVIEW_ENTRY );
 	// Construct the document loader instance
 	ClockDocLoader *docLoader = new ClockDocLoader();
 
@@ -181,6 +195,7 @@ void ClockViewManager::loadWorldClockView()
 	HbEffect::disable(mWorldClockView->toolBar()->graphicsItem());
 
 	mWorldClockView->setupView(mAppControllerIf, docLoader);
+OstTraceFunctionExit0( CLOCKVIEWMANAGER_LOADWORLDCLOCKVIEW_EXIT );
 }
 
 /*!
@@ -188,6 +203,7 @@ void ClockViewManager::loadWorldClockView()
  */
 void ClockViewManager::loadOtherViews()
 {
+	OstTraceFunctionEntry0( CLOCKVIEWMANAGER_LOADOTHERVIEWS_ENTRY );
 	mMainView->setupAfterViewReady();
 	
 	// Load world clock view
@@ -204,6 +220,7 @@ void ClockViewManager::loadOtherViews()
 	// needs to be created so that a new entry can also be created. Finally
 	// NotesApplication object needs to emit applicationReady Signal.
 	emit appReady();
+OstTraceFunctionExit0( CLOCKVIEWMANAGER_LOADOTHERVIEWS_EXIT );
 }
 
 // End of file	--Don't remove this.

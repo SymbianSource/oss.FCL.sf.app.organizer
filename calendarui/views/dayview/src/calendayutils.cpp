@@ -131,23 +131,6 @@ HbMainWindow* CalenDayUtils::mainWindow()
 }
 
 /*!
- \brief isHorizontalSwipe
- 
- \return TRUE if horizontal swipe was recognized (angle in specific range)
- */
-bool CalenDayUtils::isHorizontalSwipe(qreal angle) const
-{
-    bool isHSwipe = false;
-    if ((angle < KCalenSwipeAngle) || 
-        ((angle > 180 - KCalenSwipeAngle) && (angle < 180 + KCalenSwipeAngle)) ||
-        (angle > 360 - KCalenSwipeAngle)) {
-        isHSwipe = true;
-    }
-    
-    return isHSwipe;
-}
-
-/*!
  \brief getEventValidStartEndTime
  \brief Get event's valid start/end time from agenda entry.
  */

@@ -37,7 +37,13 @@ symbian: {
 	"../conf/calendarUI.confml				APP_LAYER_CONFML(calendarUI.confml)" \
 	"../conf/calendarUI_101F874B.crml		APP_LAYER_CRML(calendarUI_101F874B.crml)" \
 	# stubsis is added to provide IAD
-	"../stubsis/calendar_stub.sis             /epoc32/data/z/system/install/calendar_stub.sis"
+	"../stubsis/calendar_stub.sis             /epoc32/data/z/system/install/calendar_stub.sis" \
+	# backup_registration.xml
+	"data/backup_registration.xml             /epoc32/data/z/private/10005901/backup_registration.xml" \
+	"data/backup_registration.xml             /epoc32/release/winscw/urel/z/private/10005901/backup_registration.xml" \
+	"data/backup_registration.xml             /epoc32/release/winscw/udeb/z/private/10005901/backup_registration.xml"
+
+	
 
 
 	LIBS += -lcalencontroller \

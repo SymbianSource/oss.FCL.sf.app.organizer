@@ -27,6 +27,11 @@
 
 // User includes
 #include "digitalclockwidget.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "digitalclockwidgetTraces.h"
+#endif
+
 
 // Constants
 const int clockUpdateInterval  (60000); // msec
@@ -47,6 +52,7 @@ DigitalClockWidget::DigitalClockWidget(bool useAmPm, QGraphicsItem *parent)
   : HbWidget(parent),
     mUseAmPm(useAmPm)
 {
+    OstTraceFunctionEntry0( DIGITALCLOCKWIDGET_DIGITALCLOCKWIDGET_ENTRY );
     bool result = HbStyleLoader::registerFilePath(":/resource/digitalclockwidget.widgetml");
     result = HbStyleLoader::registerFilePath(":/resource/digitalclockwidget.css");
     result = HbStyleLoader::registerFilePath(":/resource/digitalclockwidget_color.css");
@@ -60,6 +66,7 @@ DigitalClockWidget::DigitalClockWidget(bool useAmPm, QGraphicsItem *parent)
     int initialIntervalTime = (clockUpdateInterval - ( time.msec() + (time.second() * 1000)));
     mTimer->start(initialIntervalTime);
     
+OstTraceFunctionExit0( DIGITALCLOCKWIDGET_DIGITALCLOCKWIDGET_EXIT );
 }
 
 /*!
@@ -67,11 +74,13 @@ DigitalClockWidget::DigitalClockWidget(bool useAmPm, QGraphicsItem *parent)
 */
 DigitalClockWidget::~DigitalClockWidget()
 {   
+    OstTraceFunctionEntry0( DUP1_DIGITALCLOCKWIDGET_DIGITALCLOCKWIDGET_ENTRY );
     mTimer->stop();
     HbStyleLoader::unregisterFilePath(":/resource/digitalclockwidget.widgetml");
     HbStyleLoader::unregisterFilePath(":/resource/digitalclockwidget.css");
     HbStyleLoader::unregisterFilePath(":/resource/digitalclockwidget_color.css");
 
+OstTraceFunctionExit0( DUP1_DIGITALCLOCKWIDGET_DIGITALCLOCKWIDGET_EXIT );
 }
 
 /*!
@@ -79,9 +88,11 @@ DigitalClockWidget::~DigitalClockWidget()
  */
 void DigitalClockWidget::tick()
 {
+    OstTraceFunctionEntry0( DIGITALCLOCKWIDGET_TICK_ENTRY );
     mTimer->setInterval(clockUpdateInterval);
     updatePrimitives();
     update();
+OstTraceFunctionExit0( DIGITALCLOCKWIDGET_TICK_EXIT );
 }
 
 /*!
@@ -89,6 +100,7 @@ void DigitalClockWidget::tick()
  */
 void DigitalClockWidget::setAmPm(bool useAmPm)
 {
+    OstTraceFunctionEntry0( DIGITALCLOCKWIDGET_SETAMPM_ENTRY );
     
     bool old = mUseAmPm;
     mUseAmPm = useAmPm;
@@ -103,6 +115,7 @@ void DigitalClockWidget::setAmPm(bool useAmPm)
 	    }
     }
     
+OstTraceFunctionExit0( DIGITALCLOCKWIDGET_SETAMPM_EXIT );
 }
 
 /*!
@@ -110,7 +123,9 @@ void DigitalClockWidget::setAmPm(bool useAmPm)
  */
 void DigitalClockWidget::resizeEvent(QGraphicsSceneResizeEvent *event)
 {
+    OstTraceFunctionEntry0( DIGITALCLOCKWIDGET_RESIZEEVENT_ENTRY );
     HbWidget::resizeEvent(event);
+OstTraceFunctionExit0( DIGITALCLOCKWIDGET_RESIZEEVENT_EXIT );
 }
 
 /*!
@@ -118,6 +133,7 @@ void DigitalClockWidget::resizeEvent(QGraphicsSceneResizeEvent *event)
  */
 void DigitalClockWidget::createPrimitives()
 {
+    OstTraceFunctionEntry0( DIGITALCLOCKWIDGET_CREATEPRIMITIVES_ENTRY );
     mClockLabel = new HbTextItem(this);    
     mClockLabel->setTextWrapping( Hb::TextNoWrap );
     HbStyle::setItemName(mClockLabel, QLatin1String("clockLabel"));
@@ -125,6 +141,7 @@ void DigitalClockWidget::createPrimitives()
     mAmPmLabel = new HbTextItem(this);
     mClockLabel->setTextWrapping( Hb::TextNoWrap );
     HbStyle::setItemName(mAmPmLabel, QLatin1String("amPmLabel"));
+OstTraceFunctionExit0( DIGITALCLOCKWIDGET_CREATEPRIMITIVES_EXIT );
 }
 
 /*!
@@ -133,6 +150,7 @@ void DigitalClockWidget::createPrimitives()
  */
 void DigitalClockWidget::updatePrimitives()
 {
+OstTraceFunctionEntry0( DIGITALCLOCKWIDGET_UPDATEPRIMITIVES_ENTRY );
 
     QTime time = QTime::currentTime();
     QString timeString;
@@ -154,4 +172,5 @@ void DigitalClockWidget::updatePrimitives()
 
     mClockLabel->setText(timeString);
 
+OstTraceFunctionExit0( DIGITALCLOCKWIDGET_UPDATEPRIMITIVES_EXIT );
 }

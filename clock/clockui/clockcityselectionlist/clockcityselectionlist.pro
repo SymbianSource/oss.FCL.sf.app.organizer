@@ -23,7 +23,8 @@ DEFINES += CLOCKCITYSELECTIONLIST_LIB
 INCLUDEPATH += \
 		./inc \
 		../../inc \
-		../../clockmw/clocktimezone/inc
+		../../clockmw/clocktimezone/inc \
+		./traces
 
 DEPENDPATH += \
 		./inc \

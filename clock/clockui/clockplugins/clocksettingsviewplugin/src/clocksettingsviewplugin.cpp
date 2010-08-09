@@ -21,6 +21,11 @@
 // User includes
 #include "clockregionalsettingsview.h"
 #include "clocksettingsviewplugin.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clocksettingsviewpluginTraces.h"
+#endif
+
 
 /*!
 	\class ClockSettingsViewPlugin
@@ -34,6 +39,8 @@
  */
 ClockSettingsViewPlugin::ClockSettingsViewPlugin()
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEWPLUGIN_CLOCKSETTINGSVIEWPLUGIN_ENTRY );
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEWPLUGIN_CLOCKSETTINGSVIEWPLUGIN_EXIT );
 }
 
 /*!
@@ -41,6 +48,8 @@ ClockSettingsViewPlugin::ClockSettingsViewPlugin()
  */
 ClockSettingsViewPlugin::~ClockSettingsViewPlugin()
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKSETTINGSVIEWPLUGIN_CLOCKSETTINGSVIEWPLUGIN_ENTRY );
+	OstTraceFunctionExit0( DUP1_CLOCKSETTINGSVIEWPLUGIN_CLOCKSETTINGSVIEWPLUGIN_EXIT );
 }
 
 /*!
@@ -48,9 +57,11 @@ ClockSettingsViewPlugin::~ClockSettingsViewPlugin()
  */
 void ClockSettingsViewPlugin::launchRegionalSettingsView()
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEWPLUGIN_LAUNCHREGIONALSETTINGSVIEW_ENTRY );
 	//The view is removed from main window and deleted once you select back on view
 	ClockRegionalSettingsView *view = new ClockRegionalSettingsView();
 	view->showView();
+	OstTraceFunctionExit0( CLOCKSETTINGSVIEWPLUGIN_LAUNCHREGIONALSETTINGSVIEW_EXIT );
 }
 
 Q_EXPORT_PLUGIN2(clocksettingsviewplugin, ClockSettingsViewPlugin)

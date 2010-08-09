@@ -25,7 +25,7 @@
 #include "hb_calencommands.hrh"
 #include "calenservicesimpl.h"
 #include <agendaentry.h>
-#include "caleneditor.h"
+#include <caleneditor.h>
 #include "calendateutils.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE

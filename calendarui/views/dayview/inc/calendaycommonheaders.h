@@ -11,45 +11,90 @@
 *
 * Contributors:
 *
-* Description:  CalenDay commons.
+* Description:  CalenDay commons. All UI specified constants and enums shared
+*               beetwen many files should be moved here.
 *
 */
 
 #ifndef CALENDAYCOMMONHEADERS_H_
 #define CALENDAYCOMMONHEADERS_H_
 
-// Constants
+// Constants defined by UI spec.
 
 /*!
- Default timeout for scrolling between days [ms]
+ Number of hours in day (UI spec)
  */
-const int KCalenScrollDaysTimeout = 600;
+const int KCalenHoursInDay = 24;
 
 /*!
- Value [%] defines how long (depending on content area width) should horizontal
- pan gesture be to change day to previous/next.
- If the gesture is shorter - current view is not changed.
+ Number of time slots in hour (half of hour is defined as time slot) (UI spec)
  */
-const int KCalenHScrollMoveParam = 30;  //!< Percentage
+const int KCalenSlotsInHour = 2;
 
 /*!
- Value [degree] defines the max. angle of swipe gesture which should change day.
+ Content area (1/4 of screen) dedicated for All day events in Day View (UI spec)
  */
-const qreal KCalenSwipeAngle = 30;
+const qreal KCalenAllDayEventArea = 0.25;
+
+/*!
+ The width [un] of empty right column in Day View (UI spec)
+ */
+const qreal KCalenEmptyRightColumnWidth = 6.0;
+
+/*!
+ The minimum width [un] of touchable event bubble (UI spec)
+ */
+const qreal KCalenMinTouchableEventWidth = 8.2;
+
+/*!
+ The minimum width [un] of event bubble (UI spec)
+ */
+const qreal KCalenMinBubbleWidth = 3.0;
+
+/*!
+ The width [un] of time strip (indicator) in event bubble (UI spec)
+ */
+const qreal KCalenTimeStripWidth = 1.5;
+
+/*!
+ The width [un] of space beetwen event buubles in Day View (UI spec)
+ */
+const qreal KCalenSpaceBeetwenEvents = 1.5;
+
+/*!
+ Number of All day events displayed in single day that remains touchable 
+ in portrait orientation (UI spec)
+ */
+const int KCalenTouchableAllDayEventsCountPortrait = 1;
+
+/*!
+ Number of All day events displayed in single day that remains touchable 
+ in landscape orientation (UI spec)
+ */
+const int KCalenTouchableAllDayEventsCountLandscape = 2;
+
+/*!
+ Thickness [un] of hour line (UI spec)
+ */
+const qreal KCalenHourLineThickness = 0.15;
+
+/*!
+ Thickness [un] of time line (UI spec)
+ */
+const qreal KCalenTimeLineThickness = 0.75;
+
+/*!
+ Color scheme for hour line (UI spec)
+ */
+const QString KCalenHourLineColor = "qtc_cal_day_hour_lines";
+
+/*!
+ Color scheme for current time line (UI spec)
+ */
+const QString KCalenTimeLineColor = "qtc_cal_month_current_day";
 
 
 // Enumerations
-
-/*!
- \enum CalenPanDirection
- \brief Enumeration identifies pan gesture directions.
- */
-enum CalenPanDirection
-{
-    ECalenPanNotSet = 0,
-    ECalenPanVertical,
-    ECalenPanHorizontal
-};
 
 /*!
  \enum CalenScrollDirection

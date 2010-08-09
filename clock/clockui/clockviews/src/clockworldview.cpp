@@ -36,6 +36,11 @@
 #include "timezoneclient.h"
 #include "clockcityselectionlist.h"
 #include "clockhomecityitem.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockworldviewTraces.h"
+#endif
+
 
 /*!
 	\class ClockWorldView
@@ -52,6 +57,7 @@ ClockWorldView::ClockWorldView(QGraphicsItem *parent)
 :HbView(parent),
  mSelectedItem(-1)
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_CLOCKWORLDVIEW_ENTRY );
 	// Timer for updating list data upon time change/update.
 	mRefreshTimer = new QTimer();
 	connect(
@@ -60,6 +66,7 @@ ClockWorldView::ClockWorldView(QGraphicsItem *parent)
 
 	// Create the model.
 	mCityListModel = new QStandardItemModel();
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_CLOCKWORLDVIEW_EXIT );
 }
 
 /*!
@@ -67,6 +74,7 @@ ClockWorldView::ClockWorldView(QGraphicsItem *parent)
  */
 ClockWorldView::~ClockWorldView()
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKWORLDVIEW_CLOCKWORLDVIEW_ENTRY );
 	if (mDocLoader) {
 		delete mDocLoader;
 		mDocLoader = 0;
@@ -78,6 +86,7 @@ ClockWorldView::~ClockWorldView()
 	HbStyleLoader::unregisterFilePath(":/style/hblistviewitem.css");
 	HbStyleLoader::unregisterFilePath(":/style/hblistviewitem.widgetml");
 	HbStyleLoader::unregisterFilePath(":/style/hblistviewitem_color.css");
+	OstTraceFunctionExit0( DUP1_CLOCKWORLDVIEW_CLOCKWORLDVIEW_EXIT );
 }
 
 /*!
@@ -91,6 +100,7 @@ void ClockWorldView::setupView(
 		ClockAppControllerIf &controllerIf,
 		ClockDocLoader *docLoader)
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_SETUPVIEW_ENTRY );
 	mDocLoader = docLoader;
 	mAppControllerIf = &controllerIf;
 
@@ -189,6 +199,7 @@ void ClockWorldView::setupView(
 		mAddCityAction->setEnabled(false);
 		mAddCityMenuAction->setVisible(false);
 	}
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_SETUPVIEW_EXIT );
 }
 
 /*!
@@ -196,6 +207,7 @@ void ClockWorldView::setupView(
  */
 void ClockWorldView::refreshCityList()
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_REFRESHCITYLIST_ENTRY );
 	updateCurrentLocationInfo(mTimezoneClient->timeUpdateOn());
 	int cityInfoCount = mCityInfoList.count();
 
@@ -214,6 +226,7 @@ void ClockWorldView::refreshCityList()
 		// Start the timer again for one minute.
 		QTimer::singleShot(60 * 1000, this, SLOT(refreshCityList()));
 	}
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_REFRESHCITYLIST_EXIT );
 }
 
 /*!
@@ -221,6 +234,7 @@ void ClockWorldView::refreshCityList()
  */
 void ClockWorldView::updateCurrentLocationInfo(int networkTime)
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_UPDATECURRENTLOCATIONINFO_ENTRY );
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 	Qt::Orientation currentOrienation = window->orientation();
 	loadSection(currentOrienation);
@@ -268,6 +282,7 @@ void ClockWorldView::updateCurrentLocationInfo(int networkTime)
 		
 		mHomeCityWidget->setHomeCityItemData(itemList);
 	}
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_UPDATECURRENTLOCATIONINFO_EXIT );
 }
 
 /*!
@@ -280,6 +295,7 @@ void ClockWorldView::updateCurrentLocationInfo(int networkTime)
 void ClockWorldView::handleItemLongPressed(
 		HbAbstractViewItem *item, const QPointF &coords)
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_HANDLEITEMLONGPRESSED_ENTRY );
 	// Get the ndex of the selected item.
 	mSelectedItem = item->modelIndex().row();
 
@@ -296,6 +312,7 @@ void ClockWorldView::handleItemLongPressed(
 	itemContextMenu->open(this, SLOT(selectedMenuAction(HbAction*)));
 	itemContextMenu->setPreferredPos(coords);
 	itemContextMenu->setAttribute( Qt::WA_DeleteOnClose,true);
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_HANDLEITEMLONGPRESSED_EXIT );
 }
 
 /*!
@@ -304,6 +321,7 @@ void ClockWorldView::handleItemLongPressed(
  */
 void ClockWorldView::handleAddLocation()
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_HANDLEADDLOCATION_ENTRY );
 	// Construct the city selection list and show the same.
 	mCitySelectionList = new ClockCitySelectionList(mTimezoneClient, this);
 	connect(
@@ -312,6 +330,7 @@ void ClockWorldView::handleAddLocation()
 
 	// Show the city list.
 	mCitySelectionList->showCityList();
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_HANDLEADDLOCATION_EXIT );
 }
 
 /*!
@@ -320,6 +339,7 @@ void ClockWorldView::handleAddLocation()
  */
 void ClockWorldView::handleDeleteAction()
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_HANDLEDELETEACTION_ENTRY );
 	if (-1 != mSelectedItem) {
 		QStandardItem *item = mCityListModel->takeItem(mSelectedItem);
 		mCityListModel->removeRow(mSelectedItem);
@@ -340,6 +360,7 @@ void ClockWorldView::handleDeleteAction()
 			mAddCityMenuAction->setVisible(true);
 		}
 	}
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_HANDLEDELETEACTION_EXIT );
 }
 
 /*!
@@ -347,6 +368,7 @@ void ClockWorldView::handleDeleteAction()
  */
 void ClockWorldView::handleSetAsCurrentLocationAction()
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_HANDLESETASCURRENTLOCATIONACTION_ENTRY );
 	// Get the info of the selected item.
 	LocationInfo newHomeCity = mCityInfoList[mSelectedItem];
 
@@ -382,6 +404,7 @@ void ClockWorldView::handleSetAsCurrentLocationAction()
 	// Update the data file.
 	mTimezoneClient->saveLocations(mCityInfoList);
 	mSelectedItem = -1;
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_HANDLESETASCURRENTLOCATIONACTION_EXIT );
 }
 
 /*!
@@ -392,6 +415,7 @@ void ClockWorldView::handleSetAsCurrentLocationAction()
  */
 void ClockWorldView::handleCitySelected(LocationInfo info)
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_HANDLECITYSELECTED_ENTRY );
 	// Info is invalid if the timezoneId is set to -1. We don't do anything in
 	// that case.
 	if (-1 != info.timezoneId) {
@@ -439,6 +463,7 @@ void ClockWorldView::handleCitySelected(LocationInfo info)
 	}
 	// Cleanup.
 	mCitySelectionList->deleteLater();
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_HANDLECITYSELECTED_EXIT );
 }
 
 /*!
@@ -446,7 +471,9 @@ void ClockWorldView::handleCitySelected(LocationInfo info)
  */
 void ClockWorldView::showAlarmsView()
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_SHOWALARMSVIEW_ENTRY );
 	mAppControllerIf->switchToView(MainView);
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_SHOWALARMSVIEW_EXIT );
 }
 
 /*!
@@ -455,7 +482,9 @@ void ClockWorldView::showAlarmsView()
  */
 void ClockWorldView::refreshWorldView()
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_REFRESHWORLDVIEW_ENTRY );
 	mDisplayWorldClockView->setChecked(true);
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_REFRESHWORLDVIEW_EXIT );
 }
 
 /*!
@@ -463,6 +492,7 @@ void ClockWorldView::refreshWorldView()
  */
 void ClockWorldView::loadSection(Qt::Orientation orientation)
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_LOADSECTION_ENTRY );
 	bool networkTime = mTimezoneClient->timeUpdateOn();
 	bool loadSuccess;
 	if (Qt::Horizontal == orientation) {
@@ -498,6 +528,7 @@ void ClockWorldView::loadSection(Qt::Orientation orientation)
 		}
 	}
 	mCityListView->update();
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_LOADSECTION_EXIT );
 }
 
 /*!
@@ -506,9 +537,11 @@ void ClockWorldView::loadSection(Qt::Orientation orientation)
  */
 void ClockWorldView::updateAllLocationInfo()
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_UPDATEALLLOCATIONINFO_ENTRY );
 	updateCurrentLocationInfo(mTimezoneClient->timeUpdateOn());
 	updateCityList();
 	refreshCityList();
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_UPDATEALLLOCATIONINFO_EXIT );
 }
 
 /*!
@@ -516,11 +549,13 @@ void ClockWorldView::updateAllLocationInfo()
  */
 void ClockWorldView::selectedMenuAction(HbAction *action)
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_SELECTEDMENUACTION_ENTRY );
 	if (action == mSetCurrentLocationAction) {
 		handleSetAsCurrentLocationAction();
 	} else if (action == mRemoveCityAction) {
 		handleDeleteAction();
 	}
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_SELECTEDMENUACTION_EXIT );
 }
 
 /*!
@@ -530,6 +565,7 @@ void ClockWorldView::selectedMenuAction(HbAction *action)
  */
 QModelIndex ClockWorldView::addCityToList(const LocationInfo& locationInfo)
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_ADDCITYTOLIST_ENTRY );
 	// Here we construct a model item and add it to the list model.
 	QStandardItem *modelItem = new QStandardItem();
 
@@ -543,6 +579,7 @@ QModelIndex ClockWorldView::addCityToList(const LocationInfo& locationInfo)
 			index, getCityListDecorationString(locationInfo),
 			Qt::DecorationRole);
 
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_ADDCITYTOLIST_EXIT );
 	return index;
 }
 
@@ -555,10 +592,13 @@ QModelIndex ClockWorldView::addCityToList(const LocationInfo& locationInfo)
  */
 bool ClockWorldView::isDay(QDateTime dateTime)
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_ISDAY_ENTRY );
 	// It is day between 6:00 AM and 6:00 PM. Otherwise night.
 	if (17 < dateTime.time().hour() || 6 > dateTime.time().hour()) {
+		OstTraceFunctionExit0( CLOCKWORLDVIEW_ISDAY_EXIT );
 		return false;
 	}
+	OstTraceFunctionExit0( DUP1_CLOCKWORLDVIEW_ISDAY_EXIT );
 	return true;
 }
 
@@ -570,6 +610,7 @@ bool ClockWorldView::isDay(QDateTime dateTime)
 QVariantList ClockWorldView::getCityListDisplayString(
 		const LocationInfo& locationInfo)
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_GETCITYLISTDISPLAYSTRING_ENTRY );
 	QVariantList displayString;
 	QDateTime dateTime = QDateTime::currentDateTime();
 	dateTime = dateTime.toUTC();
@@ -645,6 +686,7 @@ QVariantList ClockWorldView::getCityListDisplayString(
 	QString timeInfo = dateTime.toString(mSettingsUtility->timeFormatString());
 	displayString.append(timeInfo);
 
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_GETCITYLISTDISPLAYSTRING_EXIT );
 	return displayString;
 }
 
@@ -656,6 +698,7 @@ QVariantList ClockWorldView::getCityListDisplayString(
 QVariantList ClockWorldView::getCityListDecorationString(
 		const LocationInfo& locationInfo)
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_GETCITYLISTDECORATIONSTRING_ENTRY );
 	QVariantList decorationString;
 	QDateTime dateTime = QDateTime::currentDateTime();
 	dateTime = dateTime.toUTC();
@@ -677,6 +720,7 @@ QVariantList ClockWorldView::getCityListDecorationString(
 	}
 	decorationString.append(HbIcon(dstIconPath));
 	
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_GETCITYLISTDECORATIONSTRING_EXIT );
 	return decorationString;
 	
 }
@@ -686,6 +730,7 @@ QVariantList ClockWorldView::getCityListDecorationString(
  */
 void ClockWorldView::updateCityList()
 {
+	OstTraceFunctionEntry0( CLOCKWORLDVIEW_UPDATECITYLIST_ENTRY );
 	int cityInfoCount = mCityInfoList.count();
 
 	if (cityInfoCount) {
@@ -741,6 +786,7 @@ void ClockWorldView::updateCityList()
 			mTimezoneClient->saveLocations(mCityInfoList);
         }
 	}
+	OstTraceFunctionExit0( CLOCKWORLDVIEW_UPDATECITYLIST_EXIT );
 }
 
 // End of file-- Don't delete.

@@ -23,12 +23,19 @@
 // User includes
 #include "datetimesettingsplugin.h"
 #include "datetimesettingsview.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "datetimesettingspluginTraces.h"
+#endif
+
 
 /*!
 	Constructor.
  */
 DateTimeSettingsPlugin::DateTimeSettingsPlugin()
 {
+	OstTraceFunctionEntry0( DATETIMESETTINGSPLUGIN_DATETIMESETTINGSPLUGIN_ENTRY );
+	OstTraceFunctionExit0( DATETIMESETTINGSPLUGIN_DATETIMESETTINGSPLUGIN_EXIT );
 }
 
 /*!
@@ -36,6 +43,8 @@ DateTimeSettingsPlugin::DateTimeSettingsPlugin()
  */
 DateTimeSettingsPlugin::~DateTimeSettingsPlugin()
 {
+	OstTraceFunctionEntry0( DUP1_DATETIMESETTINGSPLUGIN_DATETIMESETTINGSPLUGIN_ENTRY );
+	OstTraceFunctionExit0( DUP1_DATETIMESETTINGSPLUGIN_DATETIMESETTINGSPLUGIN_EXIT );
 }
 
 /*!
@@ -43,7 +52,9 @@ DateTimeSettingsPlugin::~DateTimeSettingsPlugin()
  */
 int DateTimeSettingsPlugin::uid() const
 {
+	OstTraceFunctionEntry0( DATETIMESETTINGSPLUGIN_UID_ENTRY );
 	// UID of the plugin.
+	OstTraceFunctionExit0( DATETIMESETTINGSPLUGIN_UID_EXIT );
 	return 0x102818E9;
 }
 
@@ -54,6 +65,7 @@ QList<CpSettingFormItemData*> DateTimeSettingsPlugin::
 						      createSettingFormItemData(
 							  CpItemDataHelper &itemDataHelper) const
 {
+	OstTraceFunctionEntry0( DATETIMESETTINGSPLUGIN_CREATESETTINGFORMITEMDATA_ENTRY );
 	HbIcon icon ;
 	HbExtendedLocale locale = HbExtendedLocale::system();
 	QString timeInfo = locale.format(
@@ -70,6 +82,7 @@ QList<CpSettingFormItemData*> DateTimeSettingsPlugin::
 			itemDataHelper,hbTrId("txt_cp_main_view_list_time_date"),
 			displayString,icon);
 	entryItemList.append(entryItem);
+	OstTraceFunctionExit0( DATETIMESETTINGSPLUGIN_CREATESETTINGFORMITEMDATA_EXIT );
 	return entryItemList;
 }
 

@@ -95,6 +95,7 @@ CalenEditorRepeatField::CalenEditorRepeatField(CalenEditorPrivate* calenEditor,
 	mRepeatItem(0),
 	mRepeatComboBox(0),
 	mCustomRepeatUntilItem(0),
+	mRepeatRoleValue(0),
 	mIsBiWeekly(false),
 	mIsWorkdays(false),
 	mRepeatUntilItemAdded(false)
@@ -230,12 +231,32 @@ void CalenEditorRepeatField::populateRepeatItem(int index)
 									  AgendaRepeatRule(
 									  AgendaRepeatRule::InvalidRule));
 	}
-	
-	// Update the repeat choices depending upon the duration
-	updateRepeatChoices();
+	// Connect the slot once the updation of mRepeatComboBox is done
 	connect(mRepeatComboBox, SIGNAL(currentIndexChanged(int)), this,
 				SLOT(handleRepeatIndexChanged(int)));
+	// Update the repeat choices depending upon the duration
+	updateRepeatChoices();
 	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_POPULATEREPEATITEM_EXIT );
+}
+
+/*!
+	Removes the repeat until item from the model
+	and removed the connection for date picker launch too.
+ */
+void CalenEditorRepeatField::removeRepeatUntilItem()
+{
+	mRepeatRuleType = AgendaRepeatRule::InvalidRule;
+	if (mRepeatUntilItemAdded) {
+		mEditorForm->removeConnection(mCustomRepeatUntilItem, SIGNAL(clicked()),
+	                                this, SLOT(launchRepeatUntilDatePicker()));
+		QModelIndex repeatIndex =
+		        mCalenEditorModel->indexFromItem(mRepeatItem);
+		mCalenEditorModel->removeItem(
+		                              mCalenEditorModel->index(
+		                              repeatIndex.row()+ 1, 0));
+		mRepeatUntilItemAdded = false;
+		mCustomRepeatUntilItem = 0;
+	}
 }
 
 /*!
@@ -253,7 +274,27 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 	// Get the user role we have set for this index
 	QVariant role = mRepeatComboBox->itemData(index, userRole);
 	int value = role.toInt();
-	switch (value) {
+	
+	// Boolean to check if the repeating property of the entry is changed.
+	// based on the value and mRepeatUntilItemAdded
+	// ie. From repeating to non repeating OR vice versa OR No change
+	bool repeatPropertyChange = false;
+	if (value > 0 && value <= 6 && !mRepeatUntilItemAdded) {
+		// Non repeating to repeating
+		repeatPropertyChange = true;
+	}else if(mRepeatUntilItemAdded && value == 0) {
+		// Repeating to non repeating
+		repeatPropertyChange = true;
+	}else {
+		// No change in repeat value
+		repeatPropertyChange = false;
+	}
+	QDate repeatUntilDate = mRepeatUntilDate;
+
+	if (value != mRepeatRoleValue)
+	{
+	    mRepeatRoleValue = value;
+	    switch (value) {
 		case DailyRole: {
 			if (!mRepeatUntilItemAdded) {
 				insertRepeatUntilItem();
@@ -293,7 +334,6 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 				mCustomRepeatUntilItem->setContentWidgetData( "text",
 												locale.format( mRepeatUntilDate,
 												r_qtn_date_usual_with_zero));
-
 			}
 			mRepeatRuleType = AgendaRepeatRule::WeeklyRule;
 		}
@@ -342,23 +382,19 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 		}
 		break;
 		default: {
-			mRepeatRuleType = AgendaRepeatRule::InvalidRule;
-			if (mRepeatUntilItemAdded) {
-				QModelIndex repeatIndex =
-				        mCalenEditorModel->indexFromItem(mRepeatItem);
-				mCalenEditorModel->removeItem(
-				                              mCalenEditorModel->index(
-				                              repeatIndex.row()+ 1, 0));
-				mRepeatUntilItemAdded = false;
-				mCustomRepeatUntilItem = 0;
-			}
+			removeRepeatUntilItem();
 		}
 		break;
+	}
 	}
 	if(!mCalenEditor->isNewEntry()) {
 		mCalenEditor->addDiscardAction();
 	}
-	mCalenEditor->updateReminderChoices();
+	// Depending on repeatPropertyChange value and the repeatuntil date change 
+	// the reminder choices are updated 
+	if(repeatPropertyChange || repeatUntilDate != mRepeatUntilDate) {
+		mCalenEditor->updateReminderChoices();
+	}
 	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_HANDLEREPEATINDEXCHANGED_EXIT );
 }
 
@@ -512,11 +548,20 @@ void CalenEditorRepeatField::updateRepeatChoices()
         OstTraceFunctionExit0( CALENEDITORREPEATFIELD_UPDATEREPEATCHOICES_EXIT );
         return;
     }
+	// Disconnect the slot and connect it back again at end to avoid unnecessary
+	// calls to handleRepeatIndexChanged slot. Or else the slot gets called 
+	// when we add all of items to the repeat combobox.
+	disconnect(mRepeatComboBox, SIGNAL(currentIndexChanged(int)), this,
+				SLOT(handleRepeatIndexChanged(int)));
 	// Clear all the choices and add it again. If we dont do it 
 	// as user would have changed the end times many times and we would have
 	// deleted repeat options depending upon that
 	// Get the current choice
 	int choice = mRepeatComboBox->currentIndex();
+	
+	QVariant role = mRepeatComboBox->itemData(choice, userRole);
+	mRepeatRoleValue = role.toInt();
+	
 	int previousCount = mRepeatComboBox->count();
 	mRepeatComboBox->clear();
 	QStringList repeatChoices;
@@ -571,6 +616,8 @@ void CalenEditorRepeatField::updateRepeatChoices()
 		mRepeatComboBox->removeItem(RepeatWeekly);
 		mRepeatComboBox->removeItem(RepeatWorkdays);
 		mRepeatComboBox->removeItem(RepeatDaily);
+		//Remove the repeat until item too.
+		removeRepeatUntilItem();
 	} else if (mCalenEditor->editedEntry()->endTime()
 			>= (mCalenEditor->editedEntry()->startTime().addMonths(1))) {
 		isRemovedItem = true;
@@ -617,6 +664,10 @@ void CalenEditorRepeatField::updateRepeatChoices()
 	if (choice >= count) {
 		choice = count - 1;
 	}
+	
+	//Connecting back the slot for repeat index change before setting index.
+	connect(mRepeatComboBox, SIGNAL(currentIndexChanged(int)), this,
+				SLOT(handleRepeatIndexChanged(int)));
 	// Set the previous user's choice
 	mRepeatComboBox->setCurrentIndex(choice);
 	OstTraceFunctionExit0( DUP1_CALENEDITORREPEATFIELD_UPDATEREPEATCHOICES_EXIT );

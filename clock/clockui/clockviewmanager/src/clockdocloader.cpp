@@ -22,6 +22,11 @@
 #include "clockwidget.h"
 #include "clockworldview.h"
 #include "clockhomecityitem.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockdocloaderTraces.h"
+#endif
+
 
 /*!
 	\class ClockDocLoader
@@ -37,21 +42,26 @@
  */
 QObject *ClockDocLoader::createObject(const QString &type, const QString &name)
 {
+	OstTraceFunctionEntry0( CLOCKDOCLOADER_CREATEOBJECT_ENTRY );
 	if (CLOCK_MAIN_VIEW == name) {
 		QObject *object = new ClockMainView();
 		object->setObjectName(name);
+		OstTraceFunctionExit0( CLOCKDOCLOADER_CREATEOBJECT_EXIT );
 		return object;
 	} else if (CLOCK_WIDGET == name) {
 		QObject *object = new ClockWidget();
 		object->setObjectName(name);
+		OstTraceFunctionExit0( DUP1_CLOCKDOCLOADER_CREATEOBJECT_EXIT );
 		return object;
 	} else if (CLOCK_WORLD_VIEW == name) {
 		QObject *object = new ClockWorldView();
 		object->setObjectName(name);
+		OstTraceFunctionExit0( DUP2_CLOCKDOCLOADER_CREATEOBJECT_EXIT );
 		return object;
 	} else if (CLOCK_WORLD_HOMECITY == name) {
 		QObject *object = new ClockHomeCityItem();
 		object->setObjectName(name);
+		OstTraceFunctionExit0( DUP3_CLOCKDOCLOADER_CREATEOBJECT_EXIT );
 		return object;
 	}
 

@@ -20,6 +20,11 @@
 #include "clocksettingsdocloader.h"
 #include "clocksettingsdefines.h"
 #include "clocksettingsview.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clocksettingsdocloaderTraces.h"
+#endif
+
 
 /*!
 	\class ClockSettingsDocLoader
@@ -35,6 +40,7 @@
  */
 QObject *ClockSettingsDocLoader::createObject(const QString &type, const QString &name)
 {
+	OstTraceFunctionEntry0( CLOCKSETTINGSDOCLOADER_CREATEOBJECT_ENTRY );
 	return HbDocumentLoader::createObject(type, name);
 }
 

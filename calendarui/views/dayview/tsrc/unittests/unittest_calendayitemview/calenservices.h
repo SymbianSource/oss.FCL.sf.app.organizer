@@ -20,6 +20,8 @@
 
 #include "calencontext.h"
 
+extern quint32 SELECTED_COMMAND;
+
 /*!
  Mocked class MCalenServices
  */
@@ -36,7 +38,12 @@ public:
     
     MCalenContext Context() {return MCalenContext();}
     
-    bool IssueCommandL( quint32 aCommand  ) {Q_UNUSED(aCommand); return true;}
+    bool IssueCommandL( quint32 aCommand  ) 
+    {
+        SELECTED_COMMAND = aCommand;
+
+        return true;
+    }
 };
 
 #endif // CALENSERVICES_H

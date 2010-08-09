@@ -30,7 +30,8 @@ INCLUDEPATH += \
 		../clockviews/inc \
 		../clockappcontroller/inc \
 		../clockwidget/clockwidgetimpl/inc \
-		../../inc
+		../../inc \
+		./traces
 
 symbian: {
 	TARGET.CAPABILITY = ALL -TCB

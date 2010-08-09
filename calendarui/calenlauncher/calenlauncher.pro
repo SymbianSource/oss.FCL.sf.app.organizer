@@ -25,20 +25,19 @@ DEPENDPATH += ./src \
 			  ./inc 
 
 
-symbian: {
-	BLD_INF_RULES.prj_exports += \
-				"./inc/calenlauncher.h  |../inc/calenlauncher.h"
-				
+symbian: {				
 				
 	TARGET.UID3 = 0x10282DCD
 	TARGET.CAPABILITY += ALL -TCB
 	TARGET.EPOCALLOWDLLDATA = 1
+	
+	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 	
 	LIBS += -lxqservice \
           -lxqserviceutil
 }
 
 SOURCES += calenlauncher.cpp		   
-HEADERS += calenlauncher.h		   
+HEADERS += ../../organizer_plat/calendar_launcher_api/inc/calenlauncher.h	   
 		   
 # End of file	--Don't remove this.

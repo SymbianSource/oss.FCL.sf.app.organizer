@@ -31,6 +31,11 @@
 #define CALEN_EDITOR_ADD_DESCRIPTION_ACTION "addDescriptionAction"
 #define CALEN_EDITOR_DELETE_EVENT_ACTION "deleteEventAction"
 
+// Constants
+const int SecsInOneHour( 3600 );
+const int MaxRowsInTextItem(10);
+const int MaxCharacterLimit(255);
+
 enum CustomItemOffset {
     CustomWidgetFrom = HbDataFormModelItem::CustomItemBase + 1,
     CustomWidgetTo,

@@ -26,6 +26,25 @@
 #include "calendaycontentscrollarea.h"
 #include "calendayutils.h"
 
+// Constants
+/*!
+ Default timeout for scrolling between days [ms]
+ */
+const int KCalenScrollDaysTimeout = 600;
+
+/*!
+ Value [%] defines how long (depending on content area width) should horizontal
+ pan gesture be to change day to previous/next.
+ If the gesture is shorter - current view is not changed.
+ */
+const int KCalenHScrollMoveParam = 30;  //!< Percentage
+
+/*!
+ Value [degree] defines the max. angle of swipe gesture which should change day.
+ */
+const qreal KCalenSwipeAngle = 30;
+
+
 /*!
  \class CalenDayContentScrollArea
  \brief Scrollable container class for content widgets.
@@ -213,7 +232,7 @@ void CalenDayContentScrollArea::gestureEvent(QGestureEvent *event)
             mStartPosition = contentWidget()->pos();
             
             qreal swipeAngle = swipeGesture->sceneSwipeAngle();
-            if (CalenDayUtils::instance()->isHorizontalSwipe(swipeAngle)) {
+            if (isHorizontalSwipe(swipeAngle)) {
                 if (QSwipeGesture::Left == 
                     swipeGesture->sceneHorizontalDirection()) {
                     mMoveDirection = ECalenScrollToNext;
@@ -369,6 +388,23 @@ void CalenDayContentScrollArea::moveTo(const QPointF &newPosition, int time)
     if (mMoveDirection != ECalenScrollNoDayChange) {
         emit scrollAreaMoveStarted(mMoveDirection);
     }
+}
+
+/*!
+ \brief isHorizontalSwipe
+ 
+ \return TRUE if horizontal swipe was recognized (angle in specific range)
+ */
+bool CalenDayContentScrollArea::isHorizontalSwipe(qreal angle) const
+{
+    bool isHSwipe = false;
+    if ((angle < KCalenSwipeAngle) || 
+        ((angle > 180 - KCalenSwipeAngle) && (angle < 180 + KCalenSwipeAngle)) ||
+        (angle > 360 - KCalenSwipeAngle)) {
+        isHSwipe = true;
+    }
+    
+    return isHSwipe;
 }
 
 /*!

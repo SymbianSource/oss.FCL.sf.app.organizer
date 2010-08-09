@@ -25,10 +25,12 @@ CONFIG += hb
 				
 INCLUDEPATH += . \
                ../../../inc/ \
+               ../../../../../inc/
 
 DEPENDPATH  += . \
                ../../../inc/ \
                ../../../src/ \
+               ../../../../../inc/
 
 # Input
 HEADERS +=	hbeffect.h \
@@ -49,7 +51,8 @@ HEADERS +=	hbeffect.h \
 			calendayhourscrollarea.h \
 			calendayutils.h \
 			calendateutils.h \
-			calendayview.h
+			calendayview.h \
+			calencommon.h
 
 SOURCES +=	unittest_calendayview.cpp \
 			calendayview.cpp 

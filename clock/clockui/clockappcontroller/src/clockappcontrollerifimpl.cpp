@@ -23,6 +23,11 @@
 #include "timezoneclient.h"
 #include "settingsutility.h"
 #include "alarmclient.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockappcontrollerifimplTraces.h"
+#endif
+
 
 /*!
 	\class ClockAppControllerIfImpl
@@ -43,12 +48,14 @@ ClockAppControllerIfImpl::ClockAppControllerIfImpl(
 :QObject(parent),
  mAppController(controller)
 {
+	OstTraceFunctionEntry0( CLOCKAPPCONTROLLERIFIMPL_CLOCKAPPCONTROLLERIFIMPL_ENTRY );
 	// Construct the timezone client.
 	mTimeZoneClient = TimezoneClient::getInstance();
 	// Construct the settings utility object.
 	mSettingsUtility = new SettingsUtility(this);
 	// Construct the alarm client object.
 	mAlarmClient = new AlarmClient(this);
+	OstTraceFunctionExit0( CLOCKAPPCONTROLLERIFIMPL_CLOCKAPPCONTROLLERIFIMPL_EXIT );
 }
 
 /*!
@@ -56,6 +63,7 @@ ClockAppControllerIfImpl::ClockAppControllerIfImpl(
  */
 ClockAppControllerIfImpl::~ClockAppControllerIfImpl()
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKAPPCONTROLLERIFIMPL_CLOCKAPPCONTROLLERIFIMPL_ENTRY );
 	if (!mTimeZoneClient->isNull()) {
 		mTimeZoneClient->deleteInstance();
 	}
@@ -67,6 +75,7 @@ ClockAppControllerIfImpl::~ClockAppControllerIfImpl()
 		delete mAlarmClient;
 		mAlarmClient = 0;
 	}
+	OstTraceFunctionExit0( DUP1_CLOCKAPPCONTROLLERIFIMPL_CLOCKAPPCONTROLLERIFIMPL_EXIT );
 }
 
 
@@ -79,6 +88,8 @@ ClockAppControllerIfImpl::~ClockAppControllerIfImpl()
  */
 TimezoneClient* ClockAppControllerIfImpl::timezoneClient()
 {
+	OstTraceFunctionEntry0( CLOCKAPPCONTROLLERIFIMPL_TIMEZONECLIENT_ENTRY );
+	OstTraceFunctionExit0( CLOCKAPPCONTROLLERIFIMPL_TIMEZONECLIENT_EXIT );
 	return mTimeZoneClient;
 }
 
@@ -91,6 +102,8 @@ TimezoneClient* ClockAppControllerIfImpl::timezoneClient()
  */
 SettingsUtility* ClockAppControllerIfImpl::settingsUtility()
 {
+	OstTraceFunctionEntry0( CLOCKAPPCONTROLLERIFIMPL_SETTINGSUTILITY_ENTRY );
+	OstTraceFunctionExit0( CLOCKAPPCONTROLLERIFIMPL_SETTINGSUTILITY_EXIT );
 	return mSettingsUtility;
 }
 
@@ -103,6 +116,8 @@ SettingsUtility* ClockAppControllerIfImpl::settingsUtility()
  */
 AlarmClient* ClockAppControllerIfImpl::alarmClient()
 {
+	OstTraceFunctionEntry0( CLOCKAPPCONTROLLERIFIMPL_ALARMCLIENT_ENTRY );
+	OstTraceFunctionExit0( CLOCKAPPCONTROLLERIFIMPL_ALARMCLIENT_EXIT );
 	return mAlarmClient;
 }
 
@@ -115,7 +130,9 @@ AlarmClient* ClockAppControllerIfImpl::alarmClient()
  */
 void ClockAppControllerIfImpl::switchToView(ClockViews viewId)
 {
+	OstTraceFunctionEntry0( CLOCKAPPCONTROLLERIFIMPL_SWITCHTOVIEW_ENTRY );
 	mAppController->mViewManager->showView(viewId);
+	OstTraceFunctionExit0( CLOCKAPPCONTROLLERIFIMPL_SWITCHTOVIEW_EXIT );
 }
 
 // End of file	--Don't remove this.

@@ -1,0 +1,15 @@
+// Created by TraceCompiler 2.2.3
+// DO NOT EDIT, CHANGES WILL BE LOST
+
+#ifndef __CLOCKSETTINGSDOCLOADERTRACES_H__
+#define __CLOCKSETTINGSDOCLOADERTRACES_H__
+
+#define KOstTraceComponentID 0x10005906
+
+#define CLOCKSETTINGSDOCLOADER_CREATEOBJECT_ENTRY 0x8a0021
+
+
+#endif
+
+// End of file
+

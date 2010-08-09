@@ -189,7 +189,7 @@ void CalenPreviewPane::populateLabel(QDateTime date)
 			QString start;
 			if(mInstanceArray[i].type() != AgendaEntry::TypeTodo && 
 					mInstanceArray[i].type() != AgendaEntry::TypeAnniversary && 
-					mInstanceArray[i].type() != AgendaEntry::TypeEvent) {
+					!CalenAgendaUtils::isAlldayEvent(mInstanceArray[i])) {
 				QDateTime startTime = mInstanceArray[i].startTime();
 				// Check if event starts in past
 				checkStartTimeOfEvent(startTime);
@@ -370,6 +370,11 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
     
     if(HbPanGesture *gesture = qobject_cast<HbPanGesture *>(event->gesture(Qt::PanGesture))) {
         if (gesture->state() == Qt::GestureUpdated) {
+            // Check if effect is not yet completed, ignore the current gesture if it is
+            if (mIsGestureHandled) {
+                OstTraceFunctionExit0( CALENPREVIEWPANE_GESTUREEVENT_EXIT );
+                return;
+            }
             // TODO: This work around till framework provides an api
             // to know the direciton of the pan, until then we need
             // calculate the direction explicitly
@@ -400,7 +405,7 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
                     event->accept(Qt::PanGesture);
                 } else {
                     event->accept(Qt::PanGesture);
-                    OstTraceFunctionExit0( CALENPREVIEWPANE_GESTUREEVENT_EXIT );
+                    OstTraceFunctionExit0( DUP1_CALENPREVIEWPANE_GESTUREEVENT_EXIT );
                     return;
                 }
             } else if (abs(verticalDiff) < MAX_PAN_DIRECTION_THRESHOLD) {
@@ -416,7 +421,7 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
                    event->accept(Qt::PanGesture);
                }else {
                    event->accept(Qt::PanGesture);
-                   OstTraceFunctionExit0( DUP1_CALENPREVIEWPANE_GESTUREEVENT_EXIT );
+                   OstTraceFunctionExit0( DUP2_CALENPREVIEWPANE_GESTUREEVENT_EXIT );
                    return;
                }
             }
@@ -476,6 +481,22 @@ void CalenPreviewPane::checkStartTimeOfEvent(QDateTime &dateTime)
         QTime time(0,0,0,0); // 0 means 12:00 AM
         dateTime.setTime(time);
     }
+}
+
+/*!
+ Sets the effect beign handled flag to true
+ */
+void CalenPreviewPane::effectStarted()
+{
+    mIsGestureHandled = true;
+}
+
+/*!
+ Resets the effect beign handled flag to true
+ */
+void CalenPreviewPane::effectFinished()
+{
+    mIsGestureHandled = false;
 }
 
 // End of file  --Don't remove this.

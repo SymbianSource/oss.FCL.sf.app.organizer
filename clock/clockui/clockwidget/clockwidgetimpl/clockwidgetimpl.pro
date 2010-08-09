@@ -33,10 +33,13 @@ CONFIG(release, debug|release){
   }
 }
 
-DEPENDPATH += ./inc \
-              ./src
+DEPENDPATH += \
+			./inc \
+            ./src
 
-INCLUDEPATH += ./inc
+INCLUDEPATH += \
+			./inc \
+			./traces
 
 SOURCES += \
 		clockwidget.cpp \

@@ -38,6 +38,14 @@ class CalenEditorReminderField : public QObject
 	Q_OBJECT
 	
 public:
+	enum AllDayReminderIndex 
+		{
+		ReminderOff = 0,
+		ReminderOnEventDay,
+		ReminderOneDayBefore,
+		ReminderTwoDaysBefore
+		};
+public:
 	CalenEditorReminderField(CalenEditorPrivate* calenEditor,
 	                         HbDataForm* form, HbDataFormModel* model,
 	                         QObject *parent = NULL);

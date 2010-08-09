@@ -41,6 +41,7 @@
 #include "calenservices.h"
 #include "calencontext.h"
 #include "calendateutils.h"
+#include "calenagendautils.h"
 #include "CalenUid.h"
 #include "caleneventlistviewitem.h"
 #include "calenpluginlabel.h"
@@ -373,7 +374,9 @@ void CalenAgendaViewWidget::populateListWidget()
         // of items in the list. Remove the extra rows
         mListModel->removeRows(0, mListModel->rowCount() - mInstanceArray.count());
     }
+    //to set the index to first item of the list , when view refresh
     mIndex = 0; 
+    //status reset for not setting any property
     mIconCheck = false;
     mListModel->setColumnCount(singleColumn);
     mIconCheck = true;
@@ -466,10 +469,9 @@ void CalenAgendaViewWidget::createListItem(int index, AgendaEntry entry)
         OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_CREATELISTITEM_EXIT );
         return;
     }
-    // Check if the entry is a timed entry
-    // TODO: Right now, only appointment/meeting type is being handled
-    // Handle other timed entry types like reminder etc
-    if (entry.isTimedEntry()) {
+    // Check if the entry is a timed entry and not all day event
+    // an all-day event when it is synched from OUTLOOK then entry type will be EAppt
+    if (!CalenAgendaUtils::isAlldayEvent(entry) && entry.isTimedEntry()) {
         // Get the text and icon data for the entry
         addTimedEventToList(index, entry);
     } else {
@@ -615,7 +617,7 @@ void CalenAgendaViewWidget::addTimedEventToList(int index, AgendaEntry entry)
             iconData << HbIcon(locationIcon);
         }
         else {
-            iconData << HbIcon();
+            iconData << QVariant();
         }
         textData << entry.location();
     }
@@ -691,7 +693,7 @@ void CalenAgendaViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
         // Nothing to do as of now as anniversary events
         // cannot be created
         // TODO: To be handled in case of sync
-    } else if (entryType == AgendaEntry::TypeEvent) {
+    } else if (CalenAgendaUtils::isAlldayEvent(entry)) {
         // This is an all day event
         // Append the all-day icon
         iconData << HbIcon(allDayIcon);
@@ -699,12 +701,12 @@ void CalenAgendaViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
         // Check if alarm is enabled for the entry
         if (entry.alarm().isNull()) {
             // Insert a blank icon. Else next text item will get shifted to left
-            iconData << HbIcon();
+            iconData << QVariant();
         } else {
         	// if entry is not repeating in place of reminder icon put a blank 
         	// icon and move reminder icon to the place of repeating icon 
         	 if (!entry.isRepeating()) {
-        		 iconData << HbIcon();
+                 iconData << QVariant();
         	 }
             iconData << HbIcon(reminderIcon);
         }
@@ -719,7 +721,7 @@ void CalenAgendaViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
         	// put the blank icon only when both reminder and repeating icons 
         	// are not there
         	if (entry.alarm().isNull()) {
-        	iconData << HbIcon();
+        	iconData << QVariant();
         	}
         }
         
@@ -731,7 +733,8 @@ void CalenAgendaViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
             if (!entry.geoValue().isNull()){ 
                 iconData << HbIcon(locationIcon);
             }else {
-                iconData << HbIcon();
+                iconData << QVariant();
+           
             }
         } else {
             textData << QVariant();
@@ -771,12 +774,12 @@ void CalenAgendaViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
         // Check if alarm is enabled for the entry
         if (entry.alarm().isNull()) {
         	// Insert a blank icon. Else next text item will get shifted to left
-        	iconData << HbIcon();
+        	iconData << QVariant();
         } else {
         	// if entry is not repeating in place of reminder icon put a blank 
         	// icon and move reminder icon to the place of repeating icon 
         	if (!entry.isRepeating()) {
-        		iconData << HbIcon();
+        		iconData << QVariant();
         	}
         	iconData << HbIcon(reminderIcon);
         }
@@ -788,7 +791,7 @@ void CalenAgendaViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
         	// Insert the blank icon only when both reminder and repeating icons 
         	// are not there
         	if (entry.alarm().isNull()) {
-        		iconData << HbIcon();
+        		iconData << QVariant();
         	}
         }
     }
@@ -834,6 +837,13 @@ void CalenAgendaViewWidget::handleListItemStretching(Qt::Orientation orientation
         AgendaEntry entry = mInstanceArray[index];
         if (!entry.isNull()) {
             AgendaEntry::Type eventType = entry.type();
+            // Need to check explicitly for Appt that got synched from OUTLOOK
+            // that can be an all-day event
+            if (AgendaEntry::TypeAppoinment == eventType) {
+            	if (CalenAgendaUtils::isAlldayEvent(entry)) {
+            		eventType = AgendaEntry::TypeEvent;
+            	}
+            }
             switch(eventType) {
                 // Apply the stretching to only to-do's,
                 // anniversary and all-day event types
@@ -1023,7 +1033,8 @@ void CalenAgendaViewWidget::viewEntry()
     
     // Set the context
     setContextFromHighlight(entry);
-     
+    
+    //for not setting any property again 
     mIconCheck = false;
     // Launch the event viewer.
     mServices.IssueCommandL(ECalenEventView);
@@ -1268,16 +1279,24 @@ void CalenAgendaViewWidget::clearListModel()
     OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_CLEARLISTMODEL_EXIT );
     }
 
+// ----------------------------------------------------------------------------
+// CalenAgendaViewWidget::hasAllDayIcon
+// return true  if property for all day icon to set
+// ----------------------------------------------------------------------------
+//
 bool CalenAgendaViewWidget::hasAllDayIcon()
     {
     return mIconCheck;
     }
 
 
-
+// ----------------------------------------------------------------------------
+// CalenAgendaViewWidget::checkEntryIcons
+// check if all day icon is present
+// ----------------------------------------------------------------------------
+//
 void CalenAgendaViewWidget::checkEntryIcons()
     {
-    //  return allDayLeftIcon;
     int index = 0;
     //check the number of entries
     index  = mInstanceArray.count(); 
@@ -1286,49 +1305,40 @@ void CalenAgendaViewWidget::checkEntryIcons()
      if(mIndex < index )   
      entry = mInstanceArray[mIndex];
      
-     mRightAlarmIcon = false;
-     mRightRepeatIcon = false;
-     mRightExceptionIcon = false;
      mLeftAllDayIcon = false;
+     mLocationData = false;
      
-     if(!entry.alarm().isNull()){
-         mRightAlarmIcon = true;
-         }
-     if (entry.isRepeating()){
-         mRightRepeatIcon = true; 
-         }
-     if (!entry.recurrenceId().isNull()){
-         mRightExceptionIcon = true;
-         }
-
-     if(!entry.isTimedEntry()){
+     if(!entry.isTimedEntry() || CalenAgendaUtils::isAlldayEvent(entry)){
          //all day icon is not there if its a timed entry
          mLeftAllDayIcon = true;
-         } 
+         }
+  
+     if (!entry.location().isEmpty()) {
+         mLocationData = true ;
+         }
      //check if shift to next entry
     if(mNextEntry)
         mIndex++;     
 
     }
 
+// ----------------------------------------------------------------------------
+// CalenAgendaViewWidget::isAllDayIcon
+// retirn true  if all day icon is present
+// ----------------------------------------------------------------------------
+//
 bool CalenAgendaViewWidget::isAllDayIcon()
     {
     return mLeftAllDayIcon;
     }
 
-bool CalenAgendaViewWidget::isExceptionIcon()
+// ----------------------------------------------------------------------------
+// CalenAgendaViewWidget::isLocationData
+// return true  if location entry is present
+// ----------------------------------------------------------------------------
+//
+bool CalenAgendaViewWidget::isLocationData()
     {
-    return mRightExceptionIcon;
+    return mLocationData;
     }
-
-bool CalenAgendaViewWidget::isAlarmIcon()
-    {
-    return mRightAlarmIcon;
-    }
-
-bool CalenAgendaViewWidget::isRepeatingIcon()
-    {
-    return mRightRepeatIcon;
-    }
-
 // End of file	--Don't remove this.

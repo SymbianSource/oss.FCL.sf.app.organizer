@@ -322,6 +322,8 @@ void CalenDeleteUi::DeleteCurrentEntryL()
 					// Show a confirmation note whether the user
 					// wants to delete the single instance or all of them
 					showRepeatingEntryDeleteQuery();
+				} else if (CalenAgendaUtils::isAlldayEvent(entry)) {
+					showDeleteQuery(EDeleteEvent);
 				} else {
 					// If the entry is not a repeating entry,
 					// delete it directly
@@ -545,6 +547,8 @@ void CalenDeleteUi::handleRepeatedEntryDelete(int index)
 									instance, AgendaUtil::ThisAndAll);
 				break;
 		}
+	}else {
+	    iController.BroadcastNotification(ECalenNotifyDeleteFailed);
 	}
 	OstTraceFunctionExit0( CALENDELETEUI_HANDLEREPEATEDENTRYDELETE_EXIT );
 }
@@ -588,6 +592,11 @@ void CalenDeleteUi::showDeleteQuery(const TDeleteConfirmationType type,
         case EDeleteAll:
             {
             text.append(hbTrId("txt_calendar_info_delete_all_calendar_entries"));
+            break;
+            }
+        case EDeleteEvent:
+            {
+            text.append(hbTrId("txt_calendar_info_delete_allday_event"));
             break;
             }
         default:
@@ -657,6 +666,8 @@ void CalenDeleteUi::handleDeletion(HbAction* action)
 						iController.Services().agendaInterface()->deleteRepeatedEntry( 
 								instance, mRecurrenceRange );
 					}
+				}else {
+				    iController.BroadcastNotification(ECalenNotifyDeleteFailed); 
 				}
 			}
 				break;
@@ -672,11 +683,12 @@ void CalenDeleteUi::handleDeletion(HbAction* action)
 				break;
 				
 		}
+	} else {
+		// If the user presses cancel button the notification will be
+		// ECalenNotifyDeleteFailed as default.
+		// Notify the status
+		iController.BroadcastNotification(notification);
 	}
-	// If the user presses cancel button the notification will be
-	// ECalenNotifyDeleteFailed as default.
-	// Notify the status
-	iController.BroadcastNotification(notification);
 	
 	// Reset the member variables
 	mDeleteAction = NULL;

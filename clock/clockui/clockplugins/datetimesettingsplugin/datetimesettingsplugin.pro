@@ -26,7 +26,8 @@ DEPENDPATH += . \
 INCLUDEPATH += . \
 				../../../inc \
 				../../../clockmw/clocktimezone/inc \
-				../../clocksettingsview/inc
+				../../clocksettingsview/inc \
+				./traces
 
 LIBS += \
 		-lcpframework \

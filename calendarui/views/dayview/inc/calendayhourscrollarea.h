@@ -19,16 +19,16 @@
 #define CALENDAYHOURSCROLLAREA_H_
 
 // System includes
-#include <hbscrollarea.h>
 #include <QDateTime>
+#include <HbScrollArea>
 
 // User includes
 #include "calendaycommonheaders.h"
 
-//forward declarations
+// Forward declarations
 class CalenDayHourElement;
 
-#ifdef  CALENVIEWS_DLL
+#ifdef CALENVIEWS_DLL
 #define CALENDAYHOURSCROLLAREA_EXPORT Q_DECL_EXPORT
 #else
 #define CALENDAYHOURSCROLLAREA_EXPORT Q_DECL_IMPORT
@@ -37,11 +37,12 @@ class CalenDayHourElement;
 // Class declaration
 class CALENDAYHOURSCROLLAREA_EXPORT CalenDayHourScrollArea : public HbScrollArea
 {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     CalenDayHourScrollArea(QGraphicsItem *parent = 0);
     virtual ~CalenDayHourScrollArea();
+    
     void setDateTime(const QDateTime &dateTime);
     QDateTime dateTime() const;
     

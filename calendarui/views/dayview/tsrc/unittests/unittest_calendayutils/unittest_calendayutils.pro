@@ -35,7 +35,8 @@ DEPENDPATH  += . \
                ./../../../../../inc/
 
 # Input
-HEADERS +=	hbdeviceprofile.h \
+HEADERS +=	hbstyle.h \
+            hbdeviceprofile.h \
 			hbinstance.h \
 			calendayutils.h \
 			calendaycommonheaders.h

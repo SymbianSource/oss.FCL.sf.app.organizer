@@ -25,6 +25,9 @@
 #include <hbextendedlocale.h>
 #include <hblineedit.h>
 
+class XQApplicationManager;
+class XQAiwRequest;
+
 class HbDateTimePicker;
 class HbPushButton;
 class HbDataFomViewer;
@@ -53,9 +56,6 @@ public:
 protected:
 	virtual HbWidget* createCustomWidget();
 	
-private:
-	void setSelectedLocation( QVariant &aValue );
-	
 protected slots:
 	void handleDate();
 	void handleTime();
@@ -64,6 +64,7 @@ protected slots:
 	void handleLocationTextChange(QString location);
     void launchLocationPicker();
     void handleEditingFinished();
+    void setSelectedLocation( const QVariant &aValue );
 	
 Q_SIGNALS:
 	void dateTimeUpdated(QDateTime& fromDateTime);
@@ -78,7 +79,10 @@ private:
 	QTime mTime;
 	QTime mMaxTime;
 	QTime mMinTime;
-
+	
+	XQApplicationManager *mAppManager;
+	XQAiwRequest* mRequest;
+	
 	HbPushButton* mPushButtonTime;
 	HbPushButton* mPushButtonDate;
 	HbPushButton *mRepeatUntilWidget;
@@ -92,6 +96,7 @@ private:
 	HbLineEdit *mLocationLineEdit; 
 	HbPushButton* mLocationPushButton;
 	bool mIsFromItem;
+	bool mRequestPending;
 	
 };
 

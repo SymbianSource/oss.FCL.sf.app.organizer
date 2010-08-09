@@ -38,6 +38,12 @@ int main(int argc, char *argv[])
 
 	// Main window for providing the scene context
 	HbMainWindow window;
+	// Flags to gain some optimizations from the framework
+	// TODO: Check if orbit itself is setting these flags in mainwindow
+	// If yes, then we need not set here
+	window.setOptimizationFlags(QGraphicsView::DontAdjustForAntialiasing);
+    window.setRenderHint(QPainter::TextAntialiasing, false);
+
 	
 	//For translation, loading and installing translator
 	HbTranslator translator("calendar");

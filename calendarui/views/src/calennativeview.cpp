@@ -50,8 +50,9 @@
  Default constructor.
  */
 CalenNativeView::CalenNativeView(MCalenServices &services) :
-	mServices(services), mIsCapturedScreenShotValid(false),
-    mEntriesInDataBase(false)
+	mServices(services),
+	mEntriesInDataBase(false),
+	mIsCapturedScreenShotValid(false)
 {
     OstTraceFunctionEntry0( CALENNATIVEVIEW_CALENNATIVEVIEW_ENTRY );
     

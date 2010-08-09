@@ -25,15 +25,24 @@
 #include "caleneventlistviewitemTraces.h"
 #endif
 
-
+// ----------------------------------------------------------------------------
+// CalenEventListViewItem::CalenEventListViewItem
+// constructor
+// ----------------------------------------------------------------------------
+// 
 CalenEventListViewItem::CalenEventListViewItem(CalenAgendaViewWidget *parent) :
-HbListViewItem(parent),mAllDayIcon(false),mParent(parent)
+HbListViewItem(parent),mAllDayIcon(false),mLocationEntry(false),mParent(parent)
 {
     OstTraceFunctionEntry0( CALENEVENTLISTVIEWITEM_CALENEVENTLISTVIEWITEM_ENTRY );
     
     OstTraceFunctionExit0( CALENEVENTLISTVIEWITEM_CALENEVENTLISTVIEWITEM_EXIT );
 }
 
+// ----------------------------------------------------------------------------
+// CalenEventListViewItem::~CalenEventListViewItem
+// constructor
+// ----------------------------------------------------------------------------
+// 
 CalenEventListViewItem::~CalenEventListViewItem()
 {
     OstTraceFunctionEntry0( DUP1_CALENEVENTLISTVIEWITEM_CALENEVENTLISTVIEWITEM_ENTRY );
@@ -42,6 +51,11 @@ CalenEventListViewItem::~CalenEventListViewItem()
     OstTraceFunctionExit0( DUP1_CALENEVENTLISTVIEWITEM_CALENEVENTLISTVIEWITEM_EXIT );
 }
 
+// ----------------------------------------------------------------------------
+// CalenEventListViewItem::createItem
+// creates the instance of class
+// ----------------------------------------------------------------------------
+// 
 HbAbstractViewItem* CalenEventListViewItem::createItem()
 {
     OstTraceFunctionEntry0( CALENEVENTLISTVIEWITEM_CREATEITEM_ENTRY );
@@ -50,6 +64,11 @@ HbAbstractViewItem* CalenEventListViewItem::createItem()
     return new CalenEventListViewItem(*this);
 }
 
+// ----------------------------------------------------------------------------
+// CalenEventListViewItem::updateChildItems
+// creates the child items
+// ----------------------------------------------------------------------------
+// 
 void CalenEventListViewItem::updateChildItems()
 {
     OstTraceFunctionEntry0( CALENEVENTLISTVIEWITEM_UPDATECHILDITEMS_ENTRY );
@@ -57,9 +76,7 @@ void CalenEventListViewItem::updateChildItems()
         {
         mParent->checkEntryIcons();
         mAllDayIcon = mParent->isAllDayIcon();
-        mExceptionIcon = mParent->isExceptionIcon();
-        mAlarmIcon = mParent->isAlarmIcon();
-        mRepeatingIcon = mParent->isRepeatingIcon();
+        mLocationEntry =  mParent->isLocationData();
         }
     
     HbListViewItem::updateChildItems();
@@ -67,38 +84,47 @@ void CalenEventListViewItem::updateChildItems()
     OstTraceFunctionExit0( CALENEVENTLISTVIEWITEM_UPDATECHILDITEMS_EXIT );
 }
 
+// ----------------------------------------------------------------------------
+// CalenEventListViewItem::hasAllDayIcon
+// check if all day icon is there in item
+// ----------------------------------------------------------------------------
+// 
 bool CalenEventListViewItem::hasAllDayIcon()
     {
     return mAllDayIcon ;
     }
 
+// ----------------------------------------------------------------------------
+// CalenEventListViewItem::setAllDayLeftIcon
+// set the all day icon 
+// ----------------------------------------------------------------------------
+// 
 void CalenEventListViewItem::setAllDayLeftIcon(bool icon)
     {
     mAllDayIcon = icon;
     }
-bool CalenEventListViewItem::hasRepeatingIcon()
+
+// ----------------------------------------------------------------------------
+// CalenEventListViewItem::hasAllDayIcon
+// check if location entry is there in item
+// ----------------------------------------------------------------------------
+// 
+bool CalenEventListViewItem::locationEntryLayout()
     {
-    return  mRepeatingIcon;
+    if(mAllDayIcon && !mLocationEntry)
+        return true;
+    else
+        return false;
     }
 
-void CalenEventListViewItem::setRepeatingIcon(bool icon)
+// ----------------------------------------------------------------------------
+// CalenEventListViewItem::setAllDayLeftIcon
+// set the location entry status 
+// ----------------------------------------------------------------------------
+// 
+void CalenEventListViewItem::setLocationEntry(bool icon)
     {
-    mRepeatingIcon = icon;
+    mLocationEntry = icon;
     }
-bool CalenEventListViewItem::hasAlarmIcon()
-    {
-    return mAlarmIcon;
-    }
-void CalenEventListViewItem::setAlarmIcon(bool icon )
-    {
-    mAlarmIcon = icon  ;
-    }
-bool CalenEventListViewItem::hasExceptionIcon()
-    {
-    return mExceptionIcon; 
-    }
-void CalenEventListViewItem::setExceptionIcon(bool icon )
-    {
-    mExceptionIcon = icon ;
-    }
+
 // End of file

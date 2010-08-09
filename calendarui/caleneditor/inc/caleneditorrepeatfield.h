@@ -57,6 +57,7 @@ public:
 
 private:
 	void insertRepeatUntilItem();
+	void removeRepeatUntilItem();
 	
 private slots:
 	void handleRepeatIndexChanged(int index);
@@ -90,6 +91,7 @@ private:
 	HbDateTimePicker* mDatePicker;
 	QDate mRepeatUntilDate;
 	AgendaRepeatRule::RuleType mRepeatRuleType;
+	int mRepeatRoleValue;
 	bool mIsBiWeekly;
 	bool mIsWorkdays;
 	bool mRepeatUntilItemAdded;

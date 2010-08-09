@@ -26,7 +26,8 @@ DEPENDPATH += . \
 INCLUDEPATH += . \
 				../../../inc \
 				../../clocksettingsview/inc \
-				../../../clockmw/clocksettingsutility/inc
+				../../../clockmw/clocksettingsutility/inc \
+				./traces
 
 LIBS += \
 		-lclocksettingsview

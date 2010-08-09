@@ -21,6 +21,11 @@
 // User includes
 #include "alarmclient.h"
 #include "alarmlistener.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "alarmclientTraces.h"
+#endif
+
 
 /*!
 	\class AlarmClient
@@ -33,10 +38,12 @@ AlarmClient::AlarmClient(QObject* parent)
 :QObject(parent),
 mListener(0)
 {	
+	OstTraceFunctionEntry0( ALARMCLIENT_ALARMCLIENT_ENTRY );
 	// Connect to the alarm server.
 	User::LeaveIfError(mAlarmSrvSession.Connect());
 	// Construct the listener, but do not start it.
 	mListener = new AlarmListener(this, mAlarmSrvSession);
+OstTraceFunctionExit0( ALARMCLIENT_ALARMCLIENT_EXIT );
 }
 
 /*!
@@ -44,6 +51,7 @@ mListener(0)
  */
 AlarmClient::~AlarmClient()
 {
+OstTraceFunctionEntry0( DUP1_ALARMCLIENT_ALARMCLIENT_ENTRY );
 
 	if (mListener) {
 		mListener->stop();
@@ -51,6 +59,7 @@ AlarmClient::~AlarmClient()
 		mListener = 0;
 	}
 	mAlarmSrvSession.Close();
+OstTraceFunctionExit0( DUP1_ALARMCLIENT_ALARMCLIENT_EXIT );
 }
 
 /*!
@@ -60,6 +69,7 @@ AlarmClient::~AlarmClient()
  */
 void AlarmClient::getAlarmList(QList<AlarmInfo>& alarmList)
 {
+	OstTraceFunctionEntry0( ALARMCLIENT_GETALARMLIST_ENTRY );
 	// This will hold the alarm ids returned from alarm server.
 	RArray<TAlarmId> alarmIdArray;
 	AlarmInfo alarmInfo;
@@ -121,6 +131,7 @@ void AlarmClient::getAlarmList(QList<AlarmInfo>& alarmList)
 	}
 	// Cleanup.
 	alarmIdArray.Close();
+OstTraceFunctionExit0( ALARMCLIENT_GETALARMLIST_EXIT );
 }
 
 /*!
@@ -128,6 +139,7 @@ void AlarmClient::getAlarmList(QList<AlarmInfo>& alarmList)
  */
 void AlarmClient::setAlarm(AlarmInfo& alarmInfo)
 {
+	OstTraceFunctionEntry0( ALARMCLIENT_SETALARM_ENTRY );
 	// Get the current home time
 	TTime homeTime;
 	homeTime.HomeTime();
@@ -204,10 +216,12 @@ void AlarmClient::setAlarm(AlarmInfo& alarmInfo)
 
 		alarmInfo.alarmDateTime = alarmDate;
 	}
+OstTraceFunctionExit0( ALARMCLIENT_SETALARM_EXIT );
 }
 
 void AlarmClient::setAlarmState(TAlarmState state, AlarmState& alarmState)
 {
+	OstTraceFunctionEntry0( ALARMCLIENT_SETALARMSTATE_ENTRY );
 	switch (state) {
 		case EAlarmStateInPreparation:
 			alarmState = InPreparation;
@@ -231,10 +245,12 @@ void AlarmClient::setAlarmState(TAlarmState state, AlarmState& alarmState)
 			break;
 	}
 
+OstTraceFunctionExit0( ALARMCLIENT_SETALARMSTATE_EXIT );
 }
 
 void AlarmClient::setAlarmState(AlarmState state, TAlarmState& alarmState)
 {
+	OstTraceFunctionEntry0( DUP1_ALARMCLIENT_SETALARMSTATE_ENTRY );
 	switch (state) {
 		case InPreparation:
 			alarmState = EAlarmStateInPreparation;
@@ -257,11 +273,13 @@ void AlarmClient::setAlarmState(AlarmState state, TAlarmState& alarmState)
 		default:
 			break;
 	}
+OstTraceFunctionExit0( DUP1_ALARMCLIENT_SETALARMSTATE_EXIT );
 }
 
 void AlarmClient::setAlarmRepeatType(
 		TAlarmRepeatDefinition repeat, AlarmRepeatType& repeatType)
 {
+	OstTraceFunctionEntry0( ALARMCLIENT_SETALARMREPEATTYPE_ENTRY );
 	switch (repeat) {
 		case EAlarmRepeatDefintionRepeatOnce:
 			repeatType = Once;
@@ -278,11 +296,13 @@ void AlarmClient::setAlarmRepeatType(
 		default:
 			break;
 	}
+OstTraceFunctionExit0( ALARMCLIENT_SETALARMREPEATTYPE_EXIT );
 }
 
 void AlarmClient::setAlarmRepeatType(
 		AlarmRepeatType repeat, TAlarmRepeatDefinition& repeatType)
 {
+	OstTraceFunctionEntry0( DUP1_ALARMCLIENT_SETALARMREPEATTYPE_ENTRY );
 	switch (repeat) {
 		case Once:
 			repeatType = EAlarmRepeatDefintionRepeatOnce;
@@ -299,12 +319,15 @@ void AlarmClient::setAlarmRepeatType(
 		default:
 			break;
 	}
+OstTraceFunctionExit0( DUP1_ALARMCLIENT_SETALARMREPEATTYPE_EXIT );
 }
 
 void AlarmClient::deleteAlarm(int alarmId)
 {
+	OstTraceFunctionEntry0( ALARMCLIENT_DELETEALARM_ENTRY );
 	// Request the alarmserver to delete the alarm.
 	mAlarmSrvSession.AlarmDelete(alarmId);
+OstTraceFunctionExit0( ALARMCLIENT_DELETEALARM_EXIT );
 }
 
 /*!
@@ -315,25 +338,30 @@ void AlarmClient::deleteAlarm(int alarmId)
  */
 int AlarmClient::deleteSnoozedAlarm(int alarmId)
 {
+	OstTraceFunctionEntry0( ALARMCLIENT_DELETESNOOZEDALARM_ENTRY );
 	AlarmInfo alarmInfo;
 	int retVal(KErrNone);
 	int returnVal = getAlarmInfo(alarmId, alarmInfo);
 	if (KErrNone != retVal) {
+		OstTraceFunctionExit0( ALARMCLIENT_DELETESNOOZEDALARM_EXIT );
 		return retVal;
 	}
 	returnVal = mAlarmSrvSession.AlarmDelete(alarmId);
 	if (KErrNone != retVal) {
+		OstTraceFunctionExit0( DUP1_ALARMCLIENT_DELETESNOOZEDALARM_EXIT );
 		return retVal;
 	}
 	alarmInfo.alarmState = InPreparation;
 	alarmInfo.nextDueTime = alarmInfo.origAlarmTime;
 	setAlarm(alarmInfo);
 	
+	OstTraceFunctionExit0( DUP2_ALARMCLIENT_DELETESNOOZEDALARM_EXIT );
 	return retVal;
 }
 
 int AlarmClient::getAlarmInfo(int alarmId, AlarmInfo& alarmInfo)
 {
+	OstTraceFunctionEntry0( ALARMCLIENT_GETALARMINFO_ENTRY );
 	TASShdAlarm tempSharedAlarm;
 
 	// Get the requested alarm info from the alarm server.
@@ -392,31 +420,40 @@ int AlarmClient::getAlarmInfo(int alarmId, AlarmInfo& alarmInfo)
 			alarmInfo.volumeStatus = AlarmVolumeOff;
 		}
 	}
+	OstTraceFunctionExit0( ALARMCLIENT_GETALARMINFO_EXIT );
 	return error;
 }
 
 void AlarmClient::toggleAlarmStatus(int alarmId, int alarmStatus)
 {
+OstTraceFunctionEntry0( ALARMCLIENT_TOGGLEALARMSTATUS_ENTRY );
 
 	mAlarmSrvSession.SetAlarmStatus(alarmId, (TAlarmStatus)alarmStatus);
 
+OstTraceFunctionExit0( ALARMCLIENT_TOGGLEALARMSTATUS_EXIT );
 }
 
 void AlarmClient::startListener()
 {
+		OstTraceFunctionEntry0( ALARMCLIENT_STARTLISTENER_ENTRY );
 		mListener->start();
 
+OstTraceFunctionExit0( ALARMCLIENT_STARTLISTENER_EXIT );
 }
 
 void AlarmClient::stopListener()
 {
+	OstTraceFunctionEntry0( ALARMCLIENT_STOPLISTENER_ENTRY );
 	mListener->stop();
 
+OstTraceFunctionExit0( ALARMCLIENT_STOPLISTENER_EXIT );
 }
 
 void AlarmClient::notifyChange(int alarmId)
 {
+		OstTraceFunctionEntry0( ALARMCLIENT_NOTIFYCHANGE_ENTRY );
 		emit alarmStateChanged(alarmId);
+OstTraceFunctionExit0( ALARMCLIENT_NOTIFYCHANGE_EXIT );
 }
 
 // End of file	--Don't remove this.

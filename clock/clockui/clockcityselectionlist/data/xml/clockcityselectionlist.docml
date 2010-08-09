@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <hbdocument version="0.9">
     <object name="addOwnCityAction" type="HbAction">
-        <string name="text" value="Add own city"/>
+        <string locid="txt_clk_opt_add_own_city" name="text" value="Add own city"/>
     </object>
     <widget name="clockCitySelectionView" type="HbView">
         <widget name="clockCitySelectionWidget" role="HbView:widget" type="HbWidget">
@@ -35,7 +35,7 @@
         <widget name="viewMenu" role="HbView:menu" type="HbMenu">
             <ref object="addOwnCityAction" role="HbMenu:addAction"/>
         </widget>
-        <string locid="txt_common_common_clock" name="title" value="Clock"/>
+        <string locid="txt_clock_title_clock" name="title" value="Clock"/>
     </widget>
     <metadata activeUIState="Common ui state" display="NHD portrait" unit="un">
         <uistate name="Common ui state" sections="#common"/>

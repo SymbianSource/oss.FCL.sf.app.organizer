@@ -30,6 +30,7 @@ DEPENDPATH += . \
 DEFINES += TESTCALENEDITOR \
 		   CALENEDITOR_LIB 
 INCLUDEPATH += . \
+		../../../../calendarui/caleneditor/traces \
                ../../../../calendarui/caleneditor/inc \
 			   ../../../../calendarui/agendainterface/inc \
 			   ../../../../calendarui/commonutils/inc \
@@ -59,8 +60,7 @@ SOURCES +=  unittest_caleneditor.cpp \
 			caleneditor_p.cpp \
 			caleneditordocloader.cpp 
 		
-HEADERS += caleneditor.h \
-		   caleneditorcustomitem.h \
+HEADERS += 	   caleneditorcustomitem.h \
 		   caleneditorcommon.h \
 		   caleneditordocloader.h \
 		   caleneditor_p.h 

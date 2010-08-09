@@ -23,6 +23,7 @@
 // User Includes
 #include "caleneditordatahandler.h"
 #include "calendateutils.h"
+#include "calenagendautils.h"
 #include <agendaentry.h>
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
@@ -170,7 +171,7 @@ bool CalenEditorDataHandler::isAllDayEdited() const
 	OstTraceFunctionEntry0( CALENEDITORDATAHANDLER_ISALLDAYEDITED_ENTRY );
 	HbDataFormModelItem* alldayItem = mCalenEditor->allDayCheckBoxItem();
 	if (alldayItem) {
-		if (mOriginalEntry->type() == AgendaEntry::TypeEvent) {
+		if (CalenAgendaUtils::isAlldayEvent(*mOriginalEntry)) {
 			if (alldayItem->contentWidgetData("checkState")
 			        == Qt::Checked) {
 				OstTraceFunctionExit0( CALENEDITORDATAHANDLER_ISALLDAYEDITED_EXIT );

@@ -17,12 +17,15 @@
 #ifndef CALENDAYMODELMANAGER_H
 #define CALENDAYMODELMANAGER_H
 
+// System includes
 #include <QObject>
 #include <QMap>
 #include <QDateTime>
 
+// User includes
 #include "calendaycommonheaders.h"
 
+// Forward declarations
 class QAbstractItemModel;
 class MCalenServices; 
 class CalenDayModel;
@@ -58,7 +61,7 @@ public slots:
 private:
 	void createAllModels();
 	void moveBackward();
-	void moveForeward();
+	void moveForward();
 
 private:
     QMap<ModelDay, CalenDayModel*> mModels;

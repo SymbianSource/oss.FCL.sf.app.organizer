@@ -20,6 +20,11 @@
 
 // User includes
 #include "clockcitylistproxymodel.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockcitylistproxymodelTraces.h"
+#endif
+
 
 /*!
 	\class ClockCityListProxyModel
@@ -38,7 +43,9 @@
 ClockCityListProxyModel::ClockCityListProxyModel(QObject *parent)
 :QSortFilterProxyModel(parent)
 {
+	OstTraceFunctionEntry0( CLOCKCITYLISTPROXYMODEL_CLOCKCITYLISTPROXYMODEL_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( CLOCKCITYLISTPROXYMODEL_CLOCKCITYLISTPROXYMODEL_EXIT );
 }
 
 /*!
@@ -52,11 +59,13 @@ ClockCityListProxyModel::ClockCityListProxyModel(QObject *parent)
 bool ClockCityListProxyModel::filterAcceptsRow(
 		int sourceRow, const QModelIndex &sourceParent) const
 {
+	OstTraceFunctionEntry0( CLOCKCITYLISTPROXYMODEL_FILTERACCEPTSROW_ENTRY );
 	// Get the model index of the source model.
 	QModelIndex modelIndex = sourceModel()->index(
 			sourceRow, filterKeyColumn(), sourceParent);
 
 	if (!modelIndex.isValid()) {
+		OstTraceFunctionExit0( CLOCKCITYLISTPROXYMODEL_FILTERACCEPTSROW_EXIT );
 		return false;
 	}
 
@@ -71,6 +80,7 @@ bool ClockCityListProxyModel::filterAcceptsRow(
 	if (Qt::UserRole + 100 == role) {
 		QString string = modelData.value<QString>();
 		if (string.contains(filterExp)) {
+			OstTraceFunctionExit0( DUP1_CLOCKCITYLISTPROXYMODEL_FILTERACCEPTSROW_EXIT );
 			return true;
 		}
 	}

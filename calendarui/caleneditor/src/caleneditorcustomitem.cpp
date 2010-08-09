@@ -33,11 +33,11 @@
 #include <QGraphicsLinearLayout>
 #include <QDate>
 #include <QTime>
+#include <xqaiwrequest.h>
+#include <xqappmgr.h>
 
 //LI related headers
 #include "qlocationpickeritem.h"
-#include <xqaiwrequest.h>
-#include <xqappmgr.h>
 
 // User includes
 #include "caleneditorcustomitem.h"
@@ -61,12 +61,15 @@
  */
 CalenEditorCustomItem::CalenEditorCustomItem(QGraphicsItem *parent)
 :HbDataFormViewItem(parent),
+ mAppManager(0),
+ mRequest(0),
  mPushButtonTime(0),
  mPushButtonDate(0),
  mRepeatUntilWidget(0),
  mReminderTimeWidget(0),
  mDatePicker(0),
- mTimePicker(0)
+ mTimePicker(0),
+ mRequestPending(false)
 {
 	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_CALENEDITORCUSTOMITEM_ENTRY );
 	mMinDate = CalenDateUtils::minTime().date();
@@ -86,6 +89,9 @@ CalenEditorCustomItem::~CalenEditorCustomItem()
 	OstTraceFunctionEntry0( DUP1_CALENEDITORCUSTOMITEM_CALENEDITORCUSTOMITEM_ENTRY );
 	// Nothing yet.
 	OstTraceFunctionExit0( DUP1_CALENEDITORCUSTOMITEM_CALENEDITORCUSTOMITEM_EXIT );
+	
+  delete mAppManager;
+  delete mRequest;
 }
 /*!
 	Creates a new CalenEditorCustomItem.
@@ -169,7 +175,7 @@ HbWidget* CalenEditorCustomItem::createCustomWidget()
 											CALEN_EDITOR_LOCATION_LINEEDIT));
 			mLocationLineEdit->setObjectName("locationLineEdit");
 			mLocationLineEdit->setMinRows(1);
-			mLocationLineEdit->setMaxRows(4);
+			mLocationLineEdit->setMaxRows(MaxRowsInTextItem);
 			mLocationPushButton = qobject_cast<HbPushButton*>(
 									editorLocationDocLoader.findWidget(
 											CALEN_EDITOR_LOCATION_PUSHBUTTON));
@@ -214,27 +220,34 @@ HbWidget* CalenEditorCustomItem::createCustomWidget()
 
 void CalenEditorCustomItem::launchLocationPicker()
 {
-	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_LAUNCHLOCATIONPICKER_ENTRY );
-	XQApplicationManager *appManager = new XQApplicationManager();
-
-    XQAiwRequest *request = appManager->create("com.nokia.symbian", "ILocationPick", "pick()", true);
-    if( request )
+		OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_LAUNCHLOCATIONPICKER_ENTRY );
+   	if(!mAppManager)
+	{
+    	mAppManager = new XQApplicationManager();
+    }
+	if(!mRequest)
+	{
+    	mRequest = mAppManager->create("com.nokia.symbian", "ILocationPick", "pick()", true);
+    	mRequest->setSynchronous(false);
+    	connect(mRequest, SIGNAL(requestOk(const QVariant&)), this, SLOT(setSelectedLocation(const QVariant&)));
+    }
+	if(!mRequestPending)
     {
-		QVariant retValue;
-		if( request->send( retValue ) )
-		{
-			setSelectedLocation(retValue);
-		}
-	}
+    	if( mRequest->send() )
+    	{
+    		mRequestPending = true;
+    	}
+    }
     OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_LAUNCHLOCATIONPICKER_EXIT );
 }
 /*!
 	set the selected location from the picker to the line edit widget 
 	and notify the other observers.
 */
-void CalenEditorCustomItem::setSelectedLocation( QVariant &aValue )
+void CalenEditorCustomItem::setSelectedLocation( const QVariant &aValue )
 {
 	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_SETSELECTEDLOCATION_ENTRY );
+	mRequestPending = false;
 	QLocationPickerItem selectedLocation = aValue.value<QLocationPickerItem>();
 	if( selectedLocation.mIsValid )
     {

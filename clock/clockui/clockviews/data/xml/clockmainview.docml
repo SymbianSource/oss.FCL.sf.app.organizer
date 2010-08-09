@@ -41,7 +41,7 @@
                 </widget>
                 <real name="z" value="21"/>
                 <sizepolicy horizontalPolicy="Expanding" horizontalStretch="0" verticalPolicy="Expanding" verticalStretch="0"/>
-                <sizehint height="47.7612un" type="PREFERRED" width="expr(var(hb-param-screen-short-edge) )"/>
+                <sizehint height="15.52239un" type="PREFERRED" width="expr(var(hb-param-screen-short-edge) )"/>
             </widget>
             <widget name="horizontalDivider" type="HbLabel">
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
@@ -54,14 +54,32 @@
                 <icon iconName="qtg_graf_input_h_swipe" name="icon"/>
                 <real name="z" value="2"/>
             </widget>
-            <widget name="placeLabel" type="HbLabel">
-                <enums name="alignment" value="AlignAbsolute|AlignRight|AlignTrailing"/>
+            <widget name="placeLabel" type="HbWidget">
+                <widget name="placetext" type="HbLabel">
+                    <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                    <sizepolicy horizontalPolicy="Maximum" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
+                    <sizehint height="var(hb-param-text-height-tiny)" type="PREFERRED"/>
+                    <sizehint height="var(hb-param-text-height-tiny)" type="MINIMUM"/>
+                    <string name="plainText" value="India +5:30 GMT"/>
+                </widget>
+                <widget name="dstIcon" type="HbLabel">
+                    <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                    <icon iconName=" " name="icon"/>
+                    <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
+                    <sizehint height="var(hb-param-graphic-size-secondary)" type="FIXED" width="var(hb-param-graphic-size-secondary)"/>
+                </widget>
                 <enums name="layoutDirection" value="LeftToRight"/>
                 <real name="z" value="2"/>
-                <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
-                <sizehint height="expr(var(hb-param-text-height-tiny) )" type="PREFERRED" width="18.58295un"/>
-                <string name="plainText" value="united kingdom 0:00 GMT"/>
+                <sizepolicy horizontalPolicy="Maximum" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
+                <sizehint height="expr(var(hb-param-text-height-tiny) )" type="PREFERRED" width="21.49254un"/>
                 <fontspec name="fontSpec" role="Undefined" textheight="expr(var(hb-param-text-height-tiny) )"/>
+                <layout orientation="Horizontal" spacing="var(hb-param-margin-gene-middle-horizontal)" type="linear">
+                    <contentsmargins bottom="0un" left="0un" right="0un" top="0un"/>
+                    <stretchitem stretchfactor="1"/>
+                    <linearitem itemname="placetext"/>
+                    <linearitem itemname="dstIcon"/>
+                    <stretchitem stretchfactor="1"/>
+                </layout>
             </widget>
             <layout type="anchor">
                 <anchoritem dst="clockWidget" dstEdge="TOP" spacing="2un" src="" srcEdge="TOP"/>
@@ -70,14 +88,14 @@
                 <anchoritem dst="noAlarmLabel" dstEdge="BOTTOM" spacing="-35.26739un" src="" srcEdge="BOTTOM"/>
                 <anchoritem dst="dateLabel" dstEdge="LEFT" spacing="2un" src="" srcEdge="LEFT"/>
                 <anchoritem dst="dateLabel" dstEdge="TOP" spacing="29.73761un" src="" srcEdge="TOP"/>
-                <anchoritem dst="alarmListView" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>
-                <anchoritem dst="alarmListView" dstEdge="BOTTOM" spacing="-18un" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="alarmListView" dstEdge="LEFT" spacing="-0.44776un" src="" srcEdge="LEFT"/>
+                <anchoritem dst="alarmListView" dstEdge="BOTTOM" spacing="-18.51493un" src="" srcEdge="BOTTOM"/>
                 <anchoritem dst="horizontalDivider" dstEdge="LEFT" spacing="6.1194un" src="" srcEdge="LEFT"/>
                 <anchoritem dst="horizontalDivider" dstEdge="BOTTOM" spacing="-9.70896un" src="" srcEdge="BOTTOM"/>
                 <anchoritem dst="verticalDivider" dstEdge="RIGHT" spacing="-8.80597un" src="" srcEdge="RIGHT"/>
                 <anchoritem dst="verticalDivider" dstEdge="BOTTOM" spacing="-2.84328un" src="" srcEdge="BOTTOM"/>
-                <anchoritem dst="placeLabel" dstEdge="TOP" spacing="35.07463un" src="" srcEdge="TOP"/>
-                <anchoritem dst="placeLabel" dstEdge="RIGHT" spacing="-16.04392un" src="" srcEdge="RIGHT"/>
+                <anchoritem dst="placeLabel" dstEdge="TOP" spacing="28.20896un" src="" srcEdge="TOP"/>
+                <anchoritem dst="placeLabel" dstEdge="RIGHT" spacing="-6.71642un" src="" srcEdge="RIGHT"/>
             </layout>
         </widget>
         <widget name="viewToolbar" role="HbView:toolBar" type="HbToolBar">
@@ -96,6 +114,22 @@
         </widget>
         <widget name="dateLabel" type="HbLabel">
             <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
+        </widget>
+        <widget name="clockWidget" plugin="clockwidgetplugin" type="ClockWidget">
+            <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
+            <sizehint height="31.9un" type="FIXED" width="31.9un"/>
+        </widget>
+        <widget name="placeLabel" type="HbWidget">
+            <sizehint height="expr(var(hb-param-text-height-tiny) )" type="PREFERRED" width="expr(var(hb-param-screen-short-edge) - 4un  )"/>
+        </widget>
+        <widget name="verticalDivider" type="HbLabel">
+            <bool name="visible" value="TRUE"/>
+        </widget>
+        <widget name="horizontalDivider" type="HbLabel">
+            <icon iconName="qtg_graf_divider_h_thin" name="icon"/>
+            <enums name="aspectRatioMode" value="IgnoreAspectRatio"/>
+            <sizepolicy horizontalPolicy="Minimum" horizontalStretch="1" verticalPolicy="Fixed" verticalStretch="0"/>
+            <sizehint height="0.5un" type="PREFERRED" width="21.49254un"/>
         </widget>
         <widget name="clockMainViewWidget" role="HbView:widget" type="HbWidget">
             <layout type="anchor">
@@ -120,28 +154,27 @@
                 <anchoritem dst="placeLabel" dstEdge="RIGHT" spacing="-expr(var(hb-param-margin-gene-right) )" src="" srcEdge="RIGHT"/>
             </layout>
         </widget>
-        <widget name="placeLabel" type="HbLabel">
-            <sizehint height="expr(var(hb-param-text-height-tiny) )" type="PREFERRED" width="expr(var(hb-param-screen-short-edge) - 4un  )"/>
-            <enums name="alignment" value="AlignAbsolute|AlignVCenter|AlignHCenter"/>
-        </widget>
-        <widget name="clockWidget" plugin="clockwidgetplugin" type="ClockWidget">
-            <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Fixed" verticalStretch="0"/>
-            <sizehint height="31.9un" type="FIXED" width="31.9un"/>
-        </widget>
-        <widget name="horizontalDivider" type="HbLabel">
-            <icon iconName="qtg_graf_divider_h_thin" name="icon"/>
-            <enums name="aspectRatioMode" value="IgnoreAspectRatio"/>
-            <sizepolicy horizontalPolicy="Minimum" horizontalStretch="1" verticalPolicy="Fixed" verticalStretch="0"/>
-            <sizehint height="0.5un" type="PREFERRED" width="21.49254un"/>
-        </widget>
-        <widget name="verticalDivider" type="HbLabel">
-            <bool name="visible" value="TRUE"/>
-        </widget>
     </section>
     <section name="landscape">
         <widget name="alarmListView" type="HbListView">
             <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Expanding" verticalStretch="0"/>
             <sizehint type="MAXIMUM" width="53.73un"/>
+        </widget>
+        <widget name="clockWidget" plugin="clockwidgetplugin" type="ClockWidget">
+            <sizehint height="expr(var(hb-param-screen-short-edge)  - var(hb-param-widget-chrome-height) - var(hb-param-widget-toolbar-height) - 12.75un )" type="PREFERRED" width="expr(var(hb-param-screen-short-edge)  - var(hb-param-widget-chrome-height) - var(hb-param-widget-toolbar-height) - 12.75un )"/>
+        </widget>
+        <widget name="placeLabel" type="HbWidget">
+            <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
+        </widget>
+        <widget name="verticalDivider" type="HbLabel">
+            <icon iconName="qtg_graf_divider_v_thin" name="icon"/>
+            <enums name="aspectRatioMode" value="IgnoreAspectRatio"/>
+            <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
+            <sizehint type="PREFERRED" width="0.1un"/>
+        </widget>
+        <widget name="horizontalDivider" type="HbLabel">
+            <sizehint height="0.5un" type="PREFERRED" width="21.49254un"/>
+            <bool name="visible" value="TRUE"/>
         </widget>
         <widget name="clockMainViewWidget" role="HbView:widget" type="HbWidget">
             <layout type="anchor">
@@ -165,23 +198,6 @@
                 <anchoritem dst="placeLabel" dstEdge="RIGHT" spacing="-expr(var(hb-param-margin-gene-right) )" src="alarmListView" srcEdge="LEFT"/>
                 <anchoritem dst="placeLabel" dstEdge="BOTTOM" spacing="-expr(var(hb-param-margin-gene-bottom) )" src="" srcEdge="BOTTOM"/>
             </layout>
-        </widget>
-        <widget name="placeLabel" type="HbLabel">
-            <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
-            <enums name="alignment" value="AlignAbsolute|AlignVCenter|AlignHCenter"/>
-        </widget>
-        <widget name="clockWidget" plugin="clockwidgetplugin" type="ClockWidget">
-            <sizehint height="expr(var(hb-param-screen-short-edge)  - var(hb-param-widget-chrome-height) - var(hb-param-widget-toolbar-height) - 12.75un )" type="PREFERRED" width="expr(var(hb-param-screen-short-edge)  - var(hb-param-widget-chrome-height) - var(hb-param-widget-toolbar-height) - 12.75un )"/>
-        </widget>
-        <widget name="horizontalDivider" type="HbLabel">
-            <sizehint height="0.5un" type="PREFERRED" width="21.49254un"/>
-            <bool name="visible" value="TRUE"/>
-        </widget>
-        <widget name="verticalDivider" type="HbLabel">
-            <icon iconName="qtg_graf_divider_v_thin" name="icon"/>
-            <enums name="aspectRatioMode" value="IgnoreAspectRatio"/>
-            <sizepolicy horizontalPolicy="Fixed" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
-            <sizehint type="PREFERRED" width="0.1un"/>
         </widget>
     </section>
     <metadata activeUIState="portrait" display="NHD-3.2-inch_portrait" unit="un">

@@ -26,6 +26,11 @@
 #include "settingsutility.h"
 #include "timezoneclient.h"
 #include "clockdatatypes.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "settingsutilityTraces.h"
+#endif
+
 
 /*!
 	\class SettingsUtility.
@@ -37,6 +42,7 @@
 SettingsUtility::SettingsUtility(QObject *parent)
 :QObject(parent)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_SETTINGSUTILITY_ENTRY );
 	mTimeSeparatorList << tr(".") << tr(":");
 	mClockTypeList << hbTrId("txt_clock_button_digital") << hbTrId("txt_clock_button_analog");
 	mTimeFormatList << hbTrId("txt_clk_setlabel_val_24_hour") << hbTrId("txt_clk_setlabel_val_12_hour");
@@ -44,6 +50,7 @@ SettingsUtility::SettingsUtility(QObject *parent)
 	mDateSeparatorList << tr(".") << tr(":") << tr("/") << tr("-");
 	mAutoUpdateValueList << tr("ON") << tr("OFF");
 	mSnoozeValueList << tr("5 minutes") << tr("15 minutes") << tr(" 30 minutes") << tr("1 hour");
+	OstTraceFunctionExit0( SETTINGSUTILITY_SETTINGSUTILITY_EXIT );
 }
 
 /*!
@@ -51,7 +58,9 @@ SettingsUtility::SettingsUtility(QObject *parent)
  */
 SettingsUtility::~SettingsUtility()
 {
+	OstTraceFunctionEntry0( DUP1_SETTINGSUTILITY_SETTINGSUTILITY_ENTRY );
 	// Nothing.
+	OstTraceFunctionExit0( DUP1_SETTINGSUTILITY_SETTINGSUTILITY_EXIT );
 }
 
 /*!
@@ -59,6 +68,7 @@ SettingsUtility::~SettingsUtility()
  */
 QString SettingsUtility::time()
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_TIME_ENTRY );
 	return QTime::currentTime().toString(timeFormatString());
 }
 
@@ -67,6 +77,7 @@ QString SettingsUtility::time()
  */
 void SettingsUtility::setTimeFormat(const QString& format)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_SETTIMEFORMAT_ENTRY );
 	TLocale locale;
 
 	if (format == mTimeFormatList.at(0)) {
@@ -77,6 +88,7 @@ void SettingsUtility::setTimeFormat(const QString& format)
 		// Nothing to do.
 	}
 	locale.Set();
+	OstTraceFunctionExit0( SETTINGSUTILITY_SETTIMEFORMAT_EXIT );
 }
 
 /*!
@@ -84,6 +96,7 @@ void SettingsUtility::setTimeFormat(const QString& format)
  */
 int SettingsUtility::timeFormat(QStringList &format)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_TIMEFORMAT_ENTRY );
 	TLocale locale;
 	int value = -1;
 
@@ -95,6 +108,7 @@ int SettingsUtility::timeFormat(QStringList &format)
 
 	format = mTimeFormatList;
 
+	OstTraceFunctionExit0( SETTINGSUTILITY_TIMEFORMAT_EXIT );
 	return value;
 }
 
@@ -103,6 +117,7 @@ int SettingsUtility::timeFormat(QStringList &format)
  */
 void SettingsUtility::setClockType(const QString &type)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_SETCLOCKTYPE_ENTRY );
 	TLocale locale;
 
 	if (type == mClockTypeList.at(0)) {
@@ -113,6 +128,7 @@ void SettingsUtility::setClockType(const QString &type)
     	// Nothing to do.
     }
 	locale.Set();
+	OstTraceFunctionExit0( SETTINGSUTILITY_SETCLOCKTYPE_EXIT );
 }
 
 /*!
@@ -120,6 +136,7 @@ void SettingsUtility::setClockType(const QString &type)
  */
 int SettingsUtility::clockType(QStringList &list)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_CLOCKTYPE_ENTRY );
 	TLocale locale;
 	int value = -1;
 
@@ -133,6 +150,7 @@ int SettingsUtility::clockType(QStringList &list)
 
 	list = mClockTypeList;
 
+	OstTraceFunctionExit0( SETTINGSUTILITY_CLOCKTYPE_EXIT );
 	return value;
 }
 
@@ -141,6 +159,7 @@ int SettingsUtility::clockType(QStringList &list)
  */
 void SettingsUtility::setTimeSeparator(const QString &separator)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_SETTIMESEPARATOR_ENTRY );
 	if (mTimeSeparatorList.contains(separator)) {
 	    TLocale locale;
 
@@ -149,6 +168,7 @@ void SettingsUtility::setTimeSeparator(const QString &separator)
 
 		locale.Set();
     }
+	OstTraceFunctionExit0( SETTINGSUTILITY_SETTIMESEPARATOR_EXIT );
 }
 
 /*!
@@ -156,6 +176,7 @@ void SettingsUtility::setTimeSeparator(const QString &separator)
  */
 int SettingsUtility::timeSeparator(QStringList &list)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_TIMESEPARATOR_ENTRY );
 	TLocale locale;
 	TChar separatorChar = locale.TimeSeparator(1);
 	int value = -1;
@@ -169,6 +190,7 @@ int SettingsUtility::timeSeparator(QStringList &list)
 	}
 
 	list = mTimeSeparatorList;
+	OstTraceFunctionExit0( SETTINGSUTILITY_TIMESEPARATOR_EXIT );
 	return value;
 }
 
@@ -177,6 +199,7 @@ int SettingsUtility::timeSeparator(QStringList &list)
  */
 QString SettingsUtility::date()
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_DATE_ENTRY );
 	return QDate::currentDate().toString(dateFormatString());
 }
 
@@ -185,6 +208,7 @@ QString SettingsUtility::date()
  */
 void SettingsUtility::setDateFormat(const QString &format)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_SETDATEFORMAT_ENTRY );
 	TLocale locale;
 	int index;
 
@@ -210,6 +234,7 @@ void SettingsUtility::setDateFormat(const QString &format)
 	}
 
 	locale.Set();
+	OstTraceFunctionExit0( SETTINGSUTILITY_SETDATEFORMAT_EXIT );
 }
 
 /*!
@@ -217,6 +242,7 @@ void SettingsUtility::setDateFormat(const QString &format)
  */
 int SettingsUtility::dateFormat(QStringList &format)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_DATEFORMAT_ENTRY );
 	TLocale locale;
 	int index = -1;
 
@@ -237,6 +263,7 @@ int SettingsUtility::dateFormat(QStringList &format)
 
 	format = mDateFormatList;
 
+	OstTraceFunctionExit0( SETTINGSUTILITY_DATEFORMAT_EXIT );
 	return index;
 }
 
@@ -245,12 +272,14 @@ int SettingsUtility::dateFormat(QStringList &format)
  */
 void SettingsUtility::setDateSeparator(const QString &separator)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_SETDATESEPARATOR_ENTRY );
 	TLocale locale;
 	locale.SetDateSeparator(
 			TChar(separator.unicode()->unicode()), 1);
 	locale.SetDateSeparator(
 			TChar(separator.unicode()->unicode()), 2);
 	locale.Set();
+	OstTraceFunctionExit0( SETTINGSUTILITY_SETDATESEPARATOR_EXIT );
 }
 
 /*!
@@ -258,6 +287,7 @@ void SettingsUtility::setDateSeparator(const QString &separator)
  */
 int SettingsUtility::dateSeparator(QStringList &separator)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_DATESEPARATOR_ENTRY );
 	TLocale locale;
 	TChar separatorChar = locale.DateSeparator(1);
 
@@ -282,6 +312,7 @@ int SettingsUtility::dateSeparator(QStringList &separator)
 
 	separator = mDateSeparatorList;
 
+	OstTraceFunctionExit0( SETTINGSUTILITY_DATESEPARATOR_EXIT );
 	return value;
 }
 
@@ -292,7 +323,9 @@ int SettingsUtility::dateSeparator(QStringList &separator)
  */
 void SettingsUtility::setWorkdays(const QString &workdays)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_SETWORKDAYS_ENTRY );
 	Q_UNUSED(workdays)
+	OstTraceFunctionExit0( SETTINGSUTILITY_SETWORKDAYS_EXIT );
 }
 
 /*!
@@ -303,6 +336,7 @@ void SettingsUtility::setWorkdays(const QString &workdays)
  */
 int SettingsUtility::workdays(QStringList &workdaysList)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_WORKDAYS_ENTRY );
 	Q_UNUSED(workdaysList)
 
 	return 0;
@@ -315,6 +349,7 @@ int SettingsUtility::workdays(QStringList &workdaysList)
  */
 QString SettingsUtility::timeFormatString()
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_TIMEFORMATSTRING_ENTRY );
 	QString format;
 	TLocale locale;
 	QStringList dummyList;
@@ -329,6 +364,7 @@ QString SettingsUtility::timeFormatString()
 
 	format.replace(QString(":"), separator);
 
+	OstTraceFunctionExit0( SETTINGSUTILITY_TIMEFORMATSTRING_EXIT );
 	return format;
 }
 
@@ -339,6 +375,7 @@ QString SettingsUtility::timeFormatString()
  */
 QString SettingsUtility::dateFormatString()
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_DATEFORMATSTRING_ENTRY );
 	QStringList dummyList;
 	QString format(mDateFormatList.at(dateFormat(dummyList)));
 	QString separator = mDateSeparatorList.at(dateSeparator(dummyList));
@@ -346,6 +383,7 @@ QString SettingsUtility::dateFormatString()
 	format.replace(QString(" "), separator);
 	format.replace(QString("mm"), QString("MM"));
 
+	OstTraceFunctionExit0( SETTINGSUTILITY_DATEFORMATSTRING_EXIT );
 	return format;
 }
 
@@ -356,7 +394,9 @@ QString SettingsUtility::dateFormatString()
  */
 void SettingsUtility::setSnoozeTime(int index)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_SETSNOOZETIME_ENTRY );
 	Q_UNUSED(index)
+	OstTraceFunctionExit0( SETTINGSUTILITY_SETSNOOZETIME_EXIT );
 }
 
 /*!
@@ -367,9 +407,11 @@ void SettingsUtility::setSnoozeTime(int index)
  */
 int SettingsUtility::snoozeTime(QStringList &snoozeValueList)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_SNOOZETIME_ENTRY );
 	int index = -1;
 
 	snoozeValueList = mSnoozeValueList;
+	OstTraceFunctionExit0( SETTINGSUTILITY_SNOOZETIME_EXIT );
 	return index;
 }
 
@@ -380,9 +422,11 @@ int SettingsUtility::snoozeTime(QStringList &snoozeValueList)
  */
 void SettingsUtility::setStartOfWeek(int index)
 {
+	OstTraceFunctionEntry0( SETTINGSUTILITY_SETSTARTOFWEEK_ENTRY );
 	TLocale locale;
 	TDay day = (TDay)index;
 	locale.SetStartOfWeek(day);
 	locale.Set();
+	OstTraceFunctionExit0( SETTINGSUTILITY_SETSTARTOFWEEK_EXIT );
 }
 // End of file	--Don't remove this.

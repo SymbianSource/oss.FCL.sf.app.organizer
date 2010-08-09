@@ -484,18 +484,18 @@ void NotesTodoView::updateSubTitle(ulong id)
 	OstTraceFunctionEntry0( NOTESTODOVIEW_UPDATESUBTITLE_ENTRY );
 	Q_UNUSED(id)
 
-	// Get the number of notes and to-do entries.
+	// Get the number of incompleted to-do entries.
 	QList<ulong> entries = mAgendaUtil->entryIds(
 		AgendaUtil::IncludeIncompletedTodos);
 	mSubTitle->setHeading(
 			hbTrId("txt_notes_subhead_todos_ln_pending",entries.count()));
 	
-	if (0 >= entries.count()) {
-		mEmptyListLabel->show();
-		mListView->hide();
-	} else {
+	if (0 < mProxyModel->rowCount()) {
 		mEmptyListLabel->hide();
 		mListView->show();
+	} else {
+		mEmptyListLabel->show();
+		mListView->hide();
 	}
 	OstTraceFunctionExit0( NOTESTODOVIEW_UPDATESUBTITLE_EXIT );
 }

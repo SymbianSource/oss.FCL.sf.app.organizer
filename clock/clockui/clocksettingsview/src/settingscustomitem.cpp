@@ -36,6 +36,11 @@
 #include "clockcityselectionlist.h"
 #include "timezoneclient.h"
 #include "clockregionalsettingsview.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "settingscustomitemTraces.h"
+#endif
+
 
 /*!
 	\class SettingsCustomItem
@@ -52,10 +57,12 @@
 SettingsCustomItem::SettingsCustomItem(QGraphicsItem *parent)
 :HbDataFormViewItem(parent)
 {
+	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_SETTINGSCUSTOMITEM_ENTRY );
 	// Construct the settignsutility.
 	mSettingsUtility = new SettingsUtility();
 	// Construct the timezone client.
 	mTimezoneClient = TimezoneClient::getInstance();
+	OstTraceFunctionExit0( SETTINGSCUSTOMITEM_SETTINGSCUSTOMITEM_EXIT );
 }
 
 /*!
@@ -63,7 +70,9 @@ SettingsCustomItem::SettingsCustomItem(QGraphicsItem *parent)
  */
 SettingsCustomItem::~SettingsCustomItem()
 {
-    // Nothing yet.
+	OstTraceFunctionEntry0( DUP1_SETTINGSCUSTOMITEM_SETTINGSCUSTOMITEM_ENTRY );
+	// Nothing yet.
+	OstTraceFunctionExit0( DUP1_SETTINGSCUSTOMITEM_SETTINGSCUSTOMITEM_EXIT );
 }
 
 /*!
@@ -72,6 +81,7 @@ SettingsCustomItem::~SettingsCustomItem()
  */
 HbAbstractViewItem* SettingsCustomItem::createItem()
 {
+	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_CREATEITEM_ENTRY );
 	return new SettingsCustomItem(*this);
 }
 
@@ -81,14 +91,17 @@ HbAbstractViewItem* SettingsCustomItem::createItem()
  */
 bool SettingsCustomItem::canSetModelIndex(const QModelIndex &index) const
 {
+	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_CANSETMODELINDEX_ENTRY );
 	HbDataFormModelItem::DataItemType itemType =
 			static_cast<HbDataFormModelItem::DataItemType>(
 			index.data(HbDataFormModelItem::ItemTypeRole).toInt());
 
 	if(itemType >= HbDataFormModelItem::CustomItemBase &&
 			itemType <= (HbDataFormModelItem::CustomItemBase + 50)) {
+		OstTraceFunctionExit0( SETTINGSCUSTOMITEM_CANSETMODELINDEX_EXIT );
 		return true;
 	} else {
+		OstTraceFunctionExit0( DUP1_SETTINGSCUSTOMITEM_CANSETMODELINDEX_EXIT );
 		return false;
 	}
 
@@ -96,6 +109,7 @@ bool SettingsCustomItem::canSetModelIndex(const QModelIndex &index) const
 
 void SettingsCustomItem::restore()
 {
+	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_RESTORE_ENTRY );
 	HbDataFormModelItem::DataItemType itemType =
 			static_cast<HbDataFormModelItem::DataItemType>(
 			modelIndex().data(HbDataFormModelItem::ItemTypeRole).toInt());
@@ -147,11 +161,14 @@ void SettingsCustomItem::restore()
 		default:
 		break;
 	}
+	OstTraceFunctionExit0( SETTINGSCUSTOMITEM_RESTORE_EXIT );
 }
 
 void SettingsCustomItem::setWeekdaysList(QStringList list)
 {
+	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_SETWEEKDAYSLIST_ENTRY );
 	mWeekdaysList = list;
+	OstTraceFunctionExit0( SETTINGSCUSTOMITEM_SETWEEKDAYSLIST_EXIT );
 }
 
 /*!
@@ -160,6 +177,7 @@ void SettingsCustomItem::setWeekdaysList(QStringList list)
  */
 HbWidget* SettingsCustomItem::createCustomWidget()
 {
+	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_CREATECUSTOMWIDGET_ENTRY );
 	HbDataFormModelItem::DataItemType itemType =
 		static_cast<HbDataFormModelItem::DataItemType>(modelIndex()
 		.data(HbDataFormModelItem::ItemTypeRole).toInt());
@@ -171,6 +189,7 @@ HbWidget* SettingsCustomItem::createCustomWidget()
 			connect(
 					mTimeWidget, SIGNAL(clicked()),
 					this, SLOT(launchTimePicker()));
+			OstTraceFunctionExit0( SETTINGSCUSTOMITEM_CREATECUSTOMWIDGET_EXIT );
 			return mTimeWidget;
 		}
 
@@ -180,6 +199,7 @@ HbWidget* SettingsCustomItem::createCustomWidget()
 			connect(
 					mDateWidget, SIGNAL(clicked()),
 					this, SLOT(launchDatePicker()));
+			OstTraceFunctionExit0( DUP1_SETTINGSCUSTOMITEM_CREATECUSTOMWIDGET_EXIT );
 			return mDateWidget;
 		}
 
@@ -189,6 +209,7 @@ HbWidget* SettingsCustomItem::createCustomWidget()
 			connect(
 					mPlaceWidget, SIGNAL(clicked()),
 					this, SLOT(launchCitySelectionList()));
+			OstTraceFunctionExit0( DUP2_SETTINGSCUSTOMITEM_CREATECUSTOMWIDGET_EXIT );
 			return mPlaceWidget;
 		}
 
@@ -198,6 +219,7 @@ HbWidget* SettingsCustomItem::createCustomWidget()
 			connect(
 					mRegSettingsWidget, SIGNAL(clicked()),
 					this, SLOT(launchRegSettingsView()));
+			OstTraceFunctionExit0( DUP3_SETTINGSCUSTOMITEM_CREATECUSTOMWIDGET_EXIT );
 			return mRegSettingsWidget;
 		}
 
@@ -230,6 +252,7 @@ HbWidget* SettingsCustomItem::createCustomWidget()
 				}
 			}
 
+			OstTraceFunctionExit0( DUP4_SETTINGSCUSTOMITEM_CREATECUSTOMWIDGET_EXIT );
 			return mWorkdaysWidget;
 		}
 
@@ -243,6 +266,7 @@ HbWidget* SettingsCustomItem::createCustomWidget()
  */
 void SettingsCustomItem::launchTimePicker()
 {
+	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_LAUNCHTIMEPICKER_ENTRY );
 	if (mTimePickerDialog) {
 		delete mTimePickerDialog;
 	}
@@ -279,6 +303,7 @@ void SettingsCustomItem::launchTimePicker()
 	mTimePickerDialog->addAction(mCancelAction);
 
 	mTimePickerDialog->open(this, SLOT(selectedAction(HbAction*)));
+	OstTraceFunctionExit0( SETTINGSCUSTOMITEM_LAUNCHTIMEPICKER_EXIT );
 }
 
 /*!
@@ -286,6 +311,7 @@ void SettingsCustomItem::launchTimePicker()
  */
 void SettingsCustomItem::handleOkAction()
 {
+	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_HANDLEOKACTION_ENTRY );
 	if (mTimePickerDialog) {
 		// Get the time from the time picker.
 		QTime newTime = static_cast<HbDateTimePicker *> (
@@ -317,6 +343,7 @@ void SettingsCustomItem::handleOkAction()
 					QDateTime(newDate, QTime::currentTime()));
 		}
 	}
+	OstTraceFunctionExit0( SETTINGSCUSTOMITEM_HANDLEOKACTION_EXIT );
 }
 
 /*!
@@ -324,6 +351,7 @@ void SettingsCustomItem::handleOkAction()
  */
 void SettingsCustomItem::launchDatePicker()
 {
+	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_LAUNCHDATEPICKER_ENTRY );
 	if (mDatePickerDialog) {
 		delete mDatePickerDialog;
 	}
@@ -357,6 +385,7 @@ void SettingsCustomItem::launchDatePicker()
 	mDatePickerDialog->addAction(mCancelAction);
 
 	mDatePickerDialog->open(this, SLOT(selectedAction(HbAction*)));
+	OstTraceFunctionExit0( SETTINGSCUSTOMITEM_LAUNCHDATEPICKER_EXIT );
 }
 
 /*!
@@ -364,12 +393,14 @@ void SettingsCustomItem::launchDatePicker()
  */
 void SettingsCustomItem::launchCitySelectionList()
 {
+	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_LAUNCHCITYSELECTIONLIST_ENTRY );
 	mCitySelectionList = new ClockCitySelectionList(mTimezoneClient, this);
 	connect(
 			mCitySelectionList, SIGNAL(citySelected(LocationInfo)),
 			this, SLOT(updatePlaceItem(LocationInfo)));
 
 	mCitySelectionList->showCityList();
+	OstTraceFunctionExit0( SETTINGSCUSTOMITEM_LAUNCHCITYSELECTIONLIST_EXIT );
 }
 
 /*!
@@ -379,9 +410,11 @@ void SettingsCustomItem::launchCitySelectionList()
  */
 void SettingsCustomItem::updatePlaceItem(LocationInfo info)
 {
+	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_UPDATEPLACEITEM_ENTRY );
 	if (-1 != info.timezoneId) {
 		mTimezoneClient->setAsCurrentLocationL(info);
 	}
+	OstTraceFunctionExit0( SETTINGSCUSTOMITEM_UPDATEPLACEITEM_EXIT );
 }
 
 /*!
@@ -389,12 +422,14 @@ void SettingsCustomItem::updatePlaceItem(LocationInfo info)
  */
 void SettingsCustomItem::launchRegSettingsView()
 {
+	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_LAUNCHREGSETTINGSVIEW_ENTRY );
 	ClockRegionalSettingsView *view =
 			new ClockRegionalSettingsView();
 	connect(mTimezoneClient, SIGNAL(timechanged()),
           view, SLOT(updateWeekStartOn()));
 	view->showView();
 	
+	OstTraceFunctionExit0( SETTINGSCUSTOMITEM_LAUNCHREGSETTINGSVIEW_EXIT );
 }
 
 /*!
@@ -402,9 +437,11 @@ void SettingsCustomItem::launchRegSettingsView()
  */
 void SettingsCustomItem::selectedAction(HbAction *action)
 {
+	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_SELECTEDACTION_ENTRY );
 	if (action==mOkAction) {
 		handleOkAction();
 	}
+	OstTraceFunctionExit0( SETTINGSCUSTOMITEM_SELECTEDACTION_EXIT );
 }
 
 /*!
@@ -412,6 +449,7 @@ void SettingsCustomItem::selectedAction(HbAction *action)
  */
 QString SettingsCustomItem::workdaysSetting()
 {
+	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_WORKDAYSSETTING_ENTRY );
 	HbExtendedLocale locale = HbExtendedLocale::system();
 	// 0(Sun)0(sat)1(Fri)1(Thu)1(Wed)1(Tue)1(Mon)
 	QString workdaysString = locale.workDays();
@@ -430,6 +468,7 @@ QString SettingsCustomItem::workdaysSetting()
     }
 //	workdays.append('\0');
 
+	OstTraceFunctionExit0( SETTINGSCUSTOMITEM_WORKDAYSSETTING_EXIT );
 	return workdays;
 }
 

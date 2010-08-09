@@ -22,7 +22,7 @@ CONFIG += symbian_test
 DEPENDPATH += . \
 			  ./src \
 			  ../../../../calendarui/calenlauncher/src \
-			  ../../../../calendarui/calenlauncher/inc
+			  ../../inc
 INCLUDEPATH += .
 
 

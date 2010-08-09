@@ -28,10 +28,7 @@ DEPENDPATH += ./src \
 			  ./data
 
 symbian: {
-	BLD_INF_RULES.prj_exports += \
-				"./inc/caleneditor.h  |../inc/caleneditor.h"
-				
-				
+			
 	TARGET.UID3 = 0x10207198
 	TARGET.CAPABILITY += ALL -TCB
 	TARGET.EPOCALLOWDLLDATA = 1
@@ -52,7 +49,7 @@ SOURCES += caleneditor.cpp \
 					caleneditorrepeatfield.cpp \
 					caleneditordatahandler.cpp
 					
-HEADERS += caleneditor.h \
+HEADERS +=	../../organizer_plat/calendar_editor_api/inc/caleneditor.h \
             caleneditorcustomitem.h \
             caleneditorcommon.h \
             caleneditordocloader.h \

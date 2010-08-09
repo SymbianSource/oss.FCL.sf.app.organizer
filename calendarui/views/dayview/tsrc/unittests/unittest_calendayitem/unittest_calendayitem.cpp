@@ -11,15 +11,26 @@
  *
  * Contributors:
  *
- * Description: Test class for CalenDayContentWidget
+ * Description: Test class for CalenDayItem
  *
  */
 #include <QGraphicsItem>
 #include <QtTest/QtTest>
+#include <QGraphicsSceneEvent>
+#include <QDebug>
 
+
+#include "agendaentry.h"
+#include "calendaycontainer.h"
+
+#define private public
+#define protected public
 
 #include "calendayitem.h"
-#include "calendaycontainer.h"
+
+
+QRectF gTestWindowRect;
+Qt::Orientation gTestOrientation;
 
 class TestCalenDayItem : public QObject
 {
@@ -35,9 +46,12 @@ private slots:
     void init();
     void cleanup();
 
-    void testConstructors();
     void testCreateItem();
-
+    void testUpdateChildItems();
+    void testHasEventDescription();
+    void testHasBackgroundFrame();
+    
+    void testConstructors();
 private:
     CalenDayItem *mItem;
     CalenDayContainer *mContainer;
@@ -47,7 +61,7 @@ private:
  Constructor
  */
 TestCalenDayItem::TestCalenDayItem() :
-   mItem(NULL)
+   mItem(NULL), mContainer(NULL)
 {
 
 }
@@ -82,6 +96,9 @@ void TestCalenDayItem::init()
 {
     mContainer = new CalenDayContainer();
     mItem = new CalenDayItem(mContainer);
+    
+    mItem->mBg = new HbFrameItem();
+    mItem->mEventDesc = new HbTextItem(0);
 }
 
 /*!
@@ -95,8 +112,8 @@ void TestCalenDayItem::cleanup()
     }
     
     if (mContainer) {
-       delete mContainer;
-       mContainer = NULL;
+        delete mContainer;
+        mContainer = NULL;
     }
 }
 
@@ -118,17 +135,64 @@ void TestCalenDayItem::testConstructors()
 }
 
 /*!
-  Test function for creating new abstract items.
-  1. Test if item is created
-  2. Test if is the same as orginal.
+ Test function for creating new abstract items.
+ 1. Test if item is created
+ 2. Test if is the same as orginal.
  */
 void TestCalenDayItem::testCreateItem()
-{
-    HbAbstractViewItem *testItem = mItem->createItem();
-    QVERIFY(testItem);
-    
-    delete testItem;
-}
+	{
+		HbAbstractViewItem *testItem = mItem->createItem();
+		QVERIFY(testItem);
+		delete testItem;
+	}
+
+void TestCalenDayItem::testUpdateChildItems()
+	{
+		
+	}
+
+void TestCalenDayItem::testHasEventDescription()
+	{
+		QGraphicsSceneResizeEvent *event = new QGraphicsSceneResizeEvent();
+		qreal width = mItem->rect().width();
+		
+		qDebug() << "inited";
+		
+		mItem->mEventDescMinWidth = width - 4;
+		
+		qDebug() << "before resize";
+		
+		mItem->resizeEvent(event);
+		
+		qDebug() << "resize called";
+		
+		QVERIFY(mItem->hasEventDescription() == true);
+		
+		
+		mItem->mEventDescMinWidth = width + 8;
+		mItem->resizeEvent(event);
+		
+		qDebug() << "resize 2 called";
+		
+		QVERIFY(mItem->hasEventDescription() == false);
+	}
+
+void TestCalenDayItem::testHasBackgroundFrame()
+	{
+		QGraphicsSceneResizeEvent *event = new QGraphicsSceneResizeEvent();
+		qreal width = mItem->rect().width();
+
+
+		mItem->mFrameMinWidth = width - 4;
+		mItem->resizeEvent(event);
+	
+		QVERIFY(mItem->hasBackgroundFrame() == true);
+	
+		mItem->mFrameMinWidth = width + 8;
+		mItem->resizeEvent(event);
+	
+		QVERIFY(mItem->hasBackgroundFrame() == false);
+	}
 
 QTEST_MAIN(TestCalenDayItem);
 #include "unittest_calendayitem.moc"

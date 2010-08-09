@@ -52,6 +52,14 @@ NONSHARABLE_CLASS( CALENAGENDAUTIL_EXPORT CalenAgendaUtils )
          **/
         static bool endsAtStartOfDay( AgendaEntry& entry,
                                                         const QDateTime& day );
+        
+        /**
+         * Checks if the given entry is an all-day
+         * Need to call this API only for entry types other than EEvent 
+         * @param entry Entry for which all-day attribute is being queried
+         * @returns True, If entry is an all-day else False
+         */
+        static bool CalenAgendaUtils::isAlldayEvent( const AgendaEntry& entry );
 
     };
 

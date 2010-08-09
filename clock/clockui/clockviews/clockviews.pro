@@ -32,7 +32,8 @@ INCLUDEPATH += \
 		../clockalarmeditor/inc \
 		../clockwidget/clockwidgetimpl/inc \
 		../clockcityselectionlist/inc \
-		../inc
+		../inc \
+		./traces
 
 DEPENDPATH += \
 		./inc \

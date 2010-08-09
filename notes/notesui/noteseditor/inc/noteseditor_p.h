@@ -65,6 +65,7 @@ private slots:
 	bool saveNote();
 	bool saveTodo();
 	void editingCompleted(bool status);
+	void viewCreationCompleted(int error);
 
 private:
 	bool isNoteEdited();

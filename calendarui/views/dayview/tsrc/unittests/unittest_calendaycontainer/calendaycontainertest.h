@@ -11,31 +11,30 @@
 *
 * Contributors:
 *
-* Description:  Day view container - parent widget for events (CalenDayItem) and
-* hours area widgets (CalenDayEventsPane)
-* Responsible for positioning and resizing events widgets.
+* Description: Class inherit CalenDayContainer needed to test
 *
 */
 
-#ifndef CALENDAYCONTAINER_H
-#define CALENDAYCONTAINER_H
+#ifndef CALENDAYCONTAINERTEST_H
+#define CALENDAYCONTAINERTEST_H
 
-//System includes
+#include <QObject>
+#include "calendaycontainer.h"
 
-
-//Forward declarations
-
-
-class CalenDayContainer
+class CalenDayContainerTest : public CalenDayContainer
 {
+    Q_OBJECT
 
 public:
-    CalenDayContainer(){}
-	
-	const QDate &date() const { return QDate(); }
-
+    CalenDayContainerTest(QGraphicsItem *parent = 0)
+    : CalenDayContainer(parent)
+    {
+        
+    }
+    
+    
+    friend class TestCalenDayContainer;
 };
 
+#endif
 
-#endif // CALENDAYCONTAINER_H
-// End of File

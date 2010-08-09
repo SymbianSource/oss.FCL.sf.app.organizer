@@ -17,6 +17,7 @@
 #include <QGraphicsItem>
 #include <QtTest/QtTest>
 
+#include "hbstyle.h"
 #include "calendayutils.h"
 #include "hbdeviceprofile.h"
 #include "calendaycommonheaders.h"
@@ -25,6 +26,7 @@
 QRectF gTestWindowRect = QRectF(0, 0, 10, 20);
 Qt::Orientation gTestOrientation = Qt::Horizontal;
 qreal param_value = 10;
+qreal unitInPix = 1;
 
 class TestCalenDayUtils : public QObject
 	{
@@ -47,7 +49,6 @@ private slots:
 	void testContentWidth();
 
 	void testConstructors();
-	void testHorizontalSwipe();
 	void testOrientation();
 
 private:
@@ -158,21 +159,6 @@ void TestCalenDayUtils::testConstructors()
 	QVERIFY(testUtils);
 	}
 
-/*!
- Test function for checking if swipe is horizontal or not
- 1)test Horizontal swipe
- 2)test no horizontal swipe
- */
-void TestCalenDayUtils::testHorizontalSwipe()
-	{
-	//1)
-	QCOMPARE(CalenDayUtils::instance()->isHorizontalSwipe(KCalenSwipeAngle-5),
-			true);
-
-	//2)
-	QCOMPARE(CalenDayUtils::instance()->isHorizontalSwipe(KCalenSwipeAngle+5),
-			false);
-	}
 
 /*!
  Test function for getting main window's orientation

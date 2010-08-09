@@ -18,6 +18,8 @@
 #ifndef CALENINSTANCEID_H
 #define CALENINSTANCEID_H
 
+#include <agendaentry.h>
+
 /*!
  Mocked class TCalenInstanceId
  */
@@ -30,6 +32,15 @@ public:
     
     static TCalenInstanceId nullInstanceId() {
         return TCalenInstanceId();
+    }
+    
+    static TCalenInstanceId create( const AgendaEntry& entry )
+    {
+        TCalenInstanceId id;
+        id.mEntryLocalUid = entry.id();
+        id.mInstanceTime = entry.startTime();
+        id.mType = entry.type();
+        return id;
     }
     
 public: // data members

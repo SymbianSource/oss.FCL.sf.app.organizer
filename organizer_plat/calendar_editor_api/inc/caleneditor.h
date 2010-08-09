@@ -38,7 +38,7 @@ class CalenEditorPrivate;
 #   define CALENEDITOR_EXPORT Q_DECL_IMPORT
 #endif
 
-class CALENEDITOR_EXPORT CalenEditor : public QObject //HbView
+class CalenEditor : public QObject //HbView
 {
 	Q_OBJECT
 
@@ -48,20 +48,23 @@ public:
 		TypeUnKnown = -1
 	};
 	
-	explicit CalenEditor(QObject *parent = 0);
-	explicit CalenEditor(AgendaUtil *agendaUtil, QObject *parent = 0);
-	virtual ~CalenEditor();
-
-public:
-	void edit(const QFile &handle, bool launchCalendar);
-	void edit(AgendaEntry entry, bool launchCalendar);
-	void edit(ulong id, bool launchCalendar);
-	void create(QDateTime newEntryDateTime,
+	CALENEDITOR_EXPORT explicit CalenEditor(QObject *parent = 0);
+	CALENEDITOR_EXPORT explicit CalenEditor(AgendaUtil *agendaUtil, QObject *parent = 0);
+	CALENEDITOR_EXPORT virtual ~CalenEditor();
+	CALENEDITOR_EXPORT void edit(const QFile &handle, bool launchCalendar);
+	CALENEDITOR_EXPORT void edit(AgendaEntry entry, bool launchCalendar);
+	CALENEDITOR_EXPORT void edit(ulong id, bool launchCalendar);
+	CALENEDITOR_EXPORT void create(QDateTime newEntryDateTime,
 	            bool launchCalendar,
 	            CalenEditor::CreateType type = TypeAppointment);
-	void create(AgendaEntry entry,
+	CALENEDITOR_EXPORT void create(AgendaEntry entry,
 	            bool launchCalendar,
 	            CalenEditor::CreateType type = TypeAppointment);
+    /**
+    * This Function saves the entries
+    * Should only be called after edit or create function has been called 
+    */
+	CALENEDITOR_EXPORT void saveAndCloseEditor();
 
 signals:
 	void entrySaved();

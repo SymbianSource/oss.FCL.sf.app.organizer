@@ -22,7 +22,9 @@ DEFINES += TIMEZONECLIENT_LIBRARY
 INCLUDEPATH += ../../inc \
 			   ../../data/timezonedata \
 			   ../../clockengines/inc \
-			   ../../clockengines/clockserver/client/inc
+			   ../../clockengines/clockserver/client/inc \
+			   ./traces
+			   
 DEPENDPATH += . \
 			  ../../inc \
 			  ./inc \
@@ -99,8 +101,10 @@ symbian: {
 }
 
 SOURCES += timezoneclient.cpp \
-		   debug.cpp
+		   debug.cpp \
+		   environmentchangenotifier.cpp
 HEADERS += timezoneclient.h \
-		   debug.h
+		   debug.h \
+		   environmentchangenotifier.h
 
 # End of file	--Don't remove this.

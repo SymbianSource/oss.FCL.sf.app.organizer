@@ -17,4 +17,5 @@ EXPORTS
 	_ZN14CalenDateUtils9onSameDayERK9QDateTimeS2_ @ 16 NONAME
 	_ZN14CalenDateUtils9timeOfDayERK9QDateTime @ 17 NONAME
 	_ZN16CalenAgendaUtils16endsAtStartOfDayER11AgendaEntryRK9QDateTime @ 18 NONAME
+	_ZN16CalenAgendaUtils13isAlldayEventERK11AgendaEntry @ 19 NONAME
 

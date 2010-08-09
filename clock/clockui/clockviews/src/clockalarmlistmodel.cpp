@@ -30,6 +30,11 @@
 #include "clockalarmlistitemprototype.h"
 #include "clockappcontrollerif.h"
 #include "settingsutility.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockalarmlistmodelTraces.h"
+#endif
+
 
 // Constants
 const int KOneHourInMinute(60);
@@ -54,6 +59,7 @@ ClockAlarmListModel::ClockAlarmListModel(
  mSourceModel(0),
  mAppControllerIf(controllerIf)
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTMODEL_CLOCKALARMLISTMODEL_ENTRY );
 	// Construct the source model.
 	mSourceModel = new QStandardItemModel(0, 1, this);
 	
@@ -71,6 +77,7 @@ ClockAlarmListModel::ClockAlarmListModel(
 	connect(
 			mTickTimer, SIGNAL(timeout()),
 			this, SLOT(updateRemainingTime()));
+	OstTraceFunctionExit0( CLOCKALARMLISTMODEL_CLOCKALARMLISTMODEL_EXIT );
 }
 
 /*!
@@ -78,10 +85,12 @@ ClockAlarmListModel::ClockAlarmListModel(
  */
 ClockAlarmListModel::~ClockAlarmListModel()
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKALARMLISTMODEL_CLOCKALARMLISTMODEL_ENTRY );
 	if (mSourceModel) {
 		delete mSourceModel;
 		mSourceModel = 0;
 	}
+	OstTraceFunctionExit0( DUP1_CLOCKALARMLISTMODEL_CLOCKALARMLISTMODEL_EXIT );
 }
 
 /*!
@@ -89,8 +98,10 @@ ClockAlarmListModel::~ClockAlarmListModel()
  */
 void ClockAlarmListModel::populateModel()
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTMODEL_POPULATEMODEL_ENTRY );
 	// Populate the model in a different thread.
 	QTimer::singleShot(1, this, SLOT(populateSourceModel()));
+	OstTraceFunctionExit0( CLOCKALARMLISTMODEL_POPULATEMODEL_EXIT );
 }
 /*!
 	Returns the source model to be used with clock main view.
@@ -100,6 +111,8 @@ void ClockAlarmListModel::populateModel()
  */
 QAbstractItemModel *ClockAlarmListModel::sourceModel()
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTMODEL_SOURCEMODEL_ENTRY );
+	OstTraceFunctionExit0( CLOCKALARMLISTMODEL_SOURCEMODEL_EXIT );
 	return mSourceModel;
 }
 
@@ -108,6 +121,7 @@ QAbstractItemModel *ClockAlarmListModel::sourceModel()
  */
 void ClockAlarmListModel::populateSourceModel()
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTMODEL_POPULATESOURCEMODEL_ENTRY );
 	// Clear the model if it has any data already.
 	mSourceModel->clear();
 	mSourceModel->setColumnCount(1);
@@ -138,6 +152,7 @@ void ClockAlarmListModel::populateSourceModel()
 		// Start the Timer for 1 minute.
 		mTickTimer->start(60000 - 1000 * QTime::currentTime().second());
 	}
+	OstTraceFunctionExit0( CLOCKALARMLISTMODEL_POPULATESOURCEMODEL_EXIT );
 }
 
 /*!
@@ -147,6 +162,7 @@ void ClockAlarmListModel::populateSourceModel()
  */
 QString ClockAlarmListModel::calculateRemainingTime(AlarmInfo alarmInfo)
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTMODEL_CALCULATEREMAININGTIME_ENTRY );
 	QDateTime currentDateTime = QDateTime::currentDateTime();
 	QDateTime alarmTime = QDateTime(
 			alarmInfo.alarmDateTime, alarmInfo.nextDueTime);
@@ -199,6 +215,7 @@ QString ClockAlarmListModel::calculateRemainingTime(AlarmInfo alarmInfo)
 		formatTimeNote = hbTrId("txt_clock_main_view_setlabel_in_1days");
 		timeNote = formatTimeNote.arg(QString::number(dayleft));
 	}
+	OstTraceFunctionExit0( CLOCKALARMLISTMODEL_CALCULATEREMAININGTIME_EXIT );
 	return timeNote;
 }
 
@@ -210,6 +227,7 @@ QString ClockAlarmListModel::calculateRemainingTime(AlarmInfo alarmInfo)
  */
 int ClockAlarmListModel::getRemainingSeconds(QDateTime &alarmDateTime)
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTMODEL_GETREMAININGSECONDS_ENTRY );
 	int remainingSeconds;
 	QDateTime currentDateTime = QDateTime::currentDateTime();
 
@@ -232,6 +250,7 @@ int ClockAlarmListModel::getRemainingSeconds(QDateTime &alarmDateTime)
 	}
 
 	remainingSeconds = alarmTimeInSec - currentTimeInSec;
+	OstTraceFunctionExit0( CLOCKALARMLISTMODEL_GETREMAININGSECONDS_EXIT );
 	return remainingSeconds;
 }
 
@@ -244,6 +263,7 @@ int ClockAlarmListModel::getRemainingSeconds(QDateTime &alarmDateTime)
  */
 void ClockAlarmListModel::updateSourceModel(int alarmId)
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTMODEL_UPDATESOURCEMODEL_ENTRY );
 	Q_UNUSED(alarmId)
 	int alarmInfoCount;
 	int modelCount;
@@ -331,6 +351,7 @@ void ClockAlarmListModel::updateSourceModel(int alarmId)
 			mTickTimer->stop();
 		}
 	}
+	OstTraceFunctionExit0( CLOCKALARMLISTMODEL_UPDATESOURCEMODEL_EXIT );
 }
 
 /*!
@@ -340,6 +361,7 @@ void ClockAlarmListModel::updateSourceModel(int alarmId)
  */
 void ClockAlarmListModel::updateRemainingTime()
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTMODEL_UPDATEREMAININGTIME_ENTRY );
 	// Get the list of pending clock alarms from server.
 	AlarmInfo alarmInfo;
 	for (int row = 0; row < mSourceModel->rowCount(); row++) {
@@ -365,6 +387,7 @@ void ClockAlarmListModel::updateRemainingTime()
 	}
 	// Start the Timer for 1 minute.
 	mTickTimer->start(60000);
+	OstTraceFunctionExit0( CLOCKALARMLISTMODEL_UPDATEREMAININGTIME_EXIT );
 }
 
 /*!
@@ -377,6 +400,7 @@ void ClockAlarmListModel::updateRemainingTime()
 QStringList ClockAlarmListModel::getDisplayStringListforAlarmItem(
 		AlarmInfo alarmInfo)
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTMODEL_GETDISPLAYSTRINGLISTFORALARMITEM_ENTRY );
 	QStringList displayStringList;
 	QString timeString;
 	if (Snoozed == alarmInfo.alarmState) {
@@ -400,8 +424,8 @@ QStringList ClockAlarmListModel::getDisplayStringListforAlarmItem(
 		QString remainingTime = calculateRemainingTime(alarmInfo);
 		displayStringList.append(remainingTime);
 	} else {
-		// TODO: localization
-		displayStringList.append(QString("In-active"));
+		displayStringList.append(
+		        hbTrId("txt_clock_main_view_setlabel_inactive"));
 	}
 
 	QString alarmDescription = alarmInfo.alarmDesc;
@@ -428,6 +452,7 @@ QStringList ClockAlarmListModel::getDisplayStringListforAlarmItem(
 		}
 	}
 	displayStringList.append(repeatTypeString);
+	OstTraceFunctionExit0( CLOCKALARMLISTMODEL_GETDISPLAYSTRINGLISTFORALARMITEM_EXIT );
 	return displayStringList;
 }
 
@@ -438,6 +463,7 @@ QStringList ClockAlarmListModel::getDisplayStringListforAlarmItem(
  */
 void ClockAlarmListModel::appendAlarmToModel(AlarmInfo alarmInfo)
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTMODEL_APPENDALARMTOMODEL_ENTRY );
 	// Append only pending alarms to the model.
 	if (Notified != alarmInfo.alarmState) {
 		QStandardItem *item = new QStandardItem();
@@ -481,6 +507,7 @@ void ClockAlarmListModel::appendAlarmToModel(AlarmInfo alarmInfo)
 		mSourceModel->appendRow(item);
 	}
 
+	OstTraceFunctionExit0( CLOCKALARMLISTMODEL_APPENDALARMTOMODEL_EXIT );
 }
 
 /*!
@@ -493,6 +520,7 @@ void ClockAlarmListModel::appendAlarmToModel(AlarmInfo alarmInfo)
 void ClockAlarmListModel::updateAlarmDetails(
 		QModelIndex modelIndex, AlarmInfo alarmInfo)
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTMODEL_UPDATEALARMDETAILS_ENTRY );
 	if (Notified != alarmInfo.alarmState) {
 		QStringList displayStringList =
 				getDisplayStringListforAlarmItem(alarmInfo);
@@ -534,6 +562,7 @@ void ClockAlarmListModel::updateAlarmDetails(
 		alarmData.append(alarmInfo.alarmStatus);
 		mSourceModel->setData(modelIndex, alarmData, AlarmDetails);
 	}
+	OstTraceFunctionExit0( CLOCKALARMLISTMODEL_UPDATEALARMDETAILS_EXIT );
 }
 
 /*!
@@ -543,6 +572,7 @@ void ClockAlarmListModel::updateAlarmDetails(
  */
 int ClockAlarmListModel::getActiveAlarmCount()
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTMODEL_GETACTIVEALARMCOUNT_ENTRY );
 	int activeAlarmCount = 0;
 	for (int index = 0; index < mSourceModel->rowCount(); index++) {
 		// Get the data for the alarm.
@@ -552,6 +582,7 @@ int ClockAlarmListModel::getActiveAlarmCount()
 			activeAlarmCount++;
 		}
 	}
+	OstTraceFunctionExit0( CLOCKALARMLISTMODEL_GETACTIVEALARMCOUNT_EXIT );
 	return activeAlarmCount;
 }
 // End of file	--Don't remove this.

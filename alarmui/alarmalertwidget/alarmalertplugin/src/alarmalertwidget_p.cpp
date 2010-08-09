@@ -376,7 +376,7 @@ void AlarmAlertDialogPrivate::handleClockAlarms()
 	if (!stopAction) {
 		qFatal("Unable to load the stopAction softkey");
 	}
-	stopAction->setText(hbTrId("txt_calendar_button_alarm_dialog_snooze"));
+	stopAction->setText(hbTrId("txt_calendar_button_alarm_stop"));
 	disconnect(stopAction, SIGNAL(triggered()), this, SLOT(close()));
 	connect(stopAction, SIGNAL(triggered()), this, SLOT(dismissed()));
 
@@ -496,7 +496,7 @@ void AlarmAlertDialogPrivate::handleCalendarAlarms()
 	if (!stopAction) {
 		qFatal("Unable to find the stopAction softkey");
 	}
-	stopAction->setText(hbTrId("txt_calendar_button_alarm_dialog_snooze"));
+	stopAction->setText(hbTrId("txt_calendar_button_alarm_stop"));
 	disconnect(stopAction, SIGNAL(triggered()), this, SLOT(close()));
 	connect(stopAction, SIGNAL(triggered()), this, SLOT(dismissed()));
 	OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_HANDLECALENDARALARMS_EXIT );
@@ -558,7 +558,7 @@ void AlarmAlertDialogPrivate::handleToDoAlarms()
 	if (!stopAction) {
 		qFatal("Unable to load the stopAction softkey");
 	}
-	stopAction->setText(hbTrId("txt_calendar_button_alarm_dialog_snooze"));
+	stopAction->setText(hbTrId("txt_calendar_button_alarm_stop"));
 	disconnect(stopAction, SIGNAL(triggered()), this, SLOT(close()));
 	connect(stopAction, SIGNAL(triggered()), this, SLOT(dismissed()));
 	OstTraceFunctionExit0( ALARMALERTDIALOGPRIVATE_HANDLETODOALARMS_EXIT );

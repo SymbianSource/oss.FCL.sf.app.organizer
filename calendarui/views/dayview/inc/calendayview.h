@@ -144,7 +144,8 @@ private slots:
 
 public slots:
 	void changeView(TCalenCommandId viewId);
-	
+
+private slots:
     /**
      * Scrolls content to correct position after view repopulation
      */

@@ -18,7 +18,8 @@ TEMPLATE = lib
 TARGET = clockalarmclient
 DEFINES += ALARMCLIENT_LIBRARY
 
-INCLUDEPATH += ../../inc
+INCLUDEPATH += ../../inc \
+			   ./traces
 
 DEPENDPATH += . \
 			  ./inc \

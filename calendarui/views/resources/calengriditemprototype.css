@@ -1,16 +1,4 @@
-CalenGridItemPrototype:portrait {
-	layout: calendarCustomGridItem;
-}
-
-CalenGridItemPrototype:landscape {
-	layout: calendarCustomGridItem;
-}
-
-CalenGridItemPrototype[layoutName="calendarCustomGridItem"]:portrait{
-	layout:calendarCustomGridItem;
-}
-
-CalenGridItemPrototype[layoutName="calendarCustomGridItem"]:landscape{
+CalenGridItemPrototype[layoutName="calendarCustomGridItem"] {
 	layout:calendarCustomGridItem;
 }
 

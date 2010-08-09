@@ -22,6 +22,11 @@
 
 // User includes
 #include "clockapplication.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "mainTraces.h"
+#endif
+
 
 /*!
 	The main entry point of the clock application.
@@ -30,6 +35,7 @@
  */
 int main(int argc, char *argv[])
 {
+	OstTraceFunctionEntry0( _MAIN_ENTRY );
 	// Create and initialize an ClockApplication instance
 	QScopedPointer<ClockApplication> application(
 				new ClockApplication(argc, argv));

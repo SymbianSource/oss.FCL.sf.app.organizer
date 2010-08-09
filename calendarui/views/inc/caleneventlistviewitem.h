@@ -26,30 +26,53 @@ class CalenEventListViewItem : public HbListViewItem
 {
     Q_OBJECT
     Q_PROPERTY(bool leftAllDayIcon READ hasAllDayIcon WRITE setAllDayLeftIcon)
-    Q_PROPERTY(bool repeatingIcon READ hasRepeatingIcon WRITE setRepeatingIcon) 
-    Q_PROPERTY(bool alarmIcon READ hasAlarmIcon WRITE setAlarmIcon)
-    Q_PROPERTY(bool exceptionIcon READ hasExceptionIcon WRITE setExceptionIcon)
+    Q_PROPERTY(bool locationEntry READ locationEntryLayout WRITE setLocationEntry)
+
 public:
+    /**
+     * @brief Constructor
+     * @param CalenAgendaViewWidget
+     */
     CalenEventListViewItem(CalenAgendaViewWidget *parent = 0);
+    
+    /**
+     * @brief Destructor
+     */
     ~CalenEventListViewItem();
 
+    /**
+     * @brief creates the instance  of the class
+     */
     HbAbstractViewItem * createItem();
-    void updateChildItems();
-    bool hasAllDayIcon();
-    void setAllDayLeftIcon(bool icon = false);
-    bool hasRepeatingIcon();
-    void setRepeatingIcon(bool icon = false);
-    bool hasAlarmIcon();
-    void setAlarmIcon(bool icon = false);
-    bool hasExceptionIcon();
-    void setExceptionIcon(bool icon = false);
-private:  
     
-    bool mAllDayIcon ;
-    bool mExceptionIcon ;
-    bool mAlarmIcon ;
-    bool mRepeatingIcon ;
+    /**
+     * @brief crestes the item of the list
+     */
+    void updateChildItems();
+    
+    /**
+     * @brief check if all day icon is present
+     */
+    bool hasAllDayIcon();
+    
+    /**
+     * @brief sets teh all day icon 
+     */
+    void setAllDayLeftIcon(bool icon = false);
+    
+    /**
+    * @brief sets location entry status 
+    */
+    void setLocationEntry(bool icon);
+    
+    /**
+    * @brief check if location is present
+    */
+    bool locationEntryLayout();
+private:  
     CalenAgendaViewWidget* mParent; 
+    bool mAllDayIcon ;
+    bool mLocationEntry;
 };
 
 #endif      // __CALEN_EVENT_LIST_VIEW_ITEM_H__

@@ -24,6 +24,11 @@
 
 // User includes.
 #include "clockalarmcustomitem.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockalarmcustomitemTraces.h"
+#endif
+
 
 /*!
 	\class ClockAlarmCustomItem
@@ -40,7 +45,9 @@
 ClockAlarmCustomItem::ClockAlarmCustomItem(QGraphicsItem *parent)
 :HbDataFormViewItem(parent)
 {
+	OstTraceFunctionEntry0( CLOCKALARMCUSTOMITEM_CLOCKALARMCUSTOMITEM_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( CLOCKALARMCUSTOMITEM_CLOCKALARMCUSTOMITEM_EXIT );
 }
 
 /*!
@@ -48,7 +55,9 @@ ClockAlarmCustomItem::ClockAlarmCustomItem(QGraphicsItem *parent)
  */
 ClockAlarmCustomItem::~ClockAlarmCustomItem()
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKALARMCUSTOMITEM_CLOCKALARMCUSTOMITEM_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( DUP1_CLOCKALARMCUSTOMITEM_CLOCKALARMCUSTOMITEM_EXIT );
 }
 
 /*!
@@ -58,6 +67,7 @@ ClockAlarmCustomItem::~ClockAlarmCustomItem()
  */
 HbAbstractViewItem* ClockAlarmCustomItem::createItem()
 {
+	OstTraceFunctionEntry0( CLOCKALARMCUSTOMITEM_CREATEITEM_ENTRY );
 	return new ClockAlarmCustomItem(*this);
 }
 
@@ -67,13 +77,16 @@ HbAbstractViewItem* ClockAlarmCustomItem::createItem()
  */
 bool ClockAlarmCustomItem::canSetModelIndex(const QModelIndex &index) const
 {
+	OstTraceFunctionEntry0( CLOCKALARMCUSTOMITEM_CANSETMODELINDEX_ENTRY );
 	HbDataFormModelItem::DataItemType itemType = 
 			static_cast<HbDataFormModelItem::DataItemType>(
 			index.data(HbDataFormModelItem::ItemTypeRole).toInt());
 
 	if(itemType == (HbDataFormModelItem::CustomItemBase)) {
+		OstTraceFunctionExit0( CLOCKALARMCUSTOMITEM_CANSETMODELINDEX_EXIT );
 		return true;
 	} else {
+		OstTraceFunctionExit0( DUP1_CLOCKALARMCUSTOMITEM_CANSETMODELINDEX_EXIT );
 		return false;
 	}
 
@@ -81,6 +94,7 @@ bool ClockAlarmCustomItem::canSetModelIndex(const QModelIndex &index) const
 
 void ClockAlarmCustomItem::restore()
 {
+	OstTraceFunctionEntry0( CLOCKALARMCUSTOMITEM_RESTORE_ENTRY );
 	HbDataFormModelItem::DataItemType itemType =
 			static_cast<HbDataFormModelItem::DataItemType>(
 			modelIndex().data(HbDataFormModelItem::ItemTypeRole).toInt());
@@ -95,6 +109,7 @@ void ClockAlarmCustomItem::restore()
 				"objectName", modlItem->contentWidgetData("objectName"));
 	}
 
+	OstTraceFunctionExit0( CLOCKALARMCUSTOMITEM_RESTORE_EXIT );
 }
 
 /*!
@@ -104,7 +119,9 @@ void ClockAlarmCustomItem::restore()
  */
 HbWidget* ClockAlarmCustomItem::createCustomWidget()
 {
+	OstTraceFunctionEntry0( CLOCKALARMCUSTOMITEM_CREATECUSTOMWIDGET_ENTRY );
 	mCustomButton = new HbPushButton(this);
+	OstTraceFunctionExit0( CLOCKALARMCUSTOMITEM_CREATECUSTOMWIDGET_EXIT );
 	return mCustomButton;
 }
 

@@ -31,6 +31,7 @@
 #include <hbaction.h>
 
 // User Includes
+#include "calenagendautils.h"
 #include "caleneditorreminderfield.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
@@ -183,12 +184,11 @@ void CalenEditorReminderField::populateReminderItem(bool newEntry)
 		// Check if all day event or not and then set the choices accordingly.
 		if (mCalenEditor->editedEntry()->alarm().isNull()) {
 			// Alarm is set off
-			mReminderItem->setContentWidgetData("currentIndex", 0);
+			mReminderItem->setContentWidgetData("currentIndex", ReminderOff);
 			if(mReminderTimeAdded) {
 				removeReminderTimeField();
 			}
-		} else if (mCalenEditor->editedEntry()->type()
-		        != AgendaEntry::TypeEvent) {
+		} else if (!mCalenEditor->isAllDayEvent()) {
 			// Get the reminder offset value.
 			int reminderOffset =
 			        mCalenEditor->editedEntry()->alarm().timeOffset();
@@ -201,9 +201,9 @@ void CalenEditorReminderField::populateReminderItem(bool newEntry)
 			// If past then disable the field.
 			if (!mReminderTimeAdded) {
 				insertReminderTimeField();
-				if (pastEvent) {
-					mCustomReminderTimeItem->setEnabled(false);
-				}
+			}
+			if (pastEvent && mReminderTimeAdded) {
+				mCustomReminderTimeItem->setEnabled(false);
 			}
 			QStringList reminderChoicesForAllDay;
 			reminderChoicesForAllDay << hbTrId("txt_calendar_setlabel_reminder_val_off") 
@@ -217,15 +217,15 @@ void CalenEditorReminderField::populateReminderItem(bool newEntry)
 			reminder = mCalenEditor->editedEntry()->alarm();
 			int offsetInMins = reminder.timeOffset();
 			if (offsetInMins < 0 || offsetInMins == 0) {
-				mReminderItem->setContentWidgetData("currentIndex", 1);
+				mReminderItem->setContentWidgetData("currentIndex", ReminderOnEventDay);
 				mReminderTimeForAllDay = referenceTime.addSecs(-(offsetInMins
 						* 60));
 			} else if (offsetInMins < numberOfMinutesInADay) {
-				mReminderItem->setContentWidgetData("currentIndex", 2);
+				mReminderItem->setContentWidgetData("currentIndex", ReminderOneDayBefore);
 				mReminderTimeForAllDay = referenceTime.addSecs(-(offsetInMins
 						* 60));
 			} else {
-				mReminderItem->setContentWidgetData("currentIndex", 3);
+				mReminderItem->setContentWidgetData("currentIndex", ReminderTwoDaysBefore);
 				offsetInMins %= (24 * 60);
 				mReminderTimeForAllDay = referenceTime.addSecs(-(offsetInMins
 						* 60));
@@ -274,14 +274,14 @@ void CalenEditorReminderField::handleReminderIndexChanged(int index)
 		        startDateTimeForAllDay(
 		                               mCalenEditor->editedEntry()->startTime().date(),
 		                               QTime(0, 0, 0));
-		if (mReminderItem->contentWidgetData("currentIndex") == 0) {
+		if (mReminderItem->contentWidgetData("currentIndex") == ReminderOff) {
 			reminder = AgendaAlarm();
-			mCustomReminderTimeItem->setEnabled(false);
+			removeReminderTimeField();
 		} else {
 			int offset = 0;
-			if (mReminderItem->contentWidgetData("currentIndex") == 2) {
+			if (mReminderItem->contentWidgetData("currentIndex") == ReminderOneDayBefore) {
 				offset = 1;
-			} else if (mReminderItem->contentWidgetData("currentIndex") == 3) {
+			} else if (mReminderItem->contentWidgetData("currentIndex") == ReminderTwoDaysBefore) {
 				offset = 2;
 			}
 			if(!mReminderTimeAdded) {
@@ -301,9 +301,9 @@ void CalenEditorReminderField::handleReminderIndexChanged(int index)
 			reminderDateTimeForAllDay.setTime(mReminderTimeForAllDay);
 			int seconds =
 					reminderDateTimeForAllDay.secsTo(startDateTimeForAllDay);
-			int timeOffest = seconds / 60;
+			int timeOffset = seconds / 60;
 			mCustomReminderTimeItem->setEnabled(true);
-			reminder.setTimeOffset(timeOffest);
+			reminder.setTimeOffset(timeOffset);
 			reminder.setAlarmSoundName(QString(" "));
 		}
 	}
@@ -383,16 +383,48 @@ void CalenEditorReminderField::updateReminderChoicesForAllDay(QDate referenceDat
 	QDate tomorrow = QDate::currentDate().addDays(1);
 	QDate theDayAfterTomorrow = QDate::currentDate().addDays(2);
 	
+	// Get the previous index to retain if the alarm is valid
+	QVariant countVariant = mReminderItem->contentWidgetData("currentIndex");
+	int previousIndex = countVariant.toInt();
+	AgendaAlarm previousAlarm = mCalenEditor->editedEntry()->alarm();
+	
+	// Update the reminder choices only if the alarm set is not valid
+	// Get the alarm offset to check for the validity
+	int offset = mCalenEditor->editedEntry()->alarm().timeOffset();
+	bool update =  true;
+	
+	// Calculate the alarm time
+	QDateTime refDateTime;
+	refDateTime.setDate(referenceDate);
+	refDateTime.setTime(mCalenEditor->editedEntry()->startTime().time());
+	QTime checkTime = refDateTime.time().addSecs(-(offset * 60));
+	refDateTime.setTime(checkTime);
+	// Check for valid alarm offset
+	if(offset >= 0) {
+		// If the alarm which was already set is valid, 
+		// then dont update the reminder choices
+		if ((refDateTime > QDateTime::currentDateTime()) || 
+				(refDateTime.date() == QDate::currentDate() && (
+						refDateTime.time() > QTime::currentTime()))) {
+			update = false;
+		}		
+	}
+	// If the event is on a past date the default alarm will be off.
 	if (referenceDate < QDate::currentDate() || 
 			referenceDate == QDate::currentDate()) {
 		// Set reminder off for past event.
 		reminderChoicesForAllDay << hbTrId("txt_calendar_setlabel_reminder_val_off");
 		mReminderItem->setContentWidgetData(QString("items"), 
 													reminderChoicesForAllDay);
-		mReminderItem->setEnabled(false); 
-		removeReminderTimeField();
+		mReminderItem->setEnabled(false);		
+		// Remove the reminder field if it was added
+		if(mReminderTimeAdded) {
+			removeReminderTimeField();
+		}
 	} else if (theDayAfterTomorrow < referenceDate || 
 			theDayAfterTomorrow == referenceDate) {
+		// If the event is on a future date which is two days after the current date
+		// The options are off, on event day, 1 day before and 2 days before
 		reminderChoicesForAllDay 
 				<< hbTrId("txt_calendar_setlabel_reminder_val_off")
 				<< hbTrId("txt_calendar_setlabel_reminder_val_on_event_day")
@@ -400,18 +432,67 @@ void CalenEditorReminderField::updateReminderChoicesForAllDay(QDate referenceDat
 				<< hbTrId("txt_calendar_setlabel_reminder_val_2_days_before");
 		mReminderItem->setEnabled(true);
 		mCustomReminderTimeItem->setEnabled(true);
-	} else {
+		mReminderItem->setContentWidgetData(QString("items"), 
+													reminderChoicesForAllDay);
+	} else if (QTime::currentTime() < QTime(18, 0, 0, 0)) {
+		// If the event is on a future date which is one day after the current date
+		// and current time is before 6.00 pm.
+		// The options are off, on event day and 1 day before
 		reminderChoicesForAllDay 
-					<< hbTrId("txt_calendar_setlabel_reminder_val_off")
-					<< hbTrId("txt_calendar_setlabel_reminder_val_on_event_day")
-					<< hbTrId("txt_calendar_setlabel_reminder_val_1_day_before");
+				<< hbTrId("txt_calendar_setlabel_reminder_val_off")
+				<< hbTrId("txt_calendar_setlabel_reminder_val_on_event_day")
+				<< hbTrId("txt_calendar_setlabel_reminder_val_1_day_before");
 		mReminderItem->setEnabled(true);
 		mCustomReminderTimeItem->setEnabled(true);
-	}
-	if (mReminderItem->isEnabled()) {
 		mReminderItem->setContentWidgetData(QString("items"), 
-											reminderChoicesForAllDay);
+		                                    reminderChoicesForAllDay);
+	}else {
+		// If the event is on a future date which is one day after the current date
+		// and current time is after 6.00 pm.
+		// The options are off and on event day
+		reminderChoicesForAllDay 
+				<< hbTrId("txt_calendar_setlabel_reminder_val_off")
+				<< hbTrId("txt_calendar_setlabel_reminder_val_on_event_day");
+		mReminderItem->setEnabled(true);
+		mCustomReminderTimeItem->setEnabled(true);
+		mReminderItem->setContentWidgetData(QString("items"), 
+		                                    reminderChoicesForAllDay);
 	}
+	// Set the proper index based on the validity of the previous index
+	int count = reminderItemsCount();
+	// By default, in case of reminder updation, its been agreed to set 
+	// ReminderOneDayBefore even though ReminderTwoDaysBefore holds good
+	// If the ReminderOneDayBefore option is available set it or 
+	// else set it to ReminderOff
+	if(count > ReminderOneDayBefore) {
+		// Don't make the reminder off since
+		// the valid reminder options are there in the combobox
+		// So check for ReminderOff is needed
+		if (update && 
+			(previousIndex == ReminderOff || previousIndex >= ReminderOneDayBefore)) {
+			// If the index has to be updated check the previous index value
+			// And set the default reminder as 1 day before.
+			mReminderItem->setContentWidgetData("currentIndex", 
+														ReminderOneDayBefore);
+		}else {
+			// Set the previous index since the alarm is valid
+			mReminderItem->setContentWidgetData("currentIndex", previousIndex);
+			// Set the previous alarm also as the value will be changed to default value
+			// when the current index is been changed
+			mCalenEditor->editedEntry()->setAlarm(previousAlarm);
+			// Get the alarm time from the offset
+			QTime alarmTime = refDateTime.time();
+			// Set the alarm time and display it on the button
+			mReminderTimeForAllDay.setHMS(
+					alarmTime.hour(),alarmTime.minute(),alarmTime.second());
+			setDisplayTime();
+		}
+	}else {
+		// Enters this condition if the previous index set is not valid or
+		// the index is ReminderOff
+		mReminderItem->setContentWidgetData("currentIndex", ReminderOff);
+	}
+	
 	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_UPDATEREMINDERCHOICESFORALLDAY_EXIT );
 }
 
@@ -485,18 +566,27 @@ void CalenEditorReminderField::removeReminderTimeField()
 void CalenEditorReminderField::launchReminderTimePicker()
 {
 	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_LAUNCHREMINDERTIMEPICKER_ENTRY );
-	mTimePicker = new HbDateTimePicker(mReminderTimeForAllDay);
-	mTimePicker->setTime(mReminderTimeForAllDay);
+	
 	HbDialog *popUp = new HbDialog();
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
 	popUp->setTimeout(HbDialog::NoTimeout);
-	popUp->setContentWidget(mTimePicker);
+	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
 	popUp->setHeadingWidget( new HbLabel(
-			hbTrId("Reminder Time")));
-	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
+				hbTrId("Reminder Time")));
+	
+	HbExtendedLocale locale = HbExtendedLocale::system();
+	mTimePicker = new HbDateTimePicker(mReminderTimeForAllDay);
+	if(locale.timeStyle() == HbExtendedLocale::Time12) {
+		mTimePicker->setDisplayFormat("hh:mm ap");	
+	}else {
+		mTimePicker->setDisplayFormat("hh:mm");
+	}
+	mTimePicker->setTime(mReminderTimeForAllDay);
+	popUp->setContentWidget(mTimePicker);
+	
+	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"), popUp);
 	popUp->addAction(okAction);
 	connect(okAction, SIGNAL(triggered()), this, SLOT(setReminderTimeForAllDay()));
-	connect(okAction, SIGNAL(triggered()), popUp, SLOT(close()));
 	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"),
 	                                      popUp));
 	popUp->open();

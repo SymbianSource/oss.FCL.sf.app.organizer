@@ -16,8 +16,8 @@
 */
 
 #include "calencontroller.h"
-#include "calenserviceprovider.h"
 #include "calenapplication.h"
+#include "calenserviceprovider.h"
 
 /*!
 	CalenApplication
@@ -54,7 +54,7 @@ void CalenApplication::createController()
 		mController->constructController();
 		connect(mController, SIGNAL(appReady()), this, SLOT(handleAppReady()));
 		// Create the Calendar service provider
-		CalenServiceProvider service(mController);
+		mService = new CalenServiceProvider(mController, this);
 	}
 }
 

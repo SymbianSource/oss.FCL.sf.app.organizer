@@ -21,6 +21,7 @@
 
 // Forward Declarations.
 class CCalenController;
+class CalenServiceProvider;
 
 class CalenApplication : public HbApplication
 {
@@ -44,6 +45,7 @@ private slots:
 	
 private:
 	QPointer<CCalenController> mController;
+	QPointer<CalenServiceProvider> mService;
 };
 
 // End of file	--Don't remove this.

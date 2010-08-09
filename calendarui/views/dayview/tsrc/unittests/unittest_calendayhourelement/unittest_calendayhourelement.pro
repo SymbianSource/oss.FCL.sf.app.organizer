@@ -27,6 +27,7 @@ CONFIG += hb
 #it need folder in c:/unittest path
 #DEFINES += SAVE_IMAGES  
 
+DEFINES += CALENVIEWS_DLL
 				
 INCLUDEPATH += . \
                ../../../inc/ \

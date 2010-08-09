@@ -178,6 +178,7 @@ class  CalenViewManager :	public QObject,
 		int  mCurrentViewId;
 		int  mPreviousViewsId;
 		int  mFirstView;
+		bool mInstanceViewCreated;
         };
 
 #endif // CALENVIEWMANAGER_H

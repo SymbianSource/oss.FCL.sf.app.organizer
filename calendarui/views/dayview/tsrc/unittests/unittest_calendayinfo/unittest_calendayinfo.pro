@@ -46,13 +46,17 @@ HEADERS +=	calendayinfo.h \
 			
 
 SOURCES +=	unittest_calendayinfo.cpp \
-			calendayinfo.cpp 
+			calendayinfo.cpp \
+			calendayutils.cpp
 
 symbian : {
 	TARGET.CAPABILITY = CAP_APPLICATION
     MMP_RULES += "USERINCLUDE ."
     	
     INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
+            
+        LIBS += -lcalencommonutils \
+                -lagendainterface
             
     BLD_INF_RULES.prj_testexports += \
         "./rom/unittest_calendayinfo.iby        CORE_APP_LAYER_IBY_EXPORT_PATH(unittest_calendayinfo.iby)"

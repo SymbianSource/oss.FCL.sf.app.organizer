@@ -33,9 +33,11 @@
 #include <HbGroupBox>
 #include <HbDocumentLoader>
 #include <HbTranslator>
+#include <HbAbstractVkbHost>
+#include <HbLineEdit>
 #include <xqsettingsmanager.h>
 #include <xqsettingskey.h>
-
+#include <QLocale>
 
 // User includes
 #include "clockprivatecrkeys.h"
@@ -44,6 +46,11 @@
 #include "settingsutility.h"
 #include "timezoneclient.h"
 #include "clockalarmcustomitem.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockalarmeditorTraces.h"
+#endif
+
 
 // Constants
 const int KOneHourInMinute(60);
@@ -75,6 +82,7 @@ ClockAlarmEditor::ClockAlarmEditor(
  mAlarmId(alarmId),
  mStartOfWeek(0),
  mAlarmDayItemInserted(false),
+ mIsQuickAlarm(true),
  mAlarmEditorForm(0),
  mAlarmEditorModel(0),
  mAlarmTimeItem(0),
@@ -84,6 +92,7 @@ ClockAlarmEditor::ClockAlarmEditor(
  mAlarmDescription(0),
  mAlarmClient(alarmClient)
 {
+ 	OstTraceFunctionEntry0( CLOCKALARMEDITOR_CLOCKALARMEDITOR_ENTRY );
  	// Load the translation file and install the alarmeditor specific translator
 	mTranslator = new HbTranslator("clockalarmeditor");
 	mTranslator->loadCommon();
@@ -146,16 +155,11 @@ ClockAlarmEditor::ClockAlarmEditor(
 	// Get the menu items for the alarm editor.
 	mDeleteAction = qobject_cast<HbAction *> (
 			loader->findObject("deleteAction"));
-	mDiscardAction = qobject_cast<HbAction *>(
-			loader->findObject("discardChanges"));
 
 	// Connect the signals for the menu item.
 	connect(
 			mDeleteAction, SIGNAL(triggered()),
 			this, SLOT(handleDeleteAction()));
-	connect(
-			mDiscardAction, SIGNAL(triggered()),
-			this, SLOT(handleDiscardAction()));
 
 	// Add the done soft key action.
 	mDoneAction = new HbAction(Hb::DoneNaviAction);
@@ -163,7 +167,19 @@ ClockAlarmEditor::ClockAlarmEditor(
 			mDoneAction, SIGNAL(triggered()),
 			this, SLOT(handleDoneAction()));
 	mAlarmEditorView->setNavigationAction(mDoneAction);
+	
+	if (mAlarmEditorView) {
+		mVirtualKeyboard = new HbAbstractVkbHost(mAlarmEditorView);
+    }
+	connect(
+			mVirtualKeyboard, SIGNAL(keypadOpened()),
+			this, SLOT(handleKeypadOpen()));
+	connect(
+			mVirtualKeyboard, SIGNAL(keypadClosed()),
+			this, SLOT(handleKeypadClosed()));
 
+
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_CLOCKALARMEDITOR_EXIT );
 }
 
 /*!
@@ -171,12 +187,14 @@ ClockAlarmEditor::ClockAlarmEditor(
  */
 ClockAlarmEditor::~ClockAlarmEditor()
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKALARMEDITOR_CLOCKALARMEDITOR_ENTRY );
 	// Remove the translator
 	if (mTranslator) {
 		delete mTranslator;
 		mTranslator = 0;
 	}
 
+	OstTraceFunctionExit0( DUP1_CLOCKALARMEDITOR_CLOCKALARMEDITOR_EXIT );
 }
 
 /*!
@@ -184,10 +202,12 @@ ClockAlarmEditor::~ClockAlarmEditor()
  */
 void ClockAlarmEditor::showAlarmEditor()
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_SHOWALARMEDITOR_ENTRY );
 	// Store the current view and set alarm editor as current view.
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 	window->addView(mAlarmEditorView);
 	window->setCurrentView(mAlarmEditorView);
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_SHOWALARMEDITOR_EXIT );
 }
 
 /*!
@@ -195,6 +215,7 @@ void ClockAlarmEditor::showAlarmEditor()
  */
 void ClockAlarmEditor::handleDoneAction()
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_HANDLEDONEACTION_ENTRY );
 	int alarmDayIndex = -1;
 	if (mAlarmDayItemInserted) {
 		alarmDayIndex = mAlarmDayItem->contentWidgetData("currentIndex").toInt();
@@ -215,6 +236,7 @@ void ClockAlarmEditor::handleDoneAction()
 	emit alarmSet();
 
 	closeAlarmEditor();
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_HANDLEDONEACTION_EXIT );
 }
 
 /*!
@@ -222,39 +244,9 @@ void ClockAlarmEditor::handleDoneAction()
  */
 void ClockAlarmEditor::handleDeleteAction()
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_HANDLEDELETEACTION_ENTRY );
 	closeAlarmEditor();
-}
-
-/*!
-    Handles discard changes action on the editor.
- */
-void ClockAlarmEditor::handleDiscardAction()
-{
-	// Reset alarm time.
-	mAlarmTimeItem->setContentWidgetData(
-			"text",mAlarmInfo.nextDueTime.toString(mTimeFormat));
-	// Reset repeat info.
-	mAlarmOccurenceItem->setContentWidgetData("currentIndex", mAlarmInfo.repeatType);
-
-	// Reset alarm day item.
-	if (mAlarmDayItemInserted) {
-    	int currentIndex = mAlarmInfo.alarmDateTime.dayOfWeek() - 1;
-        currentIndex -= mStartOfWeek;
-        if(0 > currentIndex){
-           currentIndex += KDaysInWeek;
-        }
-		mAlarmDayItem->setContentWidgetData(
-				"currentIndex",currentIndex);
-	}
-
-	// Reset for alarm sound.
-	if (AlarmVolumeOn == mAlarmInfo.volumeStatus) {
-		mAlarmSoundItem->setContentWidgetData("checkState", Qt::Checked);
-	} else {
-		mAlarmSoundItem->setContentWidgetData("checkState", Qt::Unchecked);
-	}
-
-	mAlarmDescription->setContentWidgetData("text", mAlarmInfo.alarmDesc);
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_HANDLEDELETEACTION_EXIT );
 }
 
 /*!
@@ -262,6 +254,7 @@ void ClockAlarmEditor::handleDiscardAction()
  */
 void ClockAlarmEditor::handleTimeChange(const QString &text)
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_HANDLETIMECHANGE_ENTRY );
 	// If it is a new alarm.
 	if (!mAlarmId) {
 		// Decide the day to focus.
@@ -271,11 +264,13 @@ void ClockAlarmEditor::handleTimeChange(const QString &text)
 				text,
 				mTimeFormat);
 		if (!alarmTime.isValid()) {
+			OstTraceFunctionExit0( CLOCKALARMEDITOR_HANDLETIMECHANGE_EXIT );
 			return;
 		}
 
 		QTime homeTime = QTime::currentTime();
 		if (-1 == alarmDayIndex) {
+			OstTraceFunctionExit0( DUP1_CLOCKALARMEDITOR_HANDLETIMECHANGE_EXIT );
 			return;
 		}
 		if (homeTime > alarmTime) {
@@ -290,11 +285,19 @@ void ClockAlarmEditor::handleTimeChange(const QString &text)
             if(0 > alarmDayIndex){
                alarmDayIndex += KDaysInWeek;
             }
+            mAlarmEditorForm->removeConnection(
+            					mAlarmDayItem, SIGNAL(currentIndexChanged(int)),
+            					this, SLOT(handleDayChanged(int)));
+            mIsQuickAlarm = true;
 			mAlarmDayItem->setContentWidgetData(
 					"currentIndex",
 					alarmDayIndex);
+			mAlarmEditorForm->addConnection(
+								mAlarmDayItem, SIGNAL(currentIndexChanged(int)),
+								this, SLOT(handleDayChanged(int)));
 		}
 	}
+	OstTraceFunctionExit0( DUP2_CLOCKALARMEDITOR_HANDLETIMECHANGE_EXIT );
 }
 
 /*!
@@ -302,7 +305,10 @@ void ClockAlarmEditor::handleTimeChange(const QString &text)
  */
 void ClockAlarmEditor:: handleOccurenceChanged(int index)
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_HANDLEOCCURENCECHANGED_ENTRY );
 	Q_UNUSED(index)
+	
+	mIsQuickAlarm = false;
 
 	int repeatIndex =
 			mAlarmOccurenceItem->contentWidgetData("currentIndex").toInt();
@@ -315,6 +321,7 @@ void ClockAlarmEditor:: handleOccurenceChanged(int index)
 				mTimeFormat);
 		QTime homeTime = QTime::currentTime();
 		if (-1 == alarmDayIndex) {
+			OstTraceFunctionExit0( CLOCKALARMEDITOR_HANDLEOCCURENCECHANGED_EXIT );
 			return;
 		}
 		if (homeTime > alarmTime) {
@@ -327,7 +334,10 @@ void ClockAlarmEditor:: handleOccurenceChanged(int index)
 			// Show the alarm days field to select the day.
 			mAlarmDayItem = new HbDataFormModelItem(
 					HbDataFormModelItem::ComboBoxItem,
-					QString(hbTrId("txt_clock_formlabel_day")));
+					QString(hbTrId("txt_clk_setlabel_day")));
+			mAlarmEditorForm->addConnection(
+								mAlarmDayItem, SIGNAL(currentIndexChanged(int)),
+								this, SLOT(handleDayChanged(int)));
 
 			// Add the alarm days beginning from the start of week.
 			QStringList alarmDays;
@@ -356,6 +366,7 @@ void ClockAlarmEditor:: handleOccurenceChanged(int index)
 			mAlarmDayItemInserted = false;
 		}
 	}
+	OstTraceFunctionExit0( DUP1_CLOCKALARMEDITOR_HANDLEOCCURENCECHANGED_EXIT );
 }
 
 /*!
@@ -363,6 +374,7 @@ void ClockAlarmEditor:: handleOccurenceChanged(int index)
  */
 void ClockAlarmEditor::handleOkAction()
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_HANDLEOKACTION_ENTRY );
 	// Get the time from the time picker.
 	QTime newAlarmTime = static_cast<HbDateTimePicker *> (
 			mTimePickerDialog->contentWidget())->time();
@@ -370,9 +382,12 @@ void ClockAlarmEditor::handleOkAction()
 	// Update the selected time value.
 	mAlarmTimeItem->setContentWidgetData("text",newAlarmTime.toString(mTimeFormat));
 
-	if (mAlarmInfo.nextDueTime != newAlarmTime ) {
+	if (mOldAlarmTime != newAlarmTime && mIsQuickAlarm) {
 		handleTimeChange(newAlarmTime.toString(mTimeFormat));
 	}
+	
+	mOldAlarmTime = newAlarmTime;
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_HANDLEOKACTION_EXIT );
 }
 
 /*!
@@ -380,6 +395,7 @@ void ClockAlarmEditor::handleOkAction()
  */
 void ClockAlarmEditor::launchTimePicker()
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_LAUNCHTIMEPICKER_ENTRY );
 	if (mTimePickerDialog) {
 		delete mTimePickerDialog;
 	}
@@ -424,6 +440,7 @@ void ClockAlarmEditor::launchTimePicker()
 	mTimePickerDialog->addAction(mCancelAction);
 
 	mTimePickerDialog->open(this, SLOT(selectedAction(HbAction*)));
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_LAUNCHTIMEPICKER_EXIT );
 }
 
 /*!
@@ -431,12 +448,15 @@ void ClockAlarmEditor::launchTimePicker()
  */
 void ClockAlarmEditor::handleAlarmSoundChanged(int checkedState)
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_HANDLEALARMSOUNDCHANGED_ENTRY );
 	Q_UNUSED(checkedState)
-	if (AlarmVolumeOff == mAlarmInfo.volumeStatus) {
+	mIsQuickAlarm = false;
+/*	if (AlarmVolumeOff == mAlarmInfo.volumeStatus) {
 		mAlarmInfo.volumeStatus = AlarmVolumeOn;
 	} else {
 		mAlarmInfo.volumeStatus = AlarmVolumeOff;
-	}
+	}*/
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_HANDLEALARMSOUNDCHANGED_EXIT );
 }
 
 /*!
@@ -444,8 +464,69 @@ void ClockAlarmEditor::handleAlarmSoundChanged(int checkedState)
  */
 void ClockAlarmEditor::selectedAction(HbAction *action)
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_SELECTEDACTION_ENTRY );
 	if (action == mOkAction) {
 		handleOkAction();
+	}
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_SELECTEDACTION_EXIT );
+}
+
+/*!
+	Slot to handle the change in day item.
+ */
+void ClockAlarmEditor::handleDayChanged(int index)
+{
+	Q_UNUSED(index)
+	mIsQuickAlarm = false;
+}
+
+/*!
+	Slot to handle the change in description.
+ */
+void ClockAlarmEditor::handleDescriptionChanged(const QString &text)
+{
+	Q_UNUSED(text)
+	mIsQuickAlarm = false;
+}
+
+/*!
+	Slot to handle the open event of vkb.
+ */
+void ClockAlarmEditor::handleKeypadOpen()
+{
+	QModelIndex descriptionItemIndex =
+			mAlarmEditorModel->indexFromItem(mAlarmDescription); 
+	HbDataFormViewItem *viewItem = static_cast<HbDataFormViewItem *> (
+			mAlarmEditorForm->itemByIndex(descriptionItemIndex));
+	if (viewItem) {
+		HbLineEdit *editor = static_cast<HbLineEdit *>(
+				viewItem->dataItemContentWidget());
+		int temp = editor->text().length();
+		bool flag = editor->hasSelectedText();
+		if (!flag) {
+			editor->setSelection(0, temp);
+		}
+	}
+}
+
+/*!
+	Slot to handle the close event of vkb.
+ */
+void ClockAlarmEditor::handleKeypadClosed()
+{
+	QModelIndex descriptionItemIndex =
+			mAlarmEditorModel->indexFromItem(mAlarmDescription); 
+	HbDataFormViewItem *viewItem = static_cast<HbDataFormViewItem *> (
+			mAlarmEditorForm->itemByIndex(descriptionItemIndex));
+	if (viewItem) {
+		HbLineEdit *editor = static_cast<HbLineEdit *>(
+				viewItem->dataItemContentWidget());
+		
+		editor->setSelection(0, 0);
+		if (editor->text().isEmpty()) {
+	        editor->setText(hbTrId("txt_clk_formlabel_val_alarm"));
+        }
+
 	}
 }
 
@@ -454,6 +535,7 @@ void ClockAlarmEditor::selectedAction(HbAction *action)
  */
 void ClockAlarmEditor::initModel()
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_INITMODEL_ENTRY );
 	// Remove the model.
 	if (mAlarmEditorForm->model()) {
 		delete mAlarmEditorForm->model();
@@ -466,6 +548,7 @@ void ClockAlarmEditor::initModel()
 	populateModelItems();
 	// Set the model.
 	mAlarmEditorForm->setModel(mAlarmEditorModel);
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_INITMODEL_EXIT );
 }
 
 /*!
@@ -473,8 +556,9 @@ void ClockAlarmEditor::initModel()
  */
 void ClockAlarmEditor::populateModelItems()
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_POPULATEMODELITEMS_ENTRY );
 	// Time.
-	// Creats a data form model item to set time.
+	// Creates a data form model item to set time.
 	mAlarmTimeItem = mAlarmEditorModel->appendDataFormItem(
 			HbDataFormModelItem::CustomItemBase,
 			QString(hbTrId("txt_clk_setlabel_time")),
@@ -517,6 +601,9 @@ void ClockAlarmEditor::populateModelItems()
 					HbDataFormModelItem::ComboBoxItem,
 					QString(hbTrId("txt_clk_setlabel_day")),
 					mAlarmEditorModel->invisibleRootItem());
+			mAlarmEditorForm->addConnection(
+					mAlarmDayItem, SIGNAL(currentIndexChanged(int)),
+					this, SLOT(handleDayChanged(int)));
 
 			// Add the alarm days beginning from the start of week.
 			QStringList alarmDays;
@@ -553,7 +640,7 @@ void ClockAlarmEditor::populateModelItems()
 	if (AlarmVolumeOn == mAlarmInfo.volumeStatus) {
 		mAlarmSoundItem->setContentWidgetData("checkState",Qt::Checked);
 	}
-	mAlarmSoundItem->setContentWidgetData("objectName", "alarmaSound");
+	mAlarmSoundItem->setContentWidgetData("objectName", "alarmSound");
 	mAlarmEditorForm->addConnection(
 			mAlarmSoundItem, SIGNAL(stateChanged(int)),
 			this,SLOT(handleAlarmSoundChanged(int)));
@@ -565,7 +652,11 @@ void ClockAlarmEditor::populateModelItems()
 			mAlarmEditorModel->invisibleRootItem());
 	mAlarmDescription->setContentWidgetData("text", mAlarmInfo.alarmDesc);
 	mAlarmDescription->setContentWidgetData("objectName", "alaramDescription");
+	mAlarmEditorForm->addConnection(
+			mAlarmDescription, SIGNAL(textChanged (const QString &)),
+			this, SLOT(handleDescriptionChanged(const QString &)));
 
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_POPULATEMODELITEMS_EXIT );
 }
 
 /*!
@@ -575,6 +666,7 @@ void ClockAlarmEditor::populateModelItems()
  */
 void ClockAlarmEditor::initAlarmInfo()
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_INITALARMINFO_ENTRY );
 	// Fill default values for alarmInfo.
 	mAlarmInfo.nextDueTime = getPreviousAlarmTime();
 	mAlarmInfo.alarmDesc =
@@ -602,6 +694,11 @@ void ClockAlarmEditor::initAlarmInfo()
 		mAlarmClient.getAlarmInfo(mAlarmId, mAlarmInfo);
 		mAlarmClient.deleteAlarm(mAlarmId);
 	}
+	
+	// Set the value for previous alarm time.
+	mOldAlarmTime = mAlarmInfo.nextDueTime;
+	
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_INITALARMINFO_EXIT );
 }
 
 /*!
@@ -610,6 +707,7 @@ void ClockAlarmEditor::initAlarmInfo()
 void ClockAlarmEditor::setAlarm(
 		QString timeInfo, QString descInfo, int repeatType, int alarmDayIndex)
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_SETALARM_ENTRY );
 	QTime alarmTime;
 	AlarmInfo alarmInfo;
 
@@ -633,7 +731,12 @@ void ClockAlarmEditor::setAlarm(
 	}
 
 	// Fill the alarm volume status
-	alarmInfo.volumeStatus = mAlarmInfo.volumeStatus;
+	int state = mAlarmSoundItem->contentWidgetData("checkState").toInt();
+	if (Qt::Checked == state) {
+	    alarmInfo.volumeStatus = AlarmVolumeOn;
+    } else {
+    	alarmInfo.volumeStatus = AlarmVolumeOff;
+    }
 
 	// Request the listener to set the alarm.
 	mAlarmClient.setAlarm(alarmInfo);
@@ -655,6 +758,7 @@ void ClockAlarmEditor::setAlarm(
 
 	// Save previous alarm time.
 	setPreviosAlarmTime(alarmTime);
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_SETALARM_EXIT );
 }
 
 /*!
@@ -665,6 +769,7 @@ void ClockAlarmEditor::setAlarm(
  */
 QTime ClockAlarmEditor::getPreviousAlarmTime()
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_GETPREVIOUSALARMTIME_ENTRY );
 	QTime previousTime(9,0,0);
 
 	// Read the initial values from the cenrep.
@@ -677,9 +782,11 @@ QTime ClockAlarmEditor::getPreviousAlarmTime()
 		previousTime.setHMS(
 				alarmTimeMinutes / 60, alarmTimeMinutes % 60, 0);
 
+		OstTraceFunctionExit0( CLOCKALARMEDITOR_GETPREVIOUSALARMTIME_EXIT );
 		return previousTime;
 	}
 
+	OstTraceFunctionExit0( DUP1_CLOCKALARMEDITOR_GETPREVIOUSALARMTIME_EXIT );
 	return previousTime;
 }
 
@@ -688,18 +795,22 @@ QTime ClockAlarmEditor::getPreviousAlarmTime()
  */
 void ClockAlarmEditor::setPreviosAlarmTime(QTime time)
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_SETPREVIOSALARMTIME_ENTRY );
 	int alarmTimeMinutes = (time.hour() * 60) + (time.minute());
 
 	// Write the value to cenrep.
 	mSettingsManager->writeItemValue(*mPreviosAlarmTime, alarmTimeMinutes);
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_SETPREVIOSALARMTIME_EXIT );
 }
 
 void ClockAlarmEditor::closeAlarmEditor()
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_CLOSEALARMEDITOR_ENTRY );
 	// Remove the alarm editor.
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 	window->removeView(mAlarmEditorView);
 	deleteLater();
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_CLOSEALARMEDITOR_EXIT );
 }
 
 /*!
@@ -709,6 +820,7 @@ void ClockAlarmEditor::closeAlarmEditor()
  */
 void ClockAlarmEditor::displayDSTRollOverNote(AlarmInfo& alarmInfo)
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_DISPLAYDSTROLLOVERNOTE_ENTRY );
 
 	QString alarmTime = alarmInfo.nextDueTime.toString(mTimeFormat);
 	QString dstRollOverText =
@@ -716,6 +828,7 @@ void ClockAlarmEditor::displayDSTRollOverNote(AlarmInfo& alarmInfo)
 	QString displayText = dstRollOverText.arg(alarmTime);
 	// show the note
 	launchDialog(displayText);
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_DISPLAYDSTROLLOVERNOTE_EXIT );
 }
 
 /*!
@@ -725,6 +838,7 @@ void ClockAlarmEditor::displayDSTRollOverNote(AlarmInfo& alarmInfo)
  */
 void ClockAlarmEditor::displayRemainingTimeNote(AlarmInfo& alarmInfo)
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_DISPLAYREMAININGTIMENOTE_ENTRY );
 	QDateTime currentDateTime= QDateTime::currentDateTime();
 
 	QTime alarmTime = alarmInfo.origAlarmTime;
@@ -862,6 +976,7 @@ void ClockAlarmEditor::displayRemainingTimeNote(AlarmInfo& alarmInfo)
 	if (showDisplayText) {
 		launchDialog(displayText);
 	}
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_DISPLAYREMAININGTIMENOTE_EXIT );
 }
 
 /*!
@@ -872,24 +987,27 @@ void ClockAlarmEditor::displayRemainingTimeNote(AlarmInfo& alarmInfo)
  */
 void ClockAlarmEditor::getDayText(int alarmDay,QString& dayText)
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_GETDAYTEXT_ENTRY );
+	QLocale qLocale;
 	switch(alarmDay) {
-		case 1:dayText.append(hbTrId("txt_clk_setlabel_val_monday"));
+		case 1:dayText.append(qLocale.dayName(1));
 		break;
-		case 2:dayText.append(hbTrId("txt_clk_setlabel_val_tuesday"));
+		case 2:dayText.append(qLocale.dayName(2));
 		break;
-		case 3:dayText.append(hbTrId("txt_clk_setlabel_val_wednesday"));
+		case 3:dayText.append(qLocale.dayName(3));
 		break;
-		case 4:dayText.append(hbTrId("txt_clk_setlabel_val_thursday"));
+		case 4:dayText.append(qLocale.dayName(4));
 		break;
-		case 5:dayText.append(hbTrId("txt_clk_setlabel_val_friday"));
+		case 5:dayText.append(qLocale.dayName(5));
 		break;
-		case 6:dayText.append(hbTrId("txt_clk_setlabel_val_saturday"));
+		case 6:dayText.append(qLocale.dayName(6));
 		break;
-		case 7:dayText.append(hbTrId("txt_clk_setlabel_val_sunday"));
+		case 7:dayText.append(qLocale.dayName(7));
 		break;
 		default:
 			break;
 	}
+OstTraceFunctionExit0( CLOCKALARMEDITOR_GETDAYTEXT_EXIT );
 }
 /*!
 	gets remaining seconds to the alarm time from current date time
@@ -898,6 +1016,7 @@ void ClockAlarmEditor::getDayText(int alarmDay,QString& dayText)
  */
 int ClockAlarmEditor::getRemainingSeconds(QDateTime& alarmDateTime)
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_GETREMAININGSECONDS_ENTRY );
 	QDateTime currentDateTime = QDateTime::currentDateTime();
 
 	int currentDateTimeSec =
@@ -918,6 +1037,7 @@ int ClockAlarmEditor::getRemainingSeconds(QDateTime& alarmDateTime)
 	}
 
 	int remainingSeconds = alarmDateTimeSec - currentDateTimeSec;
+	OstTraceFunctionExit0( CLOCKALARMEDITOR_GETREMAININGSECONDS_EXIT );
 	return remainingSeconds;
 }
 
@@ -926,6 +1046,7 @@ int ClockAlarmEditor::getRemainingSeconds(QDateTime& alarmDateTime)
  */
 void ClockAlarmEditor::launchDialog(QString title, QString text)
 {
+	OstTraceFunctionEntry0( CLOCKALARMEDITOR_LAUNCHDIALOG_ENTRY );
 	HbNotificationDialog *notificationDialog = new HbNotificationDialog();
 	notificationDialog->setTitle(title);
 
@@ -935,6 +1056,7 @@ void ClockAlarmEditor::launchDialog(QString title, QString text)
 
 	notificationDialog->setTimeout(HbPopup::ConfirmationNoteTimeout);
 	notificationDialog->show();
+    OstTraceFunctionExit0( CLOCKALARMEDITOR_LAUNCHDIALOG_EXIT );
 }
 
 /*!
@@ -943,6 +1065,7 @@ void ClockAlarmEditor::launchDialog(QString title, QString text)
 void ClockAlarmEditor::sortAlarmDaysList(QStringList& alarmDaysList)
 
 {
+    OstTraceFunctionEntry0( CLOCKALARMEDITOR_SORTALARMDAYSLIST_ENTRY );
     for(int index=(mStartOfWeek + 1),j=KDaysInWeek;j!=0 ;index++,j--){
         if(index > KDaysInWeek){
            index = index - KDaysInWeek;
@@ -951,5 +1074,6 @@ void ClockAlarmEditor::sortAlarmDaysList(QStringList& alarmDaysList)
         getDayText(index, alarmDayText );
         alarmDaysList.append(alarmDayText);
     }
+    OstTraceFunctionExit0( CLOCKALARMEDITOR_SORTALARMDAYSLIST_EXIT );
 }
 // End of file	--Don't remove this.

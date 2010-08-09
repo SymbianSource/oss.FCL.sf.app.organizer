@@ -26,8 +26,9 @@
 #include <HbListView>
 #include <HbNotificationDialog>
 #include <HbStyleLoader>
-#include <hbapplication> // hbapplication
-#include <hbactivitymanager> // activity manager
+#include <HbColorScheme>
+#include <HbApplication> // hbapplication
+#include <HbActivityManager> // activity manager
 
 // User includes
 #include "clockmainview.h"
@@ -42,6 +43,11 @@
 #include "clockalarmlistitemprototype.h"
 #include "clockalarmlistmodel.h"
 #include "clockwidget.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockmainviewTraces.h"
+#endif
+
 
 /*!
 	\class ClockMainView
@@ -61,7 +67,9 @@ ClockMainView::ClockMainView(QGraphicsItem *parent)
  mIsLongTop(false),
  mIsScreenShotCapruted(false)
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_CLOCKMAINVIEW_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( CLOCKMAINVIEW_CLOCKMAINVIEW_EXIT );
 }
 
 /*!
@@ -69,6 +77,7 @@ ClockMainView::ClockMainView(QGraphicsItem *parent)
  */
 ClockMainView::~ClockMainView()
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKMAINVIEW_CLOCKMAINVIEW_ENTRY );
 	if (mDocLoader) {
 		delete mDocLoader;
 		mDocLoader = 0;
@@ -84,6 +93,7 @@ ClockMainView::~ClockMainView()
 	HbStyleLoader::unregisterFilePath(
 			":/style/clockalarmlistitemprototype_color.css");
 
+	OstTraceFunctionExit0( DUP1_CLOCKMAINVIEW_CLOCKMAINVIEW_EXIT );
 }
 
 /*!
@@ -96,12 +106,16 @@ ClockMainView::~ClockMainView()
 void ClockMainView::setupView(
 		ClockAppControllerIf &controllerIf, ClockDocLoader *docLoader)
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_SETUPVIEW_ENTRY );
 	mDocLoader = docLoader;
 	mAppControllerIf = &controllerIf;
 
 	mTimezoneClient = controllerIf.timezoneClient();
 	mSettingsUtility = controllerIf.settingsUtility();
 	mAlarmClient = controllerIf.alarmClient();
+	
+	// Fetch the color group of the labels from the theme.
+	mLabelColorGroup = HbColorScheme::color("qtc_view_normal");
 
 	// Create the model.
 	mAlarmListModel =  new ClockAlarmListModel(*mAppControllerIf, this);
@@ -137,6 +151,7 @@ void ClockMainView::setupView(
 	// Get the "No alarm set" label.
 	mNoAlarmLabel = qobject_cast<HbLabel *> (
 			mDocLoader->findWidget(CLOCK_NOALARMLABEL));
+	mNoAlarmLabel->setTextColor(mLabelColorGroup);
 
 	// Get the alarm's list.
 	mAlarmList = qobject_cast<HbListView *> (
@@ -185,7 +200,10 @@ void ClockMainView::setupView(
 	}
 
 	mDayLabel = static_cast<HbLabel *> (mDocLoader->findObject("dateLabel"));
-	mPlaceLabel = static_cast<HbLabel *> (mDocLoader->findObject("placeLabel"));
+	mDayLabel->setTextColor(mLabelColorGroup);
+	mPlaceLabel = static_cast<HbLabel *> (mDocLoader->findObject("placetext"));
+	mPlaceLabel->setTextColor(mLabelColorGroup);
+	mDstIcon = static_cast<HbLabel *> (mDocLoader->findObject("dstIcon"));
 	mClockWidget = static_cast<ClockWidget*> (
 			mDocLoader->findObject(CLOCK_WIDGET));
 
@@ -212,6 +230,7 @@ void ClockMainView::setupView(
 	// connect for the aboutToQuit events on application Exit as to call saveActivity
     connect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()), this, SLOT(saveActivity()));
 
+    OstTraceFunctionExit0( CLOCKMAINVIEW_SETUPVIEW_EXIT );
 }
 
 /*!
@@ -220,6 +239,7 @@ void ClockMainView::setupView(
  */
 void ClockMainView::setupAfterViewReady()
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_SETUPAFTERVIEWREADY_ENTRY );
 	// Get the toolbar/menu actions.
 	mRefreshMainView = static_cast<HbAction *> (
 			mDocLoader->findObject("alarmsAction"));
@@ -260,6 +280,7 @@ void ClockMainView::setupAfterViewReady()
 			mTimezoneClient, SIGNAL(cityUpdated()),
 			this, SLOT(updatePlaceLabel()));
 	
+	OstTraceFunctionExit0( CLOCKMAINVIEW_SETUPAFTERVIEWREADY_EXIT );
 }
 
 /*!
@@ -270,6 +291,7 @@ void ClockMainView::setupAfterViewReady()
  */
 void ClockMainView::handleAlarmStatusChanged(int row)
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_HANDLEALARMSTATUSCHANGED_ENTRY );
 	AlarmInfo alarmInfo;
 
 	// Get the data for the alarm.
@@ -311,6 +333,7 @@ void ClockMainView::handleAlarmStatusChanged(int row)
 
 		mSelectedItem = -1;
 	}
+	OstTraceFunctionExit0( CLOCKMAINVIEW_HANDLEALARMSTATUSCHANGED_EXIT );
 }
 
 /*!
@@ -319,8 +342,10 @@ void ClockMainView::handleAlarmStatusChanged(int row)
  */
 void ClockMainView::refreshMainView()
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_REFRESHMAINVIEW_ENTRY );
 	mRefreshMainView->setChecked(true);
 
+	OstTraceFunctionExit0( CLOCKMAINVIEW_REFRESHMAINVIEW_EXIT );
 }
 
 /*!
@@ -329,9 +354,11 @@ void ClockMainView::refreshMainView()
  */
 void ClockMainView::displayWorldClockView()
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_DISPLAYWORLDCLOCKVIEW_ENTRY );
 	mAppControllerIf->switchToView(WorldClock);
 	// no need to capture the screenshot here as it's done in ClockViewManager::showView
 
+	OstTraceFunctionExit0( CLOCKMAINVIEW_DISPLAYWORLDCLOCKVIEW_EXIT );
 }
 
 /*!
@@ -340,11 +367,13 @@ void ClockMainView::displayWorldClockView()
  */
 void ClockMainView::addNewAlarm()
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_ADDNEWALARM_ENTRY );
 	ClockAlarmEditor *alarmEditor = new ClockAlarmEditor(*mAlarmClient);
 	alarmEditor->showAlarmEditor();
 	// capture screenshot for future use, if application
 	// is exited/Quit from alarmEditor
 	captureScreenShot(true);
+	OstTraceFunctionExit0( CLOCKMAINVIEW_ADDNEWALARM_EXIT );
 }
 
 /*!
@@ -353,12 +382,14 @@ void ClockMainView::addNewAlarm()
  */
 void ClockMainView::openSettings()
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_OPENSETTINGS_ENTRY );
 	// Create the settings view.
 	ClockSettingsView *settingsView = new ClockSettingsView(this);
 	settingsView->loadSettingsView();
 	// capture screenshot for future use, if application
 	// is exited/Quit from alarmEditor
 	captureScreenShot(true);
+	OstTraceFunctionExit0( CLOCKMAINVIEW_OPENSETTINGS_EXIT );
 }
 
 /*!
@@ -368,6 +399,7 @@ void ClockMainView::openSettings()
  */
 void ClockMainView::handleActivated(const QModelIndex &index)
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_HANDLEACTIVATED_ENTRY );
 	if(!mIsLongTop) {// Get the data for the alarm.
 		int row = index.row();
 		QList<QVariant> alarmData =
@@ -383,6 +415,7 @@ void ClockMainView::handleActivated(const QModelIndex &index)
 		// is exited/Quit from alarmEditor
 		captureScreenShot(true);
 	}
+	OstTraceFunctionExit0( CLOCKMAINVIEW_HANDLEACTIVATED_EXIT );
 }
 
 /*!
@@ -395,6 +428,7 @@ void ClockMainView::handleActivated(const QModelIndex &index)
 void ClockMainView::handleLongPress(
 		HbAbstractViewItem *item, const QPointF &coords)
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_HANDLELONGPRESS_ENTRY );
 	mIsLongTop = true;
 	AlarmInfo alarmInfo;
 
@@ -424,6 +458,7 @@ void ClockMainView::handleLongPress(
 	itemContextMenu->setPreferredPos(coords);
 	itemContextMenu->setAttribute(Qt::WA_DeleteOnClose, true );
 	
+	OstTraceFunctionExit0( CLOCKMAINVIEW_HANDLELONGPRESS_EXIT );
 }
 
 /*!
@@ -432,6 +467,7 @@ void ClockMainView::handleLongPress(
  */
 void ClockMainView::deleteAlarm()
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_DELETEALARM_ENTRY );
 	if (-1 < mSelectedItem) {
 		// Get the data for the alarm.
 		QList<QVariant> alarmData = mAlarmListModel->sourceModel()->
@@ -440,6 +476,7 @@ void ClockMainView::deleteAlarm()
 		mAlarmClient->deleteAlarm(alarmId);
 		mSelectedItem = -1;
 	}
+	OstTraceFunctionExit0( CLOCKMAINVIEW_DELETEALARM_EXIT );
 }
 
 /*!
@@ -447,6 +484,7 @@ void ClockMainView::deleteAlarm()
  */
 void ClockMainView::removeSnoozedAlarm()
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_REMOVESNOOZEDALARM_ENTRY );
 	if (-1 < mSelectedItem) {
 		// Get the data for the alarm.
 		QList<QVariant> alarmData = mAlarmListModel->sourceModel()->
@@ -455,16 +493,19 @@ void ClockMainView::removeSnoozedAlarm()
 		mAlarmClient->deleteSnoozedAlarm(alarmId);
 		mSelectedItem = -1;
 	}
+	OstTraceFunctionExit0( CLOCKMAINVIEW_REMOVESNOOZEDALARM_EXIT );
 }
 
 void ClockMainView::updateView()
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_UPDATEVIEW_ENTRY );
 	// Update the place label.
 	updatePlaceLabel(mTimezoneClient->timeUpdateOn());
 	// Update date label.
 	updateDateLabel();
 	// Update clock widget.
 	updateClockWidget();
+	OstTraceFunctionExit0( CLOCKMAINVIEW_UPDATEVIEW_EXIT );
 }
 
 /*!
@@ -474,6 +515,7 @@ void ClockMainView::updateView()
  */
 void ClockMainView::updatePlaceLabel(int autoTimeUpdate)
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_UPDATEPLACELABEL_ENTRY );
 	if (-1 == autoTimeUpdate) {
 		autoTimeUpdate = mTimezoneClient->timeUpdateOn();
 	}
@@ -526,9 +568,13 @@ void ClockMainView::updatePlaceLabel(int autoTimeUpdate)
 	gmtOffset += tr(" ");
 
 	// Append DST info.
+	HbIcon *dstIcon = new HbIcon("");
 	if (currentZoneInfo.dstOn) {
-		gmtOffset += hbTrId("txt_common_setlabel_dst");
+		dstIcon->setIconName("qtg_mono_day_light_saving_time");
+		dstIcon->setColor(mLabelColorGroup);
+		
 	}
+	mDstIcon->setIcon(*dstIcon);
 
 	// Update the labels with the correct info.
 	mPlaceLabel->clear();
@@ -540,6 +586,7 @@ void ClockMainView::updatePlaceLabel(int autoTimeUpdate)
 				currentZoneInfo.cityName + tr(", ")
 				+ currentZoneInfo.countryName + tr(" ") + gmtOffset);
 	}
+	OstTraceFunctionExit0( CLOCKMAINVIEW_UPDATEPLACELABEL_EXIT );
 }
 
 /*!
@@ -547,6 +594,7 @@ void ClockMainView::updatePlaceLabel(int autoTimeUpdate)
  */
 void ClockMainView::handleAlarmListDisplay()
 {
+    OstTraceFunctionEntry0( CLOCKMAINVIEW_HANDLEALARMLISTDISPLAY_ENTRY );
     // alarmEditor closed reset the captured screenshot, current view is main view now
     captureScreenShot(false);
 	// Get the list of pending clock alarms from server.
@@ -570,6 +618,7 @@ void ClockMainView::handleAlarmListDisplay()
 		}
 	}
 
+	OstTraceFunctionExit0( CLOCKMAINVIEW_HANDLEALARMLISTDISPLAY_EXIT );
 }
 
 /*!
@@ -580,6 +629,7 @@ void ClockMainView::handleAlarmListDisplay()
 void ClockMainView::checkOrientationAndLoadSection(
 		Qt::Orientation orientation)
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_CHECKORIENTATIONANDLOADSECTION_ENTRY );
 	bool success;
 	// If horizontal, load the landscape section.
 	if (Qt::Horizontal == orientation) {
@@ -606,6 +656,7 @@ void ClockMainView::checkOrientationAndLoadSection(
 			hideAlarmList(false);
 		}
 	}
+	OstTraceFunctionExit0( CLOCKMAINVIEW_CHECKORIENTATIONANDLOADSECTION_EXIT );
 }
 
 /*!
@@ -613,9 +664,11 @@ void ClockMainView::checkOrientationAndLoadSection(
  */
 void ClockMainView::selectedMenuAction(HbAction *action)
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_SELECTEDMENUACTION_ENTRY );
 	if (action == mDeleteAction) {
 		deleteAlarm();
 	}
+	OstTraceFunctionExit0( CLOCKMAINVIEW_SELECTEDMENUACTION_EXIT );
 }
 
 /*!
@@ -623,13 +676,16 @@ void ClockMainView::selectedMenuAction(HbAction *action)
  */
 void ClockMainView::handleMenuClosed()
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_HANDLEMENUCLOSED_ENTRY );
 	mIsLongTop = false;
+	OstTraceFunctionExit0( CLOCKMAINVIEW_HANDLEMENUCLOSED_EXIT );
 }
 /*!
 	Sets the model to the alarm list.
  */
 void ClockMainView::setmodel()
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_SETMODEL_ENTRY );
 	// Set the model.
 	if (mAlarmList) {
 		mAlarmList->setModel(mAlarmListModel->sourceModel());
@@ -642,6 +698,7 @@ void ClockMainView::setmodel()
 		mAlarmList->setLayoutName("layout-alarmlist");
 	}
 
+	OstTraceFunctionExit0( CLOCKMAINVIEW_SETMODEL_EXIT );
 }
 
 /*!
@@ -651,6 +708,7 @@ void ClockMainView::setmodel()
  */
 void ClockMainView::hideAlarmList(bool hide)
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_HIDEALARMLIST_ENTRY );
 	if (hide) {
 		mNoAlarmLabel->show();
 		mAlarmList->hide();
@@ -660,6 +718,7 @@ void ClockMainView::hideAlarmList(bool hide)
 		mNoAlarmLabel->hide();
 		mHideAlarmList = false;
 	}
+	OstTraceFunctionExit0( CLOCKMAINVIEW_HIDEALARMLIST_EXIT );
 }
 
 /*!
@@ -667,6 +726,7 @@ void ClockMainView::hideAlarmList(bool hide)
  */
 void ClockMainView::updateDateLabel()
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_UPDATEDATELABEL_ENTRY );
 	// Get the current datetime.
 	QDateTime dateTime = QDateTime::currentDateTime();
 	// Get the day name.
@@ -680,6 +740,7 @@ void ClockMainView::updateDateLabel()
 	dayDateString += currentDate;
 
 	mDayLabel->setPlainText(dayDateString);
+	OstTraceFunctionExit0( CLOCKMAINVIEW_UPDATEDATELABEL_EXIT );
 }
 
 /*!
@@ -695,6 +756,7 @@ void ClockMainView::updateDateLabel()
  */
 void ClockMainView::updateClockWidget()
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_UPDATECLOCKWIDGET_ENTRY );
 	QStringList clockType;
     int index = mSettingsUtility->clockType(clockType);
     int zeroIndex(0);
@@ -713,6 +775,7 @@ void ClockMainView::updateClockWidget()
     }
 
 	mClockWidget->updateTime();
+	OstTraceFunctionExit0( CLOCKMAINVIEW_UPDATECLOCKWIDGET_EXIT );
 }
 
 /*!
@@ -721,12 +784,14 @@ void ClockMainView::updateClockWidget()
 */ 
 void ClockMainView::captureScreenShot(bool captureScreenShot)
 {
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_CAPTURESCREENSHOT_ENTRY );
 	// check if screen shot needs to be captured
     if (captureScreenShot) {
         mScreenShot.clear();
         mScreenShot.insert("screenshot", QPixmap::grabWidget(mainWindow(), mainWindow()->rect()));
     }
     mIsScreenShotCapruted = captureScreenShot; // set mIsScreenShotCapruted set validity of screenshot
+    OstTraceFunctionExit0( CLOCKMAINVIEW_CAPTURESCREENSHOT_EXIT );
 }
 
 /*!    
@@ -734,6 +799,7 @@ void ClockMainView::captureScreenShot(bool captureScreenShot)
 */ 
 void ClockMainView::saveActivity()
 {
+   OstTraceFunctionEntry0( CLOCKMAINVIEW_SAVEACTIVITY_ENTRY );
    // Get a pointer to activity Manager
    HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
  	// check if a valid screenshot is already captured
@@ -752,5 +818,6 @@ void ClockMainView::saveActivity()
    if ( !ok ) {
        qFatal("Add failed" );
    }
+   OstTraceFunctionExit0( CLOCKMAINVIEW_SAVEACTIVITY_EXIT );
 }
 // End of file	--Don't remove.

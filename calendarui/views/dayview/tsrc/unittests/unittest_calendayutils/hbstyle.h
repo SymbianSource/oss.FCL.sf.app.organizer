@@ -33,21 +33,14 @@
 #include <hbicon.h>
 #include <hbdeviceprofile.h>
 
-class HbStylePrivate;
-class HbStyleParameters;
-class HbStyleOption;
-class HbWidgetBase;
-class HbWidget;
-class HbStyleParameters;
-
 extern qreal param_value;
 
 class HbStyle : public QObject
 	{
 Q_OBJECT
 public:
-	HbStyle();
-	~HbStyle();
+	HbStyle() {}
+	~HbStyle() {}
 
 	// HbStyle::Primitive enums are DEPRECATED
 	enum Primitive
@@ -221,14 +214,14 @@ public:
 		P_CustomBase = 0x0f000000
 		};
 
-	virtual QGraphicsItem *createPrimitive(HbStyle::Primitive primitive,
+	QGraphicsItem *createPrimitive(HbStyle::Primitive primitive,
 			QGraphicsItem *parent = 0) const
 		{
 			Q_UNUSED(primitive);
 			Q_UNUSED(parent);
 			return 0;
 		}
-	virtual void updatePrimitive(QGraphicsItem *item,
+	void updatePrimitive(QGraphicsItem *item,
 			HbStyle::Primitive primitive, const QStyleOption *option) const
 		{
 			Q_UNUSED(item);
@@ -266,7 +259,7 @@ public:
 			value = param_value;
 			return false;
 		}
-	void parameters(HbStyleParameters &params, 
+/*	void parameters(HbStyleParameters &params, 
 			const HbDeviceProfile &profile = HbDeviceProfile()) const
 		{
 			Q_UNUSED(params);
@@ -278,30 +271,7 @@ public:
 			Q_UNUSED(params);
 			Q_UNUSED(widget);
 		}
-
-protected:
-
-	virtual void polish(HbWidget *widget, HbStyleParameters &params)
-		{
-			Q_UNUSED(params);
-			Q_UNUSED(widget);
-		}
-	virtual void updateThemedParams(HbWidget *widget)
-		{
-			Q_UNUSED(widget);
-		}
-	virtual bool hasOrientationSpecificStyleRules(HbWidget *widget)
-		{
-			Q_UNUSED(widget);
-			return false;
-		}
-
-	HbStyle(HbStylePrivate &dd, QStyle *parent)
-		{
-			Q_UNUSED(dd);
-			Q_UNUSED(parent);
-		}
-
+*/
 	};
 
 #endif // HBSTYLE_H

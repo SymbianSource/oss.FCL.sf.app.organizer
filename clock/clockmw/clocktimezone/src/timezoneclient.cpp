@@ -32,6 +32,12 @@
 #include "clockcommon.h"
 #include "clockserverclt.h"
 #include "clockprivatecrkeys.h"
+#include "environmentchangenotifier.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "timezoneclientTraces.h"
+#endif
+
 
 const int KDaysInWeek(7);
 const int KZerothRule(0);
@@ -52,11 +58,13 @@ bool TimezoneClient::mReferenceCount = false;
  */
 TimezoneClient* TimezoneClient::getInstance()
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_GETINSTANCE_ENTRY );
 	if (!mTimezoneClient) {
 		mTimezoneClient = new TimezoneClient();
 		mReferenceCount = true;
 	}
 
+	OstTraceFunctionExit0( TIMEZONECLIENT_GETINSTANCE_EXIT );
 	return mTimezoneClient;
 }
 
@@ -65,11 +73,13 @@ TimezoneClient* TimezoneClient::getInstance()
  */
 void TimezoneClient::deleteInstance()
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_DELETEINSTANCE_ENTRY );
 	if (mReferenceCount) {
 		delete mTimezoneClient;
 		mTimezoneClient = 0;
 		mReferenceCount = false;
 	}
+	OstTraceFunctionExit0( TIMEZONECLIENT_DELETEINSTANCE_EXIT );
 }
 
 /*!
@@ -77,6 +87,8 @@ void TimezoneClient::deleteInstance()
  */
 bool TimezoneClient::isNull()
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_ISNULL_ENTRY );
+	OstTraceFunctionExit0( TIMEZONECLIENT_ISNULL_EXIT );
 	return !mReferenceCount;
 }
 
@@ -84,12 +96,9 @@ bool TimezoneClient::isNull()
 	The constructor.
  */
 TimezoneClient::TimezoneClient()
-{
-	TCallBack callback(environmentCallback, this);
-
-	mNotifier = CEnvironmentChangeNotifier::NewL(
-			CActive::EPriorityStandard, callback);
-	mNotifier->Start();
+{	
+	OstTraceFunctionEntry0( TIMEZONECLIENT_TIMEZONECLIENT_ENTRY );
+	mNotifier = new EnvironmentChangeNotifier(this);
 
 	mTzLocalizer = CTzLocalizer::NewL();
 
@@ -112,6 +121,7 @@ TimezoneClient::TimezoneClient()
 	connect(
 			mSettingsManager, SIGNAL(valueChanged(XQSettingsKey, QVariant)),
 			this, SLOT(eventMonitor(XQSettingsKey, QVariant)));
+	OstTraceFunctionExit0( TIMEZONECLIENT_TIMEZONECLIENT_EXIT );
 }
 
 /*!
@@ -119,10 +129,9 @@ TimezoneClient::TimezoneClient()
  */
 TimezoneClient::~TimezoneClient()
 {
+	OstTraceFunctionEntry0( DUP1_TIMEZONECLIENT_TIMEZONECLIENT_ENTRY );
 	if (mNotifier) {
-		mNotifier->Cancel();
 		delete mNotifier;
-		mNotifier = 0;
 	}
 	if (mWorldClockModel) {
 		mWorldClockModel->clear();
@@ -138,7 +147,7 @@ TimezoneClient::~TimezoneClient()
 	if (mAllLocations.count()) {
 		mAllLocations.clear();
 	}
-
+	OstTraceFunctionExit0( DUP1_TIMEZONECLIENT_TIMEZONECLIENT_EXIT );
 }
 
 /*!
@@ -151,6 +160,7 @@ TimezoneClient::~TimezoneClient()
  */
 QList<LocationInfo>& TimezoneClient::getLocations()
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_GETLOCATIONS_ENTRY );
 	if (mAllLocations.count()) {
 		mAllLocations.clear();
 	}
@@ -202,11 +212,13 @@ QList<LocationInfo>& TimezoneClient::getLocations()
 
 	// Cleanup.
 	CleanupStack::PopAndDestroy(cityArray);
+	OstTraceFunctionExit0( TIMEZONECLIENT_GETLOCATIONS_EXIT );
 	return mAllLocations;
 }
 
 bool TimezoneClient::getUtcDstOffsetL(int& dstOffset, const CTzId& timezoneId)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_GETUTCDSTOFFSETL_ENTRY );
 	RTz tzHandle;
 	User::LeaveIfError(tzHandle.Connect());
 	CleanupClosePushL(tzHandle);
@@ -264,6 +276,7 @@ bool TimezoneClient::getUtcDstOffsetL(int& dstOffset, const CTzId& timezoneId)
 			CleanupStack::PopAndDestroy(actualizedRules);
 			CleanupStack::PopAndDestroy(timezoneRules);
 			CleanupStack::PopAndDestroy(&tzHandle);
+			OstTraceFunctionExit0( TIMEZONECLIENT_GETUTCDSTOFFSETL_EXIT );
 			return true;
 		} else {
 			dstOffset = initialTimeZoneOffset;
@@ -272,11 +285,13 @@ bool TimezoneClient::getUtcDstOffsetL(int& dstOffset, const CTzId& timezoneId)
 	CleanupStack::PopAndDestroy(actualizedRules);
 	CleanupStack::PopAndDestroy(timezoneRules);
 	CleanupStack::PopAndDestroy(&tzHandle);
+	OstTraceFunctionExit0( DUP1_TIMEZONECLIENT_GETUTCDSTOFFSETL_EXIT );
 	return false;
 }
 
 LocationInfo TimezoneClient::getCurrentZoneInfoL()
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_GETCURRENTZONEINFOL_ENTRY );
 	// Current zone info.
 	LocationInfo currentLocation;
 	int timezoneId(0);
@@ -403,21 +418,17 @@ LocationInfo TimezoneClient::getCurrentZoneInfoL()
 	// Cleanup.
 	CleanupStack::PopAndDestroy( tzId );
 	CleanupStack::PopAndDestroy( &tzHandle );
+	OstTraceFunctionExit0( TIMEZONECLIENT_GETCURRENTZONEINFOL_EXIT );
 	return currentLocation;
 }
 
 void TimezoneClient::setAsCurrentLocationL(LocationInfo &location)
 {
-/*	Debug::writeDebugMsg(
-			"In time zone client setAsCurrentLocationL " + location.cityName +
-			" " +
-			location.countryName +
-			" " +
-			QString::number(location.zoneOffset));*/
-
+	OstTraceFunctionEntry0( TIMEZONECLIENT_SETASCURRENTLOCATIONL_ENTRY );
 	LocationInfo prevLocationInfo ;
 	prevLocationInfo = getCurrentZoneInfoL();
-
+	QTime prevLocationTime = QTime::currentTime();
+	
 	mTzLocalizer->SetTimeZoneL( location.timezoneId );
 
 	TPtrC ptrCityName(
@@ -434,10 +445,19 @@ void TimezoneClient::setAsCurrentLocationL(LocationInfo &location)
 	if(prevLocationInfo.timezoneId == location.timezoneId) {
 		emit cityUpdated();	
 	}
+	
+	QTime newTime = QTime::currentTime();	
+	if ((prevLocationTime.hour() == newTime.hour())
+			&& (prevLocationTime.minute() == newTime.minute())
+			&& (prevLocationInfo.timezoneId != location.timezoneId)) {
+	    emit cityUpdated();
+    }
+	OstTraceFunctionExit0( TIMEZONECLIENT_SETASCURRENTLOCATIONL_EXIT );
 }
 
 bool TimezoneClient::isDSTOnL(int timezoneId)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_ISDSTONL_ENTRY );
 	bool returnVal( false );
 	CTzId* tzId = CTzId::NewL( timezoneId );
 	CleanupStack::PushL( tzId );
@@ -452,11 +472,13 @@ bool TimezoneClient::isDSTOnL(int timezoneId)
 	CleanupStack::PopAndDestroy( &tzHandle );
 	CleanupStack::PopAndDestroy( tzId );
 
+	OstTraceFunctionExit0( TIMEZONECLIENT_ISDSTONL_EXIT );
 	return returnVal;
 }
 
 int TimezoneClient::getStandardOffset(int timezoneId)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_GETSTANDARDOFFSET_ENTRY );
 	RTz tzHandle;
 	User::LeaveIfError(tzHandle.Connect());
 	CleanupClosePushL(tzHandle);
@@ -485,12 +507,14 @@ int TimezoneClient::getStandardOffset(int timezoneId)
 	// Cleanup.
 	CleanupStack::PopAndDestroy(&tzHandle);
 
+	OstTraceFunctionExit0( TIMEZONECLIENT_GETSTANDARDOFFSET_EXIT );
 	return stdOffset;
 }
 
 void TimezoneClient::getDstRulesL(
 		QDateTime &startTime, QDateTime &endTime, int timezoneId)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_GETDSTRULESL_ENTRY );
 	RTz tzHandle;
 	User::LeaveIfError(tzHandle.Connect());
 	CleanupClosePushL(tzHandle);
@@ -578,10 +602,12 @@ void TimezoneClient::getDstRulesL(
 	CleanupStack::PopAndDestroy(timezoneRules);
 	CleanupStack::PopAndDestroy(tzId);
 	CleanupStack::PopAndDestroy(&tzHandle);
+OstTraceFunctionExit0( TIMEZONECLIENT_GETDSTRULESL_EXIT );
 }
 
 QList<LocationInfo> TimezoneClient::getSavedLocations()
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_GETSAVEDLOCATIONS_ENTRY );
 	QList<LocationInfo> locationList;
 
 	QString fileName(CITY_INFO_DB_PATH);
@@ -593,11 +619,13 @@ QList<LocationInfo> TimezoneClient::getSavedLocations()
 		writeStream >> locationList;
 		cityInfoFile.close();
 	}
+	OstTraceFunctionExit0( TIMEZONECLIENT_GETSAVEDLOCATIONS_EXIT );
 	return locationList;
 }
 
 void TimezoneClient::saveLocations(const QList<LocationInfo> &locationList)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_SAVELOCATIONS_ENTRY );
 	QDir cityDbDir;
 	cityDbDir.mkpath(CITY_INFO_DB_PATH);
 
@@ -607,6 +635,7 @@ void TimezoneClient::saveLocations(const QList<LocationInfo> &locationList)
 	QFile cityInfoFile(fileName);
 	if (!cityInfoFile.open(QIODevice::WriteOnly)) {
 		// Error opening or creating file.
+		OstTraceFunctionExit0( TIMEZONECLIENT_SAVELOCATIONS_EXIT );
 		return;
 	}
 	QDataStream writeStream(&cityInfoFile);
@@ -614,35 +643,12 @@ void TimezoneClient::saveLocations(const QList<LocationInfo> &locationList)
 	cityInfoFile.close();
 
 	emit listUpdated();
-}
-
-void TimezoneClient::getCountries(QMap<QString, int>& countries)
-{
-	// Get all the city groups(countries).
-	QTime t;
-	t.start();
-	CTzLocalizedCityGroupArray* cityGroupArray =
-			mTzLocalizer->GetAllCityGroupsL(CTzLocalizer::ETzAlphaNameAscending);
-	CleanupStack::PushL(cityGroupArray);
-
-	t.restart();
-	// Iterate through each of the city groups.
-	for (int i = 0; i < cityGroupArray->Count(); i++) {
-		CTzLocalizedCityGroup& cityGroup(cityGroupArray->At(i));
-		TPtrC countryName(cityGroup.Name());
-
-		// Get the QString of country name
-		QString qCountryName = QString::fromUtf16(
-				countryName.Ptr(),countryName.Length());
-	    countries[qCountryName] = cityGroup.Id();
-	}
-
-	// Cleanup.
-	CleanupStack::PopAndDestroy(cityGroupArray);
+OstTraceFunctionExit0( DUP1_TIMEZONECLIENT_SAVELOCATIONS_EXIT );
 }
 
 void TimezoneClient::getCitiesForCountry(int id, QMap<QString, int>& cities)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_GETCITIESFORCOUNTRY_ENTRY );
 	// Get the city group for the given id.
 	CTzLocalizedCityArray* cityArray = mTzLocalizer->GetCitiesInGroupL(id,
 			CTzLocalizer::ETzAlphaNameAscending);
@@ -670,11 +676,13 @@ void TimezoneClient::getCitiesForCountry(int id, QMap<QString, int>& cities)
 	// Cleanup.
 	CleanupStack::PopAndDestroy(unsortedArray);
 	CleanupStack::PopAndDestroy(cityArray);
+OstTraceFunctionExit0( TIMEZONECLIENT_GETCITIESFORCOUNTRY_EXIT );
 }
 
 void TimezoneClient::getLocationInfo(
 		int groupId, int cityIndex, LocationInfo& cityInfo)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_GETLOCATIONINFO_ENTRY );
 	TRAPD(
 			error,
 
@@ -704,58 +712,40 @@ void TimezoneClient::getLocationInfo(
 			CleanupStack::PopAndDestroy(cityGroup);
 	)
 	Q_UNUSED(error)
+OstTraceFunctionExit0( TIMEZONECLIENT_GETLOCATIONINFO_EXIT );
 }
 
 QDataStream &operator<<(
 		QDataStream &writeStream, const LocationInfo& locationInfo)
 {
+	OstTraceFunctionEntry0( _OPERATOR_ENTRY );
 	writeStream << locationInfo.cityName
 			<< locationInfo.countryName
 			<< locationInfo.listImageName
 			<< locationInfo.dstOn
 			<< locationInfo.timezoneId
 			<< locationInfo.zoneOffset;
+	OstTraceFunctionExit0( _OPERATOR_EXIT );
 	return writeStream;
 }
 
 QDataStream &operator>>(
 		QDataStream &readStream, LocationInfo &locationInfo)
 {
+	OstTraceFunctionEntry0( DUP1__OPERATOR_ENTRY );
 	readStream >> locationInfo.cityName
 	>> locationInfo.countryName
 	>> locationInfo.listImageName
 	>> locationInfo.dstOn
 	>> locationInfo.timezoneId
 	>> locationInfo.zoneOffset;
+	OstTraceFunctionExit0( DUP1__OPERATOR_EXIT );
 	return readStream;
-}
-
-int TimezoneClient::environmentCallback(TAny* obj)
-{
-	TimezoneClient* self = static_cast<TimezoneClient *> (obj);
-
-	int changes = KInitialEvent;
-	if (self->mNotifier) {
-		changes = self->mNotifier->Change();
-	}
-
-	if (KInitialEvent <= changes) {
-		// We're not concerned about handling environment changes in that range.
-		return 0;
-	}
-
-	if (changes & (EChangesMidnightCrossover |
-			EChangesLocale |
-			EChangesSystemTime)) {
-		emit self->timechanged();
-	} else {
-		// Nothing to do.
-	}
-	return 0;
 }
 
 int TimezoneClient::getDstZoneOffset(int tzId)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_GETDSTZONEOFFSET_ENTRY );
 	// Connect to the timezone server.
 	RTz client;
 	User::LeaveIfError(client.Connect());
@@ -771,11 +761,13 @@ int TimezoneClient::getDstZoneOffset(int tzId)
 	// Cleanup.
 	CleanupStack::PopAndDestroy(&client);
 
+	OstTraceFunctionExit0( TIMEZONECLIENT_GETDSTZONEOFFSET_EXIT );
 	return zoneOffsets[0];
 }
 
 bool TimezoneClient::dstOn(int tzId)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_DSTON_ENTRY );
 	// Connect to the timezone server.
 	RTz client;
 	User::LeaveIfError(client.Connect());
@@ -790,11 +782,13 @@ bool TimezoneClient::dstOn(int tzId)
 	CleanupStack::PopAndDestroy(zoneId);
 	CleanupStack::PopAndDestroy(&client);
 
+	OstTraceFunctionExit0( TIMEZONECLIENT_DSTON_EXIT );
 	return returnVal;
 }
 
 int TimezoneClient::getCityGroupIdByName(const QString& name)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_GETCITYGROUPIDBYNAME_ENTRY );
 	TPtrC namePtr;
 	namePtr.Set(name.utf16(), name.length());
 
@@ -808,11 +802,13 @@ int TimezoneClient::getCityGroupIdByName(const QString& name)
 	// Cleanup.
 	CleanupStack::PopAndDestroy(cityGroup);
 
+	OstTraceFunctionExit0( TIMEZONECLIENT_GETCITYGROUPIDBYNAME_EXIT );
 	return id;
 }
 
 int TimezoneClient::getCityOffsetByNameAndId(const QString& name, int tzId)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_GETCITYOFFSETBYNAMEANDID_ENTRY );
 	TPtrC namePtr;
 	namePtr.Set(name.utf16(), name.length());
 
@@ -833,11 +829,13 @@ int TimezoneClient::getCityOffsetByNameAndId(const QString& name, int tzId)
 	// Cleanup.
 	CleanupStack::PopAndDestroy(cityArray);
 
+	OstTraceFunctionExit0( TIMEZONECLIENT_GETCITYOFFSETBYNAMEANDID_EXIT );
 	return id;
 }
 
 void TimezoneClient::setDateTime(QDateTime dateTime)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_SETDATETIME_ENTRY );
 	TMonth month = intToMonth(dateTime.date().month());
 	TTime current(TDateTime(
 			dateTime.date().year(), month, dateTime.date().day() - 1,
@@ -848,10 +846,12 @@ void TimezoneClient::setDateTime(QDateTime dateTime)
 	CleanupClosePushL(tz);
 	TInt ret(tz.SetHomeTime(current));
 	CleanupStack::PopAndDestroy(&tz);
+OstTraceFunctionExit0( TIMEZONECLIENT_SETDATETIME_EXIT );
 }
 
 void TimezoneClient::setTimeUpdateOn(bool timeUpdate)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_SETTIMEUPDATEON_ENTRY );
 	RClkSrvInterface clkSrvInterface;
 	User::LeaveIfError(clkSrvInterface.Connect());
 	if (timeUpdate) {
@@ -861,28 +861,24 @@ void TimezoneClient::setTimeUpdateOn(bool timeUpdate)
 		clkSrvInterface.DeActivateAllProtocols();
 	}
 	clkSrvInterface.Close();
+OstTraceFunctionExit0( TIMEZONECLIENT_SETTIMEUPDATEON_EXIT );
 }
 
 bool TimezoneClient::timeUpdateOn()
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_TIMEUPDATEON_ENTRY );
 	TBool autoTimeUpdateOn;
 	RClkSrvInterface clkSrvInterface;
 	User::LeaveIfError(clkSrvInterface.Connect());
 	clkSrvInterface.IsAutoTimeUpdateOn(autoTimeUpdateOn);
 	clkSrvInterface.Close();
+	OstTraceFunctionExit0( TIMEZONECLIENT_TIMEUPDATEON_EXIT );
 	return autoTimeUpdateOn;
-}
-
-QStandardItemModel *TimezoneClient::locationSelectorModel()
-{
-	if (!mWorldClockModel) {
-		createWorldClockModel();
-	}
-	return mWorldClockModel;
 }
 
 TMonth TimezoneClient::intToMonth(int month)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_INTTOMONTH_ENTRY );
 	switch (month) {
 		case 1:
 			return EJanuary;
@@ -915,23 +911,9 @@ TMonth TimezoneClient::intToMonth(int month)
 	return (TMonth) -1;
 }
 
-void TimezoneClient::createWorldClockModel()
-{
-	// Construct the model if its not yet done
-	if (!mWorldClockModel) {
-		// Create the model
-		mWorldClockModel = new QStandardItemModel(this);
-
-		getCountries(mAllCountries);
-		mCountryCount = mAllCountries.count();
-
-		// Construct the model in asynchronously
-		QTimer::singleShot(2000, this, SLOT(populateCities()));
-	}
-}
-
 void TimezoneClient::populateCities()
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_POPULATECITIES_ENTRY );
 	// First iterate over all the counties
 	QMapIterator<QString, int> countryIter(mAllCountries);
 	while (countryIter.hasNext()) {
@@ -956,6 +938,7 @@ void TimezoneClient::populateCities()
 			country->appendRow(city);
 		}
 	}
+OstTraceFunctionExit0( TIMEZONECLIENT_POPULATECITIES_EXIT );
 }
 
 /*!
@@ -966,6 +949,7 @@ void TimezoneClient::populateCities()
  */
 bool TimezoneClient::checkForDstChange(AlarmInfo& alarmInfo)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_CHECKFORDSTCHANGE_ENTRY );
 	// User to be notified whether DST rollover happens in a day or
 	// has happen within a day if he tries to change the time.
 	bool returnValue( EFalse );
@@ -1093,6 +1077,7 @@ bool TimezoneClient::checkForDstChange(AlarmInfo& alarmInfo)
 	CleanupStack::PopAndDestroy( currentTZId );
 	CleanupStack::PopAndDestroy( &tzHandle );
 
+	OstTraceFunctionExit0( TIMEZONECLIENT_CHECKFORDSTCHANGE_EXIT );
 	return returnValue;
 }
 
@@ -1103,7 +1088,9 @@ bool TimezoneClient::checkForDstChange(AlarmInfo& alarmInfo)
  */
 QList<int> TimezoneClient::getAllTimeZoneIds()
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_GETALLTIMEZONEIDS_ENTRY );
 	if (mTimeZoneIds.count()) {
+		OstTraceFunctionExit0( TIMEZONECLIENT_GETALLTIMEZONEIDS_EXIT );
 		return mTimeZoneIds;
 	} else {
 		// This list will contain the info of the cities fetched from tz server.
@@ -1127,6 +1114,7 @@ QList<int> TimezoneClient::getAllTimeZoneIds()
 		}
 
 		CleanupStack::PopAndDestroy(cityArray);
+		OstTraceFunctionExit0( DUP1_TIMEZONECLIENT_GETALLTIMEZONEIDS_EXIT );
 		return mTimeZoneIds;
 	}
 }
@@ -1138,6 +1126,7 @@ QList<int> TimezoneClient::getAllTimeZoneIds()
  */
 QList<int> TimezoneClient::getAllTimeZoneOffsets()
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_GETALLTIMEZONEOFFSETS_ENTRY );
 	QList<int> timeZoneOffsetList;
 	QList<int> timeZoneIdList;
 	if (mTimeZoneIds.count()) {
@@ -1173,6 +1162,7 @@ QList<int> TimezoneClient::getAllTimeZoneOffsets()
 	CleanupStack::PopAndDestroy( &tzHandle );
 	// Sort the offset list
 	qSort(timeZoneOffsetList.begin(),timeZoneOffsetList.end());
+	OstTraceFunctionExit0( TIMEZONECLIENT_GETALLTIMEZONEOFFSETS_EXIT );
 	return timeZoneOffsetList;
 }
 
@@ -1184,6 +1174,7 @@ QList<int> TimezoneClient::getAllTimeZoneOffsets()
  */
 QList<LocationInfo> TimezoneClient::getCountriesForUTCOffset(int utcOffset)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_GETCOUNTRIESFORUTCOFFSET_ENTRY );
 	// This list will contain the info of the countries.
 	QList<LocationInfo> countryList;
 	QList<int> cityGroupIdList;
@@ -1218,6 +1209,7 @@ QList<LocationInfo> TimezoneClient::getCountriesForUTCOffset(int utcOffset)
 	}
 	cityGroupIdList.clear();
 	CleanupStack::PopAndDestroy(cityList);
+	OstTraceFunctionExit0( TIMEZONECLIENT_GETCOUNTRIESFORUTCOFFSET_EXIT );
 	return countryList;
 }
 
@@ -1232,6 +1224,7 @@ QList<LocationInfo> TimezoneClient::getCountriesForUTCOffset(int utcOffset)
 LocationInfo TimezoneClient::addCity(
 		int timeZoneId,QString &cityName,int cityGroupId)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_ADDCITY_ENTRY );
 	TPtrC namePtr;
 	namePtr.Set(cityName.utf16(), cityName.length());
 
@@ -1249,6 +1242,7 @@ LocationInfo TimezoneClient::addCity(
 
 	CleanupStack::PopAndDestroy(newCity);
 
+	OstTraceFunctionExit0( TIMEZONECLIENT_ADDCITY_EXIT );
 	return info;
 }
 
@@ -1260,6 +1254,7 @@ LocationInfo TimezoneClient::addCity(
  */
 void TimezoneClient::eventMonitor(const XQSettingsKey& key, const QVariant& value)
 {
+	OstTraceFunctionEntry0( TIMEZONECLIENT_EVENTMONITOR_ENTRY );
 	if (key.uid() == KCRUidNitz && key.key() == KActiveProtocol) {
 		if (mSettingsManager->error() == XQSettingsManager::NoError) {
 
@@ -1275,5 +1270,13 @@ void TimezoneClient::eventMonitor(const XQSettingsKey& key, const QVariant& valu
 			}
 		}
 	}
+OstTraceFunctionExit0( TIMEZONECLIENT_EVENTMONITOR_EXIT );
+}
+
+void TimezoneClient::notifyTimeChange()
+{
+	OstTraceFunctionEntry0( TIMEZONECLIENT_NOTIFYTIMECHANGE_ENTRY );
+	emit timechanged();
+OstTraceFunctionExit0( TIMEZONECLIENT_NOTIFYTIMECHANGE_EXIT );
 }
 // End of file	--Don't remove this.

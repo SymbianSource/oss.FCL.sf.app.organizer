@@ -1207,8 +1207,10 @@ void CalenMonthGrid::paint(QPainter* painter,
 	// Painter draws the line for first two points in the list and then second 
 	// line for next two points in the list like that. Hence, list should 
 	// contain even number of points
+	// Dont draw the first horizontal line as we have thick line seperator
+	// coming between day names and the month grid
 	QVector<QPointF> pointList;
-	for (int i = 0; i < numOfRows; i++) {
+	for (int i = 1; i < numOfRows; i++) {
 		pointList.append(QPointF(startPoint.x(), 
 		                         startPoint.y() + (i * rowWidth)));
 		pointList.append(QPointF(endPoint.x(), endPoint.y() + (i * rowWidth)));

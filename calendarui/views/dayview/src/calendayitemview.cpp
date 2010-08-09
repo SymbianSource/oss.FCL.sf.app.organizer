@@ -30,14 +30,13 @@
 #include "calendaymodel.h"
 #include "calenservices.h"
 #include "calencontext.h"
+#include "calenagendautils.h"
 #include "CalenUid.h"
 
 
-// -----------------------------------------------------------------------------
-// CalenDayItemView()
-// Constructor
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Constructor
+*/
 CalenDayItemView::CalenDayItemView( MCalenServices &services, HbModelIterator *iterator, QGraphicsItem *parent ) 
 : HbAbstractItemView(mContainer = new CalenDayContainer(), iterator, parent),
   mServices( services )
@@ -71,53 +70,44 @@ CalenDayItemView::CalenDayItemView( MCalenServices &services, HbModelIterator *i
     setupContextMenu();
 }
 
-// -----------------------------------------------------------------------------
-// ~CalenDayItemView()
-// Destructor
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Destructor
+*/
 CalenDayItemView::~CalenDayItemView()
 {
     delete mInfo;
 }
 
-// -----------------------------------------------------------------------------
-// scrollTo()
-// 
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Scrolls to given index
+*/
 void CalenDayItemView::scrollTo(const QModelIndex &index, HbAbstractItemView::ScrollHint hint)
 {
     HbAbstractItemView::scrollTo(index, hint);
 }
 
-// -----------------------------------------------------------------------------
-// reset()
-// 
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Currently empty implementation.
+*/
 void CalenDayItemView::reset()
 {
-//    CalenDayItemView::reset();
+
 }
 
-// -----------------------------------------------------------------------------
-// modelAboutToBeReset()
-// Handles signal that is emitted when reset() is called, before the model's
-// internal state (e.g. persistent model indexes) has been invalidated.
-// -----------------------------------------------------------------------------
-//
+
+/*!
+   \brief Handles signal that is emitted when reset() is called, before the model's
+          internal state (e.g. persistent model indexes) has been invalidated.
+*/
 void CalenDayItemView::modelAboutToBeReset()
 {
     
 }
 
-// -----------------------------------------------------------------------------
-// modelReset()
-// Handles signal that is emitted when reset() is called, after the model's
-// internal state (e.g. persistent model indexes) has been invalidated.
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Handles signal that is emitted when reset() is called, before the model's
+          internal state (e.g. persistent model indexes) has been invalidated.
+*/
 void CalenDayItemView::modelReset()
 {
     if ( !mInfo ) {
@@ -156,12 +146,12 @@ void CalenDayItemView::modelReset()
         apptInfo.iId = id;
         apptInfo.iColor = 0xffff;
         
-        if ( entry.isTimedEntry() )
+        if ( entry.isTimedEntry() && !CalenAgendaUtils::isAlldayEvent(entry))
         	{
             apptInfo.iAllDay = false;
             mInfo->InsertTimedEvent( apptInfo );
         	}
-        else if( entry.type() == AgendaEntry::TypeEvent) //all-day event
+        else if(CalenAgendaUtils::isAlldayEvent(entry)) //all-day event
         	{
         	apptInfo.iAllDay = true;
         	mInfo->InsertAlldayEvent( apptInfo );
@@ -171,11 +161,11 @@ void CalenDayItemView::modelReset()
     HbAbstractItemView::reset();
 }
 
-// -----------------------------------------------------------------------------
-// scrollVertically()
-//  
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Scrolls view vertically to the given position.
+   
+   \param newPosition position to scroll to.
+*/
 void CalenDayItemView::scrollVertically( const QPointF &newPosition )
 {
     QPointF currentPos = contentWidget()->pos();
@@ -185,31 +175,31 @@ void CalenDayItemView::scrollVertically( const QPointF &newPosition )
     }
 }
 
-// -----------------------------------------------------------------------------
-// itemPressed()
-// This function is called when a touch down event is received within Abstract view item that is representing index. 
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief This function is called when a touch press event is received 
+          within Abstract view item that is representing index.
+          Currently it does nothing.
+*/
 void CalenDayItemView::itemPressed( const QPointF &position )
 {
     Q_UNUSED( position )
 }
 
-// -----------------------------------------------------------------------------
-// itemReleased()
-// This function is called when a touch release event is received within Abstract view item that is representing index.
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief This function is called when a touch release event is received 
+          within Abstract view item that is representing index.
+          Currently it does nothing.
+*/
 void CalenDayItemView::itemReleased( const QPointF &position )
 {
     Q_UNUSED( position )
 }
 
-// -----------------------------------------------------------------------------
-// itemActivated()
-// This function is called when the item specified by index is activated by the user.
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief This function is called when the item specified by index is activated by the user.
+   
+   \param position Not used.
+*/
 void CalenDayItemView::itemActivated( const QPointF &position )
 {
     Q_UNUSED( position )
@@ -222,11 +212,12 @@ void CalenDayItemView::itemActivated( const QPointF &position )
     }
 }
 
-// -----------------------------------------------------------------------------
-// itemLongPressed()
-// This function is called when long press event is received within Abstract view item viewItem.
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief This function is called when long press event is received within Abstract view item viewItem.
+
+   \param item Pointer to pressed item.
+   \param coord Position where item was pressed.
+*/
 void CalenDayItemView::itemLongPressed(HbAbstractViewItem* item, QPointF coords)
 {
     QModelIndex index = item->modelIndex();
@@ -238,11 +229,11 @@ void CalenDayItemView::itemLongPressed(HbAbstractViewItem* item, QPointF coords)
     }
 }
 
-// -----------------------------------------------------------------------------
-// orientationChanged()
-// Slot which is called whenever the orientation of the device changes.
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Slot which is called whenever the orientation of the device changes.
+
+   \param orientation New orientation.
+*/
 void CalenDayItemView::orientationChanged( Qt::Orientation orientation )
 {
     // Update the width of screen
@@ -254,41 +245,33 @@ void CalenDayItemView::orientationChanged( Qt::Orientation orientation )
     }
 }
 
-// -----------------------------------------------------------------------------
-// openSelectedItem()
-// Opens currently selected model item.
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Opens currently selected model item.
+*/
 void CalenDayItemView::openSelectedItem()
 {
     issueCommandOnSelectedItem( ECalenEventView );
 }
 
-// -----------------------------------------------------------------------------
-// editSelectedItem()
-// Edits currently selected model item.
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Edits currently selected model item.
+*/
 void CalenDayItemView::editSelectedItem()
 {
     issueCommandOnSelectedItem( ECalenEditCurrentEntry );
 }
 
-// -----------------------------------------------------------------------------
-// deleteSelectedIten()
-// Deletes currently selected model item.
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Deletes currently selected model item.
+*/
 void CalenDayItemView::deleteSelectedItem()
 {
     issueCommandOnSelectedItem( ECalenDeleteCurrentEntry );
 }
 
-// -----------------------------------------------------------------------------
-// setupSlots()
-// Connects item view's slots.
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Connects item view's slots.
+*/
 void CalenDayItemView::setupSlots()
 {
     // Connect to main window's orientationChanged signal to handle orientation
@@ -319,11 +302,9 @@ void CalenDayItemView::setupSlots()
         this, SLOT(itemLongPressed(HbAbstractViewItem*, QPointF)));
 }
 
-// -----------------------------------------------------------------------------
-// setupSlots()
-// Creates Context menu.
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Creates context menu.
+*/
 void CalenDayItemView::setupContextMenu()
 {
     mContextMenu = new HbMenu();
@@ -342,11 +323,11 @@ void CalenDayItemView::setupContextMenu()
     }
 }
 
-// -----------------------------------------------------------------------------
-// issueCommandOnSelectedItem()
-// Sets context to currently selected model item and issues calendar command.
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Sets context to currently selected model item and issues calendar command.
+   
+   \param command A command to be issued.
+*/
 bool CalenDayItemView::issueCommandOnSelectedItem( int command )
 {
     bool retVal(false);
@@ -379,11 +360,9 @@ bool CalenDayItemView::issueCommandOnSelectedItem( int command )
     return retVal;
 }
 
-// -----------------------------------------------------------------------------
-// clearSelectionInModel()
-// Clears current selection in Selection Model.
-// -----------------------------------------------------------------------------
-//
+/*!
+   \brief Clears current selection in Selection Model.
+*/
 void CalenDayItemView::clearSelectionInModel()
 {
     QItemSelectionModel* selModel(selectionModel());

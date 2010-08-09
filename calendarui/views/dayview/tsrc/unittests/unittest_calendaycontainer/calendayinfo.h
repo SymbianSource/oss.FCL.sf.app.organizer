@@ -86,13 +86,18 @@ public:
 
 public:
 
-    CalenDayInfo(TSlotsInHour aSlotsInHour) {
+    CalenDayInfo(TSlotsInHour aSlotsInHour) 
+    {
         Q_UNUSED(aSlotsInHour)
     }
-    virtual ~CalenDayInfo();
+    virtual ~CalenDayInfo()
+    {
+        
+    }
 
     void GetLocation( const SCalenApptInfo& aItemInfo, int& aStartSlot,
-        int& aEndSlot, int& aColumnIndex, int& aColumns ) {
+        int& aEndSlot, int& aColumnIndex, int& aColumns ) 
+    {
         Q_UNUSED(aItemInfo)
         Q_UNUSED(aStartSlot)
         Q_UNUSED(aEndSlot)
@@ -100,12 +105,27 @@ public:
         Q_UNUSED(aColumns)
     }
     
-    int AlldayCount() {
+    int AlldayCount() 
+    {
         return 0;
     }
     
-    const QList<CalenTimeRegion>& RegionList() const {
+    const QList<CalenTimeRegion>& RegionList() const 
+    {
        return mList; 
+    }
+    
+    void InsertAlldayEvent( const SCalenApptInfo& aItemInfo )
+    {
+        Q_UNUSED(aItemInfo)
+            
+        CalenTimeRegion region;
+        
+        region.iStartSlot = 10;
+        region.iEndSlot = 13;
+        region.iColumns << CalenTimeColumn();
+        
+        mList  << region;
     }
     
 public:

@@ -19,11 +19,19 @@
 #include <QtTest/QtTest>
 
 #include "calenservices.h"
+
+#include <hbabstractitemview.h>
+#include <hbmenu.h>
+
+#define private public
+
 #include "calendayitemview.h"
+
 
 // Test variables
 QRectF gTestWindowRect = QRectF(0, 0, 10, 20);
 Qt::Orientation gTestOrientation = Qt::Horizontal;
+quint32 SELECTED_COMMAND = 0; 
 
 class TestCalenItemView : public QObject
 {
@@ -40,8 +48,13 @@ private slots:
     void cleanup();
 
     void testConstructors();
+    void testIssueCommandOnSelectedItem();
+    void testOpenSelectedItem();
+    void testEditSelectedItem();
+    void testDeleteSelectedItem();
 private:
     MCalenServices   mMCalenServices;
+    CalenDayItemView *mCalenDayItemView;
 
 };
 
@@ -66,6 +79,7 @@ TestCalenItemView::~TestCalenItemView()
  */
 void TestCalenItemView::initTestCase()
 {
+    
 }
 
 /*!
@@ -81,7 +95,9 @@ void TestCalenItemView::cleanupTestCase()
  */
 void TestCalenItemView::init()
 {
-
+    HbModelIterator *iterator = new HbModelIterator();
+    mCalenDayItemView = new CalenDayItemView(mMCalenServices,iterator,0);
+    SELECTED_COMMAND = 0;
 }
 
 /*!
@@ -89,7 +105,10 @@ void TestCalenItemView::init()
  */
 void TestCalenItemView::cleanup()
 {
-
+    if(mCalenDayItemView){
+        delete mCalenDayItemView;
+        mCalenDayItemView = NULL;
+    }
 }
 
 /*!
@@ -108,6 +127,38 @@ void TestCalenItemView::testConstructors()
     testItemView = new CalenDayItemView(mMCalenServices,iterator,0);
     QVERIFY(testItemView);
     delete testItemView;
+}
+
+void TestCalenItemView::testIssueCommandOnSelectedItem()
+{
+#ifndef __WINSCW__
+    mCalenDayItemView->issueCommandOnSelectedItem((quint32)ECalenEventView);
+    QCOMPARE(SELECTED_COMMAND,(quint32)ECalenEventView);
+#endif
+}
+
+void TestCalenItemView::testOpenSelectedItem()
+{
+#ifndef __WINSCW__
+    mCalenDayItemView->openSelectedItem();
+    QCOMPARE(SELECTED_COMMAND,(quint32)ECalenEventView);
+#endif 
+}
+
+void TestCalenItemView::testEditSelectedItem()
+{
+#ifndef __WINSCW__
+    mCalenDayItemView->editSelectedItem();
+    QCOMPARE(SELECTED_COMMAND,(quint32)ECalenEditCurrentEntry);
+#endif
+}
+
+void TestCalenItemView::testDeleteSelectedItem()
+{
+#ifndef __WINSCW__
+    mCalenDayItemView->deleteSelectedItem();
+    QCOMPARE(SELECTED_COMMAND,(quint32)ECalenDeleteCurrentEntry);
+#endif
 }
 
 QTEST_MAIN(TestCalenItemView);

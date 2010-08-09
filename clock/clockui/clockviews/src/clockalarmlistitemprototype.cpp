@@ -23,11 +23,17 @@
 #include "clockalarmlistitemprototype.h"
 #include "clockdatatypes.h"
 #include "clockmainview.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "clockalarmlistitemprototypeTraces.h"
+#endif
+
 
 /*!
 	\class ClockAlarmListItemPrototype
 
-	TODO: Write description here.
+	This is the prototype class for the items in the list view. This class is
+	responsible for creating any cutom item types.
  */
 
 /*!
@@ -38,7 +44,9 @@
 ClockAlarmListItemPrototype::ClockAlarmListItemPrototype(QGraphicsItem *parent)
 :HbListViewItem(parent)
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTITEMPROTOTYPE_CLOCKALARMLISTITEMPROTOTYPE_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( CLOCKALARMLISTITEMPROTOTYPE_CLOCKALARMLISTITEMPROTOTYPE_EXIT );
 }
 
 /*!
@@ -46,7 +54,9 @@ ClockAlarmListItemPrototype::ClockAlarmListItemPrototype(QGraphicsItem *parent)
  */
 ClockAlarmListItemPrototype::~ClockAlarmListItemPrototype()
 {
+	OstTraceFunctionEntry0( DUP1_CLOCKALARMLISTITEMPROTOTYPE_CLOCKALARMLISTITEMPROTOTYPE_ENTRY );
 	// Nothing yet.
+	OstTraceFunctionExit0( DUP1_CLOCKALARMLISTITEMPROTOTYPE_CLOCKALARMLISTITEMPROTOTYPE_EXIT );
 }
 
 /*!
@@ -56,6 +66,7 @@ ClockAlarmListItemPrototype::~ClockAlarmListItemPrototype()
  */
 void ClockAlarmListItemPrototype::updateChildItems()
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTITEMPROTOTYPE_UPDATECHILDITEMS_ENTRY );
 	// First allow the base class to update.
 	HbListViewItem::updateChildItems();
 
@@ -74,6 +85,7 @@ void ClockAlarmListItemPrototype::updateChildItems()
 			malarmIconItem->setIcon(alarmIconPath);
 		}
 	}
+	OstTraceFunctionExit0( CLOCKALARMLISTITEMPROTOTYPE_UPDATECHILDITEMS_EXIT );
 }
 
 /*!
@@ -83,6 +95,7 @@ void ClockAlarmListItemPrototype::updateChildItems()
  */
 ClockAlarmListItemPrototype *ClockAlarmListItemPrototype::createItem()
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTITEMPROTOTYPE_CREATEITEM_ENTRY );
 	return new ClockAlarmListItemPrototype(*this);
 }
 
@@ -91,9 +104,11 @@ ClockAlarmListItemPrototype *ClockAlarmListItemPrototype::createItem()
  */
 void ClockAlarmListItemPrototype::handleAlarmStatusChanged()
 {
+	OstTraceFunctionEntry0( CLOCKALARMLISTITEMPROTOTYPE_HANDLEALARMSTATUSCHANGED_ENTRY );
 	int row = modelIndex().row();
 	emit static_cast<ClockAlarmListItemPrototype*>(
 			prototype())->alarmStatusHasChanged(row);
+	OstTraceFunctionExit0( CLOCKALARMLISTITEMPROTOTYPE_HANDLEALARMSTATUSCHANGED_EXIT );
 }
 
 // End of file	--Don't remove this.

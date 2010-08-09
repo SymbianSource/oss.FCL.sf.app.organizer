@@ -21,7 +21,9 @@ DEFINES += SETTINGSUTILITY_LIBRARY
 CONFIG += hb
 
 INCLUDEPATH += ../../inc \
-               ../clocktimezone/inc
+               ../clocktimezone/inc \
+               ./traces
+               
 DEPENDPATH += . \
 			  ./inc \
 			  ./src

@@ -39,13 +39,10 @@
  \param parent The parent of scroll area widget
  */
 CalenDayHourScrollArea::CalenDayHourScrollArea(QGraphicsItem *parent) :
-    HbScrollArea(parent),
-    mDateTime(QDateTime())
+    HbScrollArea(parent), mDateTime(QDateTime())
 {
+    // Grab pan gestures
     grabGesture(Qt::PanGesture);
-    
-    // Get width of hour elements and fix its size
-    qreal hourElementWidth = CalenDayUtils::instance()->hourElementWidth();
 
     // Create widget for hour elements
     HbWidget *hourWidget = new HbWidget();
@@ -53,7 +50,7 @@ CalenDayHourScrollArea::CalenDayHourScrollArea(QGraphicsItem *parent) :
     // Create and insert hour elements into vertical layout
     QGraphicsLinearLayout* hourLayout = new QGraphicsLinearLayout(Qt::Vertical,
         NULL);
-    for (int i = 0; i < 24; i++) {
+    for (int i = 0; i < KCalenHoursInDay; i++) {
         CalenDayHourElement* element = new CalenDayHourElement(QTime(i, 0),
             this);
         hourLayout->addItem(element);
@@ -61,10 +58,6 @@ CalenDayHourScrollArea::CalenDayHourScrollArea(QGraphicsItem *parent) :
     }
     hourLayout->setContentsMargins(0.0, 0.0, 0.0, 0.0);
     hourLayout->setSpacing(0.0);
-    
-    // Fix the size of scroll area
-    setMinimumWidth(hourElementWidth);
-    setMaximumWidth(hourElementWidth);
 
     // Apply hour layout for new widget and set content widget to scroll area
     hourWidget->setLayout(hourLayout);
@@ -113,21 +106,23 @@ QDateTime CalenDayHourScrollArea::dateTime() const
 /*!
  \brief Scroll view to given hour.
  
-  \param  An hour In 24 hour format (0 - 23)
+ \param  An hour in 24 hour format (0 - 23)
 */
 void CalenDayHourScrollArea::scrollToHour(int hour)
 {
+    Q_ASSERT((hour > -1) && (hour < KCalenHoursInDay));
+    
     CalenDayHourElement *hourElement = mHourElements.at(hour); 
     QRectF hourElementRect = hourElement->rect();
     hourElementRect = hourElement->mapRectToParent(hourElementRect);
     QPointF newPos = hourElementRect.topLeft();
     
-    //Ensure that we won't scroll out of bound
+    // Ensure that we won't scroll out of bound
     CalenDayHourElement *lastElement = mHourElements.last();
     qreal bottomEdge = lastElement->mapRectToParent(lastElement->rect()).bottom();
     qreal viewHeight = rect().height();
 
-    if(bottomEdge - newPos.y() < viewHeight){
+    if (bottomEdge - newPos.y() < viewHeight) {
         newPos.setY(bottomEdge - viewHeight);
     }
     

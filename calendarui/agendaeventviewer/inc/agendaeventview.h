@@ -69,13 +69,15 @@ private:
 	QString repeatRule();
 	QString alarmTimeText() const;
 	void removeWidget();
-	void updateCompletedReminderData();
+	void updateFieldsforTodoStatus();
 	void removeAllWidgets();
 	void addAllWidgets();
 	void showDeleteOccurencePopup();
 	void showDeleteConfirmationQuery();
 	void getSubjectIcon(AgendaEntry::Type type, QString &subjectIcon);
-    void getProgressIndicatorstatus(QString &progressIcon);
+	void getProgressIndicatorstatus(QString &progressIcon);
+	void updateSubjectandPriorityData();
+
 private slots:
 	void markTodoStatus();
 	void edit();
@@ -98,7 +100,7 @@ private:
 	QPointer<AgendaEventViewerItem> mSubjectWidget;
 	QPointer<AgendaEventViewerItem> mDateTimeWidget;
 	QPointer<AgendaEventViewerItem> mLocationWidget;
-	HbLabel                        *mMaptileLabel ;
+	HbLabel *mMaptileLabel ;
 	QPointer<AgendaEventViewerItem> mReminderWidget;
 	QPointer<AgendaEventViewerItem> mRepeatWidget;
 	QPointer<AgendaEventViewerItem> mDescriptionWidget;
@@ -119,11 +121,11 @@ private:
 	
 	bool mLocationFeatureEnabled;
 	QString mMaptilePath;
-    MapTileService *mMaptileService;
-    QTimer *mProgressTimer;
-    int     mProgressIconCount;  
-    bool    mMaptileStatusReceived;
-    int     mMaptileStatus; 
+	MapTileService *mMaptileService;
+	QTimer *mProgressTimer;
+	int mProgressIconCount;  
+	bool mMaptileStatusReceived;
+	int mMaptileStatus; 
 	bool mNotesPluginLoaded;
 
 private:

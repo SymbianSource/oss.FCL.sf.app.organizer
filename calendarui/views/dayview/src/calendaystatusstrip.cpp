@@ -43,7 +43,7 @@ CalenDayStatusStrip::~CalenDayStatusStrip()
 }
 
 /*!
-   \brief Return range beatween two filled lines in StripWithLines drawing 
+   \brief Returns range between two filled lines in StripWithLines drawing 
    styles.
    
    \sa CalenDayStatusStrip::DrawingStyle, setRange
@@ -54,7 +54,7 @@ qreal CalenDayStatusStrip::range() const
 }
 
 /*!
-   \brief Return color drawing
+   \brief Returns color drawing
    
    \sa setColor
  */
@@ -64,7 +64,7 @@ QColor CalenDayStatusStrip::color() const
 }
 
 /*!
-   \brief Return style of drawing.
+   \brief Returns style of drawing.
    
    \sa CalenDayStatusStrip::DrawingStyle, setDrawingStyle
  */
@@ -74,7 +74,7 @@ CalenDayStatusStrip::DrawingStyle CalenDayStatusStrip::drawingStyle() const
 }
 
 /*!
-   \brief Return orginal start and entime fo event
+   \brief Returns original start and entime fo event
    
    \sa setStartEndTime
  */
@@ -84,10 +84,10 @@ QPair<QTime,QTime> CalenDayStatusStrip::startEndTime() const
 }
 
 /*!
-   \brief It set range beatween two filled lines in StripWithLines drawing 
+   \brief It sets range between two filled lines in StripWithLines drawing 
    styles.
    
-   \param range Range beatween two filled lines
+   \param range Range between two filled lines
    
    \sa CalenDayStatusStrip::DrawingStyle, range
  */
@@ -97,7 +97,7 @@ void CalenDayStatusStrip::setRange(qreal range)
 }
 
 /*!
-   \brief It set color drawing
+   \brief It sets color drawing
    
    \param stripColor Color of drawing
    
@@ -109,7 +109,7 @@ void CalenDayStatusStrip::setColor(QColor stripColor)
 }
 
 /*!
-   \brief It set drawing style of strip 
+   \brief It sets drawing style of strip 
    
    \param drawingStyle Style of strip drawing.
    
@@ -122,7 +122,7 @@ CalenDayStatusStrip::setDrawingStyle(CalenDayStatusStrip::DrawingStyle drawingSt
 }
 
 /*!
-   It set start and end time of event
+   It sets start and end time of event
    
    \param startTime Start of event
    \param endTime End of event
@@ -223,7 +223,7 @@ void CalenDayStatusStrip::paint(
 }
 
 /*!
-   \brief It preapre points to draw filled polygon when StripWithLines style is
+   \brief It preapres points to draw filled polygon when StripWithLines style is
    on.
  */
 QPolygonF 
@@ -238,7 +238,7 @@ CalenDayStatusStrip::diagonalLine(QPointF startPoint, qreal dx, qreal dy)
 }
 
 /*!
-    Return time for position 0 and height in widget 
+    Returns time for position 0 and height in widget 
     
     \param startTime Start of event
     \param endTime End of event
@@ -277,7 +277,7 @@ CalenDayStatusStrip::diagonalLine(QPointF startPoint, qreal dx, qreal dy)
 }
 
 /*!
-   Calculate height of one minute from widget height, and start/end time. 
+   Calculates height of one minute from widget height, and start/end time. 
  */
 qreal CalenDayStatusStrip::calculateMinuteHeight(const QTime &start, 
                                                    const QTime &end)

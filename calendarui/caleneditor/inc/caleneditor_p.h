@@ -27,8 +27,8 @@
 
 //user includes
 #include <AgendaEntry>
+#include <caleneditor.h>
 
-#include "caleneditor.h"
 #include "caleneditorcommon.h"
 
 //forward declarations
@@ -154,7 +154,7 @@ private:
 	void deleteEntry(bool close = false);
 	bool handleAllDayToSave();
 	void enableFromTotimeFileds(bool, QDateTime, QDateTime);
-	QTime defaultTimeSameDay();
+	QDateTime defaultTimeSameDay( );
 	void refreshTimeForUncheckAllDay();
 	
 private slots:

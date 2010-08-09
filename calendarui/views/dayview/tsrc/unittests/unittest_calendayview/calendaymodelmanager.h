@@ -106,7 +106,7 @@ private:
 	void moveBackward()
 		{
 		}
-	void moveForeward()
+	void moveForward()
 		{
 		}
 

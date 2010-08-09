@@ -35,7 +35,8 @@ DEPENDPATH  += . \
                ./../../../../../inc/
 
 # Input
-HEADERS +=	calendaycontainer.h \
+HEADERS +=	calendaycontainertest.h \
+            calendaycontainer.h \
 			calendayutils.h \
 			calendayeventspane.h \
 			calendayitem.h \
@@ -53,11 +54,6 @@ SOURCES +=	unittest_calendaycontainer.cpp \
 symbian : {
 	TARGET.CAPABILITY = CAP_APPLICATION
     MMP_RULES += "USERINCLUDE ."
-    
-    INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
-    
-    LIBS += -lagendainterface \
-    		-lxqsettingsmanager
     		
     BLD_INF_RULES.prj_testexports += \
         "./rom/unittest_calendaycontainer.iby        CORE_APP_LAYER_IBY_EXPORT_PATH(unittest_calendaycontainer.iby)"
@@ -65,7 +61,8 @@ symbian : {
     INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
         
     LIBS += -lagendainterface \
-            -lcalencommonutils
+            -lcalencommonutils \
+            -lxqsettingsmanager
 }
 
 # End of file	--Don't remove this.

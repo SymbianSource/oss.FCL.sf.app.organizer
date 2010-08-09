@@ -45,7 +45,9 @@
 #include <maptileservice.h>//maptile service
 #include <agendautil.h>
 #include <NotesEditorInterface>
-#include <caleneditor.h>
+#include <CalenEditor>
+
+#include "calenagendautils.h"
 #include "agendaeventview.h"
 #include "agendaeventviewerdocloader.h"
 #include "agendaeventviewercommon.h"
@@ -309,7 +311,7 @@ void AgendaEventView::addViewerData()
  */
 void AgendaEventView::addMenuItem()
 {
-    OstTraceFunctionEntry0( AGENDAEVENTVIEW_ADDMENUITEM_ENTRY );
+	OstTraceFunctionEntry0( AGENDAEVENTVIEW_ADDMENUITEM_ENTRY );
 
 	if (mAgendaEntry.type() == AgendaEntry::TypeTodo) {
 
@@ -382,11 +384,11 @@ void AgendaEventView::addGroupBoxData()
 	AgendaEntry::Type entryType = mAgendaEntry.type();
 	if (entryType == AgendaEntry::TypeTodo) {
 		groupBox->setHeading(hbTrId("txt_calendar_subhead_to_do"));
+	} else if (CalenAgendaUtils::isAlldayEvent(mAgendaEntry)) {
+        groupBox->setHeading(hbTrId("txt_calendar_subhead_all_day_event"));
 	} else if (entryType == AgendaEntry::TypeAppoinment) {
 		groupBox->setHeading(hbTrId("txt_calendar_subhead_meeting"));
-	}else if (entryType == AgendaEntry::TypeEvent) {
-		groupBox->setHeading(hbTrId("txt_calendar_subhead_all_day_event"));
-	}
+	} 
 		
 	OstTraceFunctionExit0( AGENDAEVENTVIEW_ADDGROUPBOXDATA_EXIT );
 }
@@ -439,7 +441,7 @@ void AgendaEventView::addDateTimeData()
     itemData.append(QString::null);
     itemData.append("qtg_small_calendar");
 
-    mDateTimeWidget->setProperty(primaryLeftIconItem, false);  
+    mDateTimeWidget->setProperty(primaryLeftIconItem, false);
 
     mDateTimeWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
     itemData.clear();
@@ -452,59 +454,61 @@ void AgendaEventView::addDateTimeData()
     QString data;
     
     // Add agenda entry specific fields to the viewer
+    
     switch (mAgendaEntry.type()) {
     	case AgendaEntry::TypeAppoinment:
-
-    		startTimeText.append(systemLocale.format(
-							startDateTime.time(), r_qtn_time_usual_with_zero));
-
-    		endTimeText.append(systemLocale.format(endDateTime.time(),
-												r_qtn_time_usual_with_zero));
-    		startDateText.append(
-    				systemLocale.format(startDateTime.date(),
-												r_qtn_date_usual_with_zero));
-    		if (CalenDateUtils::onSameDay(startDateTime, endDateTime)) {
-    			data.append(startTimeText);
-    			data.append(CHARACTER_HYPHEN);
-    			data.append(endTimeText);
-    			data.append(CHARACTER_SPACE);
-    			data.append(startDateText);
-    		} else {
-    			// If both start and end time of a meeting are on different dates
-    			data.append(startTimeText);
-    			data.append(CHARACTER_SPACE);
-				data.append(startDateText);
-    			QString endDateText;
-    			endDateText.append(
-    					systemLocale.format(endDateTime.date(),
-    					                    r_qtn_date_usual_with_zero));
-    			data.append(CHARACTER_HYPHEN);
-    			data.append(endTimeText);
-    			data.append(CHARACTER_SPACE);
-    			data.append(endDateText);
-    		}
+    	case AgendaEntry::TypeEvent:
+    	    // Check if entry is an all-day
+    	    if (CalenAgendaUtils::isAlldayEvent(mAgendaEntry)) {
+                dateTimeText.append(systemLocale.format(startDateTime.date(),
+    	                                                        r_qtn_date_usual_with_zero));
+                if (CalenDateUtils::onSameDay(startDateTime, endDateTime.addSecs(-60))) {
+                    data.append(dateTimeText);
+                } else {
+                    QString endDate;
+                    endDate.append(
+                            systemLocale.format(endDateTime.addSecs(-60).date(),
+                                                r_qtn_date_usual_with_zero));
+                    data.append(dateTimeText);
+                    data.append(" - ");
+                    data.append(endDate);
+                }
+    	    } else {
+                startTimeText.append(systemLocale.format(
+                                startDateTime.time(), r_qtn_time_usual_with_zero));
+    
+                endTimeText.append(systemLocale.format(endDateTime.time(),
+                                                    r_qtn_time_usual_with_zero));
+                startDateText.append(
+                        systemLocale.format(startDateTime.date(),
+                                                    r_qtn_date_usual_with_zero));
+                if (CalenDateUtils::onSameDay(startDateTime, endDateTime)) {
+                    data.append(startTimeText);
+                    data.append(CHARACTER_HYPHEN);
+                    data.append(endTimeText);
+                    data.append(CHARACTER_SPACE);
+                    data.append(startDateText);
+                } else {
+                    // If both start and end time of a meeting are on different dates
+                    data.append(startTimeText);
+                    data.append(CHARACTER_SPACE);
+                    data.append(startDateText);
+                    QString endDateText;
+                    endDateText.append(
+                            systemLocale.format(endDateTime.date(),
+                                                r_qtn_date_usual_with_zero));
+                    data.append(CHARACTER_HYPHEN);
+                    data.append(endTimeText);
+                    data.append(CHARACTER_SPACE);
+                    data.append(endDateText);
+                }
+    	    }
     		break;
     	case AgendaEntry::TypeAnniversary:
     	case AgendaEntry::TypeTodo:
     		dateTimeText.append(systemLocale.format(endDateTime.date(),
     											r_qtn_date_usual_with_zero));
     		data.append(dateTimeText);
-    		break;
-    	case AgendaEntry::TypeEvent:
-
-    		dateTimeText.append(systemLocale.format(startDateTime.date(),
-    		                                        r_qtn_date_usual_with_zero));
-    		if (CalenDateUtils::onSameDay(startDateTime, endDateTime.addSecs(-60))) {
-    			data.append(dateTimeText);
-    		} else {
-    			QString endDate;
-    			endDate.append(
-    					systemLocale.format(endDateTime.addSecs(-60).date(),
-    					                    r_qtn_date_usual_with_zero));
-    			data.append(dateTimeText);
-    			data.append(" - ");
-    			data.append(endDate);
-    		}
     		break;
     	default:
     		break;
@@ -524,7 +528,7 @@ void AgendaEventView::addLocationData()
 	QStringList itemData;
 	QString progressIcon(QString::null);	
 	if ( mLocationFeatureEnabled ) {
-	    getProgressIndicatorstatus(progressIcon);	   
+	    getProgressIndicatorstatus(progressIcon);
 	}
 	 if( progressIcon.isNull() ) {
 	     itemData.append(QString::null);
@@ -580,8 +584,9 @@ void AgendaEventView::addReminderData()
 	itemData.append(QString::null);
 	itemData.append(alarmTimeText());
 	mReminderWidget->setEventViewerItemData(itemData, Qt::DisplayRole);
-    OstTraceFunctionExit0( AGENDAEVENTVIEW_ADDREMINDERDATA_EXIT );
-    }
+	mReminderWidgetAdded = true;
+	OstTraceFunctionExit0( AGENDAEVENTVIEW_ADDREMINDERDATA_EXIT );
+}
 
 /*!
 	Add completed to-do data to Event viewer
@@ -590,12 +595,12 @@ void AgendaEventView::addCompletedTodoData()
 {
 	OstTraceFunctionEntry0( AGENDAEVENTVIEW_ADDCOMPLETEDTODODATA_ENTRY );
 	QStringList itemData;
-	QString     completedText;
-    HbExtendedLocale systemLocale = HbExtendedLocale::system();;
-    itemData.append(QString::null);
+	QString completedText;
+	HbExtendedLocale systemLocale = HbExtendedLocale::system();;
 	itemData.append(QString::null);
 	itemData.append(QString::null);
-    mReminderWidget->setProperty(primaryLeftIconItem, true);
+	itemData.append(QString::null);
+	mReminderWidget->setProperty(primaryLeftIconItem, true);
 	mReminderWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 	itemData.clear();
 	completedText = systemLocale.format(mAgendaEntry.completedDateTime().date(),
@@ -781,9 +786,9 @@ void AgendaEventView::removeWidget()
 	}
 	
 	QFile file(mMaptilePath);
-    if ( !mLocationFeatureEnabled || !file.exists()
-            || mAgendaEntry.location().isEmpty()){        
-        //code added to hide and remove maptile image   
+    if (!mLocationFeatureEnabled || !file.exists()
+            || mAgendaEntry.location().isEmpty()) {
+        //code added to hide and remove maptile image
         mMaptileLabel->hide();
         mLinearLayout->removeItem(mMaptileLabel);
     }
@@ -803,8 +808,16 @@ void AgendaEventView::removeWidget()
 		}
 	}
 	
+	// Check whether the entry is a completed To-do. if so then remove the 
+	// time and date widget.
+	if (mAgendaEntry.type() == AgendaEntry::TypeTodo &&
+			AgendaEntry::TodoCompleted == mAgendaEntry.status()) {
+		mDateTimeWidget->hide();
+		mLinearLayout->removeItem(mDateTimeWidget);
+	}
+	
 	if ((mAgendaEntry.repeatRule().type() == AgendaRepeatRule::InvalidRule) &&
-	        (mAgendaEntry.recurrenceId().isNull())) { 
+			(mAgendaEntry.recurrenceId().isNull())) { 
 		mRepeatWidget->hide();
 		mLinearLayout->removeItem(mRepeatWidget);
 	}
@@ -821,14 +834,22 @@ void AgendaEventView::removeWidget()
 }
 
 /*!
-	Update the completed to-do or reminder data to event viewer.
+	Update all the fields according to to-do status change..
  */
-void AgendaEventView::updateCompletedReminderData()
+void AgendaEventView::updateFieldsforTodoStatus()
 {
-    OstTraceFunctionEntry0( AGENDAEVENTVIEW_UPDATECOMPLETEDREMINDERDATA_ENTRY );
+	OstTraceFunctionEntry0( AGENDAEVENTVIEW_UPDATEFIELDSFORTODOSTATUS_ENTRY );
 
 	if (AgendaEntry::TodoCompleted == mAgendaEntry.status()) {
+		
+		// For completed to-do due date and time should be removed.
+		mDateTimeWidget->hide();
+		mLinearLayout->removeItem(mDateTimeWidget);
+		
+		// Fill the completed data information.
 		addCompletedTodoData();
+		
+		// Add the completed date to thte viewer.
 		if (!mReminderWidgetAdded) {
 			mReminderWidget->show();
 			mLinearLayout->insertItem(2, mReminderWidget);
@@ -836,6 +857,10 @@ void AgendaEventView::updateCompletedReminderData()
 		}
 
 	} else {
+			// Add the date and time widget to the viewer.
+			mDateTimeWidget->show();
+			mLinearLayout->insertItem(1, mDateTimeWidget);
+			
 		if (!mAgendaEntry.alarm().isNull()) {
 			addReminderData();
 			if (!mReminderWidgetAdded) {
@@ -844,6 +869,7 @@ void AgendaEventView::updateCompletedReminderData()
 				mReminderWidgetAdded = true;
 			}
 		} else {
+			// Remove the completed date from the viewer.
 			if (mReminderWidgetAdded) {
 				mReminderWidget->hide();
 				mLinearLayout->removeItem(mReminderWidget);
@@ -852,10 +878,12 @@ void AgendaEventView::updateCompletedReminderData()
 		}
 
 	}
+	// The To-do icon changes according to the To-do status change.
+	updateSubjectandPriorityData();
 	
 	mLinearLayout->invalidate();
 	mLinearLayout->activate();
-	OstTraceFunctionExit0( AGENDAEVENTVIEW_UPDATECOMPLETEDREMINDERDATA_EXIT );
+	OstTraceFunctionExit0( AGENDAEVENTVIEW_UPDATEFIELDSFORTODOSTATUS_EXIT );
 }
 
 /*!
@@ -957,9 +985,15 @@ void AgendaEventView::showDeleteConfirmationQuery()
     switch (mAgendaEntry.type()) {
         case AgendaEntry::TypeAppoinment:
         case AgendaEntry::TypeEvent: {
-        text.append(hbTrId("txt_calendar_info_delete_meeting"));
-        break;
-        }
+			// Check for all-day
+        	if (CalenAgendaUtils::isAlldayEvent(mAgendaEntry)) {
+				text.append(hbTrId("txt_calendar_info_delete_allday_event"));
+        	} else {
+				text.append(hbTrId("txt_calendar_info_delete_meeting"));
+			}
+
+			break;
+		}
         case AgendaEntry::TypeAnniversary: {
         text.append(hbTrId("txt_calendar_info_delete_anniversary"));
         break;
@@ -1030,7 +1064,7 @@ void AgendaEventView::markTodoStatus()
 		mOwner->mAgendaUtil->setCompleted(mAgendaEntry, false, currentDateTime);
 	}
 
-	updateCompletedReminderData();
+	updateFieldsforTodoStatus();
 	
 	OstTraceFunctionExit0( AGENDAEVENTVIEW_MARKTODOSTATUS_EXIT );
 }
@@ -1284,8 +1318,14 @@ void AgendaEventView::getSubjectIcon(AgendaEntry::Type type, QString &subjectIco
     OstTraceFunctionEntry0( AGENDAEVENTVIEW_GETSUBJECTICON_ENTRY );
     switch(type) {
         case AgendaEntry::TypeAppoinment:
+        case AgendaEntry::TypeEvent:
             {
-            subjectIcon.append("qtg_small_meeting");
+            // Check for all-day
+            if (CalenAgendaUtils::isAlldayEvent(mAgendaEntry)) {
+                subjectIcon.append("qtg_small_day");
+            } else {
+                subjectIcon.append("qtg_small_meeting");
+            }
             }
             break;
         case AgendaEntry::TypeTodo:
@@ -1295,11 +1335,6 @@ void AgendaEventView::getSubjectIcon(AgendaEntry::Type type, QString &subjectIco
             } else {
                 subjectIcon.append("qtg_small_todo");
             }
-            }
-            break;
-        case AgendaEntry::TypeEvent:
-            {
-            subjectIcon.append("qtg_small_day");
             }
             break;
         case AgendaEntry::TypeAnniversary:
@@ -1424,6 +1459,26 @@ void AgendaEventView::getProgressIndicatorstatus(QString &progressIcon)
     }
     OstTraceFunctionExit0( AGENDAEVENTVIEW_GETPROGRESSINDICATORSTATUS_EXIT );
 }
+
+/*!
+	Updates the To-do icon for the changes in to-do status.
+ */
+void AgendaEventView::updateSubjectandPriorityData()
+{
+	OstTraceFunctionEntry0( AGENDAEVENTVIEW_UPDATESUBJECTANDPRIORITYDATA_ENTRY );
+	QStringList itemList;
+    QString priorityIcon(QString::null);
+    QString subjectIcon(QString::null);
+    getPriorityIcon(mAgendaEntry.priority(), priorityIcon);
+    getSubjectIcon(mAgendaEntry.type(),subjectIcon);
+    itemList.append(subjectIcon);
+    itemList.append(priorityIcon);
+    itemList.append(QString::null);
+
+	mSubjectWidget->setEventViewerItemData(itemList, Qt::DecorationRole);
+	OstTraceFunctionExit0( AGENDAEVENTVIEW_UPDATESUBJECTANDPRIORITYDATA_EXIT );
+}
+
 /*!
     Reload the maptile image on system orientation change.
  */

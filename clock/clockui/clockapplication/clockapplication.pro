@@ -20,7 +20,8 @@ TARGET = clock
 
 INCLUDEPATH += \
 		. \
-		../clockappcontroller/inc
+		../clockappcontroller/inc \
+		./traces
 
 DEPENDPATH += \
 		. \
