@@ -195,7 +195,7 @@ void CCalenUnifiedEditorControl::SetDataToEditorL(TBool onLocaleUpdate)
                 
                 User::LeaveIfError( entryEndTime.MinutesFrom( entryStartTime, duration ) );
                 
-                ReadRrule(firstRDate,rruleEndTime);                                           
+                ReadRruleL(firstRDate,rruleEndTime);                                           
                 
                 if( firstRDate <= entryStartTime)
                     {                    
@@ -398,7 +398,7 @@ void CCalenUnifiedEditorControl::AddDefaultBirthDayEditorL()
 
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DESCRIPTION_ITEM,
                     ECalenEditorDescription, ECalenEditorAttachment );
-    
+    iUnifiedEditor.UpdateFormL();
     TRACE_EXIT_POINT;
     }
 
@@ -473,7 +473,7 @@ void CCalenUnifiedEditorControl::AddDefaultMeetingEditorL()
     
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DESCRIPTION_ITEM,
                     ECalenEditorDescription, ECalenEditorAttachment );
-    
+    iUnifiedEditor.UpdateFormL();
     TRACE_EXIT_POINT;
     }
 
@@ -526,7 +526,7 @@ void CCalenUnifiedEditorControl::AddDefaultTodoEditorL()
     
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DESCRIPTION_ITEM,
                     ECalenEditorDescription, ECalenEditorAttachment );
-    
+    iUnifiedEditor.UpdateFormL();
     TRACE_EXIT_POINT;
     }
 
@@ -675,7 +675,7 @@ TBool CCalenUnifiedEditorControl::IsAllDayEvent()
 // To Set AllDay field value
 // -----------------------------------------------------------------------------
 //
-void CCalenUnifiedEditorControl::SetAllDayEvent( TBool aActive )
+void CCalenUnifiedEditorControl::SetAllDayEventL( TBool aActive )
     {
     TRACE_ENTRY_POINT;
     
@@ -858,15 +858,15 @@ void CCalenUnifiedEditorControl::DeletePreviousEntryTypeFieldsL()
         case CCalEntry::EEvent:
             {
             // Delete AllDay, StartDate, EndDate, and Place fields
-            iUnifiedEditor.DeleteLine( ECalenEditorAllDayItem, ETrue );
-            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, ETrue );
-            iUnifiedEditor.DeleteLine( ECalenEditorEndDate, ETrue );
-            iUnifiedEditor.DeleteLine( ECalenEditorPlace, ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorAllDayItem, EFalse );
+            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, EFalse );
+            iUnifiedEditor.DeleteLine( ECalenEditorEndDate, EFalse );
+            iUnifiedEditor.DeleteLine( ECalenEditorPlace, EFalse );
             }
             break;
         case CCalEntry::EAnniv:
             {
-            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, EFalse );
             }
             break;
         case CCalEntry::EAppt:
@@ -874,26 +874,26 @@ void CCalenUnifiedEditorControl::DeletePreviousEntryTypeFieldsL()
             if( iUnifiedEditor.Edited().IsAllDayEvent() ) 
                 {
                 // Delete, AllDay event fields from Editor
-                iUnifiedEditor.DeleteLine( ECalenEditorAllDayItem, ETrue );
+                iUnifiedEditor.DeleteLine( ECalenEditorAllDayItem, EFalse );
                 }
             else
                 {
                 // Delete, Non-AllDay event fields from Editor
-                iUnifiedEditor.DeleteLine( ECalenEditorAllDayItem, ETrue );
-                iUnifiedEditor.DeleteLine( ECalenEditorStartTime, ETrue );
-                iUnifiedEditor.DeleteLine( ECalenEditorEndTime, ETrue );
+                iUnifiedEditor.DeleteLine( ECalenEditorAllDayItem, EFalse );
+                iUnifiedEditor.DeleteLine( ECalenEditorStartTime, EFalse );
+                iUnifiedEditor.DeleteLine( ECalenEditorEndTime, EFalse );
                 }
-            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, ETrue );
-            iUnifiedEditor.DeleteLine( ECalenEditorEndDate, ETrue );
-            iUnifiedEditor.DeleteLine( ECalenEditorPlace, ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, EFalse );
+            iUnifiedEditor.DeleteLine( ECalenEditorEndDate, EFalse );
+            iUnifiedEditor.DeleteLine( ECalenEditorPlace, EFalse );
 				
 				
             }
             break;
         case CCalEntry::ETodo:
             {
-            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, ETrue );
-            iUnifiedEditor.DeleteLine( ECalenEditorPriority, ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, EFalse );
+            iUnifiedEditor.DeleteLine( ECalenEditorPriority, EFalse );
             }
             break;
         default:
@@ -922,15 +922,15 @@ void CCalenUnifiedEditorControl::DeleteExtendedEntryFields( CCalEntry::TType aPr
                 
         if( alarmTimeCtrl )
             {
-            iUnifiedEditor.DeleteLine( ECalenEditorReminderTime, ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorReminderTime, EFalse );
             }
         if( alarmDateCtrl )
             {
-            iUnifiedEditor.DeleteLine( ECalenEditorReminderDate, ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorReminderDate, EFalse );
             }
         }
 
-    iUnifiedEditor.DeleteLine( ECalenEditorReminder );
+    iUnifiedEditor.DeleteLine( ECalenEditorReminder,EFalse );
     
     /*CCoeControl* PeopleFieldCtrl = iUnifiedEditor.ControlOrNull( ECalenEditorPeople );
     if( PeopleFieldCtrl )
@@ -941,18 +941,18 @@ void CCalenUnifiedEditorControl::DeleteExtendedEntryFields( CCalEntry::TType aPr
     CCoeControl* dbNameCtrl = iUnifiedEditor.ControlOrNull( ECalenEditorDBName );
     if( dbNameCtrl )
         {
-        iUnifiedEditor.DeleteLine( ECalenEditorDBName );
+        iUnifiedEditor.DeleteLine( ECalenEditorDBName,EFalse );
         }
     // TODO: Uncomment this when enabling attachment support
-    iUnifiedEditor.DeleteLine( ECalenEditorAttachment );
+    iUnifiedEditor.DeleteLine( ECalenEditorAttachment,EFalse );
     
-    iUnifiedEditor.DeleteLine( ECalenEditorDescription );
+    iUnifiedEditor.DeleteLine( ECalenEditorDescription,EFalse );
     
     // To-Do do not have place field
     CCoeControl* editorPlaceCtrl = iUnifiedEditor.ControlOrNull( ECalenEditorPlace );
     if( editorPlaceCtrl )
         {
-        iUnifiedEditor.DeleteLine( ECalenEditorPlace );
+        iUnifiedEditor.DeleteLine( ECalenEditorPlace,EFalse );
         }
     
     // Anniversary & To-Do entry, do not have Repeat field
@@ -964,11 +964,11 @@ void CCalenUnifiedEditorControl::DeleteExtendedEntryFields( CCalEntry::TType aPr
         CCoeControl* repeatUntilCtrl = iUnifiedEditor.ControlOrNull( ECalenEditorRepeatUntil );
         if( repeatCtrl )
             {
-            iUnifiedEditor.DeleteLine( ECalenEditorRepeat );
+            iUnifiedEditor.DeleteLine( ECalenEditorRepeat,EFalse );
             }
         if( repeatUntilCtrl )
             {
-            iUnifiedEditor.DeleteLine( ECalenEditorRepeatUntil );
+            iUnifiedEditor.DeleteLine( ECalenEditorRepeatUntil,EFalse );
             }
         }
     }
@@ -1460,6 +1460,14 @@ const TDesC& CCalenUnifiedEditorControl::GetCalendarNameForEntryL()
     return iDbField->GetCalendarNameForEntryL();
     }
 
+TInt CCalenUnifiedEditorControl::GetCalendarNameForEntryL(const TDesC& aCalendarFileName)
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    
+    return iDbField->GetCalendarNameForEntryL(aCalendarFileName);
+    }
+
 // -----------------------------------------------------------------------------
 // CCalenUnifiedEditorControl::UpdateMeetingDurationL()
 // This function leaves if the end date/time is before the start date/time.
@@ -1525,7 +1533,7 @@ void CCalenUnifiedEditorControl::UpdateEndTimeL()
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void CCalenUnifiedEditorControl::ReadRrule(TTime& firstRdatestartTime, TTime& endTime)
+void CCalenUnifiedEditorControl::ReadRruleL(TTime& firstRdatestartTime, TTime& endTime)
     {   
     TRACE_ENTRY_POINT;
     

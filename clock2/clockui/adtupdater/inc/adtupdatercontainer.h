@@ -20,7 +20,7 @@
 
 // System includes
 #include <coecntrl.h>
-
+#include <e32property.h> 
 // User includes
 #include "clocktimesourceinterface.hrh"
 
@@ -46,13 +46,48 @@ class CTzLocalizedCityGroupArray;
 class CTzLocalizedCity;
 class CAdtUpdaterAppUi;
 
+class MStartupUIPhaseObserver
+    {
+    public:
+        virtual ~MStartupUIPhaseObserver() {}
+        virtual void ShowQueriesL () = 0 ;
+    };
+    
+NONSHARABLE_CLASS( CPsKeyObserver ) : public CActive
+    {
+
+    public:
+		static CPsKeyObserver* NewL( TUid aCategory, TUint aKey, TInt aTargetValue, MStartupUIPhaseObserver* aObsever);
+        CPsKeyObserver( TUid aCategory, TUint aKey, TInt aTargetValue, MStartupUIPhaseObserver* aObsever ); //move to private
+        virtual ~CPsKeyObserver();
+        void StartObservingL();
+
+    private:
+        virtual void DoCancel();
+        virtual void RunL();
+    
+    private:
+        TBool IsMatch( const TInt aKeyValue ) const;
+        void HandleKeyValueL();
+        void CompleteL( const TInt aErrorCode );
+    
+    private: // data
+        RProperty iProperty;
+        TUid iCategory;
+        TUint iKey;
+        TInt iTargetValue;
+        TRequestStatus* iClientStatus;
+        MStartupUIPhaseObserver* iStartupUIPhaseObserver;
+    };
+
+
 // Class declaration
 /**
 * @class CAdtUpdaterContainer
 * @brief The CCoeControl inheriting class.
 * @exe adtupdater.exe
 */
-class CAdtUpdaterContainer : public CCoeControl
+class CAdtUpdaterContainer : public CCoeControl, public MStartupUIPhaseObserver
 	{
 	public:			// Constructor and destructor
 	
@@ -178,6 +213,12 @@ class CAdtUpdaterContainer : public CCoeControl
     	*/
     	TBool QueryDialogsInDisplay();
     	
+    public:
+    	/**
+        * @brief Show the Date/Time/country/place.time queries.      
+        */
+    	void ShowQueriesL ();
+    			
    	private:    	// Functions from base classes
 
    		/**
@@ -227,9 +268,19 @@ class CAdtUpdaterContainer : public CCoeControl
         void DisplayNitzInfoL();
         
         /**
+        * @brief Wait for the Cherry Key values to show the country/city/date/time queries.
+        */
+        void WaitToShowQueriesL();
+        
+		/**
         * @brief Continues with normal bootup, by displaying country/city list and date/time queries.
         */
-        void ContinueWithNormalBootL();
+        void DoContinueWithNormalBootL();
+		
+		/**
+        * @brief display date and time queries if RTC time invalid or Hiddedn Reset.
+        */
+		void ShowDateAndTimeQueriesL();
         
         /**
         * @brief Prompts the user for country/city list.
@@ -294,6 +345,12 @@ class CAdtUpdaterContainer : public CCoeControl
           * @return TBool
           */
          TBool PredictiveTimeEnabled();
+         
+         /**
+          * @brief  Checks if automatic time update is ON
+          * @return TBool ETrue : if automatic time update is ON
+          */
+         TBool isAutomaticTimeUpdateON();
   
 	private:       //Data members
 		
@@ -374,7 +431,15 @@ class CAdtUpdaterContainer : public CCoeControl
 		* @var iDisplayStartupQueries
 		* @brief ETrue if the startup queries have to be displayed, EFalse otherwise.
 		*/ 
-		TBool                                       iDisplayStartupQueries;  
+		TBool                                       iDisplayStartupQueries;
+		
+		/**
+		* @var iIsRTCInvalidAndHiddenReset
+		* @brief ETrue if the RTC Time is inavalid or Hidden Rest, EFalse otherwise.
+		*/
+		TBool										iIsRTCInvalidAndHiddenReset;  
+		
+		CPsKeyObserver* iPSObserver;
 	};	
 
 #endif 		// __ADTUPDATER_CONTAINER_H__

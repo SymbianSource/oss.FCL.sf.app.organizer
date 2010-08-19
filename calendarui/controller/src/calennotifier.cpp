@@ -78,15 +78,10 @@ CCalenNotifier::~CCalenNotifier()
         iHandlers[i].iHashSet.Close();
         }
     
-    iHandlers.Reset();
-    iBroadcastQueue.Reset();
-
-    if( iAsyncCallback )
-        {
-        iAsyncCallback->Cancel();
-        delete iAsyncCallback;
-        iAsyncCallback = NULL;
-        }
+    iHandlers.Close();
+    
+    iBroadcastQueue.Close();
+    
     
     if( iFilnameDeleted )
         {
@@ -130,7 +125,7 @@ CCalenNotifier::~CCalenNotifier()
     if( iGlobalData )
         {
         // stop listening for calendar file change notifications
-        iGlobalData->CalSessionL().StopFileChangeNotification();
+        TRAP_IGNORE(iGlobalData->CalSessionL().StopFileChangeNotification());
         iGlobalData->Release();
         }
 	TRACE_EXIT_POINT;
@@ -171,8 +166,6 @@ void CCalenNotifier::ConstructL()
 	// start listening for calendar file change notifications
 	iGlobalData->CalSessionL().StartFileChangeNotificationL(*this);
 	
-	TCallBack callback(CCalenNotifier::AsyncRemoveCalendarL,this);
-	iAsyncCallback = new(ELeave) CAsyncCallBack(callback,CActive::EPriorityStandard);
 	
 	iFilnameDeleted = NULL;
 
@@ -599,8 +592,8 @@ void CCalenNotifier::Progress( TInt /*aPercentageCompleted*/ )
 TBool CCalenNotifier::NotifyProgress()
     {
     TRACE_ENTRY_POINT;
-
-    BroadcastNotification( ECalenNotifyViewCreationStarted );
+	// No one interested in this notification.Removing to avoid notification clutter.
+    // BroadcastNotification( ECalenNotifyViewCreationStarted );
 
     TRACE_EXIT_POINT;
     return EFalse;
@@ -638,11 +631,16 @@ void CCalenNotifier::Completed( TInt aStatus )
         CleanupStack::PopAndDestroy( errorUi );
         );
 
-        // Exit application
-        if (iAvkonAppUi)
-            {
-            iAvkonAppUi->Exit();
-            }
+		// If Instance view creation is cancelled, no need to
+		// exit application.All other errors exit application.
+		if(aStatus != KErrCancel)
+			{
+	        // Exit application
+	        if (iAvkonAppUi)
+	            {
+	            iAvkonAppUi->Exit();
+	            }
+			}
         }
 
     TRACE_EXIT_POINT;
@@ -761,6 +759,12 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
 		switch(changeType)
 			{
 			case MCalFileChangeObserver::ECalendarFileCreated:
+			    {
+			   TFileName lastCreatedFileName = aCalendarInfoChangeEntries[index]->FileNameL();
+               CRepository* cenRep = CRepository::NewLC(KCRUidCalendar); 
+               User::LeaveIfError( cenRep->Set( KCalendarLastUsedCalendar, lastCreatedFileName ) );
+               CleanupStack::PopAndDestroy( cenRep );
+			    }
 			case MCalFileChangeObserver::ECalendarInfoCreated:
 				{
 				BroadcastNotification(ECalenNotifyDeleteInstanceView);
@@ -798,10 +802,18 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
 
                 CleanupStack::PopAndDestroy(calendarInfo);
 
-                if (err == KErrNone && markAsdelete)
+                //remove calendar except default calendar
+                if (err == KErrNone && markAsdelete
+                        && aCalendarInfoChangeEntries[index]->FileNameL().CompareF(
+                                iGlobalData->CalSessionL().DefaultFileNameL()))
                     {
                     iFilnameDeleted = aCalendarInfoChangeEntries[index]->FileNameL().AllocL();
-                    iAsyncCallback->CallBack();
+                    BroadcastNotification(ECalenNotifyDeleteInstanceView);
+                    iGlobalData->RemoveCalendarL(iFilnameDeleted->Des());
+                    BroadcastNotification(ECalenNotifyCalendarFileDeleted);
+                                       
+                    delete iFilnameDeleted;
+                    iFilnameDeleted = NULL;
                     }
                 else
                     {
@@ -818,29 +830,5 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
 	TRACE_EXIT_POINT;
 	}
 
-// ----------------------------------------------------------------------------
-// CCalenNotifier::AsyncRemoveCalendarL(TAny* aThisPtr)
-// ----------------------------------------------------------------------------
-TInt CCalenNotifier::AsyncRemoveCalendarL(TAny* aThisPtr)
-    {
-    TRACE_ENTRY_POINT
-    static_cast<CCalenNotifier*>(aThisPtr)->AsyncRemoveCalendarL();
-    TRACE_EXIT_POINT
-    return 0;
-    }
 
-// ----------------------------------------------------------------------------
-// CCalenNotifier::AsyncRemoveCalendarL()
-//
-void CCalenNotifier::AsyncRemoveCalendarL()
-    {
-    TRACE_ENTRY_POINT
-    BroadcastNotification(ECalenNotifyDeleteInstanceView);
-    iGlobalData->RemoveCalendarL(iFilnameDeleted->Des());
-    BroadcastNotification(ECalenNotifyCalendarFileDeleted);
-                       
-    delete iFilnameDeleted;
-    iFilnameDeleted = NULL;
-    TRACE_EXIT_POINT
-    }
 // End of file

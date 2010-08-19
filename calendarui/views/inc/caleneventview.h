@@ -114,7 +114,12 @@ public: // From CCalenView
     * @return ETrue, if event viewer launched from alarm(MSK case).
     */
     TBool IsAlarmActiveInViewer(); // IsEventViewerLaunchedFromAlarm
-
+    
+    /*
+     * Hides the navi pane
+     */
+    void HideNaviPane();
+    
 public:
     
     /**

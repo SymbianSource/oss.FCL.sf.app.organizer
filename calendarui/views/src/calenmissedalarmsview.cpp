@@ -253,6 +253,11 @@ void CCalenMissedAlarmsView::HandleCommandL(TInt aCommand)
         case EAknSoftkeyBack:
         case EAknSoftkeyClose:
             {
+            MCalenToolbar* toolbar = iServices.ToolbarOrNull();
+            if(toolbar)
+                {
+                toolbar->SetToolbarVisibilityL(ETrue);  
+                } 
             iHighlightedRowNumber = 0;
 			iServices.IssueNotificationL(ECalenNotifyMissedAlarmViewClosed);
 			}
@@ -318,12 +323,11 @@ void CCalenMissedAlarmsView::DoActivateImplL( const TVwsViewId& aPrevViewId,
 void CCalenMissedAlarmsView::DoDeactivateImpl()
     {
     TRACE_ENTRY_POINT;
-    MCalenToolbar* toolbar = iServices.ToolbarOrNull();
+    /*MCalenToolbar* toolbar = iServices.ToolbarOrNull();
     if(toolbar)
         {
         toolbar->SetToolbarVisibilityL(ETrue);  
-        } 
-    
+        }  */   
     TRACE_EXIT_POINT;
     }
 

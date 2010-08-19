@@ -163,7 +163,14 @@ void CClockMarqueeLabel::RedrawRect( const TRect& aRect ) const
             // The text needs to be drawn here.
             // iMarqueeControl->Stop();
             __PRINTS( "Marquee has finished executing all loops" );
-            gc.DrawText( *Text(), aRect, baselineOffset );
+            if(AknLayoutUtils::LayoutMirrored())
+                {
+                gc.DrawText( *Text(), aRect, baselineOffset,CGraphicsContext::ERight  );
+                }
+            else
+                {
+                gc.DrawText( *Text(), aRect, baselineOffset,CGraphicsContext::ELeft );
+                }
             }
         
         }

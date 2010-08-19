@@ -72,9 +72,13 @@ void CCalenStatusPaneUtilsImpl::HideNaviPane()
     
     if( ( iNaviLabel != NULL ) && ( iNaviContainer->Top() == iNaviLabel ) )
         {
-        iNaviContainer->Pop( iNaviLabel );
-        delete iNaviLabel;
-        iNaviLabel = NULL;
+        if( iNaviLabel->ControlType() == CAknNavigationDecorator::ENotSpecified 
+                  || iNaviLabel->ControlType() == CAknNavigationDecorator::ENaviLabel)
+            {
+            iNaviContainer->Pop( iNaviLabel );
+            delete iNaviLabel;
+            iNaviLabel = NULL;          
+            }
         }
     
     TRACE_EXIT_POINT;
@@ -158,7 +162,7 @@ void CCalenStatusPaneUtilsImpl::HideNaviPane()
          {
          CCoeControl* coeRes = iNaviLabel->DecoratedControl();
          CCustomNaviControl *actualLabel = static_cast<CCustomNaviControl*>(coeRes);
-         actualLabel->SetCalendarNameAndColor(aName, aColor);
+         actualLabel->SetCalendarNameAndColorL(aName, aColor);
          actualLabel->DrawDeferred();
          iNaviContainer->ReplaceL(*iNaviLabel, *iNaviLabel);
          }
@@ -267,7 +271,7 @@ CCalenStatusPaneUtilsImpl::~CCalenStatusPaneUtilsImpl()
     delete iLongDateFormat;
     delete iMonthArray;
     delete iDayNameArray;
-    if( iNaviLabel )
+    if( iNaviLabel && iNaviContainer->Top() == iNaviLabel)
         {
         delete iNaviLabel;
         }

@@ -147,7 +147,7 @@ NONSHARABLE_CLASS( CCalenUnifiedEditorControl ) : public CBase
          * @brief To set AllDay field value
          * @param aActive
          */
-        void SetAllDayEvent( TBool aActive );
+        void SetAllDayEventL( TBool aActive );
         
         /**
          * @brief Handles a state change in the control with id aControlId. 
@@ -225,7 +225,7 @@ NONSHARABLE_CLASS( CCalenUnifiedEditorControl ) : public CBase
         /**
          * Reads the RRule and Rdates for the current CCalEntry.
          */
-        void ReadRrule(TTime& startTime, TTime& endTime);
+        void ReadRruleL(TTime& startTime, TTime& endTime);
         
         /**
          * @brief Get start date time from editor
@@ -270,6 +270,7 @@ NONSHARABLE_CLASS( CCalenUnifiedEditorControl ) : public CBase
         TInt GetCalendarIndexForEntryL();
         
         const TDesC& GetCalendarNameForEntryL();
+        TInt GetCalendarNameForEntryL(const TDesC& aCalendarFileName);
         
         /**
          * @brief Handle error codes related to the editor fields.

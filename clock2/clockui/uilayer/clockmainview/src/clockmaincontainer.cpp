@@ -218,6 +218,14 @@ TKeyResponse CClockMainContainer::OfferKeyEventL( const TKeyEvent& aKeyEvent,
             else if( iNewAlarmButton->IsFocused() && itemCount > 0 )
                 {
                 iListBox->View()->ItemDrawer()->ClearFlags( CListItemDrawer::EDisableHighlight );
+                
+                //clear ESingleClickDisabledHighlight flag only when navigation key is used
+                if(iClearSingleClickFlag)
+                    {
+                    iListBox->View()->ItemDrawer()->ClearFlags( CListItemDrawer::ESingleClickDisabledHighlight );
+                    iClearSingleClickFlag = EFalse;
+                    }
+                
                 iNewAlarmButton->SetFocus( EFalse );
                 iListBox->SetFocus( ETrue );
                 if( EKeyDownArrow == aKeyEvent.iCode )
@@ -397,6 +405,7 @@ void CClockMainContainer::HandlePointerEventL( const TPointerEvent& aPointerEven
             aPointerEvent.iType == TPointerEvent::EButton1Down &&
             !iListBox->IsFocused() && iListBox->IsVisible() )
         {
+        iNewAlarmButton->SetFocus(EFalse);
         iListBox->View()->ItemDrawer()->ClearFlags( CListItemDrawer::EDisableHighlight );
         }
     
@@ -470,6 +479,7 @@ void CClockMainContainer::UpdateAlarmListL( SClkAlarmInfo& /*aAlarmInfo*/, TAlar
     iListBox->SetCurrentItemIndexAndDraw( itemIndex );
     SetCorrectRectForNewAlarmButton();
     iNewAlarmButton->DrawDeferred();
+    iClearSingleClickFlag = ETrue;
 	__PRINTS( "CClockMainContainer::UpdateAlarmListL - Exit" );
     }
 
@@ -1160,7 +1170,7 @@ void CClockMainContainer::ConstructL( CClockMainView* aView, const TRect& aRect,
 	
     iView = aView;
     iAlarmArray = aAlarmArray;
-    
+    iClearSingleClickFlag = ETrue;
 	CreateWindowL();
     
 	// Construct the basic skin context.
@@ -1708,5 +1718,15 @@ void CClockMainContainer::SwitchClockTypeL()
     iSkinnableClock->SetExtent( skinClockRect.iTl, skinClockRect.Size() );
     iSkinnableClock->ActivateL();
     iSkinnableClock->DrawDeferred();
+    }
+
+TBool CClockMainContainer::IsNewAlaramButtonFocused()
+    {
+    __PRINTS( "CClockMainContainer::IsNewAlaramFocused - Entry" );
+    
+    return (iNewAlarmButton->IsFocused());
+    
+    __PRINTS( "CClockMainContainer::IsNewAlaramFocused - Exit" );
+    
     }
 // End of file

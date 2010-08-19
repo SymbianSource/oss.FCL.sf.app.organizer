@@ -904,6 +904,8 @@ void CClockWorldContainer::Refresh()
         {
         iWorldArray->UpdateTimeEntryList();
         }
+    
+    SizeChanged();
     DrawNow();
     
     __PRINTS( "CClockWorldContainer::Refresh - Exit" );

@@ -203,29 +203,6 @@ void CCalenTodoListBox::SizeChangedL()
     {
     //Pass to base class 
     CAknSingleGraphicHeadingStyleListBox::SizeChanged();
-    
-    //Reposition the listbox column items 
-    TAknWindowComponentLayout itemGraphic1 = AknLayoutScalable_Avkon::list_single_graphic_heading_pane_g1( 0 );
-    TAknWindowLineLayout windowLineLayout1 = itemGraphic1.LayoutLine();
-    windowLineLayout1.il += 30;
-    itemGraphic1 = windowLineLayout1;
-    
-    ItemDrawer()->ColumnData()->SetStretchableGraphicSubCellL(0,itemGraphic1,
-                                    AknLayoutScalable_Avkon::list_single_graphic_heading_pane_vc_g1( 0 ));
-    
-    
-    TAknTextComponentLayout itemText1 =  AknLayoutScalable_Avkon::list_single_graphic_heading_pane_t2( 0 );
-    TAknTextLineLayout textLineLayout1 = itemText1.LayoutLine();
-    textLineLayout1.il += 30;
-    itemText1 = textLineLayout1;
-    
-    ItemDrawer()->ColumnData()->SetStretchableTextSubCellL(1,itemText1, 
-                                   AknLayoutScalable_Avkon::list_single_graphic_heading_pane_vc_t2( 0 ));
-    
-    //further reposition if required for other columns
-    
-    //TAknTextComponentLayout itemText2 = AknLayoutScalable_Avkon::list_single_graphic_heading_pane_t1( 0 );
-    //TAknTextComponentLayout itemText2Stretch  = AknLayoutScalable_Avkon::list_single_graphic_heading_pane_vc_t1( 0 );
     }
 
 // ----------------------------------------------------------------------------
@@ -392,15 +369,12 @@ void CCalenTodoContainer::ConstructImplL()
 
     /*// Save empty text and set null for list box.
     // It is made not to display "No data".
-    iEmptyListText = iListBox->View()->EmptyListText()->AllocL();
-    //iListBox->View()->SetListEmptyTextL( KNullDesC );*/
+    iEmptyListText = iListBox->View()->EmptyListText()->AllocL();*/
     
-    // Set text for empty listbox
-    HBufC* emptyText = StringLoader::LoadLC(R_CALEN_QTN_CALE_NO_EVENTS,
-                                            iEikonEnv);
-    iListBox->View()->SetListEmptyTextL( *emptyText ); //Whenever listbox is empty, it will set with this empty text.
-    CleanupStack::PopAndDestroy(emptyText);
-
+    //set NULL string so that "no entries" is not shown 
+    //until the list is populated
+    iListBox->View()->SetListEmptyTextL( KNullDesC );
+    
     TRACE_EXIT_POINT;
     }
 
@@ -599,7 +573,13 @@ void CCalenTodoContainer::CreateEntryItertorL()
     CleanupStack::PopAndDestroy( listDes );
     CleanupStack::PopAndDestroy( &calendarInfoList ); 
     iListBox->HandleItemAdditionL();
-    //iListBox->View()->SetListEmptyTextL( *iEmptyListText );
+    
+    //Whenever listbox is empty, it will set with this empty text.
+    HBufC* emptyText = StringLoader::LoadLC(R_CALEN_QTN_CALE_NO_EVENTS,
+                                            iEikonEnv);
+    iListBox->View()->SetListEmptyTextL( *emptyText ); 
+    CleanupStack::PopAndDestroy(emptyText);
+
 
     TRACE_EXIT_POINT;
     }
@@ -1192,6 +1172,10 @@ void CCalenTodoContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent
 
     if(AknLayoutUtils::PenEnabled())
         {
+        if(iView->IsEventViewLaunchedFromAlarm())
+            {
+            return;
+            }
         TInt pointerIndex(-1);
         TBool isItem (iListBox->View()->XYPosToItemIndex(aPointerEvent.iPosition, pointerIndex));
         
@@ -1267,6 +1251,7 @@ void CCalenTodoContainer::CompletePopulationL()
     // Now we know if the view is empty or not we can update the CBA buttons.
     static_cast<CCalenTodoView*>( iView )->UpdateCBAButtonsL();
     UpdateStatusPaneAndExtensionsL();
+    UpdateTodayToolbarItemL();
 
     TRACE_EXIT_POINT;
     }

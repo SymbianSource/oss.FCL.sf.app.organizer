@@ -28,7 +28,7 @@
 // user include.
 #include "multicaluidialogmodel.h"
 #include "calendarui_debug.h"
-#include "cleanupresetanddestroy.h"
+#include "CleanupResetAndDestroy.h"
 
 const TInt KBuffLength = 24;
 
@@ -111,7 +111,7 @@ CMultiCalUiDialogModel::~CMultiCalUiDialogModel()
 // Rest of the details are commented in header.
 // ----------------------------------------------------------------------------
 //
-void CMultiCalUiDialogModel::SetCalEntry(
+void CMultiCalUiDialogModel::SetCalEntryL(
         const RPointerArray<CCalEntry>& aCalEntries)
     {
     TRACE_ENTRY_POINT

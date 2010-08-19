@@ -83,7 +83,8 @@ void CCalenContainer::ConstructL()
 
     iLayoutManager = CCalenContainerLayoutManager::NewL( iServices, *this );
     iLayoutManager->SetToolbarVisibility( ETrue );
-
+    
+    iView->SetTapIgnore(EFalse);
     TRACE_EXIT_POINT;
     }
 
@@ -865,7 +866,8 @@ void CCalenContainer::UpdateTodayToolbarItemL()
     TBool hideItem(EFalse);
     if( currentFocusedDayTime.Day() == todayDateTime.Day()  
         && currentFocusedDayTime.Month() == todayDateTime.Month()
-        && currentFocusedDayTime.Year() == todayDateTime.Year() )
+        && currentFocusedDayTime.Year() == todayDateTime.Year() 
+        && iView->Id() == KUidCalenDayView )
         {
         hideItem = ETrue;
         }

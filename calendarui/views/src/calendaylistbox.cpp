@@ -90,14 +90,11 @@ void CCalenDayListBox::ConstructL(const CCalenDayContainer* aDayContainer)
 
     // FIXME: is this necessary ?
     SetBorder(TGulBorder::ENone); 
-
-    // Set text for empty listbox
-    HBufC* emptyText = StringLoader::LoadLC(R_CALEN_QTN_CALE_NO_EVENTS,
-                                            iEikonEnv);
-    View()->SetListEmptyTextL(*emptyText); // ownership transferred
-    CleanupStack::PopAndDestroy(emptyText);
-
-    // Create scroll bar
+    //set NULL string so that "no entries" is not shown 
+    //until the list is populated
+    View()->SetListEmptyTextL(KNullDesC); 
+   
+       // Create scroll bar
     CreateScrollBarFrameL(ETrue);
     ScrollBarFrame()->SetScrollBarVisibilityL(
         CEikScrollBarFrame::EOff, CEikScrollBarFrame::EAuto);

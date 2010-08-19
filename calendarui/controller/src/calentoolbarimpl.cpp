@@ -123,6 +123,10 @@ void CCalenToolbarImpl::SetNextViewIcon( CGulIcon *aIcon )
         CAknButtonState* state = button->State();  // get current button state, not own
         state->SetIcon( aIcon );
         }
+	else
+		{
+		delete aIcon;
+		}
     iCalenToolbar->DrawDeferred();
     TRACE_EXIT_POINT;
     }

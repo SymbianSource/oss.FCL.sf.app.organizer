@@ -24,10 +24,15 @@
 
 #include "CalenServer.h"
 #include <calenglobaldata.h>
+#include <calcalendarinfo.h>
+#include <calcalendariterator.h>
 
 #include <featmgr.h>
 
 // LOCAL CONSTANTS AND MACROS
+const TInt KBuffLength = 8;
+
+_LIT( KCalendarDatabaseFilePath, "c:calendar" );
 
 enum TCalenSvrBootManagerPanic
     {
@@ -189,6 +194,13 @@ void CCalenSvrBootManager::RunL()
             CleanupReleasePushL( *gData );
             gData->CalSessionL();
             CleanupStack::PopAndDestroy( gData );
+            iState = EStateDeleteDeadCalendars;
+            CompleteSelf();
+            }
+            break;
+        case EStateDeleteDeadCalendars:
+            {
+            RemoveDeadCalendarsL();
             iState = EStateReady;
             CompleteSelf();
             }
@@ -260,6 +272,51 @@ TBool CCalenSvrBootManager::NotifyProgress()
 void CCalenSvrBootManager::Progress(TInt /*aPercentageCompleted*/)
     {
     TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenSvrBootManager::RemoveDeadCalendarsL
+// Remove all the files which are marked as EMarkAsDelete from device's 
+// file system
+// -----------------------------------------------------------------------------
+//
+void CCalenSvrBootManager::RemoveDeadCalendarsL()
+    {
+    TRACE_ENTRY_POINT;
+	TBool softDelete;
+    TBuf8<KBuffLength> keyBuff;
+    
+    // Mark the meta property key as SoftDeleted
+    keyBuff.Zero();
+    keyBuff.AppendNum(EMarkAsDelete);
+    
+    CCalSession* session = CCalSession::NewL();
+    CleanupStack::PushL(session);
+    CCalCalendarIterator* calendarIterator = 
+                      CCalCalendarIterator::NewL(*session);
+    CleanupStack::PushL(calendarIterator);
+    
+    for( CCalCalendarInfo* calendarInfo = calendarIterator->FirstL();
+         calendarInfo!=NULL;calendarInfo = calendarIterator->NextL())
+        {
+        CleanupStack::PushL(calendarInfo);
+        softDelete = EFalse;
+        TPckgC<TBool> pkgSoftDelete( softDelete );
+        TRAPD(err,pkgSoftDelete.Set(calendarInfo->PropertyValueL(keyBuff)));
+        if( KErrNone == err )
+            {
+            softDelete = pkgSoftDelete();
+            }
+        if(softDelete && calendarInfo->FileNameL().CompareF(KCalendarDatabaseFilePath) )
+            {
+            //Delete the calendar except default calendar.
+            TRAP_IGNORE(session->DeleteCalFileL(calendarInfo->FileNameL()));
+            }
+        CleanupStack::PopAndDestroy(calendarInfo);
+        }
+    CleanupStack::PopAndDestroy(calendarIterator);
+    CleanupStack::PopAndDestroy( session );
     TRACE_EXIT_POINT;
     }
 

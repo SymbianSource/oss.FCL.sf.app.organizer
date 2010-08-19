@@ -423,6 +423,11 @@ NONSHARABLE_CLASS(CCalenGlobalData) : public CBase,
 		void ConstructCalendarsListL();
 		
 		/**
+		* @brief Update calendarlist whenever CalendarInfoUpdated notification is received.  
+		*/
+		void UpdateCalendarListL();
+		
+		/**
 		* @brief gets default calendar information
 		* 
 		* @return CCalCalendarInfo returns pointer to default calendar info

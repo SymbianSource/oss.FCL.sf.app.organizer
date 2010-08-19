@@ -25,7 +25,7 @@
 #include <calendar.mbg>
 #include <AknIconUtils.h>
 #include <debug.h>
-#include <aknsutils.h>
+#include <AknsUtils.h>
 
 
 // ----------------------------------------------------------------------------
@@ -72,7 +72,7 @@ CCustomNaviControl::~CCustomNaviControl()
 // CCustomNaviControl::SetCalendarNameAndColor
 // Sets the Calendar name and Color.
 // ----------------------------------------------------------------------------    
-void CCustomNaviControl::SetCalendarNameAndColor(const TDesC& aName, const TRgb aColor)
+void CCustomNaviControl::SetCalendarNameAndColorL(const TDesC& aName, const TRgb aColor)
     {
     TRACE_ENTRY_POINT;
     delete iCalendarName;
@@ -101,9 +101,6 @@ void CCustomNaviControl::ConstructL(const TDesC& aName, const TRgb aColor)
     iCalendarColor = aColor;
     iCalendarName = aName.AllocL();
     CreateWindowL();
-    iBgContext = CAknsBasicBackgroundControlContext::NewL( KAknsIIDQsnBgNavipaneSolid,
-                                                           Rect(),
-                                                           ETrue );
     // Create an icon
     TFileName IconFile;
     IconFile = ((CEikAppUi*)CCoeEnv::Static()->AppUi())->Application()->BitmapStoreName();

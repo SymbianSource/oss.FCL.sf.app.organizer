@@ -254,7 +254,7 @@ NONSHARABLE_CLASS(CMultiCalUiDialogImpl) : public CAknDialog,  public MEikListBo
         /*
         * Async exit for the dialog
         */
-        static TInt DoAsyncExit(TAny* aPtr);        
+        static TInt DoAsyncExitL(TAny* aPtr);        
   
         
     private: // data

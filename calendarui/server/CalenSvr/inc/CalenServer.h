@@ -25,6 +25,7 @@
 #include <e32base.h>
 #include <badesca.h>
 #include <calenmulticaluids.hrh>
+#include <calfilechangenotification.h>  // MCalFileChangeObserver
 
 // INCLUDES
 #include "CalenSvrDef.h"
@@ -41,9 +42,12 @@ class CCalenSvrDBManager;
 //class CCalenSvrAlarmManager;
 class CCalenSvrMissedAlarmManager;
 class CCalCalendarInfo;
+class CCalFileChangeInfo;
+class CCalSession;
 
 // CLASS DEFINITION
-NONSHARABLE_CLASS( CCalenServer ) : public CServer2
+NONSHARABLE_CLASS( CCalenServer ) : public CServer2,
+                                     public MCalFileChangeObserver
     {
 public:
     static CCalenServer* NewL();
@@ -60,6 +64,18 @@ public:
     *   @return  Current IPC message
     */
     const RMessage2 ServerMessage() const;
+    
+public:
+    /**
+     * @brief From MCalFileChangeObserver
+     * The callback that will recieve 1 or more file change notifications
+     * 
+     *  @param aCalendarInfoChangeEntries Holds the information about the 
+     *         calendar info changes  
+     */
+    void CalendarInfoChangeNotificationL(
+        RPointerArray<CCalFileChangeInfo>& aCalendarInfoChangeEntries);
+
 
 private:
     CCalenServer(TInt aPriority);
@@ -127,6 +143,9 @@ private: // Data
     CCalenSvrDBManager* iDBManager;
     //CCalenSvrAlarmManager* iAlarmManager;
     CCalenSvrMissedAlarmManager* iMissedAlarmHandler;
+    
+    //session used for listening the file change notifications.
+    CCalSession* iSession;
 
     };
 

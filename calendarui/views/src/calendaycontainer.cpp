@@ -279,7 +279,13 @@ void CCalenDayContainer::CreateListBoxDataL()
     SetContextFromHighlightL();
 
     DestroyInstanceListL();
-
+    
+    HBufC* emptyText = StringLoader::LoadLC(R_CALEN_QTN_CALE_NO_EVENTS,
+                                                   iEikonEnv);
+    //Whenever listbox is empty, it will set with this empty text.
+    iListBox->View()->SetListEmptyTextL( *emptyText ); 
+    CleanupStack::PopAndDestroy(emptyText);
+    
     iListBox->HandleItemAdditionL(); // Is this causing unnecessary draw?
 
     iListBox->View()->SetDisableRedraw(EFalse);
@@ -1460,7 +1466,10 @@ void CCalenDayContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent
         {
         return;
         }
-        
+    if(iView->IsEventViewLaunchedFromAlarm())
+        {
+        return;
+        }
     if(aPointerEvent.iType == TPointerEvent::EButton1Down)
         {
         this->GenerateTactileFeedback(); //Tactile feedback.
@@ -1846,21 +1855,24 @@ TRect CCalenDayContainer::PreviewRectL()
 // ----------------------------------------------------------------------------
 TBool CCalenDayContainer::IsEventHasMapLocationL()
 	{
+	TRACE_ENTRY_POINT;
 	MCalenContext& context = iServices.Context();
 	TCalLocalUid instanceId = context.InstanceId().iEntryLocalUid;
 	
 	CCalEntry* entry = iServices.EntryViewL(context.InstanceId().iColId)->FetchL(instanceId);
-
+	CleanupStack::PushL(entry);
 	CCalGeoValue* geoValue = entry->GeoValueL();
+	CleanupStack::PopAndDestroy(entry);
 	if(geoValue)
 		{
 		delete geoValue;
-		delete entry;
 		// Event has saved map location, put "Show on Map"
+		TRACE_EXIT_POINT;
 		return 	ETrue;
 		}
 	else
 		{
+		TRACE_EXIT_POINT;
 		return EFalse;
 		}
 	}
@@ -1871,19 +1883,22 @@ TBool CCalenDayContainer::IsEventHasMapLocationL()
 // ----------------------------------------------------------------------------
 TBool CCalenDayContainer::IsEventHasNoLocationTextL()
 	{
+	TRACE_ENTRY_POINT;
 	MCalenContext& context = iServices.Context();
 	TCalLocalUid instanceId = context.InstanceId().iEntryLocalUid;
 	
 	CCalEntry* entry = iServices.EntryViewL(context.InstanceId().iColId)->FetchL(instanceId);
+	CleanupStack::PushL(entry);
 	TPtrC location = entry->LocationL();
+	
+	TBool ret = EFalse;
 	if(!location.Length())
 		{
-		return ETrue;
+		ret = ETrue;
 		}
-	else
-		{
-		return EFalse;
-		}
+	CleanupStack::PopAndDestroy(entry);
+	TRACE_EXIT_POINT;
+	return ret;
 	}
 // ----------------------------------------------------------------------------
 // CCalenDayContainer::IsValidEntryL()

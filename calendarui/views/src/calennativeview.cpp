@@ -708,10 +708,13 @@ void CCalenNativeView::CommonConstructL( TInt aViewResource )
 	notificationArray.Append(ECalenNotifyDeleteFailed);
 	notificationArray.Append(ECalenNotifyEntryDeleted);
 	notificationArray.Append(ECalenNotifyResourceChanged);
+	notificationArray.Append(ECalenNotifyEventViewLaunchedFromAlarm);
 	
     iServices.RegisterForNotificationsL( this,notificationArray);
     
     notificationArray.Reset();
+    
+    iIgnoreTap = EFalse;
     
     iCommandProcessing = EFalse;
     TCallBack callback(CCalenNativeView::AsyncCopyToCalendarsL,this);
@@ -1076,6 +1079,11 @@ void CCalenNativeView::HandleNotification(const TCalenNotification aNotification
             PIM_TRAPD_HANDLE( OnLocaleChangedL( EChangesSystemTime ) );
             }
             break;
+        case ECalenNotifyEventViewLaunchedFromAlarm:
+            {
+            SetTapIgnore(ETrue);
+            }
+            break;
         case ECalenNotifyEntryClosed:
             {
             // The editor/ viewer is changed
@@ -1311,6 +1319,8 @@ TAny* CCalenNativeView::CalenViewExtensionL( TUid /*aExtensionId*/ )
 void CCalenNativeView::OnEditorClosedL()
     {
     TRACE_ENTRY_POINT;
+    
+    SetTapIgnore(EFalse);
     // If the view is active, then update status pane
     if( Container() )
         {
@@ -1350,6 +1360,17 @@ TBool CCalenNativeView::IsCommandHandlingInProgress()
     TRACE_EXIT_POINT;
     }
 
+// ----------------------------------------------------------------------------
+// CCalenNativeView::IsEventViewLaunchedFromAlarm
+// other details are commented in the header
+// ----------------------------------------------------------------------------
+// 
+TBool CCalenNativeView::IsEventViewLaunchedFromAlarm()
+    {
+    TRACE_ENTRY_POINT;
+    return iIgnoreTap;
+    TRACE_EXIT_POINT;
+    }
 // ----------------------------------------------------------------------------
 // CCalenNativeView::SetCommandHandlingProgress
 // other details are commented in the header
@@ -1426,6 +1447,17 @@ TBool CCalenNativeView::IsEditorActiveOrFasterAppExit()
         TRACE_EXIT_POINT;
         return EFalse;
         }
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenNativeView::SetTapIgnore
+// Sets flag to ignore tap on any of the views 
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenNativeView::SetTapIgnore(TBool aIgnore)
+    {
+    iIgnoreTap = aIgnore;
     }
 
 // End of File

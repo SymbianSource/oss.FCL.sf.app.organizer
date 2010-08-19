@@ -355,14 +355,33 @@ void CNotepadListDialog::CreateKeyArrayOfSelectionsL()
 //
 void CNotepadListDialog::OnCmdDeleteL()
     {
-    if ( iModel->MdcaCount() == 0 ) // this is posible when clear key
+    TInt markCount( iListBox->SelectionIndexes()->Count() );
+    //For clear key,if nothing can be deleted ,do not handle the clear key
+    if ( iModel->MdcaCount() == 0 || ( markCount == 0 && !iListBox->IsHighlightEnabled() ) ) 
         {
         return;
         }
+    
+    //Fixed Item 'New Note' in notes should not be deleted
+    if ( IsNoteListDialog() && ( iListBox->CurrentItemIndex() == 0 ) && markCount == 0 )
+        {
+        return;
+        }
+    
     ClearSavedCurrentAndSelections();
     SaveCurrentAndSelectionsL();
-    TInt markCount( iListBox->SelectionIndexes()->Count() );
-    TInt deleteCount( markCount > 0 ? markCount : 1 ); 
+    
+    TInt deleteCount;
+    if ( iListBox->IsHighlightEnabled() && markCount == 0 )
+        {
+        //for an Item highlighted and no Item marked
+        deleteCount = 1;
+        }
+    else
+        {
+        deleteCount = markCount;
+        }
+    
     if ( ConfirmDeleteL( deleteCount ) )
         {
         //be sure that the marks or the items might have gone while confirming
@@ -958,6 +977,7 @@ void CNotepadListDialog::DynInitMenuPaneL(
             TKeyArrayFix itemKey(0,ECmpTUint);
             TInt ignore;
             TInt itemMarked = iListBox->SelectionIndexes()->Find( currIndex, itemKey, ignore );
+			
             if ( memoCount > 0 && 
                 ( markCount == 0 || IsNotepad() || IsTemplates()) )
                 {
@@ -965,15 +985,21 @@ void CNotepadListDialog::DynInitMenuPaneL(
                 InsertSendMenuItemAfterL( *iSendUi, *aMenuPane, 
                     ENotepadCmdOpen );
                 }
+				
             if ( memoCount == 0 )
                 {
-                aMenuPane->DeleteMenuItem(ENotepadCmdDelete);
+                aMenuPane->DeleteMenuItem( ENotepadCmdDelete );
                 }
-            if ( (memoCount == 0) ||  ( markCount >= 1  ) )
+				
+            //delete 'Open' item from Option list at the following situations:
+            //no memo,have item marked,user select the 'New note'
+            if ( ( memoCount == 0 ) || ( markCount >= 1 ) || 
+                    ( ( currIndex == 0 ) && IsNotepad() ) )
                 {
                 // this must after InsertSendMenuItemAfterL
-                aMenuPane->DeleteMenuItem(ENotepadCmdOpen);
+                aMenuPane->DeleteMenuItem( ENotepadCmdOpen );
                 }
+				
             if ( markCount >= 1 && IsNoteListDialog() && ( memoCount > 0 ) )
                 {
                 aMenuPane->SetItemSpecific( ENotepadCmdSend, EFalse );
@@ -1052,7 +1078,7 @@ void CNotepadListDialog::ProcessCommandL(TInt aCommandId)
     switch ( aCommandId )
         {
         case ENotepadCmdOpen: // Open memo
-            OnCmdOpenL(iListBox->CurrentItemIndex());
+            OnCmdOpenL( iListBox->CurrentItemIndex() );
             break;
         case ENotepadCmdAdd:
            OnCmdAddL();
@@ -1356,7 +1382,17 @@ void CNotepadListDialog::HandleListBoxEventL(
     switch(aEventType)
         {
         case EEventEnterKeyPressed:
-            OnCmdOpenL(aListBox->CurrentItemIndex());
+            
+            // create a new note with enter key when selected New Note in notes
+            if( aListBox->CurrentItemIndex() == 0 && IsNotepad() )
+                {
+                OnCmdAddL();
+                }
+            else
+                {
+                OnCmdOpenL( aListBox->CurrentItemIndex() );
+                }
+
             break;
         case EEventItemSingleClicked:
         	if ( IsNotepad() )
@@ -1388,6 +1424,7 @@ void CNotepadListDialog::HandleListBoxEventL(
                       DisplayMenuL();
                     }  
                 }
+            break;
         default:
             break;
         }

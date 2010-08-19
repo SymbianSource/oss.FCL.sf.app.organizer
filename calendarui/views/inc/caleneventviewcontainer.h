@@ -483,7 +483,7 @@ public: // New methods
 	* Checks if user has tapped on the attahcment names and then opens the corresponding 
 	* attachment
 	*/
-    void CheckAndOpenTappedAttachment(TTmPosInfo2* posInfo);
+    void CheckAndOpenTappedAttachmentL(TTmPosInfo2* posInfo);
 	
 	/**
 	* Opens the respective atatchment tapped

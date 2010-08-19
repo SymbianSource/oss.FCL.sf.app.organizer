@@ -162,7 +162,7 @@ void CMultiCalUiDialogImpl::ConstructL(const RPointerArray<CCalEntry>& aCalEntri
     
     iMultiCalUiDialogModel = CMultiCalUiDialogModel::NewL();
     
-    iMultiCalUiDialogModel->SetCalEntry(aCalEntries); 
+    iMultiCalUiDialogModel->SetCalEntryL(aCalEntries); 
     
     CAknDialog::ConstructL (R_CALENDB_LIST_MENUBAR);
     TRACE_EXIT_POINT
@@ -905,7 +905,7 @@ void CMultiCalUiDialogImpl::HandleListBoxEventL(CEikListBox* /*aListBox */,
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-TInt CMultiCalUiDialogImpl::DoAsyncExit(TAny* aPtr)
+TInt CMultiCalUiDialogImpl::DoAsyncExitL(TAny* aPtr)
     {
     TRACE_ENTRY_POINT
     CMultiCalUiDialogImpl* self = static_cast<CMultiCalUiDialogImpl*>(aPtr);

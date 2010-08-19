@@ -23,14 +23,18 @@ S60_APP_RESOURCE( clock_loc )
 
 #ifdef __ROM_HIDE_JERUSALEM
 data=DATAZ_\resource\timezonelocalization\timezones_tel_aviv.rsc			RESOURCE_FILES_DIR\timezonelocalization\timezones.rsc
+#elif defined(FF_ROM_HIDE_FALKLAND)  
+data=DATAZ_\resource\TimeZoneLocalization\timezones_lta.rsc       			RESOURCE_FILES_DIR\TimeZoneLocalization\timezones.rsc
 #else
-data=DATAZ_\resource\timezonelocalization\timezones.rsc						RESOURCE_FILES_DIR\timezonelocalization\timezones.rsc
+data=DATAZ_\resource\timezonelocalization\timezones.rsc					RESOURCE_FILES_DIR\timezonelocalization\timezones.rsc
 #endif
 
 #ifdef FF__ROM_HIDE_ISRAEL
 data=DATAZ_\resource\timezonelocalization\timezonegroups_jerusalem.rsc		RESOURCE_FILES_DIR\timezonelocalization\timezonegroups.rsc
+#elif defined(FF_ROM_HIDE_FALKLAND)  
+data=DATAZ_\resource\TimeZoneLocalization\timezonegroups_lta.rsc  		RESOURCE_FILES_DIR\TimeZoneLocalization\timezonegroups.rsc
 #else
-data=DATAZ_\resource\timezonelocalization\timezonegroups.rsc				RESOURCE_FILES_DIR\timezonelocalization\timezonegroups.rsc
+data=DATAZ_\resource\timezonelocalization\timezonegroups.rsc			RESOURCE_FILES_DIR\timezonelocalization\timezonegroups.rsc
 #endif
 
 // Alarm indicator resource file.

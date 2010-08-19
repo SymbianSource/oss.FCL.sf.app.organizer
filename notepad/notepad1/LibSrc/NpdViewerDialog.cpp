@@ -90,6 +90,7 @@ void CNotepadViewerDialog::ConstructL(TResourceReader &rr)
     iAutoFinder = CItemFinder::NewL();
     iFindMenu = CFindItemMenu::NewL( EFindItemMenuPlaceHolder );
     iFindMenu->AttachItemFinderMenuL(0);
+    iFindMenu->SetCallSubMenuVisibility( EFalse ); // Click-To-Call
     iForwardLocked = EFalse;
     iReturnValue = KErrNone;
     iFileExist = EFalse;
@@ -115,7 +116,7 @@ EXPORT_C CNotepadViewerDialog::~CNotepadViewerDialog()
         }
     delete iFilename;
     delete iSendUi;
-    iAutoFinder->SetItemFinderObserverL (0);
+    TRAP_IGNORE( iAutoFinder->SetItemFinderObserverL( 0 ) );
     delete iAutoFinder;
     delete iFindMenu;
     if( iNotifier )

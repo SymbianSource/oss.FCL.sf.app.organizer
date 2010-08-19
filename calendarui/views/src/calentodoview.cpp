@@ -729,14 +729,14 @@ void CCalenTodoView::DoActivateImplL( const TVwsViewId& /*aPrevViewId*/,
 
     RedrawStatusPaneL(); // Set a text to title pane.
     
-    MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
+    /*MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
     if(toolbarImpl) 
         {
         CAknToolbar& toolbar = toolbarImpl->Toolbar();
 
         // dim clear and clear all toolbar buttons
         toolbar.SetItemDimmed(ECalenGotoToday,ETrue,ETrue);
-        }
+        }*/
     iEventViewCommandHandled = EFalse;
     
     TRACE_EXIT_POINT;
@@ -751,7 +751,7 @@ void CCalenTodoView::DoDeactivateImpl()
     {
     TRACE_ENTRY_POINT;
     
-    MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
+    /*MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
     if(toolbarImpl) 
         {
         CAknToolbar& toolbar = toolbarImpl->Toolbar();
@@ -761,7 +761,7 @@ void CCalenTodoView::DoDeactivateImpl()
             // dim clear and clear all toolbar buttons
             toolbar.SetItemDimmed(ECalenGotoToday,EFalse,ETrue);
             }
-        }
+        }*/
     
     // Remove all markings when the view is deactivated.
     static_cast< CCalenTodoContainer* > ( iContainer )->MarkAllL( 

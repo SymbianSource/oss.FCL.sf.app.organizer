@@ -376,7 +376,7 @@ void CCalenViewManager::ConstructCustomViewL( TUid aPluginUid )
     RPointerArray<CCalenView> customViews;
     CleanupResetAndDestroyPushL( customViews );
 
-    CustomisationManager().GetCustomViewsL( aPluginUid, customViews );
+    TRAP_IGNORE(CustomisationManager().GetCustomViewsL( aPluginUid, customViews ));
     for( TInt viewIndex( customViews.Count()-1 ); viewIndex >= 0; --viewIndex )
         {
         CCalenView* customView = customViews[viewIndex];
@@ -578,6 +578,10 @@ TBool  CCalenViewManager::HandleCommandL( const TCalenCommand& aCommand )
             // when returning from event view.
             // From month/week view -> day view -> event view -> day view
             iPreviousToDayView = iCurrentViewId;
+            if(iAvoidRepopulation)
+                {
+                iAvoidRepopulation = EFalse;
+                }
             RequestActivationL( KUidCalenDayView, KUidCalenShowBackCba );
             }
             break;
@@ -586,6 +590,10 @@ TBool  CCalenViewManager::HandleCommandL( const TCalenCommand& aCommand )
             // set the view iPreviousToWeekView to handle the week view's cba
             // From month view -> week view 
             iPreviousToWeekView = iCurrentViewId;
+            if(iAvoidRepopulation)
+                {
+                iAvoidRepopulation = EFalse;
+                }
             RequestActivationL( KUidCalenWeekView, KUidCalenShowBackCba );
             }
             break;
@@ -632,7 +640,7 @@ TBool  CCalenViewManager::HandleCommandL( const TCalenCommand& aCommand )
             RequestActivationL(KUidCalenDayView);
 
 			// dim "today" toolbar item since focus is on today            
-            iToolbar->Toolbar().SetItemDimmed( ECalenGotoToday, ETrue, ETrue);
+            //iToolbar->Toolbar().SetItemDimmed( ECalenGotoToday, ETrue, ETrue);
             }
             break;
 
@@ -1615,15 +1623,14 @@ void CCalenViewManager::HandleSystemTimeChangeNotificationL()
     {
     TRACE_ENTRY_POINT;
     
-    if( iController.IsFasterAppFlagEnabled() )
-        {
         //Set the context whenever system time is changed
         TUid newViewUid = iSetting->DefaultView();
         MCalenContext& context = iController.Services().Context();
         TCalTime focusTime = context.DefaultCalTimeForViewsL();
         context.SetFocusDateAndTimeL( focusTime,
                                       TVwsViewId( KUidCalendar, newViewUid ));
-
+    if( iController.IsFasterAppFlagEnabled() )
+        {
         // reset tha flag iAvoidRepopulation to refresh the view whenever
         // system time is changed
         iAvoidRepopulation = EFalse;

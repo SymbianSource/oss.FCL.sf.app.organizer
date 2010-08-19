@@ -52,7 +52,7 @@ NONSHARABLE_CLASS(CMultiCalUiDialogModel) : public CBase
          * Setter function for calendar entry.
          * @param aCalEntry. Calendar Entry.
          */
-        void SetCalEntry(const RPointerArray<CCalEntry>& aCalEntries);
+        void SetCalEntryL(const RPointerArray<CCalEntry>& aCalEntries);
 
         /**
          * Stores the calendar entry into the calendars selected by the user.

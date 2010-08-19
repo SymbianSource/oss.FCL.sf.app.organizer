@@ -27,7 +27,10 @@
 #include <caleninstanceid.h>            // TCalenInstanceId
 #include <calenactionuiutils.h>
 #include <aknappui.h>
-#include <AknDlgShut.h> 
+#include <AknDlgShut.h>
+#include <gfxtranseffect/gfxtranseffect.h>  // For transition effects
+#include <akntranseffect.h>                 // For transition effects
+
 #include "calenviewmanager.h"
 #include "calencmdlinelauncher.h"
 #include "calencontroller.h"            // CCalenController
@@ -35,6 +38,8 @@
 #include "CalenUid.h"
 #include "calensend.h"
 #include "calendialogshutter.h"
+
+const TUid KCalendarUid             = {0x10005901};         // Calendar application UID
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -250,6 +255,10 @@ TBool CCalenCmdLineLauncher::ProcessCommandParametersL(
              
           	  context.SetFocusDateAndTimeL( focusTime,
                                          TVwsViewId( KUidCalendar, viewUid ) );
+          	//Themes effect while launching.
+          	GfxTransEffect::BeginFullScreen( AknTransEffect::EApplicationStart,TRect(), AknTransEffect::EParameterType, AknTransEffect::GfxTransParam(KCalendarUid,
+          	AknTransEffect::TParameter::EActivateExplicitContinue ) );
+          	
             if( iController.ViewManager().ViewsActivated() )
                 {
                 iController.IssueCommandL( command );
@@ -284,6 +293,8 @@ TBool CCalenCmdLineLauncher::ProcessCommandParametersL(
         		{
 		        if( iCmdParameters.iCommandType == CCalenCmdLineParser::EStartTypeUidAlarmViewer )
               		{
+                    //When event viewer launched from alarm only we need to ignore tap. (ETrue)     
+		            iController.BroadcastNotification(ECalenNotifyEventViewLaunchedFromAlarm);
               		if(! iController.ViewManager().ViewsActivated() )                    
                         {
                         iController.ViewManager().ActivateDefaultViewL( KUidCalenEventView); 
@@ -293,6 +304,8 @@ TBool CCalenCmdLineLauncher::ProcessCommandParametersL(
                     }
                 else if( iCmdParameters.iCommandType == CCalenCmdLineParser::EStartTypeUidAlarmViewerNoSnooze )
                     {
+                    //When event viewer launched from alarm only we need to ignore tap. (ETrue)     
+                    iController.BroadcastNotification(ECalenNotifyEventViewLaunchedFromAlarm);
                     if(! iController.ViewManager().ViewsActivated() )                    
                         {
                         iController.ViewManager().ActivateDefaultViewL( KUidCalenEventView);   

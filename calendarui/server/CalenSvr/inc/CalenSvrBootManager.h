@@ -51,7 +51,7 @@ private: // From CActive
 
 private:
     void CompleteSelf();
-
+    void RemoveDeadCalendarsL();
 private:
     CCalenSvrBootManager(CCalenServer& aServer);
     void ConstructL(void);
@@ -61,7 +61,8 @@ private:
     {
         EStateInit = 0, 
         EStateCreateAgendaFile,
-        EStateReady
+		EStateDeleteDeadCalendars,
+		EStateReady
     };
     TState iState;
 

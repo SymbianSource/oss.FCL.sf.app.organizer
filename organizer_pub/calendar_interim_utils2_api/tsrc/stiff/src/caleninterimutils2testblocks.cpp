@@ -26,6 +26,7 @@
 
 
 //  LOCAL CONSTANTS AND MACROS
+const TInt KTestMax  (100);
 const TInt KDefaultStartTime( 8 );
 
 // ============================= LOCAL FUNCTIONS ===============================

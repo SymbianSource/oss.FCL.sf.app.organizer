@@ -43,11 +43,13 @@
 #include <lbsposition.h>
 #include <e32math.h>
 #include <calencontext.h>
+#include <AknUtils.h>
 
 // CONSTANTS and MACROS
 _LIT(KComma, ",");
 _LIT(KNokiaVendorName, "Nokia gate5 GmbH");
 const TInt KCalenMaxTextEditorLength(160);
+_LIT( KReplaceWhitespaceChars, "\x0009\x000A\x000B\x000C\x000D\x2028\x2029" );
 
 // ----------------------------------------------------------------------------
 // CCalenLocationUi::NewL
@@ -85,7 +87,9 @@ CCalenLocationUi::~CCalenLocationUi()
        iMapView = NULL;    
        }
     ReleaseLandmarkResources();
-       
+    
+    iController.CancelNotifications( this );
+    
     if(iLocationSelector)
 	    {
 	    delete iLocationSelector;	
@@ -189,7 +193,7 @@ TBool CCalenLocationUi::HandleCommandL( const TCalenCommand& aCommand )
             break;
 	    case ECalenShowLocationQuery:
 	        {
-	        TInt userResponse = ShowDefineLocationQuery();
+	        TInt userResponse = ShowDefineLocationQueryL();
 	        if(userResponse)
 	            {
 	            isGetLocationAndSave = ETrue;
@@ -413,9 +417,12 @@ void CCalenLocationUi::LaunchMapL()
 				}
 			else if(location.Length())
 			    {
+                TBuf<KCalenMaxTextEditorLength> locationBuf;
+                locationBuf.Copy(location);
+                AknTextUtils::ReplaceCharacters(locationBuf, KReplaceWhitespaceChars, TChar(' '));
 			    // Add dummy landmark, so that Maps search box will get filled
 			    CPosLandmark* landmarkToShow = CPosLandmark::NewL();
-                landmarkToShow->SetLandmarkNameL(location);
+                landmarkToShow->SetLandmarkNameL(locationBuf);
                 iLocationSelector->SelectL( *iProvider, landmarkToShow );
                 delete landmarkToShow;
 			    }
@@ -765,7 +772,7 @@ void CCalenLocationUi::ShowAddressUpdatedNoticeL()
 //  Queries user to validate the location frm maps or not
 // -----------------------------------------------------------------------------
 //  
-TInt CCalenLocationUi::ShowDefineLocationQuery()
+TInt CCalenLocationUi::ShowDefineLocationQueryL()
     {
     TRACE_ENTRY_POINT;
     
@@ -799,51 +806,53 @@ void CCalenLocationUi::StoreLocationInfoL(CPosLandmark* landmark)
 	MCalenContext& context = iGlobalData->Context();
 	// Get the entry
 	TCalLocalUid instanceId = context.InstanceId().iEntryLocalUid;
-	CCalEntry* entry = iGlobalData->EntryViewL()->FetchL(instanceId);
-	
-	TPtrC existingLocationInfo = entry->LocationL();
-	TBuf<2*KCalenMaxTextEditorLength> locationInfo;
-	TPtrC landmarkname;
-	landmark->GetLandmarkName(landmarkname);
-	CCalGeoValue* entryGeoValue = entry->GeoValueL();
-	if(entryGeoValue || isReplaceLocation)
-		{
-		isReplaceLocation = EFalse;
-		// Query user to replace
-		TInt userResponse = ShowLocationReplaceNoticeL(landmarkname);
-		if(!userResponse)
-			{
-			delete entryGeoValue;
-			delete entry;
-			return;	
-			}
-		else
-		    {
-		    locationInfo.Append(landmarkname);
-		    delete entryGeoValue;
-		    }
-		}
-	else if(existingLocationInfo.Length() && !isReplaceLocation)
+	CCalEntry* entry = iGlobalData->EntryViewL(context.InstanceId().iColId)->FetchL(instanceId);
+
+	if(entry)
 	    {
-	    RPointerArray<HBufC> locationStrings;
-	    HBufC* oldLocation = HBufC::NewL(KCalenMaxTextEditorLength);
-	    oldLocation->Des().Copy(existingLocationInfo);
-	    
-	    HBufC* oldNewLocation = HBufC::NewL(KCalenMaxTextEditorLength);
-	    TBuf<2*KCalenMaxTextEditorLength> combLocation;
-	    combLocation.Append(existingLocationInfo);
-	    combLocation.Append(KComma);
-	    combLocation.Append(landmarkname);
-	    oldNewLocation->Des().Copy(combLocation.Left(KCalenMaxTextEditorLength));
-	    
+        TPtrC existingLocationInfo = entry->LocationL();
+        TBuf<2*KCalenMaxTextEditorLength> locationInfo;
+        TPtrC landmarkname;
+        landmark->GetLandmarkName(landmarkname);
+        CCalGeoValue* entryGeoValue = entry->GeoValueL();
+        if(entryGeoValue || isReplaceLocation)
+        {
+        isReplaceLocation = EFalse;
+        // Query user to replace
+        TInt userResponse = ShowLocationReplaceNoticeL(landmarkname);
+        if(!userResponse)
+            {
+            delete entryGeoValue;
+            delete entry;
+            return;	
+            }
+        else
+            {
+            locationInfo.Append(landmarkname);
+            delete entryGeoValue;
+            }
+        }
+        else if(existingLocationInfo.Length() && !isReplaceLocation)
+        {
+        RPointerArray<HBufC> locationStrings;
+        HBufC* oldLocation = HBufC::NewL(KCalenMaxTextEditorLength);
+        oldLocation->Des().Copy(existingLocationInfo);
+        
+        HBufC* oldNewLocation = HBufC::NewL(KCalenMaxTextEditorLength);
+        TBuf<2*KCalenMaxTextEditorLength> combLocation;
+        combLocation.Append(existingLocationInfo);
+        combLocation.Append(KComma);
+        combLocation.Append(landmarkname);
+        oldNewLocation->Des().Copy(combLocation.Left(KCalenMaxTextEditorLength));
+        
         HBufC* newLocation = HBufC::NewL(KCalenMaxTextEditorLength);
         newLocation->Des().Copy(landmarkname);
         
         locationStrings.Append(oldNewLocation);
         locationStrings.Append(newLocation);
         locationStrings.Append(oldLocation);
-	    TInt userResponse = CCalenLocationUtil::ShowLocationAppendOrReplaceL(locationStrings);
-	    locationStrings.ResetAndDestroy();
+        TInt userResponse = CCalenLocationUtil::ShowLocationAppendOrReplaceL(locationStrings);
+        locationStrings.ResetAndDestroy();
         if(userResponse == KErrCancel)
             {
             delete entry;
@@ -869,37 +878,39 @@ void CCalenLocationUi::StoreLocationInfoL(CPosLandmark* landmark)
             default:
                 break;
             }
+        }
+        else // for isReplaceLocation
+            {
+            locationInfo.Append(landmarkname);
+            }
+        TPtrC landmarkDesc;
+        landmark->GetLandmarkDescription(landmarkDesc);
+        if(landmarkDesc.Size())
+            {
+            locationInfo.Append(KComma);
+            locationInfo.Append(landmarkDesc);
+            }
+        
+        // Get the geo coordinates	
+        TLocality position;
+        landmark->GetPosition(position);
+        CCalGeoValue* geoValue = CCalGeoValue::NewL();
+        geoValue->SetLatLongL(position.Latitude(), position.Longitude());
+        
+        // Get the context
+        entry->SetLocationL(locationInfo);
+        entry->SetGeoValueL(*geoValue);
+        delete geoValue;
+        
+        if(existingLocationInfo.Length())
+            {
+            ShowAddressUpdatedNoticeL();
+            }
+        // Save entry into Agenda server
+        CCalenInterimUtils2::StoreL( *(iGlobalData->EntryViewL(context.InstanceId().iColId)), *entry, ETrue );
+        delete entry;
 	    }
-	else // for isReplaceLocation
-	    {
-	    locationInfo.Append(landmarkname);
-	    }
-	TPtrC landmarkDesc;
-	landmark->GetLandmarkDescription(landmarkDesc);
-	if(landmarkDesc.Size())
-		{
-		locationInfo.Append(KComma);
-		locationInfo.Append(landmarkDesc);
-		}
 	
-	// Get the geo coordinates	
-	TLocality position;
-    landmark->GetPosition(position);
-	CCalGeoValue* geoValue = CCalGeoValue::NewL();
-	geoValue->SetLatLongL(position.Latitude(), position.Longitude());
-	
-	// Get the context
-   	entry->SetLocationL(locationInfo);
-	entry->SetGeoValueL(*geoValue);
-	delete geoValue;
-	
-	if(existingLocationInfo.Length())
-	    {
-	    ShowAddressUpdatedNoticeL();
-	    }
-	// Save entry into Agenda server
-	CCalenInterimUtils2::StoreL( *(iGlobalData->EntryViewL()), *entry, ETrue );
-	delete entry;
 	
 	TRACE_EXIT_POINT;	
 	}

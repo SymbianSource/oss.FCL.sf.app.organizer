@@ -81,6 +81,11 @@ NONSHARABLE_CLASS( CCalenDbField ) : public CBase
          */
         const TDesC& GetCalendarNameForEntryL();
         
+		/*
+         * @brief Get calendar index for where entry belongs to
+         * @return TInt index of the calendar
+         */
+        TInt GetCalendarNameForEntryL(const TDesC& aCalendarFileName);
         /*
          * @brief check if calendar is changed or not
          * @return TBool true if calendar is chnaged

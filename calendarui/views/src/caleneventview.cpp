@@ -883,4 +883,22 @@ void CCalenEventView::SetStatusPaneFromActiveContextL()
     iSPUtils->RefreshStatusPane();
     TRACE_EXIT_POINT;
     }
+
+// ----------------------------------------------------------------------------
+// CCalenEventView::HideNaviPane
+// Hides the navi pane
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenEventView::HideNaviPane()
+    {
+    TRACE_ENTRY_POINT;
+    if (!iAvkonAppUi->IsDisplayingMenuOrDialog())
+        {
+        iSPUtils->HideNaviPane();
+        }
+    TRACE_EXIT_POINT;
+    }
+
 //end of file
+

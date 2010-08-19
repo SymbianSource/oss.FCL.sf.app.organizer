@@ -34,6 +34,7 @@
 #include "CalenDefaultEditors.hrh"
 #include "calenunifiededitor.h"
 #include "CalendarPrivateCRKeys.h"
+#include "CleanupResetAndDestroy.h"
 #include "calendarui_debug.h"
 
 
@@ -382,6 +383,30 @@ const TDesC& CCalenDbField::GetCalendarNameForEntryL()
     TRACE_EXIT_POINT
     return *iCalendarFileName;
     }
+
+// -----------------------------------------------------------------------------
+// CCalenDbField::GetCalendarNameForEntryL
+// get calendar index for the entry
+// -----------------------------------------------------------------------------
+//
+TInt CCalenDbField::GetCalendarNameForEntryL(const TDesC& aCalendarFileName)
+    {
+    TRACE_ENTRY_POINT
+    __impl_prints(_L("CCalenDbField::GetCalendarNameForEntryL  2-- start"));
+    HBufC* calendarFilename = aCalendarFileName.AllocLC();
+    RPointerArray<CCalCalendarInfo> calendarInfoList; 
+    iServices->GetAllCalendarInfoL(calendarInfoList);
+    CleanupClosePushL( calendarInfoList );
+    __impl_prints(_L("CCalenDbField::GetCalendarNameForEntryL -- GetAllCalendarInfoL"));
+    TInt index = calendarInfoList.Find(*calendarFilename,
+            CCalenDbField::CalendarInfoNameIdentifierL);
+    __impl_print(_L("CCalenDbField::GetCalendarNameForEntryL 2 -- index = %d"),index);
+    CleanupStack::PopAndDestroy(calendarFilename);     
+    CleanupStack::PopAndDestroy( &calendarInfoList );
+    
+    TRACE_EXIT_POINT
+    return index;
+    }
 	
 // -----------------------------------------------------------------------------
 // CCalenDbField::IsCalendarEdited
@@ -421,7 +446,7 @@ void CCalenDbField::ShowChangeDBQueryL()
     //show this information note to the user.
     CCalEntry& originalEntry = iUnifiedEditor.EditorDataHandler().Entry();
     RPointerArray<CCalEntry> childEntries;
-    CleanupClosePushL(childEntries);
+    CleanupResetAndDestroyPushL(childEntries);
     iServices->EntryViewL(iPreviousColId)->FetchL(originalEntry.UidL(), childEntries);            
     if(IsCalendarEdited() && (childEntries.Count() > 1))
         {

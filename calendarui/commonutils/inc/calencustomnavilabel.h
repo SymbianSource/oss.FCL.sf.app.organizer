@@ -44,7 +44,7 @@ public:
     * @param aName  Calendar name
     * @param aColor Calendar color
     */
-    void SetCalendarNameAndColor(const TDesC& aName, const TRgb aColor);
+    void SetCalendarNameAndColorL(const TDesC& aName, const TRgb aColor);
     
 private: 
 	
@@ -85,7 +85,6 @@ private: // own methods
 private:
     CFbsBitmap* iBitmap;
     CFbsBitmap* iMask;
-    CAknsBasicBackgroundControlContext* iBgContext; // for skins support
     HBufC *iCalendarName;
     TRgb iCalendarColor;
 

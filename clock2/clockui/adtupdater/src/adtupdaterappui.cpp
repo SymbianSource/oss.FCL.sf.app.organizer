@@ -55,6 +55,7 @@ CAdtUpdaterAppUi::~CAdtUpdaterAppUi()
 	
 	if( iContainer )
 		{	
+        RemoveFromStack(iContainer);
 		delete iContainer;
 		iContainer = NULL;
 		}
@@ -88,6 +89,7 @@ void CAdtUpdaterAppUi::ConstructL()
 	    // Container is not present. Construct and add to the control stack.
 	    iContainer = CAdtUpdaterContainer::NewL( ApplicationRect() );
 	    	
+	    AddToStackL( iContainer );
 		// Get the Nitz information.
     	iContainer->InformAboutNwUpdateL();		    	  
 	    }         

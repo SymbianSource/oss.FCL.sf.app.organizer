@@ -475,7 +475,14 @@ TDesC& CCalenContextImpl::GetCalendarFileNameL() const
     {
     TRACE_ENTRY_POINT
     TRACE_EXIT_POINT
-    return *iCalenFileName;
+    if(iCalenFileName)
+        {
+        return *iCalenFileName;
+        }
+    else
+        {
+        return const_cast<TDesC&> (KNullDesC());
+        }
     }
 
 // -----------------------------------------------------------------------------

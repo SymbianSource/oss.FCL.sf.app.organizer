@@ -322,7 +322,21 @@ class CClockAlarmEditorImpl : public CAknForm,
 		* @brief Object of alarm server session.
 		*/
 		RASCliSession                   iAlarmSrvSes;
+		/**
+		 * @var iWeekDaysList
+		 * @brief This holds the list of weekdays.
+		 */
+		CDesCArrayFlat*                 iWeekDaysList;
+		/**
+		 * @var iAlmDayFieldTextArray
+		 * @brief This indicates the avkon query value text array which
+		 * is used to set the array in the popup field control.
+		 */
 		CAknQueryValueTextArray*        iAlmDayFieldTextArray;
+		/**
+		 * @var iAlmDayFieldTextValue
+		 * @brief This allows to control the values of popup field control.
+		 */
 		CAknQueryValueText*             iAlmDayFieldTextValue;
 	};
 

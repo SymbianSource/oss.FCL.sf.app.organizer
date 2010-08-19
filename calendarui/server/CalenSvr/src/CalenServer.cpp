@@ -26,6 +26,7 @@
 #include <data_caging_path_literals.hrh>
 #include <bautils.h>
 #include <pathinfo.h>
+#include <calsession.h>
 
 //debug
 #include "calendarui_debug.h"
@@ -101,6 +102,12 @@ CCalenServer::CCalenServer(TInt aPriority)
 CCalenServer::~CCalenServer()
     {
     TRACE_ENTRY_POINT;
+    if( iSession )
+        {
+        // stop listening for calendar file change notifications
+        iSession->StopFileChangeNotification();
+        delete iSession;
+        }
     
     //delete iAlarmManager;
     delete iDBManager;
@@ -136,6 +143,13 @@ void CCalenServer::ConstructL()
     iDBManager = CCalenSvrDBManager::NewL();
     //iAlarmManager = CCalenSvrAlarmManager::NewL();
     iMissedAlarmHandler = CCalenSvrMissedAlarmManager::NewL();
+    
+    
+    // create cal session
+    iSession = CCalSession::NewL();
+    // start listening for calendar file change notifications
+    iSession->StartFileChangeNotificationL(*this);
+
     StartL( KCalendarServerName );
     
     TRACE_EXIT_POINT;
@@ -562,4 +576,120 @@ void CCalenServer::SetCalendarAddPropertiesL(CCalCalendarInfo& aCalendarInfo)
     TRACE_EXIT_POINT    
     }
 
+// ----------------------------------------------------------------------------
+// CCalenServer::CalendarInfoChangeNotificationL
+// Handle calendar file change notifications
+// ----------------------------------------------------------------------------
+void CCalenServer::CalendarInfoChangeNotificationL( 
+        RPointerArray<CCalFileChangeInfo>& aCalendarInfoChangeEntries)
+    {
+    TRACE_ENTRY_POINT;
+
+    // get the file change count
+    TInt calenInfoChangeCount = aCalendarInfoChangeEntries.Count();
+    RArray<TInt> calendarColors;
+    // read calendar colors from central repository
+    ReadCalendarColorsFromCenrepL(calendarColors);
+
+    for(TInt index = 0;index < calenInfoChangeCount;index++)
+        {
+        // default calendar is deleted/updated.
+        if( !aCalendarInfoChangeEntries[index]->FileNameL().CompareF(KCalendarDatabaseFilePath) )
+            {
+            MCalFileChangeObserver::TChangeType changeType = 
+            aCalendarInfoChangeEntries[index]->ChangeType();
+            switch(changeType)
+                {
+                case MCalFileChangeObserver::ECalendarFileDeleted:
+                    {
+                    // create cal session
+                    CCalSession* session = CCalSession::NewL();
+                    CleanupStack::PushL(session);
+                    
+                    // create and set metadata information from central repository
+                    CCalCalendarInfo* calendarInfo = CCalCalendarInfo::NewL();
+                    CleanupStack::PushL(calendarInfo);
+                    
+                    // EFolderLUID
+                    TBuf8<KBuffLength> keyBuff;
+                    keyBuff.AppendNum(EFolderLUID);
+                    TRAPD(err,calendarInfo->PropertyValueL(keyBuff));
+
+                    //First set the folder uid as 100000 for default calendar.
+                    // Later set the other properties
+                    if (KErrNotFound == err)
+                        {
+                        TUint calValue = 0;
+                        //Get the available offset value and set as property value.
+                        calValue = 100000;
+                        TPckgC<TUint> calValuePckg(calValue);
+                        calendarInfo->SetPropertyL(keyBuff, calValuePckg);
+                        }
+                    SetCalendarAddPropertiesL(*calendarInfo);
+                    calendarInfo->SetNameL(KCalendarDatabaseFilePath);
+                    calendarInfo->SetColor(TRgb(calendarColors[0]));
+                    calendarInfo->SetEnabled(ETrue);
+                    TBuf<KMaxFileName> calendarFileName;
+                    calendarFileName.Append(KCalendarDatabaseFilePath);
+                    //create the default calendar.
+                    TRAPD(error,session->CreateCalFileL(calendarFileName,*calendarInfo));
+                    User::LeaveIfError(error);
+                    CleanupStack::PopAndDestroy(calendarInfo);
+                    CleanupStack::PopAndDestroy(session);
+                    }
+                break;
+                case MCalFileChangeObserver::ECalendarInfoUpdated:
+                    {
+                    // create cal session
+                    CCalSession* session = CCalSession::NewL();
+                    CleanupStack::PushL(session);
+                    session->OpenL(KCalendarDatabaseFilePath);
+                    
+                    CCalCalendarInfo* calendarInfo = session->CalendarInfoL();
+                    CleanupStack::PushL(calendarInfo);
+
+                    TBuf8<KBuffLength> keyBuff;
+                    keyBuff.AppendNum(EMarkAsDelete);
+
+                    TBool markAsdelete;
+                    TPckgC<TBool> pkgMarkAsDelete(markAsdelete);
+                    TRAPD(err,pkgMarkAsDelete.Set(calendarInfo->PropertyValueL(keyBuff)));
+                    markAsdelete = pkgMarkAsDelete();
+                    if( markAsdelete )
+                        {
+                        // Mark the CalFile as visible.
+                        calendarInfo->SetEnabled( ETrue );
+                        TBuf8<KBuffLength> keyBuff;
+
+                        // Set the modification time as home time.
+                        keyBuff.Zero();
+                        keyBuff.AppendNum(EModificationTime);
+                        TTime modificationTime;
+                        modificationTime.HomeTime();
+                        TPckgC<TTime> pkgModificationTime(modificationTime);
+                        calendarInfo->SetPropertyL(keyBuff, pkgModificationTime);
+                        
+                        // Set the SyncStatus to ETrue
+                        keyBuff.Zero();
+                        keyBuff.AppendNum( ESyncStatus );
+                        TBool syncstatus( ETrue );
+                        TPckgC<TBool> pckgSyncStatusValue( syncstatus );
+                        calendarInfo->SetPropertyL( keyBuff, pckgSyncStatusValue );
+                        
+                        // Mark the meta property as SoftDeleted
+                        keyBuff.Zero();
+                        keyBuff.AppendNum(EMarkAsDelete);
+                        TPckgC<TBool> pkgSoftDelete( EFalse );
+                        calendarInfo->SetPropertyL(keyBuff, pkgSoftDelete);
+
+                        session->SetCalendarInfoL( *calendarInfo );
+                        }
+                    CleanupStack::PopAndDestroy(calendarInfo);
+                    CleanupStack::PopAndDestroy(session);
+                    }
+                }
+            }
+        }
+    TRACE_EXIT_POINT;
+    }
 // End of File

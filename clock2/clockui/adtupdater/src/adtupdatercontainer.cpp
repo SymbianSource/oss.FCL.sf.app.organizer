@@ -48,7 +48,7 @@
 
 // Constants
 const TInt KNitzPlugin( 0x200159A5 );
-const TInt KTimeout( 40000000 );				// 40 seconds
+const TInt KTimeout( 90000000 );				// 90 seconds
 const TInt KInterval( 5000000 );				// 5 seconds
 const TInt KMaximumTwoDigitValue( 99 );
 const TInt KNitzYearOffset( 2000 );
@@ -97,6 +97,11 @@ CAdtUpdaterContainer::~CAdtUpdaterContainer()
     {
     __PRINTS( "CAdtUpdaterContainer::~CAdtUpdaterContainer - Entry" );
     
+    if(iPSObserver)
+        {
+        delete iPSObserver;
+        iPSObserver = NULL;
+        }
 	if( iBgContext )
 		{
 		delete iBgContext;
@@ -153,17 +158,21 @@ void CAdtUpdaterContainer::ConstructL( const TRect& aRect )
 	
 	iAdtUpdaterAppUi =  static_cast < CAdtUpdaterAppUi* > ( CCoeEnv::Static()->AppUi() );
 	
-	SetRect( aRect );
+	
 	
 	// Construct the background control context.
     iBgContext = CAknsBasicBackgroundControlContext::NewL( KAknsIIDQsnBgScreen,
     													   aRect.Size(),
     													   EFalse );
+    SetRect( aRect );
     
     // set the flag for showing startup queries
     iDisplayStartupQueries = DisplayStartupQueriesL();
     
+    iPSObserver = CPsKeyObserver::NewL(KPSUidStartup, KPSStartupUiPhase, EStartupUiPhaseAllDone, this);
     
+	iIsRTCInvalidAndHiddenReset = EFalse;
+	
     ActivateL();
   
     __PRINTS( "CAdtUpdaterContainer::ConstructL - Exit" );
@@ -281,6 +290,12 @@ void CAdtUpdaterContainer::HandleResourceChange( TInt aType )
 	
 	// Forward the control to CCoeControl.
 	CCoeControl::HandleResourceChange( aType );
+	if( KAknsMessageSkinChange == aType || KEikDynamicLayoutVariantSwitch == aType )
+	    {
+        TRect mainPane;
+	    AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EApplicationWindow, mainPane );
+	    SetRect(mainPane);	    
+	    }
 	
 	__PRINTS( "CAdtUpdaterContainer::HandleResourceChange - Exit" );
 	}
@@ -315,42 +330,21 @@ void CAdtUpdaterContainer::InformAboutNwUpdateL()
 		// Start the timer	
 		iPeriodic->Start( KTimeout, KInterval, timerCallBack );
 		}
-	else if( IsFirstBoot()&& PredictiveTimeEnabled() )
-		{	
+	else if( IsFirstBoot()&& PredictiveTimeEnabled())
+		{		
 		__PRINTS( "First boot, normal boot sequence" );
-		
-		// The normal bootup sequence.		
-		ContinueWithNormalBootL();
-		
+		WaitToShowQueriesL();
 		__PRINTS( "CAdtUpdaterContainer::InformAboutNwUpdate : 2nd condition - Exit" );
-		
-		// Exit the application.
-		iAdtUpdaterAppUi->Exit();
 		}
 	else if( !RTCStatus() && !HiddenReset() && PredictiveTimeEnabled())
 		{
 		__PRINTS( "RTC invalid or Hidden Reset" );
 		
-		// Show in FSW.
-	    iAdtUpdaterAppUi->HideApplicationFromFSW( EFalse );
-		// Hide the status pane.
-	    iAdtUpdaterAppUi->HideStatusPane( ETrue );
 		
-		// No first boot but RTCStatus is corrupted. Ask time and date"
+		iIsRTCInvalidAndHiddenReset = ETrue;
 		
-		// Showing Date query to user.
-		ShowDateQueryL();
-		
-		// Showing Time query to user.
-		ShowTimeQueryL();
-		
-		//Deactivate the plug-in as we are setting the date/time manually
-		DeActivateNitzPlugin();
-		
+		WaitToShowQueriesL();
 		__PRINTS( "CAdtUpdaterContainer::InformAboutNwUpdate : 3rd condition - Exit" );
-		
-		// Exit the application.
-		iAdtUpdaterAppUi->Exit();
 		}		
 	else
 		{
@@ -422,12 +416,12 @@ void CAdtUpdaterContainer::NitzInfoNotAvailableL()
 	CancelAllRequests();
 	
 	// The normal bootup sequence.
-	ContinueWithNormalBootL();
+	WaitToShowQueriesL();
 
 	__PRINTS( "CAdtUpdaterContainer::NitzInfoNotAvailableL - Exit" );
 	
 	// We're done. Exit the application.
-	iAdtUpdaterAppUi->Exit();
+	//iAdtUpdaterAppUi->Exit();
 	}
 
 // ---------------------------------------------------------
@@ -453,10 +447,21 @@ void CAdtUpdaterContainer::NitzInfoAvailableL( STimeAttributes aTimeAttributes, 
 		
 		// Cancel all requests and timers.
 		CancelAllRequests();
-		
-		// Display the Nitz info.
-		DisplayNitzInfoL();
-		
+		//set nitz info only if automatic time update is ON
+		if(isAutomaticTimeUpdateON())
+		    {
+            // Display the Nitz info.
+            DisplayNitzInfoL();
+		    }
+		else
+		    {
+            //do not set the nitz info if the user has 
+            //set date/time or changed automatic time update 
+            //to OFF before 90 seconds
+            // Marking this boot as first boot.
+		    MarkFirstBoot();
+		    }
+
 		// We're done. Exit the application.
 		iAdtUpdaterAppUi->Exit();
 		}
@@ -582,13 +587,54 @@ void CAdtUpdaterContainer::DisplayNitzInfoL()
 	}
 
 // ---------------------------------------------------------
-// CAdtUpdaterContainer::ContinueWithNormalBootL
+// CAdtUpdaterContainer::WaitToShowQueriesL
 // rest of the details are commented in the header
 // ---------------------------------------------------------
 //
-void CAdtUpdaterContainer::ContinueWithNormalBootL()
+void CAdtUpdaterContainer::WaitToShowQueriesL()
 	{
-	__PRINTS( "CAdtUpdaterContainer::ContinueWithNormalBootL - Entry" );
+	__PRINTS( "CAdtUpdaterContainer::WaitToShowQueriesL - Enter" );
+	
+	iAdtUpdaterAppUi->ToggleAppViewL( EFalse);
+	iPSObserver->StartObservingL();
+	
+	__PRINTS( "CAdtUpdaterContainer::WaitToShowQueriesL - Exit" );
+	}
+
+// ---------------------------------------------------------
+// CAdtUpdaterContainer::ShowQueriesL
+// rest of the details are commented in the header
+// ---------------------------------------------------------
+//
+void CAdtUpdaterContainer::ShowQueriesL()
+	{
+	__PRINTS( "CAdtUpdaterContainer::ShowQueriesL - Entry" );
+	
+    iPSObserver->Cancel();
+    
+    if(iIsRTCInvalidAndHiddenReset)
+        {
+        ShowDateAndTimeQueriesL();				
+        }
+    else
+        {
+        DoContinueWithNormalBootL();
+        }
+
+    __PRINTS( "CAdtUpdaterContainer::Exit from APP" );
+    
+    // Exit the application.
+    iAdtUpdaterAppUi->Exit();
+	}
+	
+// ---------------------------------------------------------
+// CAdtUpdaterContainer::DoContinueWithNormalBootL
+// rest of the details are commented in the header
+// ---------------------------------------------------------
+//		
+void CAdtUpdaterContainer::DoContinueWithNormalBootL()
+	{
+	__PRINTS( "CAdtUpdaterContainer::DoContinueWithNormalBootL - Entry" );
 	
 	// First bring the application to the foreground.
 	iAdtUpdaterAppUi->ToggleAppViewL( ETrue );	
@@ -596,33 +642,63 @@ void CAdtUpdaterContainer::ContinueWithNormalBootL()
     iAdtUpdaterAppUi->HideApplicationFromFSW( EFalse );
 	// Hide the status pane.
     iAdtUpdaterAppUi->HideStatusPane( ETrue );
-	
-	//Deactivating Nitz
-	DeActivateNitzPlugin();
-	
-    TBool timeSaved;
-    TBool dateSaved;
+
+    TBool timeSaved(ETrue);
+    TBool dateSaved(ETrue);
+    //show date/time queries only if automatic time update is ON
+    if(isAutomaticTimeUpdateON())
+        {
+        //Deactivating Nitz
+        DeActivateNitzPlugin();
+
+        iQueryDialogsInDisplay = ETrue;
     
-    iQueryDialogsInDisplay = ETrue;
+        // First the country/city list.
+        ShowCountryAndCityListsL(); 
+        // Then query date.
+        timeSaved = ShowDateQueryL();
+        // Then query time.
+        dateSaved = ShowTimeQueryL();
     
-	// First the country/city list.
-	ShowCountryAndCityListsL(); 
-	// Then query date.
-	timeSaved = ShowDateQueryL();
-    // Then query time.
-	dateSaved = ShowTimeQueryL();
-	
-	iQueryDialogsInDisplay = EFalse;
-	
-	// Modify the FirstBoot flag.
-	if( timeSaved && dateSaved )
-		{
-		MarkFirstBoot();
-		}	
-	
+        iQueryDialogsInDisplay = EFalse;
+    
+        }
+    // Modify the FirstBoot flag.
+    if( timeSaved && dateSaved )
+        {
+        MarkFirstBoot();
+        }
+
     __PRINTS( "CAdtUpdaterContainer::ContinueWithNormalBootL - Exit" );
 	}
-
+	
+// ---------------------------------------------------------
+// CAdtUpdaterContainer::DoContinueWithRTCInvalidAndHiddenReset
+// rest of the details are commented in the header
+// ---------------------------------------------------------
+//
+void CAdtUpdaterContainer::ShowDateAndTimeQueriesL()
+	{
+	__PRINTS( "CAdtUpdaterContainer::DoContinueWithRTCInvalidAndHiddenReset - Entry" );	
+		
+	// Show in FSW.
+    iAdtUpdaterAppUi->HideApplicationFromFSW( EFalse );
+	// Hide the status pane.
+    iAdtUpdaterAppUi->HideStatusPane( ETrue );
+		
+	// No first boot but RTCStatus is corrupted. Ask time and date"
+		
+	// Showing Date query to user.
+	ShowDateQueryL();
+		
+	// Showing Time query to user.
+	ShowTimeQueryL();
+		
+	//Deactivate the plug-in as we are setting the date/time manually
+	DeActivateNitzPlugin();
+		
+	__PRINTS( "CAdtUpdaterContainer::DoContinueWithRTCInvalidAndHiddenReset - Exit" );
+	}
 // ---------------------------------------------------------
 // CAdtUpdaterContainer::ShowCountryAndCityListsL
 // rest of the details are commented in the header
@@ -1475,6 +1551,31 @@ void CAdtUpdaterContainer::DeActivateNitzPlugin()
 	__PRINTS( "CAdtUpdaterContainer::DeActivateNitzPlugin - Exit" );
 	}
 
+// ---------------------------------------------------------
+// CAdtUpdaterListener::isAutomaticTimeUpdateON
+// Check if automatic time update value is ON
+// ---------------------------------------------------------
+//
+
+TBool CAdtUpdaterContainer::isAutomaticTimeUpdateON()
+    {
+    __PRINTS( "CAdtUpdaterContainer::isAutomaticTimeUpdateON - Entry" );
+    
+    RClkSrvInterface clkSrvInterface;
+    
+    TBool timeUpdateOn( EFalse );
+    if(KErrNone ==  clkSrvInterface.Connect())
+        {
+    __PRINTS( "connection to clock server was successful" );
+    // get the value of AutoTimeUpdate setting
+    clkSrvInterface.IsAutoTimeUpdateOn( timeUpdateOn );   
+    clkSrvInterface.Close();
+        }
+
+    __PRINTS( "CAdtUpdaterContainer::isAutomaticTimeUpdateON - Exit" );
+    return timeUpdateOn;
+    }
+
 // -----------------------------------------------------
 // CAdtUpdaterContainer::Listener
 // rest of the details are commented in the header
@@ -1543,8 +1644,11 @@ TBool CAdtUpdaterContainer::DisplayStartupQueriesL()
 // CAdtUpdaterContainer::PredictiveTimeEnabled()
 // Rest of the details are commented in headers.
 // ---------------------------------------------------------------------------
+//
 TBool CAdtUpdaterContainer::PredictiveTimeEnabled()
      {
+     __PRINTS( "CAdtUpdaterContainer::PredictiveTimeEnabled - Entry" );
+    
      TInt value( EPredictiveTimeEnabled );
      CRepository* repository(NULL);
      
@@ -1556,7 +1660,188 @@ TBool CAdtUpdaterContainer::PredictiveTimeEnabled()
          }
      delete repository;
  
+     __PRINTS( "CAdtUpdaterContainer::PredictiveTimeEnabled - Exit" );
      return value;
      } 
+
+// ---------------------------------------------------------------------------
+// CAdtUpdaterContainer::PredictiveTimeEnabled()
+// 
+// ---------------------------------------------------------------------------
+//
+CPsKeyObserver::CPsKeyObserver( TUid aCategory, TUint aKey, TInt aTargetValue , MStartupUIPhaseObserver* aObsever)
+  : CActive( EPriorityStandard ), iCategory( aCategory ),
+    iKey( aKey ), iTargetValue(aTargetValue), iStartupUIPhaseObserver(aObsever)
+    {
+    __PRINTS( "CPsKeyObserver::CPsKeyObserver - Entry" );
+    
+    ASSERT( iStartupUIPhaseObserver != NULL );
+    CActiveScheduler::Add( this );
+	
+    __PRINTS( "CPsKeyObserver::CPsKeyObserver - Exit" );
+    }
+
+
+// ---------------------------------------------------------------------------
+// CPsKeyObserver::~CPsKeyObserver
+//
+// ---------------------------------------------------------------------------
+//
+CPsKeyObserver::~CPsKeyObserver()
+    {
+    __PRINTS( "CPsKeyObserver::~CPsKeyObserver - Entry" );
+	
+	if(IsActive())
+		{
+	    Cancel();
+		}
+    iProperty.Close();	
+    
+	__PRINTS( "CPsKeyObserver::~CPsKeyObserver - Exit" );
+    }
+
+
+// ---------------------------------------------------------------------------
+// CPsKeyObserver::StartObservingL
+//
+// ---------------------------------------------------------------------------
+//
+void CPsKeyObserver::StartObservingL()
+    {
+	__PRINTS( "CPsKeyObserver::StartObservingL - Entry" );
+	
+    ASSERT( !IsActive() );
+	
+    TInt errorCode = iProperty.Attach( iCategory, iKey );	
+    if ( errorCode == KErrNone )
+        {
+        HandleKeyValueL();
+        }
+    else
+        {
+        CompleteL( errorCode );
+        }
+    
+	__PRINTS( "CPsKeyObserver::StartObservingL - Exit" );
+    }
+
+
+// ---------------------------------------------------------------------------
+// CPsKeyObserver::DoCancel
+//
+// ---------------------------------------------------------------------------
+//
+void CPsKeyObserver::DoCancel()
+    {
+	__PRINTS( "CPsKeyObserver::DoCancel - Entry" );
+	
+    iProperty.Cancel();
+    CompleteL( KErrCancel );
+	
+	__PRINTS( "CPsKeyObserver::DoCancel - Exit" );
+    }
+
+
+// ---------------------------------------------------------------------------
+// CPsKeyObserver::RunL
+//
+// ---------------------------------------------------------------------------
+//
+void CPsKeyObserver::RunL()
+    {
+    __PRINTS( "CPsKeyObserver::RunL - Entry" );
+	
+    if ( iStatus == KErrCancel ||
+         iStatus == KErrServerTerminated ||
+         iStatus ==KErrNotSupported )
+        {
+        CompleteL( iStatus.Int() );
+        }
+    else
+        {
+        HandleKeyValueL();
+        }
+		
+	__PRINTS( "CPsKeyObserver::RunL - Exit" );
+    }
+
+// ---------------------------------------------------------------------------
+// CPsKeyObserver::IsMatch
+//
+// ---------------------------------------------------------------------------
+//
+TBool CPsKeyObserver::IsMatch( const TInt aKeyValue ) const
+    {
+	__PRINTS( "CPsKeyObserver::IsMatch - Entry" );
+	__PRINTS( "CPsKeyObserver::IsMatch - Exit" );
+	
+    return aKeyValue == iTargetValue;
+    }
+
+
+// ---------------------------------------------------------------------------
+// CPsKeyObserver::HandleKeyValueL
+//
+// ---------------------------------------------------------------------------
+//
+void CPsKeyObserver::HandleKeyValueL()
+    {
+	__PRINTS( "CPsKeyObserver::HandleKeyValueL - Entry" );
+	
+    ASSERT( !IsActive() );		
+
+    TInt value( -KMaxTInt );
+    TInt errorCode = iProperty.Get( value );
+    
+    if ( errorCode != KErrNone || IsMatch( value ) )
+        {
+        __PRINTS( "CPsKeyObserver::HandleKeyValueL - Inside If" );	
+        CompleteL( errorCode );
+        }
+    else
+        {
+        __PRINTS( "CPsKeyObserver::HandleKeyValueL - Inside else  - resubscribe" );
+   	    iProperty.Subscribe( iStatus );
+    	SetActive();
+        }
+		
+	__PRINTS( "CPsKeyObserver::HandleKeyValueL - Exit" );	
+    }
+
+
+// ---------------------------------------------------------------------------
+// CPsKeyObserver::CompleteL
+//
+// ---------------------------------------------------------------------------
+//
+void CPsKeyObserver::CompleteL( const TInt aErrorCode )
+    {
+    __PRINTS( "CPsKeyObserver::CompleteL - Entry" );	
+	
+	if(aErrorCode == KErrNone)
+		{		
+		iStartupUIPhaseObserver->ShowQueriesL();
+		}
+	else
+        {
+        __PRINTS( "CPsKeyObserver::CompleteL - Else" );
+        }
+	
+	__PRINTS( "CPsKeyObserver::CompleteL - Exit" );		
+    }
+
+// ---------------------------------------------------------------------------
+// CPsKeyObserver::NewL
+//
+// ---------------------------------------------------------------------------
+//
+CPsKeyObserver* CPsKeyObserver::NewL( TUid aCategory, TUint aKey, TInt aTargetValue , MStartupUIPhaseObserver* aObsever )
+	{
+	__PRINTS( "CPsKeyObserver::NewL - Entry" );
+	__PRINTS( "CPsKeyObserver::NewL - Exit" );
+	
+	return new ( ELeave ) CPsKeyObserver( aCategory, aKey, aTargetValue  , aObsever);
+	}
+
 
 // End of file

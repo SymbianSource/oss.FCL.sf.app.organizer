@@ -347,6 +347,7 @@ private:
     CAsyncCallBack*  iAsyncAction;
     TInt             iAsyncActionCmd;
     TInt             iCurrentIndex;
+    HBufC* iCalEditedDefaultName;
     };
 
 

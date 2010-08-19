@@ -397,7 +397,12 @@ TKeyResponse CCalenEventViewContainer::OfferKeyEventL(const TKeyEvent& aKeyEvent
                 // Scroll the text view down by one line
                 iTextEditor->MakeVisible(EFalse);
                 TInt scrollLines = KScrollViewerDown;
+                //text should not be scrolled out of the border
+		//introduced based on suggestion from texteditor team 
+		//to avoid scrolling to invalid lines
+                iTextEditor->TextLayout()->RestrictScrollToTopsOfLines(ETrue);
                 iTextEditor->TextView()->ScrollDisplayLinesL(scrollLines);
+                iTextEditor->TextLayout()->RestrictScrollToTopsOfLines(EFalse);
                 iTextEditor->UpdateScrollBarsL();
                 iTextEditor->MakeVisible(ETrue);
                 //Set focus immediately for highlight of auto find text
@@ -520,7 +525,7 @@ void CCalenEventViewContainer::HandlePointerEventL(const TPointerEvent& aPointer
                             textView->FindXyPosL(aPointerEvent.iPosition,*posInfo);
                         
                             // Check if it is tapped on any attachment name, if yes then open that attachment
-                            CheckAndOpenTappedAttachment(posInfo);
+                            CheckAndOpenTappedAttachmentL(posInfo);
                             delete posInfo;
                             }
                         }
@@ -2563,8 +2568,14 @@ void CCalenEventViewContainer::OpenViewerL(TInt attachmentToBeOpened)
         toolbar->SetToolbarVisibilityL(EFalse);
         }
     
+    CCalenEventView* eventView = static_cast<CCalenEventView*>( iView );
+    eventView->HideNaviPane();
     //open the attachment
     OpenAttachmentViewerL(file, *this);
+    if(!iEmbeddedFileOpened)
+        {
+        eventView->RedrawStatusPaneL();
+        }
     CleanupStack::PopAndDestroy(&file);
 
     
@@ -2600,7 +2611,7 @@ void CCalenEventViewContainer::HandleServerAppExit( TInt aReason)
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenEventViewContainer::CheckAndOpenTappedAttachment(TTmPosInfo2* posInfo)
+void CCalenEventViewContainer::CheckAndOpenTappedAttachmentL(TTmPosInfo2* posInfo)
     {
     // iterate through iAttachmentPosInfoArray to see if posInfo falls in any of the range
     TInt attachmentToBeOpened = -1;

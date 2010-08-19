@@ -160,6 +160,11 @@ class CClockMainContainer : public CCoeControl,
         * @brief Switches clock type
         */
 		void SwitchClockTypeL();
+		
+		/**
+        * @brief return true new alaram button is focused. 
+        */
+		TBool IsNewAlaramButtonFocused();
     	
    	private:    	// Functions from base classes
 
@@ -334,6 +339,11 @@ class CClockMainContainer : public CCoeControl,
 		CAknButton*   iNewAlarmButton;
 		
 		TTime                                   iPreviousClockTypeSwitch;
+		/**
+        * @var iClearSingleClickFlag
+        * @brief if ETrue clear ESingleClickDisabledHighlight flag of listbox
+        */
+		TBool                                   iClearSingleClickFlag;
 
 	};
 

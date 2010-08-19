@@ -169,8 +169,8 @@ void CCalenAllDayField::SetDataToEditorL()
                 }
             }
 		
-		iUnifiedEditor.EditorFields().SetDateField( ECalenEditorStartDate, startDate, ETrue );
-        iUnifiedEditor.EditorFields().SetDateField( ECalenEditorEndDate, endDate, ETrue );
+		iUnifiedEditor.EditorFields().SetDateField( ECalenEditorStartDate, startDate, EFalse );
+        iUnifiedEditor.EditorFields().SetDateField( ECalenEditorEndDate, endDate, EFalse );
         }
      else
         { 
@@ -180,16 +180,16 @@ void CCalenAllDayField::SetDataToEditorL()
             TTime startDate = iUnifiedEditor.Edited().StartDateTime();
             TTime endDate = iUnifiedEditor.Edited().EndDateTime();
             
-            iUnifiedEditor.EditorFields().SetDateField( ECalenEditorStartDate, startDate, ETrue );
-            iUnifiedEditor.EditorFields().SetTimeField( ECalenEditorStartTime, startDate, ETrue );
-            iUnifiedEditor.EditorFields().SetDateField( ECalenEditorEndDate, endDate, ETrue );
-            iUnifiedEditor.EditorFields().SetTimeField( ECalenEditorEndTime, endDate, ETrue );
+            iUnifiedEditor.EditorFields().SetDateField( ECalenEditorStartDate, startDate, EFalse );
+            iUnifiedEditor.EditorFields().SetTimeField( ECalenEditorStartTime, startDate, EFalse );
+            iUnifiedEditor.EditorFields().SetDateField( ECalenEditorEndDate, endDate, EFalse );
+            iUnifiedEditor.EditorFields().SetTimeField( ECalenEditorEndTime, endDate, EFalse );
             }
         else if( iUnifiedEditor.GetEntryType()== CCalEntry::EEvent )
             {
             TTime startTime = iUnifiedEditor.Edited().StartDateTime();
-            iUnifiedEditor.EditorFields().SetDateField( ECalenEditorStartDate, startTime, ETrue );
-            iUnifiedEditor.EditorFields().SetTimeField( ECalenEditorStartTime, startTime, ETrue );
+            iUnifiedEditor.EditorFields().SetDateField( ECalenEditorStartDate, startTime, EFalse );
+            iUnifiedEditor.EditorFields().SetTimeField( ECalenEditorStartTime, startTime, EFalse );
             }
         }    
              
@@ -214,11 +214,11 @@ void CCalenAllDayField::InsertAllDayRelatedFieldsL( TBool aAllDayEvent )
         // AllDay event, delete Start time & End time fields from form.
         if( eventStartTimeCtrl )
             {
-            iUnifiedEditor.DeleteLine( ECalenEditorStartTime,ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorStartTime,EFalse );
             }
         if( eventEndTimeCtrl )
             {
-            iUnifiedEditor.DeleteLine( ECalenEditorEndTime,ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorEndTime,EFalse );
             }
         }
     else

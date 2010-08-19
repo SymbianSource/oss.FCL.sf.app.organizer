@@ -133,6 +133,8 @@ LIBRARY         ws32.lib                // Window server
 LIBRARY         eikctl.lib              // AVKON listbox
 LIBRARY         cfclient.lib
 LIBRARY         cfservices.lib
+LIBRARY		gfxtrans.lib 		// For transition effects
+
 // For Location support
 LIBRARY		mnclientlib.lib 		// Location based services library
 LIBRARY		eposlandmarks.lib 		// Landmark support

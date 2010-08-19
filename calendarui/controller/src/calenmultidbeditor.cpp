@@ -622,7 +622,7 @@ void CCalenMultiDBEditor::FocusChanged(TDrawNow /*aDrawNow*/)
     if(IsFocused() && !iNoneChoosen)
         {
         iColVal = iChoosenColor.Value();
-        iPicture->SetRgbColorsL(iChoosenColor);
+        TRAP_IGNORE(iPicture->SetRgbColorsL(iChoosenColor));
         GetLineByLineAndPageIndex(1, 0)->DrawNow();
         }
     

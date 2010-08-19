@@ -30,7 +30,13 @@ CAPABILITY			CAP_APPLICATION PowerMgmt
 
 // Stack and heap options
 EPOCSTACKSIZE   	0x5000
-EPOCHEAPSIZE    	0x20000 0x1000000
+#ifdef WINSCW
+	EPOCHEAPSIZE        0x20000 0x400000
+#else
+	EPOCHEAPSIZE        0x20000 0x1000000
+#endif
+
+
 
 // Source information
 SOURCEPATH			../clockmainview/src
@@ -98,6 +104,12 @@ TARGETPATH			/resource/timezonelocalization
 LANGUAGE_IDS
 END
 
+START RESOURCE			../../utilities/data/timezonegroups_lta.rss
+HEADER
+TARGETPATH			/resource/timezonelocalization
+LANGUAGE_IDS
+END
+
 START RESOURCE			../../utilities/data/timezonegroups_jerusalem.rss
 HEADER
 TARGETPATH			/resource/timezonelocalization
@@ -108,6 +120,13 @@ START RESOURCE			../../utilities/data/timezones_tel_aviv.rss
 HEADER
 TARGETPATH			/resource/timezonelocalization
 TARGET				timezones_tel_aviv.rsc
+LANGUAGE_IDS
+END
+
+START RESOURCE			../../utilities/data/timezones_lta.rss
+HEADER
+TARGETPATH			/resource/timezonelocalization
+TARGET				timezones_lta.rsc
 LANGUAGE_IDS
 END
 

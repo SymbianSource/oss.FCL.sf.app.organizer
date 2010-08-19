@@ -2197,6 +2197,10 @@ void CCalenWeekContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent
 
     if(AknLayoutUtils::PenEnabled())
         {
+        if(iView->IsEventViewLaunchedFromAlarm())
+            {
+            return;
+            }
         TInt pointerIndex(-1);
         TInt oldRow(0);
         TInt oldColumn(0);

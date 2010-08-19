@@ -41,7 +41,7 @@
 #include <calcalendarinfo.h>
 #include <calentoolbar.h>
 #include <akntoolbar.h>
-#include <CalenAttachmentModel.h>
+#include <calenattachmentmodel.h>
 
 #include "calendarui_debug.h"           // Debug
 #include "calendeleteui.h"
@@ -950,6 +950,11 @@ TBool CCalenDeleteUi::DeleteEntryL( CCalEntryView* aEntryView, CCalEntry* aEntry
                                                                     CalenActionUiUtils::EDeleteEntry );
     if( doDelete )
         {
+        //Before deleteing the attachment, reset the attachment model
+        if(iController.Services().GetAttachmentData()->NumberOfItems())
+            {
+            iController.Services().GetAttachmentData()->Reset();
+            }
         aEntryView->DeleteL( *aEntry );
 
         if( aEntry )

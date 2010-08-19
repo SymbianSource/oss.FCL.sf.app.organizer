@@ -200,7 +200,7 @@ private: // Constructors
 private: // New functions
     void LoadPluginL( TUid aPluginUid );
 
-    void DoImmediatePluginLoadingL(TBool aLoadViewbasedPulgins = EFalse);   
+    void DoImmediatePluginLoadingL();   
 
     void OfferMenuPaneToPluginsL( TInt aResourceId, CEikMenuPane* aMenuPane );
 

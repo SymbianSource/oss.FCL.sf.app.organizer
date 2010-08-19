@@ -144,7 +144,6 @@ EXPORT_C CCalenCustomisationManager::~CCalenCustomisationManager()
         iSetting->Release();
         }
     iHiddenViews.Reset();
-    iDefferedUnloadPluginList.Reset();
 
     TRACE_EXIT_POINT;
     }
@@ -429,7 +428,10 @@ EXPORT_C void CCalenCustomisationManager::SetPluginAvailabilityL( TUid aPluginUi
              
             // Remove the plugin from the active plugin list
             TInt position = iActivePlugins.Find( aPluginUid );
-            ASSERT( position != KErrNotFound );
+            if(position == KErrNotFound ) // plugin has already been removed
+                { 
+                return ;
+                }
             
             iActivePlugins.Remove( position );
              
@@ -501,7 +503,7 @@ EXPORT_C void CCalenCustomisationManager::UnloadPluginsL( const RArray<TUid>& aP
         if ( position != KErrNotFound ) 
 	        {
             TUid pluginUid = iPlugins[ position]->Uid();
-            if(!(iRomBasedPlugins.Find(pluginUid) != KErrNotFound))
+            if(!iPluginInfo[position]->RomBased())           
                 {
                     if((iInfoBarProviderUid != iPlugins[position]->Uid())
                         && (iPreviewPaneProviderUid != iPlugins[ position]->Uid()))
@@ -551,6 +553,15 @@ void CCalenCustomisationManager::EnablePluginL( TUid aPluginUid )
         // Issue notification of plugin been added
         iPluginsEnabledDisabled = ETrue;
         iServices.IssueNotificationL( ECalenNotifyPluginEnabledDisabled );
+        }
+		else
+    	{
+		// Ensure plugin is enabled
+		if(iPlugins[index]->IsDisabled())
+			{
+			iPlugins[index]->Disable( EFalse );
+			iServices.IssueNotificationL( ECalenNotifyPluginEnabledDisabled );
+			}
         }
     
     TRACE_EXIT_POINT;
@@ -739,7 +750,7 @@ EXPORT_C const RPointerArray<CCalenViewInfo>& CCalenCustomisationManager::Views(
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenCustomisationManager::DoImmediatePluginLoadingL(TBool aLoadViewbasedPulgins)
+void CCalenCustomisationManager::DoImmediatePluginLoadingL()
     {
     TRACE_ENTRY_POINT;
 
@@ -759,22 +770,9 @@ void CCalenCustomisationManager::DoImmediatePluginLoadingL(TBool aLoadViewbasedP
     for ( TInt index( 0 ); index < pluginCount; ++index )
         {
         TUid pluginUid = iPluginInfo[index]->ImplementationUid();
-        TBool loadPlugins(EFalse);
         
-        if(aLoadViewbasedPulgins)
-            {
-            if ( (iActivePlugins.Find( pluginUid ) != KErrNotFound) && 
-                 !(iRomBasedPlugins.Find( pluginUid ) != KErrNotFound) )
-                {
-                loadPlugins = ETrue;
-                }                
-            }
-        else if((iActivePlugins.Find( pluginUid ) != KErrNotFound))
-            {
-            loadPlugins = ETrue;
-            }       
+        if ( iActivePlugins.Find( pluginUid ) != KErrNotFound )        
         
-        if (loadPlugins)
             {
             TRAPD( error, LoadPluginL( pluginUid ) );
             if ( error )
@@ -1291,11 +1289,14 @@ void CCalenCustomisationManager::OfferMenuPaneToPluginsL( TInt aResourceId,
         TRAPD( error,
             for (; index < count; ++index )
                 {
+                if ( !iPlugins[index]->IsDisabled() )
+                    {
                 iPlugins[index]->Plugin().CustomiseMenuPaneL( aResourceId,
                                                              aMenuPane );
                                                              
                 // The commands added should be checked to see that
                 // they match the expected command range for the plugin
+                    }
                 }
              );
          
@@ -1430,11 +1431,14 @@ void CCalenCustomisationManager::AddPluginL( CCalenCustomisation* aPlugin,
                                              TUid aUid ) 
     {
     TRACE_ENTRY_POINT;
-
+    TInt index = iPlugins.Find( aUid, CPluginInfo::Identifier );
+    if ( index == KErrNotFound )
+        {
     CPluginInfo* newPlugin = new ( ELeave ) CPluginInfo( aPlugin, aUid);
     CleanupStack::PushL( newPlugin );
     iPlugins.AppendL( newPlugin );
     CleanupStack::Pop( newPlugin );
+        }
 
     TRACE_EXIT_POINT;
     }
@@ -1494,17 +1498,12 @@ EXPORT_C void CCalenCustomisationManager::DoPluginLoadingL()
     TRACE_ENTRY_POINT;
     // Reset and destroy the contents of the owned arrays    
     //iPlugins.ResetAndDestroy();
-
-    iPluginInfo.ResetAndDestroy();
-
-    iActivePlugins.Reset();
-
     iHiddenViews.Reset();
     iDefferedUnloadPluginList.Reset();
     // create active plugin list
     CreateActivePluginListL();
     
-    DoImmediatePluginLoadingL(ETrue);
+    DoImmediatePluginLoadingL();
     iSetting->LoadL();
     iSetting->UpdatePluginListL(*this);
     
@@ -1524,7 +1523,8 @@ EXPORT_C void CCalenCustomisationManager::DisableAllPluginsL()
     for(TInt index = 0;index<pluginCount;index++)
         {
         TUid pluginUid = iPluginInfo[index]->ImplementationUid();
-        if(iActivePlugins.Find(pluginUid)!=KErrNotFound)
+        if ((iActivePlugins.Find(pluginUid) != KErrNotFound)
+                && !(iRomBasedPlugins.Find(pluginUid) != KErrNotFound))
             {
             DisablePluginOnFakeExitL(pluginUid);
             }

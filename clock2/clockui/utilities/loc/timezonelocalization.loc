@@ -4512,6 +4512,20 @@
 //r: 5.0
 #define qtn_clk_country_jerusalem "Jerusalem"
 
+//d: Name of the region in location selection popup. Leave empty if the city or area should not be included           
+//l: None  
+//w:            
+//r: 3.2 and 5.0
+//
+#define qtn_clk_country_malvinas "Islas Malvinas"
+
+//d: Name of the city in location selection popup. Leave empty if the city or area should not be included           
+//l: None  
+//w:            
+//r: 3.2 and 5.0
+//
+#define qtn_clk_city_argen_puerto_argentino "Puerto Argentino"
+
 //----------------------------------------------Phase II Countries-------------------------------------------//
 
 // End of file

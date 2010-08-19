@@ -75,7 +75,7 @@ void CCalenDayListBoxItemDrawer::DrawItemText
     // Removed code is commented out 
     iGc->SetPenColor(iTextColor);
     iGc->SetBrushColor(iBackColor);
-
+    iGc->SetClippingRect(iListBox->View()->ViewRect());
     TPtrC temp=iModel->ItemText(aItemIndex);
 
     SetupGc(aItemIndex);

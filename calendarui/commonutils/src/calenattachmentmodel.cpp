@@ -83,6 +83,10 @@ CCalenAttachmentModel::~CCalenAttachmentModel()
         {
         iAttachInfoArray.ResetAndDestroy();
         }
+	else
+		{
+		iAttachInfoArray.Close();
+		}
     TRACE_EXIT_POINT;
     }
 
@@ -405,7 +409,12 @@ EXPORT_C void CCalenAttachmentModel::Reset()
 	if( iAttachInfoArray.Count() )
 		{
 		iAttachInfoArray.ResetAndDestroy();
+		}		
+	else
+		{
+		iAttachInfoArray.Reset();
 		}
+		
 	isAttachmentModelCleared = ETrue;
 	
 	TRACE_EXIT_POINT;

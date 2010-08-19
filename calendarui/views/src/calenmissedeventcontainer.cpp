@@ -63,6 +63,7 @@
 #include <calencontext.h>
 #include <caleninstanceid.h>            // TCalenInstanceId
 #include <calenservices.h>
+#include <calentoolbar.h>
 
 // user includes
 #include "calenmissedeventcontainer.h"
@@ -176,6 +177,14 @@ void CCalenMissedEventContainer::ConstructImplL()
 	
     
 	iTextEditor->EnableKineticScrollingL(ETrue);
+	
+	//Set toolbar visibility to false, bcoz this view is not using the ToolBar
+	MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
+    if(toolbar)
+      {
+      toolbar->SetToolbarVisibilityL(EFalse);  
+      }
+	    
    	TRACE_EXIT_POINT;
 	}
 
@@ -500,11 +509,11 @@ void CCalenMissedEventContainer::HandleResourceChange(TInt aType)
         ( aType == KUidValueCoeZoomChangeEvent ) ||
         ( aType == KUidValueCoeFontChangeEvent ))
         {
-//        CEikAppUi* appUi = static_cast<CEikAppUi*>( ControlEnv()->AppUi() );
-//        SetRect( appUi->ClientRect() );
-        TRect mainPane;
+        CEikAppUi* appUi = static_cast<CEikAppUi*>( ControlEnv()->AppUi() );
+        SetRect( appUi->ClientRect() );
+        /*TRect mainPane;
         AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, mainPane );
-        SetRect( mainPane );
+        SetRect( mainPane );*/
         }
     
     if(aType == KAknsMessageSkinChange || aType == KEikDynamicLayoutVariantSwitch)

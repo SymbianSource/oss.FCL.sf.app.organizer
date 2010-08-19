@@ -181,6 +181,13 @@ public:  // New functions
     TBool IsCommandHandlingInProgress();
     
     /**
+     * @brief Checks whether eventview is launched from alarm
+     * 
+     * @return ETrue if launched from alarm popup, EFalse otherwise
+     */
+    TBool IsEventViewLaunchedFromAlarm();
+    
+    /**
      * @brief Marks that a command is being processed currently
      * 
      * @param aInProgress ETrue if the command is being handled, EFalse otherwise
@@ -196,7 +203,12 @@ public:  // New functions
     static void GetActiveCollectionidsL( 
             MCalenServices& aServices, 
             RArray< TInt >& aCollectionIds );
-
+    /**
+    * @brief Sets flag to ignore tap on any of the views
+    * 
+    * @param bool value to ignore the tap
+    */
+    void SetTapIgnore(TBool);
 #ifdef RD_CALEN_EXTERNAL_CAL
 
     /**
@@ -398,7 +410,7 @@ private:  // Data
      * @brief ETrue if some command handling is under progress, EFalse otherwise
      */
     TBool iCommandProcessing;
-    
+    TBool iIgnoreTap;
     CAsyncCallBack* iAsyncCallback; 
     };
 

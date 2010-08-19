@@ -109,6 +109,10 @@ CClockAlarmEditorImpl::~CClockAlarmEditorImpl()
         {
         delete iAlmDayFieldTextArray;
         }
+    if(iWeekDaysList)
+        {
+        delete iWeekDaysList;
+        }
 	// Close the session with alarm server.
     iAlarmSrvSes.Close();
 	
@@ -402,8 +406,16 @@ void CClockAlarmEditorImpl::PreLayoutDynInitL()
 
 	//Single click integration
     // Set the value to be displayed in the control.
-
-	
+    if ( iShowAlarmDayControl && iAlmDayFieldTextValue) 
+        {
+        iAlmDayFieldTextValue->SetCurrentValueIndex(iDayIndex); 
+        CAknPopupField* almDayCtrl = static_cast< CAknPopupField* > ( Control( EControlAlarmDayPopup ) );
+        if(almDayCtrl)
+            {
+            almDayCtrl->SetQueryValueL(iAlmDayFieldTextValue);
+            }
+        }
+   
     
     // Now the alarm description.
     HBufC* alarmDescription = HBufC::NewL( KMaxAlarmMessageLength );
@@ -569,7 +581,14 @@ void CClockAlarmEditorImpl::ConstructL()
     iOccuranceIndex = KZerothDay;
     iDayIndex = KZerothDay;
     iShowAlarmDayControl = ETrue;
-
+    
+    // Alarm day field text control init.
+    iWeekDaysList = iCoeEnv->ReadDesCArrayResourceL( R_CLOCK_WEEK_DAYS_ARRAY );
+    iAlmDayFieldTextArray = CAknQueryValueTextArray::NewL();
+    iAlmDayFieldTextArray->SetArray( *iWeekDaysList );
+    iAlmDayFieldTextValue = CAknQueryValueText::NewL();
+    iAlmDayFieldTextValue->SetArrayL( iAlmDayFieldTextArray );
+    
     // Connect to the alarm server.
     User::LeaveIfError( iAlarmSrvSes.Connect() );
     
@@ -829,15 +848,12 @@ void CClockAlarmEditorImpl::CreateAlmDayCtrlL()
         // Insert the line at the position above.
         InsertLineL( lineCount, R_CLOCK_ALARMDAY_POPUP_LINE, KZerothDay);
         
-        CDesCArrayFlat* workDaysList = iCoeEnv->ReadDesCArrayResourceL( R_CLOCK_WEEK_DAYS_ARRAY );
-        iAlmDayFieldTextArray = CAknQueryValueTextArray::NewL();
-        iAlmDayFieldTextArray->SetArray( *workDaysList );
-        iAlmDayFieldTextValue = CAknQueryValueText::NewL();
-        iAlmDayFieldTextValue->SetArrayL( iAlmDayFieldTextArray );
         iAlmDayFieldTextValue->SetCurrentValueIndex(dayIndex);
-        CAknPopupField* aAlmDayCtrl = static_cast< CAknPopupField* > ( Control( EControlAlarmDayPopup ) );
-        aAlmDayCtrl->SetQueryValueL(iAlmDayFieldTextValue);
-        
+        CAknPopupField* almDayCtrl = static_cast< CAknPopupField* > ( Control( EControlAlarmDayPopup ) );
+        if(almDayCtrl)
+            {
+            almDayCtrl->SetQueryValueL(iAlmDayFieldTextValue);
+            }
         // Set the flag to indicate that the alarm day control is present in the form.
         iShowAlarmDayControl = ETrue;
         

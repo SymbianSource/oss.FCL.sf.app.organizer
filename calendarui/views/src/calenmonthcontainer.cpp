@@ -1666,6 +1666,10 @@ void CCalenMonthContainer::HandlePointerEventL(const TPointerEvent& aPointerEven
 
     if(AknLayoutUtils::PenEnabled())
         {
+        if(iView->IsEventViewLaunchedFromAlarm())
+            {
+            return;
+            }
         CCoeControl* control( NULL );
         if(aPointerEvent.iType == TPointerEvent::EButton1Down)
             {

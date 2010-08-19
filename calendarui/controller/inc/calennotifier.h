@@ -216,9 +216,6 @@ class CCalenNotifier :  public CBase,
         
         TInt DoEnvChange();
         
-        static TInt AsyncRemoveCalendarL(TAny* aThisPtr);
-        
-        void AsyncRemoveCalendarL();
 
     private:  // Data
         // Array of handlers to notify
@@ -260,7 +257,6 @@ class CCalenNotifier :  public CBase,
         // latest time change from agenda server
         TReal iTimeOfChangeUtcReal;
         
-        CAsyncCallBack* iAsyncCallback;
         HBufC* iFilnameDeleted;
     };
 

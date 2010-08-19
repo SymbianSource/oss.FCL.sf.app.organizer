@@ -140,11 +140,11 @@ void CCalenReminderField::SetAlarmDateTimeLinesDimmedL(
         // Alarm Off, Delete alarm date & alarm time fields from Editor
         if( alarmTimeCtrl )
             {
-            iUnifiedEditor.DeleteLine( ECalenEditorReminderTime,ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorReminderTime,EFalse );
             }
         if( alarmDateCtrl )
             {
-            iUnifiedEditor.DeleteLine( ECalenEditorReminderDate,ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorReminderDate,EFalse );
             }
         }
     else

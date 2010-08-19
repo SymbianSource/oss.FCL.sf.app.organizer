@@ -980,39 +980,42 @@ TBool CCalenAlarmManager::ClearOneMissedAlarmL( TInt aEntryLocalUid, TCalCollect
 void CCalenAlarmManager::UpdateMissedAlarmsListL()
     {
     TRACE_ENTRY_POINT;
-    
-    RPointerArray<CMissedAlarm> missedAlarmStorelist;      
-    CleanupResetAndDestroyPushL( missedAlarmStorelist );   
-    iMissedAlarmStore->GetL(missedAlarmStorelist); 
-    
+       
     TUint32 newCount;
     // update the missed alarms count
     iMissedAlarmStore->CountL(newCount);
-    
-    TCalenInstanceId instanceId;
-    TInt entryLocalUid;
-    TTime instanceTime;
-    
-    //Retreiving the latest missed alarm array entry
-    CMissedAlarm* missedAlarm = missedAlarmStorelist[newCount-1];             
-    entryLocalUid = missedAlarm->iLuid;
-    instanceTime = missedAlarm->iInstanceTime;
-    
-    CCalSession &session = iController.Services().SessionL( missedAlarm->iCalFileName );
-    // pack instance ids of the missed alarm instances
-    TRAP_IGNORE(instanceId = TCalenInstanceId::CreateL( entryLocalUid,
-                                                    instanceTime, 0 ));
-    instanceId.iColId = session.CollectionIdL();
-    iMissedAlarmList.Append(instanceId);
-    CleanupStack::PopAndDestroy(); // missedAlarmStorelist
-    
-    // if iMissedAlarmList count is greater than maximum missed alarms(10)
-    // remove the old missed alarm(index = 0) from the list
-    if(iMissedAlarmList.Count()>KMaxMissedAlarms)
+	
+    // Need atleast one missed alarm to perform this
+    if(newCount>0)
         {
-        iMissedAlarmList.Remove(0);
+        RPointerArray<CMissedAlarm> missedAlarmStorelist;      
+    	CleanupResetAndDestroyPushL( missedAlarmStorelist );   
+        TCalenInstanceId instanceId;
+        TInt entryLocalUid;
+        TTime instanceTime;
+
+		iMissedAlarmStore->GetL(missedAlarmStorelist); 
+        
+        //Retreiving the latest missed alarm array entry
+        CMissedAlarm* missedAlarm = missedAlarmStorelist[newCount-1];             
+        entryLocalUid = missedAlarm->iLuid;
+        instanceTime = missedAlarm->iInstanceTime;
+        
+        CCalSession &session = iController.Services().SessionL( missedAlarm->iCalFileName );
+        // pack instance ids of the missed alarm instances
+        TRAP_IGNORE(instanceId = TCalenInstanceId::CreateL( entryLocalUid,
+                                                        instanceTime, 0 ));
+        instanceId.iColId = session.CollectionIdL();
+        iMissedAlarmList.Append(instanceId);
+        CleanupStack::PopAndDestroy(); // missedAlarmStorelist
+        
+        // if iMissedAlarmList count is greater than maximum missed alarms(10)
+        // remove the old missed alarm(index = 0) from the list
+        if(iMissedAlarmList.Count()>KMaxMissedAlarms)
+            {
+            iMissedAlarmList.Remove(0);
+            }
         }
-    
     TRACE_EXIT_POINT;
     }
 

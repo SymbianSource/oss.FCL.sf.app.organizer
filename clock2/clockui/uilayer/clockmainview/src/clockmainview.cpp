@@ -844,7 +844,7 @@ void CClockMainView::DynInitMenuPaneL( TInt aResourceId, CEikMenuPane* aMenuPane
     TBool deleteRemoveSnooze( EFalse );
 
     // There are no alarms set 
-    if( KZeroAlarms >= alarmCount )
+    if( KZeroAlarms >= alarmCount || iContainer->IsNewAlaramButtonFocused() )
         {
         // There are no alarms set. Remove the irrelevant options from the menu.
         aMenuPane->DeleteMenuItem( EClockResetAlarm );

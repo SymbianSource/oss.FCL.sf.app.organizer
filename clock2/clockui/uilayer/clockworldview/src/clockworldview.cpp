@@ -278,8 +278,9 @@ void CClockWorldView::DynInitMenuPaneL( TInt aResourceId, CEikMenuPane* aMenuPan
         }
     // Close the session with the server.
     clockServerClt.Close();
+    TInt itemIndex = iContainer->ListBox()->CurrentItemIndex();
 	
-	if( KZerothIndex == iContainer->ListBox()->CurrentItemIndex() && !timeUpdateOn )
+	if( (itemIndex <= KZerothIndex )&& !timeUpdateOn )
 	    {
 	    aMenuPane->DeleteMenuItem( EClockWorldMyRegion );
 	    aMenuPane->DeleteMenuItem( EClockWorldAddImage );
@@ -948,64 +949,66 @@ void CClockWorldView::RemoveLocationL()
     TInt currentListItem( iContainer->ListBox()->CurrentItemIndex() );
     
     // Get information about the city selected.
-    TCityInfo cityInformation( iWorldArray->GetCity( currentListItem ) );
-
-    // Construct the localizer.
-	CTzLocalizer* tzLocalizer = CTzLocalizer::NewL();
-	CleanupStack::PushL( tzLocalizer );	
-	CTzLocalizedCityArray* localizedCityList = tzLocalizer->GetCitiesInGroupL( cityInformation.iCityGroupId,
-																	           CTzLocalizer::ETzAlphaNameAscending );
-	CleanupStack::PushL( localizedCityList );
-
-
-	
-	
-	// If user says OK, remove the item from the list as well as from the MDesCArray.
-	// Also update the Data with the CClockDocument
-  
-        TInt imageIndex( iWorldArray->GetImageIndex( currentListItem ) );
+    if(currentListItem >= 0)
+        {
+        TCityInfo cityInformation( iWorldArray->GetCity( currentListItem ) );
         
-        // Remove the image icon in case it is not loaded by the other listitems      
-        iContainer->RemoveImage( cityInformation.iImagePath, imageIndex, currentListItem  );
-
-        // Update the world array.
-        iWorldArray->RemoveCity( currentListItem );
-                                    
+        // Construct the localizer.
+        CTzLocalizer* tzLocalizer = CTzLocalizer::NewL();
+        CleanupStack::PushL( tzLocalizer );	
+        CTzLocalizedCityArray* localizedCityList = tzLocalizer->GetCitiesInGroupL( cityInformation.iCityGroupId,
+                                                                                   CTzLocalizer::ETzAlphaNameAscending );
+        CleanupStack::PushL( localizedCityList );
+    
+    
+        
+        
+        // If user says OK, remove the item from the list as well as from the MDesCArray.
+        // Also update the Data with the CClockDocument
+      
+            TInt imageIndex( iWorldArray->GetImageIndex( currentListItem ) );
+            
+            // Remove the image icon in case it is not loaded by the other listitems      
+            iContainer->RemoveImage( cityInformation.iImagePath, imageIndex, currentListItem  );
+    
+            // Update the world array.
+            iWorldArray->RemoveCity( currentListItem );
+                                        
+           
+    
+            // Update the document.
+            CClockDocument* clockDocument = static_cast< CClockDocument* > ( AppUi()->Document() );
+            clockDocument->StoreDataL();
+            // Update the container.
+           
+            // If there are no more cities present, update the empty list text.
+            if( KNoCities == iWorldArray->MdcaCount() )
+                {
+                HBufC* noLocationBuf = StringLoader::LoadLC( R_WRLD_CLK_EMPTY_VIEW, iCoeEnv );
+                iContainer->ListBox()->View()->SetListEmptyTextL( noLocationBuf->Des() );
+                CleanupStack::PopAndDestroy( noLocationBuf );
+                }
        
-
-        // Update the document.
-        CClockDocument* clockDocument = static_cast< CClockDocument* > ( AppUi()->Document() );
-        clockDocument->StoreDataL();
-        // Update the container.
+        
+        // Cleanup. 
+     
+        CleanupStack::PopAndDestroy( localizedCityList );
+        CleanupStack::PopAndDestroy( tzLocalizer );
+        
+        RClkSrvInterface clkSrvInterface;
+        User::LeaveIfError( clkSrvInterface.Connect() );
+        TBool timeUpdateOn( EFalse );
+        // Get the state of the plugin.
+        clkSrvInterface.IsAutoTimeUpdateOn( timeUpdateOn );
+        clkSrvInterface.Close();
+        
        
-        // If there are no more cities present, update the empty list text.
-        if( KNoCities == iWorldArray->MdcaCount() )
-            {
-            HBufC* noLocationBuf = StringLoader::LoadLC( R_WRLD_CLK_EMPTY_VIEW, iCoeEnv );
-            iContainer->ListBox()->View()->SetListEmptyTextL( noLocationBuf->Des() );
-            CleanupStack::PopAndDestroy( noLocationBuf );
+        
+        // Redraw the container
+       
+        iContainer->Refresh();
             }
-   
-    
-    // Cleanup. 
- 
-	CleanupStack::PopAndDestroy( localizedCityList );
-	CleanupStack::PopAndDestroy( tzLocalizer );
-    
-	RClkSrvInterface clkSrvInterface;
-	User::LeaveIfError( clkSrvInterface.Connect() );
-	TBool timeUpdateOn( EFalse );
-	// Get the state of the plugin.
-	clkSrvInterface.IsAutoTimeUpdateOn( timeUpdateOn );
-	clkSrvInterface.Close();
-	
-   
-	
-	// Redraw the container
-   
-    iContainer->Refresh();
-    
-    __PRINTS( "CClockWorldView::RemoveLocationL - Exit" );
+        __PRINTS( "CClockWorldView::RemoveLocationL - Exit" );
 	}
 
 // ---------------------------------------------------------

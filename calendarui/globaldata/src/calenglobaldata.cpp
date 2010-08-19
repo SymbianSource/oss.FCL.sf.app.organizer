@@ -304,17 +304,18 @@ CCalenGlobalData::~CCalenGlobalData()
         delete iEntryViewCreation;
         iEntryViewCreation = NULL;
         }
+    
+    if (iNewInstanceView)
+        {
+        delete iNewInstanceView;
+        iNewInstanceView = NULL;
+        iNewInstanceViewCreation = NULL;
+        }
 
     if (iNewInstanceViewCreation)
         {
         delete iNewInstanceViewCreation;
         iNewInstanceViewCreation = NULL;
-        }
-
-    if (iNewInstanceView)
-        {
-        delete iNewInstanceView;
-        iNewInstanceView = NULL;
         }
 
     delete iContext;
@@ -1064,17 +1065,17 @@ void CCalenGlobalData::HandleNotification(const TCalenNotification aNotification
 			break;
 		case ECalenNotifyCalendarInfoCreated:
 			{
-			HandleCalendarInfoCreatedL();
+			TRAP_IGNORE(HandleCalendarInfoCreatedL());
 			}
 			break;
 		case ECalenNotifyCalendarInfoUpdated:
 			{
-			HandleCalendarInfoUpdatedL();
+			TRAP_IGNORE(HandleCalendarInfoUpdatedL());
 			}
 			break;
 		case ECalenNotifyCalendarFileDeleted:
 			{
-			HandleCalendarFileDeletedL();
+			TRAP_IGNORE(HandleCalendarFileDeletedL());
 			}
 			break;
 		default:
@@ -1183,10 +1184,39 @@ void CCalenGlobalData::ViewCreationCompleted( TBool aSuccess )
     if ( !aSuccess )
         {
         // Something has gone wrong
-        delete iEntryViewCreation;
-        delete iInstanceViewCreation;
-        delete iNewEntryViewCreation;
-        delete iNewInstanceViewCreation;
+        if (iEntryViewCreation)
+            {
+            delete iEntryViewCreation;
+            iEntryViewCreation = NULL;
+            }
+        if (iInstanceViewCreation)
+            {
+            delete iInstanceViewCreation;
+            iInstanceViewCreation = NULL;
+            }
+
+        if (iNewEntryViewCreation)
+            {
+            delete iNewEntryViewCreation;
+            iNewEntryViewCreation = NULL;
+
+            HBufC* fileName = iContext->GetCalendarFileNameL().AllocLC();
+            TInt index = iFileMappingArray.Find(*fileName,
+                    CCalenGlobalData::CalenInfoIdentifierL);
+            CleanupStack::PopAndDestroy(fileName);
+
+            if (index != KErrNotFound)
+                {
+                iFileMappingArray[index]->SetEntryView(NULL);
+                }
+            }
+
+        if (iNewInstanceViewCreation)
+            {
+            delete iNewInstanceViewCreation;
+            iNewInstanceViewCreation = NULL;
+            }
+
         }
     else
         {
@@ -1201,7 +1231,7 @@ void CCalenGlobalData::ViewCreationCompleted( TBool aSuccess )
         
         if ( iNewEntryViewCreation )
             {
-            iNewEntryView = iEntryViewCreation;
+            iNewEntryView = iNewEntryViewCreation;
             }
         else if ( iNewInstanceViewCreation )
             {
@@ -1626,13 +1656,15 @@ void CCalenGlobalData::ConstructCalendarsListL()
             {
             softDelete = pkgSoftDelete();
             }
-        if(!softDelete)
+        if( softDelete && 
+                calendarInfo->FileNameL().CompareF(CalSessionL().DefaultFileNameL()) )
             {
-            iCalendarInfoList.Append(calendarInfo);
+            // delete caleninfo except for default calendar.
+            delete calendarInfo;
             }
         else
             {
-            delete calendarInfo;
+            iCalendarInfoList.Append(calendarInfo);
             }
         }
     CleanupStack::PopAndDestroy(calendarIterator);
@@ -1640,6 +1672,31 @@ void CCalenGlobalData::ConstructCalendarsListL()
     TRACE_EXIT_POINT;
     }
 
+// -----------------------------------------------------------------------------
+// CCalenGlobalData::UpdateCalendarListL
+// Update calendar list whenever CalendarInfoUpdated notification is received.
+// -----------------------------------------------------------------------------
+//
+void CCalenGlobalData::UpdateCalendarListL()
+    {
+	//Getting calendar name updated from calennotifier infochangednotification
+    HBufC* calendarNameUpdated = iContext->GetCalendarFileNameL().AllocLC();
+    TInt index = iFileMappingArray.Find( *calendarNameUpdated, 
+                    CCalenGlobalData::CalenInfoIdentifierL);
+
+    if(index != KErrNotFound)
+        {
+        CCalSession* session = iFileMappingArray[index]->GetSessionPtr();
+        for(TInt i=0; i<iCalendarInfoList.Count() ;i++)
+            {
+            if( !iCalendarInfoList[i]->FileNameL().CompareF(calendarNameUpdated->Des()))
+                {
+                iCalendarInfoList[i] = session->CalendarInfoL();
+                }
+            }
+        }
+    CleanupStack::PopAndDestroy(calendarNameUpdated);
+    }
 // -----------------------------------------------------------------------------
 // CCalenGlobalData::GetDefaultCalendarInfoL
 // Get default calendar info
@@ -1756,10 +1813,10 @@ void CCalenGlobalData::HandleCalendarInfoCreatedL()
 void CCalenGlobalData::HandleCalendarInfoUpdatedL()
 	{
 	TRACE_ENTRY_POINT;
-	
-	// reconstruct the calendar list using the iterator
-	ConstructCalendarsListL();
-
+    
+	//Update Calendar list.
+    	UpdateCalendarListL();
+	    
 	TRACE_EXIT_POINT;
 	}
 

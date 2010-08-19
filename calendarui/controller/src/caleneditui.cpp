@@ -919,8 +919,8 @@ TTime CCalenEditUi::CalculateActiveTimeFromContextL()
     // (*) Alarm Default times are also set using the values
         
     TTime activeTime(Time::NullTTime()); // initialize with NULL time
-    TTime& activeTimeRef = activeTime;
-    MCalenContext &context = iGlobalData->Context();
+	MCalenContext &context = iGlobalData->Context();
+    /*TTime& activeTimeRef = activeTime;
     TUid currentView = iController.ViewManager().CurrentView();
     if(currentView == KUidCalenWeekView)
         {
@@ -945,11 +945,11 @@ TTime CCalenEditUi::CalculateActiveTimeFromContextL()
              }
          }
     else
-        {
+        {*/
         // use Today @ 8 am
         activeTime = CalenDateUtils::Today();
         activeTime = CalenDateUtils::DefaultTime(context.FocusDateAndTimeL().TimeLocalL()); // 8 am
-        }
+        //}
     
     TRACE_EXIT_POINT;
     return activeTime;
