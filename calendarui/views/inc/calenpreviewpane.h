@@ -64,6 +64,7 @@ private:
 public slots:
 	void onTwoSecondsTimeout();
 	void scrollingFinished();
+	void handleThemeChange();
     
 private:
 	enum scrollDirection{
@@ -86,6 +87,7 @@ private:
 	bool mIsGestureHandled;
 	qreal mHtDiff;
 	int mScrollDuration;
+	QColor mPreviewTextColor;
 };
 
 #endif /* CALENPREVIEWPANE_H_ */

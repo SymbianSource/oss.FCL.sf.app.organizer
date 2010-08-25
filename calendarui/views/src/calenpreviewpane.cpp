@@ -74,6 +74,8 @@ CalenPreviewPane::CalenPreviewPane(MCalenServices& services,
 	mNoEntriesLabel = 0;
 	mHtDiff = 0.0;
 	mScrollDuration = 0;
+	mPreviewTextColor = HbColorScheme::color("qtc_cal_day_preview_text");
+	
 	setAcceptDrops(true);
 	setScrollDirections(Qt::Vertical);
 	setVerticalScrollBarPolicy(HbScrollArea::ScrollBarAlwaysOff);
@@ -107,6 +109,9 @@ void CalenPreviewPane::setNoEntriesLabel(HbLabel* label)
     
 	mNoEntriesLabel = label;
 	
+	if (mPreviewTextColor.isValid()) {
+		mNoEntriesLabel->setTextColor(mPreviewTextColor);
+	}
 	OstTraceFunctionExit0( CALENPREVIEWPANE_SETNOENTRIESLABEL_EXIT );
 }
 
@@ -138,6 +143,9 @@ void CalenPreviewPane::populateLabel(QDateTime date)
 	HbFontSpec font(HbFontSpec::Secondary);
 	if (mIsNoEntriesAdded) {
 		if (!instanceCount) {
+			if (mPreviewTextColor.isValid()) {
+				mNoEntriesLabel->setTextColor(mPreviewTextColor);
+			}
 		    mNoEntriesLabel->setVisible(true);
 		    OstTraceFunctionExit0( CALENPREVIEWPANE_POPULATELABEL_EXIT );
 		    return;
@@ -162,13 +170,6 @@ void CalenPreviewPane::populateLabel(QDateTime date)
 				// Set the required font
 				label->setFontSpec(font);
 				
-				// Set the text color from the theme
-				QColor previewPaneColor = HbColorScheme::color(
-												"qtc_cal_day_preview_text");
-				if (previewPaneColor.isValid()) {
-				    label->setTextColor(previewPaneColor);
-				}
-				
 				// Set the elide mode to right
 				label->setElideMode(Qt::ElideRight);
 				// Add the label to the list
@@ -178,6 +179,10 @@ void CalenPreviewPane::populateLabel(QDateTime date)
 				// Reuse the same label
 				label = mLabelList.at(i);
 				count--;
+			}
+			
+			if (mPreviewTextColor.isValid()) {
+				label->setTextColor(mPreviewTextColor);
 			}
 			QString summary = mInstanceArray[i].summary();
 			if(!summary.length()) {
@@ -234,6 +239,9 @@ void CalenPreviewPane::populateLabel(QDateTime date)
 		// Clear the list
 		mLabelList.clear();
 		
+		if (mPreviewTextColor.isValid()) {
+			mNoEntriesLabel->setTextColor(mPreviewTextColor);
+		}
 		// Add the no entries text to the preview pane
 		mNoEntriesLabel->setVisible(true);
 		mIsNoEntriesAdded = true;
@@ -431,11 +439,12 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
             	HbInstantFeedback::play(HbFeedback::Basic);
                 // Preview pane tapped
                 mServices.IssueCommandL(ECalenAgendaView);
+                mView->disconnectAboutToQuitEvent();
                 event->accept(Qt::TapGesture);
         }
     }
     
-    OstTraceFunctionExit0( DUP2_CALENPREVIEWPANE_GESTUREEVENT_EXIT );
+    OstTraceFunctionExit0( DUP3_CALENPREVIEWPANE_GESTUREEVENT_EXIT );
 }
 
 /*!
@@ -497,6 +506,18 @@ void CalenPreviewPane::effectStarted()
 void CalenPreviewPane::effectFinished()
 {
     mIsGestureHandled = false;
+}
+
+/*!
+ Slot to handle the change in theme
+ */
+void CalenPreviewPane::handleThemeChange()
+{
+    OstTraceFunctionEntry0( CALENPREVIEWPANE_HANDLETHEMECHANGE_ENTRY );
+    
+    mPreviewTextColor = HbColorScheme::color("qtc_cal_day_preview_text");
+    
+    OstTraceFunctionExit0( CALENPREVIEWPANE_HANDLETHEMECHANGE_EXIT );
 }
 
 // End of file  --Don't remove this.

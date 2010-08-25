@@ -41,7 +41,8 @@ enum CustomItemOffset {
 	TimeItemOffset = 1,
 	DateItemOffset,
 	PlaceItemOffset,
-	RegionalItemOffset
+	RegionalItemOffset,
+	WorkdaysItemOffset
 };
 
 #endif // CLOCKSETTINGSDATATYPES_H

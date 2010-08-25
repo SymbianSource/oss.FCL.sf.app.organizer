@@ -45,7 +45,7 @@ class ClockRegionalSettingsView : public QObject
 	Q_OBJECT
 
 public:
-	CLOCKSETTINGSVIEW_EXPORT ClockRegionalSettingsView(QObject *parent = 0);
+	CLOCKSETTINGSVIEW_EXPORT ClockRegionalSettingsView(QObject *parent = 0, bool launchedByClock = 1);
 	CLOCKSETTINGSVIEW_EXPORT virtual ~ClockRegionalSettingsView();
 
 public:
@@ -91,6 +91,7 @@ private:
 	SettingsUtility *mSettingsUtility;
 	SettingsCustomItem *mCustomPrototype;
     HbTranslator *mTranslator;
+    bool mLauncedByClock;
 };
 
 #endif // CLOCKREGIONALSETTINGSVIEW_H

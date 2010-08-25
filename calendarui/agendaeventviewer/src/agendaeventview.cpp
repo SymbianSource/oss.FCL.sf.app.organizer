@@ -94,7 +94,8 @@ AgendaEventView::AgendaEventView(
 		mProgressIconCount(0),
 		mMaptileStatusReceived(false),
 		mMaptileStatus(-1),
-		mNotesPluginLoaded(false)
+		mNotesPluginLoaded(false),
+		mCalenEditorClosed(true)		        
 {
 	OstTraceFunctionEntry0( AGENDAEVENTVIEW_AGENDAEVENTVIEW_ENTRY );
 	mTranslator->loadCommon();
@@ -1110,7 +1111,7 @@ void AgendaEventView::edit()
 		connect(mCalenEditor, SIGNAL(dialogClosed()),
 		                        this, SLOT(handleCalendarEditorClosed()));
 		mCalenEditor->edit(mAgendaEntry, false);
-	
+		mCalenEditorClosed = false;
 		
 	}
 	OstTraceFunctionExit0( AGENDAEVENTVIEW_EDIT_EXIT );
@@ -1276,6 +1277,7 @@ void AgendaEventView::handleCalendarEditorClosed()
     OstTraceFunctionEntry0( AGENDAEVENTVIEW_HANDLECALENDAREDITORCLOSED_ENTRY );
 
 	// Cleanup.
+    mCalenEditorClosed = true;
 	mCalenEditor->deleteLater();
 	mOwner->editingCompleted();
 
@@ -1493,4 +1495,36 @@ void AgendaEventView::changedOrientation(Qt::Orientation orientation)
     OstTraceFunctionExit0( AGENDAEVENTVIEW_CHANGEDORIENTATION_EXIT );
 }
 
+/*!
+    Close the editor and save the entry.
+    should be call if editor is open
+ */
+void AgendaEventView::saveAndCloseEditor()
+{
+    if(mCalenEditorClosed){
+        QObject *plugin = qobject_cast<QObject*> (
+                mNotesEditorPluginLoader->instance());
+
+        NotesEditorInterface* interface =
+            qobject_cast<NotesEditorInterface*>(plugin);
+
+        
+        interface->close(NotesEditorInterface::CloseWithSave ,mOwner->mAgendaUtil);
+
+    }
+    else{
+        if(mCalenEditor){
+            mCalenEditor->saveAndCloseEditor();
+        }
+    }
+}
+
+/*!
+    Close the view .
+    should be call if view is open
+ */
+void AgendaEventView::closeAgendaEventView()
+{
+    close();  
+}
 // End of file

@@ -21,6 +21,7 @@
 #include <QPen>
 #include <hbdeviceprofile.h>
 #include <hbcolorscheme.h>
+#include <hbtheme.h>
 
 // User includes
 #include "calenthicklinesdrawer.h"
@@ -52,6 +53,10 @@ CalenThickLinesDrawer::CalenThickLinesDrawer( CalendarNamespace::WidgetType type
 	typeOfWidget = type;
 	mGridBorderColor = HbColorScheme::color("qtc_cal_grid_line");
 	setFlag(QGraphicsItem::ItemHasNoContents, false);
+	
+	connect(
+				HbTheme::instance(), SIGNAL(changed()),
+				this, SLOT(handleThemeChange()));
 	
 	OstTraceFunctionExit0( CALENTHICKLINESDRAWER_CALENTHICKLINESDRAWER_EXIT );
 }
@@ -119,6 +124,18 @@ void CalenThickLinesDrawer::paint(QPainter* painter,
     painter->setPen(oldPen);
     
     OstTraceFunctionExit0( CALENTHICKLINESDRAWER_PAINT_EXIT );
+}
+
+/*!
+ Slot to handle the change in theme
+ */
+void CalenThickLinesDrawer::handleThemeChange()
+{
+	OstTraceFunctionEntry0(CALENTHICKLINESDRAWER_HANDLETHEMECHANGE_ENTRY);
+	
+	mGridBorderColor = HbColorScheme::color("qtc_cal_grid_line");
+	
+	OstTraceFunctionExit0(CALENTHICKLINESDRAWER_HANDLETHEMECHANGE_EXIT);
 }
 
 // End of file  --Don't remove this.

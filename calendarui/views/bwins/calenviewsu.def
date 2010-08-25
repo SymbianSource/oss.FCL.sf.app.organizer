@@ -199,4 +199,11 @@ EXPORTS
 	?moveFinished@CalenDayContentScrollArea@@AAEXXZ @ 198 NONAME ; void CalenDayContentScrollArea::moveFinished(void)
 	?scrollToHour@CalenDayHourScrollArea@@QAEXH@Z @ 199 NONAME ; void CalenDayHourScrollArea::scrollToHour(int)
 	??1CalenDayContentScrollArea@@UAE@XZ @ 200 NONAME ; CalenDayContentScrollArea::~CalenDayContentScrollArea(void)
+	?handleThemeChange@CalenMonthGrid@@AAEXXZ @ 201 NONAME ; void CalenMonthGrid::handleThemeChange(void)
+	?effectStarted@CalenPreviewPane@@QAEXXZ @ 202 NONAME ; void CalenPreviewPane::effectStarted(void)
+	?handleThemeChange@CalenThickLinesDrawer@@AAEXXZ @ 203 NONAME ; void CalenThickLinesDrawer::handleThemeChange(void)
+	?effectFinished@CalenPreviewPane@@QAEXXZ @ 204 NONAME ; void CalenPreviewPane::effectFinished(void)
+	?handleThemeChange@CalenMonthView@@AAEXXZ @ 205 NONAME ; void CalenMonthView::handleThemeChange(void)
+	?isHorizontalSwipe@CalenDayContentScrollArea@@ABE_NM@Z @ 206 NONAME ; bool CalenDayContentScrollArea::isHorizontalSwipe(float) const
+	?handleThemeChange@CalenPreviewPane@@QAEXXZ @ 207 NONAME ; void CalenPreviewPane::handleThemeChange(void)
 

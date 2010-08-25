@@ -16,10 +16,10 @@
 */
 
 // System includes
-#include <hbdeviceprofile.h>
-#include <hbstyle.h>
-#include <hbinstance.h>
-#include <qdatetime.h>
+#include <QDateTime>
+#include <HbDeviceProfile>
+#include <HbStyle>
+#include <HbInstance>
 
 // User includes
 #include "calendayutils.h"

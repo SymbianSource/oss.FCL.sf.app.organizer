@@ -47,15 +47,11 @@ public:
     
     qreal range() const;
 
-    QColor color() const;
-
     CalenDayStatusStrip::DrawingStyle drawingStyle() const;
     
     QPair<QTime,QTime> startEndTime() const;
     
-    void setRange(qreal mRange);
-
-    void setColor(QColor mStripColor);
+    void setRange(qreal range);
     
     void setDrawingStyle(CalenDayStatusStrip::DrawingStyle mDrawingStyle);
     
@@ -78,7 +74,6 @@ protected:
     
 private:
     qreal mRange; //!<Distance between lines
-    QColor mColor;//!<Color of status stripe
     CalenDayStatusStrip::DrawingStyle mDrawingStyle;//!<Specify style of drawing
     /*!
        Original start and end time of event

@@ -944,10 +944,12 @@ void CalenViewManager::handleInstanceViewCreation(int status)
 	// solution for the month view implements the construction in two phases so 
 	// it needs to be refactored and a common solution needs to be put here. So 
 	// that code doesn't break if another view is added tomorow
-	if (mCalenMonthView) {
+	HbView *currentview = mController.MainWindow().currentView();
+	
+	if (mCalenMonthView && currentview == mCalenMonthView) {
 		mCalenMonthView->fetchEntriesAndUpdateModel();
 	}
-	else if (mCalenAgendaView) {
+	else if (mCalenAgendaView && currentview == mCalenAgendaView) {
 		mCalenAgendaView->doPopulation();
 	}
 	// Calls the emitAppReady function of CalenController. Need to emit this
@@ -1038,5 +1040,54 @@ void CalenViewManager::launchSettingsView()
     
     OstTraceFunctionExit0( CALENVIEWMANAGER_LAUNCHSETTINGSVIEW_EXIT );
 }
+
+
+// ----------------------------------------------------------------------------
+// CalenViewManager::removeSettingsView
+// remove settings view
+// ----------------------------------------------------------------------------
+//
+void CalenViewManager::removeSettingsView()
+{
+    if(mSettingsView){
+        mController.Services().MainWindow().removeView(mSettingsView);
+    }
+}
+    
+// ----------------------------------------------------------------------------
+// CalenViewManager::isEventViewerActive
+// check if Agenda Event Viewer is active
+// ----------------------------------------------------------------------------
+//
+bool CalenViewManager::isEventViewerActive()
+{
+   if(mCalenEventViewer)
+       return true;
+   else
+       return false;
+}
+
+// ----------------------------------------------------------------------------
+// CalenViewManager::saveAndCloseEditor
+// save the entry and close the editor
+// isEventViewerActive() should be called before this function
+// ----------------------------------------------------------------------------
+//
+void CalenViewManager::saveAndCloseEditor()
+{
+   mCalenEventViewer->saveAndCloseEditor();
+}
+
+// ----------------------------------------------------------------------------
+// CalenViewManager::closeAgendaEventView
+// close the agenda event view 
+// isEventViewerActive() should be called before this function
+// ----------------------------------------------------------------------------
+//
+void CalenViewManager::closeAgendaEventView()
+{
+   mCalenEventViewer->closeAgendaEventView();
+}
+
 
 // End of file	--Don't remove this.

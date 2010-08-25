@@ -161,6 +161,7 @@ void ClockViewManager::loadMainView()
 	// Find the main view.
 	mMainView = static_cast<ClockMainView *> (
 			docLoader->findWidget(CLOCK_MAIN_VIEW));
+	mMainView->setParent(this);
 	
 	// Disable animation effect on toolbar.
 	HbEffect::disable(mMainView->toolBar()->graphicsItem());
@@ -190,6 +191,7 @@ void ClockViewManager::loadWorldClockView()
 	// Get the world list view.
 	mWorldClockView = static_cast<ClockWorldView *> (
 			docLoader->findWidget(CLOCK_WORLD_VIEW));
+	mWorldClockView->setParent(this);
 	
 	// Disable animation effect on toolbar.
 	HbEffect::disable(mWorldClockView->toolBar()->graphicsItem());

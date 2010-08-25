@@ -56,14 +56,16 @@
 
 	\param parent The parent of type QGraphicsWidget.
  */
-ClockSettingsView::ClockSettingsView(QObject *parent)
-:QObject(parent)
+ClockSettingsView::ClockSettingsView(QObject *parent, HbTranslator *translator, bool launchedByClock)
+:QObject(parent), mTranslator(0), mLaunchedByClock(launchedByClock)
 {
 	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_CLOCKSETTINGSVIEW_ENTRY );
 	
 	// Load the translation file and install the editor specific translator
-    mTranslator = new HbTranslator("clocksettingsview");
-    mTranslator->loadCommon();
+    if(!translator) {
+        mTranslator = new HbTranslator("clocksettingsview");
+        mTranslator->loadCommon();   
+    }
 
 	// Construct the settings utility.
 	mSettingsUtility = new SettingsUtility();
@@ -292,6 +294,11 @@ void ClockSettingsView::handleNetworkTimeStateChange(int state)
 void ClockSettingsView::setupView()
 {
 	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_SETUPVIEW_ENTRY );
+	
+	if(!mLaunchedByClock) {
+	    mSettingsView->setTitle(hbTrId("txt_clock_title_control_panel"));
+	}
+	
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 	window->addView(mSettingsView);
 	window->setCurrentView(mSettingsView);
@@ -309,7 +316,7 @@ void ClockSettingsView::setupView()
 
 	// Create the custom prototype.
 	QList <HbAbstractViewItem*> prototypes = mSettingsForm->itemPrototypes();
-	SettingsCustomItem *customPrototype = new SettingsCustomItem(mSettingsForm);
+	SettingsCustomItem *customPrototype = new SettingsCustomItem(mSettingsForm, mLaunchedByClock);
 	prototypes.append(customPrototype);
 	mSettingsForm->setItemPrototypes(prototypes);
 

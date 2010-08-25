@@ -86,6 +86,7 @@ public:  // From CCalenView
 	QDateTime firstDayOfGrid();
 	void fetchEntriesAndUpdateModel();
 	void launchDayView();
+	void disconnectAboutToQuitEvent();
 	
 private:
 	void createGrid();
@@ -116,6 +117,7 @@ private slots:
 	void handleRightEffectCompleted(const HbEffect::EffectStatus &status);
 	void addRemoveActionsInMenu();
 	void changeOrientation(Qt::Orientation orientation);
+	void handleThemeChange();
 	
 private:
 	bool mIsFirstTimeLoad;
@@ -175,6 +177,7 @@ private:
 	HbMenu *mDeleteSubMenu;
 	QColor mWeekDaysColor;
 	bool   mIsAboutToQuitEventConnected; // bool to check if month view is registered to get aboutToQuit signals
+	QColor mPreviewHeadingColor;
 };
 
 #endif //CALENMONTHVIEW_H

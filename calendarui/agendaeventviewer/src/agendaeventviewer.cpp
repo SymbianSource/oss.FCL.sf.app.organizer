@@ -147,4 +147,22 @@ void AgendaEventViewer::view(AgendaEntry entry, Actions action)
 	OstTraceFunctionExit0( DUP2_AGENDAEVENTVIEWER_VIEW_EXIT );
 }
 
+/*! 
+    save the entry and close the editor
+*/
+void AgendaEventViewer::saveAndCloseEditor()
+{
+    d_ptr->saveAndCloseEditor();
+}
+
+
+/*! 
+    close the aganda event view
+*/
+void AgendaEventViewer::closeAgendaEventView()
+{
+    d_ptr->closeAgendaEventView();   
+}
+
+
 // End of file

@@ -644,6 +644,8 @@ void CCalenController::handleServiceManagerSlot(int view, const QDateTime& dateT
 		// launch the appropriate view
 		iViewManager->constructAndActivateView(view);
 		
+		iIsFromServiceFrmWrk = false;
+		
 	} else { // Calendar was in backgroung but now its being brought to foreground
 		// If current state is editing state or printing state
 		// or deleting state or sending state, then dont do anything as
@@ -654,11 +656,28 @@ void CCalenController::handleServiceManagerSlot(int view, const QDateTime& dateT
 			(currentState == CCalenStateMachine::ECalenSendingState)) {
 			// simply return - we dont have anything to do
 		} 
+
+		else if (currentState == CCalenStateMachine::ECalenViewingState) {
+             if(iViewManager->isEventViewerActive()){
+		         iViewManager->closeAgendaEventView();
+		        }
+		}
 		else if (currentState == CCalenStateMachine::ECalenEditingState) {
-			// close the editor and save the entry
+			// close the editor and save the entry if application is in background
             //and launch the desired view
-            iActionUi->saveAndCloseEditor();
+            if(iViewManager->isEventViewerActive()){
+                iViewManager->saveAndCloseEditor();
+                iViewManager->closeAgendaEventView();
+               }
+            else{
+                iActionUi->saveAndCloseEditor();
+            }
 		} 
+
+		else if (currentState == CCalenStateMachine::ECalenSettingsState){
+            iViewManager->removeSettingsView();
+	        }
+ 
 		// Set the context properly
 		mContext->setFocusDateAndTime(dateTime);
 		IssueCommandL(view);

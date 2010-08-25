@@ -43,6 +43,18 @@ private:
 	void view(const ulong id, AgendaEventViewer::Actions action);
 	void view(const QFile &fileHandle, AgendaEventViewer::Actions action);
 	void view(AgendaEntry entry, AgendaEventViewer::Actions action);
+	
+    /**
+     * close the editor and save the entry
+     * should be call if editor is open
+     */
+	void saveAndCloseEditor();
+    
+	/**
+     * close agenda event view
+     * should be call if agenda eevent view is open
+     */
+	void closeAgendaEventView();
 
 private slots:
 	void viewingCompleted(const QDate date);

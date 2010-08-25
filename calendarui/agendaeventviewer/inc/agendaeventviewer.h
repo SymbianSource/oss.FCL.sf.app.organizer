@@ -63,6 +63,10 @@ public:
 	AGENDAEVENTVIEWER_EXPORT void view(AgendaEntry entry, 
 	                                   Actions action = ActionNothing);
 
+	AGENDAEVENTVIEWER_EXPORT void saveAndCloseEditor();
+	
+	AGENDAEVENTVIEWER_EXPORT void closeAgendaEventView();
+
 signals:
 	void viewingCompleted(const QDate date = QDate());
 	void editingStarted();

@@ -27,6 +27,7 @@
 #include <hbiconitem.h>
 #include <hbframebackground.h>
 #include <hbcolorscheme.h>
+#include <hbtheme.h>
 
 // User includes
 #include "calengriditemprototype.h"
@@ -47,19 +48,16 @@
 /*!
  Constructor.
  */
-CalenGridItemPrototype::CalenGridItemPrototype(QColor todayIndColor, QColor activeColor, QColor inActiveColor,
-                                               QGraphicsWidget *parent) :
-	HbGridViewItem(parent),
-	mTodayUnderLineColor(todayIndColor),
-	mActiveTextColor(activeColor),
-	mInActiveTextColor(inActiveColor),
-	mCurrentDateColor(Qt::black),
-	mGridBorderColor(Qt::gray),
-	mEventIndicatorItem(0),
-	mMonthDayInfoItem(0),
-	mFocusIndicatorItem(0),
-	mTodayIndicatorItem(0)
-	{
+CalenGridItemPrototype::CalenGridItemPrototype(QGraphicsWidget *parent) :
+    HbGridViewItem(parent),
+    mActiveTextColor(HbColorScheme::color("qtc_cal_month_active_dates")),
+    mInActiveTextColor(HbColorScheme::color("qtc_cal_month_notactive_dates")),
+    mCurrentDateColor(HbColorScheme::color("qtc_cal_month_highlighted_text")),
+    mEventIndicatorItem(0),
+    mMonthDayInfoItem(0),
+    mFocusIndicatorItem(0),
+    mTodayIndicatorItem(0)
+    {
     OstTraceFunctionEntry0( CALENGRIDITEMPROTOTYPE_CALENGRIDITEMPROTOTYPE_ENTRY );
     
 	OstTraceFunctionExit0( CALENGRIDITEMPROTOTYPE_CALENGRIDITEMPROTOTYPE_EXIT );
@@ -116,6 +114,9 @@ HbAbstractViewItem *CalenGridItemPrototype::createItem()
 	CalenGridItemPrototype* item = new CalenGridItemPrototype(*this);
 	item->createPrimitives();
 	
+    connect(
+            HbTheme::instance(), SIGNAL(changed()),
+            item, SLOT(handleThemeChange()));
 	// Set the default frame to NULL so that HbGridView does not add its 
 	// default frame for items
 	HbFrameBackground frame;
@@ -184,8 +185,13 @@ void CalenGridItemPrototype::updateChildItems()
 			// Get the text color
 			monthTextColorRole = itemList.at(CalendarNamespace::CalendarMonthTextColorRole).value<bool>();
 			if (monthTextColorRole) {
-				// Set the active text color
-				mMonthDayInfoItem->setTextColor(mActiveTextColor);
+                if (monthFocusRole) {
+                    // Set the Highlighted text color
+                    mMonthDayInfoItem->setTextColor(mCurrentDateColor);
+                } else {
+                    // Set the active text color
+                    mMonthDayInfoItem->setTextColor(mActiveTextColor);
+                }
 			} else {
 				// Set the inactive text color
 				mMonthDayInfoItem->setTextColor(mInActiveTextColor);
@@ -233,4 +239,18 @@ bool CalenGridItemPrototype::canSetModelIndex(const QModelIndex& index)
 	return true;
 }
 
+/*!
+ Slot to handle the change in theme
+ */
+void CalenGridItemPrototype::handleThemeChange()
+{
+    OstTraceFunctionEntry0( CALENGRIDITEMPROTOTYPE_HANDLETHEMECHANGE_ENTRY );
+    
+    mActiveTextColor = HbColorScheme::color("qtc_cal_month_active_dates");
+    mInActiveTextColor = HbColorScheme::color("qtc_cal_month_notactive_dates");
+    mCurrentDateColor = HbColorScheme::color("qtc_cal_month_highlighted_text");
+    
+    OstTraceFunctionExit0( CALENGRIDITEMPROTOTYPE_HANDLETHEMECHANGE_EXIT );
+    
+}
 // End of file  --Don't remove this.

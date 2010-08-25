@@ -5,8 +5,7 @@
         	<file>caleneventlistviewitem.widgetml</file>
 		<file>caleneventlistviewitem.css</file>
 		<file>caleneventlistviewitem_color.css</file>
-		<file>qgn_indi_cdr_meeting_layer0.svg</file>
-		<file>qtg_mono_exception.png</file>
+		<file>qtg_graf_cal_event_ind.svg</file>
     </qresource>
     <qresource prefix="/fxml">
     	<file alias="view_show">view_show_normal.fxml</file>

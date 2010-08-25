@@ -16,10 +16,11 @@
 */
 // System includes
 #include <QPainter>
-#include <hbcolorscheme.h>
+#include <HbColorScheme>
 
 // User includes
-#include "CalenDayEventsPane.h"
+#include "calendayeventspane.h"
+#include "calendaycommonheaders.h"
 
 /*!
  \class CalenDayEventsPane
@@ -39,12 +40,13 @@ CalenDayEventsPane::CalenDayEventsPane(HbWidget *parent) : HbWidget(parent),
 
     HbDeviceProfile deviceProfile;
     mUnitInPixels = deviceProfile.unitValue();
-    mHourLineColor = HbColorScheme::color("qtc_cal_day_hour_lines");
+    mHourLineColor = HbColorScheme::color(KCalenHourLineColor);
     
     // Set custom dashed pen
-    mCustomDashedPen.setWidth(0.15);
+    mCustomDashedPen.setWidth(KCalenHourLineThickness);
     QVector<qreal> dashes;
-    dashes << 5 << 5;
+    dashes << KCalenHalfHourLineDashWidth * mUnitInPixels 
+        << KCalenHalfHourLineDashWidth * mUnitInPixels;
     mCustomDashedPen.setDashPattern(dashes);
     mCustomDashedPen.setCapStyle(Qt::FlatCap);
     mCustomDashedPen.setColor(mHourLineColor);
@@ -89,7 +91,7 @@ void CalenDayEventsPane::paint(QPainter *painter,
     
     QRectF drawArea = option->rect;
     
-    const qreal hourLineThickness = 0.15; //un (according to UI spec)
+    const qreal hourLineThickness = KCalenHourLineThickness;
 
     painter->save();
     

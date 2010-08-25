@@ -39,7 +39,7 @@ class SettingsCustomItem : public HbDataFormViewItem
 	Q_OBJECT
 
 public:
-	SettingsCustomItem(QGraphicsItem *parent = 0);
+	SettingsCustomItem(QGraphicsItem *parent = 0, bool launchedByClock = 1);
 	virtual ~SettingsCustomItem();
 
 public:
@@ -78,6 +78,7 @@ private:
 	SettingsUtility *mSettingsUtility;
 	ClockCitySelectionList *mCitySelectionList;
 	TimezoneClient *mTimezoneClient;
+	bool mLaunchedByClock;
 };
 
 #endif // SETTINGSCUSTOMITEM_H

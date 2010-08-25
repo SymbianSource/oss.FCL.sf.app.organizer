@@ -417,12 +417,6 @@ void AlarmAlertDialogPrivate::handleCalendarAlarms()
 			qFatal("Unable to find the alarmDate label");
 		}
 		alarmDate->setPlainText(mAlarmDate);
-		HbLabel *alarmDateNonTimed = qobject_cast<HbLabel*> (
-				mAlertDocLoader->findWidget("nonTimedAlarmDate"));
-		if (!alarmDateNonTimed) {
-			qFatal("Unable to find the nonTimedAlarmDate label");
-		}
-		alarmDateNonTimed->hide();
 	}else {
 		mAlertDocLoader->load(
 				alarmNormalUICalendarDocml, "nonTimedAlarm",&success);
@@ -440,13 +434,7 @@ void AlarmAlertDialogPrivate::handleCalendarAlarms()
 		if (!alarmDate) {
 			qFatal("Unable to find the alarmDate label");
 		}
-		alarmDate->hide();
-		HbLabel *alarmDateNonTimed = qobject_cast<HbLabel*> (
-				mAlertDocLoader->findWidget("nonTimedAlarmDate"));
-		if (!alarmDateNonTimed) {
-			qFatal("Unable to find the alarmDateNonTimed label");
-		}
-		alarmDateNonTimed->setPlainText(mAlarmDate);
+		alarmDate->setPlainText(mAlarmDate);
 	}
 
 	QGraphicsWidget *headingWidget = mAlertDocLoader->findWidget("heading");

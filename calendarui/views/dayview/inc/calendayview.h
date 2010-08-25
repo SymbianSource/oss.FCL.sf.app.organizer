@@ -32,6 +32,7 @@ class QGraphicsLinearLayout;
 class XQSettingsManager;
 class QVariant;
 class HbGroupBox;
+class HbFrameItem;
 class AgendaEntry;
 class CalenDocLoader;
 class CalenDayContentScrollArea;
@@ -150,6 +151,7 @@ private slots:
      * Scrolls content to correct position after view repopulation
      */
     void setupViewport();
+    void orientationChanged(Qt::Orientation orientation);
 
 private:
     /**
@@ -175,6 +177,7 @@ private: // members related to view management and gesture handling
     CalenDayContentWidget* mContentWidget;    //!< Content widget
     CalenDayHourScrollArea* mHourScrollArea;  //!< Scroll area for hour elements
     QGraphicsLinearLayout* mVLayout;    //!< Vertical layout for day view
+    HbWidget* mMainContainer;//!< Container widget for hour elements and content
     
     CalenDocLoader* mDocLoader; //!< Document loader for day view
     
@@ -183,7 +186,7 @@ private: // members related to view management and gesture handling
 private:    
 
     XQSettingsManager* mSettingsManager;
-    XQSettingsKey mRegionalInfo;
+    XQSettingsKey mRegionalInfoKey;
     MCalenServices  &mServices;
 	
     /**
@@ -198,6 +201,8 @@ private:
      * \brief It keep pointer to go to Today action from menu. 
      */
     HbAction *mGoToTodayMenuAction;
+    
+    HbFrameItem *mBg;   //!< Background graphic for content and hour elements
 };
 
 

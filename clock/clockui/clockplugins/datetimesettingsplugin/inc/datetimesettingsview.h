@@ -25,6 +25,7 @@
 // Forward declarations
 class QTimer;
 class TimezoneClient;
+class HbTranslator;
 
 class DateTimeSettingsView : public CpSettingFormEntryItemData
 {
@@ -34,7 +35,8 @@ public:
 			CpItemDataHelper &itemDataHelper, const QString &text = QString(),
 			const QString &description = QString(),
 			const HbIcon &icon = HbIcon(),
-			const HbDataFormModelItem *parent = 0);
+			const HbDataFormModelItem *parent = 0,
+			HbTranslator *translator = 0);
 	virtual ~DateTimeSettingsView();
 
 private slots:
@@ -47,6 +49,7 @@ private:
 private:
 	QTimer *mTickTimer;
 	TimezoneClient *mTimezoneClient;
+	HbTranslator *mTranslator;
 
 };
 

@@ -54,10 +54,11 @@
 /*!
 	Default constructor.
  */
-ClockRegionalSettingsView::ClockRegionalSettingsView(QObject *parent)
+ClockRegionalSettingsView::ClockRegionalSettingsView(QObject *parent, bool launchedByClock)
 :QObject(parent),
  mView(0),
- mLoader(0)
+ mLoader(0),
+ mLauncedByClock(launchedByClock)
 {
 	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_CLOCKREGIONALSETTINGSVIEW_ENTRY );
 	// Construct the document loader.
@@ -142,6 +143,9 @@ void ClockRegionalSettingsView::showView()
 	createModel();
 
 	// Set the view as the current view.
+	if(!mLauncedByClock) {
+	    mView->setTitle(hbTrId("txt_clock_title_control_panel"));
+	}
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 	window->addView(mView);
 	window->setCurrentView(mView);
@@ -437,7 +441,7 @@ void ClockRegionalSettingsView::populateFormModel()
 	
 	HbDataFormModelItem::DataItemType workdaysItemType =
 			static_cast<HbDataFormModelItem::DataItemType>
-			(HbDataFormModelItem::CustomItemBase + 50);
+			(HbDataFormModelItem::CustomItemBase + WorkdaysItemOffset);
 	item = new HbDataFormModelItem(workdaysItemType,
 			hbTrId("txt_clock_setlabel_workdays"));
 	mFormModel->appendDataFormItem(item);

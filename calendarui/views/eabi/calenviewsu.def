@@ -260,4 +260,11 @@ EXPORTS
 	_ZThn8_N22CalenDayHourScrollAreaD1Ev @ 259 NONAME
 	_ZThn8_N25CalenDayContentScrollAreaD0Ev @ 260 NONAME
 	_ZThn8_N25CalenDayContentScrollAreaD1Ev @ 261 NONAME
+	_ZN14CalenMonthGrid17handleThemeChangeEv @ 262 NONAME
+	_ZN14CalenMonthView17handleThemeChangeEv @ 263 NONAME
+	_ZN16CalenPreviewPane13effectStartedEv @ 264 NONAME
+	_ZN16CalenPreviewPane14effectFinishedEv @ 265 NONAME
+	_ZN21CalenThickLinesDrawer17handleThemeChangeEv @ 266 NONAME
+	_ZN16CalenPreviewPane17handleThemeChangeEv @ 267 NONAME
+	_ZNK25CalenDayContentScrollArea17isHorizontalSwipeEf @ 268 NONAME
 

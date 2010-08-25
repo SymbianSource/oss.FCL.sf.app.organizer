@@ -11,8 +11,8 @@
         <meshitem src="colorStripe" srcEdge="LEFT" dst="" dstEdge="LEFT" spacing="-var(hb-param-margin-gene-middle-horizontal)"/>
         <meshitem src="colorStripe" srcEdge="RIGHT" dst="eventDescription" dstEdge="LEFT" spacing="var(hb-param-margin-gene-middle-horizontal)"/>
         
-        <meshitem src="eventDescription" srcEdge="TOP" dst="" dstEdge="TOP" spacing="-var(hb-param-margin-gene-middle-vertical)" />
-        <meshitem src="eventDescription" srcEdge="BOTTOM" dst="" dstEdge="BOTTOM" spacing="var(hb-param-margin-gene-middle-vertical)" />
+        <meshitem src="eventDescription" srcEdge="TOP" dst="" dstEdge="TOP" spacing="-var(hb-param-margin-gene-top)" />
+        <meshitem src="eventDescription" srcEdge="BOTTOM" dst="" dstEdge="BOTTOM" spacing="var(hb-param-margin-gene-bottom)" />
         <meshitem src="eventDescription" srcEdge="RIGHT" dst="" dstEdge="RIGHT" spacing="var(hb-param-margin-gene-right)"/>
     </layout>
 	
@@ -25,7 +25,7 @@
         <meshitem src="colorStripe" srcEdge="TOP" dst="" dstEdge="TOP" />
         <meshitem src="colorStripe" srcEdge="BOTTOM" dst="" dstEdge="BOTTOM" />      
         <meshitem src="colorStripe" srcEdge="LEFT" dst="" dstEdge="LEFT" spacing="-var(hb-param-margin-gene-middle-horizontal)"/>
-        <meshitem src="colorStripe" srcEdge="RIGHT" dst="" dstEdge="RIGHT" spacer="spacerItem"/>
+        <meshitem src="colorStripe" srcEdge="RIGHT" dst="" dstEdge="RIGHT" spacing="var(hb-param-margin-gene-middle-horizontal)"/>
     </layout>
 	
     <layout name="noIconNoTextNoBkgLayout" type="mesh">

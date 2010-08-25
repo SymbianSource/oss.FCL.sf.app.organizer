@@ -141,8 +141,8 @@ void CalenDayHourElement::paint(
                 * currentDateTime.time().minute() / 60;
 
             QColor color = HbColorScheme::color(KCalenTimeLineColor);
-            painter->setPen(QPen(color, KCalenTimeLineThickness * mUnitInPixels,
-                Qt::SolidLine, Qt::FlatCap));
+            painter->setPen(QPen(color, KCalenCurrentTimeLineThickness
+                * mUnitInPixels, Qt::SolidLine, Qt::FlatCap));
             QLineF currentTimeline(drawArea.left(), drawArea.top() + currentTimeY,
                     drawArea.right(), drawArea.top() + currentTimeY);
             painter->drawLine(currentTimeline);

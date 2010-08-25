@@ -17,7 +17,7 @@
 
 // System includes
 #include <QGraphicsLinearLayout>
-#include <hbmodeliterator.h>
+#include <HbModelIterator>
 
 // User includes
 #include "calendaymodelmanager.h"
@@ -33,6 +33,7 @@
 /*!
  \brief Constructor
  
+ \param modelManager Day View model manager
  \param parent The parent of central widget
  */
 CalenDayContentWidget::CalenDayContentWidget(
@@ -41,7 +42,7 @@ CalenDayContentWidget::CalenDayContentWidget(
     HbWidget(parent), mLayout(NULL), mModelManager(modelManager)
 {
     mWidgets.clear();
-    initializeViews(parent);
+    initializeViews();
 }
 
 /*!
@@ -198,7 +199,7 @@ void CalenDayContentWidget::widgetScrolled(const QPointF &newPos)
  
  \param parent Parent object 
  */
-void CalenDayContentWidget::initializeViews(QGraphicsItem *parent)
+void CalenDayContentWidget::initializeViews()
 {
     // Create item views
     HbModelIterator *iterator(0);
@@ -227,12 +228,14 @@ void CalenDayContentWidget::initializeViews(QGraphicsItem *parent)
     connect(nextItemView, SIGNAL(scrollPositionChanged(const QPointF&)), this,
         SLOT(widgetScrolled(const QPointF&)));
 
-    // Install event filters to receive events necessary for gesture handling
-    CalenDayContentScrollArea* scrollArea =
-        static_cast<CalenDayContentScrollArea*> (parent);
-    prevItemView->installEventFilter(scrollArea);
-    currItemView->installEventFilter(scrollArea);
-    nextItemView->installEventFilter(scrollArea);
+    if (parentItem()) {
+        // Install event filters to receive events necessary for gesture handling
+        CalenDayContentScrollArea* scrollArea =
+            static_cast<CalenDayContentScrollArea*> (parentItem());
+        prevItemView->installEventFilter(scrollArea);
+        currItemView->installEventFilter(scrollArea);
+        nextItemView->installEventFilter(scrollArea);
+    }
 
     // Add views to layout
     add(prevItemView);

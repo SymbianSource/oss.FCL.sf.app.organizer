@@ -290,102 +290,108 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 		repeatPropertyChange = false;
 	}
 	QDate repeatUntilDate = mRepeatUntilDate;
-
-	if (value != mRepeatRoleValue)
-	{
-	    mRepeatRoleValue = value;
-	    switch (value) {
-		case DailyRole: {
-			if (!mRepeatUntilItemAdded) {
-				insertRepeatUntilItem();
+	// Update the repeat type only if its has been changed
+	// ie. if the previous repeatrole is different from the current repeat role
+	if (value != mRepeatRoleValue) {
+		mRepeatRoleValue = value;
+		switch (value) {
+			case DailyRole: {
+				if (!mRepeatUntilItemAdded) {
+					insertRepeatUntilItem();
+				}
+				if (mCustomRepeatUntilItem) {
+					// Show default repeat until date till one year for daily rule 
+					mRepeatUntilDate = 
+						mCalenEditor->editedEntry()->startTime().date().addYears(1);
+					mCustomRepeatUntilItem->setContentWidgetData( "text", 
+						locale.format( 
+								mRepeatUntilDate, r_qtn_date_usual_with_zero));
+				}
+				mRepeatRuleType = AgendaRepeatRule::DailyRule;
 			}
-			if (mCustomRepeatUntilItem) {
-				// Show default repeat until date till one year for daily rule 
-				mRepeatUntilDate = mCalenEditor->editedEntry()->startTime().date().addYears(1);
-				mCustomRepeatUntilItem->setContentWidgetData( "text", 
-												locale.format( mRepeatUntilDate,
-												r_qtn_date_usual_with_zero));
+			break;
+			case WorkdaysRole: {
+				if (!mRepeatUntilItemAdded) {
+					insertRepeatUntilItem();
+				}
+				if (mCustomRepeatUntilItem) {
+					// Show default repeat until date till one year for workdays rule
+					mRepeatUntilDate = 
+						mCalenEditor->editedEntry()->startTime().date().addYears(1);
+					mCustomRepeatUntilItem->setContentWidgetData( "text",
+						locale.format( 
+								mRepeatUntilDate, r_qtn_date_usual_with_zero));
+				}
+				mRepeatRuleType = AgendaRepeatRule::WeeklyRule;
+				mIsWorkdays = true;
 			}
-			mRepeatRuleType = AgendaRepeatRule::DailyRule;
+			break;
+			case WeeklyRole: {
+				if (!mRepeatUntilItemAdded) {
+					insertRepeatUntilItem();
+				}
+				if (mCustomRepeatUntilItem) {
+					// Show default repeat until date till one year for weekly rule
+					mRepeatUntilDate = 
+						mCalenEditor->editedEntry()->startTime().date().addYears(1);
+					mCustomRepeatUntilItem->setContentWidgetData( "text",
+						locale.format( 
+								mRepeatUntilDate, r_qtn_date_usual_with_zero));
+				}
+				mRepeatRuleType = AgendaRepeatRule::WeeklyRule;
+			}
+			break;
+			case BiWeeklyRole: {
+				if (!mRepeatUntilItemAdded) {
+					insertRepeatUntilItem();
+				}
+				if (mCustomRepeatUntilItem) {
+					// Show default repeat until date till one year for bi-weekly rule
+					mRepeatUntilDate = 
+						mCalenEditor->editedEntry()->startTime().date().addYears(1);
+					mCustomRepeatUntilItem->setContentWidgetData( "text",
+						locale.format( 
+							mRepeatUntilDate, r_qtn_date_usual_with_zero));
+				}
+				mRepeatRuleType = AgendaRepeatRule::WeeklyRule;
+				mIsBiWeekly = true;
+			}
+			break;
+			case MonthlyRole: {
+				if (!mRepeatUntilItemAdded) {
+					insertRepeatUntilItem();
+				}
+				if (mCustomRepeatUntilItem) {
+					// Show default repeat until date till one year for monthly rule
+					mRepeatUntilDate = 
+						mCalenEditor->editedEntry()->startTime().date().addYears(1);
+					mCustomRepeatUntilItem->setContentWidgetData( "text",
+						locale.format(
+								mRepeatUntilDate, r_qtn_date_usual_with_zero));
+				}
+				mRepeatRuleType = AgendaRepeatRule::MonthlyRule;
+			}
+			break;
+			case YearlyRole: {
+				if (!mRepeatUntilItemAdded) {
+					insertRepeatUntilItem();
+				}
+				if (mCustomRepeatUntilItem) {
+					// Show default repeat until date till ten years for yearly rule
+					mRepeatUntilDate = 
+						mCalenEditor->editedEntry()->startTime().date().addYears(10);
+					mCustomRepeatUntilItem->setContentWidgetData( "text",
+						locale.format(
+							mRepeatUntilDate, r_qtn_date_usual_with_zero));
+				}
+				mRepeatRuleType = AgendaRepeatRule::YearlyRule;
+			}
+			break;
+			default: {
+				removeRepeatUntilItem();
+			}
+			break;
 		}
-		break;
-		case WorkdaysRole: {
-			if (!mRepeatUntilItemAdded) {
-				insertRepeatUntilItem();
-			}
-			if (mCustomRepeatUntilItem) {
-				// Show default repeat until date till one year for workdays rule
-				mRepeatUntilDate = mCalenEditor->editedEntry()->startTime().date().addYears(1);
-				mCustomRepeatUntilItem->setContentWidgetData( "text",
-												locale.format( mRepeatUntilDate,
-												r_qtn_date_usual_with_zero));
-			}
-			mRepeatRuleType = AgendaRepeatRule::WeeklyRule;
-			mIsWorkdays = true;
-		}
-		break;
-		case WeeklyRole: {
-			if (!mRepeatUntilItemAdded) {
-				insertRepeatUntilItem();
-			}
-			if (mCustomRepeatUntilItem) {
-				// Show default repeat until date till one year for weekly rule
-				mRepeatUntilDate = mCalenEditor->editedEntry()->startTime().date().addYears(1);
-				mCustomRepeatUntilItem->setContentWidgetData( "text",
-												locale.format( mRepeatUntilDate,
-												r_qtn_date_usual_with_zero));
-			}
-			mRepeatRuleType = AgendaRepeatRule::WeeklyRule;
-		}
-		break;
-		case BiWeeklyRole: {
-			if (!mRepeatUntilItemAdded) {
-				insertRepeatUntilItem();
-			}
-			if (mCustomRepeatUntilItem) {
-				// Show default repeat until date till one year for bi-weekly rule
-				mRepeatUntilDate = mCalenEditor->editedEntry()->startTime().date().addYears(1);
-				mCustomRepeatUntilItem->setContentWidgetData( "text",
-												locale.format( mRepeatUntilDate,
-												r_qtn_date_usual_with_zero));
-			}
-			mRepeatRuleType = AgendaRepeatRule::WeeklyRule;
-			mIsBiWeekly = true;
-		}
-		break;
-		case MonthlyRole: {
-			if (!mRepeatUntilItemAdded) {
-				insertRepeatUntilItem();
-			}
-			if (mCustomRepeatUntilItem) {
-				// Show default repeat until date till one year for monthly rule
-				mRepeatUntilDate = mCalenEditor->editedEntry()->startTime().date().addYears(1);
-				mCustomRepeatUntilItem->setContentWidgetData( "text",
-												locale.format( mRepeatUntilDate,
-												r_qtn_date_usual_with_zero));
-			}
-			mRepeatRuleType = AgendaRepeatRule::MonthlyRule;
-		}
-		break;
-		case YearlyRole: {
-			if (!mRepeatUntilItemAdded) {
-				insertRepeatUntilItem();
-			}
-			if (mCustomRepeatUntilItem) {
-				// Show default repeat until date till ten years for yearly rule
-				mRepeatUntilDate = mCalenEditor->editedEntry()->startTime().date().addYears(10);
-				mCustomRepeatUntilItem->setContentWidgetData( "text",
-												locale.format( mRepeatUntilDate,
-												r_qtn_date_usual_with_zero));
-			}
-			mRepeatRuleType = AgendaRepeatRule::YearlyRule;
-		}
-		break;
-		default: {
-			removeRepeatUntilItem();
-		}
-		break;
-	}
 	}
 	if(!mCalenEditor->isNewEntry()) {
 		mCalenEditor->addDiscardAction();
@@ -668,8 +674,17 @@ void CalenEditorRepeatField::updateRepeatChoices()
 	//Connecting back the slot for repeat index change before setting index.
 	connect(mRepeatComboBox, SIGNAL(currentIndexChanged(int)), this,
 				SLOT(handleRepeatIndexChanged(int)));
+	// By default the repeat combobox index will be 0
 	// Set the previous user's choice
 	mRepeatComboBox->setCurrentIndex(choice);
+	// If the previous user's choice is also zero, then slot 
+	// handleRepeatIndexChanged will not be called as 
+	// there is no change in current index
+	// So explicitly call updateReminderChoices to update the reminder choices
+	// for choice : 0 (Not repeated)
+	if(choice == 0) {
+		mCalenEditor->updateReminderChoices();
+	}
 	OstTraceFunctionExit0( DUP1_CALENEDITORREPEATFIELD_UPDATEREPEATCHOICES_EXIT );
 }
 

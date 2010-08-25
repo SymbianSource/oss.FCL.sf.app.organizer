@@ -15,9 +15,11 @@
 *
 */
 
+// System includes
 #include <calenservices.h>
 #include <calencontext.h>
 
+// User includes
 #include "calendaymodelmanager.h"
 #include "calendaymodel.h"
 

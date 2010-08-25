@@ -18,6 +18,7 @@
 
 // System includes
 #include <QDateTime>
+#include <QPointer>
 #include <hbdialog.h>
 #include <hbdevicedialoginterface.h>
 #include <hbeffect.h>
@@ -215,19 +216,19 @@ private:
      * @var mAlarmDescription
      * @brief Points to the alarm description label
      */
-    HbLabel *mAlarmDescription;
+    QPointer<HbLabel> mAlarmDescription;
     
     /**
     * @var mAlarmDateTime
     * @brief Points to the alarm expiry time label
     */
-    HbLabel *mAlarmDateTime;
+    QPointer<HbLabel> mAlarmDateTime;
     
     /**
      * @var mAlarmIcon
      * @brief Points to the alarm icon label
      */
-    HbLabel *mAlarmIcon;
+    QPointer<HbLabel> mAlarmIcon;
     
     /**
      * @var mMainWindow

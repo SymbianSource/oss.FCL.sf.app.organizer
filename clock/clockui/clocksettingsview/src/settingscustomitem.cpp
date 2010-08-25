@@ -28,6 +28,7 @@
 #include <HbListWidget>
 #include <HbExtendedLocale>
 #include <HbListWidgetItem>
+#include <HbStyleLoader>
 
 // User includes
 #include "settingscustomitem.h"
@@ -54,14 +55,16 @@
 	\param parent The parent.
  */
 
-SettingsCustomItem::SettingsCustomItem(QGraphicsItem *parent)
-:HbDataFormViewItem(parent)
+SettingsCustomItem::SettingsCustomItem(QGraphicsItem *parent, bool launchedByClock)
+:HbDataFormViewItem(parent), mLaunchedByClock(launchedByClock)
 {
 	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_SETTINGSCUSTOMITEM_ENTRY );
 	// Construct the settignsutility.
 	mSettingsUtility = new SettingsUtility();
 	// Construct the timezone client.
 	mTimezoneClient = TimezoneClient::getInstance();
+	// Register for the css.
+	HbStyleLoader::registerFilePath(":/style/settingscustomitem.css");
 	OstTraceFunctionExit0( SETTINGSCUSTOMITEM_SETTINGSCUSTOMITEM_EXIT );
 }
 
@@ -71,7 +74,8 @@ SettingsCustomItem::SettingsCustomItem(QGraphicsItem *parent)
 SettingsCustomItem::~SettingsCustomItem()
 {
 	OstTraceFunctionEntry0( DUP1_SETTINGSCUSTOMITEM_SETTINGSCUSTOMITEM_ENTRY );
-	// Nothing yet.
+	// Unregister the css.
+	HbStyleLoader::unregisterFilePath(":/style/settingscustomitem.css");
 	OstTraceFunctionExit0( DUP1_SETTINGSCUSTOMITEM_SETTINGSCUSTOMITEM_EXIT );
 }
 
@@ -185,6 +189,7 @@ HbWidget* SettingsCustomItem::createCustomWidget()
 	switch (itemType) {
 		case (TimeItemOffset + HbDataFormModelItem::CustomItemBase):
 		{
+			setProperty("expandItem", false);
 			mTimeWidget = new HbPushButton(this);
 			connect(
 					mTimeWidget, SIGNAL(clicked()),
@@ -195,6 +200,7 @@ HbWidget* SettingsCustomItem::createCustomWidget()
 
 		case (DateItemOffset + HbDataFormModelItem::CustomItemBase):
 		{
+			setProperty("expandItem", false);
 			mDateWidget = new HbPushButton(this);
 			connect(
 					mDateWidget, SIGNAL(clicked()),
@@ -205,6 +211,7 @@ HbWidget* SettingsCustomItem::createCustomWidget()
 
 		case (PlaceItemOffset + HbDataFormModelItem::CustomItemBase):
 		{
+			setProperty("expandItem", false);
 			mPlaceWidget = new HbPushButton(this);
 			connect(
 					mPlaceWidget, SIGNAL(clicked()),
@@ -215,6 +222,7 @@ HbWidget* SettingsCustomItem::createCustomWidget()
 
 		case (RegionalItemOffset + HbDataFormModelItem::CustomItemBase):
 		{
+			setProperty("expandItem", false);
 			mRegSettingsWidget = new HbPushButton(this);
 			connect(
 					mRegSettingsWidget, SIGNAL(clicked()),
@@ -223,8 +231,11 @@ HbWidget* SettingsCustomItem::createCustomWidget()
 			return mRegSettingsWidget;
 		}
 
-		case (50 + HbDataFormModelItem::CustomItemBase):
+		case (WorkdaysItemOffset + HbDataFormModelItem::CustomItemBase):
 		{
+			// Set the property so that the custom item layout 
+			// will be the same for both portrait and landscape 
+			setProperty("expandItem", true);
 			mWorkdaysWidget = new HbListWidget(this);
 			mWorkdaysWidget->setSelectionMode(HbAbstractItemView::MultiSelection);
 			mWorkdaysWidget->setScrollDirections(0);
@@ -424,7 +435,8 @@ void SettingsCustomItem::launchRegSettingsView()
 {
 	OstTraceFunctionEntry0( SETTINGSCUSTOMITEM_LAUNCHREGSETTINGSVIEW_ENTRY );
 	ClockRegionalSettingsView *view =
-			new ClockRegionalSettingsView();
+			new ClockRegionalSettingsView(0, mLaunchedByClock);
+
 	connect(mTimezoneClient, SIGNAL(timechanged()),
           view, SLOT(updateWeekStartOn()));
 	view->showView();

@@ -362,6 +362,9 @@ void ClockAlarmEditor:: handleOccurenceChanged(int index)
 		// Check if the Alarm days item is added.
 		// Remove if already added.
 		if (mAlarmDayItemInserted) {
+			mAlarmEditorForm->removeConnection(
+								mAlarmDayItem, SIGNAL(currentIndexChanged(int)),
+								this, SLOT(handleDayChanged(int)));
 			mAlarmEditorModel->removeItem(mAlarmDayItem);
 			mAlarmDayItemInserted = false;
 		}
@@ -524,7 +527,8 @@ void ClockAlarmEditor::handleKeypadClosed()
 		
 		editor->setSelection(0, 0);
 		if (editor->text().isEmpty()) {
-	        editor->setText(hbTrId("txt_clk_formlabel_val_alarm"));
+	    	mAlarmDescription->setContentWidgetData(
+	    			"text", hbTrId("txt_clk_formlabel_val_alarm"));
         }
 
 	}

@@ -44,12 +44,12 @@ const qreal KCalenEmptyRightColumnWidth = 6.0;
 /*!
  The minimum width [un] of touchable event bubble (UI spec)
  */
-const qreal KCalenMinTouchableEventWidth = 8.2;
+const qreal KCalenMinTouchableEventWidth = 8.0;
 
 /*!
  The minimum width [un] of event bubble (UI spec)
  */
-const qreal KCalenMinBubbleWidth = 3.0;
+const qreal KCalenMinEventWidth = 3.0;
 
 /*!
  The width [un] of time strip (indicator) in event bubble (UI spec)
@@ -57,9 +57,14 @@ const qreal KCalenMinBubbleWidth = 3.0;
 const qreal KCalenTimeStripWidth = 1.5;
 
 /*!
- The width [un] of space beetwen event buubles in Day View (UI spec)
+ The width [un] of space beetwen event bubbles in Day View (UI spec)
  */
 const qreal KCalenSpaceBeetwenEvents = 1.5;
+
+/*!
+ The minimum width [un] of space beetwen event bubbles in Day View (UI spec)
+ */
+const qreal KCalenMinSpaceBeetwenEvents = 0.1;
 
 /*!
  Number of All day events displayed in single day that remains touchable 
@@ -79,12 +84,17 @@ const int KCalenTouchableAllDayEventsCountLandscape = 2;
 const qreal KCalenHourLineThickness = 0.15;
 
 /*!
- Thickness [un] of time line (UI spec)
+ Thickness [un] of current time line (UI spec)
  */
-const qreal KCalenTimeLineThickness = 0.75;
+const qreal KCalenCurrentTimeLineThickness = 0.75;
 
 /*!
- Color scheme for hour line (UI spec)
+ Width [un] of dashes in half-hour line (UI spec)
+ */
+const qreal KCalenHalfHourLineDashWidth = 1.5;
+
+/*!
+ Color scheme for hour and half-hour lines (UI spec)
  */
 const QString KCalenHourLineColor = "qtc_cal_day_hour_lines";
 
@@ -92,6 +102,16 @@ const QString KCalenHourLineColor = "qtc_cal_day_hour_lines";
  Color scheme for current time line (UI spec)
  */
 const QString KCalenTimeLineColor = "qtc_cal_month_current_day";
+
+/*!
+ Color scheme for Day View background in portrait mode (UI spec)
+ */
+const QString KCalenBackgroundColorPortrait = "qtg_graf_cal_bg_prt";
+
+/*!
+ Color scheme for Day View background in landscape mode (UI spec)
+ */
+const QString KCalenBackgroundColorLandscape = "qtg_graf_cal_bg_lsc";
 
 
 // Enumerations

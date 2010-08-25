@@ -19,8 +19,8 @@
 #include <QGraphicsLinearLayout>
 #include <QGesture>
 
-#include <hbinstance.h>
-#include <hbswipegesture.h>
+#include <HbInstance>
+#include <HbSwipeGesture>
 
 // User includes
 #include "calendaycontentscrollarea.h"

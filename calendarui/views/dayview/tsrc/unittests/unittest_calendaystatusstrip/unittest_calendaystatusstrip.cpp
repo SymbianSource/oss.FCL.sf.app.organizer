@@ -42,7 +42,6 @@ private slots:
     void cleanup();
 
     void testConstructors();
-    void testSetGetColor();
     void testSetGetRange();
     void testSetGetDrawingStyle_data();
     void testSetGetDrawingStyle();
@@ -126,24 +125,6 @@ void TestCalenStatusStrip::testConstructors()
     testStatusStrip = new CalenDayStatusStrip();
     QVERIFY(testStatusStrip);
     delete testStatusStrip;
-}
-
-/*!
-   Test function for geting and setting color
-   1. Test setting red color
-   2. Test change color to blue
- */
-void TestCalenStatusStrip::testSetGetColor()
-{
-    //1)
-    mStatusStrip->setColor(QColor(Qt::red));
-    QColor testColor = mStatusStrip->color();
-    QCOMPARE(QColor(Qt::red),testColor);
-    
-    //2)
-    mStatusStrip->setColor(QColor(Qt::blue));
-    testColor = mStatusStrip->color();
-    QCOMPARE(QColor(Qt::blue),testColor);
 }
 
 /*!
@@ -339,7 +320,6 @@ void TestCalenStatusStrip::testCalculateMinuteHegiht()
 void TestCalenStatusStrip::testPaint()
 {      
     //preapre data needed to draw on widget
-    mStatusStrip->setColor(QColor(Qt::red));
     QPair<QTime, QTime> startEndTime;
     startEndTime.first = QTime(10,20,0);
     startEndTime.second = QTime(15,10,00);

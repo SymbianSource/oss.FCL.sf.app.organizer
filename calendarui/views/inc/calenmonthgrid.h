@@ -87,6 +87,10 @@ public slots:
 	void appendRows();
 	void itemActivated(const QModelIndex &index);
 
+private slots:
+
+	void handleThemeChange();
+	
 private:
 	QStandardItemModel *mModel;
 	scrollDirection mDirection;
@@ -95,14 +99,13 @@ private:
 	CalenMonthView *mView;
 	int mCurrentRow;
 	bool mIsNonActiveDayFocused;
-	QDateTime mNonActiveFocusedDay;
 	bool mIgnoreItemActivated;
 	QPointF mPressedPos;
-	QColor mGridLineColor;
-	QColor mGridBorderColor;
 	QGraphicsWidget* mContentWidget;
 	QList<QString> mLocalisedDates;
 	QPointF mStartPos;
+	QColor mGridLineColor;
+	bool mActiveDatesSet;
 };
 
 #endif // CALENMONTHGRID_H

@@ -16,14 +16,15 @@
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                 <real name="z" value="1"/>
                 <sizehint height="10un" type="MINIMUM"/>
-                <fontspec name="fontSpec" role="Primary" textheight="9.8un"/>
                 <string name="plainText" value="9:00 am"/>
+                <fontspec name="fontSpec" role="Primary" textheight="9.8un"/>
+                <sizehint height="10un" type="PREFERRED"/>
             </widget>
             <widget name="alarmDescription" type="HbLabel">
                 <enums name="textWrapping" value="TextWordWrap"/>
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
                 <real name="z" value="3"/>
-                <sizehint height="7un" type="PREFERRED"/>
+                <sizehint height="expr(2 * var(hb-param-text-height-secondary) )" type="PREFERRED"/>
                 <sizehint height="7un" type="MINIMUM"/>
                 <sizehint height="7un" type="MAXIMUM"/>
                 <string name="textFormat" value="PlainText"/>
@@ -33,6 +34,7 @@
                 <icon iconName="qtg_large_bell" name="icon"/>
                 <real name="z" value="5"/>
                 <sizehint height="15un" type="PREFERRED" width="15un"/>
+                <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
             </widget>
             <layout type="anchor">
                 <anchoritem dst="alarmTime" dstEdge="LEFT" spacing="var(hb-param-margin-gene-popup)" src="" srcEdge="LEFT"/>
@@ -41,15 +43,15 @@
                 <anchoritem dst="alarmDescription" dstEdge="LEFT" spacing="var(hb-param-margin-gene-popup)" src="" srcEdge="LEFT"/>
                 <anchoritem dst="alarmDescription" dstEdge="TOP" spacing="var(hb-param-margin-gene-popup)" src="alarmTime" srcEdge="BOTTOM"/>
                 <anchoritem dst="alarmDescription" dstEdge="RIGHT" spacing="-var(hb-param-margin-gene-popup)" src="" srcEdge="RIGHT"/>
-                <anchoritem dst="alarmIcon" dstEdge="LEFT" spacing="17.5un" src="" srcEdge="LEFT"/>
                 <anchoritem dst="alarmIcon" dstEdge="TOP" spacing="var(hb-param-margin-gene-popup)" src="alarmDescription" srcEdge="BOTTOM"/>
                 <anchoritem dst="alarmIcon" dstEdge="BOTTOM" spacing="-var(hb-param-margin-gene-popup)" src="" srcEdge="BOTTOM"/>
+                <anchoritem dst="alarmIcon" dstEdge="CENTERH" spacing="0un" src="" srcEdge="CENTERH"/>
             </layout>
         </widget>
         <ref object="snoozeAction" role="HbWidget:addAction"/>
         <ref object="stopAction" role="HbWidget:addAction"/>
     </widget>
-    <metadata activeUIState="Common ui state" display="NHD portrait" unit="un">
+    <metadata activeUIState="Common ui state" display="NHD-3.2-inch_portrait" unit="un">
         <uistate name="Common ui state" sections="#common"/>
     </metadata>
 </hbdocument>

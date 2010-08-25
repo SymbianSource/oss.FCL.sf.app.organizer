@@ -19,7 +19,7 @@
 #define CALENDAYCONTENTSCROLLAREA_H_
 
 // System includes
-#include <hbscrollarea.h>
+#include <HbScrollArea>
 
 // User includes
 #include "calendaycommonheaders.h"

@@ -153,10 +153,6 @@ QObject *CalenDocLoader::createObject(const QString &type,
 	        QObject *calenDayInfo = new HbGroupBox();
 	        calenDayInfo->setObjectName(name);
 	        return calenDayInfo;
-	} else if (name == QString(CALEN_DAYVIEW_REGIONALINFO)) {
-        QObject *calenRegionalInfo = new HbGroupBox();
-        calenRegionalInfo->setObjectName(name);
-        return calenRegionalInfo;
     } else if (name == QString(CALEN_DAYVIEW_CONTENTWIDGET)) {
         QObject *calenContentWidget = new HbWidget();
         calenContentWidget->setObjectName(name);

@@ -238,12 +238,12 @@ void CalenDayContainer::updateTimedEventGeometry(
 
     // Event's startX/width
     eventWidth /= columns;
-
-    // In case when eventWidth will be smaller then KCalenMinBubbleWidth [un]
+    
+    // In case when eventWidth will be smaller then KCalenMinEventWidth [un]
     // spacings between events should be smaller.
     // Check whether it's possible to shrink them so the bubbles width 
-    // can stay at KCalenMinBubbleWidth [un] (time stripe + frame margins).
-    qreal minWidth = KCalenMinBubbleWidth * mLayoutValues.unitInPixels;
+    // can stay at KCalenMinEventWidth [un] (time stripe + frame margins).
+    qreal minWidth = KCalenMinEventWidth * mLayoutValues.unitInPixels;
     if (eventWidth - mLayoutValues.eventMargin < minWidth) {
 
         // Calculate new margin value
@@ -267,7 +267,8 @@ void CalenDayContainer::updateTimedEventGeometry(
             eventWidth = minWidth;
         }
         
-        //First column margin should be always 1.5un (mLayoutValues.eventMargin)
+        // First column margin should be always KCalenSpaceBeetwenEvents 
+        // (mLayoutValues.eventMargin)
         eventStartX += columnIdx * (eventWidth + newMarginValue) + mLayoutValues.eventMargin;
     }
     else {
@@ -277,6 +278,10 @@ void CalenDayContainer::updateTimedEventGeometry(
     }
 
     QRectF eventGeometry(eventStartX, eventStartY, eventWidth, eventHeight);
+    
+    // Workaround to prevent size hint caching inside effectiveSizeHint
+    item->setMinimumSize(0, 0);
+    item->setMaximumSize(eventWidth, eventHeight);
     item->setGeometry(eventGeometry);
 }
 
@@ -341,6 +346,10 @@ void CalenDayContainer::updateAllDayEventGeometry(
     }
 
     QRectF eventGeometry(eventStartX, eventStartY, eventWidth, eventHeight);
+	
+    // Workaround to prevent size hint caching inside effectiveSizeHint
+    item->setMinimumSize(0, 0);
+    item->setMaximumSize(eventWidth, eventHeight);
     item->setGeometry(eventGeometry);
 }
 
@@ -367,8 +376,7 @@ void CalenDayContainer::getTimedEventLayoutValues(LayoutValues& layoutValues)
     }
 
     // 2. event area width -> eventAreaWidth[out]
-    qreal emptyRightColumnWidth(0.0);
-    emptyRightColumnWidth = KCalenEmptyRightColumnWidth
+    qreal emptyRightColumnWidth = KCalenEmptyRightColumnWidth
         * layoutValues.unitInPixels;
     layoutValues.eventAreaWidth = contentWidth - emptyRightColumnWidth
         - layoutValues.eventAreaX;
@@ -383,7 +391,8 @@ void CalenDayContainer::getTimedEventLayoutValues(LayoutValues& layoutValues)
 
     // check if we should create absorber over some overlapping region
     layoutValues.maxColumns = layoutValues.eventAreaWidth
-        / (KCalenMinTouchableEventWidth * layoutValues.unitInPixels);
+        / ((KCalenMinTouchableEventWidth + KCalenSpaceBeetwenEvents)
+            * layoutValues.unitInPixels);
 }
 
 

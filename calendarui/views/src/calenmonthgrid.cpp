@@ -65,7 +65,8 @@ CalenMonthGrid::CalenMonthGrid(QGraphicsItem *parent):
 	mCurrentRow(-100),
 	mIsNonActiveDayFocused(false),
 	mIgnoreItemActivated(false),
-	mGridBorderColor(Qt::gray)
+	mGridLineColor(HbColorScheme::color("qtc_cal_grid_line")),
+    mActiveDatesSet(false)
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_CALENMONTHGRID_ENTRY );
     
@@ -81,15 +82,15 @@ CalenMonthGrid::CalenMonthGrid(QGraphicsItem *parent):
 	setEnabledAnimations(HbAbstractItemView::None);
 	setFrictionEnabled(false);
 	setFlag(QGraphicsItem::ItemHasNoContents, false);
+	
+	// Disable the rows and columns swapping on orientation change
+	setSwapDimensionsOnOrientationChange(false);
+	
 	resetTransform();
 	
 	// Get the content widget of the scroll area to draw the grid lines
 	mContentWidget = contentWidget();
-	
-	// Get the all required colors 
-	// Color of the grid lines
-	mGridLineColor = HbColorScheme::color("qtc_cal_grid_line");
-	
+
 	// Get the localised dates well before
 	// TODO: Need to update the mLocalisedDates when user changes the
 	// phone language keeping calendar application in background
@@ -101,6 +102,13 @@ CalenMonthGrid::CalenMonthGrid(QGraphicsItem *parent):
 	// Connect to scrolling finished signal
 	connect(this, SIGNAL(scrollingEnded()), this,
 			SLOT(scrollingFinished()));
+
+    connect(
+                HbTheme::instance(), SIGNAL(changed()),
+                this, SLOT(handleThemeChange()));
+				
+	// Disable the haptic feedback for the month grid during scrolling
+    setAttribute(Hb::InteractionDisabled);
 	
 	OstTraceFunctionExit0( CALENMONTHGRID_CALENMONTHGRID_EXIT );
 }
@@ -218,19 +226,14 @@ void CalenMonthGrid::updateMonthGridModel(QList<CalenMonthData> &monthDataArray,
 	}
 	
 	if (isFirstTime) {
-		// Color of the today indicator
-		QColor todayIndColor = HbColorScheme::color("qtc_cal_month_current_day");
-		// Color of the active dates
-		QColor mActiveTextColor = 
-								HbColorScheme::color("qtc_cal_month_active_dates");
-		// Color of the inactive dates
-		QColor mInActiveTextColor = 
-							HbColorScheme::color("qtc_cal_month_notactive_dates");
 		
 		// Create the prototype
-		CalenGridItemPrototype* gridItemPrototype = new CalenGridItemPrototype(
-						todayIndColor, mActiveTextColor, mInActiveTextColor, this);
+		CalenGridItemPrototype* gridItemPrototype = new CalenGridItemPrototype(this);
 		
+	    connect(
+	            HbTheme::instance(), SIGNAL(changed()),
+	            gridItemPrototype, SLOT(handleThemeChange()));
+	    
 		// Set the mode and the prototype
 		setModel(mModel,gridItemPrototype);
 		
@@ -339,15 +342,32 @@ void CalenMonthGrid::downGesture()
     OstTraceFunctionEntry0( CALENMONTHGRID_DOWNGESTURE_ENTRY );
     
     // Make sure that content widget is properly placed
+    // We are doing this as tapping on inactive date of previous month is leading to
+    // position the grid at wrong place after scrolling down. Hence, set the grid
+    // at proper position before we start actual scrolling
     if (mIsNonActiveDayFocused) {
         mIsAtomicScroll = true;
         int itemToBeScrolled = mView->rowsInPrevMonth() * KCalenDaysInWeek;
         QModelIndex indexToBeScrolled  = mModel->index(itemToBeScrolled, 0);
         scrollTo(indexToBeScrolled);
     }
+   
+    // Set the required flags
     mDirection = down;
     mIsAtomicScroll = false;
-    setAttribute(Hb::InteractionDisabled);
+    
+    // Set the active and inactive dates
+    QDateTime activeMonth = mView->getActiveDay();
+    // For previous month, substract one month to the current month
+    setActiveDates(activeMonth.addMonths(-1).date());
+    mActiveDatesSet = true;
+    // Set the focus to proper date before scrolling to avoid somekind of
+    // jerkiness
+    if (!mIsNonActiveDayFocused) {
+        setFocusToProperDay();
+    }
+    
+    // Start the scrolling
     QPointF targetPos(0.0, 0.0);
     scrollContentsTo(targetPos,500);
     
@@ -361,17 +381,23 @@ void CalenMonthGrid::upGesture()
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_UPGESTURE_ENTRY );
     
-    // Make sure that content widget is properly placed
-    if (mIsNonActiveDayFocused) {
-        mIsAtomicScroll = true;
-        int itemToBeScrolled = mView->rowsInPrevMonth() * KCalenDaysInWeek;
-        itemToBeScrolled += KNumOfVisibleRows * KCalenDaysInWeek;
-        QModelIndex indexToBeScrolled  = mModel->index(itemToBeScrolled, 0);
-        scrollTo(indexToBeScrolled);
-    }
+   
+    // Set the required flags
     mDirection = up;
     mIsAtomicScroll = false;
-    setAttribute(Hb::InteractionDisabled);
+    
+    // Set the active and inactive dates
+    QDateTime activeMonth = mView->getActiveDay();
+    // For next month, add one month to the current month
+    setActiveDates(activeMonth.addMonths(1).date());
+    mActiveDatesSet = true;
+    // Set the focus to proper date before scrolling to avoid somekind of
+    // jerkiness
+    if (!mIsNonActiveDayFocused) {
+        setFocusToProperDay();
+    }
+    
+    // Start the scrolling
     QPointF targetPos(0.0, mStartPos.y() - size().height());
     scrollContentsTo(-targetPos,500);
 	
@@ -420,12 +446,11 @@ void CalenMonthGrid::gestureEvent(QGestureEvent *event)
     
    if(HbPanGesture *gesture = qobject_cast<HbPanGesture *>(event->gesture(Qt::PanGesture))) {
         if (gesture->state() == Qt::GestureStarted) {
-            setAttribute(Hb::InteractionDisabled);
             mIsAtomicScroll = false;
             if (!mIsPanGesture) {
                 mDirection = invalid;
                 mStartPos = mContentWidget->pos();
-                // TODO: This work aroung till framework provides an api
+                // TODO: This work around till framework provides an api
                 // to know the direciton of the pan, until then we need
                 // calculate the direction explicitly
                 // Get to know the direction of the gesture
@@ -478,7 +503,6 @@ void CalenMonthGrid::gestureEvent(QGestureEvent *event)
         }
     } else if(HbSwipeGesture *gesture = qobject_cast<HbSwipeGesture *>(event->gesture(Qt::SwipeGesture))) {
         if (gesture->state() == Qt::GestureStarted) {
-            setAttribute(Hb::InteractionDisabled);
             mIsAtomicScroll = false;
             mDirection = invalid;
             if (gesture->sceneVerticalDirection() == QSwipeGesture::Down) {
@@ -524,23 +548,25 @@ void CalenMonthGrid::scrollingFinished()
 	} else if(!mIsAtomicScroll) {
 		QDateTime activeDate = mView->getActiveDay();
 		if(mDirection == down) { // down gesture
-			if (!mIsNonActiveDayFocused) {
+			if (!mActiveDatesSet) {
 				setActiveDates(activeDate.addMonths(-1).date());
+				setFocusToProperDay();
 			}
 			prependRows();
 		} else if (mDirection == up) { //up gesture
-			if (!mIsNonActiveDayFocused) {
+			if (!mActiveDatesSet) {
 				setActiveDates(activeDate.addMonths(1).date());
+				setFocusToProperDay();
 			}
 			appendRows();
 		}
 		mDirection = invalid;
+		mActiveDatesSet = false;
 	} else {
         mIsAtomicScroll = false;
         mDirection = invalid;
 	}
 	mIgnoreItemActivated = false;
-	setAttribute(Hb::InteractionDisabled, false);
 	
 	OstTraceFunctionExit0( CALENMONTHGRID_SCROLLINGFINISHED_EXIT );
 }
@@ -581,7 +607,6 @@ void CalenMonthGrid::handlePanGestureFinished()
 			// we should again show the current month by scrolling downwards
 			mDirection = down;
 			mIsAtomicScroll = true;
-			setAttribute(Hb::InteractionDisabled);
 			scrollContentsTo(-mStartPos,500);
 		}
 	} else if (month == prevMonth.date().month()) {
@@ -591,7 +616,6 @@ void CalenMonthGrid::handlePanGestureFinished()
 			// we should again show the current month by scrolling upwards
 			mDirection = up;
 			mIsAtomicScroll = true;
-			setAttribute(Hb::InteractionDisabled);
 			scrollContentsTo(-mStartPos,500);
 		} else {
 			// down gesture to show the previous month
@@ -609,8 +633,7 @@ void CalenMonthGrid::handlePanGestureFinished()
 			upGesture();
 		} else {
 			// we should again show the current month by scrolling upwards
-			mDirection = invalid;
-			setAttribute(Hb::InteractionDisabled);
+			mDirection = up;
 			scrollContentsTo(-mStartPos,500);
 		}
 	} else if (month == nextMonth.addMonths(1).date().month()) {
@@ -629,13 +652,6 @@ void CalenMonthGrid::handlePanGestureFinished()
 void CalenMonthGrid::prependRows()
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_PREPENDROWS_ENTRY );
-    
-	// Before we do anything, set the focus to proper date
-	// Set it only when non active day was focussed. When inactive day
-	// was focussed, we need to focus the same day
-	if (!mIsNonActiveDayFocused) {
-		setFocusToProperDay();
-	}
 	
 	// Block the signals generated by model, this is being done as
 	// we want to avoid the overload of view listening to signals
@@ -756,13 +772,6 @@ void CalenMonthGrid::handlePrependingRows(QList<CalenMonthData > &monthDataList)
 void CalenMonthGrid::appendRows()
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_APPENDROWS_ENTRY );
-    
-	// Before we do anything, set the focus to proper date
-	// Set it only when non active day was focussed. When inactive day
-	// was focussed, we need to focus the same day
-	if (!mIsNonActiveDayFocused) {
-		setFocusToProperDay();
-	}
 	
 	// Block the signals generated by model, this is being done as
 	// we want to avoid the overload of view listening to signals
@@ -924,21 +933,19 @@ void CalenMonthGrid::itemActivated(const QModelIndex &index)
 		if(month != monthDataList[mCurrentRow].Day().date().month()){
 			// Set the flag
 			mIsNonActiveDayFocused = true;
-			mNonActiveFocusedDay = monthDataList[mCurrentRow].Day();
+			QDateTime nonActiveFocusedDay = monthDataList[mCurrentRow].Day();
 			
 			// Add one month to active month
 			activeMonth = activeMonth.addMonths(1);
 			if (activeMonth.date().month() == 
-				mNonActiveFocusedDay.date().month()) {
+			        nonActiveFocusedDay.date().month()) {
 				mDirection = up;
 				// up gesture
 				upGesture();
-				setActiveDates(activeMonth.date());
 			} else {
 				mDirection = down;
 				// down gesture
 				downGesture();
-				setActiveDates(activeMonth.addMonths(-2).date());
 			}
 		} 
 		mView->setContextForActiveDay(index.row());
@@ -1025,12 +1032,14 @@ void CalenMonthGrid::setActiveDates(QDate activeDate)
 	end = firstDateInGrid.daysTo(endOfActiveMonth);
 	
 	// Set the active text color
-	for (int i = start; i < end; i++) {	
-		QModelIndex index = mModel->index(i,0);
-		QVariant itemData = index.data(Qt::UserRole + 1);
-		QVariantList list = itemData.toList();
-		list.replace(CalendarNamespace::CalendarMonthTextColorRole, true);
-		mModel->itemFromIndex(index)->setData(list);
+	if (start >= 0 && end < monthDataList.count()) {
+        for (int i = start; i < end; i++) {	
+            QModelIndex index = mModel->index(i,0);
+            QVariant itemData = index.data(Qt::UserRole + 1);
+            QVariantList list = itemData.toList();
+            list.replace(CalendarNamespace::CalendarMonthTextColorRole, true);
+            mModel->itemFromIndex(index)->setData(list);
+        }
 	}
 	
 	// Now set the inactive text color to those which were active before the swipe
@@ -1071,12 +1080,14 @@ void CalenMonthGrid::setActiveDates(QDate activeDate)
 	}
 	
 	// Set the inactive text color
-	for (int i = start; i < end; i++) {		
-		QModelIndex index = mModel->index(i,0);
-		QVariant itemData = index.data(Qt::UserRole + 1);
-		QVariantList list = itemData.toList();
-		list.replace(CalendarNamespace::CalendarMonthTextColorRole, false);
-		mModel->itemFromIndex(index)->setData(list);
+	if (start >= 0 && end < monthDataList.count()) {
+        for (int i = start; i < end; i++) {		
+            QModelIndex index = mModel->index(i,0);
+            QVariant itemData = index.data(Qt::UserRole + 1);
+            QVariantList list = itemData.toList();
+            list.replace(CalendarNamespace::CalendarMonthTextColorRole, false);
+            mModel->itemFromIndex(index)->setData(list);
+        }
 	}
 	
 	OstTraceFunctionExit0( DUP1_CALENMONTHGRID_SETACTIVEDATES_EXIT );
@@ -1162,11 +1173,8 @@ void CalenMonthGrid::paint(QPainter* painter,
 	qreal widthInPixels = GRIDLINE_WIDTH * unitValue;
 	pen.setStyle(Qt::SolidLine);
 	pen.setWidth(widthInPixels);
-	if (mGridLineColor.isValid()) {
-		pen.setBrush(mGridLineColor);
-	} else {
-		pen.setBrush(mGridBorderColor);
-	}
+	pen.setBrush(mGridLineColor);
+	
 	// Store the old pen
 	QPen oldPen = painter->pen();
 	
@@ -1233,6 +1241,18 @@ void CalenMonthGrid::paint(QPainter* painter,
 	painter->setPen(oldPen);
 	
 	OstTraceFunctionExit0( CALENMONTHGRID_PAINT_EXIT );
+}
+
+/*!
+ Slot to handle the change in theme
+ */
+void CalenMonthGrid::handleThemeChange()
+{
+    OstTraceFunctionEntry0(CALENMONTHGRID_HANDLETHEMECHANGE_ENTRY);
+    
+    mGridLineColor = HbColorScheme::color("qtc_cal_grid_line");
+    
+    OstTraceFunctionExit0(CALENMONTHGRID_HANDLETHEMECHANGE_EXIT);
 }
 
 // End of File

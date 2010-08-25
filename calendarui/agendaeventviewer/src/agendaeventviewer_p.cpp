@@ -275,4 +275,25 @@ void AgendaEventViewerPrivate::viewCreationCompleted(int error)
     mAction = AgendaEventViewer::ActionNothing;
 	OstTraceFunctionExit0( AGENDAEVENTVIEWERPRIVATE_VIEWCREATIONCOMPLETED_EXIT );
 	}
+
+// ----------------------------------------------------------------------------
+// AgendaEventViewerPrivate::saveAndCloseEditor
+// save the entry and close the editor
+// ----------------------------------------------------------------------------
+//
+void AgendaEventViewerPrivate::saveAndCloseEditor()
+{
+    mAgendaEventView->saveAndCloseEditor();
+}
+
+
+// ----------------------------------------------------------------------------
+// AgendaEventViewerPrivate::closeAgendaEventView
+// close the agenda event view 
+// ----------------------------------------------------------------------------
+//
+void AgendaEventViewerPrivate::closeAgendaEventView()
+{
+    mAgendaEventView->closeAgendaEventView(); 
+}
 // End of file

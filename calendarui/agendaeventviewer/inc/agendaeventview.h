@@ -50,7 +50,19 @@ public:
 	AgendaEventView(
 			AgendaEventViewerPrivate *owner, QObject *parent=0);
 	virtual ~AgendaEventView();
-
+public:
+	
+	/*
+	 * forcefully closing the editor.
+	 * should be call if view is open,
+	 */
+	void saveAndCloseEditor();
+    
+	/*
+     * forcefully closing the view.
+     * should be call if view is open,
+     */
+    void closeAgendaEventView();
 private:
 	void execute(AgendaEntry entry, AgendaEventViewer::Actions action);
 	void addViewerData();
@@ -125,6 +137,7 @@ private:
 	QTimer *mProgressTimer;
 	int mProgressIconCount;  
 	bool mMaptileStatusReceived;
+	bool mCalenEditorClosed ;
 	int mMaptileStatus; 
 	bool mNotesPluginLoaded;
 

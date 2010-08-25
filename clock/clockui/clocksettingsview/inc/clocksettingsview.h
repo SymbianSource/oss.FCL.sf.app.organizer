@@ -46,7 +46,8 @@ class ClockSettingsView : public QObject
 	Q_OBJECT
 
 public:
-	CLOCKSETTINGSVIEW_EXPORT ClockSettingsView(QObject *parent = 0);
+	CLOCKSETTINGSVIEW_EXPORT ClockSettingsView(QObject *parent = 0, HbTranslator *translator = 0,
+	        bool launchedByClock = 1);
 	CLOCKSETTINGSVIEW_EXPORT virtual ~ClockSettingsView();
 
 public:
@@ -93,6 +94,7 @@ private:
 	XQSettingsKey *mAlarmSnoozeTimeKey;
 	QHash<int, int> mAlarmSnoozeTimeHash;
 	HbTranslator *mTranslator;
+	bool mLaunchedByClock;
 };
 
 #endif // CLOCKSETTINGSVIEW_H

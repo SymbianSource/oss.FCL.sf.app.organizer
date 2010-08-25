@@ -47,7 +47,7 @@ public:
 
 	Qt::Orientation orientation()
 		{
-		return 1;
+		return Qt::Horizontal;
 		}
 
 	HbMainWindow* mainWindow()

@@ -23,9 +23,11 @@
 // System includes
 #include <QObject>
 
-// User includes
+// User includes.
 #include <cpplugininterface.h>
 
+// Forward class declartion.
+class HbTranslator;
 class DateTimeSettingsPlugin : public QObject, public CpPluginInterface
 {
 	Q_OBJECT
@@ -37,6 +39,9 @@ public:
 
 	virtual int uid() const;
 	QList<CpSettingFormItemData*> createSettingFormItemData(CpItemDataHelper &itemDataHelper) const;
+	
+private:
+	HbTranslator *mTranslator;
 };
 
 #endif /* DATETIMESETTINGSPLUGIN_H_ */

@@ -23,7 +23,6 @@
             <widget name="monthViewExceptPreviewPane" type="HbWidget">
                 <widget name="monthTitle" type="HbLabel">
                     <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-					<string name="textColor" value="qtc_cal_monthgrid_title"/>
 					<fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                     <real name="z" value="6"/>
                     <sizehint height="expr(var(hb-param-text-height-secondary) + 0.75un + 0.75un)" type="PREFERRED" width="52un"/>
@@ -33,44 +32,37 @@
                 </widget>
                 <widget name="dayNamesWidget" type="HbWidget">
                     <widget name="firstDayLabel" type="HbLabel">
-                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-						<string name="textColor" value="qtc_cal_week_day"/>
+                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>						
                         <real name="z" value="6"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
                     <widget name="secondDayLabel" type="HbLabel">
-                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-						<string name="textColor" value="qtc_cal_week_day"/>
+                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>						
                         <real name="z" value="6"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
                     <widget name="thirdDayLabel" type="HbLabel">
-                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-						<string name="textColor" value="qtc_cal_week_day"/>
+                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>						
                         <real name="z" value="6"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
                     <widget name="fourthDayLabel" type="HbLabel">
-                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-						<string name="textColor" value="qtc_cal_week_day"/>
+                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>						
                         <real name="z" value="6"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
                     <widget name="fifthDayLabel" type="HbLabel">
-                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-						<string name="textColor" value="qtc_cal_week_day"/>
+                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>						
                         <real name="z" value="6"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
                     <widget name="sixthDayLabel" type="HbLabel">
-                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-						<string name="textColor" value="qtc_cal_week_day"/>
+                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>						
                         <real name="z" value="6"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
                     <widget name="seventhDayLabel" type="HbLabel">
-                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
-						<string name="textColor" value="qtc_cal_week_day"/>
+                        <enums name="alignment" value="AlignVCenter|AlignHCenter"/>						
                         <real name="z" value="6"/>
                         <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-tiny)"/>
                     </widget>
@@ -169,7 +161,6 @@
 					<widget name="prevRegionalInfo" type="HbLabel">
 					<enums name="alignment" value="AlignCenter"/>
 					<fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
-					<string name="textColor" value="qtc_cal_day_preview_heading"/>
 					<contentsmargins bottom="0.75un" left="var(hb-param-margin-gene-left)" right="var(hb-param-margin-gene-right)" top="0.75un"/>
 					</widget>
 	                <widget name="prevPaneLayout" type="HbWidget">
@@ -227,7 +218,6 @@
 					<widget name="currRegionalInfo" type="HbLabel">
 					<enums name="alignment" value="AlignCenter"/>
 					<fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
-					<string name="textColor" value="qtc_cal_day_preview_heading"/>
 					<contentsmargins bottom="0.75un" left="var(hb-param-margin-gene-left)" right="var(hb-param-margin-gene-right)" top="0.75un"/>
 					</widget>
                     <widget name="currPaneLayout" type="HbWidget">
@@ -285,7 +275,6 @@
 					<widget name="nextRegionalInfo" type="HbLabel">
 					<enums name="alignment" value="AlignCenter"/>
 					<fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
-					<string name="textColor" value="qtc_cal_day_preview_heading"/>
 					<contentsmargins bottom="0.75un" left="var(hb-param-margin-gene-left)" right="var(hb-param-margin-gene-right)" top="0.75un"/>
 					</widget>
                     <widget name="nextPaneLayout" type="HbWidget">

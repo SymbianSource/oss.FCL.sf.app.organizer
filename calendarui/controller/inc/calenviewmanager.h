@@ -103,7 +103,28 @@ class  CalenViewManager :	public QObject,
 		void constructOtherViews();
 		
 		void launchSettingsView();
+				
+		/**
+		 * @brief check if Agenda Event Viewer is active
+		 */
+		bool isEventViewerActive();
+
+		/**
+		 * save the entry and close the editor
+		 */
+		void saveAndCloseEditor();
 		
+
+        /**
+         * close agenda event view
+         * should be call if agenda eevent view is open
+         */
+		void closeAgendaEventView();
+        
+		/**
+         * remove the setting view
+         */
+		void removeSettingsView();
 		
 	public: // from MCalenNotificationHandler
    

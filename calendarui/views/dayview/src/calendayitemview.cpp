@@ -18,9 +18,9 @@
 //System includes
 #include <QGesture>
 #include <QGraphicsLinearLayout>
-#include <hbabstractviewitem.h>
-#include <hbinstance.h>
-#include <hbaction.h>
+#include <HbAbstractViewItem>
+#include <HbInstance>
+#include <HbAction>
 
 //User includes
 #include "calendayitemview.h"
@@ -54,9 +54,6 @@ CalenDayItemView::CalenDayItemView( MCalenServices &services, HbModelIterator *i
     setScrollDirections(Qt::Vertical);
     setScrollingStyle(HbScrollArea::PanWithFollowOn);
     setVerticalScrollBarPolicy(HbScrollArea::ScrollBarAlwaysOff);
-    
-    grabGesture(Qt::PanGesture);
-    ungrabGesture(Qt::SwipeGesture);
     
     //TODO: KG: Animate item pressed?! HbAbstractItemView::TouchDown
     setEnabledAnimations( HbAbstractItemView::None );

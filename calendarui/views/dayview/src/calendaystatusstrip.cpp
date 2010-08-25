@@ -15,11 +15,15 @@
  *
  */
 
+// System includes
 #include <QPainter>
 #include <QPen>
+#include <HbColorScheme>
 
+// User includes
 #include "calendaystatusstrip.h"
 
+// Constants
 qreal const CalenDayStatusStrip::mMinute = 60;
 qreal const CalenDayStatusStrip::mMinimumTime = 5;
 
@@ -28,7 +32,7 @@ qreal const CalenDayStatusStrip::mMinimumTime = 5;
  */
 CalenDayStatusStrip::CalenDayStatusStrip(HbWidget *parent)
     : HbWidget(parent), mRange(2), 
-      mDrawingStyle(CalenDayStatusStrip::Filled)      
+      mDrawingStyle(CalenDayStatusStrip::Filled)
 {
     setFlag(QGraphicsItem::ItemHasNoContents,false);
 
@@ -51,16 +55,6 @@ CalenDayStatusStrip::~CalenDayStatusStrip()
 qreal CalenDayStatusStrip::range() const
 {
     return mRange;
-}
-
-/*!
-   \brief Returns color drawing
-   
-   \sa setColor
- */
-QColor CalenDayStatusStrip::color() const
-{
-    return mColor;
 }
 
 /*!
@@ -94,18 +88,6 @@ QPair<QTime,QTime> CalenDayStatusStrip::startEndTime() const
 void CalenDayStatusStrip::setRange(qreal range)
 {
     mRange = range;
-}
-
-/*!
-   \brief It sets color drawing
-   
-   \param stripColor Color of drawing
-   
-   \sa stripColor
- */
-void CalenDayStatusStrip::setColor(QColor stripColor)
-{
-    mColor = stripColor;
 }
 
 /*!
@@ -193,7 +175,7 @@ void CalenDayStatusStrip::paint(
     painter->setClipRect(bounding, Qt::IntersectClip);
 
     //prepare brush and paint
-    QBrush brush(mColor);
+    QBrush brush(HbColorScheme::color("qtc_cal_month_current_day"));
     painter->setBrush(brush);
     QPen pen;
     pen.setWidth(1);

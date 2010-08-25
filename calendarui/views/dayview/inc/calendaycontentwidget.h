@@ -19,7 +19,7 @@
 #define CALENDAYCONTENTWIDGET_H_
 
 // System includes
-#include <hbwidget.h>
+#include <HbWidget>
 
 // User includes
 #include "calendaycommonheaders.h"
@@ -61,8 +61,8 @@ public slots:
     void relayoutWidgets(CalenScrollDirection scrollTo);
     void widgetScrolled(const QPointF &newPos);
     
-private:
-    void initializeViews(QGraphicsItem *parent);
+protected:
+    void initializeViews();
 
 private:
     QGraphicsLinearLayout* mLayout; //!< Linear layout for day views

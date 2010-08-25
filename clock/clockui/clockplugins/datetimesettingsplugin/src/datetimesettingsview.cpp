@@ -50,12 +50,13 @@
 DateTimeSettingsView::DateTimeSettingsView(
 		CpItemDataHelper &itemDataHelper, const QString &text,
 		const QString &description, const HbIcon &icon,
-		const HbDataFormModelItem *parent):
+		const HbDataFormModelItem *parent, HbTranslator *translator):
 		CpSettingFormEntryItemData(
 				itemDataHelper, text, description, icon, parent)
 {
 	OstTraceFunctionEntry0( DATETIMESETTINGSVIEW_DATETIMESETTINGSVIEW_ENTRY );
 	// Construct the timezone client.
+	mTranslator = translator;
 	mTimezoneClient = TimezoneClient::getInstance();
 	connect(
 			mTimezoneClient, SIGNAL(timechanged()),
@@ -95,7 +96,7 @@ DateTimeSettingsView::~DateTimeSettingsView()
 void DateTimeSettingsView::onLaunchView()
 {
 	OstTraceFunctionEntry0( DATETIMESETTINGSVIEW_ONLAUNCHVIEW_ENTRY );
-	ClockSettingsView *settingsView = new ClockSettingsView(this);
+	ClockSettingsView *settingsView = new ClockSettingsView(this, mTranslator, false);	
 	settingsView->loadSettingsView();
 	OstTraceFunctionExit0( DATETIMESETTINGSVIEW_ONLAUNCHVIEW_EXIT );
 }

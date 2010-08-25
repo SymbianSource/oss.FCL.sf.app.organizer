@@ -205,13 +205,6 @@ void CalenEditorReminderField::populateReminderItem(bool newEntry)
 			if (pastEvent && mReminderTimeAdded) {
 				mCustomReminderTimeItem->setEnabled(false);
 			}
-			QStringList reminderChoicesForAllDay;
-			reminderChoicesForAllDay << hbTrId("txt_calendar_setlabel_reminder_val_off") 
-					<< hbTrId("txt_calendar_setlabel_reminder_val_on_event_day")
-					<< hbTrId("txt_calendar_setlabel_reminder_val_1_day_before")
-					<< hbTrId("txt_calendar_setlabel_reminder_val_2_days_before");
-			mReminderItem->setContentWidgetData(QString("items"),
-			                                    reminderChoicesForAllDay);
 			QTime referenceTime(0, 0, 0);
 			// Set the appropriate reminder depending on the value of time offset.
 			reminder = mCalenEditor->editedEntry()->alarm();
@@ -220,7 +213,7 @@ void CalenEditorReminderField::populateReminderItem(bool newEntry)
 				mReminderItem->setContentWidgetData("currentIndex", ReminderOnEventDay);
 				mReminderTimeForAllDay = referenceTime.addSecs(-(offsetInMins
 						* 60));
-			} else if (offsetInMins < numberOfMinutesInADay) {
+			} else if (offsetInMins <= numberOfMinutesInADay) {
 				mReminderItem->setContentWidgetData("currentIndex", ReminderOneDayBefore);
 				mReminderTimeForAllDay = referenceTime.addSecs(-(offsetInMins
 						* 60));
@@ -549,6 +542,8 @@ void CalenEditorReminderField::removeReminderTimeField()
 {
 	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_REMOVEREMINDERTIMEFIELD_ENTRY );
 	mReminderTimeAdded = false;
+	mEditorForm->removeConnection(mCustomReminderTimeItem, SIGNAL(clicked()),
+		                           this, SLOT(launchReminderTimePicker()));
 	if (mCustomReminderTimeItem) {
 		QModelIndex reminderIndex =
 				mCalenEditorModel->indexFromItem(mCustomReminderTimeItem);

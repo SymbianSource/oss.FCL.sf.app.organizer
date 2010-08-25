@@ -37,7 +37,10 @@ public:
 	CalenThickLinesDrawer( CalendarNamespace::WidgetType type, 
 						   QGraphicsItem* parent = NULL );  
 	virtual ~CalenThickLinesDrawer();
-		
+
+private slots:
+	void handleThemeChange();
+	
 private:
 	void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 	           QWidget* widget);

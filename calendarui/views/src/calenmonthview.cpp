@@ -27,6 +27,7 @@
 #include <hblabel.h>
 #include <hbframeitem.h>
 #include <hbcolorscheme.h>
+#include <hbtheme.h>
 #include <agendautil.h>
 #include <agendaentry.h>
 #include <hbapplication.h> // hbapplication
@@ -93,9 +94,14 @@ CalenMonthView::CalenMonthView(MCalenServices &services) :
 	mLocale = HbExtendedLocale::system();
 	mFirstWeekLabel = NULL;
 	mIsPrevPaneGesture = false;
-	// Get the week day color from the theme
+	// Get the week day and preview heading color from the theme
 	mWeekDaysColor = HbColorScheme::color("qtc_cal_week_day");
 	
+	mPreviewHeadingColor = HbColorScheme::color("qtc_cal_day_preview_heading");
+	
+    connect(HbTheme::instance(), SIGNAL(changed()),
+                this, SLOT(handleThemeChange()));
+    
 	OstTraceFunctionExit0( CALENMONTHVIEW_CALENMONTHVIEW_EXIT );
 }
 
@@ -179,6 +185,10 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 	mCurrPreviewPane->setView(this);
 	mCurrPreviewPane->setNoEntriesLabel(currPaneNoEntriesLabel);
 	
+    connect(
+            HbTheme::instance(), SIGNAL(changed()),
+            mCurrPreviewPane, SLOT(handleThemeChange()));
+	
 	mCurrPaneLayoutWidget = qobject_cast<HbWidget*>(docLoader->findWidget(CALEN_CURRPANELAYOUT));
 	mCurrPaneLayout = static_cast<QGraphicsLinearLayout*>(mCurrPaneLayoutWidget->layout());
 	
@@ -194,6 +204,9 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 			docLoader->findWidget(CALEN_NOENTRIES_LABEL_PREV));
 	mPrevPreviewPane->setView(this);
 	mPrevPreviewPane->setNoEntriesLabel(prevPaneNoEntriesLabel);
+    connect(
+            HbTheme::instance(), SIGNAL(changed()),
+            mPrevPreviewPane, SLOT(handleThemeChange()));
 	mPrevPaneParent->setVisible(false);
 	
 	mPrevPaneLayoutWidget = qobject_cast<HbWidget*>(docLoader->findWidget(CALEN_PREVPANELAYOUT));
@@ -210,6 +223,10 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 			docLoader->findWidget(CALEN_NOENTRIES_LABEL_NEXT));
 	mNextPreviewPane->setView(this);
 	mNextPreviewPane->setNoEntriesLabel(nextPaneNoEntriesLabel);
+    connect(
+            HbTheme::instance(), SIGNAL(changed()),
+            mNextPreviewPane, SLOT(handleThemeChange()));
+    
 	mNextPaneParent->setVisible(false);
 	mNextPaneLayoutWidget = qobject_cast<HbWidget*>(docLoader->findWidget(CALEN_NEXTPANELAYOUT));
 	mNextPaneLayout = static_cast<QGraphicsLinearLayout*>(mNextPaneLayoutWidget->layout());
@@ -560,8 +577,11 @@ void CalenMonthView::showHideRegionalInformation()
 			}
 			QString *pluginString = pluginText();
 			mPrevRegionalInfo->setPlainText(*pluginString);
+			mPrevRegionalInfo->setTextColor(mPreviewHeadingColor);
 			mCurrRegionalInfo->setPlainText(*pluginString);
+			mCurrRegionalInfo->setTextColor(mPreviewHeadingColor);
 			mNextRegionalInfo->setPlainText(*pluginString);
+			mNextRegionalInfo->setTextColor(mPreviewHeadingColor);
 		} else {
 			if (mPrevRegionalInfo) {
 				mPrevPaneLayout->removeItem(mPrevRegionalInfo);
@@ -1427,13 +1447,24 @@ void CalenMonthView::launchDayView()
 	mServices.IssueCommandL(ECalenDayView);
 	// day view launched now, disconnect to get the call backs for saveActivity 
 	// on aboutToQuit signal
-	if (mIsAboutToQuitEventConnected)
-	    {
-        disconnect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()), this, SLOT(saveActivity()));
-        mIsAboutToQuitEventConnected = false;
-	    }
+	disconnectAboutToQuitEvent();
 	
 	OstTraceFunctionExit0( CALENMONTHVIEW_LAUNCHDAYVIEW_EXIT );
+}
+
+/*!
+disconnects for the aboutToQuit events
+ */
+void CalenMonthView::disconnectAboutToQuitEvent()
+{
+	OstTraceFunctionEntry0( CALENMONTHVIEW_DISCONNECTABOUTTOQUITEVENT_ENTRY );
+	
+	if (mIsAboutToQuitEventConnected) {
+		disconnect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()), this, SLOT(saveActivity()));
+		mIsAboutToQuitEventConnected = false;
+	}
+	
+	OstTraceFunctionExit0( CALENMONTHVIEW_DISCONNECTABOUTTOQUITEVENT_EXIT );
 }
 
 /*!
@@ -1450,6 +1481,28 @@ void CalenMonthView::changeOrientation(Qt::Orientation orientation)
 		}
 		
 	OstTraceFunctionExit0( CALENMONTHVIEW_CHANGEORIENTATION_EXIT );
+}
+
+/*!
+ Slot to handle the change in theme
+ */
+void CalenMonthView::handleThemeChange()
+{
+    OstTraceFunctionEntry0( CALENMONTHVIEW_HANDLETHEMECHANGE_ENTRY );
+    
+    // Refresh the month view when the theme change happens
+    mWeekDaysColor = HbColorScheme::color("qtc_cal_week_day");
+    QColor monthTitleColor = HbColorScheme::color("qtc_cal_monthgrid_title");
+    
+    if (mTitleLabel && monthTitleColor.isValid()) {
+		mTitleLabel->setTextColor(monthTitleColor);
+	}
+    
+    mPreviewHeadingColor = HbColorScheme::color("qtc_cal_day_preview_heading");
+    
+    mServices.IssueCommandL(ECalenStartActiveStep);
+    
+    OstTraceFunctionExit0( CALENMONTHVIEW_HANDLETHEMECHANGE_EXIT );
 }
 
 /*!
@@ -1721,9 +1774,12 @@ void CalenMonthView::updateDayLabel()
     labels.append(mFifthDayLabel);
     labels.append(mSixthDayLabel);
     labels.append(mSeventhDayLabel);
+    QGraphicsLinearLayout* layout = static_cast<QGraphicsLinearLayout*> (mDayNameWidget->layout());
     for(int i=0;i < KCalenDaysInWeek; i++ )
         {
         labels.at(i)->setPlainText(weekDayArray[weekDayIndex]);
+        // Set the stretch factor as 1 so that each label occupies equal space
+        layout->setStretchFactor(labels.at(i), 1);
         if(weekDayIndex == KCalenDaysInWeek - 1 )//Sunday
             {
             weekDayIndex = 0;//reset to monday

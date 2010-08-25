@@ -19,6 +19,7 @@
 #include <QDateTime>
 #include <cpsettingformentryitemdataimpl.h>
 #include <HbExtendedLocale>
+#include <HbTranslator>
 
 // User includes
 #include "datetimesettingsplugin.h"
@@ -35,6 +36,8 @@
 DateTimeSettingsPlugin::DateTimeSettingsPlugin()
 {
 	OstTraceFunctionEntry0( DATETIMESETTINGSPLUGIN_DATETIMESETTINGSPLUGIN_ENTRY );
+	mTranslator = new HbTranslator("clocksettingsview");
+	mTranslator->loadCommon();
 	OstTraceFunctionExit0( DATETIMESETTINGSPLUGIN_DATETIMESETTINGSPLUGIN_EXIT );
 }
 
@@ -44,6 +47,10 @@ DateTimeSettingsPlugin::DateTimeSettingsPlugin()
 DateTimeSettingsPlugin::~DateTimeSettingsPlugin()
 {
 	OstTraceFunctionEntry0( DUP1_DATETIMESETTINGSPLUGIN_DATETIMESETTINGSPLUGIN_ENTRY );
+	if(mTranslator) {
+	    delete mTranslator;
+	    mTranslator = 0;
+	}
 	OstTraceFunctionExit0( DUP1_DATETIMESETTINGSPLUGIN_DATETIMESETTINGSPLUGIN_EXIT );
 }
 
@@ -66,7 +73,8 @@ QList<CpSettingFormItemData*> DateTimeSettingsPlugin::
 							  CpItemDataHelper &itemDataHelper) const
 {
 	OstTraceFunctionEntry0( DATETIMESETTINGSPLUGIN_CREATESETTINGFORMITEMDATA_ENTRY );
-	HbIcon icon ;
+	HbIcon icon ;	
+	
 	HbExtendedLocale locale = HbExtendedLocale::system();
 	QString timeInfo = locale.format(
 			QTime::currentTime(), r_qtn_time_usual_with_zero);
@@ -79,8 +87,8 @@ QList<CpSettingFormItemData*> DateTimeSettingsPlugin::
 	
 	QList<CpSettingFormItemData*> entryItemList;
 	CpSettingFormItemData *entryItem = new DateTimeSettingsView(
-			itemDataHelper,hbTrId("txt_cp_main_view_list_time_date"),
-			displayString,icon);
+			itemDataHelper, hbTrId("txt_cp_main_view_list_time_date"),
+			displayString,icon, 0, mTranslator);
 	entryItemList.append(entryItem);
 	OstTraceFunctionExit0( DATETIMESETTINGSPLUGIN_CREATESETTINGFORMITEMDATA_EXIT );
 	return entryItemList;

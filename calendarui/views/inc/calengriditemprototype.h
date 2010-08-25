@@ -32,15 +32,13 @@ class CalenTodayIndicatorLineDrawer;
 
 // CONSTANTS
 const QString focusIconName = "qtg_fr_cal_focused_day_ind";
-const QString eventIndname = "qtg_graf_cal_event_ind";
+const QString eventIndname = ":/qtg_graf_cal_event_ind.svg";
 
 class CalenGridItemPrototype : public HbGridViewItem
 {
 	Q_OBJECT
 
 public:
-	CalenGridItemPrototype(QColor todayIndColor, QColor activeColor, QColor inActiveColor, 
-	                       QGraphicsWidget *parent = 0);
 	CalenGridItemPrototype(QGraphicsWidget *parent = 0);
 	virtual ~CalenGridItemPrototype()
 	{
@@ -54,12 +52,14 @@ public:
 	bool canSetModelIndex(const QModelIndex& index);
 	void createPrimitives();
 
+public slots:
+
+	void handleThemeChange();
+
 private:
-	QColor mTodayUnderLineColor;
 	QColor mActiveTextColor;
 	QColor mInActiveTextColor;
 	QColor mCurrentDateColor;
-	QColor mGridBorderColor;
 	HbIconItem *mEventIndicatorItem;
 	HbTextItem *mMonthDayInfoItem;
 	HbFrameItem *mFocusIndicatorItem;
