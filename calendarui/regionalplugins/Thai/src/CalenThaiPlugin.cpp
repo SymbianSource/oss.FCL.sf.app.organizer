@@ -11,25 +11,19 @@
 *
 * Contributors:
 *
-* Description:   Calendar Thai Plugin.
+* Description:  
  *
 */
 
-
 #include "calendarui_debug.h"
 
+#include <QtGui>
+
 #include <eikenv.h>
-#include <eiklabel.h>
 #include <bautils.h>
-#include <AknBidiTextUtils.h>
-#include <AknUtils.h>
-#include <avkon.hrh>
-
-#include <AknsSkinInstance.h>
-#include <AknsUtils.h>
-#include <gulcolor.h>
-
-
+#include <qstring.h>
+#include <hblabel.h>
+#include <hbwidget.h>
 #include "CalenThaiPlugin.h"
 
 
@@ -77,25 +71,13 @@ CCalenThaiPlugin* CCalenThaiPlugin::NewL(MCalenServices* aServices)
 CCalenThaiPlugin::~CCalenThaiPlugin()
     {
     TRACE_ENTRY_POINT;
-    
-    if(iLabelControl)
-        {
-        delete iLabelControl;
-        iLabelControl = NULL;
-        }
- 	
- 	if(iInfoBarText)
- 	    {
- 	    delete iInfoBarText;
- 	    iInfoBarText = NULL;
- 	    }
- 	
-	if ( iServices )
+
+    if (iServices)
         {
         iServices->CancelNotifications(this);
         iServices->Release();
         }
-    
+
     TRACE_EXIT_POINT;
     }
 
@@ -104,8 +86,7 @@ CCalenThaiPlugin::~CCalenThaiPlugin()
 // ----------------------------------------------------------------------------
 //
 CCalenThaiPlugin::CCalenThaiPlugin(MCalenServices* aServices)
-    : iServices(aServices),
-      iInfoBarText(NULL)
+    : iServices(aServices)
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
@@ -118,31 +99,7 @@ CCalenThaiPlugin::CCalenThaiPlugin(MCalenServices* aServices)
 void CCalenThaiPlugin::ConstructL()
     {
     TRACE_ENTRY_POINT;
-    iServices->RegisterForNotificationsL( this, ECalenNotifyContextChanged );
-    iLabelControl = CCalenPluginLabel::NewL(*this);
-    TRACE_EXIT_POINT;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenThaiPlugin::SetLabelContentL
-// ----------------------------------------------------------------------------
-//
-void CCalenThaiPlugin::SetLabelContentL( CEikLabel& aLabel ) 
-    {
-    TRACE_ENTRY_POINT;
-    const CFont*  labelFont = NULL;
-    labelFont = AknLayoutUtils::FontFromId(EAknLogicalFontPrimarySmallFont,NULL);
-    aLabel.SetFont( labelFont );
-    aLabel.SetLabelAlignment(ELayoutAlignCenter);
-    aLabel.SetTextL( iThaiYearText );
-    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
-    TRgb color;
-    TInt error = AknsUtils::GetCachedColor(skin, color,
-            KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6);
-    if (error == KErrNone)
-        {
-        aLabel.OverrideColorL(EColorLabelText, color);
-        }
+    iServices->RegisterForNotificationsL(this, ECalenNotifyContextChanged);
     TRACE_EXIT_POINT;
     }
 
@@ -158,26 +115,6 @@ void CCalenThaiPlugin::UpdateLocalizerInfoL()
     TRACE_EXIT_POINT;
 	}
 
-// ----------------------------------------------------------------------------
-// CCalenThaiPlugin::GetCustomViewsL
-// ----------------------------------------------------------------------------
-//
-void CCalenThaiPlugin::GetCustomViewsL(  RPointerArray<CCalenView>& 
-                                             /*aCustomViewArray */)
-	{
-	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;
-	}
-// ----------------------------------------------------------------------------
-// CCalenThaiPlugin::GetCustomSettingsL
-// ----------------------------------------------------------------------------
-//
-void CCalenThaiPlugin::GetCustomSettingsL( RPointerArray<CAknSettingItem>& 
-                                                  /*aCustomSettingArray */)
-	{
-	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;
-	}
 
 // ----------------------------------------------------------------------------
 // CCalenThaiPlugin::HandleCommandL
@@ -190,97 +127,50 @@ TBool CCalenThaiPlugin::HandleCommandL( const TCalenCommand&
 	TRACE_EXIT_POINT;
 	return EFalse;
 	}
-
-// ----------------------------------------------------------------------------
-// CCalenThaiPlugin::CalenCommandHandlerExtensionL
-//
-// ----------------------------------------------------------------------------
-//
-TAny* CCalenThaiPlugin::CalenCommandHandlerExtensionL( TUid /*aExtensionUid*/ )
-    {
-    TRACE_ENTRY_POINT;
-		TRACE_EXIT_POINT;
-		return NULL;
-    }
-
 // ----------------------------------------------------------------------------
 // CCalenThaiPlugin::InfobarL
 // This function is called in case of Avkon views
 // ----------------------------------------------------------------------------
 //
-CCoeControl* CCalenThaiPlugin::InfobarL( const TRect& aRect )
+HbWidget* CCalenThaiPlugin::InfobarL( )
 	{
 	TRACE_ENTRY_POINT;
-	if(!iLabelControl)
-	    {
-	    return NULL;
-	    }
-	    
-	//Update the local information based on current context
-    //from framework.    
-	UpdateLocalizerInfoL(); 
-	//Set the content for the label 
-	iLabelControl->SetRect(aRect);
-	SetLabelContentL(*iLabelControl);
+
+    CalenPluginLabel* labelControl = new CalenPluginLabel();
+    TRAP_IGNORE(UpdateLocalizerInfoL());
+    QString text = QString::fromUtf16(iThaiYearText.Ptr(),
+            iThaiYearText.Length());
+    labelControl->setPlainText(text);
     TRACE_EXIT_POINT;
-    return iLabelControl;
+    return labelControl;
+
     }
 
 // ----------------------------------------------------------------------------
-// CCalenThaiPlugin::InfobarL
-// This function is called in case of Hitchcock views
+// CCalenThaiPlugin::InfobarTextL
+// This function is called to get Infobar text
 // ----------------------------------------------------------------------------
 //
-const TDesC& CCalenThaiPlugin::InfobarL()
+QString* CCalenThaiPlugin::InfobarTextL()
+    {
+	TRACE_ENTRY_POINT;
+    TRAP_IGNORE(UpdateLocalizerInfoL());
+    QString text = QString::fromUtf16(iThaiYearText.Ptr(),iThaiYearText.Length());
+	TRACE_EXIT_POINT;
+    return (new QString(text));
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenThaiPlugin::CustomiseMenu
+// This function is called to add menuitem 
+// ----------------------------------------------------------------------------
+//
+void CCalenThaiPlugin::CustomiseMenu(HbMenu* aHbMenu)
     {
     TRACE_ENTRY_POINT;
-    if(iInfoBarText)
-        {
-        delete iInfoBarText;
-        iInfoBarText = NULL;
-        }
-        
-    //Update the local information based on current context
-    //from framework.
-    UpdateLocalizerInfoL(); 
-    iInfoBarText = iThaiYearText.AllocLC();
-    CleanupStack::Pop();
-    
+	Q_UNUSED(aHbMenu);
     TRACE_EXIT_POINT;
-    return *iInfoBarText;
     }
-
-// ----------------------------------------------------------------------------
-// CCalenThaiPlugin::CustomPreviewPaneL
-// ----------------------------------------------------------------------------
-//
-MCalenPreview* CCalenThaiPlugin::CustomPreviewPaneL( TRect& /*aRect*/ )
-	{
-	TRACE_ENTRY_POINT
-	TRACE_EXIT_POINT
-	return NULL;
-	}
-
-// ----------------------------------------------------------------------------
-// CCalenThaiPlugin::PreviewPaneL
-// ----------------------------------------------------------------------------
-//
-CCoeControl* CCalenThaiPlugin::PreviewPaneL(  TRect& /*aRect*/ )
-	{
-	TRACE_ENTRY_POINT;
-	UpdateLocalizerInfoL();
-	if(iLabelControl)
-        {
-        delete iLabelControl;
-        iLabelControl = NULL;
-        }
-    iLabelControl = CCalenPluginLabel::NewL(*this);
-	SetLabelContentL(*iLabelControl);
-	
-	TRACE_EXIT_POINT;
-	return iLabelControl;
-	}
-
 // ----------------------------------------------------------------------------
 // CCalenThaiPlugin::HandleNotification
 // ----------------------------------------------------------------------------
@@ -296,122 +186,44 @@ void CCalenThaiPlugin::HandleNotification(const TCalenNotification aNotification
 		
 	}
 // ----------------------------------------------------------------------------
-// CCalenThaiPlugin::CommandHandlerL
+// CCalenEditorsPlugin::CommandHandlerL
 // ----------------------------------------------------------------------------
-//
-MCalenCommandHandler* CCalenThaiPlugin::CommandHandlerL( TInt 
-                                                 /*aCommand*/)
-	{
-	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;
-	return NULL;
-	}
-// ----------------------------------------------------------------------------
-// CCalenThaiPlugin::RemoveViewsFromCycle
-// ----------------------------------------------------------------------------
-//
-void CCalenThaiPlugin::RemoveViewsFromCycle( RArray<TInt>& /*aViews*/ )
-	{
-	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;
-	}
-
-// ----------------------------------------------------------------------------
-// CCalenThaiPlugin::CanBeEnabledDisabled
-// ----------------------------------------------------------------------------
-//
-TBool CCalenThaiPlugin::CanBeEnabledDisabled()
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return ETrue;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenThaiPlugin::CalenCustomisationExtensionL
-// ----------------------------------------------------------------------------
-//
-TAny* CCalenThaiPlugin::CalenCustomisationExtensionL( TUid /*aExtensionUid*/ )
-    {
-    TRACE_ENTRY_POINT;
-		TRACE_EXIT_POINT;
-		return NULL;
-    }
-// ----------------------------------------------------------------------------
-// CCalenThaiPlugin::CustomiseMenuPaneL
-// ----------------------------------------------------------------------------
-//
-TBool CCalenThaiPlugin::CustomiseMenuPaneL( TInt /*aResourceId*/, 
-                                                    CEikMenuPane* /*aMenuPane*/)
-	{
-	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;
-	return EFalse;
-	}
-// ----------------------------------------------------------------------------
-// CCalenPluginLabel::NewL
-// ----------------------------------------------------------------------------
-//
-CCalenPluginLabel* CCalenPluginLabel::NewL(CCalenThaiPlugin& aPlugin)
-	{
-	TRACE_ENTRY_POINT;
-	CCalenPluginLabel* self = new(ELeave)CCalenPluginLabel(aPlugin);
-	CleanupStack::PushL(self);
-	self->ConstructL();
-    CleanupStack::Pop(self);
-    TRACE_EXIT_POINT;
-    return self;
-	}
 	
-// ----------------------------------------------------------------------------
-// CCalenPluginLabel::CCalenPluginLabel
-// ----------------------------------------------------------------------------
-//	
-CCalenPluginLabel::CCalenPluginLabel(CCalenThaiPlugin& aPlugin) : iPlugin(aPlugin) 
+MCalenCommandHandler* CCalenThaiPlugin::CommandHandlerL( TInt aCommand )
 	{
 	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;	
+	Q_UNUSED(aCommand);
+    TRACE_EXIT_POINT;
+    return NULL;
 	}
 
-// ----------------------------------------------------------------------------
-// CCalenPluginLabel::ConstructL
-// ----------------------------------------------------------------------------
-//
-void CCalenPluginLabel::ConstructL()
-	{
+
+CalenPluginLabel::CalenPluginLabel(QGraphicsItem* parent)
+    :HbLabel(parent)
+    {
+	TRACE_ENTRY_POINT;
+    
+	setAlignment(Qt::AlignCenter);
+	setTextColor(Qt::blue);
+    setTextWrapping(Hb::TextWrapping);
+    setOpacity(12); 
+	TRACE_EXIT_POINT;	
+    }
+
+CalenPluginLabel::~CalenPluginLabel()
+    {
 	TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
-	}
-// ----------------------------------------------------------------------------
-// CCalenPluginLabel::~CCalenPluginLabel
-// ----------------------------------------------------------------------------
-//
-CCalenPluginLabel::~CCalenPluginLabel()
-	{
-	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;
-	}
-// ----------------------------------------------------------------------------
-// CCalenPluginLabel::Draw
-// ----------------------------------------------------------------------------
-//	
-void CCalenPluginLabel::Draw( const TRect& aRect) const
-	{
-	TRACE_ENTRY_POINT;
-	CEikLabel::Draw(aRect);
-	TRACE_EXIT_POINT;
-	}
-// ----------------------------------------------------------------------------
-// CCalenPluginLabel::HandlePointerEventL
-// ----------------------------------------------------------------------------
-//
-void CCalenPluginLabel::HandlePointerEventL(const TPointerEvent& 
-                                                              /*aPointerEvent*/)
-	{
-	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;
-	}
+    }
 
+void CalenPluginLabel::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
+    {
+	TRACE_ENTRY_POINT;
+	Q_UNUSED(painter);
+	Q_UNUSED(option);
+	Q_UNUSED(widget);
+    TRACE_EXIT_POINT;
+    }
 //EOF
 
 

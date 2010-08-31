@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002-2009 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies). 
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -43,8 +43,7 @@ DEFFILE         BCTestCalendar2.def
 	#if defined(__S60_)
 	    OS_LAYER_SYSTEMINCLUDE
 	#else // __S60_ not defined
-	    SYSTEMINCLUDE   /epoc32/include 
-	    SYSTEMINCLUDE   /epoc32/include/internal
+	    SYSTEMINCLUDE   /epoc32/include
 	#endif // __S60_
 
 	SOURCEPATH      ../src
@@ -54,20 +53,19 @@ DEFFILE         BCTestCalendar2.def
 	#if defined(__S60_)
 	    OS_LAYER_SYSTEMINCLUDE
 	#else // __S60_ not defined
-	    SYSTEMINCLUDE   /epoc32/include 
-	    SYSTEMINCLUDE   /epoc32/include/internal
+	    SYSTEMINCLUDE   /epoc32/include
 	#endif // __S60_
 
 	SOURCEPATH      ../src
 #endif // SBSV2
 
+APP_LAYER_SYSTEMINCLUDE
 SYSTEMINCLUDE   /epoc32/include		
 SYSTEMINCLUDE	/epoc32/include/middleware 	
 SYSTEMINCLUDE	/epoc32/include/domain/middleware 	
 SYSTEMINCLUDE	/epoc32/include/osextensions 	
 SYSTEMINCLUDE	/epoc32/include/domain/osextensions 	
 SYSTEMINCLUDE	/epoc32/include/applications
-SYSTEMINCLUDE   /epoc32/include/internal
 
 SOURCE          BCTestCalendar2.cpp
 SOURCE          BCTestCalendar2Blocks.cpp

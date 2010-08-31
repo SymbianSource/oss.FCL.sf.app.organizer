@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,10 +11,9 @@
 *
 * Contributors:
 *
-* Description:   For data of MonthView by one day.
- *
+* Description:  CalenMonthData implementation.
+*
 */
-
 
 
 //debug
@@ -22,92 +21,114 @@
 
 //  INCLUDES
 #include "calenmonthdata.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenmonthdataTraces.h"
+#endif
+
 
 
 // ================= MEMBER FUNCTIONS =======================
 
-// C++ default constructor can NOT contain any code, that
-// might leave.
+// ----------------------------------------------------------------------------
+// CalenMonthData::CalenMonthData
+// 
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
 //
-TCalenMonthData::TCalenMonthData()
-    : iDay(TInt64(0)), iHasEvents(EFalse)
+CalenMonthData::CalenMonthData()
+    : mDay(QDateTime()), mHasEvents(false)
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CALENMONTHDATA_CALENMONTHDATA_ENTRY );
+
+    OstTraceFunctionExit0( CALENMONTHDATA_CALENMONTHDATA_EXIT );
     }
 
-// C++ constructor can NOT contain any code, that
-// might leave.
-//
-// -----------------------------------------------------------------------------
-// ?classname::?member_function
-// ?implementation_description
+// ----------------------------------------------------------------------------
+// CalenMonthData::CalenMonthData
+// 
 // (other items were commented in a header).
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 //
-TCalenMonthData::TCalenMonthData
-(TTime aDay)
-    : iDay(aDay), iHasEvents(EFalse)
+CalenMonthData::CalenMonthData
+(QDateTime day)
+    : mDay(day), mHasEvents(false)
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( DUP1_CALENMONTHDATA_CALENMONTHDATA_ENTRY );
+    
+    OstTraceFunctionExit0( DUP1_CALENMONTHDATA_CALENMONTHDATA_EXIT );
     }
 
-// Destructor
-// -----------------------------------------------------------------------------
-// ?classname::?member_function
-// ?implementation_description
+// ----------------------------------------------------------------------------
+// CalenMonthData::~CalenMonthData
+// 
 // (other items were commented in a header).
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 //
-TCalenMonthData::~TCalenMonthData()
+CalenMonthData::~CalenMonthData()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( DUP2_CALENMONTHDATA_CALENMONTHDATA_ENTRY );
+    
+    OstTraceFunctionExit0( DUP2_CALENMONTHDATA_CALENMONTHDATA_EXIT );
     }
 
 // ---------------------------------------------------------
-// TCalenMonthData::Day
+// CalenMonthData::Day
 // return day
 // (other items were commented in a header).
 // ---------------------------------------------------------
 //
-TTime TCalenMonthData::Day()
+QDateTime CalenMonthData::Day()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENMONTHDATA_DAY_ENTRY );
     
-    TRACE_EXIT_POINT;
-    return iDay;
+    OstTraceFunctionExit0( CALENMONTHDATA_DAY_EXIT );
+    return mDay;
     }
 
 // -----------------------------------------------------------------------------
-// ?classname::?member_function
+// ?classname::SetHasEvents
 // ?implementation_description
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void TCalenMonthData::SetHasEvents(TBool aHasEvents)
+void CalenMonthData::SetHasEvents(bool hasEvents)
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CALENMONTHDATA_SETHASEVENTS_ENTRY );
     
-    iHasEvents = aHasEvents;
+    mHasEvents = hasEvents;
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CALENMONTHDATA_SETHASEVENTS_EXIT );
     }
 
 // -----------------------------------------------------------------------------
-// ?classname::?member_function
+// ?classname::HasEvents
 // ?implementation_description
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-TBool TCalenMonthData::HasEvents()
+bool CalenMonthData::HasEvents()
     {
-    TRACE_ENTRY_POINT;
-          
-    TRACE_EXIT_POINT;
-    return iHasEvents;
+    OstTraceFunctionEntry0( CALENMONTHDATA_HASEVENTS_ENTRY );
+    
+    OstTraceFunctionExit0( CALENMONTHDATA_HASEVENTS_EXIT );
+    return mHasEvents;
     }
 
+void CalenMonthData::setActive(bool isActive)
+    {
+    OstTraceFunctionEntry0( CALENMONTHDATA_SETACTIVE_ENTRY );
+    
+    mIsActive = isActive;
+    
+    OstTraceFunctionExit0( CALENMONTHDATA_SETACTIVE_EXIT );
+    }
 
+bool CalenMonthData::isActive()
+    {
+    OstTraceFunctionEntry0( CALENMONTHDATA_ISACTIVE_ENTRY );
+    
+    OstTraceFunctionExit0( CALENMONTHDATA_ISACTIVE_EXIT );
+    return mIsActive;
+    }
 // End of File

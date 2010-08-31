@@ -201,13 +201,7 @@ public:
     * @since S60 5.0
     */
     void PublishAlarmResultL(const TAlarmSourceResultValues aResult);
-	
-private: // methods  
-    /**
-    * 
-    * @since TB9.2
-    */
-    void SilenceAlarm();
+
 private: // constructors
 
     /** 

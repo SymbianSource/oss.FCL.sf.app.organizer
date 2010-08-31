@@ -15,31 +15,30 @@
 *
 */
 
-#include <avkon.hrh>
-#include <coemain.h>
-#include <aknappui.h>
 
 // includes
 #include "calendarui_debug.h"           // Debug macros
+
 #include "calenstatemachine.h"
 #include "calenstate.h"
 #include "calenidlestate.h"
-#include "calenbackgroundstate.h"
+#include "calenpopulationstate.h"
 #include "calendeletingstate.h"
+#include "calenbackgroundstate.h"
 #include "caleneditingstate.h"
 #include "calenexitingstate.h"
 #include "calenhelpstate.h"
-#include "calenpopulationstate.h"
 #include "calenprintingstate.h"
 #include "calensendingstate.h"
 #include "calensettingsstate.h"
 #include "calenviewingstate.h"
-#include "calenmapstate.h"
-#include "calenattachmentstate.h"
-#include "calenalarmstate.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenstatemachineTraces.h"
+#endif
+
 
 const TInt KHashLength = 64;
-
 // ----------------------------------------------------------------------------
 // CCalenStateMachine::NewL
 // Two phased constructor.
@@ -48,14 +47,14 @@ const TInt KHashLength = 64;
 //
 CCalenStateMachine* CCalenStateMachine::NewL( CCalenController& aController )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENSTATEMACHINE_NEWL_ENTRY );
+    
     CCalenStateMachine* self = new ( ELeave ) CCalenStateMachine( aController );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENSTATEMACHINE_NEWL_EXIT );
     return self;
     }
 
@@ -69,8 +68,9 @@ CCalenStateMachine::CCalenStateMachine( CCalenController& aController )
     : iController( aController ) , 
       iOutstandingNotifications(&::HashCalenNotificationFunction,&::HashCalenNotificationIdentityRelation)
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENSTATEMACHINE_CCALENSTATEMACHINE_ENTRY );
+    
+    OstTraceFunctionExit0( CCALENSTATEMACHINE_CCALENSTATEMACHINE_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -81,8 +81,8 @@ CCalenStateMachine::CCalenStateMachine( CCalenController& aController )
 //        
 void CCalenStateMachine::ConstructL()
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENSTATEMACHINE_CONSTRUCTL_ENTRY );
+    
     CCalenState* state = NULL;
 
     iOutstandingNotifications.ReserveL(KHashLength);
@@ -129,23 +129,10 @@ void CCalenStateMachine::ConstructL()
     state = CCalenExitingState::NewLC( iController, iOutstandingNotifications );
     iStates.InsertL( state, ECalenExitingState );
     CleanupStack::Pop( state );
-    
-    state = CCalenMapState::NewLC( iController, iOutstandingNotifications );
-    iStates.InsertL( state, ECalenMapState );
-    CleanupStack::Pop( state );
-    
-    state = CCalenAttachmentState::NewLC( iController, iOutstandingNotifications );
-    iStates.InsertL( state, ECalenAttachmentState );
-    CleanupStack::Pop( state );
-	
-	state = CCalenAlarmState::NewLC( iController, iOutstandingNotifications );
-    iStates.InsertL( state, ECalenAlarmState );
-    CleanupStack::Pop( state );
-
 
     ASSERT( iStates.Count() == KCalenLastState );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENSTATEMACHINE_CONSTRUCTL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -156,12 +143,12 @@ void CCalenStateMachine::ConstructL()
 //
 CCalenStateMachine::~CCalenStateMachine()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENSTATEMACHINE_CCALENSTATEMACHINE_ENTRY );
     
     iOutstandingNotifications.Close();
     iStates.ResetAndDestroy();
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CCALENSTATEMACHINE_CCALENSTATEMACHINE_EXIT );
     }     
 
 // ----------------------------------------------------------------------------
@@ -172,16 +159,26 @@ CCalenStateMachine::~CCalenStateMachine()
 //
 void CCalenStateMachine::HandleNotification(const TCalenNotification aNotification )
     {
-    TRACE_ENTRY_POINT;
-
-	TRAPD(error,iStates[iCurrentState]->HandleNotificationL( aNotification, *this)); 
-    if(error!=KErrNone)
-		{
-		// do avoid warning
-		}
-	
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENSTATEMACHINE_HANDLENOTIFICATION_ENTRY );
+    
+	TRAP_IGNORE(iStates[iCurrentState]->HandleNotificationL( aNotification, *this)); 
+   
+    OstTraceFunctionExit0( CCALENSTATEMACHINE_HANDLENOTIFICATION_EXIT );
     }
+
+// ----------------------------------------------------------------------------
+// CCalenStateMachine::CurrentState
+// Returns the current state in which calendar is.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+CCalenStateMachine::TCalenStateIndex CCalenStateMachine::CurrentState()
+{
+    OstTraceFunctionEntry0( CCALENSTATEMACHINE_CURRENTSTATE_ENTRY );
+    
+	OstTraceFunctionExit0( CCALENSTATEMACHINE_CURRENTSTATE_EXIT );
+	return iCurrentState;
+}
 
 // ----------------------------------------------------------------------------
 // CCalenStateMachine::HandleCommandL
@@ -191,18 +188,11 @@ void CCalenStateMachine::HandleNotification(const TCalenNotification aNotificati
 //
 TBool CCalenStateMachine::HandleCommandL( const TCalenCommand& aCommand )
     {
-    TRACE_ENTRY_POINT;
-
-    if( aCommand.Command() == EAknSoftkeyExit 
-        || aCommand.Command() == EAknCmdExit 
-    	|| aCommand.Command() == EEikCmdExit )
-        {
-        iAvkonAppUi->Exit();
-        }
+    OstTraceFunctionEntry0( CCALENSTATEMACHINE_HANDLECOMMANDL_ENTRY );
     
     TBool cmdUsed = iStates[iCurrentState]->HandleCommandL( aCommand, *this);
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENSTATEMACHINE_HANDLECOMMANDL_EXIT );
     return cmdUsed;
     }
 
@@ -214,8 +204,8 @@ TBool CCalenStateMachine::HandleCommandL( const TCalenCommand& aCommand )
 //
 void CCalenStateMachine::CancelPreviousCmd()
 	{
-	TRACE_ENTRY_POINT;
-	
+    OstTraceFunctionEntry0( CCALENSTATEMACHINE_CANCELPREVIOUSCMD_ENTRY );
+    
 	TCalenStateIndex previousState = iStates[iCurrentState]->PreviousState();
 	iStates[iCurrentState]->CancelExecutingCmd();
 	
@@ -224,7 +214,7 @@ void CCalenStateMachine::CancelPreviousCmd()
 		iCurrentState = previousState;
 		}
 	
-	TRACE_EXIT_POINT;
+	OstTraceFunctionExit0( CCALENSTATEMACHINE_CANCELPREVIOUSCMD_EXIT );
 	}
 
 // ----------------------------------------------------------------------------
@@ -235,10 +225,10 @@ void CCalenStateMachine::CancelPreviousCmd()
 //	
 CCalenStateMachine::TCalenStateIndex CCalenStateMachine::GetCurrentState()
 	{
-	TRACE_ENTRY_POINT;
-	TRACE_EXIT_POINT;
-	
-	return iCurrentState;
+    OstTraceFunctionEntry0( CCALENSTATEMACHINE_GETCURRENTSTATE_ENTRY );
+    
+    OstTraceFunctionExit0( CCALENSTATEMACHINE_GETCURRENTSTATE_EXIT );
+    return iCurrentState;
 	}
 
 // ----------------------------------------------------------------------------
@@ -249,11 +239,11 @@ CCalenStateMachine::TCalenStateIndex CCalenStateMachine::GetCurrentState()
 //		
 void CCalenStateMachine::SetCurrentState(const TCalenStateIndex& aState)
 	{
-	TRACE_ENTRY_POINT;
-	
+    OstTraceFunctionEntry0( CCALENSTATEMACHINE_SETCURRENTSTATE_ENTRY );
+    
 	iCurrentState = aState;
 	
-	TRACE_EXIT_POINT;
+	OstTraceFunctionExit0( CCALENSTATEMACHINE_SETCURRENTSTATE_EXIT );
 	}
 
 // ----------------------------------------------------------------------------
@@ -264,11 +254,11 @@ void CCalenStateMachine::SetCurrentState(const TCalenStateIndex& aState)
 //
 void CCalenStateMachine::SetCurrentPreviousState(const TCalenStateIndex& aState)
 	{
-	TRACE_ENTRY_POINT;
-		
+    OstTraceFunctionEntry0( CCALENSTATEMACHINE_SETCURRENTPREVIOUSSTATE_ENTRY );
+    
 	iStates[iCurrentState]->SetPreviousState(aState);
 	
-	TRACE_EXIT_POINT;
+	OstTraceFunctionExit0( CCALENSTATEMACHINE_SETCURRENTPREVIOUSSTATE_EXIT );
 	}
 
 // ----------------------------------------------------------------------------
@@ -279,10 +269,10 @@ void CCalenStateMachine::SetCurrentPreviousState(const TCalenStateIndex& aState)
 //	
 void CCalenStateMachine::ActivateCurrentStateL()
 	{
-	TRACE_ENTRY_POINT;
-		
+    OstTraceFunctionEntry0( CCALENSTATEMACHINE_ACTIVATECURRENTSTATEL_ENTRY );
+    
 	iStates[iCurrentState]->HandleStateActivationL(*this);
 		
-	TRACE_EXIT_POINT;	
+	OstTraceFunctionExit0( CCALENSTATEMACHINE_ACTIVATECURRENTSTATEL_EXIT );
 	}
 // End of file

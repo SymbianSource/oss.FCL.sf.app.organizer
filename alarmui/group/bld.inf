@@ -33,46 +33,37 @@ PRJ_EXPORTS
 ../inc/alarmsourcecontextdef.h  |../../inc/alarmsourcecontextdef.h
 
 // context framework scripts
-alarmui_snooze.rul          /epoc32/release/winscw/udeb/z/private/10282bc4/rules/alarmui_snooze.rul
-alarmui_snooze.rul          /epoc32/release/winscw/urel/z/private/10282bc4/rules/alarmui_snooze.rul
-alarmui_snooze.rul          /epoc32/data/z/private/10282bc4/rules/alarmui_snooze.rul
-alarmui_activate.rul        /epoc32/release/winscw/udeb/z/private/10282bc4/rules/alarmui_activate.rul
-alarmui_activate.rul        /epoc32/release/winscw/urel/z/private/10282bc4/rules/alarmui_activate.rul
-alarmui_activate.rul        /epoc32/data/z/private/10282bc4/rules/alarmui_activate.rul
-alarmui_stop.rul            /epoc32/release/winscw/udeb/z/private/10282bc4/rules/alarmui_stop.rul
-alarmui_stop.rul            /epoc32/release/winscw/urel/z/private/10282bc4/rules/alarmui_stop.rul
-alarmui_stop.rul            /epoc32/data/z/private/10282bc4/rules/alarmui_stop.rul
-alarmui_silence.rul	    /epoc32/data/z/private/10282bc4/rules/alarmui_silence.rul	
-alarmui_silence.rul	    /epoc32/release/winscw/urel/z/private/10282bc4/rules/alarmui_silence.rul	
-alarmui_silence.rul	    /epoc32/release/winscw/udeb/z/private/10282bc4/rules/alarmui_silence.rul	
+alarmuisnooze.rul           /epoc32/release/winscw/udeb/z/private/10282bc4/rules/alarmuisnooze.rul
+alarmuisnooze.rul           /epoc32/release/winscw/urel/z/private/10282bc4/rules/alarmuisnooze.rul
+alarmuisnooze.rul           /epoc32/data/z/private/10282bc4/rules/alarmuisnooze.rul
 
 
 // alarm tones
 // wins
-../DataSrc/alarm.aac        /epoc32/release/wins/udeb/z/data/sounds/digital/alarm.aac
-../DataSrc/clock.aac        /epoc32/release/wins/udeb/z/data/sounds/digital/clock.aac
-../DataSrc/alarm.aac        /epoc32/release/wins/urel/z/data/sounds/digital/alarm.aac
-../DataSrc/clock.aac        /epoc32/release/wins/urel/z/data/sounds/digital/clock.aac
+../datasrc/alarm.aac        /epoc32/release/wins/udeb/z/data/sounds/digital/alarm.aac
+../datasrc/clock.aac        /epoc32/release/wins/udeb/z/data/sounds/digital/clock.aac
+../datasrc/alarm.aac        /epoc32/release/wins/urel/z/data/sounds/digital/alarm.aac
+../datasrc/clock.aac        /epoc32/release/wins/urel/z/data/sounds/digital/clock.aac
 // winscw
-../DataSrc/alarm.aac        /epoc32/release/winscw/udeb/z/data/sounds/digital/alarm.aac
-../DataSrc/clock.aac        /epoc32/release/winscw/udeb/z/data/sounds/digital/clock.aac
-../DataSrc/alarm.aac        /epoc32/release/winscw/urel/z/data/sounds/digital/alarm.aac
-../DataSrc/clock.aac        /epoc32/release/winscw/urel/z/data/sounds/digital/clock.aac
+../datasrc/alarm.aac        /epoc32/release/winscw/udeb/z/data/sounds/digital/alarm.aac
+../datasrc/clock.aac        /epoc32/release/winscw/udeb/z/data/sounds/digital/clock.aac
+../datasrc/alarm.aac        /epoc32/release/winscw/urel/z/data/sounds/digital/alarm.aac
+../datasrc/clock.aac        /epoc32/release/winscw/urel/z/data/sounds/digital/clock.aac
 // thumb
-../DataSrc/alarm.aac        /epoc32/release/thumb/udeb/z/data/sounds/digital/alarm.aac
-../DataSrc/clock.aac        /epoc32/release/thumb/udeb/z/data/sounds/digital/clock.aac
-../DataSrc/alarm.aac        /epoc32/release/thumb/urel/z/data/sounds/digital/alarm.aac
-../DataSrc/clock.aac        /epoc32/release/thumb/urel/z/data/sounds/digital/clock.aac
+../datasrc/alarm.aac        /epoc32/release/thumb/udeb/z/data/sounds/digital/alarm.aac
+../datasrc/clock.aac        /epoc32/release/thumb/udeb/z/data/sounds/digital/clock.aac
+../datasrc/alarm.aac        /epoc32/release/thumb/urel/z/data/sounds/digital/alarm.aac
+../datasrc/clock.aac        /epoc32/release/thumb/urel/z/data/sounds/digital/clock.aac
 // armv5
-../DataSrc/alarm.aac        /epoc32/data/z/data/sounds/digital/alarm.aac
-../DataSrc/clock.aac        /epoc32/data/z/data/sounds/digital/clock.aac
+../datasrc/alarm.aac        /epoc32/data/z/data/sounds/digital/alarm.aac
+../datasrc/clock.aac        /epoc32/data/z/data/sounds/digital/clock.aac
 
 //stubsis is added to provide IAD
 ../stubsis/alarmui_stub.sis   										/epoc32/data/z/system/install/alarmui_stub.sis
 
 PRJ_MMPFILES
-AlmAlert.mmp
-AknAlarmService.mmp
+almalert.mmp
+aknalarmservice.mmp
 
 PRJ_TESTMMPFILES
 // none

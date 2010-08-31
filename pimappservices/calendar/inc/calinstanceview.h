@@ -152,8 +152,12 @@ public:
 	IMPORT_C const CCalSortCriteria& SortCriteria() const;
 #endif
 	
+	IMPORT_C void SetFavouriteFilter(
+			const CalCommon::TCalFavouriteFilter& aFavouriteFilter);
+
 	const CalCommon::TCalPriorityRange& PriorityRange() const;
-	
+	const CalCommon::TCalFavouriteFilter& FavouriteFilter() const;
+
 private:
 	CCalFindInstanceSettings(CalCommon::TCalViewFilter aFilter, const CalCommon::TCalTimeRange& aTimeRange);
 	void ConstructL();
@@ -167,6 +171,7 @@ private:
 #ifdef SYMBIAN_CALENDAR_ENHANCEDSEARCHANDSORT
 	CCalSortCriteria*  				iSortCriteria;
 #endif
+	CalCommon::TCalFavouriteFilter iFavouriteFilter;
 	};
 
 #ifdef SYMBIAN_CALENDAR_ENHANCEDSEARCHANDSORT

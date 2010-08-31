@@ -22,6 +22,10 @@
 #include "calencontroller.h"
 #include "calenstatemachine.h"
 #include "calennotifier.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenviewingstateTraces.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // CCalenViewingState::NewLC
@@ -30,13 +34,13 @@
 CCalenViewingState* CCalenViewingState::NewLC( CCalenController& aController,
                                                    RHashSet<TCalenNotification>& aOutstandingNotifications )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENVIEWINGSTATE_NEWLC_ENTRY );
+    
     CCalenViewingState* self = new ( ELeave ) CCalenViewingState( aController,aOutstandingNotifications );
     CleanupStack::PushL( self );
     self->ConstructL();
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENVIEWINGSTATE_NEWLC_EXIT );
     return self;
     }
 
@@ -46,10 +50,11 @@ CCalenViewingState* CCalenViewingState::NewLC( CCalenController& aController,
 // ----------------------------------------------------------------------------
 void CCalenViewingState::ConstructL()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENVIEWINGSTATE_CONSTRUCTL_ENTRY );
+    
     BaseConstructL();
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENVIEWINGSTATE_CONSTRUCTL_EXIT );
     }
     
 // ----------------------------------------------------------------------------
@@ -60,9 +65,9 @@ CCalenViewingState::CCalenViewingState( CCalenController& aController,
                                                     RHashSet<TCalenNotification>& aOutstandingNotifications )
     : CCalenState( aController, aOutstandingNotifications )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENVIEWINGSTATE_CCALENVIEWINGSTATE_ENTRY );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENVIEWINGSTATE_CCALENVIEWINGSTATE_EXIT );
     }
     
 // ----------------------------------------------------------------------------
@@ -71,9 +76,9 @@ CCalenViewingState::CCalenViewingState( CCalenController& aController,
 // ----------------------------------------------------------------------------    
 CCalenViewingState::~CCalenViewingState()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENVIEWINGSTATE_CCALENVIEWINGSTATE_ENTRY );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CCALENVIEWINGSTATE_CCALENVIEWINGSTATE_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -83,7 +88,7 @@ CCalenViewingState::~CCalenViewingState()
 TBool CCalenViewingState::HandleCommandL( const TCalenCommand& aCommand,
                                         CCalenStateMachine& aStateMachine )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENVIEWINGSTATE_HANDLECOMMANDL_ENTRY );
     
     TInt cmd = aCommand.Command();
     MCalenCommandHandler* handler = iController.GetCommandHandlerL( cmd );
@@ -99,6 +104,7 @@ TBool CCalenViewingState::HandleCommandL( const TCalenCommand& aCommand,
 	    case ECalenEditSeries:
         case ECalenRestoreTodo:
         case ECalenCompleteTodo:
+        case ECalenEditEntryFromViewer:
       		{
     		// set the previous state as viewing state
     		CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
@@ -121,6 +127,7 @@ TBool CCalenViewingState::HandleCommandL( const TCalenCommand& aCommand,
         case ECalenDeleteCurrentEntry:
         case ECalenDeleteSeries:
         case ECalenDeleteCurrentOccurrence:
+        case ECalenDeleteEntryFromViewer:
     		{    
 			// set the previous state as viewing state
             CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
@@ -140,29 +147,12 @@ TBool CCalenViewingState::HandleCommandL( const TCalenCommand& aCommand,
 		case ECalenGetLocation:
     	case ECalenShowLocation:
         case ECalenGetLocationAndSave:
-    		{
-    		CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
-	        SetCurrentState( aStateMachine, CCalenStateMachine::ECalenMapState );
-	        SetCurrentPreviousState( aStateMachine, cachedState );
-	        ActivateCurrentStateL(aStateMachine);        
-	        
-	        cmdUsed = ETrue;
-	        break;	
+    		{    		
     		}
-        case ECalenViewAttachmentList:
-        case ECalenAddAttachmentFromViewer:    
-            {
-            CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
-            SetCurrentState( aStateMachine, CCalenStateMachine::ECalenAttachmentState );
-            SetCurrentPreviousState( aStateMachine, cachedState );
-            ActivateCurrentStateL(aStateMachine);        
-            cmdUsed = ETrue;
-            }
-            break;    		
         }
     RequestCallbackL( handler, aCommand );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENVIEWINGSTATE_HANDLECOMMANDL_EXIT );
     return cmdUsed;
     }
 
@@ -173,8 +163,8 @@ TBool CCalenViewingState::HandleCommandL( const TCalenCommand& aCommand,
 void CCalenViewingState::HandleNotificationL(const TCalenNotification& aNotification,
                                               CCalenStateMachine& aStateMachine )
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENVIEWINGSTATE_HANDLENOTIFICATIONL_ENTRY );
+    
     switch( aNotification )
         {
         case ECalenNotifyEntryClosed:
@@ -197,7 +187,7 @@ void CCalenViewingState::HandleNotificationL(const TCalenNotification& aNotifica
             break;
         }
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENVIEWINGSTATE_HANDLENOTIFICATIONL_EXIT );
     } 
     
 // ----------------------------------------------------------------------------
@@ -206,7 +196,7 @@ void CCalenViewingState::HandleNotificationL(const TCalenNotification& aNotifica
 // ----------------------------------------------------------------------------
 void CCalenViewingState::HandleStateActivationL(CCalenStateMachine& aStateMachine)
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENVIEWINGSTATE_HANDLESTATEACTIVATIONL_ENTRY );
     
     if( iOutstandingNotifications.Find(ECalenNotifyEntryDeleted) )
     	{
@@ -217,7 +207,8 @@ void CCalenViewingState::HandleStateActivationL(CCalenStateMachine& aStateMachin
     	{
     	CCalenState::HandleStateActivationL(aStateMachine);
     	}
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CCALENVIEWINGSTATE_HANDLESTATEACTIVATIONL_EXIT );
     }    
     
  // end of file

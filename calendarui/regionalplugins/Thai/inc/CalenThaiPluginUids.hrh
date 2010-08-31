@@ -11,14 +11,13 @@
 *
 * Contributors:
 *
-* Description: Caledar Thai Plugin.
+* Description:
 *
 */
-
 
 
 #define SYMBIAN_ECOM_PLUGIN_UID              0x10009D8D
 #define CALENTHAIPLUGIN_DLL_UID              0x102823A9 
 #define CALENTHAIPLUGIN_IMPLEMENTATION_UID   0x102823A7
-#define CALENUIPLUGININTERFACE_ECOM_INTERFACE_UID       0x1028336F
+#define CALENUIPLUGININTERFACE_ECOM_INTERFACE_UID       0x2002EA3B
 

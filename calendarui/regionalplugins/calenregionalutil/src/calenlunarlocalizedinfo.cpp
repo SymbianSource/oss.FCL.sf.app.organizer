@@ -17,7 +17,12 @@
 
 
 #include "calendarui_debug.h"
-#include "calenlunarlocalizedinfo.h"
+#include "CalenLunarLocalizedInfo.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenlunarlocalizedinfoTraces.h"
+#endif
+
 
 // -----------------------------------------------------------------------------
 // CCalenLunarLocalizedInfo::NewL
@@ -25,14 +30,13 @@
 //
 EXPORT_C CCalenLunarLocalizedInfo* CCalenLunarLocalizedInfo::NewL()
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZEDINFO_NEWL_ENTRY );
     CCalenLunarLocalizedInfo* self = new (ELeave) CCalenLunarLocalizedInfo;
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop(self);
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZEDINFO_NEWL_EXIT );
     return self;
     }
 // -----------------------------------------------------------------------------
@@ -41,8 +45,8 @@ EXPORT_C CCalenLunarLocalizedInfo* CCalenLunarLocalizedInfo::NewL()
 //
 EXPORT_C CCalenLunarLocalizedInfo::~CCalenLunarLocalizedInfo()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZEDINFO_CCALENLUNARLOCALIZEDINFO_ENTRY );
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZEDINFO_CCALENLUNARLOCALIZEDINFO_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -51,8 +55,7 @@ EXPORT_C CCalenLunarLocalizedInfo::~CCalenLunarLocalizedInfo()
 //
 CCalenLunarLocalizedInfo::CCalenLunarLocalizedInfo()
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( DUP1_CCALENLUNARLOCALIZEDINFO_CCALENLUNARLOCALIZEDINFO_ENTRY );
     iFestival.Set(KNullDesC);
     iSolarTerm.Set(KNullDesC);
     iAnimalYear.Set(KNullDesC);
@@ -60,8 +63,7 @@ CCalenLunarLocalizedInfo::CCalenLunarLocalizedInfo()
     iLunarMonthAndDay = KNullDesC;
     iFullLunarDate = KNullDesC;
     iGregorianDate = KNullDesC; 
-    
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CCALENLUNARLOCALIZEDINFO_CCALENLUNARLOCALIZEDINFO_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -70,8 +72,8 @@ CCalenLunarLocalizedInfo::CCalenLunarLocalizedInfo()
 //
 void CCalenLunarLocalizedInfo::ConstructL()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZEDINFO_CONSTRUCTL_ENTRY );
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZEDINFO_CONSTRUCTL_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -80,8 +82,7 @@ void CCalenLunarLocalizedInfo::ConstructL()
 //
 EXPORT_C const TDesC& CCalenLunarLocalizedInfo::GetField( TField aField )
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZEDINFO_GETFIELD_ENTRY );
     switch ( aField )
         {
         case EFestival:           return Festival();
@@ -93,75 +94,64 @@ EXPORT_C const TDesC& CCalenLunarLocalizedInfo::GetField( TField aField )
         case EGregorianDate:      return GregorianDate();
         default:
             ASSERT( EFalse );
+            OstTraceFunctionExit0( CCALENLUNARLOCALIZEDINFO_GETFIELD_EXIT );
             return KNullDesC;
         }
-    
-    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
 // CCalenLunarLocalizedInfo::Festival
 // -----------------------------------------------------------------------------
 //
-EXPORT_C const TDesC& CCalenLunarLocalizedInfo::Festival()
-    {
-    TRACE_ENTRY_POINT;
-    
-    return iFestival;
-    
-    TRACE_EXIT_POINT;
+EXPORT_C const TDesC& CCalenLunarLocalizedInfo::Festival() 
+    { 
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZEDINFO_FESTIVAL_ENTRY );
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZEDINFO_FESTIVAL_EXIT );
+    return iFestival; 
     }
 
 // -----------------------------------------------------------------------------
 // CCalenLunarLocalizedInfo::SolarTerm
 // -----------------------------------------------------------------------------
 //
-EXPORT_C const TDesC& CCalenLunarLocalizedInfo::SolarTerm()
+EXPORT_C const TDesC& CCalenLunarLocalizedInfo::SolarTerm() 
     {
-    TRACE_ENTRY_POINT;
-    
-    return iSolarTerm;
-    
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZEDINFO_SOLARTERM_ENTRY );
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZEDINFO_SOLARTERM_EXIT );
+    return iSolarTerm; 
     }
 
 // -----------------------------------------------------------------------------
 // CCalenLunarLocalizedInfo::FullLunarDate
 // -----------------------------------------------------------------------------
 //
-EXPORT_C const TDesC& CCalenLunarLocalizedInfo::FullLunarDate()
-    {
-    TRACE_ENTRY_POINT;
-    
-    return iFullLunarDate;
-    
-    TRACE_EXIT_POINT;
+EXPORT_C const TDesC& CCalenLunarLocalizedInfo::FullLunarDate() 
+    { 
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZEDINFO_FULLLUNARDATE_ENTRY );
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZEDINFO_FULLLUNARDATE_EXIT );
+    return iFullLunarDate; 
     }
 
 // -----------------------------------------------------------------------------
 // CCalenLunarLocalizedInfo::LunarYear
 // -----------------------------------------------------------------------------
 //
-EXPORT_C const TDesC& CCalenLunarLocalizedInfo::LunarYear()
-    {
-    TRACE_ENTRY_POINT;
-    
-    return iLunarYear;
-    
-    TRACE_EXIT_POINT;
+EXPORT_C const TDesC& CCalenLunarLocalizedInfo::LunarYear() 
+    { 
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZEDINFO_LUNARYEAR_ENTRY );
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZEDINFO_LUNARYEAR_EXIT );
+    return iLunarYear; 
     }
 
 // -----------------------------------------------------------------------------
 // CCalenLunarLocalizedInfo::LunarMonthAndDay
 // -----------------------------------------------------------------------------
 //
-EXPORT_C const TDesC& CCalenLunarLocalizedInfo::LunarMonthAndDay()
-    {
-    TRACE_ENTRY_POINT;
-    
-    return iLunarMonthAndDay;
-    
-    TRACE_EXIT_POINT;
+EXPORT_C const TDesC& CCalenLunarLocalizedInfo::LunarMonthAndDay() 
+    { 
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZEDINFO_LUNARMONTHANDDAY_ENTRY );
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZEDINFO_LUNARMONTHANDDAY_EXIT );
+    return iLunarMonthAndDay; 
     }
 
 // -----------------------------------------------------------------------------
@@ -169,24 +159,20 @@ EXPORT_C const TDesC& CCalenLunarLocalizedInfo::LunarMonthAndDay()
 // -----------------------------------------------------------------------------
 //
 EXPORT_C const TDesC& CCalenLunarLocalizedInfo::AnimalYear()
-    {
-    TRACE_ENTRY_POINT;
-    
-    return iAnimalYear;
-    
-    TRACE_EXIT_POINT;
-    }
+    { 
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZEDINFO_ANIMALYEAR_ENTRY );
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZEDINFO_ANIMALYEAR_EXIT );
+    return iAnimalYear; 
+    }   
 
 // -----------------------------------------------------------------------------
 // CCalenLunarLocalizedInfo::GregorianDate
 // -----------------------------------------------------------------------------
 //
-EXPORT_C const TDesC& CCalenLunarLocalizedInfo::GregorianDate()
-    {
-    TRACE_ENTRY_POINT;
-    
-    return iGregorianDate;
-    
-    TRACE_EXIT_POINT;
+EXPORT_C const TDesC& CCalenLunarLocalizedInfo::GregorianDate() 
+    { 
+    OstTraceFunctionEntry0( CCALENLUNARLOCALIZEDINFO_GREGORIANDATE_ENTRY );
+    OstTraceFunctionExit0( CCALENLUNARLOCALIZEDINFO_GREGORIANDATE_EXIT );
+    return iGregorianDate; 
     }
 

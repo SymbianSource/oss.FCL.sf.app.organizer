@@ -35,7 +35,7 @@
 
 EXPORT_C CAgnEntry* CAgnEntry::NewL(CCalEntry::TType aType)
 	{
-	__ASSERT_ALWAYS(aType>=CCalEntry::EAppt && aType<=CCalEntry::EAnniv, Panic(EAgmErrBadTypeEntry));
+	__ASSERT_ALWAYS(aType>=CCalEntry::EAppt && aType<=CCalEntry::ENote, Panic(EAgmErrBadTypeEntry));
 	// allocate a CAgnEntry object, which invokes the CAgnSimpleEntry new operator, but passing no allocator
 	// this makes the CAgnSimpleEntry new operator use the default new operator
 	
@@ -52,7 +52,8 @@ EXPORT_C CAgnEntry* CAgnEntry::NewL(RReadStream& aStream)
 	
 	__ASSERT_ALWAYS(type==CCalEntry::EAppt || type==CCalEntry::EEvent ||
 					type==CCalEntry::EAnniv || type==CCalEntry::ETodo ||
-					type==CCalEntry::EReminder, User::Leave(KErrCorrupt));
+					type==CCalEntry::EReminder || type == CCalEntry::ENote,
+					User::Leave(KErrCorrupt));
 
 	CAgnEntry* entry = CAgnEntry::NewL(type);
 	CleanupStack::PushL(entry);
@@ -237,9 +238,9 @@ data is not included in the comparison, except for the replication status.
 		
 	// Compare the user integer.
 	if (UserInt() != aEntry.UserInt())
-	    {
-	    return EFalse;
-	    }	
+		{
+		return EFalse;
+		}	
 	
 	if ( DTStampUtcL() != aEntry.DTStampUtcL() )
 		{
@@ -685,7 +686,7 @@ void CAgnEntry::ExternalizeEntryL(RWriteStream& aStream, TBool aToBuffer) const
 			}
 		}
 
-    // Set the user integer of the stream.
+	// Set the user integer of the stream.
 	aStream.WriteInt32L( UserInt() );
 	
 	// future DC proofing
@@ -1854,9 +1855,9 @@ Sets the user integer for this entry.
 @internalComponent
 */
 EXPORT_C void CAgnEntry::SetUserInt( TUint32 aUserInt )
-    {
-    CAgnSimpleEntry::SetUserInt(aUserInt);
-    }
+	{
+	CAgnSimpleEntry::SetUserInt(aUserInt);
+	}
 
 /**
 Gets the user integer of this entry.
@@ -1865,9 +1866,9 @@ Gets the user integer of this entry.
 @internalComponent
 */
 EXPORT_C TUint32 CAgnEntry::UserInt() const
-    {
-    return CAgnSimpleEntry::UserInt();
-    }
+	{
+	return CAgnSimpleEntry::UserInt();
+	}
 
 EXPORT_C void CAgnEntry::ExternalizeToBufferL(RWriteStream& aWriteStream) const
 /** Used for passing the data to the between client and server
@@ -2009,6 +2010,18 @@ EXPORT_C void CAgnEntry::SetGeoValueL(const TReal& aLatitude, const TReal& aLong
 // verify entry is valid before storing it
 EXPORT_C void CAgnEntry::VerifyBeforeStoreL()
 	{
+	// check for entry type note
+	if( Type() == CCalEntry::ENote  && !StartTime().IsSet())
+		{
+		// read the modfication time from simple entry
+		TAgnCalendarTime agnStartTime;
+		agnStartTime.SetUtcL(CAgnSimpleEntry::LastModifiedDateUtc());
+
+		TAgnCalendarTime agnEndTime = agnStartTime;
+		// set the modification time as start and end time
+		CAgnSimpleEntry::SetStartAndEndTimeL(agnStartTime, agnEndTime);
+		}
+
 	//Check entry time
 	if ( Type() != CCalEntry::ETodo )
 		{

@@ -16,86 +16,166 @@
 */
 
 
-#include <aknnotewrappers.h>            // CAknInformationNote
-#include <aknViewAppUi.h>               // CAknViewAppUi
-#include <StringLoader.h>               // Loads strings from resource
-#include <aknappui.h>
-#include <bautils.h>
-#include <data_caging_path_literals.hrh>
-#include <pathinfo.h>
-#include <avkon.hrh>
-#include "calenviewinfo.h"              // View information
-#include <Calendar.rsg>                 // Calendar resourcess
-#include <missedalarmstore.h>           // missed alarm store
-#include <calsession.h>
-#include <calencommandhandler.h>
-#include <calencontext.h>
-#include <calenconstants.h>             // KCalenLostAlarms etc
-#include <calcalendarinfo.h>
+#include <e32std.h>
+#include <hbmainwindow.h>
+#include <hbwidget.h>
+#include <hbinstance.h>
+#include <hbapplication.h> //Activity Manager
+#include <xqserviceutil.h> // service utils
 
-#include "calendarui_debug.h"           // Debug macros
+// User includes
 #include "calencontroller.h"            // CCalenController
-#include "calenactionui.h"              // Default command handling
-#include "calennotifier.h"              // Broadcasts system events
-#include "calenviewmanager.h"           // Responsible for all view activations
-#include "calenalarmmanager.h" 			// Alarm Manager
+#include "calenviewmanager.h"           // Responsible for all view activations        
 #include "calenservicesimpl.h"          // MCalenServices implementation
-#include "calensetting.h"
-#include "calencmdlinelauncher.h"       // Command line launcher
+#include "calenactionui.h"              // Default command handling
 #include "calencustomisationmanager.h"  // Customisation Manager
+#include "calennotificationhandler.h"
+#include "calennotifier.h"
+#include "hb_calencommands.hrh"
+#include "calendarui_debug.h"           // Debug macros
 #include "calenstatemachine.h"
-#include "calenicons.h"
-#include "calentoolbarimpl.h"
-#include "calenmultipledbmanager.h"
-#include "calenattachmentmodel.h"
+#include "calenservicesimpl.h"          // Calendar service implementation
+#include "CalenUid.h"
+#include "calencontextimpl.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calencontrollerTraces.h"
+#endif
 
+
+// Constants
 const TInt KCustomCommandRangeStart     = ECalenLastCommand; 
 const TInt KNumberOfCommandsPerServices = 100;
-_LIT( KResourceFile, "calencommonui.rsc" );
 
 // ----------------------------------------------------------------------------
-// CCalenController::NewL
-// First stage construction. This will leave if an instance of the controller
-// already exists.  All access to an instance of the controller should be
-// through the InstanceL function, except for the initial construction
-// which should be handled by the appui.
-// This is to prevent usage of this API through the services dll when Calendar
-// application is not running.
+// CCalenController::CCalenController
+// Constructor
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C CCalenController* CCalenController::NewL( CAknViewAppUi& aAppUi )
-    {
-    TRACE_ENTRY_POINT;
+CCalenController::CCalenController()
+{
+    OstTraceFunctionEntry0( CCALENCONTROLLER_CCALENCONTROLLER_ENTRY );
+    
+	// Check the Application Startup reason, set iIsFromServiceFrmWrk if application
+	// is started by service framework, false otherwise
+    /*Hb::ActivationReasonService == qobject_cast<HbApplication*>(qApp)->activateReason() ? 
+        iIsFromServiceFrmWrk = true:
+        iIsFromServiceFrmWrk = false; */
+    
+    // Check if calendar is launched thru XQService framework
+    iIsFromServiceFrmWrk = XQServiceUtil::isService(); // Since activateReason 
+    //of hbapplication is not returning right value if the activity is started 
+    //as services so using the above line temporarily untill a fix is available in 
+    // hbappliacation. Need to remove this line after the fix is available for hbapplcation
+    
+    iNextServicesCommandBase = KCustomCommandRangeStart;
+    iRefCount = 0;
+    mAgendaUtil = 0;
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_CCALENCONTROLLER_EXIT );
+}
 
-    CCalenController* self = NULL;
-    TAny* tlsPtr = Dll::Tls();
+// ----------------------------------------------------------------------------
+// CCalenController::constuctController
+// Construct the controller completely
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenController::constructController()
+{
+	OstTraceFunctionEntry0( CCALENCONTROLLER_CONSTRUCTCONTROLLER_ENTRY );
+	// Store the pointer in tls, also avoid multiple creations
+	checkMultipleCreation();
 
-    // Check Thread local storage
-    if( !tlsPtr )
-        {
-        // TLS is NULL, so no CCalenController has been created yet.
-        self = new( ELeave ) CCalenController( aAppUi );
-        CleanupStack::PushL( self );
-        // Store a self pointer in TLS
-        User::LeaveIfError( Dll::SetTls( static_cast<TAny*>( self ) ) );
-        // Increment ref count right away. If we don't do it here, and someone
-        // calls Controller::InstanceL in ConstructL and then ConstructL
-        // leaves, we will double delete the controller.
-        ++self->iRefCount;
-        self->ConstructL();
-        CleanupStack::Pop( self );
-        }
-    else
-        {
-        // An instance of the controller exists already.
-        // This function should only have been called once, by CCalenAppUi
-        User::Leave( KErrAlreadyExists );
-        }
+	// Get an instance of AgendaUtil interface class
+	// This will take care of 
+	mAgendaUtil = new AgendaUtil();
 
-    TRACE_EXIT_POINT;
-    return self;
-    }
+	iStateMachine = CCalenStateMachine::NewL( *this );
+
+	// Create the notifier.
+	iNotifier = new( ELeave )CalenNotifier( *iStateMachine );
+
+	// Construct the context
+	mContext = new CalenContextImpl(iNotifier);
+
+	// Set the default context.Once will start use of calencmdlinelauncher,
+	// Then need to remove this function
+	SetDefaultContext();
+
+	RArray<TCalenNotification> notificationArray;
+	// Complete construction of the notifier and register the
+	// global data for notifications
+	iNotifier->ConstructL();
+
+	// Create the services
+	iServices = CalenServicesImpl::NewL();
+	// Create the customisation manager, and register for 
+	// notifications
+	iCustomisationManager = CCalenCustomisationManager::NewL( *this,
+	                                                          *iServices );
+	// Create the view manager, and register for notifications
+	iViewManager = new CalenViewManager(*this);
+
+	iViewManager->SecondPhaseConstruction();
+
+	hbInstance->allMainWindows().first()->show();
+
+	// Create the action uis.
+	iActionUi = CCalenActionUi::NewL( *this );
+
+	notificationArray.Append(ECalenNotifySettingsChanged);
+	notificationArray.Append(ECalenNotifyCheckPluginUnloading);
+	notificationArray.Append(ECalenNotifyEComRegistryChanged);
+	notificationArray.Append(ECalenNotifySystemLanguageChanged);
+
+	RegisterForNotificationsL( iCustomisationManager,notificationArray);
+	notificationArray.Reset();
+
+	notificationArray.Append(ECalenNotifyViewPopulationComplete);
+	notificationArray.Append(ECalenNotifyExternalDatabaseChanged);
+	notificationArray.Append(ECalenNotifyMultipleEntriesDeleted);
+	notificationArray.Append(ECalenNotifyDialogClosed);
+	notificationArray.Append(ECalenNotifyEntrySaved);
+	notificationArray.Append(ECalenNotifyEntryDeleted);
+	notificationArray.Append(ECalenNotifyInstanceDeleted);
+	notificationArray.Append(ECalenNotifySystemLocaleChanged);
+	notificationArray.Append(ECalenNotifySystemLanguageChanged);
+	notificationArray.Append(ECalenNotifySystemTimeChanged);
+	notificationArray.Append(ECalenNotifyEntryClosed);
+	notificationArray.Append(ECalenNotifySettingsClosed);
+
+	RegisterForNotificationsL( iViewManager, notificationArray );
+	notificationArray.Reset();  
+	notificationArray.Close();
+	
+	OstTraceFunctionExit0( CCALENCONTROLLER_CONSTRUCTCONTROLLER_EXIT );
+}
+
+void CCalenController::checkMultipleCreation()
+{
+	OstTraceFunctionEntry0( CCALENCONTROLLER_CHECKMULTIPLECREATION_ENTRY );
+	TAny* tlsPtr = Dll::Tls();
+
+	// Check Thread local storage
+	if( !tlsPtr )
+		{
+		// Store a self pointer in TLS
+		User::LeaveIfError( Dll::SetTls( static_cast<TAny*>( this ) ) );
+		// Increment ref count right away. If we don't do it here, and someone
+		// calls Controller::InstanceL in ConstructL and then ConstructL
+		// leaves, we will double delete the controller.
+		++this->iRefCount;
+		}
+	else
+		{
+		// An instance of the controller exists already.
+		// This function should only have been called once, by CCalenAppUi
+		User::Leave( KErrAlreadyExists );
+		}	
+	OstTraceFunctionExit0( CCALENCONTROLLER_CHECKMULTIPLECREATION_EXIT );
+}
 
 // ----------------------------------------------------------------------------
 // CCalenController::InstanceL
@@ -106,10 +186,10 @@ EXPORT_C CCalenController* CCalenController::NewL( CAknViewAppUi& aAppUi )
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C CCalenController* CCalenController::InstanceL()
+CCalenController* CCalenController::InstanceL()
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENCONTROLLER_INSTANCEL_ENTRY );
+    
     CCalenController* self = NULL;
     TAny* tlsPtr = Dll::Tls();
 
@@ -128,252 +208,26 @@ EXPORT_C CCalenController* CCalenController::InstanceL()
 
     ++self->iRefCount;
 
-    TRACE_EXIT_POINT;
-    return self;
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_INSTANCEL_EXIT );
+    return self;    
     }
 
 // ----------------------------------------------------------------------------
-// CCalenController::ConstructL
-// 2nd phase of construction
+// CCalenController::ReleaseCustomisations
+// Releases any plugins by deleting the customisation manager
+// should only be called on exiting by the application.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenController::ConstructL()
+void CCalenController::ReleaseCustomisations()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_RELEASECUSTOMISATIONS_ENTRY );
     
-       	TFileName fileName;
-	// Get the complate path of the DLL from where it is currently loaded
-	Dll::FileName( fileName );
-	
-	TFileName resFile;
-	
-	// Append the Drive letters ex., Z: or C:
-	resFile.Append(fileName.Mid(0,2));
-	resFile.Append(KDC_RESOURCE_FILES_DIR);
-    resFile.Append(KResourceFile);
+    delete iCustomisationManager;
+    iCustomisationManager = NULL;
     
-    BaflUtils::NearestLanguageFile( CCoeEnv::Static()->FsSession(), resFile );
-    
-	iResourceFileOffset = CEikonEnv::Static()->AddResourceFileL( resFile );
-	
-    
-	iStateMachine = CCalenStateMachine::NewL( *this );
-    // Create the notifier.
-    iNotifier = new( ELeave )CCalenNotifier( *this );
-
-    // Get an instance of the global data
-    iGlobalData = CCalenGlobalData::NewL( *iNotifier, iNotifier, iNotifier );
-    iGlobalData->InitializeGlobalDataL();
-    
-    RArray<TCalenNotification> notificationArray;
-    // Complete construction of the notifier and register the
-    // global data for notifications
-    iNotifier->ConstructL();
-    
-    notificationArray.Append(ECalenNotifyEntryInstanceViewCreated);
-    notificationArray.Append(ECalenNotifyEntryInstanceViewCreationFailed);
-    notificationArray.Append(ECalenNotifyDeleteInstanceView);
-    notificationArray.Append(ECalenNotifyRealExit);
-    notificationArray.Append(ECalenNotifyCalendarInfoCreated);
-    notificationArray.Append(ECalenNotifyCalendarInfoUpdated);
-    
-
-    RegisterForNotificationsL( iGlobalData,notificationArray);
-    notificationArray.Reset();
-    
-    // Create the cmd line handler
-    iCmdLineLauncher = CCalenCmdLineLauncher::NewL( *this, iAppUi );
-    
-    // Create the services
-    iServices = CCalenServicesImpl::NewL();
-    
-    // Create the action uis.
-    iActionUi = CCalenActionUi::NewL( *this );
-    
-    // Create the settings
-    iSetting = CCalenSetting::InstanceL();
-    
-    // Create the view manager, and register for notifications
-    iViewManager = CCalenViewManager::NewL( iAppUi, *this );
-    
-    notificationArray.Append(ECalenNotifySettingsChanged);
-    notificationArray.Append(ECalenNotifySettingsClosed);
-    notificationArray.Append(ECalenNotifySystemLocaleChanged);
-    notificationArray.Append(ECalenNotifyPluginEnabledDisabled);
-    notificationArray.Append(ECalenNotifyEntrySaved);
-    notificationArray.Append(ECalenNotifyEntryDeleted);
-    notificationArray.Append(ECalenNotifyInstanceDeleted);
-    notificationArray.Append(ECalenNotifyMultipleEntriesDeleted);
-    notificationArray.Append(ECalenNotifyExternalDatabaseChanged);
-    notificationArray.Append(ECalenNotifyDeleteFailed);
-    notificationArray.Append(ECalenNotifyEntryClosed);
-	notificationArray.Append(ECalenNotifyCancelDelete);
-    notificationArray.Append(ECalenNotifySystemTimeChanged);
-    notificationArray.Append(ECalenNotifyAppForegrounded);
-    notificationArray.Append(ECalenNotifyDayViewClosed);
-    notificationArray.Append(ECalenNotifyWeekViewClosed);
-    notificationArray.Append(ECalenNotifyAppBackgrounded);
-    notificationArray.Append(ECalenNotifyViewPopulationComplete);
-    notificationArray.Append(ECalenNotifyCalendarFieldChanged);
-    notificationArray.Append(ECalenNotifyCancelStatusUpdation);
-    notificationArray.Append(ECalenNotifyMarkedEntryCompleted);
-    notificationArray.Append(ECalenNotifyAttachmentAdded);
-    notificationArray.Append(ECalenNotifyAttachmentViewerClosed);
-    notificationArray.Append(ECalenNotifyAttachmentRemoved);
-    notificationArray.Append(ECalenNotifyCalendarInfoCreated);
-    notificationArray.Append(ECalenNotifyCalendarInfoUpdated);
-    notificationArray.Append(ECalenNotifyCalendarFileDeleted);
-    
-    RegisterForNotificationsL( iViewManager, notificationArray );
-    notificationArray.Reset();
-                                                         
-    // Create the customisation manager, and register for 
-    // notifications
-    iCustomisationManager = CCalenCustomisationManager::NewL( *this,
-                                                              iSetting->PluginAvailability(),
-                                                              *iServices,
-                                                              iViewManager->ViewInfoArray() );
-                                                                    
-    notificationArray.Append(ECalenNotifySettingsChanged);
-    notificationArray.Append(ECalenNotifyCheckPluginUnloading);
-    notificationArray.Append(ECalenNotifyEComRegistryChanged);
-    
-    RegisterForNotificationsL( iCustomisationManager,notificationArray);
-    notificationArray.Reset();
-    
-    // Some plugins may have been added or removed - update the settings.
-    iSetting->UpdatePluginListL( *iCustomisationManager );
-    
-    // View manager constructs the custom views using the
-    // customisation manager
-    iViewManager->ConstructCustomViewsL( *iCustomisationManager );
-    
-    // for handling missed alarms/msk improvements for alarm
-    iAlarmManager = CCalenAlarmManager::NewL(*this); 
-    
-    notificationArray.Append(ECalenNotifyLostAlarms);
-    notificationArray.Append(ECalenNotifyMissedAlarmViewClosed);
-    notificationArray.Append(ECalenNotifyClearMissedAlarms);
-    notificationArray.Append(ECalenNotifyMissedEventViewClosed);
-    notificationArray.Append(ECalenNotifyEntryDeleted);
-    notificationArray.Append(ECalenNotifyInstanceDeleted);
-    notificationArray.Append(ECalenNotifyEntrySaved);
-    notificationArray.Append(ECalenNotifyMultipleEntriesDeleted);
-    notificationArray.Append(ECalenNotifySystemTimeChanged);
-    notificationArray.Append(ECalenNotifyAlarmStopped);
-    notificationArray.Append(ECalenNotifyAlarmSnoozed);
-    notificationArray.Append(ECalenNotifyEntryClosed);
-    notificationArray.Append(ECalenNotifyAppForegrounded);
-    
-    RegisterForNotificationsL( iAlarmManager, notificationArray );
-    notificationArray.Reset();
-
-    //iMultipleDbmanager = CCalenMultipleDbManager::NewL();
-    
-    iAttachmentData = CCalenAttachmentModel::NewL();
-    
-    notificationArray.Close();
-    
-    TRACE_EXIT_POINT;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenController::CCalenController
-// C++ default constructor.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-CCalenController::CCalenController( CAknViewAppUi& aAppUi )
-    : iAppUi( aAppUi ),
-      iNextServicesCommandBase( KCustomCommandRangeStart ),
-      iFasterApp( EFalse )
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenController::~CCalenController
-// Private destructor, called from Release() when reference count is 0.
-// Frees all resources.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-CCalenController::~CCalenController()
-    {    
-    TRACE_ENTRY_POINT;
-
-    if(iSystemTimeChangedMsgDelayer)
-        {
-        iSystemTimeChangedMsgDelayer->Cancel();
-        delete iSystemTimeChangedMsgDelayer;
-        iSystemTimeChangedMsgDelayer = NULL;
-        }
-    
-    if(iAttachmentData)
-        {
-        delete iAttachmentData;
-        iAttachmentData = NULL;
-        }
-
-    if( iAlarmManager )
-        {
-        delete iAlarmManager;
-        }
-
-    if( iCustomisationManager )
-        {
-        delete iCustomisationManager;
-        }
-
-    if( iViewManager )
-        {
-        delete iViewManager;
-        }
-
-    if ( iSetting )
-        {
-        iSetting->Release();
-        }
-
-    if( iActionUi )
-        {
-        delete iActionUi;
-        }
-
-    if ( iServices )
-        {
-        iServices->Release();
-        }
-
-    if( iCmdLineLauncher )
-        {
-        delete iCmdLineLauncher;
-        }
-
-    if( iGlobalData )
-        {
-        iGlobalData->Release();
-        }
-
-    if( iNotifier )
-        {
-        delete iNotifier;
-        }
-
-    if( iStateMachine )
-        {
-        delete iStateMachine;
-        }
-
-   if( iResourceFileOffset )
-       {
-       CCoeEnv::Static()->DeleteResourceFile( iResourceFileOffset );
-       }
-    Dll::SetTls( NULL );
-    
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCONTROLLER_RELEASECUSTOMISATIONS_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -384,10 +238,10 @@ CCalenController::~CCalenController()
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C void CCalenController::Release()
+void CCalenController::Release()
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENCONTROLLER_RELEASE_ENTRY );
+    
     --iRefCount;
     
     // The controller owns its own instance of the services, therefore the
@@ -396,26 +250,72 @@ EXPORT_C void CCalenController::Release()
         {
         delete this;
         }
-
-    TRACE_EXIT_POINT;
-    }
     
+    OstTraceFunctionExit0( CCALENCONTROLLER_RELEASE_EXIT );
+    }
+
 // ----------------------------------------------------------------------------
-// CCalenController::ReleaseCustomisations
-// Releases any plugins by deleting the customisation manager
-// should only be called on exiting by the document.
+// CCalenController::~CCalenController
+// Private destructor, called from Release() when reference count is 0.
+// Frees all resources.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C void CCalenController::ReleaseCustomisations()
+CCalenController::~CCalenController()
     {
-    TRACE_ENTRY_POINT;
-    
-    delete iCustomisationManager;
-    iCustomisationManager = NULL;
-    
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENCONTROLLER_CCALENCONTROLLER_ENTRY );
+
+    if(iStateMachine) {
+    	delete iStateMachine;
+    	iStateMachine = NULL;
     }
+
+    if ( iServices )
+        {
+        iServices->Release();
+        }
+    
+    if( mContext )
+		{
+		delete mContext;
+		mContext = NULL;
+		}
+    // iActionUi has to be deleted before iNotifier
+    // as the unregistering of the notifications has to be done
+    if( iActionUi )
+ 	   {
+ 	   delete iActionUi;
+ 	   iActionUi = NULL;
+ 	   }
+    
+    if( iNotifier )
+		{
+    	delete iNotifier;
+    	iNotifier = NULL;
+		}
+    
+    if( iViewManager )
+		{
+    	delete iViewManager;
+    	iViewManager = NULL;
+		}
+    
+    if( iCustomisationManager )
+		{
+    	delete iCustomisationManager;
+    	iCustomisationManager = NULL;
+		}
+		
+    if (mAgendaUtil) {
+        delete mAgendaUtil;
+        mAgendaUtil = 0;
+    }
+    
+    Dll::SetTls( NULL );
+    
+    OstTraceFunctionExit0( DUP1_CCALENCONTROLLER_CCALENCONTROLLER_EXIT );
+    }
+
 
 // ----------------------------------------------------------------------------
 // CCalenController::IssueCommmandL
@@ -425,129 +325,135 @@ EXPORT_C void CCalenController::ReleaseCustomisations()
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C TBool CCalenController::IssueCommandL( TInt aCommand )
+TBool CCalenController::IssueCommandL( TInt aCommand )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_ISSUECOMMANDL_ENTRY );
+    
     TCalenCommand cmd;
-    
-    if( aCommand == EAknCmdHideInBackground ||
-	  ( aCommand == EAknSoftkeyExit && iAppUi.ExitHidesInBackground() ) )
-	    {
-	    SetFasterAppFlag( ETrue );
-	    aCommand = ECalenFasterAppExit;
-	    }
-    else if( aCommand == EAknCmdExit || aCommand == EEikCmdExit
-             || aCommand == EAknSoftkeyExit )
-        {
-        if( iViewManager->CalenToolbar() )
-            {
-            iViewManager->CalenToolbar()->ResetCalendarToolbar();
-            }
-        }
-    else
-        {
-        if((aCommand < ECalenViewCommandBase ) || (aCommand > iNextServicesCommandBase))
-            {
-            return EFalse;
-            }
-        }
-    
-    cmd.SetCommandAndContextL( aCommand, iGlobalData->Context() );
+    cmd.SetCommandAndContextL( aCommand ,context());
 
     TBool ret = iStateMachine->HandleCommandL( cmd );
-
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_ISSUECOMMANDL_EXIT );
     return ret;
     }
 
-
 // ----------------------------------------------------------------------------
-// CCalenController::RequestActivationL
-// Request activation of a specific view
+// CCalenController::Services
+// Returns the services
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenController::RequestActivationL( const TVwsViewId& aViewId )
+MCalenServices& CCalenController::Services()
     {
-    TRACE_ENTRY_POINT;
-
-    iViewManager->RequestActivationL( aViewId );
-
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_SERVICES_ENTRY );
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_SERVICES_EXIT );
+    return *iServices;
     }
 
 // ----------------------------------------------------------------------------
-// CCalenController::BroadcastNotification
+// CCalenController::ViewManager
+// Returns a reference to the view manager
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+CalenViewManager& CCalenController::ViewManager()
+    {
+    OstTraceFunctionEntry0( CCALENCONTROLLER_VIEWMANAGER_ENTRY );
+    
+	OstTraceFunctionExit0( CCALENCONTROLLER_VIEWMANAGER_EXIT );
+	return *iViewManager;
+    }
+    
+// ----------------------------------------------------------------------------
+// CCalenController::MainWindow
+// Returns a reference to the MainWindow
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+HbMainWindow& CCalenController::MainWindow()
+    {
+    
+    OstTraceFunctionEntry0( DUP1_CCALENCONTROLLER_MAINWINDOW_ENTRY );
+
+    OstTraceFunctionExit0( DUP1_CCALENCONTROLLER_MAINWINDOW_EXIT );
+    
+    return *(hbInstance->allMainWindows().first());
+	
+	
+    }    
+
+// ----------------------------------------------------------------------------
+// CCCalenController::BroadcastNotification
 // Passes the notification to the Calendar Notifier.  The notification will
 // then be broadcast to all observers
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C void CCalenController::BroadcastNotification( TCalenNotification aNotification )
+void CCalenController::BroadcastNotification( TCalenNotification aNotification )
     {
-    TRACE_ENTRY_POINT;
-    
+    OstTraceFunctionEntry0( CCALENCONTROLLER_BROADCASTNOTIFICATION_ENTRY );
+
     iNotifier->BroadcastNotification( aNotification );
-        
-    TRACE_EXIT_POINT;
+
+    OstTraceFunctionExit0( CCALENCONTROLLER_BROADCASTNOTIFICATION_EXIT );
     }
 
 // ----------------------------------------------------------------------------
-// CCalenController::RegisterForNotificationsL
+// CCCalenController::RegisterForNotificationsL
 // Registers the passed notification handler with the Calendar Notifier
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C void CCalenController::RegisterForNotificationsL( MCalenNotificationHandler* aHandler,
+void CCalenController::RegisterForNotificationsL( MCalenNotificationHandler* aHandler,
                                                             TCalenNotification aNotification )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_REGISTERFORNOTIFICATIONSL_ENTRY );
 
     iNotifier->RegisterForNotificationsL( aHandler, aNotification );
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENCONTROLLER_REGISTERFORNOTIFICATIONSL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
-// CCalenController::RegisterForNotificationsL
+// CCCalenController::RegisterForNotificationsL
 // Registers the passed notification handler with the Calendar Notifier
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C void CCalenController::RegisterForNotificationsL( MCalenNotificationHandler* aHandler,
+void CCalenController::RegisterForNotificationsL( MCalenNotificationHandler* aHandler,
                                                             RArray<TCalenNotification>& aNotifications )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENCONTROLLER_REGISTERFORNOTIFICATIONSL_ENTRY );
 
     iNotifier->RegisterForNotificationsL( aHandler, aNotifications );
-
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( DUP1_CCALENCONTROLLER_REGISTERFORNOTIFICATIONSL_EXIT );
     }
 
 // ----------------------------------------------------------------------------
-// CCalenController::CancelNotifications
+// CCCalenController::CancelNotifications
 // Removes the passed handler from the notifier.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C void CCalenController::CancelNotifications( MCalenNotificationHandler* aHandler )
+void CCalenController::CancelNotifications( MCalenNotificationHandler* aHandler )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_CANCELNOTIFICATIONS_ENTRY );
 
     iNotifier->CancelNotifications( aHandler );
-
-    TRACE_EXIT_POINT;
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_CANCELNOTIFICATIONS_EXIT );
     }
 
 // ----------------------------------------------------------------------------
-// CCalenController::GetCommandHandlerL
+// CCCalenController::GetCommandHandlerL
 // Searches for a command handler for a particular command.  Customisations
 // are searched first.  If no customisation wants to handle the command it is
 // handled by the view manager or the action uis
 // ----------------------------------------------------------------------------
 MCalenCommandHandler* CCalenController::GetCommandHandlerL( TInt aCommand )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_GETCOMMANDHANDLERL_ENTRY );
     
     MCalenCommandHandler* handler( NULL );
 
@@ -560,173 +466,50 @@ MCalenCommandHandler* CCalenController::GetCommandHandlerL( TInt aCommand )
         }
 
     // See if the view manager wants the command
-    if(!handler)
+    if ( !handler )
         {
-        if( aCommand >= ECalenViewCommandBase
+        if (   aCommand >= ECalenViewCommandBase
             && aCommand < ECalenEditCommandBase )
             {
             handler = iViewManager;
             }
-     	else if(aCommand >= ECalenMissedAlarmCommandBase
-      		&& aCommand < ECalenAttachmentCommandBase )
+     	else if( aCommand >= ECalenMissedAlarmCommandBase
+      		&& aCommand < ECalenLastCommand )
 	    	{
-	    	handler = iAlarmManager;
+	    	//handler = iAlarmManager;
 	    	} 
         else 
             {
-            handler = iActionUi->GetCommandHandlerL(aCommand);
+            handler = iActionUi->GetCommandHandlerL( aCommand );
             }
         }
 
     // No command handler is an error  
     
+    OstTraceFunctionExit0( CCALENCONTROLLER_GETCOMMANDHANDLERL_EXIT );
+    
     // return the handler
-    TRACE_EXIT_POINT;
     return handler;
     }
 
-// ----------------------------------------------------
-//  CCalenController::CheckSystemTimeAtStartUpL
-//  Check the system time change at the startup
-// ----------------------------------------------------
-//
-void CCalenController::CheckSystemTimeAtStartUpL()
-    {
-    TRACE_ENTRY_POINT;
-
-    if(iSystemTimeChangedMsgDelayer)
-        {
-        iSystemTimeChangedMsgDelayer->Cancel();
-        delete iSystemTimeChangedMsgDelayer;
-        iSystemTimeChangedMsgDelayer = NULL;
-        }
-    
-    // Introduce delay (CPeriodic) before showing the note 
-    // to allow time for the active view to display before
-    // note.
-    
-    TCallBack callback;
-    callback = TCallBack( SystemTimeChangeCallback, this );
-                                     
-    iSystemTimeChangedMsgDelayer = new (ELeave) CAsyncCallBack(
-                            callback, CActive::EPriorityStandard);
-    iSystemTimeChangedMsgDelayer->CallBack();
-
-    TRACE_EXIT_POINT;
-    }
-
-// ----------------------------------------------------
-//  CCalenController::SystemTimeChangeCallback
-//  This function is called when the System time is changed.
-// ----------------------------------------------------
-//
-TInt CCalenController::SystemTimeChangeCallback(TAny* aThisPtr)
-    {
-    TRACE_ENTRY_POINT;
-
-    PIM_TRAPD_HANDLE(
-        static_cast<CCalenController*>(aThisPtr)->HandleSystemTimeChangeL());
-
-    TRACE_EXIT_POINT;
-    return 0;
-    }
-
 // ----------------------------------------------------------------------------
-// CCalenController::HandleSystemTimeChangeL
-// Checks to see if the system time was changed while Calendar was
-// not running or in the background, potentially causing alarms to be missed
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CCalenController::HandleSystemTimeChangeL()
-    {
-    TRACE_ENTRY_POINT;
-    
-    // get the system time change info
-    TInt timeChanged = iNotifier->SystemTimeChangedL();
-
-    switch( timeChanged )
-        {
-        case KCalenTimeZoneChanged:
-            {
-            ShowSystemChangeInfoNoteL( R_QTN_CALE_NOTE_SYSTEM_TIME_CHANGED );
-            }
-            break;
-        case KCalenLostAlarms:
-            {
-            // Not displayed since missed alarms are handled in missed alarms view.
-            // No need to show the info note the user.
-            // Part of alarm improvement REQ for calendar.
-            //ShowSystemChangeInfoNoteL( R_QTN_CALE_NOTE_MISSED_ALARMS );
-            }
-            break;
-        case KNoUserInfoNoteDisplay:
-        default:
-            break;
-        }
-    
-    // update system time change info to the cenrep
-    iNotifier->UpdateSytemTimeChangeInfoL();
- 
-    TRACE_EXIT_POINT;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenController::ShowSystemChangeInfoNoteL
-// Displays an information note if the system time changed while Calendar
-// was inactive
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CCalenController::ShowSystemChangeInfoNoteL( TInt aResourceId )
-    {
-    TRACE_ENTRY_POINT;
-
-    HBufC* buf = StringLoader::LoadLC( aResourceId, CEikonEnv::Static() );
-    CAknInformationNote* dialog = new( ELeave ) CAknInformationNote();
-
-    dialog->ExecuteLD( *buf );
-
-    CleanupStack::PopAndDestroy( buf );
-
-    TRACE_EXIT_POINT;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenController::NewServicesL
+// CCCalenController::NewServicesL
 // Factory function for creating new MCalenServices objects
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C MCalenServices* CCalenController::NewServicesL()
+MCalenServices* CCalenController::NewServicesL()
     {
-    TRACE_ENTRY_POINT;
-
+    OstTraceFunctionEntry0( CCALENCONTROLLER_NEWSERVICESL_ENTRY );
+    
     TInt commandRangeStart = iNextServicesCommandBase;
     TInt commandRangeEnd = commandRangeStart + KNumberOfCommandsPerServices;
     iNextServicesCommandBase = commandRangeEnd + 1;
 
-    CCalenServicesImpl* svc = CCalenServicesImpl::NewL( commandRangeStart,
-                                                                              commandRangeEnd );
-    TRACE_EXIT_POINT;
+    CalenServicesImpl* svc = CalenServicesImpl::NewL( commandRangeStart,commandRangeEnd );
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_NEWSERVICESL_EXIT );
     return svc;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenController::ProcessCommandParametersL
-// Takes care of commandline parameters.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-EXPORT_C void CCalenController::ProcessCommandParametersL( TApaCommand aCommand,
-                                                       TFileName& aDocumentName,
-                                                       const TDesC8& aTail )
-    {
-    TRACE_ENTRY_POINT;
-
-    iCmdLineLauncher->ProcessCommandParametersL( aCommand, aDocumentName, aTail );
-
-    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
@@ -735,97 +518,14 @@ EXPORT_C void CCalenController::ProcessCommandParametersL( TApaCommand aCommand,
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CCalenNotifier& CCalenController::Notifier()
+CalenNotifier& CCalenController::Notifier()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_NOTIFIER_ENTRY );
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_NOTIFIER_EXIT );
     return *iNotifier;
     }
-
-// ----------------------------------------------------------------------------
-// CCalenController::SetExitOnDialogFlag
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CCalenController::SetExitOnDialogFlag( TBool aFlag )
-    {
-    TRACE_ENTRY_POINT;
     
-    iCmdLineLauncher->SetExitOnDialogclose( aFlag );
-    
-    TRACE_EXIT_POINT;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenController::GetExitOnDialogFlag
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-TBool CCalenController::GetExitOnDialogFlag()
-    {
-    TRACE_ENTRY_POINT;
-
-    TBool tempVal;
-    tempVal = iCmdLineLauncher->GetExitOnDialogStatus();
-    return tempVal;
-
-    TRACE_EXIT_POINT;
-    }
-    
-// ----------------------------------------------------------------------------
-// CCalenController::Services
-// Returns the services
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-MCalenServices& CCalenController::Services()
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return *iServices;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenController::OfferMenuPaneL
-// Offers the menu pane to plugins for customisation.
-// Acts as a conduit between the services and the customisation manager.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-EXPORT_C void CCalenController::OfferMenuPaneL( TInt aResourceId,
-                                                                     CEikMenuPane* aMenuPane )
-    {
-    TRACE_ENTRY_POINT;
-
-    iCustomisationManager->OfferMenuPaneL( aResourceId, aMenuPane );
-
-    if( aResourceId == R_CALENDAR_CHANGE_VIEW_MENUPANE )
-        {
-        // The cascading view switch menu is being displayed
-        // therefore the view manager needs to be asked to remove
-        // the current view
-        iViewManager->RemoveCurrentViewFromMenu( aMenuPane );
-        }
-    
-    TUint32 missedAlarmsCount(0);
-    // get the count from missed alarm store
-    iAlarmManager->MissedAlarmStore()->CountL(missedAlarmsCount);
-    
-    //For adding "Missed Alarms" menu item for native views menu pane
-    if(!missedAlarmsCount)
-        {
-        if( aResourceId == R_CALENDAR_MONTH_MENUPANE
-            || aResourceId == R_CALENDAR_DAY_MENUPANE
-            || aResourceId == R_CALENDAR_WEEK_MENUPANE
-            || aResourceId == R_TODO_LIST_MENUPANE )
-                {
-                aMenuPane->DeleteMenuItem(ECalenMissedAlarmsView);
-                }
-        }
-
-    TRACE_EXIT_POINT;
-    }
-
 // ----------------------------------------------------------------------------
 // CCalenController::Infobar
 // Descriptor passed to plugins to get customised info bar text.
@@ -833,54 +533,26 @@ EXPORT_C void CCalenController::OfferMenuPaneL( TInt aResourceId,
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C CCoeControl* CCalenController::Infobar( const TRect& aRect )
+HbWidget* CCalenController::Infobar()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return iCustomisationManager->Infobar( aRect );
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenController::Infobar
-// Descriptor passed to plugins to get customised info bar text.
-// Acts as a conduit between the services and the customisation manager.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-EXPORT_C const TDesC& CCalenController::Infobar()
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENCONTROLLER_INFOBAR_ENTRY );
+    
+    OstTraceFunctionExit0( DUP1_CCALENCONTROLLER_INFOBAR_EXIT );
     return iCustomisationManager->Infobar();
     }
-
 // ----------------------------------------------------------------------------
-// CCalenController::PreviewPane
-// Descriptor passed to plugins to get customised preview pane text.
-// Acts as a conduit between the services and the customisation manager.
+// CCalenController::InfobarTextL
+// @returns info bar text
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C CCoeControl* CCalenController::PreviewPane( TRect& aRect )
+QString* CCalenController::InfobarTextL()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return iCustomisationManager->PreviewPane( aRect );
+    OstTraceFunctionEntry0( CCALENCONTROLLER_INFOBARTEXTL_ENTRY );
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_INFOBARTEXTL_EXIT );
+    return iCustomisationManager->InfobarTextL();
     }
-
-// ----------------------------------------------------------------------------
-// CCalenController::CustomPreviewPaneL
-// Return custom preview pane
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-EXPORT_C MCalenPreview* CCalenController::CustomPreviewPaneL( TRect& aRect )
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return iCustomisationManager->CustomPreviewPaneL(aRect);
-    }
-
 // ----------------------------------------------------------------------------
 // CCalenController::CustomisationManager
 // Returns a reference to the customisation manager
@@ -889,279 +561,188 @@ EXPORT_C MCalenPreview* CCalenController::CustomPreviewPaneL( TRect& aRect )
 //
 CCalenCustomisationManager& CCalenController::CustomisationManager()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_CUSTOMISATIONMANAGER_ENTRY );
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_CUSTOMISATIONMANAGER_EXIT );
     return *iCustomisationManager;
     }
 
 // ----------------------------------------------------------------------------
-// CCalenController::ViewManager
-// Returns a reference to the view manager
+// CCalenController::SetDefaultContext
+// Sets the default context for today
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
-CCalenViewManager& CCalenController::ViewManager()
+//       
+void CCalenController::SetDefaultContext()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return *iViewManager;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_SETDEFAULTCONTEXT_ENTRY );
+      
+    QDateTime focusTime = mContext->defaultCalTimeForViewsL();
+    mContext->setFocusDateAndTime(focusTime);
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_SETDEFAULTCONTEXT_EXIT );
     }
 
 // ----------------------------------------------------------------------------
-// CCalenController::MissedAlarmStore
-// Returns a reference to the Missed Alarm Store
+// CCalenController::OfferMenu
+// Offers the menu to plugins for customisation.
+// Acts as a conduit between the services and the customisation manager.
+// (other items were commented in a header).
 // ----------------------------------------------------------------------------
-CMissedAlarmStore* CCalenController::MissedAlarmStore()
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
 
-    return iAlarmManager->MissedAlarmStore();
+void CCalenController::OfferMenu(HbMenu* aHbMenu)
+    {
+    OstTraceFunctionEntry0( CCALENCONTROLLER_OFFERMENU_ENTRY );
+    
+    iCustomisationManager->OfferMenu(aHbMenu);
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_OFFERMENU_EXIT );
     }
 
 // ----------------------------------------------------------------------------
-// CCalenController::IsFasterAppFlagEnabled
-// Returns ETrue if the application is fake exited
-// else return EFalse.
+// CCalenController::agendaInterface
+// returns the interface to the agenda database
 // (other items were commented in a header).
-// ----------------------------------------------------------------------------
-TBool CCalenController::IsFasterAppFlagEnabled()
+// ---------------------------------------------------------------------------
+//
+AgendaUtil* CCalenController::agendaInterface()
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-	return iFasterApp;
+    OstTraceFunctionEntry0( CCALENCONTROLLER_AGENDAINTERFACE_ENTRY );
+    
+    
+    OstTraceFunctionExit0( CCALENCONTROLLER_AGENDAINTERFACE_EXIT );
+    return mAgendaUtil;
     }
 
 // ----------------------------------------------------------------------------
-// CCalenController::SetFasterAppFlag
-// Set the flag 'iFasterApp' to ETrue if application is fake exited
-// and to EFalse once the application comes to foreground.
+// CCalenController::context
+// returns the calendar context
 // (other items were commented in a header).
+// ---------------------------------------------------------------------------
+//
+MCalenContext& CCalenController::context()
+    {
+	OstTraceFunctionEntry0( CCALENCONTROLLER_CONTEXT_ENTRY );
+	
+    OstTraceFunctionExit0( CCALENCONTROLLER_CONTEXT_EXIT );
+    return *mContext;
+    }
+
 // ----------------------------------------------------------------------------
-void CCalenController::SetFasterAppFlag( TBool aFlag )
-	{
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-	iFasterApp = aFlag;
+// CCalenController::handleServiceManagerSlot
+// Launches the requested view 
+// (other items were commented in a header).
+// ---------------------------------------------------------------------------
+//
+void CCalenController::handleServiceManagerSlot(int view, const QDateTime& dateTime)
+{
+	OstTraceFunctionEntry0( CCALENCONTROLLER_HANDLESERVICEMANAGERSLOT_ENTRY );
+	
+	if (iIsFromServiceFrmWrk) {
+		// Set the context properly
+		mContext->setFocusDateAndTime(dateTime);
+		// launch the appropriate view
+		iViewManager->constructAndActivateView(view);
+		
+		iIsFromServiceFrmWrk = false;
+		
+	} else { // Calendar was in backgroung but now its being brought to foreground
+		// If current state is editing state or printing state
+		// or deleting state or sending state, then dont do anything as
+		// user might loose the data
+		CCalenStateMachine::TCalenStateIndex currentState = iStateMachine->CurrentState();
+		if ((currentState == CCalenStateMachine::ECalenDeletingState) ||
+			(currentState == CCalenStateMachine::ECalenPrintingState) ||
+			(currentState == CCalenStateMachine::ECalenSendingState)) {
+			// simply return - we dont have anything to do
+		} 
+
+		else if (currentState == CCalenStateMachine::ECalenViewingState) {
+             if(iViewManager->isEventViewerActive()){
+		         iViewManager->closeAgendaEventView();
+		        }
+		}
+		else if (currentState == CCalenStateMachine::ECalenEditingState) {
+			// close the editor and save the entry if application is in background
+            //and launch the desired view
+            if(iViewManager->isEventViewerActive()){
+                iViewManager->saveAndCloseEditor();
+                iViewManager->closeAgendaEventView();
+               }
+            else{
+                iActionUi->saveAndCloseEditor();
+            }
+		} 
+
+		else if (currentState == CCalenStateMachine::ECalenSettingsState){
+            iViewManager->removeSettingsView();
+	        }
+ 
+		// Set the context properly
+		mContext->setFocusDateAndTime(dateTime);
+		IssueCommandL(view);
+            
+		// connect to raise the window to foreground once the view is ready
+		connect(&MainWindow(), SIGNAL(viewReady()), 
+		        this, SLOT(raiseWindow()));
 	}
 
+}
+void CCalenController::raiseWindow()
+    {
+    MainWindow().raise();
+    disconnect(&MainWindow(), SIGNAL(viewReady()), 
+                        this, SLOT(raiseWindow()));
+    }
 // ----------------------------------------------------------------------------
-// CCalenController::AppUi
-// Returns a reference to the appui
+// CCalenController::getFirstView
+// returns the first view with which calendar has been launched
 // (other items were commented in a header).
-// ----------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 //
-CAknViewAppUi& CCalenController::AppUi()
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return iAppUi;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenController::GetMissedAlarmsList
-// Returns the missed alarms list
-// ----------------------------------------------------------------------------
-void CCalenController::GetMissedAlarmsList(RArray<TCalenInstanceId>& aMissedAlarmsList)
-    {
-    TRACE_ENTRY_POINT;
-    iAlarmManager->GetMissedAlarmsList(aMissedAlarmsList);
-    TRACE_EXIT_POINT;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenController::Settings
-// Returns a reference to the calendar settings
-// ----------------------------------------------------------------------------
-CCalenSetting& CCalenController::Settings()
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return *iSetting;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenController::GetIconL
-// Get icon of specific type
-// ----------------------------------------------------------------------------
-//
-CGulIcon* CCalenController::GetIconL( MCalenServices::TCalenIcons aIndex, const TInt aViewId ) 
-    {
-    TRACE_ENTRY_POINT;
-    
-    // if view requests next view icon
-    if(aIndex == MCalenServices::ECalenNextViewIcon)
-        {
-        return (iViewManager->GetNextViewIconL());
-        }
-    
-    TRACE_EXIT_POINT;
-    return iViewManager->IconsL().GetIconL(aIndex,aViewId);
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenController::MultipleDbManager
-// Returns a reference to the CCalenMultipleDbManager
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-CCalenMultipleDbManager& CCalenController::MultipleDbManager()
-    {
-    TRACE_ENTRY_POINT
-    CCalenMultipleDbManager* tmp = NULL;
-    TRACE_EXIT_POINT
-    return *tmp;
-    }
-
-// ----------------------------------------------------------------------------
-// CCalenController::StateMachine
-// Returns a reference to the CCalenStateMachine
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-CCalenStateMachine& CCalenController::StateMachine()
-    {
-    TRACE_ENTRY_POINT
-    TRACE_EXIT_POINT
-    return *iStateMachine;
-    }
-
-
-// -----------------------------------------------------------------------------
-// CCalenController::GetActiveCollectionidsL
-// -----------------------------------------------------------------------------
-//
-void CCalenController::GetActiveCollectionidsL(
-                                           RArray<TInt>& aCollectionIds)
-    {
-    TRACE_ENTRY_POINT
-    RPointerArray<CCalCalendarInfo> calendarInfoList;
-    CleanupClosePushL(calendarInfoList);
-    iGlobalData->GetAllCalendarInfoL(calendarInfoList);
-    
-    for(TInt index=0;index<calendarInfoList.Count();index++)
-        {
-        if(calendarInfoList[index]->Enabled())
-            {
-            HBufC* calendarFileName = 
-                calendarInfoList[index]->FileNameL().AllocLC();
-            aCollectionIds.Append(
-                 iGlobalData->CalSessionL(*calendarFileName).CollectionIdL());
-            CleanupStack::PopAndDestroy(calendarFileName);
-            }
-        }
-    
-    CleanupStack::PopAndDestroy(&calendarInfoList);
-    TRACE_EXIT_POINT
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenController::AttachmentData
-// Returns a reference to the CCalenAttachmentModel
-// ----------------------------------------------------------------------------
-//
-CCalenAttachmentModel& CCalenController::AttachmentData()
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    return *iAttachmentData;
-    }
+int CCalenController::getFirstView()
+{
+	OstTraceFunctionEntry0( CCALENCONTROLLER_GETFIRSTVIEW_ENTRY );
 	
-// -----------------------------------------------------------------------------
-// CCalenController::IsEditorActive
-// Tells framework whether editor is active or not
-// -----------------------------------------------------------------------------
-//
-TBool CCalenController::IsEditorActive()
-    {
-    return (iActionUi->IsEditorActive());
-    }
+	OstTraceFunctionExit0( CCALENCONTROLLER_GETFIRSTVIEW_EXIT );
+	
+	return iViewManager->getFirstView();
+	
+}
 
-// -----------------------------------------------------------------------------
-// CCalenController::AddCalendarL
-// Adds a new calendar file with metadata set
-// -----------------------------------------------------------------------------
-//
-void CCalenController::AddCalendarL(CCalCalendarInfo* aCalendarInfo)
-    {
-    TRACE_ENTRY_POINT;
-    iGlobalData->AddCalendarL(aCalendarInfo);
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenController::UpdateCalendarL
-// Updates calendar file with new calendar info
-// -----------------------------------------------------------------------------
-//
-void CCalenController::UpdateCalendarL(CCalCalendarInfo* aCalendarInfo)
-    {
-    TRACE_ENTRY_POINT;
-    iGlobalData->UpdateCalendarL(aCalendarInfo);
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenController::RemoveCalendarL
-// Removes calendar file based on calendar file name
-// -----------------------------------------------------------------------------
-//
-void CCalenController::RemoveCalendarL(const TDesC& aCalendarFileName)
-    {
-    TRACE_ENTRY_POINT;
-    iGlobalData->RemoveCalendarL(aCalendarFileName);
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenController::RemoveCalendarL
-// Removes all dead calendar files from the file system
-// -----------------------------------------------------------------------------
-//
-void CCalenController::RemoveDeadCalendarsL()
-    {
-    TRACE_ENTRY_POINT;
-    iGlobalData->RemoveDeadCalendarsL();
-    TRACE_EXIT_POINT;
-    }
-// -----------------------------------------------------------------------------
-// CCalenController::GetAllCalendarInfoL
-// Get all available calendar info
-// -----------------------------------------------------------------------------
-//
-void CCalenController::GetAllCalendarInfoL(
-                RPointerArray<CCalCalendarInfo>& aCalendarInfoList)
-    {
-    TRACE_ENTRY_POINT;
-    iGlobalData->GetAllCalendarInfoL(aCalendarInfoList);
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
-// CCalenController::SetLaunchFromExternalApp
-//
+// ----------------------------------------------------------------------------
+// CCalenController::eventFilter
+// Filters and handles the changes in events
 // (other items were commented in a header).
-// -----------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 //
-void CCalenController::SetLaunchFromExternalApp( TBool aFlag )
-    {
-    TRACE_ENTRY_POINT;
+bool CCalenController::eventFilter(QObject *object, QEvent *event)
+{
+    OstTraceFunctionEntry0( CCALENCONTROLLER_EVENTFILTER_ENTRY );
     
-    iLaunchFromExternalApp = aFlag;
-    TRACE_EXIT_POINT;
-    }
+    switch (event->type())
+        {
+        case QEvent::LanguageChange:
+        	//TODO: Unload the translator and install the locale specific translator
+        	iNotifier->BroadcastNotification( ECalenNotifySystemLanguageChanged );
+            break;
+        case QEvent::LocaleChange:
+        	// TODO: handle the locale changes
+            break;
+        default:
+            break;
+        }
+    OstTraceFunctionExit0( CCALENCONTROLLER_EVENTFILTER_EXIT );
 
-// -----------------------------------------------------------------------------
-// CCalenController::SetLaunchFromExternalApp
-//
-// (other items were commented in a header).
-// -----------------------------------------------------------------------------
-//
-TBool CCalenController::IsLaunchFromExternalApp()
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    
-    return iLaunchFromExternalApp;
-    }
-// End of file
+    return QObject::eventFilter(object, event);
+}
 
+/*
+ * Emits the appReady signal.
+ */
+void CCalenController::emitAppReady()
+{
+	emit appReady();
+}
+
+// End of file	--Don't remove this.

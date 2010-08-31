@@ -1,3 +1,0 @@
-EXPORTS
-	?NewDialog@@YAPAVMClockCitySelectionList@@XZ @ 1 NONAME ; class MClockCitySelectionList * NewDialog(void)
-

@@ -11,15 +11,14 @@
 *
 * Contributors:
 *
-* Description:   Calendar controller
+* Description:  Calendar controller
 *
 */
-
 
 #ifndef CALENHASHFUNCTIONS_INL_
 #define CALENHASHFUNCTIONS_INL_
 
-#include <calennotificationhandler.h>   // TCalenNotification
+#include "calennotificationhandler.h"
 
 // ----------------------------------------------------------------------------
 // Global function HashCalenNotificationFunction

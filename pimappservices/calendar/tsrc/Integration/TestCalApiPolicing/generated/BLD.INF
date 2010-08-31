@@ -21,11 +21,11 @@ TestCalApiPolicing.mmp
 
 PRJ_TESTEXPORTS
 
-TestCalApiPolicing.bat /epoc32/tools/TestCalApiPolicing.bat
-Cap_80000004_TestCalApiPolicingSub.script C:/testdata/scripts/Cap_80000004_TestCalApiPolicingSub.script
-Cap_00010004_TestCalApiPolicingSub.script C:/testdata/scripts/Cap_00010004_TestCalApiPolicingSub.script
-Cap_00008004_TestCalApiPolicingSub.script C:/testdata/scripts/Cap_00008004_TestCalApiPolicingSub.script
-Cap_00000004_TestCalApiPolicingSub.script C:/testdata/scripts/Cap_00000004_TestCalApiPolicingSub.script
-TestCalApiPolicing.IBY /epoc32/rom/include/TestCalApiPolicing.IBY
-TestCalApiPolicing.script C:/testdata/scripts/TestCalApiPolicing.script
+TestCalApiPolicing.bat \epoc32\tools\TestCalApiPolicing.bat
+Cap_80000004_TestCalApiPolicingSub.script C:\testdata\scripts\Cap_80000004_TestCalApiPolicingSub.script
+Cap_00010004_TestCalApiPolicingSub.script C:\testdata\scripts\Cap_00010004_TestCalApiPolicingSub.script
+Cap_00008004_TestCalApiPolicingSub.script C:\testdata\scripts\Cap_00008004_TestCalApiPolicingSub.script
+Cap_00000004_TestCalApiPolicingSub.script C:\testdata\scripts\Cap_00000004_TestCalApiPolicingSub.script
+TestCalApiPolicing.IBY \epoc32\rom\include\TestCalApiPolicing.IBY
+TestCalApiPolicing.script C:\testdata\scripts\TestCalApiPolicing.script
 

@@ -165,7 +165,7 @@ private:
 	TUint8				iReserved;		// This exists whether declared or not because of the 4-byte memory boundaries
 	TCalCollectionId	iCollectionId;
 
-	TUint32             iUserInt; //the field has been moved to simple entry since PREQ2049
+	TUint32				iUserInt; //the field has been moved to simple entry since PREQ2049
 	};
 
 #endif

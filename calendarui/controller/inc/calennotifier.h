@@ -11,54 +11,37 @@
 *
 * Contributors:
 *
-* Description:   Calendar notifier
+* Description:  Calendar notifier
 *
 */
-
 
 
 #ifndef CALENNOTIFIER_H
 #define CALENNOTIFIER_H
 
 // INCLUDES
-#include <e32hashtab.h>                 // RHashSet
-#include <cenrepnotifyhandler.h>        // MCenRepNotifyHandlerCallback
-#include <calennotificationhandler.h>   // MCalenNotificationHandler
-#include <calprogresscallback.h>        // MCalProgressCallBack
-#include <calfilechangenotification.h>  // MCalFileChangeObserver
-
-#include "calendbchangenotifier.h"      // MCalenDBChangeObserver
+#include <e32hashtab.h>                 //RHashSet
+#include "calennotificationhandler.h"   // MCalenNotificationHandler
 #include "calencontextchangeobserver.h" // MCalenContextChangeObserver
-#include "calenecomchangeobserver.h"    // MCalenEComChangeObserver
 
 // FORWARD DECLARATIONS
-class CCalenGlobalData;                 // Calendar global data singleton
 class CEnvironmentChangeNotifier;       // Receive system event notifications
-class CCalenEComWatcher;                // Receives Ecom registry change notifications
-class CCalenSetting;                    // Calendar settings
-class CCalenController;
-class CCalFileChangeInfo;
+class CCalenStateMachine;
 
 /**
- * CCalenNotifier observes various system events relevent to Calendar
+ * CalenNotifier observes various system events relevent to Calendar
  * MCalenNotificationHandlers can register for notifications of specific
  * events. This minimises the number of event observers required
  * throughout the Calendar application.
  */
-class CCalenNotifier :  public CBase,
-                              public MCenRepNotifyHandlerCallback,
-                              public MCalenDBChangeObserver,
-                              public MCalProgressCallBack,
-                              public MCalenContextChangeObserver,
-                              public MCalenEComChangeObserver,
-                              public MCalFileChangeObserver
-                              
+class CalenNotifier :  public CBase,   
+                       public MCalenContextChangeObserver
     {
     public:
         /**
          * C++ default Constructor
          */
-        CCalenNotifier( CCalenController& aController );
+        CalenNotifier( CCalenStateMachine& aStateMachine );
 
         /**
          * 2nd phase of construction.
@@ -68,7 +51,7 @@ class CCalenNotifier :  public CBase,
         /**
          * Destructor
          */
-        virtual ~CCalenNotifier();
+        virtual ~CalenNotifier();
 
     public:
         /**
@@ -107,55 +90,8 @@ class CCalenNotifier :  public CBase,
          * @param aNotification Notification to broadcast
          */
         void BroadcastApprovedNotification( TCalenNotification aNotification );
-
-        /**
-         * Check if the system time changed since Calendar was
-         * last launched
-         */
-        TInt SystemTimeChangedL();
-
-        /**
-         * After calling this function, any settings changed notifications
-         * will not be broadcast until after ResumeSettingsNotifications
-         * has been called.
-         */
-        void DeferSettingsNotifications();
-
-        /**
-         * Resumes settings notifications after they have been paused
-         * with DeferSettingsNotifications.
-         */
-        void ResumeSettingsNotifications();
         
-        /**
-         * Update the cenrep with latest system time change information 
-         */
-        void UpdateSytemTimeChangeInfoL();
-    
-    public:
-        /**
-         * From MCenRepNotifyHandlerCallback.
-         * Notification of any change to the Calendar central repository
-         * where the main Calendar settings are stored
-         * @param aId Id of the cenrep key that changed
-         */
-        void HandleNotifyGeneric( TUint32 aId );
-
-        /**
-         * From MCenRepNotifyHandlerCallback.
-         * Notification of central repository observer failure.
-         */
-        void HandleNotifyError( TUint32 aId,
-                                        TInt aError,
-                                        CCenRepNotifyHandler* aHandler );
-
-        /**
-         * From MCalenDBChangeObserver.
-         * Notification of any change to the Calendar database through an
-         * external CCalSession.
-         * Notifications are limited to a maximum of one per second
-         */
-        void HandleDBChangeL();
+    public:       
 
         /**
          * From MCalenContextChangeObserver.
@@ -163,43 +99,8 @@ class CCalenNotifier :  public CBase,
          */
         void ContextChanged();
 
-        /**
-         * From MCalenEComChangeObserver
-         * Called by when the ecom registry gets changed.
-         */
-        void EComChanged();
-        
-        /**
-         * @brief From MCalFileChangeObserver
-         * The callback that will recieve 1 or more file change notifications
-         * 
-         *  @param aCalendarInfoChangeEntries Holds the information about the 
-         *         calendar info changes  
-         */
-        void CalendarInfoChangeNotificationL(
-            RPointerArray<CCalFileChangeInfo>& aCalendarInfoChangeEntries);
-
-     public:
-        /**
-         * From MCallProgressCallBack
-         * Called when CCalEntryView creation is complete.
-         * @param aStatus completion status
-         */
-        void Completed( TInt aStatus );
-
-        /**
-         * From MCallProgressCallBack
-         * Not used by this class
-         */
-        void Progress( TInt aPercentageCompleted );
-
-        /**
-         * From MCallProgressCallBack
-         * Returns EFalse to disable progress notifications
-         */
-        TBool NotifyProgress();
-
     private:    // Callback functions from observers
+        
         /**
          * Called from CEnvironmentChangeNotifier when the
          * system environment changes
@@ -207,15 +108,15 @@ class CCalenNotifier :  public CBase,
          * @return EFalse
          */
         static TInt EnvChangeCallbackL( TAny* aThisPtr );
-
+        
         /**
          * Broadcasts the given notification.
          * @param aNotification Notification id to be broadcasted
          */
-        void DoBroadcast( TCalenNotification aNotification );
+        void DoBroadcast( TCalenNotification aNotification );  
         
         TInt DoEnvChange();
-        
+       
 
     private:  // Data
         // Array of handlers to notify
@@ -230,34 +131,16 @@ class CCalenNotifier :  public CBase,
 
         RArray<TNotificationHandler> iHandlers;
 
-        // Notifications about locale and time changes
-        CEnvironmentChangeNotifier* iEnvChangeNotifier;
-
-        // Notifications about Calendar settings changes
-        CRepository* iRepository;
-        CCenRepNotifyHandler* iCenRepChangeNotifier;
-
-        // Calendar Global Data singleton
-        CCalenGlobalData* iGlobalData;
-        
-        // Notifications about changes to the ECom registry
-        CCalenEComWatcher* iEComWatcher;
-       // CCalenEComWatcher* iEComWatcher1;
-
         RArray<TCalenNotification> iBroadcastQueue;
         TBool iBroadcastActive;
+        
+        CCalenStateMachine& iStateMachine; 
+        
+        // Notifications about locale and time changes
+        CEnvironmentChangeNotifier* iEnvChangeNotifier;
+        
+        bool iIgnoreFirstLocaleChange;
 
-        CCalenSetting* iSetting;
-        TBool iIsSettingsBroadcastDeferred;
-        TBool iSettingsNeedsBroadcast;
-        TBool iLocaleNeedsBroadcast;
-        CCalenController& iController;
-        TBool iIgnoreFirstLocaleChange;
-        
-        // latest time change from agenda server
-        TReal iTimeOfChangeUtcReal;
-        
-        HBufC* iFilnameDeleted;
     };
 
 #endif // CALENNOTIFIER_H

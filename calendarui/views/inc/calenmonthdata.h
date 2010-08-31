@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,8 +11,8 @@
 *
 * Contributors:
 *
-* Description:   For data of MonthView by one day.
- *
+* Description:  CalenEventLabel class definition.
+*
 */
 
 
@@ -22,48 +22,63 @@
 //  INCLUDES
 #include <e32std.h>
 #include <e32base.h>
-
-//  FORWARD DECLARATIONS
-class TCalenMonthData;
-
-//  DATA TYPES
-typedef CArrayFixFlat<TCalenMonthData> CMonthDataArray;
+#include <QDateTime>
 
 //  CLASS DEFINITIONS
 /**
  *  For data of month view
  */
-NONSHARABLE_CLASS( TCalenMonthData )
+NONSHARABLE_CLASS( CalenMonthData )
     {
 public :  // Constructors and destructor
     /**
      * C++ default constructor.
      */
-    TCalenMonthData();
+    CalenMonthData();
 
     /**
      * C++ constructor.
      */
-    TCalenMonthData(TTime aDay);
+    CalenMonthData(QDateTime day);
 
     /**
      * Destructor.
      */
-    virtual ~TCalenMonthData();
+    virtual ~CalenMonthData();
 
 public : // New funcitons
     /**
      * return day
      * @return day
      */
-    TTime   Day();
+    QDateTime Day();
 
-    void SetHasEvents(TBool aHasEvents);
-    TBool HasEvents();
+    /**
+     * 
+     */
+    void SetHasEvents(bool HasEvents);
+    
+    /**
+     * 
+     */
+    bool HasEvents();
+    
+    void setActive(bool isActive);
+    
+    bool isActive();
 
 private :  // New data
-    TTime   iDay;
-    TBool iHasEvents;
+    /**
+     * 
+     */
+    QDateTime mDay;
+    
+    /**
+     * 
+     */
+    bool mHasEvents;
+    
+    bool mIsActive;
     };
 
 #endif      //  CALENMONTHDATA_H

@@ -21,10 +21,11 @@
 
 // INCLUDES
 #include <e32base.h>
-#include <calencommands.hrh>
-#include <calennotificationhandler.h>      // TCalenNotification
+#include "hb_calencommands.hrh"      // command ids
+#include "calennotificationhandler.h"      // TCalenNotification
 
 // ENUMERATIONS
+
 // Enumeration of the various possible states that the controller can be
 // be in.
 enum TControllerState
@@ -112,13 +113,10 @@ const TStateTableEntry KStateTable[] =
     /* ECalenMonthView */
     { EIdle , EIdle, KCalenNoNotification },
 
-    /* ECalenWeekView */
-    { EIdle , EIdle, KCalenNoNotification },
-
     /* ECalenDayView */
     { EIdle , EIdle, KCalenNoNotification },
 
-    /* ECalenTodoView */
+    /* ECalenAgendaView */
     { EIdle , EIdle, KCalenNoNotification },
 
     /* ECalenForwardsToDayView */
@@ -142,9 +140,6 @@ const TStateTableEntry KStateTable[] =
     { EIdle , EIdle, KCalenNoNotification },
 
     /* ECalenUpdateToolbar */
-    { EIdle , EIdle, KCalenNoNotification },
-
-    /* ECalenStartActiveStep */
     { EIdle , EIdle, KCalenNoNotification },
 
     /* ECalenGotoToday */

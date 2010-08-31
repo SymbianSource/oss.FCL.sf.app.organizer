@@ -35,6 +35,8 @@
 #include <caltime.h>
 #include <calprogresscallback.h>
 
+#include "alarmcommon.h"
+
 // FORWARD DECLARATIONS
 
 class CCalSession;
@@ -49,6 +51,7 @@ class CAlarmContextFwSupport;
 class MProfileEngine;
 class CNotifierDialogController;
 class CAknAlarmService;
+class AlarmAlert;
 
 // CLASS DECLARATION
 
@@ -68,6 +71,7 @@ public: // data types
         {
         EAlarmTypeClock = 0,
         EAlarmTypeCalendar,
+        EAlarmTypeTodo,
         EAlarmTypeOther
         };
 
@@ -240,7 +244,8 @@ public:
     * @since S60 3.2
     * @return Pointer to CNotifierDialogController.
     */
-    CNotifierDialogController* NotifierDialogController();
+    // CNotifierDialogController* NotifierDialogController();
+    AlarmAlert *NotifierDialogController();
 
     /**
     * Stop the active alarm and reset the snooze count.
@@ -260,11 +265,7 @@ public:
     * @since S60 3.2
     **/
     void DoSnooze();
-    /**
-    * Silence the active alarm.
-    * @since tb9.2
-    **/
-    void DoSilence();    
+
     /**
     * Checks if this alarm can be shown in "alarm" or in "charging" state.
     * @since S60 3.2
@@ -480,6 +481,13 @@ public:
 	* @return ETrue if viewer is open.
     */
     TBool IsCalendarAlarmViewer();
+    
+    /**
+     * @brief Gets the alarm information for the alarm that is
+     * about to expire
+     * @return The alarm information 
+     */
+    SAlarmInfo* GetAlarmInfo();
 
 private:
 
@@ -630,7 +638,8 @@ private:  // data
     * Pointer to global note API.
     * Not own.
     */
-    CNotifierDialogController* iNotifierDialogController;
+    // CNotifierDialogController* iNotifierDialogController;
+    AlarmAlert* iAlarmAlert;
 
     /**
     * Plays alarm tones according to user settings.

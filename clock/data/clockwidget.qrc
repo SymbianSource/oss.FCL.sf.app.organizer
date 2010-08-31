@@ -1,0 +1,20 @@
+<!DOCTYPE RCC><RCC version="1.0">
+	<qresource prefix="/clock">
+		<file alias="analog_face_day.svg">analog/0_qtg_graf_clock_day_bg.svg</file>
+		<file alias="hour_hand_day.svg">analog/0_qtg_graf_clock_day_hour.svg</file>
+		<file alias="minute_hand_day.svg">analog/0_qtg_graf_clock_day_min.svg</file>
+		
+		<file alias="sep_colon.svg">digital/qsn_cp_clock_digital_new_colon.svg</file>
+		<file alias="sep_dot.svg">digital/qsn_cp_clock_digital_new_stop.svg</file>
+		<file alias="digit_zero.svg">digital/qsn_cp_clock_digital_new_zero.svg</file>
+		<file alias="digit_one.svg">digital/qsn_cp_clock_digital_new_one.svg</file>
+		<file alias="digit_two.svg">digital/qsn_cp_clock_digital_new_two.svg</file>
+		<file alias="digit_three.svg">digital/qsn_cp_clock_digital_new_three.svg</file>
+		<file alias="digit_four.svg">digital/qsn_cp_clock_digital_new_four.svg</file>
+		<file alias="digit_five.svg">digital/qsn_cp_clock_digital_new_five.svg</file>
+		<file alias="digit_six.svg">digital/qsn_cp_clock_digital_new_six.svg</file>
+		<file alias="digit_seven.svg">digital/qsn_cp_clock_digital_new_seven.svg</file>
+		<file alias="digit_eight.svg">digital/qsn_cp_clock_digital_new_eight.svg</file>
+		<file alias="digit_nine.svg">digital/qsn_cp_clock_digital_new_nine.svg</file>
+	</qresource>
+</RCC>

@@ -1,4 +1,0 @@
-
--c32,8 qgn_prop_checkbox_on.svg
--c32,8 qgn_prop_checkbox_off.svg                   
-

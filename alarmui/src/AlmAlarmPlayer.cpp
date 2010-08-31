@@ -306,7 +306,7 @@ void CAlmAlarmPlayer::PlayCalendarBeepL(void)
 //
 void CAlmAlarmPlayer::PlayClockBeepL(void)
 {
-    TRACE_ENTRY_POINT;
+    /*TRACE_ENTRY_POINT;
     iBeepPlayer = CMdaAudioToneUtility::NewL( *this );
 
     SET_VOLUME( iBeepPlayer, 
@@ -315,7 +315,7 @@ void CAlmAlarmPlayer::PlayClockBeepL(void)
 
     iBeepPlayer->SetPriority( KAudioPriorityAlarm, static_cast<TMdaPriorityPreference>( KAudioPrefAlarmClock ) );
 
-    iBeepPlayer->PrepareToPlayDesSequence( KPhoneBeepSequence );
+    iBeepPlayer->PrepareToPlayDesSequence( KPhoneBeepSequence );*/
     TRACE_EXIT_POINT;
 }
 

@@ -23,14 +23,14 @@
 #include "AlmAlarmControl.h"
 #include "pim_trace.h"
 #include "alarmutils.h"
-#include <secondarydisplay/alarmuiSecondaryDisplay.h>
+// #include <secondarydisplay/alarmuiSecondaryDisplay.h>
 #include <bautils.h>
 #include <StringLoader.h>
 #include <pathinfo.h>
 #include <featmgr.h>
 #include <aknnotewrappers.h>
 #include <coreapplicationuisdomainpskeys.h>
-#include <alarmuidomainpskeys.h>
+// #include <alarmuidomainpskeys.h>
 #include <data_caging_path_literals.hrh>
 
 #include <AlmAlert.rsg>
@@ -39,8 +39,9 @@
 
 #include <aknnotewrappers.h>
 #include <AknMediatorFacade.h>
+#include "alarmalertwrapper.h" 
 
-#include <missedalarm.h>
+// #include <missedalarm.h>
 
 _LIT( KResourceFile, "AlmAlert.rsc" );
 
@@ -176,7 +177,7 @@ void CAlmAlarmControl::HandleStateChange(TInt aOldState)
                 iAlarmUtils->StartKeyBlocker();
 
                 // reset the key guard
-                iAlarmUtils->SetKeyGuard( ETrue );
+                //iAlarmUtils->SetKeyGuard( ETrue );
             }
 
             break;
@@ -226,9 +227,9 @@ void CAlmAlarmControl::DoAutoSnooze()
     // Allow auto-snooze only while waiting user input
     if( IsState( EStateWaitingInput ) )
         {
-        SetState( EStateAfterInput );
-	 StopOrSnoozeAlarm();
-	 DoCancelDialog();
+        SetState( EStateAfterInput );       
+        iAlarmUtils->TryToSnoozeActiveAlarm();
+        DoCancelDialog();        
         }
     TRACE_EXIT_POINT;
     }
@@ -240,11 +241,13 @@ void CAlmAlarmControl::DoAutoSnooze()
 void CAlmAlarmControl::DoCancelDialog()
 {
     TRACE_ENTRY_POINT;
-    if( iGlobalNoteId != KErrNotFound )
+    /*if( iGlobalNoteId != KErrNotFound )
     {
-        iAlarmUtils->NotifierDialogController()->SetNoteObserver( this );
-        iAlarmUtils->NotifierDialogController()->CancelNote( iGlobalNoteId );
-    }
+        // iAlarmUtils->NotifierDialogController()->SetNoteObserver( this );
+        // iAlarmUtils->NotifierDialogController()->CancelNote( iGlobalNoteId );
+        iAlarmUtils->NotifierDialogController()->dismissAlarmAlert();
+    }*/
+    iAlarmUtils->NotifierDialogController()->dismissAlarmAlert();
     iAlarmUtils->StopAlarmSound();
     iAlarmUtils->CancelAutoSnooze();
     TRACE_EXIT_POINT;
@@ -261,19 +264,21 @@ void CAlmAlarmControl::AskWakeupPhoneL()
     ASSERT( IsState( EStateBeforeAskingWakeup ) );
     if( IsState( EStateBeforeAskingWakeup ) )
     {
-        HBufC* label = NULL;
-        TBuf<1> time;
-        iAlarmUtils->GetWakeupLabelL( label );
-        CleanupStack::PushL( label );
+        // HBufC* label = NULL;
+        // TBuf<1> time;
+        // iAlarmUtils->GetWakeupLabelL( label );
+        // CleanupStack::PushL( label );
 
-		if(!IsVisible())
+/*		if(!IsVisible())
 		{
 			MakeVisible(ETrue);
-		}
-        iAlarmUtils->NotifierDialogController()->SetNoteObserver( this );
-        iGlobalNoteId = iAlarmUtils->NotifierDialogController()->DisplayAlarmL( EAskWakeUp, *label, time/*not used*/ );
+		}*/
+        // iAlarmUtils->NotifierDialogController()->SetNoteObserver( this );
+        // iGlobalNoteId = iAlarmUtils->NotifierDialogController()->DisplayAlarmL( EAskWakeUp, *label, time/*not used*/ );
+        SAlarmInfo* alarmInfo = iAlarmUtils->GetAlarmInfo();
+		iAlarmUtils->NotifierDialogController()->showAlarmAlert( alarmInfo );
 
-        CleanupStack::PopAndDestroy( label );
+        // CleanupStack::PopAndDestroy( label );
 
         // shutdown automatically if user doesn't react within one minute
         iAlarmUtils->StartShutdownTimer( KAlarmAutoShutdown );
@@ -358,7 +363,7 @@ void CAlmAlarmControl::StoreMissedAlarmDataL()
     {
 	//Get the Calendar instance values and         	  
 	//Store it in the missed alarm repository
-	
+	/*
 	RPointerArray<CMissedAlarm> missedAlarmList;
 	TCalLocalUid localUid = iAlarmUtils->AlarmData().iLocalUid;
 	TCalTime instanceTime = iAlarmUtils->AlarmData().iInstanceTime;
@@ -374,38 +379,8 @@ void CAlmAlarmControl::StoreMissedAlarmDataL()
 	CleanupStack::PopAndDestroy( missedAlarmStore );
 	CleanupStack::Pop( missedAlarm );
 	missedAlarmList.ResetAndDestroy();
+	*/
     }
-
-
-// ---------------------------------------------------------
-// Checks for calendar type alarm needed to be stored as missed alarm   
-// Stops the alarm and enters to missed alarm table. If the calendar type
-// is clock, then snoozes the alarm.
-// ---------------------------------------------------------
-//
-void CAlmAlarmControl::StopOrSnoozeAlarm()
-	{
-	
-	TRACE_ENTRY_POINT;
-	if( iAlarmUtils->IsCalendarAlarm() )
-		{	 
-		if( iAlarmUtils->IsCalendarAlarmViewer() )
-			{				 
-			iAlarmUtils->SetCalendarAlarmViewer(EFalse);		   
-			}
-		else
-			{
-			TRAP_IGNORE( StoreMissedAlarmDataL() );
-			}
-		iAlarmUtils->DoStopAlarm(); 										 
-		}
-	else
-		{		 
-		iAlarmUtils->TryToSnoozeActiveAlarm();
-		}
-    	TRACE_EXIT_POINT;
-	}
-
 // ===========================================================
 // ================ INHERITED FUNCTIONS ======================
 
@@ -432,12 +407,12 @@ void CAlmAlarmControl::ConstructL(CAknAlarmService* aSupervisor)
     iResOffset = iEikonEnv->AddResourceFileL( resFile );
     
 
-    iEikonEnv->EikAppUi()->AddToStackL(
+    /*iEikonEnv->EikAppUi()->AddToStackL(
         this,
         ECoeStackPriorityAlert,
         ECoeStackFlagRefusesFocus );
-
-	MakeVisible(EFalse);
+*/
+	// MakeVisible(EFalse);
 	SetStopFromContext(EFalse);
     iAlarmUtils = CAlarmUtils::NewL( this, aSupervisor );
 
@@ -447,9 +422,10 @@ void CAlmAlarmControl::ConstructL(CAknAlarmService* aSupervisor)
     // observe system state changes
     iPropertySWStateValue = CPropertyObserver::NewL( *this, KPSUidStartup, KPSGlobalSystemState );
     //For Plasma accessory handling
-    _LIT_SECURITY_POLICY_PASS( KGeneralReadPolicy );
-	_LIT_SECURITY_POLICY_C1( KProtectedWritePolicy, ECapabilityWriteDeviceData );
+    // _LIT_SECURITY_POLICY_PASS( KGeneralReadPolicy );
+	// _LIT_SECURITY_POLICY_C1( KProtectedWritePolicy, ECapabilityWriteDeviceData );
 
+	/*
 	RProperty::Define( KPSUidAlarmExtCntl, KAlarmStopKey, RProperty::EInt, KGeneralReadPolicy, KProtectedWritePolicy );
     RProperty::Define( KPSUidAlarmExtCntl, KAlarmSnoozeKey, RProperty::EInt, KGeneralReadPolicy, KProtectedWritePolicy );
 
@@ -458,6 +434,7 @@ void CAlmAlarmControl::ConstructL(CAknAlarmService* aSupervisor)
 
     //observe Plasma accessory snooze key changes
     iPropertySnoozeAlarm = CPropertyObserver::NewL(*this, KPSUidAlarmExtCntl, KAlarmSnoozeKey);
+	*/
     //observe SysAp backlight setting PS Key
 	iPropertyBacklight = CPropertyObserver::NewL(*this, KPSUidCoreApplicationUIs, KLightsAlarmLightActive);
     TRACE_EXIT_POINT;
@@ -503,39 +480,41 @@ void CAlmAlarmControl::ShowAlarm()
                 // (e.g. updating snooze time before showing the snooze info note)
                 TRAPD( err, iAlarmUtils->InitialiseAlarmDataL(); )
 
-                HBufC* text = NULL;
-
-                if( !err )
+                // Get the alarm information
+                SAlarmInfo* alarmInfo = iAlarmUtils->GetAlarmInfo();
+                // Get the ringing type
+                alarmInfo->iIsSilent = iAlarmUtils->IsRingingTypeSilent() || iAlarmUtils->IsOffTone();
+                // Check if the alarm can be snoozed
+                alarmInfo->iCanSnooze = iAlarmUtils->CanSnooze();
+            
+                // cleanup (release global data)
+                iAlarmUtils->UninitialiseAlarmData();
+                /*if(!IsVisible())
                 {
-                    TRAP( err, iAlarmUtils->GetAlarmLabelL( text ); )
+                    MakeVisible(ETrue);
                 }
-            	// cleanup (release global data)
-            	iAlarmUtils->UninitialiseAlarmData();
-                if( !err )
-                {
-                	if(!IsVisible())
-                	{
-                		MakeVisible(ETrue);
-                	}
-                    iAlarmUtils->NotifierDialogController()->SetNoteObserver( this );
+                iAlarmUtils->NotifierDialogController()->SetNoteObserver( this );
 
-                    // setup CBA for the global note
-                    TUint cba(0);  // See AknDialogController.h
-                    // alarm type - no silence key for clock alarms, unknown alarms are handled as calendar alarms
-                    cba |= iAlarmUtils->IsClockAlarm() ? EClockAlarm | ENoSilence : ECalendarAlarm;
-                    // disable silence key when ringing type is set to "silent" or if alarm sounds is set off
-                    cba |= iAlarmUtils->IsRingingTypeSilent() || iAlarmUtils->IsOffTone() ? ENoSilence : 0;
-                    // disable silence and snooze key if alarm can't be snoozed anymore
-                    cba |= iAlarmUtils->CanSnooze() ? 0 : EHideSnooze | ENoSilence;
-                    // show "Open" MSK for calendar alarms if the security lock is not active
-                    cba |= iAlarmUtils->IsCalendarAlarm() && !iAlarmUtils->IsSecurityLockActive() ? EMskOpen : 0;
+                // setup CBA for the global note
+                TUint cba(0);  // See AknDialogController.h
+                // alarm type - no silence key for clock alarms, unknown alarms are handled as calendar alarms
+                cba |= iAlarmUtils->IsClockAlarm() ? EClockAlarm | ENoSilence : ECalendarAlarm;
+                // disable silence key when ringing type is set to "silent" or if alarm sounds is set off
+                cba |= iAlarmUtils->IsRingingTypeSilent() || iAlarmUtils->IsOffTone() ? ENoSilence : 0;
+                // disable silence and snooze key if alarm can't be snoozed anymore
+                cba |= iAlarmUtils->CanSnooze() ? 0 : EHideSnooze | ENoSilence;
+                // show "Open" MSK for calendar alarms if the security lock is not active
+                cba |= iAlarmUtils->IsCalendarAlarm() && !iAlarmUtils->IsSecurityLockActive() ? EMskOpen : 0;
 
-                    // request alarm dialog
-                    TBuf<1> time;
-                    TRAP( err, iGlobalNoteId = iAlarmUtils->NotifierDialogController()->DisplayAlarmL( cba, *text, time/*not used*/ ) );
-                    delete text; // only delete if GetAlarmLabelL call was successfull
-                    ASSERT( !err );
-                }
+                // request alarm dialog
+                TBuf<1> time;
+                TRAP( err, iGlobalNoteId = iAlarmUtils->NotifierDialogController()->DisplayAlarmL( cba, *text, timenot used ) );
+                delete text; // only delete if GetAlarmLabelL call was successfull
+                ASSERT( !err ); */     
+                iAlarmUtils->NotifierDialogController()->showAlarmAlert(alarmInfo);
+                //iAlarmUtils->StartAutoSnoozeTimer();
+                //iAlarmUtils->PlayAlarmSound();
+                //SetState( EStateWaitingInput );
 
                 if( err ) // failed to fetch alarm data or show the notification
                 {
@@ -544,6 +523,8 @@ void CAlmAlarmControl::ShowAlarm()
                     // -> stop and ignore the alarm
                     HandleInterruptAlarm( EReasonKSysApHideAlarm );
                 }
+                delete alarmInfo->iLocation;
+                delete alarmInfo->iSubject;
             }
         }
         break;
@@ -750,8 +731,9 @@ void CAlmAlarmControl::HandlePropertyChange(const TUid aCategory, const TUint aK
             // cancel the alarm
             if( iGlobalNoteId != KErrNotFound )
             {
-                iAlarmUtils->NotifierDialogController()->SetNoteObserver( this );
-                iAlarmUtils->NotifierDialogController()->CancelNote( iGlobalNoteId );
+                // iAlarmUtils->NotifierDialogController()->SetNoteObserver( this );
+                // iAlarmUtils->NotifierDialogController()->CancelNote( iGlobalNoteId );
+                iAlarmUtils->NotifierDialogController()->dismissAlarmAlert();
             }
         }
         else // stop
@@ -771,6 +753,7 @@ void CAlmAlarmControl::HandlePropertyChange(const TUid aCategory, const TUint aK
         }
     }
 
+	/*
     //For plasma support
     else if( aCategory == KPSUidAlarmExtCntl && aKey == KAlarmStopKey && aValue == EAlarmUIStopAlarm )
     {
@@ -789,6 +772,7 @@ void CAlmAlarmControl::HandlePropertyChange(const TUid aCategory, const TUint aK
 
     	ExternalSnoozeAlarm();
     }
+	*/
 	else if( aCategory == KPSUidCoreApplicationUIs && aKey == KLightsAlarmLightActive)
 	{
 		if(IsState(EStateWaitingInput) && aValue ==  ELightsBlinkingUninitialized )
@@ -873,7 +857,7 @@ void CAlmAlarmControl::NoteCompleted(TInt aNoteId, TInt aCommand)
 	                    {
                         // Do not leave if calendar launch fails. Just continue as normally
                         iAlarmUtils->StopAlarmSound();
-                        PIM_TRAPD_ASSERT( iAlarmUtils->StartCalendarL(); )
+                        // PIM_TRAPD_ASSERT( iAlarmUtils->StartCalendarL(); )
                         iAlarmUtils->StartAutoSnoozeTimer();  // restart auto-snooze timer
 	                    }
                 }
@@ -961,7 +945,7 @@ TBool CAlmAlarmControl::DisplayDialogL(TInt aPriority)
         {
             iAlarmUtils->StartAutoSnoozeTimer();
             iAlarmUtils->PlayAlarmSound();
-            iAlarmUtils->SetKeyGuard( EFalse );
+            //iAlarmUtils->SetKeyGuard( EFalse );
             SetState( EStateWaitingInput );
             iAlarmUtils->StartKeyBlocker();  // block all input for 0.5 seconds
         }
@@ -1016,8 +1000,8 @@ TBool CAlmAlarmControl::CancelDialog(TInt aPriority)
         case EStateWaitingInput:
         {
             SetState( EStateIdle );
-	          DoCancelDialog();
-            StopOrSnoozeAlarm();
+            DoCancelDialog();
+            iAlarmUtils->TryToSnoozeActiveAlarm();
         }
         break;
 
@@ -1123,7 +1107,7 @@ TKeyResponse CAlmAlarmControl::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEvent
             {
                 // Normally pressing End Call key generates CancelDialog callback, but
                 // when we have an active call we don't get the CancelDialog...
-                iAlarmUtils->NotifierDialogController()->CancelNote( iGlobalNoteId );  // Cancel alarm....will snooze...
+                // iAlarmUtils->NotifierDialogController()->CancelNote( iGlobalNoteId );  // Cancel alarm....will snooze...
                 TRACE_EXIT_POINT;
                 return EKeyWasNotConsumed;
             }
@@ -1176,7 +1160,7 @@ TKeyResponse CAlmAlarmControl::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEvent
 void CAlmAlarmControl::ShowSnoozeInfoNoteL()
 {
     TRACE_ENTRY_POINT;
-
+/*
     //Changes for MPIN-73VCR2
    HBufC* stringHolder = NULL;
    CAknInformationNote* note = new (ELeave) CAknInformationNote();
@@ -1224,6 +1208,7 @@ void CAlmAlarmControl::ShowSnoozeInfoNoteL()
     {
         SetState( EStateIdle );
     }
+	*/
     TRACE_EXIT_POINT;
 }
 
@@ -1322,10 +1307,91 @@ void CAlmAlarmControl::HandleAlmInfoCRChangeL(TUint32 /*aCount*/)
  {
  	return iStopFromContextFw;
  }
-
- CAlarmUtils* CAlmAlarmControl::AlarmUtils() const
-     {
-     return iAlarmUtils;
-     }
- // End of File
  
+ void CAlmAlarmControl::alertCompleted(AlarmCommand command)
+ {
+     //iAlarmUtils->CancelShutdown();
+     iAlarmUtils->StopAlarmSound();
+
+     switch( iState )
+         {
+         /**
+          * EStateWaitingInput: normal case
+          * EStateWaitingDisplayRequest:
+          *     This happens only if the global note got handled before we got the DisplayDialogL call.
+          *     (e.g. note is dismissed if the cover is closed at the same time when alarm expires)
+          **/
+         case EStateWaitingInput:
+         case EStateWaitingDisplayRequest:
+             {
+             switch( command )
+                 {
+                 case AlarmStop:
+                     {
+                     SetState( EStateAfterInput );
+					 // cancel timers
+					 iAlarmUtils->CancelAutoSnooze();
+                     iAskWakeup = ETrue; // ask wakeup after all the alarms are handled
+                     iAlarmUtils->DoStopAlarm();  // stop
+                     break;
+                     }
+                 case AlarmSnooze:
+                     {
+                     // cancel timers
+					 iAlarmUtils->CancelAutoSnooze();
+					 SetState( EStateAfterInput );
+
+                     SetState( EStateShowingSnoozeInfo );
+                     iAlarmUtils->TryToSnoozeActiveAlarm();
+                     if( IsState( EStateWaitingShowRequest ) )
+                         {
+                         ShowAlarm();
+                         }
+                     else
+                         {
+                         SetState( EStateIdle );
+                         }
+                     }
+                 }
+             }
+         break;
+         }  
+     TRACE_EXIT_POINT;
+ }
+ 
+ void CAlmAlarmControl::alertDisplayed(AlarmCommand /*command*/)
+ {
+     TRACE_ENTRY_POINT;
+     switch( iState )
+     {
+         case EStateWaitingDisplayRequest:
+         {
+             iAlarmUtils->StartAutoSnoozeTimer();
+             iAlarmUtils->PlayAlarmSound();
+             //iAlarmUtils->SetKeyGuard( EFalse );
+             SetState( EStateWaitingInput );
+             iAlarmUtils->StartKeyBlocker();  // block all input for 0.5 seconds
+         }
+         break;
+
+         case EStateBeforeAskingWakeup:
+         {
+             SetState( EStateAskingWakeup );
+         }
+         break;
+
+         default:
+         {
+             // panic - invalid state!
+             Panic( EAlarmUIInvalidState | EAlarmUIDisplayDialog );
+         }
+     }
+ }
+ 
+ void CAlmAlarmControl::alertCancelled(AlarmCommand /*command*/)
+ {
+     iAlarmUtils->StopAlarmSound();
+     iAlarmUtils->CancelAutoSnooze();
+ }
+
+// End of File

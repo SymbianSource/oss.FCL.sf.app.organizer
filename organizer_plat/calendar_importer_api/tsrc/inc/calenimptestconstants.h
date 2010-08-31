@@ -25,11 +25,12 @@ _LIT( KTypeVCal, "vcal" );
 _LIT( KTypeICal, "ical" );
 
 //Directory
+// FOR ARMV5
 _LIT( KInputDirName,  "E://testing//data//unittest//calenimptest//input//" );
-_LIT( KOutputDirName, "E://testing//data//unittest//calenimptest//output//" );
-_LIT( KTestIniFile, "CalenImpTest.ini" );
 
-//_LIT( KCalenImporterSisxFilePath, "E://testing//data//unittest//calenimptest//input//calenimporter.sisx");
+// FOR WINSCW enable below path and copy the vcs and ics files to this path
+// and comment out the above path
+// _LIT( KInputDirName,  "\\logs\\testframework\\" );
 
 // These properties will be excluded from the import / export comparison tests
 // as the dates they contain should be generated at run time.

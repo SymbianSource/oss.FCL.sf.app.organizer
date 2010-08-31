@@ -438,7 +438,7 @@ void CAgnAlarmActive::FindAndQueueNextAlarmL(TBool aSysTimeHasChanged)
 		
 		if ( now < lastAlarm )
 			{
-			now += TTimeIntervalSeconds(2);
+			now += TTimeIntervalSeconds(1);
 			}
 		}
 
@@ -468,7 +468,7 @@ void CAgnAlarmActive::QueueNextAlarmL(CArrayFixFlat<TAgnSortInstance>* aAlarmedI
 		
 		if ( now < lastAlarm )
 			{
-			now += TTimeIntervalSeconds(2);
+			now += TTimeIntervalSeconds(1);
 			}			
 		}
 

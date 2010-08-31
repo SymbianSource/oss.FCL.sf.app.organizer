@@ -21,9 +21,10 @@ CAPABILITY   None
 sourcepath      .
 
 userinclude     .
-userinclude ../inc 
+userinclude ../inc
+
+APP_LAYER_SYSTEMINCLUDE 
 systeminclude /epoc32/include 
-APP_LAYER_SYSTEMINCLUDE_SYMBIAN
 
 source	        TJapaneseSoundProperty.cpp
 

@@ -19,10 +19,11 @@
 
 #ifndef __ALMALERTRESOURCES_IBY__
 #define __ALMALERTRESOURCES_IBY__
+#include <data_caging_paths_for_iby.hrh>
 
 
-
-data=DATAZ_\RESOURCE_FILES_DIR\AlmAlert.rsc    RESOURCE_FILES_DIR\AlmAlert.rsc
+data=DATAZ_/RESOURCE_FILES_DIR/AlmAlert.rsc    RESOURCE_FILES_DIR/AlmAlert.rsc
+data=DATAZ_/QT_TRANSLATIONS_DIR/alarmui.qm QT_TRANSLATIONS_DIR/alarmui.qm
 
 
 #endif  // __ALMALERTRESOURCES_IBY__

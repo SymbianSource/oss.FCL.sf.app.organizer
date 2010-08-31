@@ -1,0 +1,41 @@
+<hbwidget type="AgendaEventViewerItem" version="0.1">
+  <layout name="layout-eventvieweritem" type="mesh">
+     <meshitem src="primaryTextItem" srcEdge="LEFT" dst="" dstEdge="LEFT" />
+     <meshitem src="primaryTextItem" srcEdge="TOP" dst="" dstEdge="TOP" />
+     <meshitem src="primaryTextItem" srcEdge="LEFT" dst="secondaryTextItem" dstEdge="LEFT" />
+
+     <meshitem src="primaryIconItem" srcEdge="TOP" dst="" dstEdge="TOP" /> 
+     <meshitem src="primaryIconItem" srcEdge="RIGHT" dst="" dstEdge="RIGHT" />
+
+     <meshitem src="secondaryIconItem" srcEdge="LEFT" dst="" dstEdge="LEFT" />
+     <meshitem src="secondaryIconItem" srcEdge="TOP" dst="secondaryTextItem" dstEdge="TOP" />
+
+     <meshitem src="secondaryTextItem" srcEdge="BOTTOM" dst="" dstEdge="BOTTOM" />
+     <meshitem src="secondaryTextItem" srcEdge="TOP" dst="primaryTextItem" dstEdge="BOTTOM" />
+     <meshitem src="secondaryTextItem" srcEdge="LEFT" dst="secondaryIconItem" dstEdge="RIGHT" />
+     <meshitem src="secondaryTextItem" srcEdge="RIGHT" dst="" dstEdge="RIGHT" />
+
+  </layout>
+
+  <layout name="layout-eventvieweritem-stretch" type="mesh">
+
+     
+     <meshitem src="primaryLeftIconItem" srcEdge="TOP" dst="" dstEdge="TOP" /> 
+     <meshitem src="primaryLeftIconItem" srcEdge="LEFT" dst="" dstEdge="LEFT" />
+
+     <meshitem src="primaryTextItem" srcEdge="TOP" dst="" dstEdge="TOP" />
+     <meshitem src="primaryTextItem" srcEdge="LEFT" dst="primaryLeftIconItem" dstEdge="RIGHT" />
+
+     <meshitem src="primaryRightIconItem" srcEdge="TOP" dst="" dstEdge="TOP" /> 
+     <meshitem src="primaryRightIconItem" srcEdge="RIGHT" dst="" dstEdge="RIGHT" />
+
+     <meshitem src="secondaryIconItem" srcEdge="LEFT" dst="" dstEdge="LEFT" />
+     <meshitem src="secondaryIconItem" srcEdge="TOP" dst="secondaryTextItem" dstEdge="TOP" />
+
+     <meshitem src="secondaryTextItem" srcEdge="BOTTOM" dst="" dstEdge="BOTTOM" />
+     <meshitem src="secondaryTextItem" srcEdge="TOP" dst="primaryTextItem" dstEdge="BOTTOM" />
+     <meshitem src="secondaryTextItem" srcEdge="LEFT" dst="primaryTextItem" dstEdge="LEFT" />
+     <meshitem src="secondaryTextItem" srcEdge="RIGHT" dst="" dstEdge="RIGHT" />
+
+  </layout>
+</hbwidget>

@@ -11,10 +11,9 @@
 *
 * Contributors:
 *
-* Description:   Calendar state machine
+* Description:  Calendar state machine
 *
 */
-
 
 
 // includes
@@ -23,6 +22,10 @@
 #include "calencontroller.h"
 #include "calenstatemachine.h"
 #include "calennotifier.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "calenexitingstateTraces.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // CCalenExitingState::NewLC
@@ -31,13 +34,13 @@
 CCalenExitingState* CCalenExitingState::NewLC( CCalenController& aController,
                                                        RHashSet<TCalenNotification>&  aOutstandingNotifications )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENEXITINGSTATE_NEWLC_ENTRY );
 
     CCalenExitingState* self = new ( ELeave ) CCalenExitingState( aController,aOutstandingNotifications);
     CleanupStack::PushL( self );
     self->ConstructL();
 
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENEXITINGSTATE_NEWLC_EXIT );
     return self;
     }
 
@@ -47,10 +50,11 @@ CCalenExitingState* CCalenExitingState::NewLC( CCalenController& aController,
 // ----------------------------------------------------------------------------
 void CCalenExitingState::ConstructL()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENEXITINGSTATE_CONSTRUCTL_ENTRY );
+    
     BaseConstructL();
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENEXITINGSTATE_CONSTRUCTL_EXIT );
     }
     
 // ----------------------------------------------------------------------------
@@ -61,9 +65,9 @@ CCalenExitingState::CCalenExitingState( CCalenController& aController,
                                                     RHashSet<TCalenNotification>&  aOutstandingNotifications )
     : CCalenState( aController, aOutstandingNotifications )
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( CCALENEXITINGSTATE_CCALENEXITINGSTATE_ENTRY );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( CCALENEXITINGSTATE_CCALENEXITINGSTATE_EXIT );
     }
     
 // ----------------------------------------------------------------------------
@@ -72,9 +76,9 @@ CCalenExitingState::CCalenExitingState( CCalenController& aController,
 // ----------------------------------------------------------------------------    
 CCalenExitingState::~CCalenExitingState()
     {
-    TRACE_ENTRY_POINT;
+    OstTraceFunctionEntry0( DUP1_CCALENEXITINGSTATE_CCALENEXITINGSTATE_ENTRY );
     
-    TRACE_EXIT_POINT;
+    OstTraceFunctionExit0( DUP1_CCALENEXITINGSTATE_CCALENEXITINGSTATE_EXIT );
     }
 
 // ----------------------------------------------------------------------------
@@ -84,8 +88,9 @@ CCalenExitingState::~CCalenExitingState()
 TBool CCalenExitingState::HandleCommandL( const TCalenCommand& /*aCommand*/,
                                         CCalenStateMachine& /*aStateMachine*/  )
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENEXITINGSTATE_HANDLECOMMANDL_ENTRY );
+    
+    OstTraceFunctionExit0( CCALENEXITINGSTATE_HANDLECOMMANDL_EXIT );
     return EFalse;
     }
 
@@ -96,8 +101,9 @@ TBool CCalenExitingState::HandleCommandL( const TCalenCommand& /*aCommand*/,
 void CCalenExitingState::HandleNotificationL(const TCalenNotification& /*aNotification*/,
                                               CCalenStateMachine& /*aStateMachine*/ )
     {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
+    OstTraceFunctionEntry0( CCALENEXITINGSTATE_HANDLENOTIFICATIONL_ENTRY );
+    
+    OstTraceFunctionExit0( CCALENEXITINGSTATE_HANDLENOTIFICATIONL_EXIT );
     }  
 
 

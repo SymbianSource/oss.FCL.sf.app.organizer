@@ -26,7 +26,7 @@ REM Agenda Model
 
 REM Configurable heap size for agenda server.
 #ifndef AGENDA_SERVER_MAX_HEAPSIZE
-#define AGENDA_SERVER_MAX_HEAPSIZE  0x400000
+#define AGENDA_SERVER_MAX_HEAPSIZE  0x100000
 #endif
 
 file=ABI_DIR\BUILD_DIR\agnmodel.dll        System\Libs\agnmodel.dll

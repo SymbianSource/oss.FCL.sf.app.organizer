@@ -16,14 +16,14 @@
 */
 
 
-#include "calenlunarvietnameselocalizer.h"
+#include "CalenLunarVietnameseLocalizer.h"
 
-#include "calenlunarlocalizer.h"
-#include "calenlunarinfo.h"
-#include "calenlunarlocalizedinfo.h"
-#include "calenextrarowformatter.h"
+#include "CalenLunarLocalizer.h"
+#include "CalenLunarInfo.h"
+#include "CalenLunarLocalizedInfo.h"
+#include "CalenExtraRowFormatter.h"
 
-#include <CalenLunarVietnamesePluginData.rsg>
+#include <calenlunarvietnameseplugindata.rsg>
 #include <StringLoader.h>
 
 
@@ -137,8 +137,8 @@ void CCalenLunarVietnameseLocalizer::LocalizeMonthAndDayL(
     day.Num( TInt64(aInfo.iLunarDate.iDay ));
     CPtrCArray* monthAndDaySubs = new (ELeave) CPtrCArray(2);
     CleanupStack::PushL( monthAndDaySubs );
-    monthAndDaySubs->AppendL(day);
     monthAndDaySubs->AppendL(month);
+    monthAndDaySubs->AppendL(day);
     
     HBufC* tmp = StringLoader::LoadLC( dateResource, *monthAndDaySubs );
     aLocInfo->iLunarMonthAndDay = *tmp;

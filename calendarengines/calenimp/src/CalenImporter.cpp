@@ -25,7 +25,7 @@
 
 
 #include "AgnExternalInterface.h"
-#include <agnimportobserver.h>
+#include <AgnImportObserver.h>
 
 #include <caldataexchange.h>
 #include <calentry.h>

@@ -21,10 +21,10 @@ UID			 0 0xE30956BA
 
 CAPABILITY readuserdata writeuserdata
 
-USERINCLUDE	 ../inc
-SYSTEMINCLUDE   /epoc32/include
+USERINCLUDE	 ..\inc
+SYSTEMINCLUDE   \epoc32\include
 
-SOURCEPATH	  ../src
+SOURCEPATH	  ..\src
 SOURCE		  alldayevents.cpp
 
 LIBRARY      euser.lib estor.lib efsrv.lib pimtestclient.lib 

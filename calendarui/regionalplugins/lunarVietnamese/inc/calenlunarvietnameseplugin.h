@@ -17,20 +17,24 @@
 
 
  
-#ifndef __CALENLUNARPLUGIN_H__
-#define __CALENLUNARPLUGIN_H__
+#ifndef __CALENLUNARVIETNAMESEPLUGIN_H__
+#define __CALENLUNARVIETNAMESEPLUGIN_H__
 
 //SYSTEM INCLUDES
 #include <e32base.h>
 #include <ecom.h>
 #include <ConeResLoader.h> 
 
+#include <QtGui>
+
+#include <hblabel.h>
+
 //CALENDAR INCLUDES
 #include <calencommandhandler.h>
 #include <calennotificationhandler.h>
 #include <calenservices.h>
 #include <eiklabel.h>
-#include <coecntrl.h>
+#include <COECNTRL.H>
 #include <calencustomisation.h>
 
 #include "CalendarVariant.hrh"
@@ -38,21 +42,25 @@
 #include "calendarui_debug.h"
 
 //FORWARD DECLARE
+class QString;
+
+class HbWidget;
+class HbMenu;
+
 class CEikonEnv;
 class CCalenLunarInfoProvider;
 class CCalenLunarLocalizer;
 class CCalenLunarLocalizedInfo;
-class CEikLabel;
-class MCalenPreview;
-
-
 
 //CLASS DECLARATION
-NONSHARABLE_CLASS(CCalenLunarVietnamesePlugin) :public CCalenCustomisation,
-												public MCalenCommandHandler,
-												public MCalenNotificationHandler
+class CCalenLunarVietnamesePlugin :public CCalenCustomisation,
+								public MCalenCommandHandler,
+								public MCalenNotificationHandler
+												
 									
 	{
+	
+	
 	public:
 	    
 	    
@@ -64,17 +72,10 @@ NONSHARABLE_CLASS(CCalenLunarVietnamesePlugin) :public CCalenCustomisation,
 		void ConstructL();
 		
 	public: //From CCalenCustomisation
-		void GetCustomViewsL(  RPointerArray<CCalenView>& aCustomViewArray );
-		void GetCustomSettingsL( RPointerArray<CAknSettingItem>& aCustomSettingArray );
-        CCoeControl* InfobarL( const TRect& aRect );
-        const TDesC& InfobarL();
-        MCalenPreview* CustomPreviewPaneL( TRect& aRect );
-        CCoeControl* PreviewPaneL(  TRect& aRect );
+		HbWidget* InfobarL( );
+        QString* InfobarTextL();        
         MCalenCommandHandler* CommandHandlerL( TInt aCommand );
-        void RemoveViewsFromCycle( RArray<TInt>& aViews );
-        TBool CustomiseMenuPaneL( TInt aResourceId, CEikMenuPane* aMenuPane );
-        TBool CanBeEnabledDisabled();
-        TAny* CalenCustomisationExtensionL( TUid aExtensionUid );
+        void CustomiseMenu(HbMenu* aHbMenu);
         
     public:// From MCalenCommandHandler
         TBool HandleCommandL( const TCalenCommand& aCommand );
@@ -84,9 +85,8 @@ NONSHARABLE_CLASS(CCalenLunarVietnamesePlugin) :public CCalenCustomisation,
         void HandleNotification(const TCalenNotification aNotification );
         
     private:
-        void SetLabelContentL( CEikLabel& aLabel ,const TRect& aRect);
-        void SetLabelContentExtraL( CEikLabel& aLabel, TRect& aRect);
-        void FormatExtraRowStringL( CEikLabel& aLabel,TBool aTwoLines);
+        void SetLabelContentL( HbLabel& aLabel );        
+        void FormatExtraRowStringL( HbLabel& aLabel,TBool aTwoLines);
         void SetLunarLocalizerL();
         void UpdateLocalizerInfoL();
         void ExecuteMessageDialogL( TDesC& aMsgText );
@@ -111,19 +111,21 @@ NONSHARABLE_CLASS(CCalenLunarVietnamesePlugin) :public CCalenCustomisation,
 		*/
 		CCalenLunarLocalizedInfo* iLocInfo;
 		
-    /**
+		/**
 		* Currently displayed text for extra row
 		*/ 
 		TPtrC iExtraRowText;
 		MCalenServices* iServices;
-	    CEikLabel* iLabelControl;
-	    
-	    /**
-        * This text object is used for hitchcock
-        * infobar in Month/Day/Week.
-        */
-        HBufC* iInfoBarText;	
-	    
+		/**
+		* This text object is used for hitchcock
+		* infobar in Month/Day/Week.
+		*/
+		HBufC* iInfoBarText;
+		
+		/**
+		* This control is used in view.
+		*/
+	    HbLabel* iLabelControl;
 	    TInt iStart;
 	    TInt iEnd;
 	    TRect iRect;
@@ -131,27 +133,25 @@ NONSHARABLE_CLASS(CCalenLunarVietnamesePlugin) :public CCalenCustomisation,
 		
 	};
 	
+class CalenPluginLabel : public HbLabel
+    {
+    Q_OBJECT
+    
+	public:
+		CalenPluginLabel( CCalenLunarVietnamesePlugin& aPlugin,QGraphicsItem *parent=0);
+		~CalenPluginLabel();     
+		
+	public slots:	
+	void showLunarData();
+	
+	private:
+		void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 ); 
+		void mousePressEvent(QGraphicsSceneMouseEvent *event);
+	private:
+		CCalenLunarVietnamesePlugin& iPlugin;	
+    };	
 
-NONSHARABLE_CLASS(CCalenPluginLabel) : public CEikLabel 
-	{
-		public:
-		static CCalenPluginLabel* NewL(CCalenLunarVietnamesePlugin& iPlugin);
-		
-		private:
-		~CCalenPluginLabel();
-		CCalenPluginLabel(CCalenLunarVietnamesePlugin& iPlugin);
-		void ConstructL();
-		
-		private: //CCoeControl
-		void HandlePointerEventL(const TPointerEvent& aPointerEvent);
-        void Draw( const TRect& aRect) const;
-		
-		private:
-		CCalenLunarVietnamesePlugin& iPlugin;
-		
-	};	
-
-#endif //__CALENLUNARPLUGIN_H__
+#endif //__CALENLUNARVIETNAMESEPLUGIN_H__
 
 
 

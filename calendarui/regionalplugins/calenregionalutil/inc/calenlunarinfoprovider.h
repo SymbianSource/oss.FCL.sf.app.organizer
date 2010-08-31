@@ -20,7 +20,7 @@
 #ifndef __CALENLUNARINFOPROVIDER_H__
 #define __CALENLUNARINFOPROVIDER_H__
 
-#include "calenlunarinfo.h"
+#include "CalenLunarInfo.h"
 #include <e32base.h>
 
 

@@ -31,11 +31,11 @@
 
 const TInt KAlarmNoteTextLength( 256 ); // KGlobalNoteTextLength
 const TInt KDateTimeDescLen( 20 ); // enough space for // "16:54" or "1:56 am" or "10.10.2010"
-const TInt KClockAlarmType( -1 );
-_LIT( KWesternSubjectSeparator, ", " );
-_LIT( KArabicSubjectSeparator, " \x060c" );
-_LIT( KNewLine, "\n" );
-_LIT( KSpace, " " );
+// const TInt KClockAlarmType( -1 );
+// _LIT( KWesternSubjectSeparator, ", " );
+// _LIT( KArabicSubjectSeparator, " \x060c" );
+// _LIT( KNewLine, "\n" );
+// _LIT( KSpace, " " );
 
 
 // ============================ MEMBER FUNCTIONS ===============================
@@ -45,6 +45,9 @@ CAlmAlarmInfo::CAlmAlarmInfo(CAlarmUtils* aAlarmUtils)
 : iAlarmUtils( aAlarmUtils )
 {
     TRACE_ENTRY_POINT;
+    
+    iAlarmInfo = new SAlarmInfo;
+    
     TRACE_EXIT_POINT;
 }
 
@@ -56,6 +59,12 @@ CAlmAlarmInfo::~CAlmAlarmInfo(void)
     delete iLocation;
     delete iDate;
     delete iTime;
+    
+    if( iAlarmInfo )
+        {
+        delete iAlarmInfo;
+        iAlarmInfo = NULL;
+        }
     TRACE_EXIT_POINT;
 }
 
@@ -63,9 +72,9 @@ CAlmAlarmInfo::~CAlmAlarmInfo(void)
 // Get the text for the alarm query.
 // -----------------------------------------------------------------------------
 //
-void CAlmAlarmInfo::GetAlarmLabelL( const TASShdAlarm& aAlarm, 
-                                    HBufC*& aText, 
-                                    const CAlarmUtils::TAlarmType& aAlarmType )
+void CAlmAlarmInfo::GetAlarmLabelL( const TASShdAlarm& /*aAlarm*/, 
+                                    HBufC*& /*aText*/, 
+                                    const CAlarmUtils::TAlarmType& /*aAlarmType*/ )
 {
     /**
      *  Clock alarm:                  Other/unknown alarms:
@@ -101,8 +110,8 @@ void CAlmAlarmInfo::GetAlarmLabelL( const TASShdAlarm& aAlarm,
     TRACE_ENTRY_POINT;
 
     // cover UI params...
-    TInt coverUIAlarmType( KClockAlarmType );
-
+    // TInt coverUIAlarmType( KClockAlarmType );
+/*
     switch( aAlarmType )
     {
         case CAlarmUtils::EAlarmTypeClock:
@@ -115,7 +124,7 @@ void CAlmAlarmInfo::GetAlarmLabelL( const TASShdAlarm& aAlarm,
         case CAlarmUtils::EAlarmTypeOther:
         {
             // For Cover UI - unknown alarms are handled as calendar meetings
-            coverUIAlarmType = CCalEntry::EAppt;
+            // coverUIAlarmType = CCalEntry::EAppt;
 
             GetCoverUIParamsForClockAndOtherL( aAlarm, CAlarmUtils::EAlarmTypeOther );
             SetupUnknownAlarmL( aText );
@@ -139,7 +148,7 @@ void CAlmAlarmInfo::GetAlarmLabelL( const TASShdAlarm& aAlarm,
 
             // entry type
             CCalEntry::TType type = entry->EntryTypeL();
-            coverUIAlarmType = type;
+            // coverUIAlarmType = type;
 
             GetCoverUIParamsForCalendarL( entry );
 
@@ -183,14 +192,13 @@ void CAlmAlarmInfo::GetAlarmLabelL( const TASShdAlarm& aAlarm,
                                                                      *iCoverDate, 
                                                                      *iSubject, 
                                                                      *iLocation );
-    // ... and cleanup
     delete iSubject;   iSubject = NULL;
     delete iLocation;  iLocation = NULL;
     delete iDate;      iDate = NULL;
     delete iTime;      iTime = NULL;
     delete iCoverDate; iCoverDate = NULL;
     delete iCoverTime; iCoverTime = NULL;
-
+*/
     TRACE_EXIT_POINT;
 }
 
@@ -205,10 +213,118 @@ void CAlmAlarmInfo::GetWakeupLabelL(HBufC*& aLabel)
     TRACE_EXIT_POINT;
 }
 
+SAlarmInfo* CAlmAlarmInfo::GetAlarmInfo(TASShdAlarm aAlarm, CAlarmUtils::TAlarmType aAlarmType)
+{
+    // Based on the alarm type, get the appropriate information
+    switch( aAlarmType )
+        {
+        case CAlarmUtils::EAlarmTypeClock:
+            {
+            SetupClockAlarmL( aAlarm );
+            // Set the alarm type
+			iAlarmInfo->iAlarmAlertType = CAlarmUtils::EAlarmTypeClock;
+            }
+        break;
+
+        case CAlarmUtils::EAlarmTypeOther:
+            {
+            // TODO: Handle this case 
+            SetupUnknownAlarmL( aAlarm );
+            iAlarmInfo->iAlarmAlertType = CAlarmUtils::EAlarmTypeOther;
+            }
+        break;
+
+        case CAlarmUtils::EAlarmTypeCalendar:
+            {
+            // Check phone restore mode before creating agenda session
+            if( iAlarmUtils->IsPhoneInRestoreMode() )
+                {
+                User::Leave( KErrCancel );
+                }
+            // Set the alarm type
+            iAlarmInfo->iAlarmAlertType = CAlarmUtils::EAlarmTypeCalendar;
+            
+            // Fetch the calendar entry and instance time
+            CCalEntry* entry = NULL;
+            
+            // TODO: Use agenda interface to fetch the entry details
+            iAlarmUtils->FetchEntryL( entry );
+            CleanupStack::PushL( entry );
+            
+            const TTime instanceTime( iAlarmUtils->AlarmData().iInstanceTime.TimeLocalL() );
+
+            // Subject
+            iAlarmInfo->iSubject = HBufC::NewL( KAlarmNoteTextLength - KDateTimeDescLen );
+            iAlarmInfo->iSubject->Des().Append( entry->SummaryL().Left( iAlarmInfo->iSubject->Des().MaxLength() ) );
+            iAlarmInfo->iSubject->Des().TrimAll();
+
+            // Location
+            iAlarmInfo->iLocation = HBufC::NewL( Max( 0, KAlarmNoteTextLength - KDateTimeDescLen - iAlarmInfo->iSubject->Length() ) );
+            iAlarmInfo->iLocation->Des().Append( entry->LocationL().Left( iAlarmInfo->iLocation->Des().MaxLength() ) );
+            iAlarmInfo->iLocation->Des().TrimAll();
+
+            // Date
+            iAlarmInfo->iDate = instanceTime;
+
+            // Get the entry type
+            CCalEntry::TType type = entry->EntryTypeL();
+
+            // Based on the type of entry, get the information
+            switch( type )
+                {
+                case CCalEntry::EAppt:
+                case CCalEntry::EReminder:
+                    {
+                    // TODO : Format text based on type of entry
+                    // SetupAppointmentAlarmL( aAlarm );
+                    iAlarmInfo->iTime = instanceTime;
+                    iAlarmInfo->iIsTimed = ETrue;
+                    }
+                break;
+
+                case CCalEntry::ETodo:
+                    {
+                    // TODO : Format text based on type of entry
+                    //SetupToDoAlarmL( aAlarm );
+                    iAlarmInfo->iAlarmAlertType = CAlarmUtils::EAlarmTypeTodo;
+                    iAlarmInfo->iTime = TTime( 0 );
+                    iAlarmInfo->iIsTimed = EFalse;
+                    // No Location is there for todo alarms
+                    iAlarmInfo->iLocation = HBufC::NewL( 0 );
+                    }
+                break;
+                
+                case CCalEntry::EEvent:
+                    {
+                    // No time information for an all day event	
+                    iAlarmInfo->iTime = TTime( 0 );
+                    iAlarmInfo->iIsTimed = EFalse;
+                    }
+                break;
+                
+                default:
+                    {
+                    // TODO : Format text based on type of entry
+                    // SetupAnniversaryAlarmL( aAlarm );
+                    iAlarmInfo->iTime = TTime( 0 );
+                    }
+                break;
+                }
+            CleanupStack::PopAndDestroy( entry );
+            }
+        break;
+
+        default:
+            __ASSERT_DEBUG( EFalse, User::Invariant() );
+    }
+    return iAlarmInfo;
+}
+
 // =============================================================================
 // ALARM SETUP METHODS
 // =============================================================================
 
+/*
 // -----------------------------------------------------------------------------
 // Create alarm notification string for Clock alarm.
 // "[Clock alarm:][\n][time][\n][Description]"
@@ -387,7 +503,7 @@ void CAlmAlarmInfo::SetupAnniversaryAlarmL(HBufC*& aText)
     TRACE_EXIT_POINT;
 }
 
-
+*/
 
 // =============================================================================
 // STRING UTILITY FUNCTIONS
@@ -415,6 +531,7 @@ void CAlmAlarmInfo::AppendSubjectLocationText(TPtr& aDest, const TDesC& aSeparat
     TRACE_EXIT_POINT;
 }
 
+/*
 // -----------------------------------------------------------------------------
 // Create strings needed for calendar alarms.
 // AVKON global note can't (currently) show more than 256 characters.  So no 
@@ -516,6 +633,42 @@ void CAlmAlarmInfo::GetCoverUIParamsForClockAndOtherL( const TASShdAlarm& aAlarm
     CleanupStack::PopAndDestroy( dateFormat );
     TRACE_EXIT_POINT;
 }
+*/
 
+void CAlmAlarmInfo::SetupUnknownAlarmL(TASShdAlarm /* aAlarm */)
+{
+    
+}
+
+void CAlmAlarmInfo::SetupClockAlarmL(TASShdAlarm aAlarm)
+{
+    // The alarm subject
+    iAlarmInfo->iSubject = aAlarm.Message().AllocL();
+    iAlarmInfo->iSubject->Des().TrimAll();
+
+    // Location must not be displayed for clock alarms
+    iAlarmInfo->iLocation = HBufC::NewL( 0 );
+
+    // The alarm time
+    iAlarmInfo->iTime = aAlarm.NextDueTime();
+
+    // Date must not be shown for clock alarms
+    iAlarmInfo->iDate = TTime( 0 );
+}
+
+void CAlmAlarmInfo::SetupAppointmentAlarmL(TASShdAlarm /* aAlarm */)
+{
+
+}
+
+void CAlmAlarmInfo::SetupToDoAlarmL(TASShdAlarm /* aAlarm */)
+{
+    
+}
+
+void CAlmAlarmInfo::SetupAnniversaryAlarmL(TASShdAlarm /* aAlarm */)
+{
+    
+}
 
 // End of File

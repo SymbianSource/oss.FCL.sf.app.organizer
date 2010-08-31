@@ -21,7 +21,12 @@
 
 #include "calencustomisation.h"
 #include "CalenLunarChinesePlugin.h"
-#include "calenregionalpluginuids.h"
+#include "CalenRegionalPluginUids.h"
+#include "OstTraceDefinitions.h"
+#ifdef OST_TRACE_COMPILER_IN_USE
+#include "CalenLunarChinesePluginProxyTraces.h"
+#endif
+
 
 
 // ----------------------------------------------------------------------------
@@ -40,7 +45,9 @@ const TImplementationProxy ImplementationTable[] =
 // ----------------------------------------------------------------------------
 EXPORT_C const TImplementationProxy* ImplementationGroupProxy(TInt& aTableCount)
     {
+    OstTraceFunctionEntry0( _IMPLEMENTATIONGROUPPROXY_ENTRY );
     aTableCount = sizeof(ImplementationTable) / sizeof (TImplementationProxy);
+    OstTraceFunctionExit0( _IMPLEMENTATIONGROUPPROXY_EXIT );
     return ImplementationTable;
     }
 
