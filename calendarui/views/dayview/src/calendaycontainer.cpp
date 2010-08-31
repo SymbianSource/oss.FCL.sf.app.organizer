@@ -247,8 +247,8 @@ void CalenDayContainer::updateTimedEventGeometry(
     if (eventWidth - mLayoutValues.eventMargin < minWidth) {
 
         // Calculate new margin value
-        // from totalMarginSpace we need to subtract 
-        // mLayoutValues.eventMargin because first margin is always 1.5un
+        // from totalMarginSpace we need to subtract mLayoutValues.eventMargin 
+        // because first margin is always KCalenSpaceBeetwenEvents
         qreal totalMarginSpace = mLayoutValues.eventAreaWidth - minWidth
             * columns - mLayoutValues.eventMargin;
         qreal newMarginValue = totalMarginSpace / (columns - 1);
@@ -259,8 +259,8 @@ void CalenDayContainer::updateTimedEventGeometry(
         }
         else {
             // There's not enough space
-            // New minWidth is KCalenTimeStripWidth [un] (time stripe only)
-            minWidth = KCalenTimeStripWidth * mLayoutValues.unitInPixels;
+            // New minWidth is KCalenMinTimeStripWidth [un] (time stripe only)
+            minWidth = KCalenMinTimeStripWidth * mLayoutValues.unitInPixels;
             totalMarginSpace = mLayoutValues.eventAreaWidth - minWidth * columns 
 				- mLayoutValues.eventMargin;
             newMarginValue = totalMarginSpace / (columns - 1);
@@ -360,36 +360,39 @@ void CalenDayContainer::updateAllDayEventGeometry(
  */
 void CalenDayContainer::getTimedEventLayoutValues(LayoutValues& layoutValues)
 {
-    // Get the width of content area
+    // Get the width of entire content area
     qreal contentWidth = CalenDayUtils::instance()->contentWidth();
 
-    // 1. Time column width -> eventAreaX[out]
     HbStyle style;
     HbDeviceProfile deviceProfile;
     layoutValues.unitInPixels = deviceProfile.unitValue();
 
+    // Empty right column's width
+    qreal emptyRightColumnWidth = KCalenEmptyRightColumnWidth
+        * layoutValues.unitInPixels;
+
+    // Margins between the overlapping events -> eventMargin[out]
+    layoutValues.eventMargin = KCalenSpaceBeetwenEvents
+        * layoutValues.unitInPixels;
+
+    // Start position (x) for drawing events -> eventAreaX[out]
     if (mInfo && mInfo->AlldayCount()) {
-        layoutValues.eventAreaX = KCalenAllDayEventArea * contentWidth;
+        layoutValues.eventAreaX = KCalenAllDayEventArea * (contentWidth
+            - emptyRightColumnWidth);
     }
     else {
         layoutValues.eventAreaX = 0;
     }
 
-    // 2. event area width -> eventAreaWidth[out]
-    qreal emptyRightColumnWidth = KCalenEmptyRightColumnWidth
-        * layoutValues.unitInPixels;
+    // Event area width (excluding All Day Events area)-> eventAreaWidth[out]
     layoutValues.eventAreaWidth = contentWidth - emptyRightColumnWidth
         - layoutValues.eventAreaX;
 
-    // 3. margins between the overlapping events -> eventMargin[out]
-    layoutValues.eventMargin = KCalenSpaceBeetwenEvents
-        * layoutValues.unitInPixels;
-
-    // 4. half-hour slot'h height -> slotHeight[out]
+    // Half-hour slot's height -> slotHeight[out]
     layoutValues.slotHeight = CalenDayUtils::instance()->hourElementHeight()
         / KCalenSlotsInHour;
 
-    // check if we should create absorber over some overlapping region
+    // Check if touch absorbers should be created over some overlapping regions
     layoutValues.maxColumns = layoutValues.eventAreaWidth
         / ((KCalenMinTouchableEventWidth + KCalenSpaceBeetwenEvents)
             * layoutValues.unitInPixels);

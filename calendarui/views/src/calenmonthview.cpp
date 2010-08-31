@@ -589,12 +589,12 @@ void CalenMonthView::showHideRegionalInformation()
 				mPrevRegionalInfo = NULL;
 			}
 			if (mCurrRegionalInfo) {
-				mPrevPaneLayout->removeItem(mCurrRegionalInfo);
+				mCurrPaneLayout->removeItem(mCurrRegionalInfo);
 				mCurrRegionalInfo->hide();
 				mCurrRegionalInfo = NULL;
 			}
 			if (mNextRegionalInfo) {
-				mPrevPaneLayout->removeItem(mNextRegionalInfo);
+				mNextPaneLayout->removeItem(mNextRegionalInfo);
 				mNextRegionalInfo->hide();
 				mNextRegionalInfo = NULL;
 			}

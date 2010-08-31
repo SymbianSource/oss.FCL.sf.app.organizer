@@ -31,7 +31,7 @@
 // ----------------------------------------------------------------------------
 // 
 CalenEventListViewItem::CalenEventListViewItem(CalenAgendaViewWidget *parent) :
-HbListViewItem(parent),mAllDayIcon(false),mLocationEntry(false),mParent(parent)
+HbListViewItem(parent),mParent(parent),mAllDayIcon(false)
 {
     OstTraceFunctionEntry0( CALENEVENTLISTVIEWITEM_CALENEVENTLISTVIEWITEM_ENTRY );
     
@@ -76,7 +76,6 @@ void CalenEventListViewItem::updateChildItems()
         {
         mParent->checkEntryIcons();
         mAllDayIcon = mParent->isAllDayIcon();
-        mLocationEntry =  mParent->isLocationData();
         }
     
     HbListViewItem::updateChildItems();
@@ -102,29 +101,6 @@ bool CalenEventListViewItem::hasAllDayIcon()
 void CalenEventListViewItem::setAllDayLeftIcon(bool icon)
     {
     mAllDayIcon = icon;
-    }
-
-// ----------------------------------------------------------------------------
-// CalenEventListViewItem::hasAllDayIcon
-// check if location entry is there in item
-// ----------------------------------------------------------------------------
-// 
-bool CalenEventListViewItem::locationEntryLayout()
-    {
-    if(mAllDayIcon && !mLocationEntry)
-        return true;
-    else
-        return false;
-    }
-
-// ----------------------------------------------------------------------------
-// CalenEventListViewItem::setAllDayLeftIcon
-// set the location entry status 
-// ----------------------------------------------------------------------------
-// 
-void CalenEventListViewItem::setLocationEntry(bool icon)
-    {
-    mLocationEntry = icon;
     }
 
 // End of file

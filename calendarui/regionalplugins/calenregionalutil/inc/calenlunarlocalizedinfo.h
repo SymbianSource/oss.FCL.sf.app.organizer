@@ -51,13 +51,13 @@ public: // public API
      */
     IMPORT_C const TDesC& GetField( TField aField );
     
-    IMPORT_C const TDesC& Festival() { return iFestival; }
-    IMPORT_C const TDesC& SolarTerm() { return iSolarTerm; }
-    IMPORT_C const TDesC& FullLunarDate() { return iFullLunarDate; }
-    IMPORT_C const TDesC& LunarYear() { return iLunarYear; }    
-    IMPORT_C const TDesC& LunarMonthAndDay() { return iLunarMonthAndDay; }    
-    IMPORT_C const TDesC& AnimalYear() { return iAnimalYear; }    
-    IMPORT_C const TDesC& GregorianDate() { return iGregorianDate; }
+    IMPORT_C const TDesC& Festival();
+    IMPORT_C const TDesC& SolarTerm();
+    IMPORT_C const TDesC& FullLunarDate();
+    IMPORT_C const TDesC& LunarYear();    
+    IMPORT_C const TDesC& LunarMonthAndDay();    
+    IMPORT_C const TDesC& AnimalYear();    
+    IMPORT_C const TDesC& GregorianDate();
 
 private:
     CCalenLunarLocalizedInfo();

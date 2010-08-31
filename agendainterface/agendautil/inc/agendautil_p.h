@@ -61,7 +61,9 @@ public:
 	AgendaUtilPrivate(AgendaUtil* calendar);
 	~AgendaUtilPrivate();
 
-	ulong store(AgendaEntry &entry, AgendaUtil::RecurrenceRange range);
+	ulong store(
+			AgendaEntry &entry, AgendaUtil::RecurrenceRange range,
+			QDateTime &instanceOriginalDateTime);
 	ulong cloneEntry(const AgendaEntry& entry, AgendaEntry::Type type);
 	
 	bool deleteEntry(ulong id);

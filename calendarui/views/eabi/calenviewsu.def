@@ -267,4 +267,5 @@ EXPORTS
 	_ZN21CalenThickLinesDrawer17handleThemeChangeEv @ 266 NONAME
 	_ZN16CalenPreviewPane17handleThemeChangeEv @ 267 NONAME
 	_ZNK25CalenDayContentScrollArea17isHorizontalSwipeEf @ 268 NONAME
+	_ZN14CalenMonthView26disconnectAboutToQuitEventEv @ 269 NONAME
 

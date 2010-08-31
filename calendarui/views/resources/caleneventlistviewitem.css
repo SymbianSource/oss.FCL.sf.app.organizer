@@ -1,27 +1,11 @@
-CalenEventListViewItem[leftAllDayIcon="false"]:portrait{
+CalenEventListViewItem[leftAllDayIcon="false"]{
 	layout: custom;
 }
 
-CalenEventListViewItem[leftAllDayIcon="false"]:landscape{
-    layout: custom;
-}
-
-CalenEventListViewItem[leftAllDayIcon="true"]:portrait{
+CalenEventListViewItem[leftAllDayIcon="true"]{
 	layout: custom-subjecticon;
 }
 
-CalenEventListViewItem[leftAllDayIcon="true"]:landscape{
-    layout: custom-subjecticon;
-}
-
-
-CalenEventListViewItem[locationEntry="true"]:portrait{
-	layout: custom-locationentry;
-}
-
-CalenEventListViewItem[locationEntry="true"]:landscape{
-    layout: custom-locationentry;
-}
 
 
 CalenEventListViewItem::icon-1{
@@ -50,6 +34,7 @@ CalenEventListViewItem::icon-4{
 }
 
 CalenEventListViewItem::text-1{
+		top: -var(hb-param-margin-gene-top);
 		left: -var(hb-param-margin-gene-left);
     font-variant: secondary;
 		text-height: var(hb-param-text-height-secondary);
@@ -61,19 +46,8 @@ CalenEventListViewItem::text-1{
 CalenEventListViewItem::text-2{
 	top: -var(hb-param-margin-gene-top);
 		right: var(hb-param-margin-gene-middle-horizontal);
-	   left: -var(hb-param-margin-gene-middle-horizontal);
-    font-variant: primary;
-    text-height: var(hb-param-text-height-primary);
-    text-align: left;
- 
-}
-
-
-CalenEventListViewItem::text-2[locationEntry="true"]{
-		top: -var(hb-param-margin-gene-top);
-	  bottom: var(hb-param-margin-gene-bottom);
-		right: var(hb-param-margin-gene-middle-horizontal);
 	  left: -var(hb-param-margin-gene-middle-horizontal);
+	   bottom:var(hb-param-margin-gene-middle-vertical); 
     font-variant: primary;
     text-height: var(hb-param-text-height-primary);
     text-align: left;
@@ -82,7 +56,7 @@ CalenEventListViewItem::text-2[locationEntry="true"]{
 
 
 CalenEventListViewItem::text-3{
-    top: -var(hb-param-margin-gene-middle-vertical);
+      
 		right: var(hb-param-margin-gene-middle-horizontal);
     bottom: var(hb-param-margin-gene-bottom);
     font-variant: secondary;

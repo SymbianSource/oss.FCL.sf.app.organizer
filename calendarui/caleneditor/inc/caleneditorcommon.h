@@ -33,6 +33,8 @@
 
 // Constants
 const int SecsInOneHour( 3600 );
+const int SecsIn15Mins( 900 );  //15 * 60 secs
+const int SecsIn30Mins( 1800 ); //30 * 60 secs
 const int MaxRowsInTextItem(10);
 const int MaxCharacterLimit(255);
 

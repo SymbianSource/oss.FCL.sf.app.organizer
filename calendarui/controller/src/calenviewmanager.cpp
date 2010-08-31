@@ -258,6 +258,9 @@ void CalenViewManager::loadMonthView()
 	Q_ASSERT_X(mCalenMonthView, "calenviewmanager.cpp", 
 											"Unable to load calenMonth view");
 	
+	// Set the parent to delete the view once will exit the application
+	mCalenMonthView->setParent(this);
+	
 	// Setup the month view.
 	mCalenMonthView->setupView(mMonthViewDocLoader);
 	
@@ -289,6 +292,9 @@ void CalenViewManager::loadAgendaView()
 	if (!mCalenAgendaView) {
 		qFatal("calenviewmanager.cpp : Unable to find agenda view");
 	}
+	
+	// Set the parent to delete the view once will exit the application
+	mCalenAgendaView->setParent(this);
 	
 	// Setup the agenda view
 	mCalenAgendaView->setupView(mAgendaViewDocLoader);
@@ -325,6 +331,9 @@ void CalenViewManager::loadDayView()
         if (!mCalenDayView) {
             qFatal("calenviewmanager.cpp : Unable to find day view");
         }
+        
+        // Set the parent to delete the view once will exit the application
+        mCalenDayView->setParent(this);
         
         // Set up the day view - day view takes the ownership
         mCalenDayView->setupView(docLoader);
@@ -689,6 +698,9 @@ void CalenViewManager::loadAlternateAgendaView()
         qFatal("calenviewmanager.cpp : Unable to find alternate agenda view");
     }
 
+    // Set the parent to delete the view once will exit the application
+    mCalenAgendaViewAlt->setParent(this);
+    
     // Setup the agenda view
     mCalenAgendaViewAlt->setupView(mAgendaViewAltDocLoader);
     OstTraceFunctionExit0( CALENVIEWMANAGER_LOADALTERNATEAGENDAVIEW_EXIT );
@@ -952,6 +964,9 @@ void CalenViewManager::handleInstanceViewCreation(int status)
 	else if (mCalenAgendaView && currentview == mCalenAgendaView) {
 		mCalenAgendaView->doPopulation();
 	}
+    else if (mCalenDayView && currentview == mCalenDayView) {
+        mCalenDayView->doPopulation();
+    }
 	// Calls the emitAppReady function of CalenController. Need to emit this
 	// signal after the view is fully constructed & populated
 	// with actual data and ready to be used. So entry view & instance view

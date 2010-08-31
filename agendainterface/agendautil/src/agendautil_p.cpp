@@ -203,11 +203,14 @@ void AgendaUtilPrivate::CalChangeNotification(
 /*!
 	To store the new entry or update the entry in the Calendar db.
 
-	\param entry The entry to be added/updated
-	\param range The recurrence range of entry
+	\param entry The entry to be added/updated.
+	\param range The recurrence range of entry.
+	\param instanceOriginalDateTime The start time of the original instance..
 	\return ulong The local uid of the entry added/updated in the db.
 */
-ulong AgendaUtilPrivate::store(AgendaEntry &entry, AgendaUtil::RecurrenceRange range)
+ulong AgendaUtilPrivate::store(
+		AgendaEntry &entry, AgendaUtil::RecurrenceRange range,
+		QDateTime &instanceOriginalDateTime)
 {
 	// Will be filled with the lUID of the new entry created.
 	TCalLocalUid localUid = 0;
@@ -269,7 +272,7 @@ ulong AgendaUtilPrivate::store(AgendaEntry &entry, AgendaUtil::RecurrenceRange r
 					// We are creating an exception, hence get the global Uid
 					HBufC8* guid = parentEntry->UidL().AllocLC();
 					
-					QDateTime instanceOriginalDateTime = entry.startTime();
+					
 					
 					// create new (child) entry
 					// Use original instance time for recurrenceID as this entry hasn't got one.

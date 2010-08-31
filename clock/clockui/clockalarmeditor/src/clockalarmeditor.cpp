@@ -224,6 +224,10 @@ void ClockAlarmEditor::handleDoneAction()
 		   alarmDayIndex -= KDaysInWeek;
 		}
 	}
+	
+	if(mAlarmId) {
+		mAlarmClient.deleteAlarm(mAlarmId);
+	}
 
 	setAlarm(
 			mAlarmTimeItem->contentWidgetData("text").toString(),
@@ -245,6 +249,9 @@ void ClockAlarmEditor::handleDoneAction()
 void ClockAlarmEditor::handleDeleteAction()
 {
 	OstTraceFunctionEntry0( CLOCKALARMEDITOR_HANDLEDELETEACTION_ENTRY );
+	if(mAlarmId) {
+		mAlarmClient.deleteAlarm(mAlarmId);
+	}
 	closeAlarmEditor();
 	OstTraceFunctionExit0( CLOCKALARMEDITOR_HANDLEDELETEACTION_EXIT );
 }
@@ -696,7 +703,6 @@ void ClockAlarmEditor::initAlarmInfo()
 	// get the alarm details and fill it in mAlarmInfo.
 	if (mAlarmId) {
 		mAlarmClient.getAlarmInfo(mAlarmId, mAlarmInfo);
-		mAlarmClient.deleteAlarm(mAlarmId);
 	}
 	
 	// Set the value for previous alarm time.

@@ -26,7 +26,6 @@ class CalenEventListViewItem : public HbListViewItem
 {
     Q_OBJECT
     Q_PROPERTY(bool leftAllDayIcon READ hasAllDayIcon WRITE setAllDayLeftIcon)
-    Q_PROPERTY(bool locationEntry READ locationEntryLayout WRITE setLocationEntry)
 
 public:
     /**
@@ -60,19 +59,9 @@ public:
      */
     void setAllDayLeftIcon(bool icon = false);
     
-    /**
-    * @brief sets location entry status 
-    */
-    void setLocationEntry(bool icon);
-    
-    /**
-    * @brief check if location is present
-    */
-    bool locationEntryLayout();
 private:  
     CalenAgendaViewWidget* mParent; 
     bool mAllDayIcon ;
-    bool mLocationEntry;
 };
 
 #endif      // __CALEN_EVENT_LIST_VIEW_ITEM_H__

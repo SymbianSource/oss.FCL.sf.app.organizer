@@ -1,12 +1,12 @@
-CalenDayItem{
+CalenDayItem {
     layout: noIconLayout;
 }
 
-CalenDayItem[!eventDescription][!backgroundFrame]{
+CalenDayItem[!eventDescription][!backgroundFrame] {
     layout: noIconNoTextNoBkgLayout;
 }
 
-CalenDayItem[!eventDescription][backgroundFrame]{
+CalenDayItem[!eventDescription][backgroundFrame] {
     layout: noIconNoTextLayout;
 }
 
@@ -20,11 +20,5 @@ CalenDayItem::eventDescription {
 }
  
 CalenDayItem::colorStripe {
-    pref-width: 1.5un;
-    size-policy-horizontal: fixed; 
-}
-
-CalenDayItem::spacerItem{
-    pref-width: 1.5un;
-    size-policy-horizontal: expanding; 
+    size-policy-horizontal: fixed;
 }

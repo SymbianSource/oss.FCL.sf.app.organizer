@@ -32,6 +32,7 @@
 // User Included
 #include "caleneditorrepeatfield.h"
 #include "caleneditorcustomitem.h"
+#include "caleneditorreminderfield.h"
 #include "calendateutils.h"
 #include "OstTraceDefinitions.h"
 #ifdef OST_TRACE_COMPILER_IN_USE
@@ -400,6 +401,18 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 	// the reminder choices are updated 
 	if(repeatPropertyChange || repeatUntilDate != mRepeatUntilDate) {
 		mCalenEditor->updateReminderChoices();
+		// Once the entry is changed from  non repeating to repeating 
+		// and if the alarm set is off 
+		// Then change the reminder option to the default 'one day before' 
+		// if the option is valid
+		if (mCalenEditor->isAllDayEvent() && 
+					repeatPropertyChange && mRepeatUntilItemAdded) {
+			if(!mCalenEditor->isReminderTimeForAllDayAdded() &&
+					mCalenEditor->getReminderCount() >= 3) {
+				mCalenEditor->setCurrentIndexOfReminderField(
+							CalenEditorReminderField::ReminderOneDayBefore);
+			}
+		}
 	}
 	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_HANDLEREPEATINDEXCHANGED_EXIT );
 }
@@ -523,6 +536,8 @@ void CalenEditorRepeatField::launchRepeatUntilDatePicker()
 void CalenEditorRepeatField::setRepeatUntilDate()
 {
 	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_SETREPEATUNTILDATE_ENTRY );
+	//Get the previous date which was set
+	QDate previousDate = mRepeatUntilDate;
 	mRepeatUntilDate = mDatePicker->date();
 	if (mRepeatUntilDate.isValid()) {
 		HbExtendedLocale locale = HbExtendedLocale::system();
@@ -531,6 +546,18 @@ void CalenEditorRepeatField::setRepeatUntilDate()
 		mCustomRepeatUntilItem->setContentWidgetData("text", dateString);
 	}
 	mCalenEditor->updateReminderChoices();
+	// If the entry's  repeatuntil date is changed from past to a future date
+	// And if the alarm set set is off 
+	// Then change the reminder option to the default 'one day before' 
+	// if the option is valid
+	if (mCalenEditor->isAllDayEvent() && previousDate <= QDate::currentDate()) {
+		if(mRepeatUntilDate > QDate::currentDate() && 
+							!mCalenEditor->isReminderTimeForAllDayAdded() &&
+							 mCalenEditor->getReminderCount() >= 3) {
+			mCalenEditor->setCurrentIndexOfReminderField(
+							CalenEditorReminderField::ReminderOneDayBefore);
+		}
+	}
 	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_SETREPEATUNTILDATE_EXIT );
 }
 

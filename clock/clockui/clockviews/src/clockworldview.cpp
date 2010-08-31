@@ -660,25 +660,21 @@ QVariantList ClockWorldView::getCityListDisplayString(
 		}
 	}
 	else if ( hours ){
-		if(hours == 1 ) {
-			displayFormat = hbTrId("txt_clock_dblist_daily_val_ln_hr");
-			offsetString = displayFormat.arg(hours);
-			offsetDifference += offsetString;
+		if(hours == 1) {
+			displayFormat = hbTrId("txt_clock_dblist_daily_val_ln_hr",hours);
+			offsetDifference += displayFormat;
 		}
 		else {
-			displayFormat = hbTrId("txt_clock_dblist_val_1_hrs");
-			offsetString = displayFormat.arg(hours);
-			offsetDifference += offsetString;
+			displayFormat = hbTrId("txt_clock_dblist_daily_val_ln_hr",hours);
+			offsetDifference += displayFormat;
 		}
 	}
 	else if (minutes){
-		displayFormat = hbTrId("txt_clock_dblist_daily_val_ln_mins");
-		offsetString = displayFormat.arg(minutes);
-		offsetDifference += offsetString;
+		displayFormat = hbTrId("txt_clock_dblist_daily_val_ln_mins",minutes);
+		offsetDifference += displayFormat;
 	} else {
-		displayFormat = hbTrId("txt_clock_dblist_val_1_hrs");
-		offsetString = displayFormat.arg(0);
-		offsetDifference += offsetString;
+		displayFormat = hbTrId("txt_clock_dblist_daily_val_ln_hr",0);
+		offsetDifference += displayFormat;
 	}
 	displayString.append(offsetDifference);
 

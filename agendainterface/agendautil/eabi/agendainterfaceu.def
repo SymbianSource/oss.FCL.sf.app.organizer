@@ -26,7 +26,7 @@ EXPORTS
 	_ZN10AgendaUtil24isWorkdaysRepeatingEntryERK16AgendaRepeatRule @ 25 NONAME
 	_ZN10AgendaUtil26entryViewCreationCompletedEi @ 26 NONAME
 	_ZN10AgendaUtil29instanceViewCreationCompletedEi @ 27 NONAME
-	_ZN10AgendaUtil5storeER11AgendaEntryNS_15RecurrenceRangeE @ 28 NONAME
+	_ZN10AgendaUtil5storeER11AgendaEntryNS_15RecurrenceRangeE9QDateTime @ 28 NONAME
 	_ZN10AgendaUtil7maxTimeEv @ 29 NONAME
 	_ZN10AgendaUtil7minTimeEv @ 30 NONAME
 	_ZN10AgendaUtil8entryIdsENS_11FilterFlagsE @ 31 NONAME

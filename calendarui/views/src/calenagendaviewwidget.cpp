@@ -1306,16 +1306,12 @@ void CalenAgendaViewWidget::checkEntryIcons()
      entry = mInstanceArray[mIndex];
      
      mLeftAllDayIcon = false;
-     mLocationData = false;
      
      if(!entry.isTimedEntry() || CalenAgendaUtils::isAlldayEvent(entry)){
          //all day icon is not there if its a timed entry
          mLeftAllDayIcon = true;
          }
-  
-     if (!entry.location().isEmpty()) {
-         mLocationData = true ;
-         }
+     
      //check if shift to next entry
     if(mNextEntry)
         mIndex++;     
@@ -1332,13 +1328,4 @@ bool CalenAgendaViewWidget::isAllDayIcon()
     return mLeftAllDayIcon;
     }
 
-// ----------------------------------------------------------------------------
-// CalenAgendaViewWidget::isLocationData
-// return true  if location entry is present
-// ----------------------------------------------------------------------------
-//
-bool CalenAgendaViewWidget::isLocationData()
-    {
-    return mLocationData;
-    }
 // End of file	--Don't remove this.

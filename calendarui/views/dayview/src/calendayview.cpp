@@ -407,7 +407,7 @@ void CalenDayView::setHeadingText(const HbEffect::EffectStatus &status)
     // Set the heading
 
     // Append the date which is formatted as per the locale   
-    mHeadingLabel->setHeading(hbTrId("txt_calendar_subhead_1_2").arg(dayString).arg(
+    mHeadingLabel->setHeading(QString("%1 %2").arg(dayString).arg(
         systemLocale.format(mDate.date(), r_qtn_date_usual_with_zero)));
 
     HbEffect::start(mHeadingLabel, "fadeIn");

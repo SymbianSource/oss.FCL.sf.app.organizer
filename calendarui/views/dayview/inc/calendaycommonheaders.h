@@ -57,6 +57,11 @@ const qreal KCalenMinEventWidth = 3.0;
 const qreal KCalenTimeStripWidth = 1.5;
 
 /*!
+ The minimum width [un] of time strip (indicator) in event bubble (UI spec)
+ */
+const qreal KCalenMinTimeStripWidth = 1.4;
+
+/*!
  The width [un] of space beetwen event bubbles in Day View (UI spec)
  */
 const qreal KCalenSpaceBeetwenEvents = 1.5;

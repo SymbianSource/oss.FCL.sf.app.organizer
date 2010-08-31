@@ -203,7 +203,7 @@ qreal CalenDayUtils::calculateHourElementHeight() const
     qreal textHeight = 0.0;
     qreal verticalSpacing = 0.0;
         
-    qreal bottomSpacer = 3.0 * unitInPixels;
+    qreal bottomSpacer = 4.1 * unitInPixels;
     style.parameter(QString("hb-param-text-height-secondary"), textHeight, 
         deviceProfile);
     style.parameter(QString("hb-param-margin-gene-middle-vertical"), 

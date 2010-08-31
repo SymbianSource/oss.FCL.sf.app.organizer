@@ -21,6 +21,7 @@
 #include <qfont.h>
 #include <qicon.h>
 #include <qpainter.h>
+#include <qevent.h>
 #include <hblabel.h>
 #include <hbmainwindow.h>
 #include <hbframeitem.h>
@@ -127,6 +128,7 @@ void CalenPreviewPane::populateLabel(QDateTime date)
 	// Scroll contents to zero position before we display to the user
 	// if it was scrolling already or timer was running
 	mNumOfScrolls = 0;
+	mScrollDuration = 0;
 	stopScrolling();
 	
 	mDate = date;
@@ -299,7 +301,13 @@ void CalenPreviewPane::startAutoScroll()
 		OstTraceFunctionExit0( CALENPREVIEWPANE_STARTAUTOSCROLL_EXIT );
 		return;
 	}
-
+	
+	// Stop the timer
+	mTwoSecTimer->stop();
+	
+	// Set the proper scroll direction
+	mScrollDirection = up;
+	
 	// Start the 2 seconds timer
 	mTwoSecTimer->setSingleShot(true);
 	connect(mTwoSecTimer, SIGNAL(timeout()), this, SLOT(onTwoSecondsTimeout()));
@@ -331,13 +339,13 @@ void CalenPreviewPane::onTwoSecondsTimeout()
 	}
 	
     // Start the scrolling in the proper direction
-	if (mScrollDirection == up) {
+	if (mScrollDirection == up && mScrollDuration) {
 		// Start scrolling upwards
 		mScrollDirection = down;
 		mNumOfScrolls++;
 		QPointF targetPos(0.0, -mHtDiff);
         scrollContentsTo(-targetPos, mScrollDuration * 1000);
-	} else if (mScrollDirection == down) {
+	} else if (mScrollDirection == down && mScrollDuration) {
 		mScrollDirection = up;
 		mNumOfScrolls++;
 		// Start scrolling downwards
@@ -438,6 +446,9 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
         if (tapGesture && tapGesture->state() == Qt::GestureFinished) {
             	HbInstantFeedback::play(HbFeedback::Basic);
                 // Preview pane tapped
+            	// Stop the scrolling first
+            	stopScrolling();
+            	// Issue command to launch agenda view
                 mServices.IssueCommandL(ECalenAgendaView);
                 mView->disconnectAboutToQuitEvent();
                 event->accept(Qt::TapGesture);
@@ -466,12 +477,16 @@ void CalenPreviewPane::stopScrolling()
 {
     OstTraceFunctionEntry0( CALENPREVIEWPANE_STOPSCROLLING_ENTRY );
     
-	if (isScrolling() || mTwoSecTimer->isActive()) {
+    mTwoSecTimer->stop();
+	if (isScrolling()) {
+        mNumOfScrolls = 0; // required so that timer will not get started again in 
+        // scrollingFinished() slot
+        // Stop the scrolling by sending the foucs out event
+        QFocusEvent* focusEvent = new QFocusEvent(QFocusEvent::FocusOut, Qt::MouseFocusReason);
+        focusOutEvent(focusEvent); 
+        
+        // Set the contents position to zero
 		scrollContentsTo(QPointF(0.0,0.0));
-		
-		// Call pan gesture with zero delta just to stop the scfrolling 
-		HbScrollArea::panGesture(QPointF(0.0,0.0));
-		mTwoSecTimer->stop();
 	}
 	
 	OstTraceFunctionExit0( CALENPREVIEWPANE_STOPSCROLLING_EXIT );

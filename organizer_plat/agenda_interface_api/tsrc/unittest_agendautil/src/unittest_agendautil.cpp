@@ -51,6 +51,8 @@ private slots:
 	void test_fetchEntriesInRange();
 	void test_cloneEntry();
 	void test_todoCompleted();
+	void test_createExceptionalEntryWithSubjectChange();
+	void test_createExceptionalEntryWithStartTimeChange();
 
 private:
 	int createMultipleEntries();
@@ -603,6 +605,153 @@ void TestAgendaUtil::test_todoCompleted()
 {
 	completeTodo();
 	unCompletedTodo();
+}
+
+/*
+	Test the api AgendaUtil::store for exceptional entry.
+ */
+void TestAgendaUtil::test_createExceptionalEntryWithSubjectChange()
+{
+	// Test case setup.
+	
+	// Clean up all the entries.
+	QDateTime startRange(QDate(1900, 01, 1), QTime(0, 0, 0, 0));
+	QDateTime endRange(QDate(2100, 12, 30), QTime(23, 59, 59, 0));
+	mAgendaUtil->deleteEntries(startRange,endRange);
+	
+	// Start the timer as the above operation is asynchronous
+	if (!mWait) {
+		QT_TRAP_THROWING(mWait = new (ELeave) CActiveSchedulerWait;);
+		if (!mWait->IsStarted()) {
+			mWait->Start();
+		}
+	}
+
+	// Create the repeating entry.
+	AgendaEntry entry;
+	entry.setType(AgendaEntry::TypeAppoinment);
+	entry.setSummary("Test case");
+	QDateTime startTime(QDate(2010,1,1),QTime(8,0,0,0));
+	QDateTime endTime(QDate(2010,1,1),QTime(9,0,0,0));
+	
+	entry.setStartAndEndTime(
+			startTime,
+			endTime);
+	
+	AgendaRepeatRule repeatRule;
+	repeatRule.setType(AgendaRepeatRule::DailyRule);
+	repeatRule.setRepeatRuleStart(startTime);
+	QDateTime until(QDate(2010, 2, 3));
+	repeatRule.setUntil(until);
+	repeatRule.setInterval(1);
+	entry.setRepeatRule(repeatRule);
+
+	ulong id = mAgendaUtil->store(entry);
+	
+	// Get the instance and create the exceptional entry by changing the subject
+	AgendaEntry savedEntry = mAgendaUtil->fetchById(id);
+	QList<AgendaEntry> entriesRetrieved =
+			mAgendaUtil->fetchEntriesInRange(
+					QDateTime(QDate(2010, 1, 2), QTime(8, 0, 0, 0)),
+					QDateTime(QDate(2010, 1, 2), QTime(9, 0, 0, 0)));
+	
+	int numOfEntriesRetrieved = entriesRetrieved.count();
+	AgendaEntry modifiedEntry = entriesRetrieved.first();
+	// Verify
+	QVERIFY(id == modifiedEntry.id());
+	
+	modifiedEntry.setSummary("Test case Exceptional");
+	
+	// Run the test case
+	ulong newId = mAgendaUtil->store(
+			modifiedEntry, AgendaUtil::ThisOnly, modifiedEntry.startTime());
+	
+	// Verify.
+	QVERIFY(id != newId);
+	
+	entriesRetrieved.clear();
+	
+	// Get the exceptional entry.
+	AgendaEntry exceptionalEntry = mAgendaUtil->fetchById(newId);
+	
+	// Verify.
+	QCOMPARE(exceptionalEntry.summary(), modifiedEntry.summary());
+	QVERIFY(exceptionalEntry.recurrenceId() == modifiedEntry.startTime());
+}
+
+/*!
+	Test the api AgendaUtil::store for exceptional entry.
+ */
+void TestAgendaUtil::test_createExceptionalEntryWithStartTimeChange()
+{
+	// Test case setup.
+	
+	// Clean up all the entries.
+	QDateTime startRange(QDate(1900, 01, 1), QTime(0, 0, 0, 0));
+	QDateTime endRange(QDate(2100, 12, 30), QTime(23, 59, 59, 0));
+	mAgendaUtil->deleteEntries(startRange,endRange);
+	
+	// Start the timer as the above operation is asynchronous
+	if (!mWait) {
+		QT_TRAP_THROWING(mWait = new (ELeave) CActiveSchedulerWait;);
+		if (!mWait->IsStarted()) {
+			mWait->Start();
+		}
+	}
+
+	QList<AgendaEntry> allEntries = mAgendaUtil->fetchAllEntries();
+	int count = allEntries.count();
+	
+	// Create the repeating entry.
+	AgendaEntry entry;
+	entry.setType(AgendaEntry::TypeAppoinment);
+	entry.setSummary("Test case");
+	QDateTime startTime(QDate(2010,2,1),QTime(8,0,0,0));
+	QDateTime endTime(QDate(2010,2,1),QTime(9,0,0,0));
+	
+	entry.setStartAndEndTime(startTime, endTime);
+	
+	AgendaRepeatRule repeatRule;
+	repeatRule.setType(AgendaRepeatRule::DailyRule);
+	repeatRule.setRepeatRuleStart(startTime);
+	QDateTime until(QDate(2010, 3, 3));
+	repeatRule.setUntil(until);
+	repeatRule.setInterval(1);
+	entry.setRepeatRule(repeatRule);
+
+	ulong id = mAgendaUtil->store(entry);
+	
+	// Get the instance and create the exceptional entry by changing the subject
+	AgendaEntry savedEntry = mAgendaUtil->fetchById(id);
+	QList<AgendaEntry> entriesRetrieved =
+			mAgendaUtil->fetchEntriesInRange(
+					QDateTime(QDate(2010, 2, 2), QTime(8, 0, 0, 0)),
+					QDateTime(QDate(2010, 2, 2), QTime(9, 0, 0, 0)));
+	
+	int numOfEntriesRetrieved = entriesRetrieved.count();
+	AgendaEntry modifiedEntry = entriesRetrieved.first();
+	AgendaEntry originalEntry = modifiedEntry;
+	// Verify
+	QVERIFY(id == modifiedEntry.id());
+	
+	QDateTime modifiedStartTime(QDate(2010,2,1),QTime(8,0,0,0));
+	QDateTime modifiedEndTime(QDate(2010,2,1),QTime(9,0,0,0));
+	modifiedEntry.setStartAndEndTime(modifiedStartTime, modifiedStartTime);
+
+	// Run the test case
+	ulong newId = mAgendaUtil->store(
+			modifiedEntry, AgendaUtil::ThisOnly, originalEntry.startTime());
+	
+	// Verify.
+	QVERIFY(id != newId);
+	
+	entriesRetrieved.clear();
+	
+	// Get the exceptional entry.
+	AgendaEntry exceptionalEntry = mAgendaUtil->fetchById(newId);
+	
+	// Verify.
+	QVERIFY(exceptionalEntry.recurrenceId() == originalEntry.startTime());
 }
 
 /*!

@@ -98,11 +98,14 @@ AgendaUtil::~AgendaUtil()
 
 	\param entry The entry to be added/updated
 	\param range The recurrence range of entry
+	\param instanceOriginalDateTime The start time of the original instance.
 	\return ulong The local uid of the entry added/updated in the db.
 */
-ulong AgendaUtil::store(AgendaEntry &entry, AgendaUtil::RecurrenceRange range)
+ulong AgendaUtil::store(
+		AgendaEntry &entry, AgendaUtil::RecurrenceRange range,
+		QDateTime instanceOriginalDateTime)
 {
-	return d->store(entry, range);
+	return d->store(entry, range, instanceOriginalDateTime);
 }
 
 /*!

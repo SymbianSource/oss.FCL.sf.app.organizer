@@ -208,7 +208,7 @@ QString* CCalenLunarChinesePlugin::InfobarTextL( )
 void CCalenLunarChinesePlugin::CustomiseMenu(HbMenu* aHbMenu)
     {
     OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_CUSTOMISEMENU_ENTRY );
-    HbAction* lunarAction = new HbAction("Show Lunar Data");
+    HbAction* lunarAction = new HbAction(hbTrId("txt_calendar_opt_show_lunar_data"));
     QList<QAction*> actionList = aHbMenu->actions();     
     TInt count = actionList.count() - 1;  //To show the option "show lunar data"
                                           //as a second last action item  for all 

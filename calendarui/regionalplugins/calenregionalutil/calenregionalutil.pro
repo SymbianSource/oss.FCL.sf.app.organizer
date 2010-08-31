@@ -44,7 +44,7 @@ SOURCES +=  ./src/calenextrarowformatter.cpp \
 						./src/calenlunarinfoprovider.cpp \
 						./src/calenlunarlocalizedinfo.cpp \
 						./src/calenlunarlocalizer.cpp \
-						./src/calensolarterms.cpp \
+						./src/calensolarterms.cpp
        
        
 

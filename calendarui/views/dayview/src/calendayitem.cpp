@@ -70,7 +70,7 @@ CalenDayItem::CalenDayItem(const CalenDayItem & source) :
     mFrameMinWidth = KCalenMinEventWidth * deviceProfile.unitValue();
     mEventDescMinWidth = KCalenMinTouchableEventWidth
         * deviceProfile.unitValue();
-
+    
     // Minimum width is assured by widgetml and css, additionally called here 
     // to prevent minimum size hint caching inside effectiveSizeHint
     setMinimumWidth(stripeWidth);
@@ -111,10 +111,6 @@ void CalenDayItem::updateChildItems()
 
         mUpdated = true;
     }
-
-    //TODO: check if needed
-    //repolish(); 
-    //HbAbstractViewItem::updateChildItems();
 }
 
 
@@ -215,10 +211,15 @@ void CalenDayItem::resizeEvent(QGraphicsSceneResizeEvent *event)
 
     qreal width = rect().width();
 
+    HbDeviceProfile deviceProfile;
     if (width < mEventDescMinWidth) {
+        mColorStripe->setPreferredWidth(KCalenMinTimeStripWidth
+            * deviceProfile.unitValue());
         mEventDesc->hide();
     }
     else {
+        mColorStripe->setPreferredWidth(KCalenTimeStripWidth
+            * deviceProfile.unitValue());
         mEventDesc->show();
     }
 

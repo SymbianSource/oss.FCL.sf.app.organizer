@@ -45,6 +45,14 @@ public:
 		ReminderOneDayBefore,
 		ReminderTwoDaysBefore
 		};
+	enum MeetingReminderIndex
+		{
+		//Starting the enum from 1 bcoz ReminderOff of AllDayReminderIndex can be used.
+		ReminderAtStart = 1,
+		Reminder15MinsBefore,
+		Reminder30MinsBefore,
+		Reminder1HourBefore
+		};
 public:
 	CalenEditorReminderField(CalenEditorPrivate* calenEditor,
 	                         HbDataForm* form, HbDataFormModel* model,
@@ -69,6 +77,10 @@ public:
 	void setCurrentIndex(int index);
 	void disableReminderTimeField();
 	bool isReminderTimeForAllDayAdded();
+	void UpdateReminderChoicesForSameDay(QTime startTime);
+	void setSavedMeetingReminderIndex();
+	int getReminderIndexBasedOnEntryAlarm();
+	
 private slots:
 	void handleReminderIndexChanged(int index);
 	void launchReminderTimePicker();

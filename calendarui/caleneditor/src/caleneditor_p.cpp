@@ -1096,6 +1096,8 @@ void CalenEditorPrivate::saveFromDateTime(QDateTime& fromDateTime)
 {
 	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SAVEFROMDATETIME_ENTRY );
 	QDateTime endTime = mEditedEntry->endTime();
+	// Get the previous start date of the entry
+	QDate previousDate = mEditedEntry->startTime().date();
 	// Update the end time accordingly on UI - duration will be 60 mins
 	// bydefault only while creating new entry and if it crossed the endtime
 	if (mNewEntry && fromDateTime > endTime) {
@@ -1122,6 +1124,18 @@ void CalenEditorPrivate::saveFromDateTime(QDateTime& fromDateTime)
 	}
 
 	updateReminderChoices();
+	// If the entry start date is been changed from past date to a future date
+	// And if the alarm set set is off change the reminder option to 
+	// 'one day before' if the option is valid
+	if (isAllDayEvent() && previousDate <= QDate::currentDate()) {
+		if(fromDateTime.date() > QDate::currentDate() && 
+			(mReminderField->currentReminderIndex() == 
+									CalenEditorReminderField::ReminderOff) && 
+			mReminderField->reminderItemsCount() >= 3) {
+			mReminderField->setCurrentIndex(
+							CalenEditorReminderField::ReminderOneDayBefore);
+		}
+	}
 	OstTraceFunctionExit0( CALENEDITORPRIVATE_SAVEFROMDATETIME_EXIT );
 }
 
@@ -1150,13 +1164,14 @@ void CalenEditorPrivate::updateReminderChoices()
 				 {
 					mReminderField->setReminderOff();
 		} else {
-			// Enabled implies future. If changing from future to future do not 
-			// do anything.
-			if (!mReminderField->isReminderFieldEnabled()) {
-				mReminderField->setReminderChoices();
-				// Set the default alarm time 15 minutes before
-				mReminderField->setCurrentIndex(2);
+			if (referenceDate == QDate::currentDate()) {
+				mReminderField->UpdateReminderChoicesForSameDay(mEditedEntry->startTime().time());
 			}
+			else {
+				mReminderField->setReminderChoices();
+			}
+			//Set the reminder field to the previous value which was saved.
+			mReminderField->setSavedMeetingReminderIndex();
 		}
 	}
 	OstTraceFunctionExit0( CALENEDITORPRIVATE_UPDATEREMINDERCHOICES_EXIT );
@@ -1355,14 +1370,26 @@ void CalenEditorPrivate::handleAllDayChange(int state)
 		// This is  to avoid conflict in the reminder time as 
 		// the index set for the normal meeting may not be valid for an allday 
 		// Set it off before doing the reminder updation for all day
-		mReminderField->setCurrentIndex(0);
+		mReminderField->setCurrentIndex(CalenEditorReminderField::ReminderOff);
 		mReminderField->updateReminderChoicesForAllDay(referenceDate);
-		// If the reminder field is enabled and it is not off 
-		// it implies default alarm day and time is being displayed.
+		// Now the reminder combox box is updated with the valid reminder options
+		// If the reminder field is enabled and it is off 
+		// it implies default alarm day and time should be displayed.
 		if (mReminderField->isReminderFieldEnabled() && 
-					mReminderField->currentReminderIndex() != 0) {
+					mReminderField->currentReminderIndex() == 
+										CalenEditorReminderField::ReminderOff) {
+			mReminderField->insertReminderTimeField();
 			// Set the default alarm for all day.
-			mReminderField->setDefaultAlarmForAllDay();
+			if(mReminderField->reminderItemsCount() > 2) {
+				// Set reminder as "One day before"
+				mReminderField->setCurrentIndex(
+								CalenEditorReminderField::ReminderOneDayBefore);
+			}else {
+				// Since the "One day before" is not valid
+				// Set the reminder "On event day"
+				mReminderField->setCurrentIndex(
+								CalenEditorReminderField::ReminderOnEventDay);
+			}
 		} else {
 			// Remove reminder time field.
 			mReminderField->removeReminderTimeField();
@@ -1378,7 +1405,7 @@ void CalenEditorPrivate::handleAllDayChange(int state)
 		mReminderField->removeReminderTimeField();
 		mReminderField->setReminderChoices();
 		// Set the default alarm time 15 minutes before
-		mReminderField->setCurrentIndex(2);
+		mReminderField->setCurrentIndex(CalenEditorReminderField::Reminder15MinsBefore);
 		updateReminderChoices();
 	}
 
@@ -1695,7 +1722,9 @@ bool CalenEditorPrivate::saveEntry()
 	if (!handleAllDayToSave()) {
 		// creating an exceptional entry
 		if (!mIsChild && (mEditRange == ThisOnly)) {
-			mAgendaUtil->store(*mEditedEntry, AgendaUtil::ThisOnly);
+			mAgendaUtil->store(
+					*mEditedEntry, AgendaUtil::ThisOnly,
+					mOriginalEntry->startTime());
 		} else {
 			mAgendaUtil->store(*mEditedEntry);
 		}
@@ -1913,6 +1942,22 @@ bool CalenEditorPrivate::isReminderTimeForAllDayAdded()
 }
 
 /*!
+	Returns true if repeatuntil item is been added
+	Used to know if the entry is repeating. For new entries this
+	is the only way to find whether its repeating or not
+ */
+bool CalenEditorPrivate::isRepeatUntilItemAdded()
+{
+	// For exceptional entries the repeatfield will not be present
+	// So need to check if the repeat field is there or not
+	if( mRepeatField ) {
+		return mRepeatField->isRepeatUntilItemAdded();
+	}else {
+		return false;
+	}
+}
+
+/*!
 	Checks if it is an all day event or not.
  */
 bool CalenEditorPrivate::isAllDayEvent()
@@ -1956,13 +2001,11 @@ void CalenEditorPrivate::setCurrentIndexOfReminderField(int index)
 }
 
 /*!
-	Sets the reminder choices for a non all day event.
+	Gets the reminder options count
  */
-void CalenEditorPrivate::setReminderChoices()
+int CalenEditorPrivate::getReminderCount()
 {
-    OstTraceFunctionEntry0( CALENEDITORPRIVATE_SETREMINDERCHOICES_ENTRY );
-    mReminderField->setReminderChoices();
-    OstTraceFunctionExit0( CALENEDITORPRIVATE_SETREMINDERCHOICES_EXIT );
+	return mReminderField->reminderItemsCount();
 }
 
 /*!

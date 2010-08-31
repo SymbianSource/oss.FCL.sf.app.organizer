@@ -107,11 +107,12 @@ public:
 	bool isNewEntry();
 	HbDataFormModelItem* allDayCheckBoxItem();
 	bool isReminderTimeForAllDayAdded();
+	bool isRepeatUntilItemAdded();
 	bool isAllDayEvent();
 	void updateReminderChoices();
 	int currentIndexOfReminderField();
 	void setCurrentIndexOfReminderField(int index);
-	void setReminderChoices();
+	int getReminderCount();
 	bool isEditRangeThisOnly();
 	bool isAllDayFieldAdded();
 	void forcedSaveEntry();

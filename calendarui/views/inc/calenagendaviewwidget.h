@@ -118,11 +118,6 @@ public:
      */
     bool isAllDayIcon();
     
-    /**
-    * @brief return true if location is present
-    */
-   bool isLocationData();
-
         
     
     
@@ -381,7 +376,6 @@ private:
 	bool mIconCheck; 
 	bool mNextEntry;
 	bool mLeftAllDayIcon;
-	bool mLocationData;
 
 };
 

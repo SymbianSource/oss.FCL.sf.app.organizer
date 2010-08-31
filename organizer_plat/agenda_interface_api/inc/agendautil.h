@@ -21,13 +21,13 @@
 // System includes
 #include <QObject>
 #include <QList>
+#include <QDateTime>
 
 // User includes
 #include "agendaentry.h"
 #include "agendainterfacedefines.h"
 
 // Forward declarations
-class QDateTime;
 class AgendaUtilPrivate;
 
 class XQCALENDAR_EXPORT AgendaUtil : public QObject
@@ -72,7 +72,8 @@ public:
 	AgendaUtil(QObject* parent = 0);
 	~AgendaUtil();
 
-	ulong store(AgendaEntry &entry, AgendaUtil::RecurrenceRange range = ThisAndAll);
+	ulong store(AgendaEntry &entry, AgendaUtil::RecurrenceRange range = ThisAndAll,
+			QDateTime instanceOriginalDateTime = QDateTime());
 	ulong cloneEntry(const AgendaEntry& entry, AgendaEntry::Type type);
 	bool deleteEntry(ulong id);
 	void deleteRepeatedEntry(

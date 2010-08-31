@@ -321,7 +321,7 @@ bool CalenDayContentScrollArea::event(QEvent *e)
         result = HbScrollArea::event(e);
         
         // Scroll to middle widget when layout request
-        if (e->type() == QEvent::LayoutRequest) {
+        if (e->type() == QEvent::LayoutRequest || e->type() == QEvent::Show) {
             scrollToMiddleWidget();
         }  
     }

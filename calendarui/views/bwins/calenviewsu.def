@@ -206,4 +206,5 @@ EXPORTS
 	?handleThemeChange@CalenMonthView@@AAEXXZ @ 205 NONAME ; void CalenMonthView::handleThemeChange(void)
 	?isHorizontalSwipe@CalenDayContentScrollArea@@ABE_NM@Z @ 206 NONAME ; bool CalenDayContentScrollArea::isHorizontalSwipe(float) const
 	?handleThemeChange@CalenPreviewPane@@QAEXXZ @ 207 NONAME ; void CalenPreviewPane::handleThemeChange(void)
+	?disconnectAboutToQuitEvent@CalenMonthView@@QAEXXZ @ 208 NONAME ; void CalenMonthView::disconnectAboutToQuitEvent(void)
 
