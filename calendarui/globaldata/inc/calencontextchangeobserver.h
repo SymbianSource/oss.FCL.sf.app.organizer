@@ -11,10 +11,11 @@
 *
 * Contributors:
 *
-* Description:  Notifier for changes in context. Required by CCalenContextImpl
+* Description:   Notifier for changes in context. Required by CCalenContextImpl
 *                on construction.
 *
 */
+
 
 
 #ifndef CALENCONTEXTCHANGEOBSERVER_H

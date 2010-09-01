@@ -1,0 +1,222 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   The application resource file.
+*
+*/
+
+// Resource identifier
+NAME ZYXW
+
+// System includes
+#include <eikon.rh>
+#include <avkon.rh>
+#include <eikon.rsg>
+#include <avkon.rsg>
+#include <avkon.hrh>
+#include <clkdatetimeview.loc>
+// adtupdater.loc is no more needed as the logical strings are picked up from clkdatetimeview.loc.
+// TODO: will be removed.
+// #include <adtupdater.loc>
+
+// User includes
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf=""; }
+
+// Resource definitions
+// ---------------------------------------------------------
+// The EIK app info.
+// ---------------------------------------------------------
+//
+RESOURCE EIK_APP_INFO
+	{
+	}
+	
+// Resource definitions
+// ---------------------------------------------------------
+// r_adtupdater_main_view
+// The main view.
+// ---------------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_adtupdater_main_view
+	{
+	}
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_qtn_clk_info_retrieving_time
+// Localized text resource.
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_clk_info_retrieving_time
+	{
+	buf = qtn_clk_info_retrieving_time;
+	}
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_qtn_clk_query_time_not_received
+// Localized text resource.
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_clk_query_time_not_received
+	{
+	buf = qtn_clk_query_time_not_received;
+	}
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_qtn_clk_nitz_inf_query
+// Localized text resource.
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_clk_nitz_inf_query
+	{
+	buf = qtn_clk_nitz_inf_query;
+	}
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_qtn_clk_nitz_inf_header
+// Localized text resource.
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_clk_nitz_inf_header
+	{
+	buf = qtn_clk_msg_time_zone;
+	}
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_qtn_clk_dst_info
+// Resource for the string "Daylight saving time".
+// ---------------------------------------------------------
+//	
+RESOURCE TBUF r_qtn_clk_dst_info
+	{
+	buf = qtn_clk_dst_info;
+	}	
+	
+// Resource definitions
+// ---------------------------------------------------------
+// r_cba_clk_ok_change
+// The command button group for the global message query.
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_cba_clk_ok_change
+	{
+	buttons =
+		{
+        CBA_BUTTON { id = EAknSoftkeyOk;		txt = text_softkey_ok; },
+        CBA_BUTTON { id = EAknSoftkeyCancel;	txt = qtn_text_softkey_change; }
+        };
+	}
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_qtn_clk_qtl_select_country
+// Localized text resource.
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_clk_qtl_select_country
+	{
+	buf = qtn_clk_qtl_select_country;
+	}
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_qtn_clk_qtl_select_city
+// Localized text resource.
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_clk_qtl_select_city
+	{
+	buf = qtn_clk_qtl_select_city;
+	}
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_qtn_clk_nitz_gmt
+// Localized text resource.
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_clk_nitz_gmt
+	{
+	buf = qtn_clk_nitz_gmt;
+	}
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_clk_date_setting_query_dialog
+// Dialog resource for setting date.
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_clk_date_setting_query_dialog
+    {
+    flags = EGeneralQueryFlags | EEikDialogFlagVirtualInput;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY__OK;
+    items =
+    	{
+		DLG_LINE
+			{
+			type = EAknCtQuery;
+			id = EGeneralQuery;
+			control= AVKON_DATA_QUERY 
+				{ 
+				layout = EDateLayout;
+				label = qtn_clk_sett_date;
+				control = DATE_EDITOR
+					{
+					minDate = DATE { year = 1980; };
+					maxDate = DATE { year = 2060; };
+					};
+				};
+			}
+    	};
+    }
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_clk_time_setting_query_dialog
+// Dialog resource for setting time.
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_clk_time_setting_query_dialog
+    {
+    flags = EGeneralQueryFlags | EEikDialogFlagVirtualInput;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY__OK;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_DATA_QUERY
+                { 
+                layout = ETimeLayout;
+                label = qtn_clk_sett_time;
+                control = TIME_EDITOR
+	                {
+                    minTime = TIME { second = 0; minute = 0; hour = 0; };
+                    maxTime = TIME { second = 59; minute = 59; hour = 23; };
+                    flags= EEikTimeWithoutSecondsField;
+                    };  
+                };
+            }
+        };
+
+    }
+
+// End of file

@@ -17,43 +17,40 @@
 
 
  
-#ifndef __CALENLUNARCHINESEPLUGIN_H__
-#define __CALENLUNARCHINESEPLUGIN_H__
+#ifndef __CALENLUNARPLUGIN_H__
+#define __CALENLUNARPLUGIN_H__
 
 //SYSTEM INCLUDES
+#include <e32base.h>
 #include <ecom.h>
+#include <ConeResLoader.h> 
 
 //CALENDAR INCLUDES
 #include <calencommandhandler.h>
 #include <calennotificationhandler.h>
 #include <calenservices.h>
+#include <eiklabel.h>
+#include <coecntrl.h>
 #include <calencustomisation.h>
 
 #include "CalendarVariant.hrh"
 
 
 //FORWARD DECLARE
-class QString;
-class HbTranslator;
-class HbWidget;
-class HbMenu;
-
+class CEikonEnv;
 class CCalenLunarInfoProvider;
 class CCalenLunarLocalizer;
 class CCalenLunarLocalizedInfo;
-class CalenRegionalInfo;
-
-
+class CEikLabel;
+class MCalenPreview;
 
 
 //CLASS DECLARATION
-class CCalenLunarChinesePlugin :public CCalenCustomisation,
-								public MCalenCommandHandler,
-								public MCalenNotificationHandler
-												
+NONSHARABLE_CLASS(CCalenLunarChinesePlugin) : 	public CCalenCustomisation,
+												public MCalenCommandHandler,
+												public MCalenNotificationHandler
 									
 	{
-	
 	public:
 	    
 	    static CCalenLunarChinesePlugin* NewL( MCalenServices* aServices );
@@ -63,11 +60,18 @@ class CCalenLunarChinesePlugin :public CCalenCustomisation,
 		CCalenLunarChinesePlugin( MCalenServices* aServices);
 		void ConstructL();
 		
-	public: //From CCalenCustomisation		
-		HbWidget* InfobarL( );
-        QString* InfobarTextL();        
+	public: //From CCalenCustomisation
+		void GetCustomViewsL(  RPointerArray<CCalenView>& aCustomViewArray );
+		void GetCustomSettingsL( RPointerArray<CAknSettingItem>& aCustomSettingArray );
+        CCoeControl* InfobarL( const TRect& aRect );
+        const TDesC& InfobarL();
+        MCalenPreview* CustomPreviewPaneL( TRect& aRect );
+        CCoeControl* PreviewPaneL(  TRect& aRect );
         MCalenCommandHandler* CommandHandlerL( TInt aCommand );
-        void CustomiseMenu(HbMenu* aHbMenu);
+        void RemoveViewsFromCycle( RArray<TInt>& aViews );
+        TBool CustomiseMenuPaneL( TInt aResourceId, CEikMenuPane* aMenuPane );
+        TBool CanBeEnabledDisabled();
+        TAny* CalenCustomisationExtensionL( TUid aExtensionUid );
         
     public:// From MCalenCommandHandler
         TBool HandleCommandL( const TCalenCommand& aCommand );
@@ -77,9 +81,11 @@ class CCalenLunarChinesePlugin :public CCalenCustomisation,
         void HandleNotification( const TCalenNotification aNotification );
         
     private:
-        void FormatExtraRowStringL();
+        void SetLabelContentL( CEikLabel& aLabel ,const TRect& aRect);
+        void SetLabelContentExtraL( CEikLabel& aLabel, TRect& aRect);
+        void FormatExtraRowStringL( CEikLabel& aLabel,TBool aTwoLines);
         void UpdateLocalizerInfoL();
-       void ExecuteMessageDialogL( QString aMsgText );
+        void ExecuteMessageDialogL( TDesC& aMsgText );
        
     public:
         void ShowDetailsL();
@@ -111,11 +117,40 @@ class CCalenLunarChinesePlugin :public CCalenCustomisation,
 		* infobar in Month/Day/Week.
 		*/
 		HBufC* iInfoBarText;
+		
+		/**
+		* This control is used in avkon view.
+		*/
+	    CEikLabel* iLabelControl;
 	    TInt iStart;
 	    TInt iEnd;
-	    HbTranslator* iTranslator;
+	    TRect iRect;
+	    TInt  iResourceFileOffset;
 	    
-	    CalenRegionalInfo* iRegionalInfo ;
 	};
 	
-#endif //__CALENLUNARCHINESEPLUGIN_H__
+
+NONSHARABLE_CLASS(CCalenPluginLabel) : public CEikLabel 
+	{
+		public:
+		static CCalenPluginLabel* NewL(CCalenLunarChinesePlugin& iPlugin);
+		
+		private:
+		~CCalenPluginLabel();
+		CCalenPluginLabel(CCalenLunarChinesePlugin& iPlugin);
+		void ConstructL();
+		
+		private: //CCoeControl
+		void HandlePointerEventL(const TPointerEvent& aPointerEvent);
+        void Draw( const TRect& aRect) const;
+		
+		private:
+		CCalenLunarChinesePlugin& iPlugin;
+		
+	};	
+
+#endif //__CALENLUNARPLUGIN_H__
+
+
+
+ 									

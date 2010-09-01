@@ -1,0 +1,1159 @@
+/*
+* Copyright (c) 2002-2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   This file contains resources for the module.
+*
+*/
+
+
+#include <data_caging_paths_strings.hrh>
+#include <bldvariant.hrh>
+#include <avkon.loc>
+#include <eikon.rh>
+#include <avkon.rh>
+#include <CommonDialogs.rh>
+#include <avkon.rsg>
+#include <AvkonIcons.hrh>
+#include <aknsconstants.hrh>
+#include <calendar.loc>
+#include <calendar.mbg>
+#include <calencommands.hrh>
+
+#include "calendar.hrh"
+
+NAME    CACU
+RESOURCE RSS_SIGNATURE { }
+
+// ---------------------------------------------------------
+//
+//    r_calen_commonui_qtn_cale_no_subject
+//    The empty text when the item subject is empty
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_commonui_qtn_cale_no_subject
+    {
+    buf = qtn_cale_no_subject;
+    }
+
+//----------------------------------------------------
+//
+//    r_calen_commonui_erasequery_note
+//    Delete confirmation query
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_calen_commonui_erasequery_note
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO__YES;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationLayout;
+                };
+            }
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_calen_commonui_qtn_cale_quest_delete_all_notes
+//    Delete all.
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_calen_commonui_qtn_cale_quest_delete_all_notes
+    {
+    buf = qtn_cale_quest_delete_all_notes;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_commonui_qtn_todo_quest_delete_note
+//    Delete todo.
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF64 r_calen_commonui_qtn_todo_quest_delete_note
+    {
+    buf = qtn_todo_quest_delete_note;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_commonui_qtn_todo_quest_delete_notes
+//    Delete todos.
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF64 r_calen_commonui_qtn_todo_quest_delete_notes
+    {
+    buf = qtn_todo_quest_delete_notes;
+    }
+
+//----------------------------------------------------
+//
+//    r_calen_commonui_qtn_cale_quest_delete_event
+//    Delete entry.
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_calen_commonui_qtn_cale_quest_delete_event
+    {
+    buf = qtn_cale_quest_delete_event;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_commonui_qtn_cale_lq_del_repeated_note
+//    Repeatable note Erase prompt
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_commonui_qtn_cale_lq_del_repeated_note
+    {
+    buf = qtn_cale_lq_del_repeated_note;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_commonui_qtn_cale_lq_save_chang_repeated
+//    Repeat Note Save prompt
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_commonui_qtn_cale_lq_save_chang_repeated
+    {
+    buf = qtn_cale_lq_save_chang_repeated;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_commonui_qtn_cale_lq_edit_recurring
+//    Repeat Note Open prompt
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_commonui_qtn_cale_lq_edit_recurring
+    {
+    buf = qtn_cale_lq_edit_recurring;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_commonui_repeatnote_choicelist
+//    Define choice list of saving or deleting repeat note.
+//
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_calen_commonui_repeatnote_choicelist
+    {
+    items =
+        {
+        LBUF
+            {
+            txt = qtn_cale_lq_this_occurence;
+            },
+        LBUF
+            {
+            txt = qtn_cale_lq_all_occurences;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_commonui_repeatnote_edit_choicelist
+//    Define choice list of editing repeating note.
+//
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_calen_commonui_repeatnote_edit_choicelist
+    {
+    items =
+        {
+        LBUF
+            {
+            txt = qtn_cale_lq_edit_this;
+            },
+        LBUF
+            {
+            txt = qtn_cale_lq_edit_series;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_new_meeting_note
+//    Define option to create a new meeting
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_new_meeting_note
+    {
+    buf = qtn_cale_meeting_note;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_new_meeting_request_note
+//    Define option to create a new meeting request
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_new_meeting_request_note
+    {
+    buf = qtn_cale_meeting_request_note;
+    }
+
+// ---------------------------------------------------------
+//
+//    qtn_cale_day_note
+//    Define option to create a new day note
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_day_note
+    {
+    buf = qtn_cale_day_note;
+    }
+
+// ---------------------------------------------------------
+//
+//    qtn_cale_note_anniversary
+//    Define option to create a new day note
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_note_anniversary
+    {
+    buf = qtn_cale_note_anniversary;
+    }
+
+// ---------------------------------------------------------
+//
+//    qtn_cale_note_todo
+//    Define option to create a new todo note
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_note_todo
+    {
+    buf = qtn_cale_note_todo;
+    }
+
+// ---------------------------------------------------------
+//
+//    qtn_cale_view_month
+//    Define option to create switch to month view
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_view_month
+    {
+    buf = qtn_cale_opt_change_month;
+    }
+
+// ---------------------------------------------------------
+//
+//    qtn_cale_view_week
+//    Define option to switch to week view
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_view_week
+    {
+    buf = qtn_cale_opt_change_week;
+    }
+
+// ---------------------------------------------------------
+//
+//    qtn_cale_view_day
+//    Define option to switch to day view
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_view_day
+    {
+    buf = qtn_cale_opt_change_day;
+    }
+// ---------------------------------------------------------
+//
+//    qtn_cale_view_todo
+//    Define option to switch to todo view
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_view_todo
+    {
+    buf = qtn_cale_opt_change_todo;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calendar_new_note_query_title
+//    Define a title for query dialog to create a new note for
+//    empty day & todo views
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calendar_new_note_query_title
+    {
+    buf = qtn_cale_opt_make_note;
+    }
+
+// ---------------------------------------------------------
+//
+//    qtn_cale_note_todo
+//    Define a query dialog to create a new note for
+//    empty day & todo views
+// ---------------------------------------------------------
+//
+
+RESOURCE DIALOG r_calendar_new_note_query
+{
+    flags   = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_SELECT_CANCEL__SELECT;
+    items =
+    {
+        DLG_LINE
+        {
+            type    = EAknCtListQueryControl;
+            id      = EListQueryControl;
+            control = AVKON_LIST_QUERY_CONTROL
+            {
+                heading  = " "; // needed, otherwise heading is not created at all!
+                listtype = EAknCtSinglePopupMenuListBox;
+                listbox  = LISTBOX
+                {
+                    flags  = EAknListBoxMenuList;
+                    height = 3;
+                    width  = 3;
+                };
+            };
+        }
+    };
+}
+
+// ---------------------------------------------------------
+//
+//    r_calendar_switch_view_query_title
+//    Define a title for query dialog to switch view for
+//    views number > 7
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calendar_switch_view_query_title
+    {
+    buf = qtn_cale_om_change;
+    }
+
+// ---------------------------------------------------------
+//
+//    qtn_cale_switch_view
+//    Define a query dialog to switch view for
+//    views number >7
+// ---------------------------------------------------------
+//
+
+RESOURCE DIALOG r_calendar_switch_view_query
+{
+    flags   = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_SELECT_CANCEL__SELECT;
+    items =
+    {
+        DLG_LINE
+        {
+            type    = EAknCtListQueryControl;
+            id      = EListQueryControl;
+            control = AVKON_LIST_QUERY_CONTROL
+            {
+                heading  = " "; // needed, otherwise heading is not created at all!
+                listtype = EAknCtSinglePopupMenuListBox;
+                listbox  = LISTBOX
+                {
+                    flags  = EAknListBoxMenuList;
+                    height = 7;
+                    width  = 2;
+                };
+            };
+        }
+    };
+}
+//----------------------------------------------------
+//
+// Button state extensions for toolbar and toolbar extension buttons.
+// These is required to support skinned graphics for the buttons.
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_BUTTON_STATE_EXTENSION r_calen_tb_ext_qgn_indi_cale_tb_today
+     {
+     bmbSkinIdMajor = EAknsMajorGeneric;
+     bmbSkinIdMinor =  EAknsMinorGenericQgnIndiCaleTbToday;
+     //skin KAknsIIDQgnIndiRepeatAdd
+     } 
+
+RESOURCE AVKON_BUTTON_STATE_EXTENSION r_calen_tb_ext_qgn_indi_cale_tb_changeview
+     {
+     bmbSkinIdMajor = EAknsMajorGeneric;
+     bmbSkinIdMinor = EAknsMinorGenericQgnIndiCaleTbChangeview;
+     //skin KAknsIIDQgnIndiCaleTbRight
+     }
+
+RESOURCE AVKON_BUTTON_STATE_EXTENSION r_calen_tb_ext_qgn_indi_cale_tb_new_entry
+      {
+      bmbSkinIdMajor = EAknsMajorGeneric;
+      bmbSkinIdMinor = EAknsMinorGenericQgnIndiCaleTbNewEntry;
+      //skin KAknsIIDQgnIndiCaleTbNewEntry
+      }
+// ---------------------------------------------------------
+// r_calen_toolbar_extension
+// Resource for calendar toolbar
+// ---------------------------------------------------------
+//
+RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension
+    {
+    flags = KAknToolbarFixed;
+    items =
+        {
+        TBAR_CTRL
+            {
+            type = EAknCtButton;
+            id = ECalenNewMeeting;
+            control = AVKON_BUTTON
+                {
+                flags = KAknButtonSizeFitText;
+                states =
+                    {
+                    AVKON_BUTTON_STATE
+                        {
+                        helptxt = qtn_cale_tb_new_entry_tooltip;
+                        bmpfile = BITMAP_DIR"\\calendar.mif";
+                        bmpid = EMbmCalendarQgn_indi_cale_tb_new_entry;
+                        bmpmask = EMbmCalendarQgn_indi_cale_tb_new_entry_mask;
+                        extension = r_calen_tb_ext_qgn_indi_cale_tb_new_entry;
+                        }
+                    };
+                };
+            },
+        TBAR_CTRL
+            {
+            type = EAknCtButton;
+            id = ECalenGotoToday;
+            control = AVKON_BUTTON
+                {
+                flags = KAknButtonSizeFitText;
+                states =
+                    {
+                    AVKON_BUTTON_STATE
+                        {
+                        helptxt = qtn_cale_tb_today_tooltip;
+                        bmpfile = BITMAP_DIR"\\calendar.mif";
+                        bmpid = EMbmCalendarQgn_indi_cale_tb_today;
+                        bmpmask = EMbmCalendarQgn_indi_cale_tb_today_mask;
+                        extension = r_calen_tb_ext_qgn_indi_cale_tb_today;
+                        }
+                    };
+                };
+            },
+        TBAR_CTRL
+            {
+            type = EAknCtToolbarExtension;
+            id = ECalenSwitchView;
+            control = AVKON_TOOLBAR_EXTENSION
+                {
+                helptxt = qtn_cale_tb_change_view_tooltip;
+                bmpFile = BITMAP_DIR"\\calendar.mif";
+                bmpId = EMbmCalendarQgn_indi_cale_tb_changeview;
+                bmpMask = EMbmCalendarQgn_indi_cale_tb_changeview_mask ;
+                extension = r_calen_tb_ext_qgn_indi_cale_tb_changeview;
+                items =
+                    {
+                    TBAR_CTRL
+                        {
+                        type = EAknCtButton;
+                        id = ECalenLastCommand;
+                        control = AVKON_BUTTON
+                            {
+                            flags = KAknButtonSizeFitText|KAknButtonTextLeft;
+                            states =
+                                {
+                                AVKON_BUTTON_STATE
+                                    {
+                                    helptxt = "dummy";
+                                    bmpfile = BITMAP_DIR"\\calendar.mif";
+                                    bmpid = EMbmCalendarQgn_indi_cale_tb_changeview;
+                                    bmpmask = EMbmCalendarQgn_indi_cale_tb_changeview_mask;
+                                    extension = r_calen_tb_ext_qgn_indi_cale_tb_changeview;
+                                    }
+                                };
+                            };
+                        }
+                    };
+                };
+            }
+        };
+    }
+
+
+// ---------------------------------------------------------
+// r_calen_toolbar_extension_mirrored
+// Resource for calendar toolbar for mirrored languages
+// ---------------------------------------------------------
+//
+RESOURCE AVKON_TOOLBAR r_calen_toolbar_extension_mirrored
+    {
+    flags = KAknToolbarFixed;
+    items =
+        {
+        TBAR_CTRL
+            {
+            type = EAknCtToolbarExtension;
+            id = ECalenSwitchView;
+            control = AVKON_TOOLBAR_EXTENSION
+                {
+                helptxt = qtn_cale_tb_change_view_tooltip;
+                bmpFile = BITMAP_DIR"\\calendar.mif";
+                bmpId = EMbmCalendarQgn_indi_cale_tb_changeview;
+                bmpMask = EMbmCalendarQgn_indi_cale_tb_changeview_mask ;
+                extension = r_calen_tb_ext_qgn_indi_cale_tb_changeview;
+                items =
+                    {
+                    TBAR_CTRL
+                        {
+                        type = EAknCtButton;
+                        id = ECalenLastCommand;
+                        control = AVKON_BUTTON
+                            {
+                            flags = KAknButtonSizeFitText|KAknButtonTextLeft;
+                            states =
+                                {
+                                AVKON_BUTTON_STATE
+                                    {
+                                    helptxt = "dummy";
+                                    bmpfile = BITMAP_DIR"\\calendar.mif";
+                                    bmpid = EMbmCalendarQgn_indi_cale_tb_changeview;
+                                    bmpmask = EMbmCalendarQgn_indi_cale_tb_changeview_mask;
+                                    extension = r_calen_tb_ext_qgn_indi_cale_tb_changeview;
+                                    }
+                                };
+                            };
+                        }
+                    };
+                };
+            },
+        TBAR_CTRL
+            {
+            type = EAknCtButton;
+            id = ECalenGotoToday;
+            control = AVKON_BUTTON
+                {
+                flags = KAknButtonSizeFitText;
+                states =
+                    {
+                    AVKON_BUTTON_STATE
+                        {
+                        helptxt = qtn_cale_tb_today_tooltip;
+                        bmpfile = BITMAP_DIR"\\calendar.mif";
+                        bmpid = EMbmCalendarQgn_indi_cale_tb_today;
+                        bmpmask = EMbmCalendarQgn_indi_cale_tb_today_mask;
+                        extension = r_calen_tb_ext_qgn_indi_cale_tb_today;
+                        }
+                    };
+                };
+            },
+        TBAR_CTRL
+            {
+            type = EAknCtButton;
+            id = ECalenNewMeeting;
+            control = AVKON_BUTTON
+                {
+                flags = KAknButtonSizeFitText;
+                states =
+                    {
+                    AVKON_BUTTON_STATE
+                        {
+                        helptxt = qtn_cale_tb_new_entry_tooltip;
+                        bmpfile = BITMAP_DIR"\\calendar.mif";
+                        bmpid = EMbmCalendarQgn_indi_cale_tb_new_entry;
+                        bmpmask = EMbmCalendarQgn_indi_cale_tb_new_entry_mask;
+                        extension = r_calen_tb_ext_qgn_indi_cale_tb_new_entry;
+                        }
+                    };
+                };
+            }
+        };
+    }
+
+
+//----------------------------------------------------
+//
+//    r_calen_multipledb_dialog
+//    Dialog resource for settings dialog.
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_calen_multipledb_dialog
+    {
+
+
+    flags = EEikDialogFlagNoDrag
+           |   EEikDialogFlagFillAppClientRect
+           |   EEikDialogFlagCbaButtons
+           |   EEikDialogFlagWait
+           //|   EAknDialogSelectionList
+           |   EEikDialogFlagNotifyEsc;
+
+    buttons = r_calen_multipledb_cba;
+
+    }
+
+//----------------------------------------------------
+//
+//    r_calen_multipledb_cba
+//    CBA resource for calendars dialog.
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_calen_multipledb_cba
+    {
+    buttons =
+        {
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyOptions;
+            txt=text_softkey_option;
+            },
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyBack;
+            txt=text_softkey_back;
+            },
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyChange;
+            txt=qtn_cale_om_edit;
+            }
+       };
+    }
+
+//----------------------------------------------------
+//
+//    r_calen_multipledb_menubar
+//    menubar resource for calendars dialog.
+//
+//----------------------------------------------------
+//
+RESOURCE MENU_BAR r_calen_multipledb_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_calen_multipledb_menupane;
+            txt = "";   // dummy
+            }
+        };
+    }
+
+//----------------------------------------------------
+//
+//    r_calen_multipledb_menupane
+//    menupane resource for calendars dialog.
+//
+//----------------------------------------------------
+//
+RESOURCE MENU_PANE r_calen_multipledb_menupane
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = ECalenCmdItemDeselect;
+            txt = qtn_cale_db_opt_hide_calendar;
+	    //Single click 
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM
+            {
+            command = ECalenCmdItemSelect;
+            txt = qtn_cale_db_opt_show_calendar;
+	    //Single click 
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM
+            {
+            command = ECalenCmdEdit;
+            txt = qtn_cale_db_opt_edit_calendar;
+	    //Single click 
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM
+            {
+            command = ECalenCmdAdd;
+            txt = qtn_cale_db_opt_add_new_calendar;
+            },
+        MENU_ITEM
+            {
+            command = ECalenCmdDelete;
+            txt = qtn_cale_db_opt_delete_calendar;
+	    //Single click 
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = EAknSoftkeyExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+
+// ---------------------------------------------------------
+//
+//    r_cale_multipledb_delete
+//    text for deleting single item
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_cale_multipledb_delete_single
+    {
+    buf = "Cannot delete %U";
+    }
+
+
+// ---------------------------------------------------------
+//
+//    r_cale_multipledb_delete
+//    text for delete
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_cale_multipledb_delete
+    {
+    buf = qtn_cale_db_delete_calendar_conf_query;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_cale_multipledb_delete
+//    text for unselect message
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_cale_multipledb_unselect
+    {
+    buf = "Cannot unselect %U";
+    }
+
+// ---------------------------------------------------------
+//
+//    r_cale_multipledb_hidden
+//    text for unselect message
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_cale_multipledb_hidden
+    {
+    buf = qtn_cale_db_hidden;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_cale_multipledb_visible
+//    text for unselect message
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_cale_multipledb_visible
+    {
+    buf = qtn_cale_db_shown;
+    }
+
+// ---------------------------------------------------------
+// Attachment list query
+// List query for the attachemnt available file types
+// ---------------------------------------------------------
+RESOURCE AVKON_MULTISELECTION_LIST_QUERY r_attachment_list_query
+    {
+    flags = EGeneralQueryFlags;
+    softkeys = R_AVKON_SOFTKEYS_SELECT_CANCEL__SELECT;
+    items =
+        {
+        AVKON_MULTISELECTION_LIST_QUERY_DLG_LINE
+            {
+            control = AVKON_LIST_QUERY_CONTROL
+                {
+                listtype = EAknCtSinglePopupMenuListBox;
+                listbox = AVKON_LIST_QUERY_LIST
+                    {
+                    array_id = r_attachment_list_query_array;
+                    };
+                heading = qtn_cale_attachment_query_heading;
+                };
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+// Attachment list query array
+// List of the attachment types
+// ---------------------------------------------------------
+RESOURCE ARRAY r_attachment_list_query_array
+    {
+    items=
+        {
+        LBUF { txt = qtn_msg_insert_qry_image; },
+        LBUF { txt = qtn_msg_insert_qry_note_as_attachment; },
+        LBUF { txt = qtn_msg_insert_qry_sound; },
+        LBUF { txt = qtn_msg_insert_qry_video; },
+        LBUF { txt = qtn_msg_insert_qry_other_files; }
+        };
+    }
+
+// ---------------------------------------------------------
+// r_qtn_calen_no_name_for_file
+// text for no name for a file
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_calen_no_name_for_file
+    {
+    buf = qtn_calen_no_file_name;
+    }
+
+RESOURCE TBUF r_calen_attachment_not_supported
+    {
+    buf = qtn_calen_file_not_supported;
+    }
+
+// ---------------------------------------------------------------------------
+//
+//    r_calen_attachment_dialog
+//    Dialog resource for settings dialog.
+//
+// ---------------------------------------------------------------------------
+RESOURCE DIALOG r_calen_attachment_dialog
+{
+    flags =
+        EEikDialogFlagNoDrag
+        | EEikDialogFlagFillAppClientRect
+        | EEikDialogFlagNoTitleBar
+        | EEikDialogFlagCbaButtons
+        ;
+    buttons = r_calen_attachment_cba;
+
+    items =
+    {
+        DLG_LINE
+        {
+            type      = ECalenAttachmentListBox;
+            id        = ECalenAttachmentListBoxId;
+            itemflags = EEikDlgItemTakesEnterKey | EEikDlgItemOfferAllHotKeys;
+            control   = LISTBOX
+            {
+                flags    = 0;
+                height   = 3;
+            };
+        }
+    };
+
+}
+
+
+//----------------------------------------------------
+//
+//    r_calen_attachment_cba
+//    CBA resource for calendars dialog.
+//
+//----------------------------------------------------
+//
+RESOURCE CBA r_calen_attachment_cba
+    {
+    buttons =
+        {
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyOptions;
+            txt=text_softkey_option;
+            },
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyBack;
+            txt=text_softkey_back;
+            },
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyOpen;
+            txt=qtn_msk_open;
+            }
+       };
+    }
+
+
+//----------------------------------------------------
+//
+//    r_calendar_attachment_menupane
+//    menupane resource for calendars dialog.
+//
+//----------------------------------------------------
+//
+RESOURCE MENU_PANE r_calendar_attachment_menupane
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = ECalenViewAttachmentCmdOpen;
+            txt = qtn_cale_opt_open;
+            //Single click 
+            flags = EEikMenuItemAction;
+            },
+        MENU_ITEM
+            {
+            command = ECalenViewAttachmentCmdSave;
+           txt = qtn_cale_stylus_popup_save;
+             //Single click
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM
+            {
+            command = ECalenViewAttachmentAdd;
+            txt = qtn_calen_editor_opt_add_attachment;
+            },
+        MENU_ITEM
+            {
+            command = ECalenViewAttachmentCmdRemove;
+            txt = qtn_cale_stylus_popup_remove_attachment;
+             //Single click 
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// Menu bar for attachments dialog.
+// ---------------------------------------------------------------------------
+RESOURCE MENU_BAR r_calendar_attachment_menubar
+    {
+    titles=
+        {
+        MENU_TITLE { menu_pane = r_calendar_attachment_menupane; txt = ""; }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// Menu pane for attachments dialog. Has one dummy menu item
+// which is deleted when application specific menu items are added.
+// ---------------------------------------------------------------------------
+/*RESOURCE MENU_PANE r_calendar_attachment_menupane
+    {
+    items =
+        {
+        MENU_ITEM { command = 0; txt = ""; }
+        };
+    }*/
+
+
+// -----------------------------------------------------------------------------
+//    Title text for attachments dialog
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_viewer_title_attachments { buf = qtn_cale_attachments_title; }
+
+
+// -----------------------------------------------------------------------------
+//    r_viewer_wait_open_dialog_note
+// Shown when trying to forward messages and attachment loading is running.
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_viewer_wait_open_dialog_note
+    {
+    flags = EAknWaitNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_CANCEL;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGeneralNote;
+            control = AVKON_NOTE
+                {
+                layout = EWaitLayout;
+                singular_label = "Opening..";
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                };
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+// r_calen_memory_selection_dialog
+// ---------------------------------------------------------
+//
+RESOURCE MEMORYSELECTIONDIALOG r_calen_memory_selection_dialog
+    {
+    locations =
+        {
+        LOCATION { root_path = text_phone_memory_root_path; },
+        LOCATION { root_path = text_memory_card_root_path; }
+        };
+    }
+
+
+// -----------------------------------------------------------------------------
+//    r_qtn_msk_fetch
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_msk_fetch
+    {
+    buf = qtn_msk_open;
+    }
+
+RESOURCE TBUF r_qtn_calen_info_cannot_open        	   { buf = qtn_cale_drm_protected_attachment; }
+RESOURCE TBUF r_qtn_calen_info_already_attached        { buf = qtn_calen_info_already_attached; }
+
+// ---------------------------------------------------------
+//
+//    r_calendar_attachment_stylus_menu_tui
+//    Touch UI long tap day stylus popup menu
+//
+// ---------------------------------------------------------
+//
+RESOURCE STYLUS_POPUP_MENU r_calendar_attachment_stylus_menu_tui
+    {
+    items =
+        {
+        STYLUS_POPUP_MENU_ITEM
+            {
+            command = ECalenViewAttachmentCmdSave;
+            txt = qtn_cale_stylus_popup_save;
+            },
+        STYLUS_POPUP_MENU_ITEM
+            {
+            command = ECalenViewAttachmentCmdRemove;
+            txt = qtn_cale_stylus_popup_remove_attachment;
+            }
+        };
+    }
+
+
+RESOURCE TBUF r_qtn_cale_tb_month_view 
+    {
+    buf = qtn_cale_tb_month_view;
+    }
+
+RESOURCE TBUF r_qtn_cale_tb_week_view 
+    {
+    buf = qtn_cale_tb_week_view;
+    }
+
+RESOURCE TBUF r_qtn_cale_tb_day_view 
+    {
+    buf = qtn_cale_tb_day_view;
+    }
+
+RESOURCE TBUF r_qtn_cale_tb_todo_view 
+    {
+    buf = qtn_cale_tb_todo_view;
+    }
+
+RESOURCE TBUF r_qtn_cale_tb_month_view_tooltip
+    {
+    buf = qtn_cale_tb_month_view_tooltip;
+    }
+
+RESOURCE TBUF r_qtn_cale_tb_week_view_tooltip
+    {
+    buf = qtn_cale_tb_week_view_tooltip;
+    }
+
+RESOURCE TBUF r_qtn_cale_tb_day_view_tooltip
+    {
+    buf = qtn_cale_tb_day_view_tooltip;
+    }
+
+RESOURCE TBUF r_qtn_cale_tb_todo_view_tooltip
+    {
+    buf = qtn_cale_tb_todo_view_tooltip;
+    }
+    
+RESOURCE TBUF r_qtn_cale_tb_custom_view 
+    {
+    buf = qtn_cale_opt_open;
+    }  
+
+// ---------------------------------------------------------
+//      r_calen_multidb_editor_color_grid_dlg
+//      Color selection dialog with customized "none" text.
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_calen_multidb_editor_color_grid_dlg
+    {
+    flags = EEikDialogFlagNotifyEsc | 
+            EEikDialogFlagCbaButtons | EEikDialogFlagNoDrag | 
+            EEikDialogFlagNoBorder;
+    buttons=R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtPopupHeadingPane;
+            id = EColourGridPopup;
+            control = AVKON_HEADING
+                {
+                label = qtn_select_colour_prompt;
+                headinglayout = R_AVKON_LIST_HEADING_PANE;
+                };
+            },
+        DLG_LINE
+            {
+            type = EAknCtColourSelectionGridDialog;
+            id   = ECtrlGridType;
+            control = AVKON_COLOUR_SELECTION_GRID
+                {
+                nonetext = qtn_chat_set_colour_default;
+                gridcontrol = GRID
+                    {
+                    style = R_COLOUR_SEL_GRID_STYLE_NONE;
+                    flags = EEikDlgItemTakesEnterKey;
+                    height  = 4;
+                    width = 4 ;
+                    };
+                };
+            }
+        };
+    }
+// End of File

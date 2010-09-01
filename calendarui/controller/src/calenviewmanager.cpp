@@ -12,1097 +12,1835 @@
 * Contributors:
 *
 * Description:  Calendar view manager
- *
+*
 */
 
 
-//system includes
-#include <hbmainwindow.h>
-#include <hbinstance.h>
-#include <hbapplication.h> // hbapplication
-#include <xqserviceutil.h> // service utils
+#include <aknViewAppUi.h>
+#include <centralrepository.h>
+#include <AknQueryDialog.h>
+#include <Calendar.rsg>
+#include <calencommonui.rsg>
+#include <akntoolbar.h>
+#include <calendateutils.h>
+#include <calencommandhandler.h>
+#include <calencommands.hrh>                // Calendar commands
+#include <calentoolbar.h>
+#include <akntoolbarextension.h>
+#include <calenactionuiutils.h>
 
-//user includes
-#include "calenviewmanager.h"
-#include "calencontroller.h"
-#include "hb_calencommands.hrh"
-#include "calenservicesimpl.h"
-#include "calenmonthview.h"
-#include "calenagendaview.h"
-#include "calenmonthview.h"
-#include "agendaeventviewer.h"
-#include "calennotificationhandler.h"
-#include "CalenUid.h"
-#include "calenactionuiutils.h"
-#include "calensettingsview.h"
-#include "calendocloader.h"
 #include "calendarui_debug.h"
-#include "calencommon.h"
-#include "calendayview.h"
-#include <agendautil.h>
-#include "OstTraceDefinitions.h"
-#ifdef OST_TRACE_COMPILER_IN_USE
-#include "calenviewmanagerTraces.h"
-#endif
+#include "calenviewmanager.h"
+#include "CalenUid.h"
+#include "calencontroller.h"
+#include "calenviewpopulator.h"
+#include "calenglobaldata.h"
+#include "CalendarPrivateCRKeys.h"          // includes CalendarInternalCRKeys.h
+#include "calenmonthview.h"                 // Native month view
+#include "calenweekview.h"                  // Native week view
+#include "calendayview.h"                   // Native day view
+#include "calentodoview.h"                  // Native todo view
+#include "caleneventview.h"                 // Event View
+#include "calenmissedalarmsview.h"			// Missed alarms view
+#include "calenmissedeventview.h"			// Missed event view
+#include "calensetting.h"                   // CCalenSetting::TViewType
+#include "calencmdlinelauncher.h"           // Command line launcher
+#include "calenservicesimpl.h"
+#include "CleanupResetAndDestroy.h"
+#include "calentoolbarimpl.h"
+#include "calencustomisationmanager.h"
+#include "calenviewinfo.h"
+#include "calentitlepane.h"
+#include "calenicons.h"
+#include "calendummyview.h"
+
+const TInt KArrayGranularity = 5;
 
 // ----------------------------------------------------------------------------
-// CalenViewManager::CalenViewManager
-// 2nd phase of construction.
+// CCalenViewManager::NewL
+// 1st phase of construction
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CalenViewManager::CalenViewManager( CCalenController& aController)
-: mController(aController)
-{
-	OstTraceFunctionEntry0( CALENVIEWMANAGER_CALENVIEWMANAGER_ENTRY );
-	
-	// Following block intializes member variables
-	mCalenEventViewer = NULL;
-	mMonthViewDocLoader = NULL;
-	mAgendaViewDocLoader = NULL;	
-	mAgendaViewAltDocLoader = NULL;
-	mCalenAgendaView = NULL;
-	mCalenMonthView = NULL;
-	mCalenAgendaViewAlt = NULL;
-	mSettingsView = NULL;
-	mCalenDayView = NULL;
-	mInstanceViewCreated = false;
-	
-	// Connect to instance view and entry view creation signals from agenda
-	// interface
-	connect(mController.agendaInterface(), SIGNAL(instanceViewCreationCompleted(int)),
-	        this, SLOT(handleInstanceViewCreation(int)));
-	connect(mController.agendaInterface(), SIGNAL(entryViewCreationCompleted(int)),
-		        this, SLOT(handleEntryViewCreation(int)));
-	connect(mController.agendaInterface(), SIGNAL(entriesChanged(QList<ulong>)),
-								this, SLOT(handleEntriesChanged(QList<ulong>)));
-    connect(mController.agendaInterface(), SIGNAL(entryUpdated(ulong)),
-                                this, SLOT(handleEntryUpdation(ulong)));
-    connect(mController.agendaInterface(), SIGNAL(entryAdded(ulong)),
-                                this, SLOT(handleEntryUpdation(ulong)));
-	OstTraceFunctionExit0( CALENVIEWMANAGER_CALENVIEWMANAGER_EXIT );
-}
+CCalenViewManager* CCalenViewManager::NewL( CAknViewAppUi& aAppUi,
+                                            CCalenController& aController )
+    {
+    TRACE_ENTRY_POINT;
 
-void CalenViewManager::SecondPhaseConstruction()
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_SECONDPHASECONSTRUCTION_ENTRY );
-    
-    // Check the Application Startup reason from Activity Manager
-    int activityReason = qobject_cast<HbApplication*>(qApp)->activateReason();
-    
-    // Check if calendar is launched thru XQService framework
-    bool isFromServiceFrmWrk = XQServiceUtil::isService(); // Since activateReason 
-    //of hbapplication is not returning right value if the activity is started 
-    //as services so using the above line temporarily untill a fix is available in 
-    // hbappliacation. Need to remove this line after the fix is available for hbapplcation
+    CCalenViewManager* self = new( ELeave ) CCalenViewManager( aAppUi,aController );
+    CleanupStack::PushL( self );
+    self->ConstructL();
+    CleanupStack::Pop( self );
 
-    
-    if (Hb::ActivationReasonActivity == activityReason) // Check if application is started 
-    // as an activity
-        {
-        // Application is started from an activity
-        // Extract activity data
-        QVariant data = qobject_cast<HbApplication*>(qApp)->activateData();
-        // Restore state from activity data
-        QByteArray serializedModel = data.toByteArray();
-        QDataStream stream(&serializedModel, QIODevice::ReadOnly);
-        int viewId; // int declared for debugging purpose
-        stream >> viewId; // read stream into an int
-        
-        mFirstView = viewId;
-        if (ECalenMonthView == viewId) // Check if Activity was stored for month view
-            {
-            loadMonthView(); // Load month view
-            }
-        else if (ECalenAgendaView == viewId) // Check if Activity was stored for agenda view
-            {
-        	loadAgendaView(); // Load agenda view
-            }
-        
-        ActivateDefaultViewL(viewId);
-        // Connect to the view ready signal so that we can construct other views 
-        // once this view is ready
-        connect(&mController.MainWindow(), SIGNAL(viewReady()), 
-                this, SLOT(handleMainViewReady()));
-
-        if (ECalenMonthView == viewId) // Check if Activity was stored for month view
-            {
-            mController.MainWindow().addView(mCalenMonthView); // Add month view to main window
-            mController.MainWindow().setCurrentView(mCalenMonthView); // Set month view as current view
-            } 
-        else if (ECalenAgendaView == viewId) // Check if Activity was stored for agenda view
-            {
-            mController.MainWindow().addView(mCalenAgendaView); // Add agenda view to main window
-            mController.MainWindow().setCurrentView(mCalenAgendaView); // Set agenda view as current view
-            }
-        } else if (isFromServiceFrmWrk/*Hb::ActivationReasonService == activityReason*/) {
-        // Dont load any views until our remote slot gets called in
-        // calenserviceprovider.cpp
-        // Just have an empty mainwindow
-    } else {
-        // Do the normal startup
-        // Load the month view and active it and add it to main window
-        mFirstView = ECalenMonthView;
-        loadMonthView();
-        ActivateDefaultViewL(ECalenMonthView);
-        // Connect to the view ready signal so that we construct other view 
-        // once this view is shown
-        connect(&mController.MainWindow(), SIGNAL(viewReady()), 
-                        this, SLOT(handleMainViewReady()));
-        
-        mController.MainWindow().addView(mCalenMonthView);
-        mController.MainWindow().setCurrentView(mCalenMonthView);
+    TRACE_EXIT_POINT;
+    return self;
     }
-    
-
-    OstTraceFunctionExit0( CALENVIEWMANAGER_SECONDPHASECONSTRUCTION_EXIT );
-}
 
 // ----------------------------------------------------------------------------
-// CalenViewManager::~CalenViewManager
+// CCalenViewManager::CCalenViewManager
+// C++ default Constructor.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+CCalenViewManager::CCalenViewManager( CAknViewAppUi& aAppUi, 
+                                      CCalenController& aController )
+    : iAppUi( aAppUi ), iController( aController )
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::~CCalenViewManager
 // Destructor.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CalenViewManager::~CalenViewManager()
-{
-    OstTraceFunctionEntry0( DUP1_CALENVIEWMANAGER_CALENVIEWMANAGER_ENTRY );
-    
-	if (mSettingsView) {
-		delete mSettingsView;
-		mSettingsView = 0;
-	}
-	if (mAgendaViewDocLoader) {
-		delete mAgendaViewDocLoader;
-		mAgendaViewDocLoader = 0;
-	}
-	if (mAgendaViewAltDocLoader) {
-		delete mAgendaViewAltDocLoader;
-		mAgendaViewAltDocLoader = 0;
-	}
-	if (mMonthViewDocLoader) {
-		delete mMonthViewDocLoader;
-		mMonthViewDocLoader = 0;
-	}
-	
-	OstTraceFunctionExit0( DUP1_CALENVIEWMANAGER_CALENVIEWMANAGER_EXIT );
-}
+CCalenViewManager::~CCalenViewManager()
+    {
+    TRACE_ENTRY_POINT;
 
-// ----------------------------------------------------------------------------
-// CalenViewManager::constructAndActivateView
-// Constructs and activates the requested view
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::constructAndActivateView(int view)
-{
-	OstTraceFunctionEntry0( CALENVIEWMANAGER_CONSTRUCTANDACTIVATEVIEW_ENTRY );
-	
-    // We are here because, some other application is launching calendar with 
-	// the view, hence connect to viewReady() signal to do any lazy loading
-	// in the slot
-	
-	// Connect to the view ready signal so that we construct other view 
-	// once this view is shown
-	connect(&mController.MainWindow(), SIGNAL(viewReady()), 
-					this, SLOT(handleMainViewReady()));
-	if (view == ECalenMonthView) {
-		mFirstView = ECalenMonthView;
-		loadMonthView();
-		ActivateDefaultViewL(ECalenMonthView);
-		// Add month view to mainwindow.
-		mController.MainWindow().addView(mCalenMonthView);
-		mController.MainWindow().setCurrentView(mCalenMonthView);
-	} else if (view == ECalenAgendaView) {
-		mFirstView = ECalenAgendaView;
-		loadAgendaView();
-		ActivateDefaultViewL(ECalenAgendaView);
-		// Add agenda view to mainwindow.
-		mController.MainWindow().addView(mCalenAgendaView);
-		mController.MainWindow().setCurrentView(mCalenAgendaView);
-		mController.MainWindow().addView(mCalenAgendaViewAlt);
-	}
-	OstTraceFunctionExit0( CALENVIEWMANAGER_CONSTRUCTANDACTIVATEVIEW_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::loadMonthView
-// Loads month view frm the docml
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::loadMonthView()
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_LOADMONTHVIEW_ENTRY );
-    
-	bool loadSuccess = false;
-	Qt::Orientation currentOrienation = mController.MainWindow().orientation();
-	// Create the month view docloader object.
-	mMonthViewDocLoader = new CalenDocLoader(mController);
-	mMonthViewDocLoader->load(CALEN_MONTHVIEW_XML_FILE, &loadSuccess);
-	Q_ASSERT_X(loadSuccess, "calenviewmanager.cpp", 
-											"Unable to load month view XML");
-	// Based on the current orientation, load the appropriate section
-	if (Qt::Vertical == currentOrienation) {
-		mMonthViewDocLoader->load(CALEN_MONTHVIEW_XML_FILE, 
-											CALEN_PORTRAIT, &loadSuccess);
-		} else {
-			mMonthViewDocLoader->load(CALEN_MONTHVIEW_XML_FILE, 
-											CALEN_LANDSCAPE, &loadSuccess);
-		}
-	Q_ASSERT_X(loadSuccess, "calenviewmanager.cpp", "Unable to load XML");
-	
-	// Get the calenmonth view from the loader.
-	mCalenMonthView = static_cast<CalenMonthView *> 
-							(mMonthViewDocLoader->findWidget(CALEN_MONTHVIEW));
-	Q_ASSERT_X(mCalenMonthView, "calenviewmanager.cpp", 
-											"Unable to load calenMonth view");
-	
-	// Set the parent to delete the view once will exit the application
-	mCalenMonthView->setParent(this);
-	
-	// Setup the month view.
-	mCalenMonthView->setupView(mMonthViewDocLoader);
-	
-	OstTraceFunctionExit0( CALENVIEWMANAGER_LOADMONTHVIEW_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::loadAgendaView
-// Loads the agenda view frm the docml
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::loadAgendaView()
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_LOADAGENDAVIEW_ENTRY );
-    
-	bool loadSuccess = false;
-	// Create the agenda view docloader object.
-	mAgendaViewDocLoader = new CalenDocLoader(mController);
-	
-	// Load default section
-	mAgendaViewDocLoader->load(CALEN_AGENDAVIEW_XML_FILE, &loadSuccess);
-	if (!loadSuccess) {
-		qFatal("calenviewmanager.cpp : Unable to load XML");
-	}
-	
-	// Get the calenagenda view from the loader
-	mCalenAgendaView = static_cast<CalenAgendaView *> (mAgendaViewDocLoader->findWidget(CALEN_AGENDAVIEW));
-	if (!mCalenAgendaView) {
-		qFatal("calenviewmanager.cpp : Unable to find agenda view");
-	}
-	
-	// Set the parent to delete the view once will exit the application
-	mCalenAgendaView->setParent(this);
-	
-	// Setup the agenda view
-	mCalenAgendaView->setupView(mAgendaViewDocLoader);
-	
-	// The following code is done to provide swipe support
-	// in agenda view. Idea is to create two views and keep
-	// switiching between these two using view switch effects
-	// to provide an illusion of flow to the user
-	loadAlternateAgendaView();
-	
-	OstTraceFunctionExit0( CALENVIEWMANAGER_LOADAGENDAVIEW_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::loadDayView
-// Loads day view from the docml
-// ----------------------------------------------------------------------------
-void CalenViewManager::loadDayView()
-{
-    bool loadSuccess = false;
-    
-    // Create the docloader object
-    CalenDocLoader *docLoader = new CalenDocLoader(mController);
-    
-    if (docLoader) {
-        docLoader->load(CALEN_DAYVIEW_DOCML, &loadSuccess);
-        if (!loadSuccess) {
-            qFatal("calenviewmanager.cpp : Unable to load day view XML");
+    delete iPopulator;
+    if(iToolbar)
+        {
+        delete iToolbar;
+        iToolbar = NULL;
         }
-        
-        // Get the CalenDayView object from the loader
-        mCalenDayView = static_cast<CalenDayView *>
-            (docLoader->findWidget(CALEN_DAYVIEW));
-        if (!mCalenDayView) {
-            qFatal("calenviewmanager.cpp : Unable to find day view");
+    if( iSetting )
+        {
+        iSetting->Release();
         }
-        
-        // Set the parent to delete the view once will exit the application
-        mCalenDayView->setParent(this);
-        
-        // Set up the day view - day view takes the ownership
-        mCalenDayView->setupView(docLoader);
+
+    if( iGlobalData )
+        {
+        iGlobalData->Release();
+        }
+
+    iViewInfoArray.ResetAndDestroy();
+    iKnownPlugins.Reset();
+    
+    delete iRemovedActiveView;
+    delete iViewRemovalCallback;
+    delete iIcons;
+
+    TRACE_EXIT_POINT;
     }
-}
 
 // ----------------------------------------------------------------------------
-// CalenViewManager::handleMainViewReady
-// Slot to handle viewReady() signal from mainwindow
+// CCalenViewManager::ConstructL
+// 2nd phase of construction.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenViewManager::handleMainViewReady()
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEMAINVIEWREADY_ENTRY );
-    
-	// Construct the month view part that is kept for lazy loading
-    if (mCalenMonthView) {
-		mCalenMonthView->doLazyLoading();
+void CCalenViewManager::ConstructL()
+    {
+    TRACE_ENTRY_POINT;
 
-		if (mInstanceViewCreated) {
-			// populate entries for the month view if the month view is launched 
-			// from the service APIs. Otherwise the month view is not populated with 
-			// the entries as CalenViewManager::handleInstanceViewCreation is called 
-			// before the month view creation so the model array is not populated.
-			mCalenMonthView->fetchEntriesAndUpdateModel();
-		}
+    iGlobalData = CCalenGlobalData::InstanceL();
+    iPopulator = CCalenViewPopulator::NewL( iController );
 
-	}
-	
-	// Construct other views
-	constructOtherViews();
-	
-    // Install the event filter for the controller once the view is ready
-    // so that system language/locale changes can be handled
-	//hbInstance->allMainWindows().first()->installEventFilter(&mController);
-	
-	// disconnect the view ready signal as we dont need it anymore
-	disconnect(&mController.MainWindow(), SIGNAL(viewReady()), 
-			   this, SLOT(handleMainViewReady()));
-	
-	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEMAINVIEWREADY_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::constructOtherViews
-// Constructs the other views apart frm firstview and adds them to main window
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::constructOtherViews()
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_CONSTRUCTOTHERVIEWS_ENTRY );
-    
-	// Load all other views except mFirstView
-	
-	// NOTE: Right now, since Calendar has only two views, month view 
-	// and agenda view, when client launches agenda view, then there is no need
-	// to construct the month view as per UI REQ., but tomorrow if new views
-	// come after agenda view, then we need to construct those views if they are
-	// native views. Right now, there is a event viewer but its not a native
-	// view. Hence, if agenda view is launched, dont construct month view
-	if (mFirstView != ECalenAgendaView) // check if agenda view is not already loaded
-		{
-		// Load all other views 
-		loadAgendaView();
-		
-		if (!mCalenDayView) {
-		    loadDayView();
-		}
-	}
-	else //agenda view was launched as first view
-	    {
-		// No implementation yet. UI specs not clear
-		// to be commented in with some more code once UI specs is frozen
-		// for agenda view launching as first view after it was saved as activity
-		// when it was launched from month view
-        // loadMonthView();
-        // mCalenMonthView->doLazyLoading();
-	    }
-
-	// Setup the settings view
-	mSettingsView = new CalenSettingsView(mController.Services());
-	
-	OstTraceFunctionExit0( CALENVIEWMANAGER_CONSTRUCTOTHERVIEWS_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::getFirstView
-// Returns the first view
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-int CalenViewManager::getFirstView()
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_GETFIRSTVIEW_ENTRY );
-    
-	OstTraceFunctionExit0( CALENVIEWMANAGER_GETFIRSTVIEW_EXIT );
-	return mFirstView;
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::showNextDay
-// other items were commented in a header
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::showNextDay()
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_SHOWNEXTDAY_ENTRY );
-    
-    // Set the context for the next day
-    QDateTime currentDay = mController.Services().Context().focusDateAndTime();
-    currentDay = currentDay.addDays(1);
-    mController.Services().Context().setFocusDate(currentDay);
-    mCurrentViewId = ECalenAgendaView;
-    // Check which is the currently activated view
-    if (mController.MainWindow().currentView() == mCalenAgendaView) {
-        mCalenAgendaView->disconnectAboutToQuitEvent(); // disconnect mCalenAgendaView to get aboutToQuit Events
-        HbEffect::add(mCalenAgendaView,
-                      ":/fxml/view_hide",
-                      "hide");
-        HbEffect::add(mCalenAgendaViewAlt,
-                      ":/fxml/view_show",
-                      "show");
-        // Set the other agenda view as the current view
-        // and animate to provide illusion of swipe
-		// It would also connect for aboutToQuit events
-        mCalenAgendaViewAlt->doPopulation();
-        mController.MainWindow().setCurrentView(mCalenAgendaViewAlt, true, Hb::ViewSwitchUseNormalAnim);
-    } else {
-    mCalenAgendaViewAlt->disconnectAboutToQuitEvent(); // disconnect mCalenAgendaViewAlt to get aboutToQuit Events
-        HbEffect::add(mCalenAgendaViewAlt,
-                      ":/fxml/view_hide",
-                      "hide");
-        HbEffect::add(mCalenAgendaView,
-                      ":/fxml/view_show",
-                      "show");
-		// It would also connect for aboutToQuit events
-        mCalenAgendaView->doPopulation();
-        mController.MainWindow().setCurrentView(mCalenAgendaView, true, Hb::ViewSwitchUseNormalAnim);
-    }
-    OstTraceFunctionExit0( CALENVIEWMANAGER_SHOWNEXTDAY_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::showPrevDay
-// other items were commented in a header
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::showPrevDay()
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_SHOWPREVDAY_ENTRY );
-    
-    QDateTime currentDay = mController.Services().Context().focusDateAndTime();
-    currentDay = currentDay.addDays(-1);
-    mController.Services().Context().setFocusDate(currentDay);
-    mCurrentViewId = ECalenAgendaView;
-    if (mController.MainWindow().currentView() == mCalenAgendaView) {
-    mCalenAgendaView->disconnectAboutToQuitEvent(); // disconnect mCalenAgendaView to get aboutToQuit Events
-        HbEffect::add(mCalenAgendaView,
-                      ":/fxml/view_hide_back",
-                      "hide");
-        HbEffect::add(mCalenAgendaViewAlt,
-                      ":/fxml/view_show_back",
-                      "show");
-		// It would also connect for aboutToQuit events
-        mCalenAgendaViewAlt->doPopulation();
-        mController.MainWindow().setCurrentView(mCalenAgendaViewAlt, true, Hb::ViewSwitchUseNormalAnim);
-    } else {
-    mCalenAgendaViewAlt->disconnectAboutToQuitEvent(); // disconnect mCalenAgendaViewAlt to get aboutToQuit Events
-        HbEffect::add(mCalenAgendaViewAlt,
-                      ":/fxml/view_hide_back",
-                      "hide");
-        HbEffect::add(mCalenAgendaView,
-                      ":/fxml/view_show_back",
-                      "show");
-		// It would also connect for aboutToQuit events
-        mCalenAgendaView->doPopulation();
-        mController.MainWindow().setCurrentView(mCalenAgendaView, true, Hb::ViewSwitchUseNormalAnim);
-    }
-    
-    OstTraceFunctionExit0( CALENVIEWMANAGER_SHOWPREVDAY_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::removePreviousView
-// Remove the previous view from main window
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::removePreviousView()
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_REMOVEPREVIOUSVIEW_ENTRY );
-    
-	if (ECalenAgendaView == mCurrentViewId) {
-		mCalenAgendaView->clearListModel();
-		mCalenAgendaViewAlt->clearListModel();
-		mController.MainWindow().removeView(mCalenAgendaView);
-		mController.MainWindow().removeView(mCalenAgendaViewAlt);
-	} else if (ECalenDayView == mCurrentViewId) {
-		mController.MainWindow().removeView(mCalenDayView);
-	} else {
-		if (ECalenMonthView == mCurrentViewId) {
-			mController.MainWindow().removeView(mCalenMonthView);
-		}
-	}
-
-	OstTraceFunctionExit0( CALENVIEWMANAGER_REMOVEPREVIOUSVIEW_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::~ActivateDefaultViewL
-//  Activates the default view, as retrieved from settings.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::ActivateDefaultViewL(int defaultView)
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_ACTIVATEDEFAULTVIEWL_ENTRY );
-    
-	mCurrentViewId = defaultView;
-	if (ECalenMonthView == defaultView) {
-		mCalenMonthView->doPopulation();
-	} else if (ECalenAgendaView == defaultView) {
-		mCalenAgendaView->doPopulation();
-	}
-	OstTraceFunctionExit0( CALENVIEWMANAGER_ACTIVATEDEFAULTVIEWL_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// Refresh current view.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-void CalenViewManager::refreshCurrentViewL()
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_REFRESHCURRENTVIEWL_ENTRY );
-    
-	activateCurrentView();
-	
-	OstTraceFunctionExit0( CALENVIEWMANAGER_REFRESHCURRENTVIEWL_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// Activate current view.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-void CalenViewManager::activateCurrentView()
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_ACTIVATECURRENTVIEW_ENTRY );
-    
-	switch (mCurrentViewId) {
-		case ECalenMonthView:
-		    mCalenMonthView->doPopulation();
-		    mController.MainWindow().setCurrentView(mCalenMonthView);
-			break;
-		case ECalenAgendaView:
-		    if (mController.MainWindow().currentView() == mCalenAgendaView) {
-		        // This happens when settings view or event viewer is opened
-		        // from the agenda view. Simply repopulate the view
-		    	if (mCalenAgendaView) {
-		    		mCalenAgendaView->doPopulation();
-					mController.MainWindow().setCurrentView(mCalenAgendaView);
-		    	} 
-		    } else if (mController.MainWindow().currentView() == mCalenAgendaViewAlt){
-		        // This happens when settings view or event viewer is opened
-		        // from the agenda view. Simply repopulate the view
-		    	if (mCalenAgendaViewAlt) {
-		    		mCalenAgendaViewAlt->doPopulation();
-		    		mController.MainWindow().setCurrentView(mCalenAgendaViewAlt);
-		    	}
-		    } else {
-		        // This is called whenever the agenda view is opened from the month
-		        // view. Since the agenda view is not added to the mainwindow,
-		        // add the agenda views to mainwindow and set any one of them as 
-		        // current view
-		    	if (mCalenAgendaView) {
-		    		mCalenAgendaView->doPopulation();
-		    		mController.MainWindow().addView(mCalenAgendaView);
-		    		mController.MainWindow().setCurrentView(mCalenAgendaView);
-		    		mController.MainWindow().addView(mCalenAgendaViewAlt);
-		    	}
-		    }
-			break;
-		case ECalenShowSettings:
-		    mSettingsView->refreshView();
-			break;
-		case ECalenDayView:
-			mCalenDayView->doPopulation();
-			mController.MainWindow().setCurrentView(mCalenDayView);
-			break;
-	}
-	
-	OstTraceFunctionExit0( CALENVIEWMANAGER_ACTIVATECURRENTVIEW_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::launchEventView
-// Launch event view.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::launchEventView()
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_LAUNCHEVENTVIEW_ENTRY );
-    
-    // capture cureent view in case app closed/quits from AgendaEventViewer
-    if (mCalenMonthView) {
-    mCalenMonthView->captureScreenshot(true);
-    }
-    else if (mCalenAgendaView) {
-    	mCalenAgendaView->captureScreenshot(true);
-    }
-	MCalenContext& context = mController.Services().Context();
-	AgendaEntry viewEntry= mController.Services().agendaInterface()->fetchById(
-			context.instanceId().mEntryLocalUid );
-	if (viewEntry.isRepeating() 
-			&& viewEntry.type() != AgendaEntry::TypeTodo) {
-		QDateTime startDateTime = context.focusDateAndTime();
-		viewEntry.setStartAndEndTime(startDateTime, 
-		                     startDateTime.addSecs(viewEntry.durationInSecs()));
-	}
-	mCalenEventViewer = new AgendaEventViewer(
-			mController.Services().agendaInterface(), this);
-	connect(mCalenEventViewer, SIGNAL(viewingCompleted(const QDate)),
-	        this, SLOT(handleViewingCompleted(const QDate)));
-	connect(mCalenEventViewer, SIGNAL(editingStarted()),
-	        this, SLOT(handleEditingStarted()));
-	connect(mCalenEventViewer, SIGNAL(editingCompleted()),
-	        this, SLOT(handleEditingCompleted()));
-	connect(mCalenEventViewer, SIGNAL(deletingStarted()),
-		        this, SLOT(handleDeletingStarted()));
-	connect(mCalenEventViewer, SIGNAL(deletingCompleted()),
-			        this, SLOT(handleDeletingCompleted()));
-
-
-	// Launch agenda event viewer
-	mCalenEventViewer->view(viewEntry, AgendaEventViewer::ActionEditDelete);
-	OstTraceFunctionExit0( CALENVIEWMANAGER_LAUNCHEVENTVIEW_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::loadAlternateAgendaView
-// other items were commented in a header
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::loadAlternateAgendaView()
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_LOADALTERNATEAGENDAVIEW_ENTRY );
-    
-    bool loadSuccess = false;
-    // Create the agenda view docloader object.
-    mAgendaViewAltDocLoader = new CalenDocLoader(mController);
-
-    // Load default section
-    mAgendaViewAltDocLoader->load(CALEN_AGENDAVIEW_XML_FILE, &loadSuccess);
-    if (!loadSuccess) {
-        qFatal("calenviewmanager.cpp : Unable to load XML");
-    }
-
-    // Get the calenagenda view from the loader
-    mCalenAgendaViewAlt = static_cast<CalenAgendaView *> (mAgendaViewAltDocLoader->findWidget(CALEN_AGENDAVIEW));
-    if (!mCalenAgendaViewAlt) {
-        qFatal("calenviewmanager.cpp : Unable to find alternate agenda view");
-    }
-
-    // Set the parent to delete the view once will exit the application
-    mCalenAgendaViewAlt->setParent(this);
-    
-    // Setup the agenda view
-    mCalenAgendaViewAlt->setupView(mAgendaViewAltDocLoader);
-    OstTraceFunctionExit0( CALENVIEWMANAGER_LOADALTERNATEAGENDAVIEW_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::HandleCommandL
-// Handles view manager commands.
-// @return ETrue if command is handled, EFalse otherwise
-// ----------------------------------------------------------------------------
-//
-TBool CalenViewManager::HandleCommandL(const TCalenCommand& command)
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLECOMMANDL_ENTRY );
-    
-	TBool commandUsed(EFalse);
-	
-	switch (command.Command()) {
-		case ECalenMonthView:
-			// First remove the previous native view before 
-			// we set the mCurrentViewId with the current view
-			removePreviousView();
-			// Add month view to mainwindow.
-			mController.MainWindow().addView(mCalenMonthView);
-			mCurrentViewId = ECalenMonthView;
-			activateCurrentView();
-			break;
-		case ECalenAgendaView:
-			// First remove the previous native view before 
-			// we set the mCurrentViewId with the current view
-			removePreviousView();
-			mCurrentViewId = ECalenAgendaView;
-			activateCurrentView();
-			break;
-		case ECalenDayView:
+    // Only create a toolbar impl if touch is enabled and a CAknToolbar exists
+    if( AknLayoutUtils::PenEnabled() )
+        {
+        CAknAppUi* appUi = static_cast<CAknAppUi*>( CEikonEnv::Static()->EikAppUi() );
+        if (appUi->CurrentFixedToolbar())
             {
-            // First add new view
-			mController.MainWindow().addView(mCalenDayView);
-			
-			// Removes current view
-		    // Notice: removing view should be done after new view is set as current to
-		    // avoid situation that there is no current view in application
-		    removePreviousView();
-    
-		    // Sets and activates day view
-		    mCurrentViewId = ECalenDayView;
-		    activateCurrentView();
-			}
-			break;
-		case ECalenEventView:
-			launchEventView();
-			break;
-		case ECalenStartActiveStep:
-			activateCurrentView();
-			break;
-		case ECalenShowNextDay:
-		    showNextDay();
-		    break;
-		case ECalenShowPrevDay:
-            showPrevDay();
-		    break;
-	}
-	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLECOMMANDL_EXIT );
-	return commandUsed;
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::HandleNotification
-//  Handles notifications.
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::HandleNotification(
-                                         const TCalenNotification notification)
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLENOTIFICATION_ENTRY );
-    
-	switch (notification) {
-		case ECalenNotifyExternalDatabaseChanged:
-		case ECalenNotifyDialogClosed:
-		case ECalenNotifyMultipleEntriesDeleted:
-		case ECalenNotifyEntrySaved:
-		case ECalenNotifyEntryDeleted:
-		case ECalenNotifyInstanceDeleted:
-		case ECalenNotifyEntryClosed:
-		case ECalenNotifySystemLocaleChanged:
-		case ECalenNotifySystemTimeChanged:
-		case ECalenNotifySystemLanguageChanged: {
-
-			if (notification == ECalenNotifySystemTimeChanged) {
-				MCalenContext &context = mController.context();
-				QDateTime defaultTime = context.defaultCalTimeForViewsL();
-				context.setFocusDateAndTime(defaultTime);
-			}
-			activateCurrentView();
-			if (mCalenMonthView) {
-				mCalenMonthView->captureScreenshot();
-			} else if (mCalenAgendaView) {
-				mCalenAgendaView->captureScreenshot();
-			}
-		}
-		    break;
-		case ECalenNotifySettingsClosed: {
-		    //when setting view closed , switch to the previous view
-		    mCurrentViewId = mPreviousViewsId ;
-			mController.Services().IssueCommandL(ECalenStartActiveStep);
-			
-			 // invalidate captured screenshots as either agenda view is activated now
-			if (mCalenMonthView) {
-			mCalenMonthView->captureScreenshot();
-			} else if (mCalenAgendaView) {
-				mCalenAgendaView->captureScreenshot();
-			}
-
-		    }
-			break;
-		default:
-			break;
-	}
-	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLENOTIFICATION_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::settingsView
-//  Returns the settings view
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-CalenSettingsView* CalenViewManager::settingsView()
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_SETTINGSVIEW_ENTRY );
-    
-	OstTraceFunctionExit0( CALENVIEWMANAGER_SETTINGSVIEW_EXIT );
-	return mSettingsView;
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::handleViewingCompleted
-//  Slot to handle signal viewingCompleted by the agenda event viewer
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::handleViewingCompleted(const QDate date)
-{
-	Q_UNUSED(date);
-	OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEVIEWINGCOMPLETED_ENTRY );
-	
-	// Cleanup.
-	mCalenEventViewer->deleteLater();
-	if (!date.isNull() && date.isValid()) {
-	    mController.Services().Context().setFocusDate(QDateTime(date));
-	}
-	mController.Services().IssueNotificationL(ECalenNotifyEntryClosed);
-	
-	// invalidate captured screenshots as either agenda view is activated now
-	if (mCalenMonthView) {
-	mCalenMonthView->captureScreenshot();
-	} else if (mCalenAgendaView) {
-		mCalenAgendaView->captureScreenshot();
-	}
-	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEVIEWINGCOMPLETED_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::handleEditingStarted
-//  Slot to handle signal editingStarted by the agenda event viewer
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::handleEditingStarted()
-{
-	OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEEDITINGSTARTED_ENTRY );
-	
-	mController.IssueCommandL(ECalenEditEntryFromViewer);
-	
-	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEEDITINGSTARTED_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::handleEditingCompleted
-//  Slot to handle signal editingCompleted by the agenda event viewer
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::handleEditingCompleted()
-{
-	OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEEDITINGCOMPLETED_ENTRY );
-	
-	mController.Services().IssueNotificationL(ECalenNotifyEditorClosedFromViewer);
-	
-	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEEDITINGCOMPLETED_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::handleDeletingStarted
-//  Slot to handle signal deletingStarted by the agenda event viewer
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::handleDeletingStarted()
-{
-	OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEDELETINGSTARTED_ENTRY );
-	
-	mController.IssueCommandL(ECalenDeleteEntryFromViewer);
-	
-	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEDELETINGSTARTED_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::handleDeletingCompleted
-//  Slot to handle signal deletingCompleted by the agenda event viewer
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::handleDeletingCompleted()
-{
-	OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEDELETINGCOMPLETED_ENTRY );
-	
-	mController.Services().IssueNotificationL(ECalenNotifyEntryDeleted);
-
-	// invalidate captured screenshots as either month view or agenda view is activated now
-    if (mCalenMonthView) {
-    mCalenMonthView->captureScreenshot();
-    } else if (mCalenAgendaView) {
-    	mCalenAgendaView->captureScreenshot();
-    }
-	
-    OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEDELETINGCOMPLETED_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::handleInstanceViewCreation
-//  Slot to handle completion of instance view creation
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::handleInstanceViewCreation(int status)
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEINSTANCEVIEWCREATION_ENTRY );
-    
-	Q_UNUSED(status);
-	
-	// This flag is needed if mCalenMonthView and mCalenAgendaview is not created
-	// and before that this slot is getting called.
-	// if we launch views through services then this slot is getting called 
-	// before the view construction.
-	mInstanceViewCreated = true;
-	
-	// handleInstanceViewCreation function is called only once. Now that the instance
-	// view creation is successfull. Events need to be populated on screen
-	// Ideal colution should be to call a uniform function, e.g. PopulateEvents
-	// where PopulateEvents should be implemeted by all views. Since the current
-	// solution for the month view implements the construction in two phases so 
-	// it needs to be refactored and a common solution needs to be put here. So 
-	// that code doesn't break if another view is added tomorow
-	HbView *currentview = mController.MainWindow().currentView();
-	
-	if (mCalenMonthView && currentview == mCalenMonthView) {
-		mCalenMonthView->fetchEntriesAndUpdateModel();
-	}
-	else if (mCalenAgendaView && currentview == mCalenAgendaView) {
-		mCalenAgendaView->doPopulation();
-	}
-    else if (mCalenDayView && currentview == mCalenDayView) {
-        mCalenDayView->doPopulation();
-    }
-	// Calls the emitAppReady function of CalenController. Need to emit this
-	// signal after the view is fully constructed & populated
-	// with actual data and ready to be used. So entry view & instance view
-	// needs to be created so that a new entry can also be created. Finally
-	// NotesApplication object needs to emit applicationReady Signal.
-	mController.emitAppReady();
-	
-	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEINSTANCEVIEWCREATION_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::handleDeletingCompleted
-//  Slot to handle completion of entry view creation
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::handleEntryViewCreation(int status)
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_HANDLEENTRYVIEWCREATION_ENTRY );
-    
-	// Nothing Yet
-	Q_UNUSED(status);
-
-	OstTraceFunctionExit0( CALENVIEWMANAGER_HANDLEENTRYVIEWCREATION_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::handleEntriesChanged
-// this function will be called when someone else has changed the database
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::handleEntriesChanged(QList<ulong> ids)
-{
-	Q_UNUSED(ids);
-	HbView *currentview = mController.MainWindow().currentView();
-	if((mCalenMonthView == currentview)||(mCalenDayView == currentview)||
-                                            (mCalenAgendaView == currentview ))
-	    {
-        activateCurrentView();
-	    }
-}
-
-// ----------------------------------------------------------------------------
-// CalenViewManager::handleEntryUpdation
-// this function will be called when any entry is updated or added into database
-// Here we need to set the context to the entry updated or added.
-// ----------------------------------------------------------------------------
-//
-void CalenViewManager::handleEntryUpdation(ulong id)
-{
-    AgendaEntry updatedEntry = mController.agendaInterface()->fetchById(id);
-
-    // Agenda entry is not null then refresh the view else close event viewer
-    if (!updatedEntry.isNull()) {
-        if (AgendaEntry::TypeTodo != updatedEntry.type()) {
-            QDate date = updatedEntry.startTime().date();
-            if (!date.isNull() && date.isValid()) {
-                mController.Services().Context().setFocusDate(QDateTime(date));
+            iToolbar = CCalenToolbarImpl::NewL( iController );
             }
         }
+
+    iSetting = CCalenSetting::InstanceL();
+    iPreviousViewId.iViewUid = KNullUid;
+    iAvoidRepopulation = EFalse;
+    iStartupComplete = ETrue;
+    
+    TRACE_EXIT_POINT;
     }
 
-}
-
 // ----------------------------------------------------------------------------
-// CalenViewManager::launchSettingsView
-// Launches settings view
+// CCalenViewManager::SetCustomisationManagerL
+// Creates custom views.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenViewManager::launchSettingsView()
-{
-    OstTraceFunctionEntry0( CALENVIEWMANAGER_LAUNCHSETTINGSVIEW_ENTRY );
-    
-    mPreviousViewsId = mCurrentViewId ;  
-    mCurrentViewId = ECalenShowSettings;
-    mSettingsView->initializeForm();
-    mController.Services().MainWindow().setCurrentView(mSettingsView);
-    
-    // capture cureent view in case app closed/quits from settings view
-    if (mCalenMonthView){
-    mCalenMonthView->captureScreenshot(true);
-    } else if(mCalenAgendaView){
-    	mCalenAgendaView->captureScreenshot(true);
-    }
-    
-    OstTraceFunctionExit0( CALENVIEWMANAGER_LAUNCHSETTINGSVIEW_EXIT );
-}
+void CCalenViewManager::ConstructCustomViewsL(
+                             CCalenCustomisationManager& aCustomisationManager )
+    {
+    TRACE_ENTRY_POINT;
 
+    iCustomisationManager = &aCustomisationManager;
+    ConstructCustomViewsL();
+    ConstructNativeViewsL();
+
+    TUid defViewUid = iSetting->DefaultView();
+    ActivateDefaultViewL( defViewUid );
+    	
+    // Register for view activation events
+    iAppUi.AddViewActivationObserverL( this );
+
+    TRACE_EXIT_POINT;
+    }
 
 // ----------------------------------------------------------------------------
-// CalenViewManager::removeSettingsView
-// remove settings view
+// CCalenViewManager::ViewInfoArray
+// Get info array
+// (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenViewManager::removeSettingsView()
-{
-    if(mSettingsView){
-        mController.Services().MainWindow().removeView(mSettingsView);
+RPointerArray<CCalenViewInfo>& CCalenViewManager::ViewInfoArray()
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    return iViewInfoArray;
     }
-}
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::CustomiszationManager
+// Return reference to the customisation manager
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+CCalenCustomisationManager& CCalenViewManager::CustomisationManager()
+    {
+    TRACE_ENTRY_POINT;
+
+    ASSERT( iCustomisationManager );
+
+    TRACE_EXIT_POINT;
+    return *iCustomisationManager;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::ConstructNativeViewsL
+// Constructs the S60 native views and registers them with the view server
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::ConstructNativeViewsL()
+    {
+    TRACE_ENTRY_POINT;
+
+    CCalenTitlePane::NewAndSwapL(iAppUi.StatusPane());
+    MCalenServices& services = iController.Services();
+    
+    
+    // Add the native views for the todo view, week view, day view , month
+    // view and event view unless they are already provided by custom views 
+    // in ROM.This is enforced by the customisation manager rejecting any 
+    // views that try to replace the native views but are not in ROM.
+
+    if (CreateNativeViewL(KUidCalenMonthView))
+        {
+        // Views take ownership of services object instantly. 
+        // No need for cleanup stack.
+        CCalenMonthView* monthView = CCalenMonthView::NewL(services);
+        AddNativeViewL(monthView); // takes ownership immediately.
+        }
+
+    if (CreateNativeViewL(KUidCalenWeekView))
+        {
+        // Views take ownership of services object instantly. 
+        // No need for cleanup stack.
+        CCalenWeekView* weekView = CCalenWeekView::NewL(services);
+        AddNativeViewL(weekView); // takes ownership immediately.
+        }
+        
+    if (CreateNativeViewL(KUidCalenDayView))
+        {  
+        // Views take ownership of services object instantly. 
+        // No need for cleanup stack.
+        CCalenDayView* dayView = CCalenDayView::NewL(services);
+        AddNativeViewL(dayView); // takes ownership immediately.
+        }
+    
+    if (CreateNativeViewL(KUidCalenTodoView))
+        {
+        // Views take ownership of services object instantly. 
+        // No need for cleanup stack.
+        CCalenTodoView* todoView = CCalenTodoView::NewL(services);
+        AddNativeViewL(todoView); // takes ownership immediately.
+        }
+	
+	if( CreateNativeViewL(KUidCalenEventView))
+		{
+        // Views take ownership of services object instantly. 
+		// No need for cleanup stack.
+        CCalenEventView* eventView = CCalenEventView::NewL(services);
+        AddNativeViewL(eventView); // takes ownership immediately.
+		}
+
+	if( CreateNativeViewL(KUidCalenMissedAlarmsView))
+		{
+        // Views take ownership of services object instantly. 
+		// No need for cleanup stack.
+        CCalenMissedAlarmsView* missedAlarmsView = CCalenMissedAlarmsView::NewL(services);
+        AddNativeViewL(missedAlarmsView); // takes ownership immediately.
+		}
+
+	if( CreateNativeViewL(KUidCalenMissedEventView))
+		{
+        // Views take ownership of services object instantly. 
+		// No need for cleanup stack.
+        CCalenMissedEventView* missedEventView = CCalenMissedEventView::NewL(services);
+        AddNativeViewL(missedEventView); // takes ownership immediately.
+		}
+	
+	if(CreateNativeViewL(KUidCalenDummyView))
+	    {
+	    CCalenDummyView* dummyView = CCalenDummyView::NewL(services);
+	    AddNativeViewL(dummyView);
+	    }
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::CreateNativeViewL
+// Checks to see if the native view needs to created.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+TBool CCalenViewManager::CreateNativeViewL(TUid aViewUid)
+    {
+    TRACE_ENTRY_POINT;
+    
+    TBool createNativeView = ETrue;
+    TBool (*compareFn)(const TUid*, const CCalenViewInfo&) 
+                                         = CCalenViewInfo::ViewInfoIdentifier;
+                                            
+    TInt position = iViewInfoArray.Find( aViewUid, compareFn );
+    if ( position != KErrNotFound )
+        {
+        // A plugin is trying to replace a native view, find if it is rom
+        // based or not
+        TBool romBased = CustomisationManager().IsViewRomBased( aViewUid );
+        if ( romBased )
+            {
+            createNativeView = EFalse;
+            }
+        else
+            {
+            // A non-rom plugin cannot replace the native views, so the view is
+            // removed
+            iAppUi.RemoveView( aViewUid );
+            
+            // Remove the entry from the view info array
+            iViewInfoArray.Remove( position );
+            
+            createNativeView = ETrue;
+            }
+        }
+        
+    TRACE_EXIT_POINT;
+    return createNativeView;
+    }
+ 
+// ----------------------------------------------------------------------------
+// CCalenViewManager::ConstructCustomViewsL
+// Constructs any custom views from all the plugins and registers them 
+// with the view server
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::ConstructCustomViewsL()
+    {
+    TRACE_ENTRY_POINT;
+
+    // Get the array of active plugins
+    const RArray<TUid>& plugins = CustomisationManager().ActivePlugins();
+
+    // For every active plugin, discover if it offers any customised views
+    // and adds them to the view server.
+    TInt numPlugins = plugins.Count();
+    for( TInt pluginIndex( 0 ); pluginIndex < numPlugins; ++pluginIndex )
+        {
+        TUid pluginUid = plugins[pluginIndex];
+        ConstructCustomViewL( pluginUid );
+        }
+
+    TRACE_EXIT_POINT;
+    }
     
 // ----------------------------------------------------------------------------
-// CalenViewManager::isEventViewerActive
-// check if Agenda Event Viewer is active
+// CCalenViewManager::ConstructCustomViewsL
+// Constructs the custom views from a particular plugin and registers them
+//  with the view server
+// (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-bool CalenViewManager::isEventViewerActive()
-{
-   if(mCalenEventViewer)
-       return true;
+void CCalenViewManager::ConstructCustomViewL( TUid aPluginUid )
+    {
+    TRACE_ENTRY_POINT;
+
+    iKnownPlugins.AppendL( aPluginUid );
+
+    RPointerArray<CCalenView> customViews;
+    CleanupResetAndDestroyPushL( customViews );
+
+    TRAP_IGNORE(CustomisationManager().GetCustomViewsL( aPluginUid, customViews ));
+    for( TInt viewIndex( customViews.Count()-1 ); viewIndex >= 0; --viewIndex )
+        {
+        CCalenView* customView = customViews[viewIndex];
+        iAppUi.AddViewL( customView );
+        customViews.Remove( viewIndex );
+        }
+    CleanupStack::PopAndDestroy(); // customViews
+
+    TRACE_EXIT_POINT;
+    }    
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::ActivateDefaultViewL
+// Activates the default view (retrieved from settings).
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::ActivateDefaultViewL( TUid aDefaultView )
+    {
+    TRACE_ENTRY_POINT;
+
+    // Find the default view in the view cycle list
+    TInt position = iViewInfoArray.Find(
+                            aDefaultView, CCalenViewInfo::ViewInfoIdentifier );
+    if( position != KErrNotFound )
+        {
+        iAppUi.SetDefaultViewL( *iAppUi.View( aDefaultView ) );
+        iViewCycleIndex = position;
+        }
+	else
+	    {
+	    CRepository* repository = CRepository::NewL( KCRUidCalendar );
+	    CleanupStack::PushL(repository);
+	    TInt tmp( static_cast<TInt>( KUidCalenMonthView.iUid ) );
+	    TInt position = iViewInfoArray.Find( KUidCalenMonthView, CCalenViewInfo::ViewInfoIdentifier );
+	    User::LeaveIfError( repository->Set( KCalendarDefaultStartView, tmp ) );
+	    iAppUi.SetDefaultViewL( *iAppUi.View( KUidCalenMonthView ) );
+	    iViewCycleIndex = position;
+	    CleanupStack::PopAndDestroy(repository);  
+	    }
+    TRACE_EXIT_POINT;
+
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::InterruptPopulationL
+// Interrupts the population of the current view. When the editors are launched
+// the view population is interrupted as it will be repopulated when the
+// the editor closes.
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::InterruptPopulationL()
+    {
+    TRACE_ENTRY_POINT;
+
+    // Cancel population of current view, if it's ongoing.
+    iPopulator->InterruptPopulationL();
+
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::RemoveCurrentViewFromMenu
+// Removes the current view from the cascading view switch menu
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::RemoveCurrentViewFromMenu( CEikMenuPane* aMenuPane )
+    {
+    TRACE_ENTRY_POINT;
+
+    TUid uid = CurrentView();
+
+    if( uid == KUidCalenMonthView )
+        {
+        aMenuPane->DeleteMenuItem( ECalenMonthView );
+        }
+    else if( uid == KUidCalenWeekView )
+        {
+        aMenuPane->DeleteMenuItem( ECalenWeekView );
+        }
+    else if( uid == KUidCalenDayView )
+        {
+        aMenuPane->DeleteMenuItem( ECalenDayView );
+        }
+    else if( uid == KUidCalenTodoView )
+        {
+        aMenuPane->DeleteMenuItem( ECalenTodoView );
+        }
+    else
+        {
+        // Assert as this point should never be reached
+        ASSERT( 0 );
+        }
+
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::AddNativeViewL
+// Adds a view to the array.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::AddNativeViewL( CCalenView* aView )
+    {
+    TRACE_ENTRY_POINT;
+
+    CleanupStack::PushL( aView );
+    iAppUi.AddViewL( aView );
+    CleanupStack::Pop( aView );
+
+    const TDesC& menuName = aView->LocalisedViewNameL( CCalenView::EMenuName );
+    const TDesC& settingsName = aView->LocalisedViewNameL( CCalenView::ESettingsName );
+
+    TUid viewUid = aView->Id();
+    
+
+    CCalenViewInfo* viewInfo = CCalenViewInfo::NewL( aView->Id(),
+                                                     KUidCalendar,
+                                                     menuName,
+                                                     settingsName,
+                                                     aView->CyclePosition() );
+        
+    // Discover if a native view has been hidden by a plugin.                                             
+    TBool hidden = iCustomisationManager->HiddenView( viewUid );
+    viewInfo->Hide( hidden );
+    
+    // Append to view info array
+    iViewInfoArray.InsertInOrderAllowRepeatsL( viewInfo, 
+                                       CCalenViewInfo::CyclePositionComparison );
+
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::HandleCommandL
+// Handles view manager commands.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+TBool  CCalenViewManager::HandleCommandL( const TCalenCommand& aCommand )
+    {
+    TRACE_ENTRY_POINT;
+    
+    TBool commandUsed(EFalse);
+    
+    switch( aCommand.Command() )
+        {
+        case ECalenMonthView:
+            {
+            RequestActivationL( KUidCalenMonthView );
+            }
+            break;
+        case ECalenWeekView:
+            {
+            RequestActivationL( KUidCalenWeekView );
+            }
+            break;
+        case ECalenDayView:
+            {
+            // reset the flag iForwardedToDayView as view switching is active
+            if(iPreviousToDayView.iViewUid!=KNullUid)
+                {
+                iPreviousToDayView.iViewUid = KNullUid;
+                }
+            RequestActivationL( KUidCalenDayView, KCalenDummyUid, KNullDesC8() );
+            if(iController.IsLaunchFromExternalApp())
+                {
+                iAvoidRepopulation = ETrue;
+                }
+            }
+            break;
+        case ECalenTodoView:
+            {
+            if (iAvoidRepopulation)
+                {
+                iAvoidRepopulation = EFalse;
+                }
+            RequestActivationL( KUidCalenTodoView );
+            }
+            break;
+        case ECalenEventView:
+            {
+            // Fix for EJCU-7LKC2C :: to prevent the display of blank view, 
+            // just set the iAvoidRepopulation to EFalse, 
+            // so that view is populated properly
+
+            if (iAvoidRepopulation)
+                {
+                iAvoidRepopulation = EFalse;
+                }
+
+        	RequestActivationL( KUidCalenEventView );
+            }
+        	break;
+        case ECalenForwardsToDayView:
+            {
+            // set the view iPreviousToDayView to handle the day view's cba
+            // when returning from event view.
+            // From month/week view -> day view -> event view -> day view
+            iPreviousToDayView = iCurrentViewId;
+            if(iAvoidRepopulation)
+                {
+                iAvoidRepopulation = EFalse;
+                }
+            RequestActivationL( KUidCalenDayView, KUidCalenShowBackCba );
+            }
+            break;
+        case ECalenForwardsToWeekView:
+            {
+            // set the view iPreviousToWeekView to handle the week view's cba
+            // From month view -> week view 
+            iPreviousToWeekView = iCurrentViewId;
+            if(iAvoidRepopulation)
+                {
+                iAvoidRepopulation = EFalse;
+                }
+            RequestActivationL( KUidCalenWeekView, KUidCalenShowBackCba );
+            }
+            break;
+        case ECalenNextView:
+            {
+            CycleNextViewL();
+            }
+            break;
+        case ECalenPrevView:
+            {
+            CyclePrevViewL();
+            }
+            break;
+        case ECalenSwitchView:
+            {
+            ShowSwitchViewQueryL();
+            }
+            break;
+        case ECalenStartActiveStep:
+            {
+            StartActiveStepL();
+            }
+            break;
+        case ECalenFasterAppExit:
+        	{
+        	HandleFasterAppExitCommandL();
+        	}
+            break;
+        case ECalenGotoToday:
+            {
+            // get today's date
+            TTime today = CalenDateUtils::Today();
+
+            // get the context    
+            MCalenContext& context = iController.Services().Context();
+            TCalTime todayCalTime;
+            todayCalTime.SetTimeLocalL( today );
+            // set today's date to the context
+            context.SetFocusDateAndTimeL( todayCalTime, iCurrentViewId  );
+            
+            SetRepopulation(EFalse);
+            // reactivate the current view
+            //RequestActivationL(iCurrentViewId.iViewUid);
+            RequestActivationL(KUidCalenDayView);
+
+			// dim "today" toolbar item since focus is on today            
+            //iToolbar->Toolbar().SetItemDimmed( ECalenGotoToday, ETrue, ETrue);
+            }
+            break;
+
+        default:
+            break;
+        }
+
+    TRACE_EXIT_POINT;
+    return commandUsed;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::CalenCommandHandlerExtensionL
+// Dummy implementation.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+TAny* CCalenViewManager::CalenCommandHandlerExtensionL( TUid /*aExtensionUid*/ )
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    return NULL;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::CurrentView
+// Returns the current view's view uid.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+TUid CCalenViewManager::CurrentView() const
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    return iCurrentViewId.iViewUid;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::HandleViewActivation
+// From MCoeViewActivationObserver
+// Called just before a view in this application is activated by the view server
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::HandleViewActivation( const TVwsViewId& aNewlyActivatedViewId,
+                                             const TVwsViewId& aViewIdToBeDeactivated )
+    {
+    TRACE_ENTRY_POINT;
+
+    TBool externalViewSwitch( EFalse );
+    // See if this is an internal or external view switch request
+    if( aViewIdToBeDeactivated.iAppUid != KUidCalendar )
+        {
+        externalViewSwitch = ETrue;
+        }
+
+    // If this is an internal view switch (view cycling from the '*' key)
+    // then ActivateLocalViewL will handle any necessary state changes.
+    // If this is an external view switch then we need to find out if Calendar was already
+    // running or if it is being launched to a specific view by another application
+    // calling ActivateViewL with Calendars UID and the UID of one of the standard views.
+    // In this case we need to set the current view in the state or we would get the
+    // default view (from the settings) activated instead of the requested view.
+    if( externalViewSwitch )
+        {
+        // Check that the view being activated belongs to Calendar.  Although I don't see
+        // how this would be called if this was false anyway.
+        if( aNewlyActivatedViewId.iAppUid == KUidCalendar )
+            {
+            // Make sure that any when any open dialogs are closed Calendar will not close as well.
+            // This could be true if Calendar was originally launched directly to the editor, and
+            // so should be closed when the dialog is closed.  If an external view switch request
+            // arrives, we want the dialog to close but Calendar to remain open.
+            // Otherwise we get a CONE 44 panic.
+            //iIsExitOnDlgClose = EFalse;
+
+            iCurrentViewId = aNewlyActivatedViewId;
+            }
+        }
+
+    iViewsActivated = ETrue;
+    
+    // check for iAvoidRepopulation to avoid repopulation whenever
+    // 1) Application comes to foreground
+    // 2) Applictaion is opened after fake exit
+    if(!iAvoidRepopulation || iController.IsLaunchFromExternalApp() )
+        {
+        TRAPD(error,StartActiveStepL());
+        if(error!=KErrNone)
+            {
+            // do avoid warning
+            }
+        }
+    
+    // Reset the flag iAvoidRepopulation
+    if (iAvoidRepopulation)
+        {
+        iAvoidRepopulation = EFalse;
+        }
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::RemoveDeActivatedView
+// Asyncronous callback function to remove the current view after it has been 
+// disabled.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+TInt CCalenViewManager::RemoveDeActivatedView( TAny* aObject )
+    {
+    TRACE_ENTRY_POINT;
+    
+    CCalenViewManager* thisPtr( static_cast<CCalenViewManager*>( aObject ) );
+    TRAP_IGNORE( thisPtr->RemoveDeActivatedViewL() );
+    
+    TRACE_EXIT_POINT;
+    return 0;
+    }
+ 
+// ----------------------------------------------------------------------------
+// CCalenViewManager::RemoveDeActivatedViewL.
+// (Leaving version)
+// Asyncronous callback function to remove the current view after it has been 
+// disabled.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//   
+void CCalenViewManager::RemoveDeActivatedViewL()
+    {
+    TRACE_ENTRY_POINT;
+    
+    TUid removedViewUid = iRemovedActiveView->ViewUid();
+    TUid removedPluginUid = iRemovedActiveView->PluginUid();
+    
+    // The view isn't the current view, so we
+    // can remove it directly from the view server
+    iAppUi.RemoveView( removedViewUid );
+
+    // Delete the view info
+    delete iRemovedActiveView;;
+    iRemovedActiveView = NULL;
+    
+    // Unload the plugin.
+    RArray<TUid> pluginArray;
+    CleanupClosePushL( pluginArray );
+    
+    pluginArray.AppendL( removedPluginUid );
+    iCustomisationManager->UnloadPluginsL( pluginArray );
+    CleanupStack::PopAndDestroy(); // pluginArray
+    
+    if(!iController.IsFasterAppFlagEnabled())
+        {
+        // Refresh the current view by simulating a settings close
+        iController.BroadcastNotification( ECalenNotifySettingsClosed );
+        }
+    else
+        {
+        iController.BroadcastNotification( ECalenNotifyCheckPluginUnloading );
+        }
+
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::CycleNextViewL
+// Requests activation for the next view in the view cycle
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::CycleNextViewL()
+    {
+    TRACE_ENTRY_POINT;
+
+    // Increment until we get to a valid view.
+    do{
+        ++iViewCycleIndex;
+
+        if( iViewCycleIndex >= iViewInfoArray.Count() )
+            {
+            iViewCycleIndex = 0;
+            }
+        }
+    while( iViewInfoArray[iViewCycleIndex]->CyclePosition() == CCalenView::ENoCyclePosition );
+
+    RequestActivationL( iViewInfoArray[iViewCycleIndex]->ViewUid() );
+
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::CyclePrevViewL
+// Requests activation for the previous view in the view cycle
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::CyclePrevViewL()
+    {
+    TRACE_ENTRY_POINT;
+
+    // Decrement until we get to a valid view.
+    do{
+        --iViewCycleIndex;
+
+        if( iViewCycleIndex < 0 )
+            {
+            iViewCycleIndex = iViewInfoArray.Count()-1;
+            }
+        }
+    while ( iViewInfoArray[iViewCycleIndex]->CyclePosition() == CCalenView::ENoCyclePosition );
+
+    RequestActivationL( iViewInfoArray[iViewCycleIndex]->ViewUid() );
+
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::RequestActivationL
+// Request activation of a specific view.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::RequestActivationL( const TVwsViewId& aViewId )
+    {
+    TRACE_ENTRY_POINT;
+    
+    RequestActivationL( aViewId.iViewUid );
+
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::RequestActivationL
+// Call this to try to activate a view
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::RequestActivationL( const TUid& aViewUid,
+                                            const TUid& aMessageId,
+                                            const TDesC8& aMessage )
+    {
+    TRACE_ENTRY_POINT;
+
+    // Cancel population of current view, if it's ongoing.
+    iPopulator->InterruptPopulationL();
+    // We start population of the newly activated view in HandleViewActivationL.
+    
+    // cache the previousviewid as we are getting aViewUid as reference.
+    TUid cachePreviousViewId = iCurrentViewId.iViewUid;
+    
+    iCurrentViewId.iViewUid = aViewUid;
+    // Update the view cycle index as iViewInfoArray would have changed
+	iViewCycleIndex = iViewInfoArray.Find( iCurrentViewId.iViewUid, 
+                                            CCalenViewInfo::ViewInfoIdentifier );
+    
+	if( iController.IsFasterAppFlagEnabled() )
+		{
+	    // Leave the application in background
+	    iAppUi.HideInBackground();
+	    // Disable bring-to-foreground on view activation
+		iAppUi.SetCustomControl(1); 
+		
+		// activate the view
+		iAppUi.ActivateLocalViewL( aViewUid, KCalenHideInBackGround, KNullDesC8() );
+	
+		// Enable bring-to-foreground on view activation.
+		iAppUi.SetCustomControl(0);  
+		}
+	else
+		{
+		iAppUi.ActivateLocalViewL( aViewUid, aMessageId, aMessage );
+		}
+	
+	// set the previous view id
+	if(cachePreviousViewId != KUidCalenEventView) 
+	    {
+        iPreviousViewId.iViewUid = cachePreviousViewId; 
+	    }	
+	TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::StartActiveStepL
+// Starts population of the current view.
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::StartActiveStepL()
+    {
+    TRACE_ENTRY_POINT;
+    
+    // check for current viewid
+    // populate the view only if iCurrentViewId is set
+    if(iCurrentViewId.iViewUid != KNullUid)
+        {
+        iPopulator->InterruptPopulationL();
+        iPopulator->BeginPopulationL(reinterpret_cast<CCalenView*>(iAppUi.View(CurrentView())));
+        }
+
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::ShowSwitchViewQueryL
+// Prompts the user to chose a view to switch to. If cancelled, returns
+// KErrCancel, otherwise one of ECalen*view.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::ShowSwitchViewQueryL()
+    {
+    TRACE_ENTRY_POINT;
+
+    // Create list of view names and uids
+    CDesCArrayFlat* viewNames = new( ELeave ) CDesCArrayFlat( KArrayGranularity );
+    CleanupStack::PushL( viewNames );
+
+    RArray<TUid> viewUids;
+    CleanupClosePushL( viewUids );
+											
+	const RArray<TUid>& activePlugins = CustomisationManager().ActivePlugins();											
+											
+    for( TInt index( 0 ); index < iViewInfoArray.Count(); ++index )
+        {
+        CCalenViewInfo& viewInfo = *( iViewInfoArray[index] );
+        if( index != iViewCycleIndex )
+            {
+            TUid pluginUid = viewInfo.PluginUid();
+            TInt position = activePlugins.Find( pluginUid );
+	        	
+            // If the view is from plugin or native view with cycle position,
+            // then add it to the switch view list
+            if(( position != KErrNotFound ) ||
+                 ( viewInfo.CyclePosition() != CCalenView::ENoCyclePosition ))
+                {
+                // Fetch the view name
+                TUid viewUid = viewInfo.ViewUid();
+                const TDesC& viewName = viewInfo.MenuName();
+                viewNames->AppendL( viewName );
+                viewUids.AppendL(viewUid );      
+                }
+            }
+        }
+        
+    // Show list query.
+    TInt choice = KErrCancel; //KErrNotFound;
+    CAknListQueryDialog* dlg = new( ELeave ) CAknListQueryDialog( &choice );
+    dlg->PrepareLC( R_CALENDAR_SWITCH_VIEW_QUERY ); // pushes dlg to CS
+    dlg->SetItemTextArray( viewNames );
+    dlg->SetOwnershipType( ELbmDoesNotOwnItemArray );
+
+    // Set title
+    CAknPopupHeadingPane* heading = dlg->Heading();
+    HBufC* title = NULL;
+    title = CCoeEnv::Static()->AllocReadResourceLC( R_CALENDAR_SWITCH_VIEW_QUERY_TITLE );
+    heading->SetTextL( *title );
+    CleanupStack::PopAndDestroy( title );
+
+    if( dlg->RunLD() )
+        {
+        // user made a choice
+        TUid viewUid = viewUids[choice];
+        RequestActivationL( viewUid );
+        }
+
+    CleanupStack::PopAndDestroy(); // viewUids
+    CleanupStack::PopAndDestroy( viewNames );
+
+    TRACE_EXIT_POINT;
+    }
+    
+// ----------------------------------------------------------------------------
+// CCalenViewManager::HandleNotification
+// Calls back when notifications that it has been registered for are broadcast
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::HandleNotification(const TCalenNotification aNotification )
+    {
+    TRACE_ENTRY_POINT;
+    
+    PIM_TRAPD_HANDLE( HandleNotificationL( aNotification ) );
+  
+    TRACE_EXIT_POINT;
+    }
+    
+// ----------------------------------------------------------------------------
+// CCalenViewManager::HandleNotificationL
+// Called from HandleNotification() when notifications that it has been
+//  registered for are broadcast
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::HandleNotificationL( TCalenNotification aNotification )
+    {
+    TRACE_ENTRY_POINT;
+    
+    switch( aNotification )
+        {
+        case ECalenNotifyPluginEnabledDisabled:
+            {
+            UpdatePluginListL();
+            }
+            break;
+        case ECalenNotifySettingsClosed:
+            {
+            // Nothing has changed, refresh statuspane only.
+            iAppUi.StatusPane()->DrawNow();
+            }
+            break;
+        case ECalenNotifySettingsChanged:
+            {
+            HandleSettingsChangeNotificationL();
+            }
+            break;       
+        case ECalenNotifyEntryDeleted:
+        case ECalenNotifyInstanceDeleted:    
+			{
+			HandleEntryDeleteNotificationL();
+			}
+			break;
+        case ECalenNotifySystemLocaleChanged:	
+        case ECalenNotifyEntrySaved:
+        case ECalenNotifyMultipleEntriesDeleted:
+        case ECalenNotifyExternalDatabaseChanged:
+        case ECalenNotifyCancelDelete:
+        case ECalenNotifyCalendarFieldChanged:
+        case ECalenNotifyMarkedEntryCompleted:
+        case ECalenNotifyCalendarInfoCreated:
+        case ECalenNotifyCalendarInfoUpdated:
+            {
+            StartActiveStepL();
+            }
+            break;
+        case ECalenNotifyCalendarFileDeleted:
+            {
+            if(iCurrentViewId.iViewUid==KUidCalenEventView)
+                {
+                //If the entry which is being viewed belongs to a calendar 
+                //that is deleted we check for collection ids of entry and 
+                //calendar session if they are same return to previous view
+                TPtrC calFileName = iGlobalData->Context().GetCalendarFileNameL();
+                TPtrC calFileNameForColId = 
+                        iGlobalData->GetCalFileNameForCollectionId(iGlobalData->Context().InstanceId().iColId);
+                if(!calFileNameForColId.CompareF(calFileName))
+                    {
+                    ActivateDefaultViewL(iPreviousToDayView.iViewUid);
+                    }
+                }
+            else
+                {
+                // refresh the current view
+                StartActiveStepL();
+                }
+            }
+            break;         
+        case ECalenNotifyEntryClosed:
+            {
+            HandleEntryClosedNotificationL();
+            }
+            break;
+        case ECalenNotifySystemTimeChanged:
+            {
+            HandleSystemTimeChangeNotificationL();
+            }
+            break;
+        case ECalenNotifyAppForegrounded:
+        	{
+        	// check for system time change whenever fake exit is done
+        	// or application comes to foreground
+            if(!iStartupComplete)
+                {
+                iController.CheckSystemTimeAtStartUpL();
+                }
+        	
+            if( iController.IsFasterAppFlagEnabled() )
+			    {
+			    iAppUi.HideApplicationFromFSW(EFalse);
+			    iController.SetFasterAppFlag( EFalse );
+			    
+			    ReloadAllPluginsL();
+			    }
+            else
+                {
+                iAvoidRepopulation = EFalse;
+                }
+        	}
+        	break;
+        case ECalenNotifyDayViewClosed:
+            {
+            if(iPreviousToDayView.iViewUid!= KNullUid)
+                {
+                // activate the previous view from where day view is launched
+                // From month/week view -> day view
+                RequestActivationL(iPreviousToDayView.iViewUid);
+                }
+            }
+            break;
+        case ECalenNotifyWeekViewClosed:
+            {
+            if(iPreviousToWeekView.iViewUid!= KNullUid)
+                {
+                // activate the previous view from where day view is launched
+                // From month/week view -> day view
+                RequestActivationL(iPreviousToWeekView.iViewUid);
+                }
+            }
+            break;
+        case ECalenNotifyAppBackgrounded:
+            {
+            // set the flag iAvoidRepopulation to prevent repopulation
+            // whenever application is brought to foreground
+            iAvoidRepopulation = ETrue;
+            
+            if( iController.IsFasterAppFlagEnabled() )
+                {
+                TRAP_IGNORE(iController.RemoveDeadCalendarsL());
+                }
+            }
+            break;
+        case ECalenNotifyViewPopulationComplete:
+            {
+            if(iStartupComplete)
+                {
+                iController.CheckSystemTimeAtStartUpL();
+                iStartupComplete = EFalse;
+                }
+            break;
+            }
+        case ECalenNotifyAttachmentViewerClosed:
+        		{
+            if( iCurrentViewId.iViewUid==KUidCalenEventView)
+                {
+                StartActiveStepL();
+                }
+            }            
+        case ECalenNotifyAttachmentRemoved:
+        case ECalenNotifyAttachmentAdded:    
+            {
+            if( iCurrentViewId.iViewUid==KUidCalenEventView && 
+                !iAvoidRepopulation    )
+                {
+                StartActiveStepL();
+                }
+            }
+        case ECalenNotifyDeleteFailed:
+        // Do nothing on deletion failed
+        default:
+            break; 
+        }
+
+    TRACE_EXIT_POINT;
+    }
+    
+// ----------------------------------------------------------------------------
+// CCalenViewManager::UpdatePluginListL
+// Discovers if a plugin has been enabled or disabled 
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::UpdatePluginListL()
+    {
+    TRACE_ENTRY_POINT;
+    
+    const RArray<TUid>& activePlugins = CustomisationManager().ActivePlugins();
+    
+    // Check for any new plugins
+    TInt activeCount = activePlugins.Count();
+    for( TInt index( 0 ); index < activeCount; ++index )
+        {
+        // For every active plugin, check to see if it is in the known list,
+        // if it isn't construct any custom views.
+        TUid pluginUid = activePlugins[index];
+        TInt position = iKnownPlugins.Find( pluginUid );
+        if( position == KErrNotFound )
+            {
+            ConstructCustomViewL( pluginUid );
+            }
+        }
+
+    RArray<TUid> disabledPlugins;
+    CleanupClosePushL( disabledPlugins );
+        
+    // Check for any disabled plugins
+    TInt knownCount = iKnownPlugins.Count();
+    for( TInt index( knownCount - 1 ); index >= 0; --index )
+        {
+        // For every known plugin, check to see if it is in the active list,
+        // if it isn't add to the disable plugin list, and remove from the
+        // known list.
+        TUid pluginUid = iKnownPlugins[index];
+        TInt position = activePlugins.Find( pluginUid );
+        if ( position == KErrNotFound )
+            {
+            disabledPlugins.AppendL( pluginUid );
+            iKnownPlugins.Remove( index );
+            }
+        }
+    
+    TInt disabledPluginCount = disabledPlugins.Count();
+    if( disabledPluginCount != 0 )
+        {
+        RemoveDisabledPluginsViewsL( disabledPlugins );
+        // Re sort the view info array
+        iViewInfoArray.Sort(  CCalenViewInfo::CyclePositionComparison );
+        }
+    else
+        {      
+        // Update the view cycle index as iViewInfoArray would have changed
+        iViewCycleIndex = iViewInfoArray.Find( iCurrentViewId.iViewUid, CCalenViewInfo::ViewInfoIdentifier );       
+        }
+    UpdateToolbarNextViewIconL(iCurrentViewId.iViewUid);
+    
+    CleanupStack::PopAndDestroy(); // disabledPlugins
+    TRACE_EXIT_POINT;
+    } 
+    
+// ----------------------------------------------------------------------------
+// CCalenViewManager::RemoveDisabledPluginsViewsL
+// Removes any custom views provided by disabled plugins
+// from the view server.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenViewManager::RemoveDisabledPluginsViewsL( RArray<TUid>& aDisabledPlugins )
+    {
+    TRACE_ENTRY_POINT;
+
+    // Find what views are provided by the disabled plugins
+    TInt disabledPluginCount = aDisabledPlugins.Count();
+    RArray<TUid> removedViews;
+    CleanupClosePushL( removedViews );
+    
+    TUid activeViewUid = CurrentView();
+    
+    for( TInt index( disabledPluginCount - 1 ); index >= 0; --index )
+        {
+        TUid pluginUid = aDisabledPlugins[index];
+        
+        // Does this plugin offer any views
+        TInt position = iViewInfoArray.Find( pluginUid, 
+                                             CCalenViewInfo::ViewPluginIdentifier );
+        TBool alreadySet = EFalse;
+        while( position != KErrNotFound )
+            {
+            CCalenViewInfo* view = iViewInfoArray[position];
+            TUid viewUid = view->ViewUid();
+            
+            // Remove from the view cycle list
+            iViewInfoArray.Remove( position );
+            
+            RArray<TInt> hiddenViews;
+            iCustomisationManager->GetHiddenViewIdL(pluginUid, hiddenViews);
+            
+            if( viewUid == activeViewUid )
+                {
+                // Removing the active view is done in three parts
+                // 1) It is removed from the viewInfo list
+                // 2) When settings is closed, the view is switched
+                // to the next view in the view cycle list.
+                // 3) When the view is deactivated it can be deleted.
+                
+                // Store the information about the current view.
+                iRemovedActiveView = view;
+                
+                // Update the view cycle index so that hidden view is launched while cycling next view
+                if(hiddenViews.Count())
+                    {
+                    // Find the index of teh hidden view
+                    TInt viewInfoIndex = iViewInfoArray.Find(TUid::Uid(hiddenViews[0]), CCalenViewInfo::ViewInfoIdentifier);
+                    iViewCycleIndex = viewInfoIndex - 1;  // Decrementing it as CycleNextView() funciton will increment it   
+                    }
+                else if(!alreadySet)
+                    {
+                    TInt nextViewCycleIndex = iViewCycleIndex - 1; // To update the view cycle index in plugin disable case
+            
+                    // Update the view cycle index as iViewInfoArray would have changed
+                    iViewCycleIndex = iViewInfoArray.Find( iCurrentViewId.iViewUid, CCalenViewInfo::ViewInfoIdentifier ); 
+                    
+                    // If the current active view has been removed,
+                    if(iViewCycleIndex == -1)
+                        {
+                            iViewCycleIndex = nextViewCycleIndex;
+                        } 
+                    alreadySet = ETrue;
+                    }
+                
+                hiddenViews.Reset();
+                // Remove the plugin from the disabled plugin list
+                // to stop the plugin being deleted.
+                aDisabledPlugins.Remove( index );
+                }
+            else
+                {
+                // The view isn't the current view, so we
+                // can remove it directly from the view server
+                iAppUi.RemoveView( viewUid );
+
+                // Delete the view info
+                delete view;
+                if(!alreadySet)
+                    {
+	                TInt nextViewCycleIndex = iViewCycleIndex - 1; // To update the view cycle index in plugin disable case
+                        
+	                // Update the view cycle index as iViewInfoArray would have changed
+	                iViewCycleIndex = iViewInfoArray.Find( iCurrentViewId.iViewUid, CCalenViewInfo::ViewInfoIdentifier ); 
+                
+	                // If the current active view has been removed,
+	                if(iViewCycleIndex == -1)
+	                    {
+	                        iViewCycleIndex = nextViewCycleIndex;
+	                    }
+	                alreadySet = ETrue;
+                    }
+               
+                }
+                
+            position = iViewInfoArray.Find( pluginUid, 
+                                        CCalenViewInfo::ViewPluginIdentifier );
+            }
+        }
+        
+    // Unload the disabled plugins
+    iCustomisationManager->UnloadPluginsL( aDisabledPlugins );
+        
+    CleanupStack::PopAndDestroy(); // removedViews
+    
+    TRACE_EXIT_POINT;
+    }
+    
+// ----------------------------------------------------------------------------
+// CCalenViewManager::ToolbarOrNull
+// Provides access to the calendar toolbar if one is available
+// ----------------------------------------------------------------------------
+MCalenToolbar* CCalenViewManager::ToolbarOrNull()
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    if (iToolbar)
+        {
+        if (iToolbar->IsICalenToolBar())
+            {
+            return iToolbar;
+            }
+        }
+    return NULL;
+    }        
+    
+// ----------------------------------------------------------------------------
+// CCalenViewManager::ViewsActivated
+// Returns if the first view activation on start-up has taken place
+// ----------------------------------------------------------------------------
+TBool CCalenViewManager::ViewsActivated() const
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    return iViewsActivated;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::UpdateToolbarNextViewIconL
+// Updates the nextview icon on the toolbar when default view is not month view
+// ----------------------------------------------------------------------------
+void CCalenViewManager::UpdateToolbarNextViewIconL(TUid aViewUid)
+	{
+	// Set the view cycle index based on the newly activated view,
+    // if the view is in the cycle array.
+    TInt index = iViewInfoArray.Find( aViewUid, CCalenViewInfo::ViewInfoIdentifier );
+    if( index != KErrNotFound )
+        {
+        iViewCycleIndex = index;
+        if( iToolbar )
+            {
+            TInt nextVwIndex = iViewCycleIndex;
+            do{
+               nextVwIndex = ( nextVwIndex + 1 )%(iViewInfoArray.Count());
+              }
+            while( iViewInfoArray[nextVwIndex]->CyclePosition() == CCalenView::ENoCyclePosition );
+            
+            CCalenView* nextview = static_cast<CCalenView*>( 
+                                        iAppUi.View( iViewInfoArray[nextVwIndex]->ViewUid() ) );
+            iToolbar->SetNextViewIcon( nextview->ViewIconL() );
+            }
+        }
+	}
+
+// ----------------------------------------------------------------------------
+// CCalenViewManager::HandleFasterAppExitCommandL
+// Handles ECalenFasterAppExit command
+// ----------------------------------------------------------------------------
+void CCalenViewManager::HandleFasterAppExitCommandL()
+    {
+    TRACE_ENTRY_POINT;
+    
+    if(iToolbar)
+        {
+        iToolbar->SetToolbarExtensionFocus(EFalse);
+        }
+    
+    // For Handling : When the default view is changed keeping that view open, 
+    // from day view changing the default view from month view to day view, 
+    // we need to reset the previous view id.
+    if(iPreviousToDayView.iViewUid!=KNullUid)
+        {
+        iPreviousToDayView.iViewUid = KNullUid;
+        }
+    
+    // For handling specific case::Calendar exited from FSW 
+    // iAvoidRepopulation is set when app backgrounded.
+    // Reset the flag for activating the view in background
+    if(iAvoidRepopulation)
+        {
+        iAvoidRepopulation = EFalse;
+        }
+    
+    // In case of fasterapp exit, first activate the dummy view before deleting the plugin views
+    // Get the default view before we remove plugins
+    iPreviousViewId.iViewUid = KNullUid;
+    
+    iController.SetExitOnDialogFlag( EFalse ); // for making iisexitondialogclose EFalse.
+
+    TUid defView = iSetting->DefaultView();
+   
+    // unload all plugins
+    iCustomisationManager->DisableAllPluginsL();
+    ActivateViewOnFakeExitL(defView);
+    // Though the current view is active view, there is no need to issue a callback as we are exiting the whole application.
+    if( iRemovedActiveView )
+        {
+        
+        if( !iViewRemovalCallback )
+            {
+            TCallBack callback( RemoveDeActivatedView, this );
+            iViewRemovalCallback = new( ELeave ) CAsyncCallBack( callback,
+                                                    CActive::EPriorityStandard );
+            }
+        iViewRemovalCallback->CallBack();
+        }
+
+    TRACE_EXIT_POINT;
+    }
+// ----------------------------------------------------------------------------
+// CCalenViewManager::HandleSettingsChangeNotificationL
+// Handles ECalenNotifySettingsChanged notification
+// ----------------------------------------------------------------------------
+void CCalenViewManager::HandleSettingsChangeNotificationL()
+    {
+    TRACE_ENTRY_POINT;
+    
+    if( iController.IsFasterAppFlagEnabled() )
+        {
+        TUid newViewUid = iSetting->DefaultView();
+        if(IsNativeView(newViewUid))
+            {
+            TUid oldViewUid = CurrentView();
+            if( newViewUid.iUid != oldViewUid.iUid )
+                {
+                RequestActivationL( newViewUid );
+                }
+            }
+        
+        // If the plugins are activated using general settings.
+        // unload all plugins.Only load the plugins when application
+        // comes to foreground
+        const RArray<TUid>& plugins = CustomisationManager().ActivePlugins();
+        if(plugins.Count())
+            {
+            // unload all plugins
+            iCustomisationManager->DisableAllPluginsL();
+            }
+        }
+
+    if( iRemovedActiveView )
+        {
+        // If the active view has been disabled, the next view in 
+        // the view cycle list is activated and the current view
+        // is removed asyncronously.
+        CycleNextViewL();
+
+        if( !iViewRemovalCallback )
+            {
+            TCallBack callback( RemoveDeActivatedView, this );
+            iViewRemovalCallback = new( ELeave ) CAsyncCallBack( callback,
+                                                    CActive::EPriorityStandard );
+            }
+    
+        iViewRemovalCallback->CallBack();
+        }
+    else if(iCustomisationManager->HiddenView(iCurrentViewId.iViewUid))
+         {
+         // Get the uid of the plugin view that is hiding the current view
+         TUid viewUid = iCustomisationManager->GetReplacePluginViewIdL(iCurrentViewId.iViewUid);
+             
+         // update the view cycle index before activating the plugin view
+         iViewCycleIndex = iViewInfoArray.Find( viewUid, 
+                                    CCalenViewInfo::ViewInfoIdentifier );
+         RequestActivationL(viewUid);
+         }
    else
-       return false;
-}
+        {
+        StartActiveStepL();
+        }
+    
+    TRACE_EXIT_POINT;
+    }
 
 // ----------------------------------------------------------------------------
-// CalenViewManager::saveAndCloseEditor
-// save the entry and close the editor
-// isEventViewerActive() should be called before this function
+// CCalenViewManager::HandleEntryDeleteNotificationL
+// Handles ECalenNotifyEntryDeleted and ECalenNotifyInstanceDeleted
+// notifications
 // ----------------------------------------------------------------------------
-//
-void CalenViewManager::saveAndCloseEditor()
-{
-   mCalenEventViewer->saveAndCloseEditor();
-}
+void CCalenViewManager::HandleEntryDeleteNotificationL()
+    {
+    TRACE_ENTRY_POINT;
+    
+    if(iCurrentViewId.iViewUid == KUidCalenEventView)   
+        {
+        // Activate the previous view when an event is deleted from
+        // the event view 
+        if(iPreviousViewId.iViewUid != KNullUid)
+            {
+            if(iPreviousToDayView.iViewUid != KNullUid)
+                {
+                RequestActivationL(iPreviousViewId.iViewUid, KUidCalenShowBackCba);
+                }
+            else
+                {
+                RequestActivationL(iPreviousViewId.iViewUid);
+                }
+            }
+        }
+    else
+        {
+        // refresh the current view
+        StartActiveStepL();             
+        }
+    
+    TRACE_EXIT_POINT;
+    }
 
 // ----------------------------------------------------------------------------
-// CalenViewManager::closeAgendaEventView
-// close the agenda event view 
-// isEventViewerActive() should be called before this function
+// CCalenViewManager::HandleEntryClosedNotificationL
+// Handles ECalenNotifyEntryClosed notification
 // ----------------------------------------------------------------------------
-//
-void CalenViewManager::closeAgendaEventView()
-{
-   mCalenEventViewer->closeAgendaEventView();
-}
+void CCalenViewManager::HandleEntryClosedNotificationL()
+    {
+    TRACE_ENTRY_POINT;
+	
+	// reset tha flag iAvoidRepopulation to refresh the view.
+	iAvoidRepopulation = EFalse;
+    
+    // if previous view is native view activate that view
+    // otherwise commandlauncher will handle  
+    if(iPreviousViewId.iViewUid != KNullUid)
+        {
+        // if iPreviousToDayView is active activate the day view with "Back" cba.
+        if(iPreviousToDayView.iViewUid!=KNullUid)
+            {
+            RequestActivationL(iPreviousViewId.iViewUid, KUidCalenShowBackCba);
+            }
+        else
+            {
+            if( !iController.GetExitOnDialogFlag() )
+                {
+                RequestActivationL(iPreviousViewId.iViewUid);
+                }
+            }
+        }
 
+	// reset tha flag iAvoidRepopulation to avoid the repopulation.
+	iAvoidRepopulation = ETrue;
+    
+    TRACE_EXIT_POINT;
+    }
 
-// End of file	--Don't remove this.
+// ----------------------------------------------------------------------------
+// CCalenViewManager::HandleSystemTimeChangeNotificationL
+// Handles ECalenNotifySystemTimeChanged notification
+// ----------------------------------------------------------------------------
+void CCalenViewManager::HandleSystemTimeChangeNotificationL()
+    {
+    TRACE_ENTRY_POINT;
+    
+        //Set the context whenever system time is changed
+        TUid newViewUid = iSetting->DefaultView();
+        MCalenContext& context = iController.Services().Context();
+        TCalTime focusTime = context.DefaultCalTimeForViewsL();
+        context.SetFocusDateAndTimeL( focusTime,
+                                      TVwsViewId( KUidCalendar, newViewUid ));
+    if( iController.IsFasterAppFlagEnabled() )
+        {
+        // reset tha flag iAvoidRepopulation to refresh the view whenever
+        // system time is changed
+        iAvoidRepopulation = EFalse;
+        
+        if(IsNativeView(newViewUid))
+            {
+            // activate the default view in background
+            RequestActivationL( newViewUid );
+            }
+        
+        // set the flag iAvoidRepopulation to avoid repopulation
+        iAvoidRepopulation = ETrue;
+        }
+    else
+        {
+        // refresh the current view
+        StartActiveStepL();
+        }
+    
+    TRACE_EXIT_POINT;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenViewManager::IconsL
+// Create a CCalenIcons object if neccessary and return a reference
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+CCalenIcons& CCalenViewManager::IconsL()
+    {
+    TRACE_ENTRY_POINT;
+
+    if (!iIcons)
+        {
+        // Icons
+        iIcons = CCalenIcons::NewL();
+        }
+
+    TRACE_EXIT_POINT;
+    return *iIcons;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenViewManager::GetNextViewIconL
+// Gets next view icon 
+// -----------------------------------------------------------------------------
+CGulIcon* CCalenViewManager::GetNextViewIconL()
+    {
+    TRACE_ENTRY_POINT;
+    
+    // Set the view cycle index based on the newly activated view,
+    // if the view is in the cycle array.
+    TInt index = iViewInfoArray.Find( iCurrentViewId.iViewUid, CCalenViewInfo::ViewInfoIdentifier );
+    if( index != KErrNotFound )
+        {
+        iViewCycleIndex = index;
+        TInt nextVwIndex = iViewCycleIndex;
+        do
+            {
+            nextVwIndex = ( nextVwIndex + 1 )%(iViewInfoArray.Count());
+            }while( iViewInfoArray[nextVwIndex]->CyclePosition() == CCalenView::ENoCyclePosition );
+        
+        // Get the next view icon
+        CCalenView* nextview = static_cast<CCalenView*>( iAppUi.View( iViewInfoArray[nextVwIndex]->ViewUid() ) );
+        return( nextview->ViewIconL() );
+        }
+             
+    TRACE_EXIT_POINT;
+    return NULL;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenViewManager::SetRepopulation
+// Resets the flag iAvoidRepopulation to activate the view.
+// -----------------------------------------------------------------------------
+void CCalenViewManager::SetRepopulation(TBool aRePopulate)
+    {
+    TRACE_ENTRY_POINT;
+    // to prevent the display of blank view, 
+    // set the iAvoidRepopulation to EFalse, 
+    // so that view is populated properly
+    
+    iAvoidRepopulation = aRePopulate;
+    
+    TRACE_EXIT_POINT;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenViewManager::CalenToolbar
+// Returns calendar toolbar
+// -----------------------------------------------------------------------------
+CCalenToolbarImpl* CCalenViewManager::CalenToolbar()
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    return iToolbar;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenViewManager::ReloadAllPluginsL
+// Reload all plugins
+// -----------------------------------------------------------------------------
+void CCalenViewManager::ReloadAllPluginsL()
+    {
+    TRACE_ENTRY_POINT;
+    
+    // load all plugins
+    iCustomisationManager->DoPluginLoadingL();
+    UpdatePluginListL();
+    
+    // only activate plugin view if it is default view
+    TUid defaultViewUid = iSetting->DefaultView();
+    if(!IsNativeView(defaultViewUid))
+        {
+        iAvoidRepopulation = EFalse;
+                
+        // Find the default view in the view cycle list
+        TInt position = iViewInfoArray.Find(
+                defaultViewUid, CCalenViewInfo::ViewInfoIdentifier );
+        if( position != KErrNotFound )
+            {
+            TVwsViewId targetViewId( KUidCalendar, defaultViewUid);
+            RequestActivationL(targetViewId);
+            iViewCycleIndex = position;
+            }
+        else
+            {
+            // if plugin providing default view is already uninstalled
+            // activate month view as default view
+            CRepository* repository = CRepository::NewL( KCRUidCalendar );
+            CleanupStack::PushL(repository);
+            TInt tmp( static_cast<TInt>( KUidCalenMonthView.iUid ) );
+            TInt position = iViewInfoArray.Find( KUidCalenMonthView, CCalenViewInfo::ViewInfoIdentifier );
+            User::LeaveIfError( repository->Set( KCalendarDefaultStartView, tmp ) );
+            iAppUi.SetDefaultViewL( *iAppUi.View( KUidCalenMonthView ) );
+            TVwsViewId targetViewId( KUidCalendar, KUidCalenMonthView);
+            RequestActivationL(targetViewId);
+            iViewCycleIndex = position;
+            CleanupStack::PopAndDestroy(repository);  
+            }
+        }
+    
+    TRACE_EXIT_POINT;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenViewManager::GetPreviousViewUid
+// Rest of the details are commented in header.
+// -----------------------------------------------------------------------------
+TUid CCalenViewManager::GetPreviousViewUid()
+    {
+    return iPreviousViewId.iViewUid;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenViewManager::IsNativeView
+// Check for native view
+// -----------------------------------------------------------------------------
+TBool CCalenViewManager::IsNativeView(TUid aViewUid)
+    {
+    TRACE_ENTRY_POINT;
+
+    if( (aViewUid == KUidCalenMonthView)||
+        (aViewUid == KUidCalenWeekView) ||
+        (aViewUid == KUidCalenDayView) ||
+        (aViewUid == KUidCalenTodoView) )
+        {
+        TRACE_EXIT_POINT;
+        return ETrue;
+        }
+    TRACE_EXIT_POINT;
+    return EFalse;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenViewManager::ActivateViewOnFakeExitL
+// Check for native view
+// -----------------------------------------------------------------------------
+void CCalenViewManager::ActivateViewOnFakeExitL(TUid aDefView)
+    {
+    TRACE_ENTRY_POINT;
+    
+    if(IsNativeView(aDefView))
+        {
+        // activate the view in background
+        RequestActivationL( aDefView, KCalenHideInBackGround, KNullDesC8() );
+        }
+    else
+        {
+        RequestActivationL( KUidCalenDummyView, KCalenHideInBackGround, KNullDesC8() );
+        }
+    
+    // set the flag to avoid repopulation when application is
+    // opened after faster exit
+    iAvoidRepopulation = ETrue;
+    
+    // set the context 
+    MCalenContext& context = iController.Services().Context();
+    TCalTime focusTime = context.DefaultCalTimeForViewsL();
+    context.SetFocusDateAndTimeL( focusTime,
+                                  TVwsViewId( KUidCalendar, aDefView) );
+    
+    TRACE_EXIT_POINT;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenViewManager::ActivateLocalViewL
+// Activate the local view if application already in back ground
+// -----------------------------------------------------------------------------
+void CCalenViewManager::ActivateLocalViewL(TUid aDefView)
+    {
+    iAppUi.ActivateLocalViewL( aDefView );      
+    }
+// End of file

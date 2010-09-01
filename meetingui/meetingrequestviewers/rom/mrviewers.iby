@@ -1,0 +1,30 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: IBY file definition for meeting request viewers component
+*
+*/
+
+#ifndef __MRVIEWERS_IBY__
+#define __MRVIEWERS_IBY__
+
+
+#ifdef __MEETING_REQUEST_SUPPORT
+
+// Meeting Request Viewers
+ECOM_PLUGIN(meetingrequestviewers.dll,101f8866.rsc)
+data=DATAZ_\BITMAP_DIR\MeetingRequestViewers.mif	BITMAP_DIR\MeetingRequestViewers.mif 
+
+#endif // __MEETING_REQUEST_SUPPORT
+
+#endif // __MRVIEWERS_IBY__

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,233 +15,332 @@
 *
 */
 
-// System includes
-#include <QString>
-#include <QtGui>
-#include <hbdatetimepicker.h>
-#include <hbdialog.h>
-#include <hbmessagebox.h>
-#include <hbaction.h>
-#include <hblabel.h>
-#include <hbradiobuttonlist.h>
-#include <centralrepository.h>
-#include <agendaentry.h>
 
-// User includes
-#include "calendarui_debug.h"
+// INCLUDES
+#include <Calendar.rsg>
+#include <calendateutils.h>
+#include <calenagendautils.h>
+#include <aknnotewrappers.h>
+#include <AknWaitDialog.h>
+#include <calcommon.h>
+#include <calentryview.h>
+#include <calinstance.h>
+#include <calinstanceview.h>
+#include <caltime.h>
+#include <centralrepository.h>
+#include <eikenv.h>
+#include <StringLoader.h>
+#include <sysutil.h>
+#include <calenglobaldata.h>
+#include <calrrule.h>
+#include <calsession.h>
+#include <calencommands.hrh>            // Calendar commands
+#include <calencontext.h>
+#include <caleninstanceid.h>            // TCalenInstanceId
+#include <calenactionuiutils.h>
+#include <calcalendarinfo.h>
+#include <calentoolbar.h>
+#include <akntoolbar.h>
+#include <calenattachmentmodel.h>
+
+#include "calendarui_debug.h"           // Debug
 #include "calendeleteui.h"
-#include "calencontext.h"
 #include "calencontroller.h"
 #include "CleanupResetAndDestroy.h"
-#include "caleninstanceid.h"
-#include "calenactionuiutils.h"
-#include "calendateutils.h"
-#include "calenagendautils.h"
-#include "OstTraceDefinitions.h"
-#ifdef OST_TRACE_COMPILER_IN_USE
-#include "calendeleteuiTraces.h"
-#endif
-
+#include "CalenInterimUtils2.h"
+#include "CalendarPrivateCRKeys.h"      // For CalendarInternalCRKeys.h
+#include "calenmultipledbmanager.h"
 
 // Local constants
 const TInt KEntriesToDelete = 1;
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::NewL
+// CCalenDeleteUi::NewL
 // Two phased constructor
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CalenDeleteUi* CalenDeleteUi::NewL( CCalenController& aController )
+CCalenDeleteUi* CCalenDeleteUi::NewL( CCalenController& aController )
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_NEWL_ENTRY );
-    
-    CalenDeleteUi* self = new( ELeave ) CalenDeleteUi( aController, NULL );
+    TRACE_ENTRY_POINT;
+
+    CCalenDeleteUi* self = new( ELeave ) CCalenDeleteUi( aController );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
 
-    OstTraceFunctionExit0( CALENDELETEUI_NEWL_EXIT );
+    TRACE_EXIT_POINT;
     return self;
     }
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::CalenDeleteUi
+// CCalenDeleteUi::CCalenDeleteUi
 // ?implementation_description
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CalenDeleteUi::CalenDeleteUi( CCalenController& aController, QObject *parent )
-    :QObject(parent), iController( aController )
+CCalenDeleteUi::CCalenDeleteUi( CCalenController& aController )
+    : iEikEnv( CEikonEnv::Static() ), iController( aController )
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_CALENDELETEUI_ENTRY );
-    
-    iIsDeleting = false;
-    
-    OstTraceFunctionExit0( CALENDELETEUI_CALENDELETEUI_EXIT );
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::~CalenDeleteUi
+// CCalenDeleteUi::~CCalenDeleteUi
 // Destructor
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-CalenDeleteUi::~CalenDeleteUi()
+CCalenDeleteUi::~CCalenDeleteUi()
     {
-    OstTraceFunctionEntry0( DUP1_CALENDELETEUI_CALENDELETEUI_ENTRY );
+    TRACE_ENTRY_POINT;
+
+    if( iWaitDialog )
+        {
+        delete iWaitDialog;
+        iWaitDialog = NULL;
+        }
+
+    if( iGlobalData )
+        {
+        iGlobalData->Release();
+        }
+
+    if( iDelAllRange )
+        delete iDelAllRange;
+
+    iDeleteColIds.Reset();
     
-    OstTraceFunctionExit0( DUP1_CALENDELETEUI_CALENDELETEUI_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::ConstructL
+// CCalenDeleteUi::ConstructL
 // Second phase of construction
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenDeleteUi::ConstructL()
+void CCalenDeleteUi::ConstructL()
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_CONSTRUCTL_ENTRY );
+    TRACE_ENTRY_POINT;
+
+    iGlobalData = CCalenGlobalData::InstanceL();
+
+    // Both the entry view and instance views are needed
+    // by the deleteUi commands, there queue the construction of both
+    RArray<TInt> colArray;
+    iController.GetActiveCollectionidsL(colArray);
     
+    CCalInstanceView* instanceView = iGlobalData->InstanceViewL(colArray);
+    colArray.Reset();
+    if( !instanceView )
+        {
+        iController.RegisterForNotificationsL( this, ECalenNotifyEntryInstanceViewCreated );
+        }
     iController.RegisterForNotificationsL( this, ECalenNotifyCancelDelete );
     iMoreEntriesToDelete = EFalse;
     iDisplayQuery = EFalse;
     iEntriesToDelete = KEntriesToDelete;
-    
-    OstTraceFunctionExit0( CALENDELETEUI_CONSTRUCTL_EXIT );
+    iDelAllRange = NULL;
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::HandleNotification
+// CCalenDeleteUi::HandleECalenNotifyViewCreatedL
+// Handles ECalenNotifyViewCreated.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenDeleteUi::HandleECalenNotifyViewCreatedL()
+    {
+    TRACE_ENTRY_POINT;
+    RArray<TInt> colArray;
+    iController.GetActiveCollectionidsL(colArray);
+    
+    if( iGlobalData->InstanceViewL(colArray) )
+        {
+        // Handle the outstanding command
+        HandleCommandL( iStoredCommand );
+
+        // Cancel the notify as the entry view is now
+        // constructed.
+        iController.CancelNotifications( this );
+        }
+    colArray.Reset();
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenDeleteUi::HandleNotification
 // Handles notifications.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenDeleteUi::HandleNotification(const TCalenNotification aNotification )
+void CCalenDeleteUi::HandleNotification(const TCalenNotification aNotification )
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_HANDLENOTIFICATION_ENTRY );
+    TRACE_ENTRY_POINT;
 
+    if ( aNotification == ECalenNotifyEntryInstanceViewCreated )
+        {
+        PIM_TRAPD_HANDLE( HandleECalenNotifyViewCreatedL() );
+        }
     if( aNotification == ECalenNotifyCancelDelete)
         {
         if(iMutlipleContextIdsCount)
             {
             // get the context
-            MCalenContext& context = iController.context();
+            MCalenContext& context = iGlobalData->Context();
             // reset the multiple contexts
-            context.resetMultipleContextIds();          
-           
+            context.ResetMultipleContextIds();
+            
+            // dismiss the waitdialog
+            if(iWaitDialog)
+                {
+                TRAP_IGNORE(iWaitDialog->ProcessFinishedL());
+                }
             }
         }
-    
-    OstTraceFunctionExit0( CALENDELETEUI_HANDLENOTIFICATION_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::HandleCommandL
+// CCalenDeleteUi::HandleCommandL
 // Handles action ui commands
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-TBool CalenDeleteUi::HandleCommandL( const TCalenCommand& aCommand )
+TBool CCalenDeleteUi::HandleCommandL( const TCalenCommand& aCommand )
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_HANDLECOMMANDL_ENTRY );
-    
+    TRACE_ENTRY_POINT;
     TBool continueCommand(EFalse);
     
-    switch( aCommand.Command() )
+    RArray<TInt> colArray;
+    iController.GetActiveCollectionidsL(colArray);
+    
+    if( colArray.Count() && !( iGlobalData->InstanceViewL(colArray) ) )
         {
-        case ECalenDeleteCurrentEntry:
-        	mDeleteCommand = ECalenDeleteCurrentEntry;
-        	DeleteCurrentEntryL(); // Entry & instance
-            break;
-
-        case ECalenDeleteSeries:
-        	mDeleteCommand = ECalenDeleteSeries;
-        	DeleteThisOrAllL( AgendaUtil::ThisAndAll );
-            break;
-            
-        case ECalenDeleteCurrentOccurrence:
-        	mDeleteCommand = ECalenDeleteCurrentOccurrence;
-        	DeleteThisOrAllL( AgendaUtil::ThisOnly );
-            break;
-            
-        case ECalenDeleteEntryWithoutQuery:
-        	//TODO:
-        	// This case is not handled currently as no such commands
-        	// has been issued. So this has to be handled once we start 
-        	// issuing the command. 
-        	/*continueCommand = DeleteEntryWithoutQueryL();*/
-            break;
-
-        case ECalenDeleteAllEntries:
-        	mDeleteCommand = ECalenDeleteAllEntries;
-        	DeleteAllEntriesL(); // EntryView & instance
-            break;
-
-        case ECalenDeleteEntriesBeforeDate:
-            DeleteEntriesBeforeDateL(); // EntryView & instance
-            break;
-
-        default:
-            // Controller decided this class was the place to handle this
-            // command but it wasn't in our list; something has gone wrong.
-            //ASSERT( EFalse );
-            break;
+        iStoredCommand = aCommand;
         }
-        
-    OstTraceFunctionExit0( CALENDELETEUI_HANDLECOMMANDL_EXIT );
+    else
+        {
+        switch( aCommand.Command() )
+            {
+            case ECalenDeleteCurrentEntry:
+                DeleteCurrentEntryL(); // Entry & instance
+                break;
+
+            case ECalenDeleteSeries:
+                DeleteThisOrAllL( CalCommon::EThisAndAll );
+                break;
+                
+            case ECalenDeleteCurrentOccurrence:
+                DeleteThisOrAllL( CalCommon::EThisOnly );
+                break;
+                
+            case ECalenDeleteEntryWithoutQuery:
+                continueCommand = DeleteEntryWithoutQueryL();
+                break;
+
+            case ECalenDeleteAllEntries:
+                HandleDeleteAllEntriesL();
+                break;
+
+            case ECalenDeleteEntriesBeforeDate:
+                DeleteEntriesBeforeDateL(); // EntryView & instance
+                break;
+
+            default:
+                // Controller decided this class was the place to handle this
+                // command but it wasn't in our list; something has gone wrong.
+                //ASSERT( EFalse );
+                break;
+            }
+        }
+    colArray.Reset();
+    TRACE_EXIT_POINT;
     return continueCommand;
     }
 
+// ----------------------------------------------------------------------------
+// CCalenDeleteUi::CalenCommandHandlerExtensionL
+// Dummy implementation.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+TAny* CCalenDeleteUi::CalenCommandHandlerExtensionL( TUid /*aExtensionUid*/ )
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    return NULL;
+    }
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::DeleteThisOrAllL
+// CCalenDeleteUi::DeleteThisOrAllL
 // Deletes series repeating entry
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenDeleteUi::DeleteThisOrAllL( AgendaUtil::RecurrenceRange aRepeatType )
-{
-    OstTraceFunctionEntry0( CALENDELETEUI_DELETETHISORALLL_ENTRY );
-
-	if( iController.context().instanceId().mEntryLocalUid )
-	{
-		AgendaEntry instance = CalenActionUiUtils::findPossibleInstanceL(
-									iController.context().instanceId(),
-									iController.Services().agendaInterface() );
-		if( !instance.isNull() )
-		{
-			DeleteSingleInstanceL( instance, aRepeatType );
-		}
-	}
-	
-	OstTraceFunctionExit0( CALENDELETEUI_DELETETHISORALLL_EXIT );
-}
+void CCalenDeleteUi::DeleteThisOrAllL( CalCommon::TRecurrenceRange aRepeatType )
+    {
+    TRACE_ENTRY_POINT;
+    
+    TBool isDeleted( EFalse );
+    
+    RArray<TInt> colIdArray;
+    colIdArray.AppendL(iGlobalData->Context().InstanceId().iColId);
+    
+    if( iGlobalData->Context().InstanceId().iEntryLocalUid )
+        {
+        CCalInstance* instance = 
+            CalenActionUiUtils::FindPossibleInstanceL( 
+                                           iGlobalData->Context().InstanceId(),
+                                           *iGlobalData->InstanceViewL(colIdArray) );
+            if( instance )
+            {
+            CleanupStack::PushL( instance );
+            isDeleted = DeleteSingleInstanceL( instance, aRepeatType );
+            
+            if( isDeleted )
+                {
+                CleanupStack::Pop( instance );
+                }
+            else
+                {
+                CleanupStack::PopAndDestroy( instance );
+                }
+            }
+        }
+    colIdArray.Reset();
+    
+    iController.BroadcastNotification( isDeleted? ECalenNotifyEntryDeleted :
+                                                               ECalenNotifyDeleteFailed );
+    
+    TRACE_EXIT_POINT;
+    }
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::DeleteEntryWithoutQueryL()
+// CCalenDeleteUi::DeleteEntryWithoutQueryL()
 // Deletes the current entry
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-TBool CalenDeleteUi::DeleteEntryWithoutQueryL()
+TBool CCalenDeleteUi::DeleteEntryWithoutQueryL()
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_DELETEENTRYWITHOUTQUERYL_ENTRY );
-    
-	bool continueCommand(EFalse);
+    TRACE_ENTRY_POINT;
+	TBool continueCommand(EFalse);
     
 	// get the context
-	MCalenContext& context = iController.context();
+	MCalenContext& context = iGlobalData->Context();
 	
 	// get the multliple context ids count
-	iMutlipleContextIdsCount = context.mutlipleContextIdsCount();
+	iMutlipleContextIdsCount = context.MutlipleContextIdsCount();
 	
 	ASSERT( iMutlipleContextIdsCount );
 
 	    if(!iMoreEntriesToDelete)
 		    {
-		    //iDisplayQuery = ShowMultipleEntriesDeleteQueryL(iMutlipleContextIdsCount);
+		    iDisplayQuery = ShowMultipleEntriesDeleteQueryL(iMutlipleContextIdsCount);
 		    }
 		
 		if(iDisplayQuery)
@@ -251,7 +350,7 @@ TBool CalenDeleteUi::DeleteEntryWithoutQueryL()
 			    DisplayWaitDialogL();
 			    }
 			// get the multiple context instance ids
-			QList<TCalenInstanceId>& multipleContextIds = context.getMutlipleContextIds();
+			RArray<TCalenInstanceId>& multipleContextIds = context.GetMutlipleContextIds();
 			
 			if(iMutlipleContextIdsCount <= iEntriesToDelete )
 			    {
@@ -269,13 +368,13 @@ TBool CalenDeleteUi::DeleteEntryWithoutQueryL()
 			while(index<iEntriesToDelete)
 			    {
 			    // get the local uid of the entry through multiple context list
-			    ulong entryLocalUid = multipleContextIds[0].mEntryLocalUid;
+			    TCalLocalUid entryLocalUid = multipleContextIds[0].iEntryLocalUid;			    
 			    if(entryLocalUid)
 			        {
-			        DeleteEntryL(entryLocalUid);
+			        DeleteEntryL(entryLocalUid, multipleContextIds[0].iColId);
 			        }
 			    // remove mutliple context based on the instanceid
-			    context.removeMultipleContextId(multipleContextIds[0]);
+			    context.RemoveMultipleContextId(multipleContextIds[0]);
 			    index++;
 			   }
 
@@ -283,596 +382,458 @@ TBool CalenDeleteUi::DeleteEntryWithoutQueryL()
 			    {
 			    MarkedEntriesDeletedL();    
 			    }
+			MCalenToolbar* toolbarImpl = iController.Services().ToolbarOrNull(); 
+            if (toolbarImpl)
+                {
+                CAknToolbar& toolbar = toolbarImpl->Toolbar();
+    
+                // dim clear and clear all toolbar buttons
+                toolbar.SetItemDimmed(ECalenNewMeeting, EFalse, ETrue);
+                }
 			}
         else
             {
-            context.resetMultipleContextIds();
+            context.ResetMultipleContextIds();
             // notify delete failed
             iController.BroadcastNotification(ECalenNotifyDeleteFailed);    
             }
 	
-    OstTraceFunctionExit0( CALENDELETEUI_DELETEENTRYWITHOUTQUERYL_EXIT );
+    TRACE_EXIT_POINT;
     return continueCommand;
     }
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::DeleteCurrentEntryL
+// CCalenDeleteUi::DeleteCurrentEntryL
 // Deletes the current entry
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenDeleteUi::DeleteCurrentEntryL()
-{
-    OstTraceFunctionEntry0( CALENDELETEUI_DELETECURRENTENTRYL_ENTRY );
+void CCalenDeleteUi::DeleteCurrentEntryL()
+    {
+    TRACE_ENTRY_POINT;
+
+    TBool deleted( EFalse );
+    TCalenNotification notification = ECalenNotifyDeleteFailed;
     
-	// Make sure we're focused on an entry.
-	if (iController.context().instanceId().mEntryLocalUid) {
-		// Fetch the entry
-		AgendaEntry entry = iController.Services().agendaInterface()->fetchById(
-				iController.context().instanceId().mEntryLocalUid);
-			// Check if the entry is a To-Do
-			if (AgendaEntry::TypeTodo == entry.type()) {
-				showDeleteQuery(EDeleteToDo);
-			} else {
-				// Show the repeat entry delete query for repeating entries except Anniversary
-				// Even though the anniversary is repeating 
-				// all the instances will be deleted
-				if ((entry.isRepeating() || !entry.recurrenceId().isNull()) 
-							&& (AgendaEntry::TypeAnniversary != entry.type())) {
-					// Show a confirmation note whether the user
-					// wants to delete the single instance or all of them
-					showRepeatingEntryDeleteQuery();
-				} else if (CalenAgendaUtils::isAlldayEvent(entry)) {
-					showDeleteQuery(EDeleteEvent);
-				} else {
-					// If the entry is not a repeating entry,
-					// delete it directly
-					// Save the entry for later reference in the slot
-					showDeleteQuery(EDeleteEntry);
-				}
+    // Make sure we're focused on an entry.
+    if( iGlobalData->Context().InstanceId().iEntryLocalUid )
+        {
+        //If todo, use the LUid.
+        //Todos returns the current time if start or end time has not been saved.
+        if( CCalEntry::ETodo == iGlobalData->Context().InstanceId().iType )
+            {
+            CCalEntry* entry = iGlobalData->EntryViewL(iGlobalData->Context().InstanceId().iColId)->FetchL(
+                                    iGlobalData->Context().InstanceId().iEntryLocalUid );
+
+            if( entry )
+                {
+                CleanupStack::PushL( entry );
+                deleted = DeleteEntryL( iGlobalData->EntryViewL(iGlobalData->Context().InstanceId().iColId), entry );
+
+                if( deleted )
+                    {
+                    CleanupStack::Pop( entry );
+                    notification = ECalenNotifyEntryDeleted;
+                    }
+                else
+                    {
+                    CleanupStack::PopAndDestroy( entry );
+                    }
+                }
+            }
+        else // Not todo
+            {
+            RArray<TInt> colIdArray;
+            colIdArray.AppendL(iGlobalData->Context().InstanceId().iColId);
+                
+            CCalInstance* instance = CalenActionUiUtils::FindPossibleInstanceL( 
+                                                            iGlobalData->Context().InstanceId(),
+                                                            *iGlobalData->InstanceViewL(colIdArray) );
+            // if we have instance we will do delete other wise just return
+            if( instance )
+                {
+                // Note: ownership handling of instance is dirty in this case, 
+                // because DeleteSingleInstanceLtakes ownership, if it's deletes 
+                // instance (property of CalInterimApi), otherwise not.
+                CleanupStack::PushL( instance );
+                deleted = DeleteSingleInstanceL( instance );
+
+                if( deleted )
+                    {
+                    CleanupStack::Pop( instance );
+                    notification = ECalenNotifyEntryDeleted;
+                    }
+                else
+                    {
+                    CleanupStack::PopAndDestroy( instance );
+                    }
+                }
+            colIdArray.Reset();
+            }
+        }
+    else
+        {
+         TBool doDelete( ETrue );
+         
+         doDelete = CalenActionUiUtils::ShowDeleteConfirmationQueryL( 
+                                                                   iGlobalData->Context().InstanceId().iType == CCalEntry::ETodo ?
+                                                                   CalenActionUiUtils::EDeleteToDo :
+                                                                   CalenActionUiUtils::EDeleteEntry );
+		if ( doDelete )
+			{
+			notification = ECalenNotifyEntryDeleted;	
 			}
-	}
-	OstTraceFunctionExit0( CALENDELETEUI_DELETECURRENTENTRYL_EXIT );
-}
+        }
+        
+    iController.BroadcastNotification( notification );
+
+    TRACE_EXIT_POINT;
+    }
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::DeleteAllEntriesL
+// CCalenDeleteUi::DeleteAllEntriesL
 // Deletes all entries
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenDeleteUi::DeleteAllEntriesL()
+void CCalenDeleteUi::DeleteAllEntriesL()
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_DELETEALLENTRIESL_ENTRY );
-    
-	if(iIsDeleting) {
-		OstTraceFunctionExit0( CALENDELETEUI_DELETEALLENTRIESL_EXIT );
-		return;
-	}
+    TRACE_ENTRY_POINT;
 
-    showDeleteQuery(EDeleteAll );
-	OstTraceFunctionExit0( DUP1_CALENDELETEUI_DELETEALLENTRIESL_EXIT );
-	}
+    ASSERT( !iIsDeleting );
+
+    const TInt buttonId = CalenActionUiUtils::ShowDeleteConfirmationQueryL( 
+                                           CalenActionUiUtils::EDeleteAll );
+
+    if( buttonId )
+        {
+        HandleDeleteMultipleEventsL( TCalTime::MinTime(), TCalTime::MaxTime(),
+                                 R_QTN_CALE_CONF_ALL_NOTES_DELETED );
+        }
+    else
+        {
+        // notify delete failed
+        iController.BroadcastNotification(ECalenNotifyDeleteFailed); 
+        }
+
+    TRACE_EXIT_POINT;
+    }
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::DeleteEntriesBeforeDateL
+// CCalenDeleteUi::DeleteEntriesBeforeDateL
 // Deletes all entries before a set date.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenDeleteUi::DeleteEntriesBeforeDateL()
+void CCalenDeleteUi::DeleteEntriesBeforeDateL()
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_DELETEENTRIESBEFOREDATEL_ENTRY );
-    
-	if(iIsDeleting) {
-		OstTraceFunctionExit0( CALENDELETEUI_DELETEENTRIESBEFOREDATEL_EXIT );
-		return;
-	}    
-    // launch the datepicker
-    dateQuery();
-    OstTraceFunctionExit0( DUP1_CALENDELETEUI_DELETEENTRIESBEFOREDATEL_EXIT );
-    }
+    TRACE_ENTRY_POINT;
 
-// ----------------------------------------------------------------------------
-// CalenDeleteUi::dateQuery
-// Launches the popup for the date selection
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenDeleteUi::dateQuery()
-	{
-    OstTraceFunctionEntry0( CALENDELETEUI_DATEQUERY_ENTRY );
-    
-	// Create a popup with datepicker to select the date.
-	HbDialog *popUp = new HbDialog();
-	popUp->setDismissPolicy(HbDialog::NoDismiss);
-	popUp->setTimeout(HbDialog::NoTimeout );
-	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
-	popUp->setHeadingWidget(new HbLabel(hbTrId("txt_calendar_title_set_date")));
-	
-	QDateTime currentDateTime(CalenDateUtils::today());
-	QDate currentDate(currentDateTime.date());
-	if(mDatePicker) {
-		mDatePicker = NULL;
-	}
-	mDatePicker = new  HbDateTimePicker(popUp);
-	mDatePicker->setMinimumDate(CalenDateUtils::minTime().date());
-	mDatePicker->setMaximumDate(currentDate);
-	mDatePicker->setDate(currentDate);
+    ASSERT( !iIsDeleting );
+    TTime date;
+    date.HomeTime();
+    TTime today = date;
 
-	popUp->setContentWidget(mDatePicker);  
-	mDeleteAction = new HbAction(
-						hbTrId("txt_common_button_delete"), popUp);
-	popUp->addAction(mDeleteAction);
-	mCancelAction = new HbAction(hbTrId("txt_common_button_cancel"),popUp);
-	popUp->addAction(mCancelAction);
-	// Show the popup
-	popUp->open(this, SLOT(handleDateQuery(HbAction*)));
-	
-	OstTraceFunctionExit0( CALENDELETEUI_DATEQUERY_EXIT );
-	}
+    TBool execute( EFalse );
+    TBool exit( ETrue );
+    do{
+        exit = ETrue;
+        execute = EFalse;
 
-// ----------------------------------------------------------------------------
-// CalenDeleteUi::handleDateQuery
-// Handles the selection for the date query
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenDeleteUi::handleDateQuery(HbAction* action)
-{
-    OstTraceFunctionEntry0( CALENDELETEUI_HANDLEDATEQUERY_ENTRY );
-    
-	if(action == mDeleteAction) {
-		// User selected the date before which all the entries has to be deleted
-		QDate selectedDate(mDatePicker->date());
-		// Check if the date is within the range.
-		if(selectedDate.isValid()) {
-			QTime time(0,0,0,0);
-			QDateTime dateTime;
-			dateTime.setDate(selectedDate);
-			dateTime.setTime(time);
-			// Do delete only if inputted day is after beginning of range
-			if(dateTime > AgendaUtil::minTime()) {
-				// Two pass delete:
-				// 1. pass
-				// To prevent destroying entries starting and ending midnight
-				// subtract one second and do delete on that range.
-				dateTime = dateTime.addSecs(-1);
-				dateTime = ( dateTime > AgendaUtil::minTime()? 
-											dateTime :  AgendaUtil::minTime());
+        TInt buttonId = CalenActionUiUtils::DateQueryL(date, R_CALEN_DEL_BEFORE_DATE_PROMPT);
 
-				HandleDeleteMultipleEventsL( AgendaUtil::minTime(), 
-																 dateTime, 1);
-			}else {
-				iController.BroadcastNotification(ECalenNotifyDeleteFailed);
-			}
-		}
-	}else {
-		// User pressed cancel
-		handleDeleteCancel();
-	}
-	// Reset the member variables
-	mDeleteAction = NULL;
-	mCancelAction = NULL;
-	
-	OstTraceFunctionExit0( CALENDELETEUI_HANDLEDATEQUERY_EXIT );
-}
-// ----------------------------------------------------------------------------
-// CalenDeleteUi::showRepeatingEntryDeleteQuery
-// Launches the popup for deleting the repeating entry
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenDeleteUi::showRepeatingEntryDeleteQuery()
-{
-    OstTraceFunctionEntry0( CALENDELETEUI_SHOWREPEATINGENTRYDELETEQUERY_ENTRY );
-    
-    HbDialog *popUp = new HbDialog();
-    popUp->setDismissPolicy(HbDialog::NoDismiss);
-    popUp->setTimeout(HbDialog::NoTimeout);
-    popUp->setAttribute( Qt::WA_DeleteOnClose, true );
-    
-    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
-    HbWidget *editWidget = new HbWidget();
-    editWidget->setLayout(layout);
-    
-    HbRadioButtonList *editButtonList = new HbRadioButtonList();
-    
-    QStringList list;
-    list << hbTrId("txt_calendar_info_this_occurrence_only")
-    		<< hbTrId("txt_calendar_info_all_occurences");
+        if( buttonId == EAknSoftkeyOk || buttonId == EEikBidOk )
+            {
+            execute = ETrue;
+            if( today < date )
+                {
+                CAknNoteDialog* dialog = new( ELeave ) CAknNoteDialog( 
+                                                            CAknNoteDialog::EConfirmationTone,
+                                                            CAknNoteDialog::ELongTimeout );
+                dialog->ExecuteLD( R_CALEN_DELETEERROR_NOTE );
+                execute = EFalse;
+                exit = EFalse;
+                }
+            }
+        }while( !exit );
 
-    editButtonList->setItems(list);
-
-    layout->addItem(editButtonList);
-    
-    popUp->setContentWidget(editWidget);
-    popUp->setHeadingWidget(new HbLabel(
-						hbTrId("txt_calendar_title_delete_repeated_entry")));
-
-    // Add cancel action
-    HbAction *cancelAction = new HbAction(
-							hbTrId("txt_common_button_cancel_singledialog"));
-    popUp->addAction(cancelAction);
-    connect(editButtonList, SIGNAL(itemSelected(int)), this,
-										SLOT(handleRepeatedEntryDelete(int)));
-    connect(editButtonList, SIGNAL(itemSelected(int)), popUp, SLOT(close()));
-    connect(cancelAction, SIGNAL(triggered()), this, 
-										SLOT(handleDeleteCancel()));
-    
-    // Show the popup
-    popUp->open();
-    
-    OstTraceFunctionExit0( CALENDELETEUI_SHOWREPEATINGENTRYDELETEQUERY_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenDeleteUi::handleDeleteCancel
-// Handles the cancel action
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenDeleteUi::handleDeleteCancel()
-{
-    OstTraceFunctionEntry0( CALENDELETEUI_HANDLEDELETECANCEL_ENTRY );
-    
-	iController.BroadcastNotification(ECalenNotifyDeleteFailed);
-	
-	OstTraceFunctionExit0( CALENDELETEUI_HANDLEDELETECANCEL_EXIT );
-}
-
-void CalenDeleteUi::handleRepeatedEntryDelete(int index)
-{
-    OstTraceFunctionEntry0( CALENDELETEUI_HANDLEREPEATEDENTRYDELETE_ENTRY );
-    
-	// Fetch the entry
-	// Find all possible instances
-	AgendaEntry instance = CalenActionUiUtils::findPossibleInstanceL(
-									iController.context().instanceId(),
-									iController.Services().agendaInterface());
-
-	if (!instance.isNull()) {
-		connect(iController.Services().agendaInterface(), 
-									SIGNAL(entryDeleted(ulong)),
-									this, SLOT(entryDeleted(ulong)));
-		switch(index) {
-			case 0:
-				// User wants to delete only this occurence
-				iController.Services().agendaInterface()->deleteRepeatedEntry(
-									instance, AgendaUtil::ThisOnly);
-				break;
-			case 1:
-				// User wants to delete all the occurences
-				iController.Services().agendaInterface()->deleteRepeatedEntry(
-									instance, AgendaUtil::ThisAndAll);
-				break;
-		}
-	}else {
-	    iController.BroadcastNotification(ECalenNotifyDeleteFailed);
-	}
-	OstTraceFunctionExit0( CALENDELETEUI_HANDLEREPEATEDENTRYDELETE_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenDeleteUi::showDeleteQuery
-// Launches the popup for deleting the instance/instances
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenDeleteUi::showDeleteQuery(const TDeleteConfirmationType type,
-                                                     const int count)
-    {
-    OstTraceFunctionEntry0( CALENDELETEUI_SHOWDELETEQUERY_ENTRY );
-    
-    HbMessageBox *popup = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
-    popup->setDismissPolicy(HbDialog::NoDismiss);
-    popup->setTimeout(HbDialog::NoTimeout);
-    popup->setAttribute( Qt::WA_DeleteOnClose, true );
-    
-    QString text = 0;
-    
-    switch(type)
+    // Do delete only if inputted day is after beginning of range
+    if( execute && date > TCalTime::MinTime() )
         {
-        case EDeleteEntry:
-            {
-            text.append(hbTrId("txt_calendar_info_delete_meeting"));
-            break;
-            }
-        case EDeleteToDo:
-            {
-            text.append(hbTrId("txt_calendar_info_delete_todo_note"));
-            break;
-            }
-        case EDeleteToDos:
-            {//"Delete %N to-do notes?"
-            // TODO: Add the text id
-            text.append("Delete %N to-do's?").arg(count);
-            break;
-            }
-        case EDeleteAll:
-            {
-            text.append(hbTrId("txt_calendar_info_delete_all_calendar_entries"));
-            break;
-            }
-        case EDeleteEvent:
-            {
-            text.append(hbTrId("txt_calendar_info_delete_allday_event"));
-            break;
-            }
-        default:
-            break;
+        // Two pass delete:
+        // 1. pass
+        // To prevent destroying entries starting and ending midnight
+        // subtract one microsecond and do delete on that range.
+        date -= TTimeIntervalMicroSeconds32( 1 );
+        date = Max( date, TCalTime::MinTime() );
+
+        HandleDeleteMultipleEventsL( TCalTime::MinTime(),
+                                                date,
+                                               R_QTN_CALE_CONF_PAST_NOTE_DELETED );
+        }
+    else
+        {
+        iController.BroadcastNotification( ECalenNotifyDeleteFailed );
         }
     
-    popup->setText(text);
-    	
-    QList<QAction*> list = popup->actions();
-    for(int i=0; i < list.count(); i++)
-        {
-        popup->removeAction(list[i]);
-        }
-    mDeleteAction = new HbAction(
-						hbTrId("txt_common_button_delete"), popup);
-    popup->addAction(mDeleteAction);
-    mCancelAction = new HbAction(hbTrId("txt_common_button_cancel"), popup); 
-    popup->addAction(mCancelAction);
-    popup->open(this, SLOT(handleDeletion(HbAction*)));
-    
-    OstTraceFunctionExit0( CALENDELETEUI_SHOWDELETEQUERY_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::handleDeletion
-// Deletes the entries based on the user selection
-// (other items were commented in a header).
-// ----------------------------------------------------------------------------
-//
-void CalenDeleteUi::handleDeletion(HbAction* action)
-{
-    OstTraceFunctionEntry0( CALENDELETEUI_HANDLEDELETION_ENTRY );
-    
-	TCalenNotification notification = ECalenNotifyDeleteFailed;
-	
-	if(action == mDeleteAction) {
-		
-		switch (mDeleteCommand) {
-			
-			case ECalenDeleteCurrentEntry:
-			{
-				// Get the entry id
-				ulong id = iController.context().instanceId().mEntryLocalUid;
-				connect(iController.Services().agendaInterface(), 
-												SIGNAL(entryDeleted(ulong)),
-												this, SLOT(entryDeleted(ulong)));
-				// Delete the entry if the delete button is been pressed
-				iController.Services().agendaInterface()->deleteEntry(id);
-			}
-				break;
-			
-			case ECalenDeleteSeries:
-			case ECalenDeleteCurrentOccurrence:
-			{
-				AgendaEntry instance = 
-						CalenActionUiUtils::findPossibleInstanceL(
-								iController.context().instanceId(),
-								iController.Services().agendaInterface() );
-				if(!instance.isNull()) {
-					QDateTime recId = instance.recurrenceId().toUTC();
-					const bool child = recId.isNull();
-					connect(iController.Services().agendaInterface(), 
-					        SIGNAL(entryDeleted(ulong)),
-					        this, SLOT(entryDeleted(ulong)));
-					if( !child || mRecurrenceRange == AgendaUtil::ThisOnly 
-							|| mRecurrenceRange == AgendaUtil::ThisAndAll) {
-						iController.Services().agendaInterface()->deleteRepeatedEntry( 
-								instance, mRecurrenceRange );
-					}
-				}else {
-				    iController.BroadcastNotification(ECalenNotifyDeleteFailed); 
-				}
-			}
-				break;
-			
-			case ECalenDeleteAllEntries:
-			{
-				HandleDeleteMultipleEventsL( AgendaUtil::minTime(), 
-											AgendaUtil::maxTime(),1 );
-			}
-				break;
-			
-			default:
-				break;
-				
-		}
-	} else {
-		// If the user presses cancel button the notification will be
-		// ECalenNotifyDeleteFailed as default.
-		// Notify the status
-		iController.BroadcastNotification(notification);
-	}
-	
-	// Reset the member variables
-	mDeleteAction = NULL;
-	mCancelAction = NULL;
-	
-	OstTraceFunctionExit0( CALENDELETEUI_HANDLEDELETION_EXIT );
-}
-
-void CalenDeleteUi::entryDeleted(ulong id)
-{
-    OstTraceFunctionEntry0( CALENDELETEUI_ENTRYDELETED_ENTRY );
-    
-    if (iController.context().instanceId().mEntryLocalUid == id) {
-        iController.BroadcastNotification(ECalenNotifyEntryDeleted);
-    }
-    disconnect(iController.Services().agendaInterface(), SIGNAL(entryDeleted(ulong)),
-               this, SLOT(entryDeleted(ulong)));
-    
-    OstTraceFunctionExit0( CALENDELETEUI_ENTRYDELETED_EXIT );
-}
-
-// ----------------------------------------------------------------------------
-// CalenDeleteUi::HandleDeleteMultipleEventsL
+// CCalenDeleteUi::HandleDeleteMultipleEventsL
 // Handles multiple delete events
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenDeleteUi::HandleDeleteMultipleEventsL( const QDateTime& aFirstDay,
-                                                 const QDateTime& aLastDay,
-                                                 int aConfNoteId )
+void CCalenDeleteUi::HandleDeleteMultipleEventsL( const TTime& aFirstDay,
+                                                                     const TTime& aLastDay,
+                                                                     TInt /*aConfNoteId */)
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_HANDLEDELETEMULTIPLEEVENTSL_ENTRY );
-    
-	if(iIsDeleting) {
-		OstTraceFunctionExit0( CALENDELETEUI_HANDLEDELETEMULTIPLEEVENTSL_EXIT );
-		return;
-	}
-    iConfirmationNoteId = aConfNoteId;
-    
+    TRACE_ENTRY_POINT;
+
+    ASSERT( !iWaitDialog );
+    ASSERT( !iIsDeleting );
+    //iConfirmationNoteId = aConfNoteId;
+
+    iWaitDialog = new( ELeave ) CAknWaitDialog( REINTERPRET_CAST( CEikDialog**, 
+                                                                  &iWaitDialog ) );
+    iWaitDialog->ExecuteLD( R_CALEN_DELETE_WAIT_NOTE );
+
     DeleteDayRangeL( aFirstDay, aLastDay );
 
-    OstTraceFunctionExit0( DUP1_CALENDELETEUI_HANDLEDELETEMULTIPLEEVENTSL_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::DeleteDayRangeL
+// CCalenDeleteUi::DeleteDayRangeL
 // Deletes all entries in a given range.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenDeleteUi::DeleteDayRangeL( const QDateTime& aStart,
-                                                      const QDateTime& aEnd )
+void CCalenDeleteUi::DeleteDayRangeL( const TTime& aStart,
+                                                      const TTime& aEnd )
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_DELETEDAYRANGEL_ENTRY );
-    
+    TRACE_ENTRY_POINT;
+
     iStartTime = aStart;
     iEndTime = aEnd;
-    
-    iIsDeleting = ETrue;
-    
-    //AgendaUtil& agendaInterface = iController.agendaInterface();
-    // Connect to the signal that gets generated when deletion is completed
-    connect(iController.agendaInterface(), SIGNAL(entriesDeleted(int)), this,
-            SLOT(doCompleted(int)));
-    AgendaUtil::FilterFlags filter =
-    	        AgendaUtil::FilterFlags(AgendaUtil::IncludeAnniversaries
-    	                | AgendaUtil::IncludeAppointments
-    	                | AgendaUtil::IncludeEvents
-    	                | AgendaUtil::IncludeReminders
-    	                | AgendaUtil::IncludeIncompletedTodos
-    	                | AgendaUtil::IncludeCompletedTodos
-    	                | AgendaUtil::IncludeAnniversaries);
-    // 1: First pass, delete all entries.
-    iController.agendaInterface()->deleteEntries(iStartTime, iEndTime, filter);
 
-    OstTraceFunctionExit0( CALENDELETEUI_DELETEDAYRANGEL_EXIT );
+    TCalTime start, end;
+    start.SetTimeLocalL( iStartTime );
+    end.SetTimeLocalL( iEndTime );
+
+    if( iDelAllRange )
+        {
+        delete iDelAllRange;
+        iDelAllRange = NULL;
+        }
+    
+    iDelAllRange = new(ELeave) CalCommon::TCalTimeRange( start, end );
+    iDeleteColIds.Reset();
+
+    iIsDeleting = ETrue;   
+
+    iController.GetActiveCollectionidsL(iDeleteColIds);
+    
+    //remember the calenders, delete entries in each calendar one by one by calling DeleteL(...) after completed()
+    iNumberOfCalendars = iDeleteColIds.Count();
+    iToShowDeleteNote = 0;
+    iGlobalData->EntryViewL(iDeleteColIds[iToShowDeleteNote])->DeleteL( *iDelAllRange, CalCommon::EIncludeAll, *this );
+        
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::DoCompletedL
+// CCalenDeleteUi::Completed
+// Completed callback
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenDeleteUi::Completed( TInt aFirstPassError )
+    {
+    TRACE_ENTRY_POINT;
+
+    PIM_TRAPD_HANDLE( DoCompletedL( aFirstPassError ) );
+
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenDeleteUi::DoCompletedL
 // Handles delete callback
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenDeleteUi::doCompleted( int aFirstPassError )
+void CCalenDeleteUi::DoCompletedL( TInt aFirstPassError )
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_DOCOMPLETED_ENTRY );
-
-    if( aFirstPassError == KErrNone )
+    TRACE_ENTRY_POINT;
+    iToShowDeleteNote++;
+    if(iNumberOfCalendars == iToShowDeleteNote)
         {
-        // 2: Second pass, delete notes that end 00:00 of next day of iEndTime
-        // We didn't delete them in first pass
-        QDateTime nextMidnight = CalenDateUtils::beginningOfDay( iEndTime.addDays(1) );
-        nextMidnight = ( nextMidnight < AgendaUtil::maxTime()? nextMidnight : AgendaUtil::maxTime() );
-        PIM_TRAPD_HANDLE( deleteEntriesEndingAtMidnight( nextMidnight ) );
+	    if( aFirstPassError == KErrNone )
+	        {
+	        // 2: Second pass, delete notes that end 00:00 of next day of iEndTime
+	        // We didn't delete them in first pass
+	        TTime nextMidnight = CalenDateUtils::BeginningOfDay( iEndTime + TTimeIntervalDays( 1 ) );
+	        nextMidnight = Min( nextMidnight, TCalTime::MaxTime() );
+	        PIM_TRAPD_HANDLE( DeleteEntriesEndingAtMidnightL( nextMidnight ) );
+	        }
+	        
+		// 3. End deleting, close wait dialog, and show confirmation or error note
+		iIsDeleting = EFalse;
+		iToShowDeleteNote = 0;
+		// dismiss the waitdialog
+		if(iWaitDialog)
+			{
+			TRAP_IGNORE(iWaitDialog->ProcessFinishedL());
+			}
+
+		if( aFirstPassError == KErrNone )
+			{
+			// Show confirmation note
+//			HBufC* buf = StringLoader::LoadLC( iConfirmationNoteId, iEikEnv );
+//			CAknConfirmationNote* dialog = new( ELeave ) CAknConfirmationNote();
+//			dialog->ExecuteLD(*buf);
+//			CleanupStack::PopAndDestroy( buf );
+			}
+		else
+			{
+			// Show error note
+			if(iEikEnv)
+			   {
+			   iEikEnv->ResolveError( aFirstPassError );
+			   }
+			}
+		iDeleteColIds.Reset();
+		delete iDelAllRange;
+		iDelAllRange = NULL;
+		
+	    iController.BroadcastNotification( ECalenNotifyMultipleEntriesDeleted );
+        }
+    else
+        {
+        //delete entries in next calendar...
+        iGlobalData->EntryViewL(iDeleteColIds[iToShowDeleteNote])->DeleteL( *iDelAllRange, CalCommon::EIncludeAll, *this );
         }
 
-    // 3. End deleting, close wait dialog, and show confirmation or error note
-    iIsDeleting = EFalse;
-    
-    iController.BroadcastNotification( ECalenNotifyMultipleEntriesDeleted );
-
-    OstTraceFunctionExit0( CALENDELETEUI_DOCOMPLETED_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::DeleteEntriesEndingAtMidnightL
+// CCalenDeleteUi::NotifyProgress
+// Delete progress notification
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+TBool CCalenDeleteUi::NotifyProgress()
+    {
+    TRACE_ENTRY_POINT;
+    // Tell framework that we are not intrested in Progress notifications.
+    TRACE_EXIT_POINT;
+    return EFalse;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenDeleteUi::Progress
+// Delete progress notification
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenDeleteUi::Progress( TInt /*aPercentageCompleted*/ )
+    {
+    TRACE_ENTRY_POINT;
+    // do nothing, we are not intrested in Progress notifications
+    TRACE_EXIT_POINT;
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenDeleteUi::DeleteEntriesEndingAtMidnightL
 // Deletes entries ending at midnight on the given day
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenDeleteUi::deleteEntriesEndingAtMidnight( QDateTime aMidnight )
+void CCalenDeleteUi::DeleteEntriesEndingAtMidnightL( TTime aMidnight )
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_DELETEENTRIESENDINGATMIDNIGHT_ENTRY );
+    TRACE_ENTRY_POINT;
 
-    QDateTime start, end;
-    QTime startTime(aMidnight.time());
-    startTime.setHMS(startTime.hour(), startTime.minute() - 1,
-                    startTime.second(), startTime.msec());
-    start.setDate(aMidnight.date());
-    start.setTime(startTime);
+    TCalTime start, end;
+    start.SetTimeLocalL( aMidnight - TTimeIntervalMinutes(1) );
+    end.SetTimeLocalL( aMidnight );
+    CalCommon::TCalTimeRange midnightRange( start, end );
     
-    end = aMidnight;
+    RArray<TInt> colIdArray;
+    iController.GetActiveCollectionidsL(colIdArray);
     
-    QList<AgendaEntry> instances = iController.Services().agendaInterface()->fetchEntriesInRange( start, end );
+    // 1: Find instances falling on midnight moment
+    RPointerArray< CCalInstance > instances;
+    CleanupResetAndDestroyPushL( instances );
+    iGlobalData->InstanceViewL(colIdArray)->FindInstanceL( instances,
+                                                 CalCommon::EIncludeAll, 
+                                                 midnightRange );
+    
+    colIdArray.Reset();
 
     // 2. loop through them and delete those entries that end at midnight
-    for( int i=0; i < instances.count(); ++i )
+    for( TInt i=0; i < instances.Count(); ++i )
         {
-        AgendaEntry entry = instances[i];
-
+        CCalInstance* item = instances[i];
+        RArray<TInt> colIdArray;
+        colIdArray.AppendL(item->InstanceIdL().iCollectionId);
+        
         // Checking that if entry ends at midnight, is quite clumsy, but here goes:
         // EndsAtStartOfDay takes only CCalInstance, but here we mimic EndsAtStartOfDay
         // for CCalEntry type.
 
         // First check that if _instance_ ends at midnight, but starts earlier
-        if( CalenAgendaUtils::endsAtStartOfDay( entry, aMidnight ) )
+        if( CalenAgendaUtils::EndsAtStartOfDayL( item, aMidnight ) )
             {
             // Second, check that _entry's_ endtime is exactly the midnight
             // This prevents us from destroying repeating entries, that has one
             // instance falling on given midnight.
-            if( entry.endTime() == aMidnight )
+            if( item->Entry().EndTimeL().TimeLocalL() == aMidnight )
                 {
-                iController.Services().agendaInterface()->deleteRepeatedEntry(entry, AgendaUtil::ThisAndAll);
+                iGlobalData->InstanceViewL(colIdArray)->DeleteL( item, CalCommon::EThisOnly );
+                // Ownership was transferred to DeleteL.
+                // Put null to array to prevent double-deletion
+                instances[i] = NULL;                
                 }
             }
+        colIdArray.Reset();
         }
+    CleanupStack::PopAndDestroy( &instances );
 
-    OstTraceFunctionExit0( CALENDELETEUI_DELETEENTRIESENDINGATMIDNIGHT_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
-// CalenDeleteUi::DeleteSingleInstanceL
+// CCalenDeleteUi::DeleteSingleInstanceL
 // Delete the given instance. Ask the user whether to delete the series or the instance.
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void CalenDeleteUi::DeleteSingleInstanceL( AgendaEntry& aInstance )
+TBool CCalenDeleteUi::DeleteSingleInstanceL( CCalInstance* aInstance )
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_DELETESINGLEINSTANCEL_ENTRY );
-    
-    DoDeleteSingleInstanceL( aInstance, EFalse, AgendaUtil::ThisAndAll );
-    
-    OstTraceFunctionExit0( CALENDELETEUI_DELETESINGLEINSTANCEL_EXIT );
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    return DoDeleteSingleInstanceL( aInstance, EFalse, CalCommon::EThisAndAll );
     }
 
 // -----------------------------------------------------------------------------
-// CalenDeleteUi::DeleteSingleInstanceL
+// CCalenDeleteUi::DeleteSingleInstanceL
 // Delete the given instance. Delete the entry range given by aRepeatType.
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void CalenDeleteUi::DeleteSingleInstanceL( AgendaEntry& aInstance, 
-                                AgendaUtil::RecurrenceRange aRepeatType )
+TBool CCalenDeleteUi::DeleteSingleInstanceL( CCalInstance* aInstance, 
+                                                            CalCommon::TRecurrenceRange aRepeatType )
     {
-    OstTraceFunctionEntry0( DUP1_CALENDELETEUI_DELETESINGLEINSTANCEL_ENTRY );
-    
-    DoDeleteSingleInstanceL( aInstance, ETrue, aRepeatType );
-    
-    OstTraceFunctionExit0( DUP1_CALENDELETEUI_DELETESINGLEINSTANCEL_EXIT );
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    return DoDeleteSingleInstanceL( aInstance, ETrue, aRepeatType );
     }
 
 // -----------------------------------------------------------------------------
-// CalenDeleteUi::DoDeleteSingleInstanceL
+// CCalenDeleteUi::DoDeleteSingleInstanceL
 // Performs the deletion of the instance. If aHasRepeatType is EFalse, the user
 // is prompted to delete either the instance or the entire series. In this case,
 // aRepeatType is ignored. If aHasRepeatType is ETrue, aRepeatType determines
@@ -880,54 +841,241 @@ void CalenDeleteUi::DeleteSingleInstanceL( AgendaEntry& aInstance,
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void CalenDeleteUi::DoDeleteSingleInstanceL(
-									AgendaEntry& aInstance,
-									bool aHasRepeatType,
-									AgendaUtil::RecurrenceRange aRepeatType )
-{
-    OstTraceFunctionEntry0( CALENDELETEUI_DODELETESINGLEINSTANCEL_ENTRY );
+TBool CCalenDeleteUi::DoDeleteSingleInstanceL( CCalInstance* aInstance,
+                                                           TBool aHasRepeatType,
+                                                           CalCommon::TRecurrenceRange aRepeatType )
+    {
+    TRACE_ENTRY_POINT;
+
+    CCalEntry& entry = aInstance->Entry();
+    const CCalEntry::TType entryType = entry.EntryTypeL(); 
+    RArray<TInt> colIdArray;
+    colIdArray.AppendL(aInstance->InstanceIdL().iCollectionId);
     
-	bool repeating = aInstance.isRepeating();
 
-	if( !repeating ) {
-		// Even though there is no RRule, the entry might
-		// have a list of rdates.
-		QList<QDate> rDates = aInstance.rDates();
-		repeating = ( rDates.count() > 0 );
-	}
-	QDateTime recId = aInstance.recurrenceId().toUTC();
-	const bool child = recId.isNull();
+    TCalRRule rrule;
 
-	if( !aHasRepeatType ) {
-		aRepeatType = AgendaUtil::ThisAndAll;
-	}
-	// For later reference in handleDeletion()
-	mRecurrenceRange = aRepeatType;
+    TBool repeating = entry.GetRRuleL( rrule );
 
-	if( !aHasRepeatType && ( child || repeating ) && 
-			( aInstance.type() != AgendaEntry::TypeAnniversary ) ) {
-		showRepeatingEntryDeleteQuery();
-	}
-	else
-	{
-		showDeleteQuery(aInstance.type() == AgendaEntry::TypeTodo ?
-														EDeleteToDo :
-														EDeleteEntry );
-	}
-	OstTraceFunctionExit0( CALENDELETEUI_DODELETESINGLEINSTANCEL_EXIT );
-}
+    if( !repeating )
+        {
+        // Even though there is no RRule, the entry might
+        // have a list of rdates.
+        RArray< TCalTime > rDateArray;
+        CleanupClosePushL( rDateArray );
+        entry.GetRDatesL( rDateArray );
+        repeating = ( rDateArray.Count() > 0 );
+        CleanupStack::PopAndDestroy(); // rDateArray
+        }
 
+    const TBool child = entry.RecurrenceIdL().TimeUtcL() != Time::NullTTime();
+
+    if( !aHasRepeatType )
+        {
+        aRepeatType = CalCommon::EThisAndAll;
+        }
+
+    TBool doDelete( ETrue );
+
+    if( !aHasRepeatType && ( child || repeating ) && ( entryType != CCalEntry::EAnniv ) )
+        {
+        doDelete = CalenActionUiUtils::ShowRepeatTypeQueryL( aRepeatType,
+                                                           CalenActionUiUtils::EDelete );
+        }
+    else
+        {
+        doDelete = CalenActionUiUtils::ShowDeleteConfirmationQueryL( 
+                                                                   entryType == CCalEntry::ETodo ?
+                                                                   CalenActionUiUtils::EDeleteToDo :
+                                                                   CalenActionUiUtils::EDeleteEntry );
+        }
+        
+    if( doDelete )
+        {
+        //Before deleteing the entry reset the attachment model
+        if(iController.Services().GetAttachmentData()->NumberOfItems())
+            {
+            iController.Services().GetAttachmentData()->Reset();
+            }
+        
+        if( !TryDeleteWithMrUtilsL( aInstance, aRepeatType ) )
+            {
+            if( !child || aRepeatType == CalCommon::EThisOnly )
+                {
+                iGlobalData->InstanceViewL(colIdArray)->DeleteL( aInstance, aRepeatType );
+                }
+            else if( aRepeatType == CalCommon::EThisAndAll )
+                {
+                // Unfortunately we can't pass the existing child instance through to the
+                // InstanceView DeleteL function because even if we pass in EThisAndAll, it
+                // only ever deletes the exception. We'll have to fetch the parent then
+                // delete it via the entry view.
+                RPointerArray<CCalEntry> entries;
+                CleanupResetAndDestroyPushL( entries );
+                iGlobalData->EntryViewL(aInstance->InstanceIdL().iCollectionId)->FetchL( aInstance->Entry().UidL(), entries );
+                iGlobalData->EntryViewL(aInstance->InstanceIdL().iCollectionId)->DeleteL( *entries[0] );
+                CleanupStack::PopAndDestroy( &entries );
+                if( aInstance )
+                    {
+                    delete aInstance;
+                    aInstance = NULL;
+                    }
+                }
+            else
+                {
+                User::Leave( KErrNotSupported );
+                }
+            }
+        }
+
+    colIdArray.Reset();
+    TRACE_EXIT_POINT;
+    return doDelete;
+    }
 
 // -----------------------------------------------------------------------------
-// CalenDeleteUi::DialogDismissedL
+// CCalenDeleteUi::DeleteEntryL
+// Deletes an entry from the database
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+TBool CCalenDeleteUi::DeleteEntryL( CCalEntryView* aEntryView, CCalEntry* aEntry )
+    {
+    TRACE_ENTRY_POINT;
+    const CCalEntry::TType entryType = aEntry->EntryTypeL();
+
+    TBool doDelete = CalenActionUiUtils::ShowDeleteConfirmationQueryL( 
+                                                                    entryType == CCalEntry::ETodo ?
+                                                                    CalenActionUiUtils::EDeleteToDo :
+                                                                    CalenActionUiUtils::EDeleteEntry );
+    if( doDelete )
+        {
+        //Before deleteing the attachment, reset the attachment model
+        if(iController.Services().GetAttachmentData()->NumberOfItems())
+            {
+            iController.Services().GetAttachmentData()->Reset();
+            }
+        aEntryView->DeleteL( *aEntry );
+
+        if( aEntry )
+            {
+            delete aEntry;
+            aEntry = NULL;
+            }
+        }
+
+    TRACE_EXIT_POINT;
+    return doDelete;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenDeleteUi::TryDeleteWithMrUtilsL
+// Attempt to delete the instance using the Meeting Request utilities,
+// if MR viewers is enabled.
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+TBool CCalenDeleteUi::TryDeleteWithMrUtilsL( CCalInstance* aInstance, 
+                                                              CalCommon::TRecurrenceRange aRepeatType )
+    {
+    TRACE_ENTRY_POINT;
+    
+    TBool doDelete = ETrue;
+
+	if( iGlobalData->InterimUtilsL().MRViewersEnabledL() && 
+        iGlobalData->InterimUtilsL().IsMeetingRequestL(aInstance->Entry()))
+
+        {
+        CMRMailboxUtils::TMailboxInfo info;
+        if( iGlobalData->AttemptToRetrieveDefaultMailboxL( info ) )
+            {
+            if(aRepeatType == CalCommon::EThisAndAll )
+                {
+                iGlobalData->MeetingRequestUtilsL().DeleteWithUiL( aInstance->Entry(),
+                                                                                      info.iEntryId );
+                if( aInstance )
+                    {
+                    delete aInstance;
+                    aInstance = NULL;
+                    }
+                }
+            else if( aRepeatType == CalCommon::EThisOnly )
+                {
+                iGlobalData->MeetingRequestUtilsL().DeleteWithUiL( aInstance, info.iEntryId );
+                }
+            else
+                {
+                User::Leave( KErrNotSupported );
+                }
+            }
+        else
+            {
+            doDelete = EFalse;
+            }
+        }
+    else
+        {
+        doDelete = EFalse;
+        }
+
+    TRACE_EXIT_POINT;
+    return doDelete;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenDeleteUi::ShowMultipleEntriesDeleteQueryL
+// For displaying multiple entries deletion confirmation query
+// -----------------------------------------------------------------------------
+//
+TInt CCalenDeleteUi::ShowMultipleEntriesDeleteQueryL(TInt aCount)
+	{
+    TRACE_ENTRY_POINT;
+
+    CAknQueryDialog *dialog = CAknQueryDialog::NewL( );
+    CleanupStack::PushL( dialog );
+    TInt resID;
+    HBufC* prompt;
+    if( aCount > 1 )
+        {
+        resID = R_CALEN_QTN_TODO_QUEST_DELETE_MARKED_NOTES;
+        prompt = StringLoader::LoadLC( resID, aCount );
+        }
+    else if( aCount ==  1 )
+        {
+        resID = R_CALEN_QTN_TODO_QUEST_DELETE_MARKED_NOTE;
+        prompt = StringLoader::LoadLC( resID );
+        }
+    else
+        {
+        CleanupStack::PopAndDestroy( dialog );
+        TRACE_EXIT_POINT;
+        return 0;   //return 0 for other invalid aCount value ( < 0 )
+        }
+    dialog->SetPromptL( *prompt );
+    CleanupStack::PopAndDestroy( prompt );
+
+    CleanupStack::Pop( dialog );
+
+    TRACE_EXIT_POINT;
+    return dialog->ExecuteLD( R_CALEN_ERASEQUERY_NOTE );
+
+	}
+
+// -----------------------------------------------------------------------------
+// CCalenDeleteUi::DialogDismissedL
 // From MProgressDialogCallback
 // Callback method
 // called when a dialog is dismissed.
 // -----------------------------------------------------------------------------
 //
-void CalenDeleteUi::DialogDismissedL( const TInt /*aButtonId*/ )
+void CCalenDeleteUi::DialogDismissedL( const TInt /*aButtonId*/ )
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_DIALOGDISMISSEDL_ENTRY );
+    TRACE_ENTRY_POINT;
+    // dismiss the wait dialog
+    if(iWaitDialog)
+        {
+        iWaitDialog->ProcessFinishedL();
+        }
     
     // no more entries to delete
     iMoreEntriesToDelete = EFalse;
@@ -935,49 +1083,136 @@ void CalenDeleteUi::DialogDismissedL( const TInt /*aButtonId*/ )
     
     // issue notification cancel delete
     iController.BroadcastNotification(ECalenNotifyCancelDelete);
-    
-    OstTraceFunctionExit0( CALENDELETEUI_DIALOGDISMISSEDL_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
-// CalenDeleteUi::DeleteEntryL
+// CCalenDeleteUi::DeleteEntryL
 // Delete entry using entry local uid
 // -----------------------------------------------------------------------------
 //
-void CalenDeleteUi::DeleteEntryL(ulong& aEntryLocalUid)
+void CCalenDeleteUi::DeleteEntryL(TCalLocalUid& aEntryLocalUid, TInt aColId)
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_DELETEENTRYL_ENTRY );
+    TRACE_ENTRY_POINT;
     
-    iController.Services().agendaInterface()->deleteEntry(aEntryLocalUid);
+    // fetch the entry
+    CCalEntry* entry = iGlobalData->EntryViewL(aColId)->FetchL(aEntryLocalUid);
+    if( entry )
+        {
+        CleanupStack::PushL( entry );
+        iGlobalData->EntryViewL(aColId)->DeleteL( *entry );
+        CleanupStack::Pop( entry );
+        delete entry;
+        entry = NULL;
+        }   
     
-    OstTraceFunctionExit0( CALENDELETEUI_DELETEENTRYL_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
-// CalenDeleteUi::DisplayWaitDialogL
+// CCalenDeleteUi::DisplayWaitDialogL
 // Display wait dialog
 // -----------------------------------------------------------------------------
 //
-void CalenDeleteUi::DisplayWaitDialogL()
+void CCalenDeleteUi::DisplayWaitDialogL()
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_DISPLAYWAITDIALOGL_ENTRY );
+    TRACE_ENTRY_POINT;
     
-    OstTraceFunctionExit0( CALENDELETEUI_DISPLAYWAITDIALOGL_EXIT );
+    delete iWaitDialog;
+    iWaitDialog = NULL;
+    iWaitDialog = new( ELeave )CAknWaitDialog( REINTERPRET_CAST( CEikDialog**, &iWaitDialog ), ETrue );
+    iWaitDialog->ExecuteLD( R_TODO_VIEW_DELETE_WAIT_NOTE );
+    iWaitDialog->SetCallback(this);
+    
+    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
-// CalenDeleteUi::MarkedEntriesDeletedL
+// CCalenDeleteUi::MarkedEntriesDeletedL
 // Dismiss wait dialog and show information note
 // -----------------------------------------------------------------------------
 //
-void CalenDeleteUi::MarkedEntriesDeletedL()
+void CCalenDeleteUi::MarkedEntriesDeletedL()
     {
-    OstTraceFunctionEntry0( CALENDELETEUI_MARKEDENTRIESDELETEDL_ENTRY );
+    TRACE_ENTRY_POINT;
     
+    // dismiss the waitdialog
+    if(iWaitDialog)
+        {
+        iWaitDialog->ProcessFinishedL();
+        }
+    
+    // Show confirmation note
+    //HBufC* buf = StringLoader::LoadLC( R_QTN_CALE_CONF_ALL_NOTES_DELETED, iEikEnv );
+    //CAknConfirmationNote* dialog = new( ELeave ) CAknConfirmationNote();
+    //dialog->ExecuteLD(*buf);
+    //CleanupStack::PopAndDestroy( buf );
+
     // notify marked entries deleted
     iController.BroadcastNotification( ECalenNotifyMarkedEntryDeleted );
     
-    OstTraceFunctionExit0( CALENDELETEUI_MARKEDENTRIESDELETEDL_EXIT );
+    TRACE_EXIT_POINT;
     }
 
+// -----------------------------------------------------------------------------
+// CCalenDeleteUi::HandleDeleteAllEntriesL
+// Handles launching of the delete all entries list query
+// -----------------------------------------------------------------------------
+//
+void CCalenDeleteUi::HandleDeleteAllEntriesL()
+    {
+    TRACE_ENTRY_POINT;
+    RPointerArray<CCalCalendarInfo> calendarInfoList;
+    CleanupClosePushL(calendarInfoList);
+	iController.Services().GetAllCalendarInfoL(calendarInfoList);
+    TInt visibleCalendarsCount(0);
+    for(TInt index=0;index<calendarInfoList.Count();index++)
+        {
+        if(calendarInfoList[index]->Enabled())
+            {
+            visibleCalendarsCount++;
+            }
+        if(visibleCalendarsCount>1)
+            {
+            break;
+            }
+        }
+    CleanupStack::PopAndDestroy();
+    
+    TInt headingTextResourceId(0);
+    if(visibleCalendarsCount==1)
+        {
+        headingTextResourceId = R_CALE_SINGLE_CALENDAR_DELETE_ENTRIES;
+        }
+    else
+        {
+        headingTextResourceId = R_CALE_MULTI_CALENDAR_DELETE_ENTRIES;
+        }
+
+    TInt selectedIndex(0);
+    CAknListQueryDialog* deleteEntriesListDialog = new(ELeave) CAknListQueryDialog(&selectedIndex);
+    deleteEntriesListDialog->PrepareLC(R_DELETE_ENTRIES_LIST_QUERY);
+    HBufC* buf = StringLoader::LoadLC( headingTextResourceId, iEikEnv );
+    deleteEntriesListDialog->QueryHeading()->SetTextL(buf->Des());
+    CleanupStack::PopAndDestroy( buf );
+    
+    if(deleteEntriesListDialog->RunLD())
+        {
+        if(selectedIndex)
+            {
+            DeleteAllEntriesL();
+            }
+        else
+            {
+            DeleteEntriesBeforeDateL();
+            }
+        }
+    else
+        {
+        iController.BroadcastNotification(ECalenNotifyDeleteFailed);
+        }
+    
+    TRACE_EXIT_POINT
+    }
+	
 // End of File

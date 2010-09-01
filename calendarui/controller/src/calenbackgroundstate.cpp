@@ -11,9 +11,10 @@
 *
 * Contributors:
 *
-* Description:  Calendar state machine
+* Description:   Calendar state machine
 *
 */
+
 
 
 // includes
@@ -22,10 +23,6 @@
 #include "calencontroller.h"
 #include "calenstatemachine.h"
 #include "calennotifier.h"
-#include "OstTraceDefinitions.h"
-#ifdef OST_TRACE_COMPILER_IN_USE
-#include "calenbackgroundstateTraces.h"
-#endif
 
 // ----------------------------------------------------------------------------
 // CCalenBackgroundState::NewLC
@@ -34,13 +31,13 @@
 CCalenBackgroundState* CCalenBackgroundState::NewLC( CCalenController& aController,
                                                             RHashSet<TCalenNotification>&  aOutstandingNotifications )
     {
-    OstTraceFunctionEntry0( CCALENBACKGROUNDSTATE_NEWLC_ENTRY );
-    
+    TRACE_ENTRY_POINT;
+
     CCalenBackgroundState* self = new ( ELeave ) CCalenBackgroundState( aController,aOutstandingNotifications );
     CleanupStack::PushL( self );
     self->ConstructL();
 
-    OstTraceFunctionExit0( CCALENBACKGROUNDSTATE_NEWLC_EXIT );
+    TRACE_EXIT_POINT;
     return self;
     }
 
@@ -50,11 +47,10 @@ CCalenBackgroundState* CCalenBackgroundState::NewLC( CCalenController& aControll
 // ----------------------------------------------------------------------------
 void CCalenBackgroundState::ConstructL()
     {
-    OstTraceFunctionEntry0( CCALENBACKGROUNDSTATE_CONSTRUCTL_ENTRY );
-    
+    TRACE_ENTRY_POINT;
     BaseConstructL();
     
-    OstTraceFunctionExit0( CCALENBACKGROUNDSTATE_CONSTRUCTL_EXIT );
+    TRACE_EXIT_POINT;
     }
     
 // ----------------------------------------------------------------------------
@@ -65,9 +61,9 @@ CCalenBackgroundState::CCalenBackgroundState( CCalenController& aController,
                                                                 RHashSet<TCalenNotification>&  aOutstandingNotifications )
     : CCalenState( aController, aOutstandingNotifications )
     {
-    OstTraceFunctionEntry0( CCALENBACKGROUNDSTATE_CCALENBACKGROUNDSTATE_ENTRY );
+    TRACE_ENTRY_POINT;
     
-    OstTraceFunctionExit0( CCALENBACKGROUNDSTATE_CCALENBACKGROUNDSTATE_EXIT );
+    TRACE_EXIT_POINT;
     }
     
 // ----------------------------------------------------------------------------
@@ -76,9 +72,9 @@ CCalenBackgroundState::CCalenBackgroundState( CCalenController& aController,
 // ----------------------------------------------------------------------------    
 CCalenBackgroundState::~CCalenBackgroundState()
     {
-    OstTraceFunctionEntry0( DUP1_CCALENBACKGROUNDSTATE_CCALENBACKGROUNDSTATE_ENTRY );
+    TRACE_ENTRY_POINT;
     
-    OstTraceFunctionExit0( DUP1_CCALENBACKGROUNDSTATE_CCALENBACKGROUNDSTATE_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
@@ -88,8 +84,7 @@ CCalenBackgroundState::~CCalenBackgroundState()
 TBool CCalenBackgroundState::HandleCommandL( const TCalenCommand& aCommand,
                                            CCalenStateMachine& aStateMachine )
     {
-    OstTraceFunctionEntry0( CCALENBACKGROUNDSTATE_HANDLECOMMANDL_ENTRY );
-      
+    TRACE_ENTRY_POINT;  
     
     //When application is pushed background
     //1,when launched from active idle ,( AI screen or missed alarm softnotification/small indicator),
@@ -106,8 +101,10 @@ TBool CCalenBackgroundState::HandleCommandL( const TCalenCommand& aCommand,
 
     switch( cmd )
         {
-        case ECalenAgendaView:
         case ECalenDayView:
+        case ECalenTodoView:
+        case ECalenMonthView:
+        case ECalenWeekView:
             SetCurrentState(aStateMachine,CCalenStateMachine::ECalenIdleState);
             cmdUsed = ETrue;
             break;
@@ -115,8 +112,22 @@ TBool CCalenBackgroundState::HandleCommandL( const TCalenCommand& aCommand,
             SetCurrentState(aStateMachine,CCalenStateMachine::ECalenViewingState);
             cmdUsed = ETrue;
             break;
-        case ECalenFasterAppExit:        	
-			if(iPreviousState == CCalenStateMachine::ECalenDeletingState)
+        case ECalenEventViewFromAlarm:
+        case ECalenEventViewFromAlarmStopOnly:
+            SetCurrentState(aStateMachine,CCalenStateMachine::ECalenAlarmState);
+            cmdUsed = ETrue;
+            break;
+        case ECalenFasterAppExit:
+        	if(iPreviousState == CCalenStateMachine::ECalenMapState)
+				{
+				// Issue map launch cancel notification
+				iController.BroadcastNotification(ECalenNotifyCancelMapLaunch);
+		        SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
+		        ActivateCurrentStateL(aStateMachine);
+		        cmdUsed = ETrue;
+		        break;
+		   		}
+        	else if(iPreviousState == CCalenStateMachine::ECalenDeletingState)
         	    {
                 // Issue ECalenNotifyDeleteFailed notification to cancel the delete
                 iController.BroadcastNotification(ECalenNotifyDeleteFailed);
@@ -124,24 +135,24 @@ TBool CCalenBackgroundState::HandleCommandL( const TCalenCommand& aCommand,
                 ActivateCurrentStateL(aStateMachine);
                 cmdUsed = ETrue;                 
         	    }
-        	else
-				{
-				if( iPreviousState == CCalenStateMachine::ECalenSettingsState
+        	else if( iPreviousState == CCalenStateMachine::ECalenSettingsState
         	       || iPreviousState == CCalenStateMachine::ECalenEditingState
-        	       || iPreviousState == CCalenStateMachine::ECalenSendingState )
-	        	    {
-	                SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
-	                ActivateCurrentStateL(aStateMachine);
-	                cmdUsed = ETrue;                 
-	        	    }
-				}
+        	       || iPreviousState == CCalenStateMachine::ECalenSendingState 
+        	       || iPreviousState == CCalenStateMachine::ECalenIdleState 
+                   || iPreviousState == CCalenStateMachine::ECalenViewingState
+                   || iPreviousState == CCalenStateMachine::ECalenAttachmentState)
+        	    {
+                SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
+                ActivateCurrentStateL(aStateMachine);
+                cmdUsed = ETrue;                 
+        	    }
         default:
             break;
         }
-    
+    if(cmdUsed)
     RequestCallbackL( handler, aCommand );
     
-    OstTraceFunctionExit0( CCALENBACKGROUNDSTATE_HANDLECOMMANDL_EXIT );
+    TRACE_EXIT_POINT;
     return cmdUsed;
     }
 
@@ -152,13 +163,20 @@ TBool CCalenBackgroundState::HandleCommandL( const TCalenCommand& aCommand,
 void CCalenBackgroundState::HandleNotificationL(const TCalenNotification& aNotification,
                                                  CCalenStateMachine& aStateMachine )
     {
-    OstTraceFunctionEntry0( CCALENBACKGROUNDSTATE_HANDLENOTIFICATIONL_ENTRY );
+    TRACE_ENTRY_POINT;
     
     switch( aNotification )
         {
         case ECalenNotifyAppForegrounded:
         	{
-        	SetCurrentState( aStateMachine, iPreviousState );
+        	if( iPreviousState == CCalenStateMachine::ECalenSendingState )
+        	    {
+        	    SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
+        	    }
+        	else
+        	    {
+                SetCurrentState( aStateMachine, iPreviousState );
+        	    }
         	// We set iOutstandingNotifications for two reasons.
         	// 1. The new state i.e. the state we are moving back can have notification info.
         	// 2. When we move to newstate we broadcast all notification from iOutstandingNotifications
@@ -177,7 +195,7 @@ void CCalenBackgroundState::HandleNotificationL(const TCalenNotification& aNotif
             break;
         }
     
-    OstTraceFunctionExit0( CCALENBACKGROUNDSTATE_HANDLENOTIFICATIONL_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
@@ -186,14 +204,13 @@ void CCalenBackgroundState::HandleNotificationL(const TCalenNotification& aNotif
 // ----------------------------------------------------------------------------
 void CCalenBackgroundState::HandleStateActivationL(CCalenStateMachine& aStateMachine)
     {
-    OstTraceFunctionEntry0( CCALENBACKGROUNDSTATE_HANDLESTATEACTIVATIONL_ENTRY );
-    
+    TRACE_ENTRY_POINT;
     if(iOutstandingNotifications.Find(ECalenNotifyAppBackgrounded))
         {
         CCalenState::HandleStateActivationL(aStateMachine);
         }
     
-    OstTraceFunctionExit0( CCALENBACKGROUNDSTATE_HANDLESTATEACTIVATIONL_EXIT );
+    TRACE_EXIT_POINT;
     }
 
  // end of file

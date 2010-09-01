@@ -1,0 +1,62 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Meeting request command definitions for callback
+*
+*/
+
+
+
+#ifndef MRCOMMANDS_HRH
+#define MRCOMMANDS_HRH
+
+enum EMRCommands
+    {
+    //ui commands *common*
+    EMRCommandRespondAccept = 0x06000,  // respond and exit viewer
+    EMRCommandRespondTentative,         // respond and exit viewer
+    EMRCommandRespondDecline,           // respond and exit viewer
+    EMRCommandReplyToSender,            // reply with e-mail
+    EMRCommandReplyToOrganiser,         // reply with e-mail
+    EMRCommandReplyToAll,               // reply with e-mail
+    EMRCommandForward,                  // forward request as an e-mail
+    EMRCommandRetrieve,                 // retrieve e-mail attachments
+    EMRCommandRemoveFromCalendar,       // remove from calendar and exit viewer
+    EMRCommandShowCalendar,             // show calendar
+    EMRCommandAttachments,              // view e-mail attachments
+    EMRCommandMessageDetails,           // view e-mail details
+    EMRCommandDisableAlarm,             // disable request alarm
+    EMRCommandShowDescriptionView,      // launch MR details view
+    EMRCommandShowAttendeesView,        // launch attendee view
+    EMRCommandShowSummaryView,          // launch MR view
+    EMRCommandSave,                     // save request
+    EMRCommandSaveFromFile,             // save to calendar from a file
+    EMRCommandSaveAndExit,              // save request and exit viewer
+    EMRCommandSend,                     // send request and exit viewer
+    EMRCommandSendUpdate,               // send update and exit viewer
+    EMRCommandCancelMR,                 // cancel request and exit viewer
+    EMRCommandDeleteMR,                 // delete request and exit viewer
+    
+    //either one is valid for options menu
+    EMRCommandHelpMeetingRequestView,
+    EMRCommandHelpMeetingDescriptionView,
+
+    //non ui commands
+    EMRCommandUnreadOpeningNote,
+    EMRCommandExitDialogs,
+    EMRCommandNavigateBackward,
+    EMRCommandNavigateForward,
+    EMRCommandsLast
+    };
+
+#endif // MRCOMMANDS_HRH

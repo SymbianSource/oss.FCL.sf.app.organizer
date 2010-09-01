@@ -1,0 +1,86 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Contains menu command ids of clock views.
+*
+*/
+
+#ifndef __CLOCK_HRH__
+#define __CLOCK_HRH__
+
+/** Menu item command ids */
+enum TClockCommands
+	{
+	EClockNewAlarm = 0x5500,
+	EClockResetAlarm,
+	EClockDeactivateAlarm,
+	EClockActivateAlarm,
+	EClockRemoveAlarm,
+	EClockSettings,
+	EClockMainViewHelp,
+	EClockMainViewExit,
+	EClockSwitchClockType,
+//single click integration
+    	EClockSelect,
+//remove snooze
+    	EClockRemoveSnooze
+	};
+
+/** Menu item command ids for world view */
+enum TClockWorldViewCommands
+	{
+	EClockWorldAddRegion = 0x8000,
+	EClockWorldRemoveRegion,
+	EClockWorldMyRegion,
+	EClockWorldAddImage,
+	EClockWorldSettings,
+	EClockWorldHelp,
+	EClockWorldExit
+	};
+
+/** Command id for world clock MSK */
+enum TClockWorldMSKCommand
+	{
+	EClockWorldMSKAddRegion = 0x6500
+	};
+
+/** The control ids for the alarm editor form controls */
+enum TClockAlarmEditorControls
+	{
+	EControlTimeEditor = 1,
+	EControlTextEditor,
+	EControlOccurancePopup,
+	EControlAlarmDayPopup
+	};
+
+/** The clock application view ids */
+enum TClockAppViewIds
+	{
+	EClockAppMainViewId = 1,
+	EClockAppWorldViewId,
+	EClkDateTimeViewId
+	};
+
+/** The clock alarm editor option commands */
+enum TClockAlarmEditorCommands
+	{
+	EClockAlarmChange = 0x5000,
+	EClockAlarmDiscardChanges,
+	EClockAlarmDelete, 
+	EClockAlarmHelp,
+	EClockAlarmExit
+	};
+
+#endif 		// __HUICLOCK_HRH__
+
+// End of file

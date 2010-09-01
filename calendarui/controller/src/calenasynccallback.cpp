@@ -11,88 +11,82 @@
 *
 * Contributors:
 *
-* Description:  Calendar async callback implementation
+* Description:   Calendar async callback implementation
  *
 */
+
 
  
  // INCLUDE FILES
  
 #include "calenasynccallback.h"
-#include "calendarui_debug.h"
-#include "OstTraceDefinitions.h"
-#ifdef OST_TRACE_COMPILER_IN_USE
-#include "calenasynccallbackTraces.h"
-#endif
- 
+#include "calendarui_debug.h" 
 
 
 // ---------------------------------------------------------------------------
-// CalenAsyncCallBack::CalenAsyncCallBack
+// CCalenAsyncCallBack::CCalenAsyncCallBack
 // C++ constructor
 // (other items were commented in a header).
 // ---------------------------------------------------------------------------
 //
-CalenAsyncCallBack::CalenAsyncCallBack(TCallBack& aCallBack, CActive::TPriority  aPriority,
+CCalenAsyncCallBack::CCalenAsyncCallBack(TCallBack& aCallBack, CActive::TPriority  aPriority,
                                          CCalenController& aController)
     :CAsyncCallBack(aCallBack, aPriority),
     iController(aController)
     {
-    OstTraceFunctionEntry0( CALENASYNCCALLBACK_CALENASYNCCALLBACK_ENTRY );
-     
-    OstTraceFunctionExit0( CALENASYNCCALLBACK_CALENASYNCCALLBACK_EXIT );
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;    
     }
 
 // ---------------------------------------------------------------------------
-// CalenAsyncCallBack::NewL
+// CCalenAsyncCallBack::NewL
 // First phase construction
 // (other items were commented in a header).
 // ---------------------------------------------------------------------------
 //  
-CalenAsyncCallBack* CalenAsyncCallBack::NewL(TCallBack& aCallBack, CActive::TPriority  aPriority,
+CCalenAsyncCallBack* CCalenAsyncCallBack::NewL(TCallBack& aCallBack, CActive::TPriority  aPriority,
                              CCalenController& aController)
     {
-    OstTraceFunctionEntry0( CALENASYNCCALLBACK_NEWL_ENTRY );
-    
-    CalenAsyncCallBack* self = new( ELeave ) CalenAsyncCallBack( aCallBack, aPriority , aController );
+    TRACE_ENTRY_POINT;
+  
+    CCalenAsyncCallBack* self = new( ELeave ) CCalenAsyncCallBack( aCallBack, aPriority , aController );
 
-    OstTraceFunctionExit0( CALENASYNCCALLBACK_NEWL_EXIT );
+    TRACE_EXIT_POINT;
     return self;
     }
 // ---------------------------------------------------------------------------
-// CalenAsyncCallBack::~CalenAsyncCallBack
+// CCalenAsyncCallBack::~CCalenAsyncCallBack
 // C++ Destructor
 // (other items were commented in a header).
 // ---------------------------------------------------------------------------
 //	
-CalenAsyncCallBack::~CalenAsyncCallBack()
+CCalenAsyncCallBack::~CCalenAsyncCallBack()
 	{
-	OstTraceFunctionEntry0( DUP1_CALENASYNCCALLBACK_CALENASYNCCALLBACK_ENTRY );
-	
-	OstTraceFunctionExit0( DUP1_CALENASYNCCALLBACK_CALENASYNCCALLBACK_EXIT );
+	TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
 	}
 
 // ---------------------------------------------------------------------------
-// CalenAsyncCallBack::BaseConstructL
+// CCalenAsyncCallBack::BaseConstructL
 // (other items were commented in a header).
 // ---------------------------------------------------------------------------
 //
-void CalenAsyncCallBack::BaseConstructL()
+void CCalenAsyncCallBack::BaseConstructL()
 	{
-	OstTraceFunctionEntry0( CALENASYNCCALLBACK_BASECONSTRUCTL_ENTRY );
+	TRACE_ENTRY_POINT;
 
-	OstTraceFunctionExit0( CALENASYNCCALLBACK_BASECONSTRUCTL_EXIT );
+    TRACE_EXIT_POINT;
 	}
 	
 // ---------------------------------------------------------------------------
-// CalenAsyncCallBack::RunL
+// CCalenAsyncCallBack::RunL
 // Handle Completion
 // (other items were commented in a header).
 // ---------------------------------------------------------------------------
 //	
-void CalenAsyncCallBack::RunL()
+void CCalenAsyncCallBack::RunL()
 	{
-	OstTraceFunctionEntry0( CALENASYNCCALLBACK_RUNL_ENTRY );
+	TRACE_ENTRY_POINT;
 	
 	if(iCallBack.CallBack())
 	    {
@@ -100,8 +94,8 @@ void CalenAsyncCallBack::RunL()
 	    // request for continuing the executing command
 	    CallBack();
 	    }
-	
-	OstTraceFunctionExit0( CALENASYNCCALLBACK_RUNL_EXIT );
+        
+	TRACE_EXIT_POINT;
 	}
 
 

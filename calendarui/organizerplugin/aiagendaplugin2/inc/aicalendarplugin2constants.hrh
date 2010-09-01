@@ -1,0 +1,118 @@
+/*
+* Copyright (c) 2005-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+ *
+*/
+
+#ifndef AICALENDARPLUGIN2CONSTANTS_HRH
+#define AICALENDARPLUGIN2CONSTANTS_HRH
+
+#include <uikon.hrh>
+#include <data_caging_path_literals.hrh>
+
+/**
+ * Remapped calendar entry types. These have additional typing according to
+ * to starting and ending times. Actual CAgnEntry::TType's are mapped to these.
+ * And only these are used in the code.
+ */
+enum TAICal2PluginItemType
+    {
+    EPluginItemNoEvents = 0,       // Used for plugin specific lines: such as title and
+                                   // "No more Calendar events for today" etc
+    EPluginItemToDo,               // CAgnEntry::TType::ETodo
+    EPluginItemMeeting,            // CAgnEntry::TType::EAppt: Meeting starting within 2 hrs.
+    EPluginItemDayNote,            // CAgnEntry::TType::EEvent
+    EPluginItemAnniv,              // CAgnEntry::TType::EEAnniv
+/*    EPluginItemNotToday,           // CAgnEntry::TType::EAppt: Meeting which has starting
+                                   //                          time tomorrow or later.
+    EPluginItemNotTodayNonTimed,   // CAgnEntry::TType::EEvent, EAnniv, ETodo*/
+    EPluginItemUpcomingMeeting,    // CAgnEntry::TType::EAppt: Timed event whose start time is more that
+                                   //                          2hrs away.
+    EPluginItemOnGoingEvent,       // CAgnEntry::TType::EAppt: Timed event whose start time is less than
+                                   //                          30 mins ago and end time not passed yet.
+    EPluginItemOlderOnGoingEvent,  // CAgnEntry::TType::EAppt: Timed event whose start time is passed more
+                                   //                          than 30 min and ending time > current time.
+    EPluginItemExpired,            // Expired events are skipped.
+                                   // End time > current time
+    };
+
+/**
+ * Calendar settings we expect to receive from framework.
+ * See comments in receiving method void CAICalendarPlugin2::ConfigureL
+ */
+enum TAICal2PluginSettings
+    {
+    EPluginEventItemCount = 1,
+    EPluginTimedEventLineCount,
+    EPluginNonTimedEventLineCount,
+    EPluginNonTimedReservedItems,
+    EPluginAppendEndTimeToOngoingItems,
+    EPluginUseAlternatePublishForUpcomingAndOngoingItems,
+    EPluginOpenInViewerOrEditor,
+    EPluginDaysToHandleAsNotToday,
+    EPluginOpenFirstValidOnIndexZero,
+    EPluginPublishInfoWithAlternateId
+    };
+
+// Default actual calendar item count
+const TInt KAICal2DefaultActualLines = 3;
+// Default nontimed item reservation
+const TInt KAICal2DefaultItemReservation = 2;
+
+_LIT     ( KAICal2SpaceChar, " " );
+const TInt KAICal2LenSpaceChar( 1 );
+_LIT     ( KAICal2HyphenChar, "-" );
+
+#define KAICal2SizeTimeFormatUsual 27  // typical: 12:34 AM[hyphen]12:56 PM (+some extra space) 
+                                       // worst  : 12:00 AM - 24/05 11:00 PM (+some extra space)
+#define KAICal2SizeDateShort 15  // 31.12.04 (+some extra space)
+
+#define KAICal2SizeDayShort 15  // monday / tuesday etc (+some extra space)
+
+const TUid KCalendarAppUID = { 0x10005901 };
+
+#define KAICal2MaxItemSize 2  // max. lines/item
+
+const TInt KAIRangeTomorrowOnly = 1;
+
+const TInt KAICal2DefaultBufferLen = 35;
+
+_LIT( KAICal2WesternSummaryLocationSeparator, ", " );
+_LIT( KAICal2ArabicSummaryLocationSeparator, " \x060c" );
+/**
+ * KReplaceWhitespaceChars contains some characters that should be replaced by space
+ * in Calendar popup, day view etc. 
+ * Following characters are replaced with space
+ * \x0009 horizontal tab
+ * \x000a new line
+ * \x000b line tabulation (vertical
+ * \x000c form feed
+ * \x000d carriage return
+ * \x2028 line separator
+ * \x2029 paragraph separator
+ */
+_LIT( KAICal2ReplaceWhitespaceChars,
+"\x0009\x000A\x000B\x000C\x000D\x2028\x2029" );
+
+_LIT16( KAICal2CmdTODAY, "TODAY" ); // Calendar command parameter
+_LIT16( KAICal2CmdDAY, "DAY " ); // Calendar command parameter
+_LIT16( KAICal2CmdDATE, "DATE " ); // Calendar command parameter
+_LIT16( KAICal2CmdLUID, "LUID " ); // Calendar command parameter
+_LIT16( KAICal2CmdLUIDViewer, "LUIDVIEWER " ); // Calendar command parameter
+_LIT( KAICal2CmdTimeFormat, "%F%Y %M %D %H %T %S %C" ); // "YYYY MM DD HH MM SS MMMMMM" - 26
+
+#endif  // AICALENDARPLUGIN2CONSTANTS_HRH
+
+
+// End of File

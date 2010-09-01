@@ -1,0 +1,39 @@
+<script xmlns="http://www.nokia.com/ns/cep/script/1.0/" xmlns:cep="http://www.nokia.com/ns/cep/1.0/">
+    <!-- If alarm is not active, nothing needs to be done -->
+    <if>
+        <equals>
+            <contextRef source='Alarm' type='Status.Active' value='false'/>
+        </equals>
+        <actions>
+            <!-- Do nothing -->
+        </actions>        
+    </if>
+    
+    <!-- Snooze alarm when device is turned upside down -->
+    <elseIf>
+        <and>
+            <!-- Check that turning interaction is set -->
+            <equals>
+            	   <contextRef source='Sensor' type='Setting.TurningInteraction.SilenceAlarm'/>
+                 <string>On</string>
+            </equals>
+                 <!-- ...and previous orientation is not 'Undefined' ... -->
+            <notEqual>
+                 <contextRef source='Sensor' type='Event.Orientation.Previous'/>
+                 <string>Undefined</string>
+            </notEqual>
+                 <!-- ...and we receive a new orientation event from sensors... -->
+	    <contextChanged>
+	         <contextRef source='Sensor' type='Event.Orientation'/>
+	    </contextChanged>
+    	    <equals>
+                 <contextRef source='Sensor' type='Event.Orientation'/>
+                 <string>DisplayDownwards</string>
+    	    </equals>
+        </and>
+        <actions>
+           <!-- snooze the alarm -->
+            <AlarmUI.Snooze/>
+        </actions>
+    </elseIf>
+</script>

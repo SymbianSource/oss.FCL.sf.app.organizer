@@ -1,0 +1,152 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:      Resource SearchSettingsPlugin.
+*
+*/
+
+
+
+
+
+
+//  RESOURCE IDENTIFIER
+NAME    ABCD // 4 letter ID
+
+//  INCLUDES
+#include    <avkon.loc>
+#include    <avkon.mbg>
+#include    <avkon.rsg>
+#include 	<avkon.rh>
+#include    <data_caging_paths_strings.hrh>
+#include    <eikcore.rsg>
+#include    <eikon.rsg>
+#include 	<eikon.rh>
+#include    <uikon.rh>
+
+#include  <SearchSettingsPlugin.loc>
+#include "SearchSettingsPlugin.hrh"
+
+//----------------------------------------------------
+//
+//
+//    Needed or loading the resource fails!
+//
+//----------------------------------------------------
+//
+RESOURCE RSS_SIGNATURE
+    {
+    }
+
+
+RESOURCE MENU_PANE r_search_app_menu_pane
+    {
+    items=
+        {
+        };
+    }
+    
+    
+// -----------------------------------------------------------------------------
+//   
+// r_search_softkeys_options_open_back
+// CBA Keys. 
+//
+// -----------------------------------------------------------------------------
+//
+
+
+RESOURCE CBA r_qtn_softkeys_option_open_back
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_back; },
+        CBA_BUTTON { id = EAknSoftkeyOpen; txt = text_softkey_open; }
+        };
+    }
+    
+//----------------------------------------------------
+//
+//    r_gs_applications_view
+//    Applications view.
+//
+//----------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_gs_applications_view
+    {
+    menubar = r_gs_menubar_open_exit;
+    cba = R_AVKON_SOFTKEYS_OPTIONS_BACK;
+    }
+//******************
+
+RESOURCE MENU_BAR r_gs_menubar_open_exit
+    {
+    titles=
+        {
+        MENU_TITLE { menu_pane = r_search_app_menu_pane;},
+        MENU_TITLE { menu_pane = r_search_view_menu_pane;}
+        };
+    }
+
+RESOURCE MENU_PANE r_search_view_menu_pane
+    {
+    items=
+        {
+        
+        MENU_ITEM { command = ESearchCmdOpen;
+                   txt = "Open";},
+
+        MENU_ITEM { command = EAknSoftkeyExit;   
+                    txt = "Exit"; }
+        };
+    }
+//******************    
+
+//----------------------------------------------------
+//
+//    r_gs_search_view_title
+//    Application view's title.
+//
+//----------------------------------------------------
+//
+RESOURCE TITLE_PANE r_gs_search_view_title
+    {
+    txt = qtn_title_search_settings;
+    }
+
+//----------------------------------------------------
+//  r_gs_search_view_caption
+//
+// Applications view caption for plugin
+//----------------------------------------------------
+//
+RESOURCE TBUF r_gs_search_view_caption
+    {
+    buf = "Search";//qtn_set_folder_applications;
+    }
+    
+//----------------------------------------------------
+//  r_gs_search_view_caption
+//
+// Applications view caption for plugin
+//----------------------------------------------------
+//
+RESOURCE TBUF r_search_view_caption
+    {
+    buf = qtn_set_search_applications;
+    }
+
+
+// ******  PDATA RESOURCES END     ******
+//End of File

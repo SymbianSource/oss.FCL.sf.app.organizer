@@ -22,26 +22,22 @@
 #include "calencontroller.h"
 #include "calenstatemachine.h"
 #include "calennotifier.h"
-#include "OstTraceDefinitions.h"
-#ifdef OST_TRACE_COMPILER_IN_USE
-#include "calenidlestateTraces.h"
-#endif
 
 // ----------------------------------------------------------------------------
-// CalenIdleState::NewLC
+// CCalenIdleState::NewLC
 // First stage construction
 // ----------------------------------------------------------------------------
 CCalenIdleState* CCalenIdleState::NewLC( CCalenController& aController, 
                     RHashSet<TCalenNotification>&  aOutstandingNotifications  )
     {
-    OstTraceFunctionEntry0( CCALENIDLESTATE_NEWLC_ENTRY );
-    
+    TRACE_ENTRY_POINT;
+
     CCalenIdleState* self = new ( ELeave ) CCalenIdleState( aController, 
                                                     aOutstandingNotifications );
     CleanupStack::PushL( self );
     self->ConstructL();
 
-    OstTraceFunctionExit0( CCALENIDLESTATE_NEWLC_EXIT );
+    TRACE_EXIT_POINT;
     return self;
     }
 
@@ -51,11 +47,10 @@ CCalenIdleState* CCalenIdleState::NewLC( CCalenController& aController,
 // ----------------------------------------------------------------------------
 void CCalenIdleState::ConstructL()
     {
-    OstTraceFunctionEntry0( CCALENIDLESTATE_CONSTRUCTL_ENTRY );
-    
+    TRACE_ENTRY_POINT;
     BaseConstructL();
     
-    OstTraceFunctionExit0( CCALENIDLESTATE_CONSTRUCTL_EXIT );
+    TRACE_EXIT_POINT;
     }
     
 // ----------------------------------------------------------------------------
@@ -66,9 +61,9 @@ CCalenIdleState::CCalenIdleState( CCalenController& aController,
                     RHashSet<TCalenNotification>&  aOutstandingNotifications )
     : CCalenState( aController, aOutstandingNotifications )
     {
-    OstTraceFunctionEntry0( CCALENIDLESTATE_CCALENIDLESTATE_ENTRY );
+    TRACE_ENTRY_POINT;
     
-    OstTraceFunctionExit0( CCALENIDLESTATE_CCALENIDLESTATE_EXIT );
+    TRACE_EXIT_POINT;
     }
     
 // ----------------------------------------------------------------------------
@@ -77,9 +72,9 @@ CCalenIdleState::CCalenIdleState( CCalenController& aController,
 // ----------------------------------------------------------------------------    
 CCalenIdleState::~CCalenIdleState()
     {
-    OstTraceFunctionEntry0( DUP1_CCALENIDLESTATE_CCALENIDLESTATE_ENTRY );
+    TRACE_ENTRY_POINT;
     
-    OstTraceFunctionExit0( DUP1_CCALENIDLESTATE_CCALENIDLESTATE_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
@@ -89,7 +84,7 @@ CCalenIdleState::~CCalenIdleState()
 TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
                                        CCalenStateMachine& aStateMachine )
     {
-    OstTraceFunctionEntry0( CCALENIDLESTATE_HANDLECOMMANDL_ENTRY );
+    TRACE_ENTRY_POINT;
     
     TInt cmd = aCommand.Command();
     MCalenCommandHandler* handler = iController.GetCommandHandlerL( cmd );
@@ -101,21 +96,11 @@ TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
     switch( cmd )
         {
         case ECalenMonthView:
+        case ECalenWeekView:
         case ECalenDayView:
-        case ECalenAgendaView:
-        case ECalenStartActiveStep:
-            {
-            // set previous state to idle
-            CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
-            SetCurrentState( aStateMachine, CCalenStateMachine::ECalenPopulationState );
-            SetCurrentPreviousState( aStateMachine, cachedState );
-            ActivateCurrentStateL(aStateMachine);               
-            cmdUsed = ETrue;
-            }
-            break;
-        case ECalenTodoEditor:
-        case ECalenTodoEditorDone:
+        case ECalenTodoView:
         case ECalenForwardsToDayView:
+        case ECalenForwardsToWeekView:
         case ECalenNextView:
         case ECalenPrevView:
         case ECalenSwitchView:
@@ -135,7 +120,16 @@ TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
         	 cmdUsed = ETrue;
              break;
         
-        
+        case ECalenStartActiveStep:
+        	{
+        	// set previous state to idle
+            CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
+            SetCurrentState( aStateMachine, CCalenStateMachine::ECalenPopulationState );
+           	SetCurrentPreviousState( aStateMachine, cachedState );
+            ActivateCurrentStateL(aStateMachine);           	
+           	cmdUsed = ETrue;
+           	}
+           	break;
         case ECalenEventView: 
         case ECalenMissedEventView: 
             {
@@ -148,11 +142,11 @@ TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
         	}
         	break;
         case ECalenNewMeeting:
+        case ECalenNewTodo:
         case ECalenNewAnniv:
         case ECalenNewDayNote:
         case ECalenNewReminder:
         case ECalenNewMeetingRequest:
-        case ECalenNewEntry:
         case ECalenEditCurrentEntry:
         case ECalenEditSeries:
         case ECalenEditOccurrence:
@@ -213,8 +207,35 @@ TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
         case ECalenGetLocation:
     	case ECalenShowLocation:
     	case ECalenGetLocationAndSave:
-    		{    		
-    		}       
+    		{
+    		CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
+	        SetCurrentState( aStateMachine, CCalenStateMachine::ECalenMapState );
+	        SetCurrentPreviousState( aStateMachine, cachedState );
+	        ActivateCurrentStateL(aStateMachine);        
+	        cmdUsed = ETrue;
+    		}
+			break;
+		case ECalenEventViewFromAlarm:
+        case ECalenEventViewFromAlarmStopOnly:	
+			{
+			CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
+            SetCurrentState( aStateMachine, CCalenStateMachine::ECalenAlarmState);
+            SetCurrentPreviousState( aStateMachine, cachedState );
+            ActivateCurrentStateL(aStateMachine);            
+            cmdUsed = ETrue;
+			}
+			break;
+    	case ECalenAddAttachment:
+    	case ECalenRemoveAttachment:
+    	case ECalenViewAttachmentList:    
+    	    {
+    	    CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
+    	    SetCurrentState( aStateMachine, CCalenStateMachine::ECalenAttachmentState );
+            SetCurrentPreviousState( aStateMachine, cachedState );
+            ActivateCurrentStateL(aStateMachine);        
+            cmdUsed = ETrue;
+    	    }
+    	    break;
         default:
             // This a valid custom command as there is a command handler
             // do not modify the new start and remain in idle.
@@ -225,7 +246,7 @@ TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
         
     RequestCallbackL( handler, aCommand );
 
-    OstTraceFunctionExit0( CCALENIDLESTATE_HANDLECOMMANDL_EXIT );
+    TRACE_EXIT_POINT;
     return cmdUsed;
     }
 
@@ -236,11 +257,11 @@ TBool CCalenIdleState::HandleCommandL( const TCalenCommand& aCommand,
 void CCalenIdleState::HandleNotificationL(const TCalenNotification& aNotification,
                                           CCalenStateMachine& aStateMachine)
     {
-    OstTraceFunctionEntry0( CCALENIDLESTATE_HANDLENOTIFICATIONL_ENTRY );
+    TRACE_ENTRY_POINT;
     
     CCalenState::HandleNotificationL( aNotification, aStateMachine );
     
-    OstTraceFunctionExit0( CCALENIDLESTATE_HANDLENOTIFICATIONL_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // end of file

@@ -1,0 +1,60 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project specification file of Text Recognizer.
+*
+*/
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+#ifdef EKA2
+
+TARGET          txtrecog.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D 0x100059ab
+
+START RESOURCE  100059ab.rss
+ #ifdef SYMBIAN_SECURE_ECOM
+ TARGET          txtrecog.rsc
+ #endif
+END
+
+#else //!EKA2
+
+TARGET          TxtRecog.MDL
+TARGETTYPE      MDL
+UID             0x10003A19 0x100059ab
+TARGETPATH      /system/recogs\
+
+#endif //EKA2
+
+CAPABILITY      CAP_RECOGNISER
+VENDORID        VID_DEFAULT
+SOURCEPATH      ../src
+SOURCE          TxtRecog.cpp
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../SrcData
+SYSTEMINCLUDE   /epoc32/include/ecom
+APP_LAYER_SYSTEMINCLUDE
+
+SOURCEPATH      ../SrcData
+START RESOURCE TxtRecog.rss
+HEADER
+	TARGETPATH APP_RESOURCE_DIR
+END //RESOURCE
+LIBRARY         euser.lib
+LIBRARY         apmime.lib 
+LIBRARY         bafl.lib 
+LIBRARY         efsrv.lib 

@@ -67,7 +67,7 @@ class TCalRRule;
 class CCalEntryIdImpl;
 
 /** Class representing a calendar entry. This can be an appointment, to-do
-item, reminder, event, anniversary, note.
+item, reminder, event or anniversary.
 
 CCalEntry contains information about a calendar entry, including
 a repeat definition, synchronisation information, and group scheduling data.
@@ -99,9 +99,7 @@ public:
 		/** A reminder, which has a start time only. */
 		EReminder,
 		/** An anniversary, which has a start time and end time. */
-		EAnniv,
-		/** A text note which has description */
-		ENote
+		EAnniv
 		};
 
 	/** Defines the possible status values of the entry.
@@ -319,10 +317,7 @@ public:
 	IMPORT_C TCalTime PreviousInstanceForLocalUIDL(const TCalTime& aTime) const;
 
 	IMPORT_C TCalTime FindRptUntilTimeL(TInt aCount);
-
-	IMPORT_C void SetFavouriteL(TUint32 aFavourite);
-	IMPORT_C TUint32 FavouriteL();
-	
+    
 public:
 	// Internal APIs
 	static CCalEntry* NewL(CCalEntryImpl* aImpl);

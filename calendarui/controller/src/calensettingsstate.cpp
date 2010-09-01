@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2007-2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -17,16 +17,14 @@
 
 
 // includes
+#include <calentoolbar.h>
+
 #include "calensettingsstate.h"
 #include "calendarui_debug.h"           // Debug macros
 #include "calencontroller.h"
 #include "calenstatemachine.h"
 #include "calennotifier.h"
 #include "calenviewmanager.h"
-#include "OstTraceDefinitions.h"
-#ifdef OST_TRACE_COMPILER_IN_USE
-#include "calensettingsstateTraces.h"
-#endif
 
 // ----------------------------------------------------------------------------
 // CCalenSettingsState::NewLC
@@ -35,14 +33,14 @@
 CCalenSettingsState* CCalenSettingsState::NewLC( CCalenController& aController,
                     RHashSet<TCalenNotification>& aOutstandingNotifications )
     {
-    OstTraceFunctionEntry0( CCALENSETTINGSSTATE_NEWLC_ENTRY );
-    
+    TRACE_ENTRY_POINT;
+
     CCalenSettingsState* self = new ( ELeave ) CCalenSettingsState( aController,
                                                     aOutstandingNotifications );
     CleanupStack::PushL( self );
     self->ConstructL();
 
-    OstTraceFunctionExit0( CCALENSETTINGSSTATE_NEWLC_EXIT );
+    TRACE_EXIT_POINT;
     return self;
     }
 
@@ -52,11 +50,10 @@ CCalenSettingsState* CCalenSettingsState::NewLC( CCalenController& aController,
 // ----------------------------------------------------------------------------
 void CCalenSettingsState::ConstructL()
     {
-    OstTraceFunctionEntry0( CCALENSETTINGSSTATE_CONSTRUCTL_ENTRY );
-    
+    TRACE_ENTRY_POINT;
     BaseConstructL();
     
-    OstTraceFunctionExit0( CCALENSETTINGSSTATE_CONSTRUCTL_EXIT );
+    TRACE_EXIT_POINT;
     }
     
 // ----------------------------------------------------------------------------
@@ -67,9 +64,9 @@ CCalenSettingsState::CCalenSettingsState( CCalenController& aController,
                     RHashSet<TCalenNotification>& aOutstandingNotifications )
     : CCalenState( aController, aOutstandingNotifications )
     {
-    OstTraceFunctionEntry0( CCALENSETTINGSSTATE_CCALENSETTINGSSTATE_ENTRY );
+    TRACE_ENTRY_POINT;
     
-    OstTraceFunctionExit0( CCALENSETTINGSSTATE_CCALENSETTINGSSTATE_EXIT );
+    TRACE_EXIT_POINT;
     }
     
 // ----------------------------------------------------------------------------
@@ -78,9 +75,9 @@ CCalenSettingsState::CCalenSettingsState( CCalenController& aController,
 // ----------------------------------------------------------------------------    
 CCalenSettingsState::~CCalenSettingsState()
     {
-    OstTraceFunctionEntry0( DUP1_CCALENSETTINGSSTATE_CCALENSETTINGSSTATE_ENTRY );
+    TRACE_ENTRY_POINT;
     
-    OstTraceFunctionExit0( DUP1_CCALENSETTINGSSTATE_CCALENSETTINGSSTATE_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
@@ -90,8 +87,8 @@ CCalenSettingsState::~CCalenSettingsState()
 TBool CCalenSettingsState::HandleCommandL( const TCalenCommand& aCommand,
                                         CCalenStateMachine& aStateMachine  )
     {
-    OstTraceFunctionEntry0( CCALENSETTINGSSTATE_HANDLECOMMANDL_ENTRY );
-    
+    TRACE_ENTRY_POINT;
+	    
     TInt cmd = aCommand.Command();
     MCalenCommandHandler* handler = iController.GetCommandHandlerL( cmd );
 	    
@@ -107,16 +104,15 @@ TBool CCalenSettingsState::HandleCommandL( const TCalenCommand& aCommand,
             cmdUsed = ETrue;
             }
             break;
-        case ECalenMonthView:
-        case ECalenAgendaView:
-        case ECalenDayView:
-        case ECalenStartActiveStep:
+        case ECalenMissedEventViewFromIdle:
             {
-            // set previous state to idle
-            CCalenStateMachine::TCalenStateIndex cachedState = CCalenStateMachine::ECalenIdleState;
-            SetCurrentState( aStateMachine, CCalenStateMachine::ECalenPopulationState );
-            SetCurrentPreviousState( aStateMachine, cachedState );
-            ActivateCurrentStateL(aStateMachine);               
+            cmdUsed = ETrue;
+            break;
+            }
+        case ECalenEventViewFromAlarm:
+        case ECalenEventViewFromAlarmStopOnly:
+        case ECalenDayView:
+            {
             cmdUsed = ETrue;
             }
             break;
@@ -128,7 +124,7 @@ TBool CCalenSettingsState::HandleCommandL( const TCalenCommand& aCommand,
         RequestCallbackL( handler, aCommand );
         }
 
-    OstTraceFunctionExit0( CCALENSETTINGSSTATE_HANDLECOMMANDL_EXIT );
+    TRACE_EXIT_POINT;
     return cmdUsed;
     }
 
@@ -139,13 +135,14 @@ TBool CCalenSettingsState::HandleCommandL( const TCalenCommand& aCommand,
 void CCalenSettingsState::HandleNotificationL(const TCalenNotification& aNotification,
                                                CCalenStateMachine& aStateMachine )
     {
-    OstTraceFunctionEntry0( CCALENSETTINGSSTATE_HANDLENOTIFICATIONL_ENTRY );
+    TRACE_ENTRY_POINT;
     
     switch( aNotification )
         {
         case ECalenNotifyPluginEnabledDisabled:
+        case ECalenNotifyEComRegistryChanged:    
             {
-			 CCalenState::HandleNotificationL( aNotification, aStateMachine );
+     		CCalenState::HandleNotificationL( aNotification, aStateMachine );
             }
             break;
         case ECalenNotifySettingsClosed:
@@ -156,18 +153,14 @@ void CCalenSettingsState::HandleNotificationL(const TCalenNotification& aNotific
             ActivateCurrentStateL(aStateMachine);
             }
             break;
-        case ECalenNotifySystemLocaleChanged:
-            {
-            CCalenState::HandleNotificationL( aNotification, aStateMachine );
-            }
-            break;
+
         default:
             // default is defer all other notifications when we are in setting state
             iOutstandingNotifications.InsertL(aNotification);
             break;
         }
     
-    OstTraceFunctionExit0( CCALENSETTINGSSTATE_HANDLENOTIFICATIONL_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
@@ -176,14 +169,14 @@ void CCalenSettingsState::HandleNotificationL(const TCalenNotification& aNotific
 // ----------------------------------------------------------------------------
 void CCalenSettingsState::HandleStateActivationL()
     {
-    OstTraceFunctionEntry0( CCALENSETTINGSSTATE_HANDLESTATEACTIVATIONL_ENTRY );
+    TRACE_ENTRY_POINT;
     
     if( iOutstandingNotifications.FindL(ECalenNotifySettingsCRepKeyChanged) )
         {
         iController.Notifier().BroadcastApprovedNotification( ECalenNotifySettingsCRepKeyChanged );
         }
     
-    OstTraceFunctionExit0( CCALENSETTINGSSTATE_HANDLESTATEACTIVATIONL_EXIT );
+    TRACE_EXIT_POINT;
     }
 
  // end of file

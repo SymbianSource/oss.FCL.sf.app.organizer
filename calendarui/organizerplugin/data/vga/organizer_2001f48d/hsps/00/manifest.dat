@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package version="0.3">
+
+  <family>vga</family>
+
+  <type>widget</type>
+
+  <!-- interface uid -->
+	<interfaceuid>0x2001f48a</interfaceuid>
+
+	<!-- vendor uid  -->
+	<provideruid>0x101fb657</provideruid>
+
+	<!-- uid -->
+	<configurationuid>0x2001f48d</configurationuid>
+
+	<!-- description -->
+	<fullname>Large calendar</fullname>
+	<shortname>org</shortname>
+	<version>1.0</version>
+
+	<!-- configuration -->
+	<filexml>widgetconfiguration.xml</filexml>
+	
+	<!-- Name of the localization files -->
+	<!--filedtd>organizerconfiguration.dtd</filedtd-->
+	
+	<!-- Locale specific resources -->
+  <localization>
+    <fileresource>orga.o0000</fileresource>
+  </localization>
+
+</package>

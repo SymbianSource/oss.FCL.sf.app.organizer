@@ -28,7 +28,7 @@ TARGET          aknalarmservice.dll
 TARGETTYPE      DLL
 LANGUAGE_IDS
 
-UID             0x1000008D 0x102072D4
+UID             0x1000008D 0x102072D4 // same as service uid, recycling really works ;)
 
 VENDORID        VID_DEFAULT
 
@@ -41,8 +41,10 @@ END
 USERINCLUDE     .
 USERINCLUDE     ../inc
 USERINCLUDE     ../AppServerStuff/Inc
-USERINCLUDE		../alarmalertwidget/alarmalertinterface/inc
 
+SYSTEMINCLUDE   ../../inc  //organizer include
+SYSTEMINCLUDE   ../../alarmengines/inc
+SYSTEMINCLUDE   /epoc32/include/uikon
 SYSTEMINCLUDE   /epoc32/include/ecom
 SYSTEMINCLUDE   /epoc32/include/connect
 SYSTEMINCLUDE   /epoc32/include/remcon
@@ -66,10 +68,10 @@ LIBRARY         aknnotifierwrapper.lib
 LIBRARY         aknnotifyplugin.lib
 LIBRARY         alarmclient.lib
 LIBRARY         alarmshared.lib
-LIBRARY         apgrfx.lib
-LIBRARY         apmime.lib
+LIBRARY         apgrfx.lib  // For RApaLsSession
+LIBRARY         apmime.lib  // TDataType
 LIBRARY         apparc.lib
-LIBRARY         avkon.lib
+LIBRARY         avkon.lib  // AknTextUtils, CAknServiceBase
 LIBRARY         bafl.lib
 LIBRARY         calinterimapi.lib
 LIBRARY         centralrepository.lib
@@ -86,19 +88,25 @@ LIBRARY         remconinterfacebase.lib
 LIBRARY         remconextensionapi.lib
 LIBRARY         platformenv.lib
 LIBRARY         featmgr.lib
+LIBRARY         ws32.lib
+
 
 //MPIN-73VCR2
 // For cover display support:
-LIBRARY			eikdlg.lib
-LIBRARY			estor.lib
+LIBRARY eikdlg.lib
+LIBRARY estor.lib
+LIBRARY featmgr.lib
+LIBRARY missedalarmstore.lib
+
 LIBRARY         starterclient.lib
 
 #ifdef RD_ALMALERT__SENSOR_SUPPORT
-LIBRARY			cfclient.lib
-LIBRARY			cfservices.lib
+LIBRARY         cfclient.lib
+LIBRARY         cfservices.lib
 #endif // RD_ALMALERT__SENSOR_SUPPORT
 
-LIBRARY			alarmalertwidget.lib
+// libraries needed for msk inplementation
+LIBRARY         calenlauncher.lib
 
 CAPABILITY      CAP_GENERAL_DLL
 

@@ -1,0 +1,191 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   This is project specification file for the clock.
+*
+*/
+
+// System includes
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+
+// Target information
+TARGET				clock.exe
+TARGETTYPE			exe
+TARGETPATH			/sys/bin
+
+// Uid and Capability information
+UID				0x100039CE 0x10005903
+CAPABILITY			CAP_APPLICATION PowerMgmt  
+
+// Stack and heap options
+EPOCSTACKSIZE   	0x5000
+#ifdef WINSCW
+	EPOCHEAPSIZE        0x20000 0x400000
+#else
+	EPOCHEAPSIZE        0x20000 0x1000000
+#endif
+
+
+
+// Source information
+SOURCEPATH			../clockmainview/src
+SOURCE				clockmainview.cpp
+SOURCE				clockmaincontainer.cpp
+SOURCE				clockalarmarray.cpp
+
+SOURCEPATH			../../utilities/clockmarqueelabel/src
+SOURCE				clockmarqueelabel.cpp
+
+SOURCEPATH			../clockworldview/src
+SOURCE				clockworldview.cpp
+SOURCE				clockworldcontainer.cpp
+SOURCE				clockworldarray.cpp
+SOURCE              		clockworlditemprocessor.cpp 
+SOURCE  	                clockworldthumbnailprovider.cpp
+
+SOURCEPATH			../src
+SOURCE				clock.cpp
+SOURCE				clockapplication.cpp
+SOURCE				clockdocument.cpp
+SOURCE				clockappui.cpp
+	
+// System include information
+APP_LAYER_SYSTEMINCLUDE
+
+// User include information
+USERINCLUDE			../inc
+USERINCLUDE			../clockalarmeditor/inc
+USERINCLUDE			../clockalarmeditor/data
+USERINCLUDE			../../inc
+USERINCLUDE			../../uimodel/inc
+USERINCLUDE			../clockmainview/inc
+USERINCLUDE			../clockworldview/inc
+USERINCLUDE			../clkdatetimeview/data
+USERINCLUDE			../clkdatetimeview/inc
+USERINCLUDE			../../utilities/clockmarqueelabel/inc
+USERINCLUDE			../../../clockengines/clockserver/client/inc
+USERINCLUDE			../../../clockengines/clockserver/server/inc
+USERINCLUDE			../../../clockengines/inc
+USERINCLUDE			../../../inc
+USERINCLUDE			../clockcityselectionlist/data
+USERINCLUDE			../clockcityselectionlist/inc
+
+// Resource information
+START RESOURCE			../data/clock.rss
+HEADER
+TARGETPATH			APP_RESOURCE_DIR
+TARGET				clock.rsc
+LANGUAGE_IDS
+END
+
+START RESOURCE			../data/clock_reg.rss
+TARGETPATH			/private/10003a3f/import/apps
+END
+
+START RESOURCE			../data/clock_loc.rss
+TARGETPATH			APP_RESOURCE_DIR
+LANGUAGE_IDS
+END
+
+START RESOURCE			../../utilities/data/timezonegroups.rss
+HEADER
+TARGETPATH			/resource/timezonelocalization
+LANGUAGE_IDS
+END
+
+START RESOURCE			../../utilities/data/timezonegroups_lta.rss
+HEADER
+TARGETPATH			/resource/timezonelocalization
+LANGUAGE_IDS
+END
+
+START RESOURCE			../../utilities/data/timezonegroups_jerusalem.rss
+HEADER
+TARGETPATH			/resource/timezonelocalization
+LANGUAGE_IDS
+END
+
+START RESOURCE			../../utilities/data/timezones_tel_aviv.rss
+HEADER
+TARGETPATH			/resource/timezonelocalization
+TARGET				timezones_tel_aviv.rsc
+LANGUAGE_IDS
+END
+
+START RESOURCE			../../utilities/data/timezones_lta.rss
+HEADER
+TARGETPATH			/resource/timezonelocalization
+TARGET				timezones_lta.rsc
+LANGUAGE_IDS
+END
+
+START RESOURCE			../../utilities/data/timezones.rss
+HEADER
+TARGETPATH			/resource/timezonelocalization
+TARGET				timezones.rsc
+LANGUAGE_IDS
+END
+
+START RESOURCE			../../utilities/data/mcc.rss
+HEADER
+TARGETPATH			/resource/mcc
+LANGUAGE_IDS
+END
+
+// Library information
+LIBRARY				euser.lib
+LIBRARY				avkon.lib
+LIBRARY				cone.lib
+LIBRARY				apparc.lib
+LIBRARY				eikcore.lib
+LIBRARY				eikcoctl.lib
+LIBRARY				eiksrv.lib
+LIBRARY				bafl.lib
+LIBRARY				aknskins.lib
+LIBRARY				aknskinsrv.lib
+LIBRARY				aknswallpaperutils.lib 
+LIBRARY				aknnotify.lib
+LIBRARY				commonengine.lib
+LIBRARY				eikdlg.lib
+LIBRARY				clkuimodel.lib
+LIBRARY				clockalarmeditor.lib
+LIBRARY				aknlayout2scalable.lib
+LIBRARY				cdlengine.lib
+LIBRARY				fbscli.lib
+LIBRARY				egul.lib
+LIBRARY				centralrepository.lib
+LIBRARY				aknicon.lib
+LIBRARY				tzclient.lib
+LIBRARY				efsrv.lib
+LIBRARY				estor.lib
+LIBRARY				clkdatetimeview.lib
+LIBRARY				timezonelocalization.lib
+LIBRARY				clockserverclient.lib
+LIBRARY				flogger.lib
+LIBRARY				eikctl.lib
+LIBRARY				mediaclientaudio.lib
+LIBRARY 			bitgdi.lib 
+LIBRARY 			platformenv.lib
+LIBRARY 			mgfetch.lib
+LIBRARY				gdi.lib
+LIBRARY				psmclient.lib
+LIBRARY				hlplch.lib
+LIBRARY				iaupdateapi.lib
+LIBRARY				featmgr.lib
+LIBRARY             		gfxtrans.lib // effect manager
+LIBRARY             		thumbnailmanager.lib
+LIBRARY       			ws32.lib
+LIBRARY             		touchfeedback.lib
+
+// End of file

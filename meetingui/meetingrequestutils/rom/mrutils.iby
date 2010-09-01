@@ -1,0 +1,29 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: IBY file definition for meeting request utils
+*
+*/
+
+#ifndef __MRUTILS_IBY__
+#define __MRUTILS_IBY__
+
+
+#ifdef __MEETING_REQUEST_SUPPORT
+
+// Meeting Request Utils
+ECOM_PLUGIN(meetingrequestutils.dll,101f8869.rsc)
+
+#endif // __MEETING_REQUEST_SUPPORT
+
+#endif // __MRUTILS_IBY__

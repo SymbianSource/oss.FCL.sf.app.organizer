@@ -15,8 +15,6 @@
 // 
 //
 
-#include <platform_paths.hrh>
-
 PRJ_PLATFORMS
 DEFAULT WINC
 
@@ -24,7 +22,7 @@ PRJ_EXPORTS
 // specify the source file followed by its destination here
 // copy will be used to copy the source file to its destination
 // If there's no destination then the source file will be copied
-// to the same name in \epoc32\include
+// to the same name in /epoc32/include
 
 ../inc/VCAL.H SYMBIAN_APP_LAYER_PUBLIC_EXPORT_PATH(vcal.h)
 ../inc/VCAL.INL SYMBIAN_APP_LAYER_PUBLIC_EXPORT_PATH(vcal.inl)
@@ -48,9 +46,9 @@ PRJ_EXPORTS
 ../inc/vcard3.h          SYMBIAN_APP_LAYER_PLATFORM_EXPORT_PATH(vcard3.h)
 #endif
 
-./versit.iby		 	/epoc32/rom/include/versit.iby
+./versit.iby		/epoc32/rom/include/versit.iby
 ./versitrecognizer.iby	/epoc32/rom/include/versitrecognizer.iby
-./versitrecognizer.iby	CORE_APP_LAYER_IBY_EXPORT_PATH(versitrecognizer.iby)
+
 
 PRJ_MMPFILES
 

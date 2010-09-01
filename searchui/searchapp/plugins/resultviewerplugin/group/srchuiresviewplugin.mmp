@@ -1,0 +1,97 @@
+/*
+* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:      Project specification file of srchuiresultviewerplugin
+*
+*/
+
+
+
+
+
+
+//#include <oem/drm.mmp>
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET          srchuiresviewplugin.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D 0x1028240A
+
+CAPABILITY 		CAP_ECOM_PLUGIN
+VENDORID   		VID_DEFAULT
+
+SOURCEPATH        ../src
+SOURCE            srchuiresultview.cpp
+SOURCE            srchuiresultcontainer.cpp
+SOURCE            srchuiresultmodel.cpp
+SOURCE            proxy.cpp
+
+// Applications resource file
+SOURCEPATH			../data
+START RESOURCE 		srchuiresultview.rss
+HEADER
+TARGETPATH			/resource/apps
+LANGUAGE_IDS
+END 
+
+START RESOURCE ../data/srchuiresviewplugin.rss
+TARGET    srchuiresviewplugin.rsc
+END
+
+// USER INCLUDES 
+USERINCLUDE		  ../inc
+USERINCLUDE		  ../../../inc
+USERINCLUDE     ../../../srchuicommon/inc
+
+//SYSTEM INCLUDES
+SYSTEMINCLUDE   /epoc32/include/ecom
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY           euser.lib
+LIBRARY           cone.lib
+LIBRARY           eikcore.lib
+LIBRARY           eikcoctl.lib
+LIBRARY           bafl.lib
+LIBRARY           sysutil.lib
+LIBRARY           filelist.lib
+LIBRARY			  estor.lib 
+
+LIBRARY			  cdlengine.lib
+LIBRARY           aknlayout2scalable.lib 
+LIBRARY 		  eikdlg.lib 
+LIBRARY 		  commonengine.lib
+LIBRARY           efsrv.lib
+LIBRARY			  avkon.lib
+LIBRARY           featmgr.lib
+LIBRARY 		  tzclient.lib
+LIBRARY           ecom.lib    
+LIBRARY           gdi.lib aknskins.lib aknskinsrv.lib //GSFramework.lib
+LIBRARY           aknicon.lib
+LIBRARY           egul.lib
+LIBRARY           fbscli.lib 
+LIBRARY           cenrepnotifhandler.lib
+LIBRARY 		  platformenv.lib
+LIBRARY		      hlplch.lib // help launcher
+LIBRARY 		  srchuicommon.lib
+LIBRARY 		  searchutilities.lib
+LIBRARY			  charconv.lib
+LIBRARY       touchfeedback.lib
+LIBRARY		      charconv.lib
+LIBRARY		      apgrfx.lib 
+LIBRARY		      apparc.lib 
+LIBRARY		      apmime.lib 
+LIBRARY           commonui.lib 
+LIBRARY           ws32.lib 
+LIBRARY           ccaclient.lib  
+// End of file

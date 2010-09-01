@@ -1,0 +1,62 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   This is project specification file for the clockcityselectionlist.
+*
+*/
+
+// System includes
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+// Application Info
+TARGET				clockcityselectionlist.dll
+TARGETTYPE			dll
+UID					0x1000008d 0x101F8669
+
+// Capability and vendor info
+VENDORID			VID_DEFAULT
+CAPABILITY			CAP_GENERAL_DLL
+
+// Source files
+SOURCEPATH			../src
+SOURCE				clockcityselectionlistimpl.cpp
+SOURCE				clockcityselectionlistpopup.cpp
+
+// User include paths
+USERINCLUDE			../inc
+USERINCLUDE			../../clockworldview/inc
+USERINCLUDE			../../../inc
+USERINCLUDE			../../../../inc
+
+// System include paths
+APP_LAYER_SYSTEMINCLUDE
+
+// Libraries
+LIBRARY				euser.lib
+LIBRARY				cone.lib
+LIBRARY				eikcore.lib
+LIBRARY				eikcoctl.lib
+LIBRARY				efsrv.lib
+LIBRARY				bafl.lib
+LIBRARY				avkon.lib
+LIBRARY				eikdlg.lib 
+LIBRARY				eikctl.lib
+LIBRARY				featmgr.lib
+LIBRARY				commonengine.lib
+LIBRARY				timezonelocalization.lib
+LIBRARY				tzclient.lib
+LIBRARY				hlplch.lib
+LIBRARY				flogger.lib
+
+// End of file

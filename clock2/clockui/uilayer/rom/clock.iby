@@ -1,0 +1,45 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Component IBY file for the clock ui.
+*
+*/
+
+#ifndef __CLOCK_IBY__
+#define __CLOCK_IBY__
+
+// Clock application executable
+S60_APP_EXE( clock )
+S60_APP_AIF_ICONS( clockapp )
+S60_APP_BITMAP( clockapp )
+S60_APP_BITMAP( clockapp_tab )
+
+// Clock application registration file
+data=DATAZ_\private\10003a3f\import\apps\clock_reg.rsc		\private\10003a3f\import\apps\clock_reg.rsc
+
+// Resource files
+data=DATAZ_\resource\mcc\mcc.rsc							RESOURCE_FILES_DIR\mcc\mcc.rsc
+
+// Other dependencies
+file=ABI_DIR\BUILD_DIR\clockalarmeditor.dll					SHARED_LIB_DIR\clockalarmeditor.dll
+file=ABI_DIR\BUILD_DIR\clkuimodel.dll						SHARED_LIB_DIR\clkuimodel.dll
+file=ABI_DIR\BUILD_DIR\clkdatetimeview.dll					SHARED_LIB_DIR\clkdatetimeview.dll
+file=ABI_DIR\BUILD_DIR\clockcityselectionlist.dll			SHARED_LIB_DIR\clockcityselectionlist.dll
+
+// ECOM Plugins
+ECOM_PLUGIN( clkdatetimeviewplugin.dll, clkdatetimeviewplugin.rsc )
+ECOM_PLUGIN( clockindicatorpaneplugin.dll, clockindicatorpaneplugin.rsc )
+
+#endif		// __CLOCK_IBY__
+
+// End of file

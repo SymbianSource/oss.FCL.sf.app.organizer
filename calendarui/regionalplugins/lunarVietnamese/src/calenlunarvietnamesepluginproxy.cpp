@@ -20,8 +20,8 @@
 
 #include <implementationproxy.h>
 
-#include "CalenLunarVietnamesePlugin.h"
-#include "CalenRegionalPluginUids.h"
+#include "calenlunarvietnameseplugin.h"
+#include "calenregionalpluginuids.h"
 
 
 // ----------------------------------------------------------------------------

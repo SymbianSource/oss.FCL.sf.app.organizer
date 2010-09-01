@@ -1,0 +1,356 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   The localization file for the clock application.
+*
+*/
+
+/*
+* Syntax of a logical name entry in this file is the following:
+*
+* // d:context description (line 1)
+* // d:context description (line N)
+* // l:P_No
+* //
+* #define qtn_?feature/?module_name_?freetext "?text"
+* #define text_?feature/?module_name_?freetext "?text"
+*
+*   where
+*         "qtn_" or "text_" starts a logical name, which does not
+*          contain dots.
+*         "d:" starts description line(s), which
+*              clarify entry's context with information like:
+*              1. Is a word a verb in imperative or is it a noun ?
+*                   - what does text "Set" mean ?
+*              2. What will replace %U (unicode text parameter) or
+*                 %N (number parameter) included in texts ?
+*                   - is it phone number or email address ?
+*         "l:" starts a layout information (one line).r_wsui_city_selection_menubar
+*              "P" and "No" are symbols in LAF's information table
+*                 - "P" is parent pane or current pane
+*                 - "No" is reference number in table
+*
+*/
+
+//d: Name in application grid form
+//l: cell_app_pane_t1
+//w:
+//r: 3.1
+//
+#define qtn_apps_clock_grid					"Clock"
+
+//d: Name in applicaton list form
+//l: list_single_large_graphic_pane_t1
+//w:
+//r: 3.1
+//
+#define qtn_apps_clock_list					"Clock"
+
+//d: Command in options menu.
+//l: list_single_pane_t1_cp2
+//w:
+//r: 3.1
+//
+#define qtn_clk_multi_new_alarm				"New Alarm"
+
+//d: Command in options menu. Opens time query dialog to change alarm time
+//l: list_single_pane_t1_cp2
+//w:
+//r: 3.1
+//
+#define qtn_alarm_change_alarm				"Reset alarm"
+
+//d: Command in options menu. Deactivates a recurring alarm.
+//l: list_single_pane_t1_cp2
+//w:
+//r: 3.1
+//
+#define qtn_clk_deact_alarm					"Deactivate Alarm"
+
+//d: Command in options menu. Activates a deactivated recurring alarm.
+//l: list_single_pane_t1_cp2
+//w:
+//r: 3.1
+//
+#define qtn_clk_activate_alarm				"Activate Alarm"
+ 
+//d: Command in options menu. Removes the current alarm.
+//l: list_single_pane_t1_cp2
+//w:
+//r: 3.1
+//
+#define qtn_alarm_delete_alarm				"Remove alarm"
+
+//d: Command in options menu. Opens "Date & Time" settings view
+//l:list_single_pane_t1_cp2
+//w:
+//r: 3.1
+//
+#define qtn_clk_settings                	"Settings"
+
+//d: Command in options menu. Used in Alarm Clock view. Opens Help application.
+//l: list_single_pane_t1_cp2
+//w:
+//r: 3.1
+//
+#define qtn_clk_help_home					"Help"
+
+//d: Text Editor
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 3.1
+//
+#define qtn_clk_alarm_description			"Description"
+
+//d: DUPLICATE of: qtn_cale_note_meeting_alarm/Calendar.loc
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 3.1
+//
+#define qtn_cale_note_meeting_alarm			"Alarm time"
+
+//d: Used in Alarm Clock view. Used in confirmation note of deleting an alarm.
+//l: popup_note_window
+//w:
+//r: 3.1
+//
+#define qtn_alarm_quest_delete				"Delete alarm?"
+
+//d: Notification query to show alarm time when DST rollover is going to happen.
+//l: popup_note_window
+//w:
+//r: 5.0
+//
+#define qtn_clk_note_alarm_dst_rollover		"Alarm will occur at %U after automatic daylight saving update."
+
+//d: Used when daily alarm is set. %N is replaced with the time of the alarm
+//l: popup_note_window
+//w:
+//r: 3.1
+//
+#define qtn_clk_alarm_note_day_clk			"Alarm occurs every day at %U"
+
+//d: Used when weekly alarm is set. %N is replaced with the time of the alarm
+//l: popup_note_window
+//w:
+//r: 3.1
+//
+#define qtn_clk_alarm_note_week_clk			"Alarm occurs every week on %0U at %1U"
+
+//d: Used when alarm is set for workdays. %N is replaced with the time of the alarm
+//l: popup_note_window
+//w:
+//r: 3.1
+//
+#define qtn_clk_alarm_note_wday_clk			"Alarm occurs workdays at %U"
+
+//d: Used when once only Alarm time has been set. %U is replaced with name of the weekday. %N is replaced with the time.
+//l: popup_note_window
+//w:
+//r: 3.1
+//
+#define qtn_clk_alarm_note_once_next		"Alarm occurs once only on next %0U at %1U"
+
+//d: Used when Alarm time has been set. Used in confirmation note of creating/changing an alarm.
+//d: %0N is replaced with 1
+//d: %1N is replaced with 1
+//l: popup_note_window
+//w:
+//r: 3.1
+//
+#define qtn_alarm_conf_singular				"Time to alarm: %0N hour and %1N minute."
+ 
+//d: Used when Alarm time has been set. Used in confirmation note of creating/changing an alarm.
+//d: %0N is replaced with digits of hours
+//d: %1N is replaced with digits of minutes
+//l: popup_note_window
+//w:
+//r: 3.1
+//
+#define qtn_alarm_conf_plural				"Time to alarm: %0N hours and %1N minutes."
+
+//d: Used when Alarm time has been set. Used in confirmation note of creating/changing an alarm.
+//d: %0N is replaced with 1
+//d: %1N is replaced with digits of minutes
+//l: popup_note_window
+//w:
+//r: 3.1
+//
+#define qtn_alarm_conf_hour_sev_min			"Time to alarm: %0N hour and %1N minutes."
+ 
+//d: Used when Alarm time has been set. Used in confirmation note of creating/changing an alarm.
+//d: %0N is replaced with digits of hours
+//d: %1N is replaced with 1
+//l: popup_note_window
+//w:
+//r: 3.1
+//
+#define qtn_alarm_conf_sev_hours_min		"Time to alarm: %0N hours and %1N minute."
+
+//d: Used when an Alarm has been snoozed. %U is replaced with the new alarm expiry time.
+//l: list_double_pane_t2
+//w:
+//r: 3.1
+//
+#define qtn_clk_alarms_view_snoozed_alarm	"Snoozed %U"
+
+//d: Title of common "Date & Time" settings view
+//l: title_pane_t2/opt9
+//w:
+//r: 3.1
+//
+#define qtn_clk_title_settings				"Date & Time settings"
+
+//d: Title of Clock view
+//l: title_pane_t2/opt9
+//w:
+//r: 3.1
+//
+#define qtn_clk_title_home_clock			"Clock"
+
+//d: Text in middle soft key in World clock view, when there is no cities added.
+//l: control_pane_t3/opt7
+//w:
+//r: 3.2
+//
+#define qtn_msk_add_city					"Add"
+
+
+//d: World clock option menu, Change image
+//l: list_single_pane_t1_cp2
+//w:
+//r: 3.2
+//
+#define qtn_clk_opt_wrld_clk_change_img					"Change image"
+
+//d: World clock view options menu, Add location.
+//l: list_single_pane_t1_cp2
+//w:
+//r: 3.2
+//
+#define qtn_clk_opt_region_add				"Add"
+
+//d: World clock view options menu, remove city.
+//l: list_single_pane_t1_cp2
+//w:
+//r: 3.1
+//
+#define qtn_clk_opt_city_rmv				"Remove"
+
+//d: World clock view opetions menu, select home location.
+//l: list_single_pane_t1_cp2
+//w:
+//r: 3.2
+//
+#define qtn_clk_opt_region_my_region		"My current location"
+
+//d: Confirmation guery for remove location operation.
+//d: %U is replaced with name of the location.
+//l: popup_note_window
+//w:
+//r: 3.2
+//
+#define qtn_clk_query_remove_region         "Remove location from the list: %U?"
+
+//d: Location view title pane.
+//l: title_pane_t2/opt9
+//w:
+//r: 3.2
+//
+#define qtn_clk_country_title               "Locations"
+
+//d: Used when time zone has to be selected.
+//l: heading_pane_t1
+//w:
+//r: 3.1
+//
+#define qtn_clk_qtl_select_city             "Select city"
+
+//d: Confirmation guery for selecting a location when Nitz is on.
+//l: popup_note_window
+//w:
+//r: 3.2
+//
+#define qtn_clk_home_region_disable_nitz	"Changing home location will disable NITZ, continue?"
+
+//d: Confirmation guery for selecting a location.
+//l: popup_note_window
+//w:
+//r: 3.2
+//
+#define qtn_clk_query_region_af_time		"Do you want to change General System Time according selected location?"
+
+//d: Used when My location has been set. Confirms time change.
+//d: %U is replaced with name of the selected location
+//l: popup_note_window
+//w:
+//r: 3.2
+//
+#define qtn_clk_note_time_changed_country	"Device time changed according to UTC offset of %U"
+
+//d: Title for the World Clock view. 
+//l: title_pane_t2/opt9
+//w:
+//r: 5.1
+//
+#define qtn_clk_title_wrld_clk                  "World Clock"
+
+//d: Used in World clock view when the view is empty.
+//l: main_list_empty_pane
+//w:
+//r: 5.1
+//
+#define qtn_wrld_clk_empty_view		        "No locations"
+
+//d: Alarm list item.
+//l: list_double_large_graphic_pane_t2
+//w:
+//r: 5.1
+//
+#define qtn_clk_command_new_alarm		    "New Alarm"
+
+//d: In alarm's list view for inactive alarms.
+//l: list_double_graphic_pane_t2
+//w:
+//r: 5.1
+//
+#define qtn_clk_alarms_view_inactive_alarm        "INACTIVE" 
+
+//d: In Alarm's view while deleting the alarm.
+//l: popup_note_window
+//w:
+//r: 5.1
+//
+#define qtn_clk_alarm_note_deleted              "Alarm deleted from Alarm view" 
+
+
+//d: In world clock view while adding 16th city.
+//l: popup_note_window
+//w:
+//r: 5.1
+//
+#define qtn_clk_note_location_max               "Unable to add more.Remove some locations."     
+//d: Used in Alarm Clock view. Used in confirmation note of deleting a snooze.
+//l: popup_note_window
+//w:
+//r: tb9.2
+//
+#define qtn_clk_remove_snooze                   "Remove Snooze"
+
+//d: In Alarm's view while removing the snooze.
+//l: popup_note_window
+//w:
+//r: tb9.2
+//
+#define qtn_clk_snooze_note_removed						"Snooze removed"
+// End of file

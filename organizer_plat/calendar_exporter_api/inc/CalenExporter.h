@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -25,7 +25,7 @@
 #include <e32base.h>
 #include <f32file.h>    // for TParse
 #include <s32mem.h>
-#include <AgnExportObserver.h>
+#include <agnexportobserver.h>
 
 
 // FORWARD DECLARATIONS

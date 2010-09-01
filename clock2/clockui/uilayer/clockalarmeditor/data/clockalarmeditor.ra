@@ -1,0 +1,286 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   This file contains the resources for alarm editor
+*
+*/
+
+// System includes
+   #include <clockalarmeditor.loc>
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_qtn_clock_alarm_editor_desc_default
+// Resource for string "Alarm"
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_clock_alarm_editor_desc_default
+    {
+    buf = qtn_clk_alarm_description_default;
+    }
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_qtn_clock_alarm_editor_text_occu
+// Resource for string "Occurance"
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_clock_alarm_editor_text_occu
+    {
+    buf = qtn_clk_alarm_occur;
+    }
+	
+// Resource definitions
+// ---------------------------------------------------------
+// r_qtn_clock_alarm_editor_text_almday
+// Resource for string "Alarm Day"
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_clock_alarm_editor_text_almday
+    {
+    buf = qtn_clk_alarm_edit_day;
+    }
+
+// ---------------------------------------------------------
+// r_qtn_clock_alarm_editor_label_text_almday
+// Resource for string "Alarm Day"
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_clock_alarm_editor_label_text_almday
+    {
+    buf = qtn_clk_alarm_label_day;
+    }
+
+// ---------------------------------------------------------
+// r_qtn_clock_alarm_editor_label_text_occu
+// Resource for string "Occurance"
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_clock_alarm_editor_label_text_occu
+    {
+    buf = qtn_clk_alarm_label_occur;
+    }	
+
+	
+// Resource definitions
+// ---------------------------------------------------------
+// r_qtn_clock_alarm_editor_title
+// Resource for string "Alarm"
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_clock_alarm_editor_title
+    {
+    buf = qtn_clk_title_create_alarm;
+    }
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_clock_alarm_editor_occu_array
+// Holds the array of occurance strings.
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_clock_alarm_editor_occu_array
+    {
+    items =
+        {
+        LBUF { txt = qtn_clk_alarm_occ_once; },
+        LBUF { txt = text_calendar_every_day; },
+        LBUF { txt = qtn_clk_alarm_occ_workd; },
+        LBUF { txt = text_calendar_every_week; }
+        };
+    }
+	
+// Resource definitions
+// ---------------------------------------------------------
+// r_clock_alarm_editor_cba
+// The button group of the alarm editor.
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_clock_alarm_editor_cba
+    {
+    buttons = 
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions;      txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyDone;    txt = text_softkey_done; },
+        CBA_BUTTON { id = EAknSoftkeyChange;    txt = qtn_options_change; }
+        };
+    }
+	
+// Resource definitions
+// ---------------------------------------------------------
+// r_clock_alarmday_popup_line
+// The alarm day popup dialog line in alarm editor.
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_clock_alarmday_popup_line
+    {
+    //Single click integration	
+    type = EAknCtPopupFieldText;
+
+    id = EControlAlarmDayPopup;
+    prompt = qtn_clk_alarm_label_day;
+    itemflags = EEikDlgItemTakesEnterKey | EEikDlgItemOfferAllHotKeys;
+    //Single click integration
+    control = POPUP_FIELD_TEXT
+        {
+        popupfield = POPUP_FIELD
+            {
+            width = 50;
+            };
+        textarray = r_clock_week_days_array;
+        };
+
+    }
+
+
+	
+// Resource definitions
+// ---------------------------------------------------------
+// r_clock_alarm_editor_popup_list
+// The alarm editor popup list resource.
+// ---------------------------------------------------------
+//
+RESOURCE POPUP_SETTING_LIST r_clock_alarm_editor_popup_list
+    {
+    flags = 0;
+    }
+	
+// Resource definitions
+// ---------------------------------------------------------
+// r_clock_alarm_editor_form
+// The alarm editor form resource.
+// ---------------------------------------------------------
+//
+RESOURCE FORM r_clock_alarm_editor_form
+    {
+    flags = EEikFormShowEmptyFields |
+            EEikFormEditModeOnly |
+            EEikFormUseDoubleSpacedFormat;
+    items = 
+        {
+        DLG_LINE        // Alarm time editor.
+            {
+            type = EEikCtTimeEditor;
+            id = EControlTimeEditor;
+            prompt = qtn_cale_note_meeting_alarm;
+            itemflags = EEikDlgItemTakesEnterKey |
+                        EEikDlgItemOfferAllHotKeys |
+                        EEikDlgItemSeparatorAfter;
+            control = TIME_EDITOR
+                {
+                minTime = TIME{ second = 0; minute = 0; hour = 0; };
+                maxTime = TIME{ second = 59; minute = 59; hour = 23; };
+                flags = EEikTimeWithoutSecondsField;
+                };
+            },
+        DLG_LINE        // Alarm description editor.
+            {
+            type = EEikCtEdwin;
+            id = EControlTextEditor;
+            prompt = qtn_clk_alarm_description;
+            itemflags = EEikDlgItemTakesEnterKey |
+                        EEikDlgItemOfferAllHotKeys |
+                        EEikDlgItemSeparatorAfter;
+            control = EDWIN
+                        {
+                        maxlength = 128;
+                        max_view_height_in_lines = 5;
+                        flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable;
+                        };
+            },
+	//Single click integration
+        DLG_LINE
+            {
+            type = EAknCtPopupFieldText;
+            prompt = qtn_clk_alarm_label_occur;
+            id = EControlOccurancePopup;
+            itemflags = EEikDlgItemTakesEnterKey | EEikDlgItemOfferAllHotKeys;
+            control = POPUP_FIELD_TEXT
+                {
+                popupfield = POPUP_FIELD
+                    {
+                    width = 50;
+                    };
+                textarray = r_clock_alarm_editor_occu_array;
+                };
+            },
+        DLG_LINE
+            {
+            type = EAknCtPopupFieldText;
+            prompt = qtn_clk_alarm_label_day;
+            id = EControlAlarmDayPopup;
+            itemflags = EEikDlgItemTakesEnterKey | EEikDlgItemOfferAllHotKeys;
+            control = POPUP_FIELD_TEXT
+                {
+                popupfield = POPUP_FIELD
+                    {
+                    width = 50;
+                    };
+                textarray = r_clock_week_days_array;
+                };
+            }
+
+        };
+    }
+	
+// Resource definitions
+// ---------------------------------------------------------
+// r_clock_alarm_editor
+// The alarm editor resource.
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_clock_alarm_editor
+    {
+    flags = EEikDialogFlagNoDrag |
+            EEikDialogFlagFillAppClientRect |
+            EEikDialogFlagButtonsRight |
+            EEikDialogFlagNoBorder |
+            EEikDialogFlagWait |
+            EEikDialogFlagCbaButtons;
+    buttons = R_AVKON_SOFTKEYS_OPTIONS_DONE;
+    form = r_clock_alarm_editor_form;
+    }
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_clock_alarm_editor_menubar
+// The alarm editor menubar.
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_clock_alarm_editor_menubar
+    {
+    titles =
+        {
+        MENU_TITLE { menu_pane = r_clock_alarm_editor_menupane; }
+        };
+    }
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_clock_alarm_editor_menupane
+// The alarm editor menupane.
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_clock_alarm_editor_menupane
+    {
+    items =
+        {
+		MENU_ITEM { command = EClockAlarmChange;			txt = qtn_options_change; },
+		MENU_ITEM { command = EClockAlarmDiscardChanges;	txt = qtn_alarm_editor_options_discard_chg; },
+        MENU_ITEM { command = EClockAlarmDelete;            txt = qtn_alarm_editor_options_delete; },
+        MENU_ITEM { command = EClockAlarmHelp;              txt = qtn_options_help; },
+        MENU_ITEM { command = EClockAlarmExit;              txt = qtn_options_exit; }
+        };
+    }
+
+// End of file

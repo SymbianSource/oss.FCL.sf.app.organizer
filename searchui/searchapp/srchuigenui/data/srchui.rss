@@ -1,0 +1,288 @@
+/*
+* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:     Resources of search general ui.  
+*
+*/
+
+
+
+
+
+
+//  RESOURCE IDENTIFIER
+NAME    SRCH // 4 letter ID
+
+//  Includes
+
+#include <eikon.rh>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.mbg>
+#include <avkon.loc>
+
+#include "srchui.hrh"
+#include <gnrlsrchui.loc>
+
+
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { }
+
+RESOURCE EIK_APP_INFO
+    {
+    }
+    
+/**
+* Menu pane used by all views
+*/	
+RESOURCE MENU_PANE r_search_app_menu_pane
+    {
+    items=
+        {
+        MENU_ITEM { command = EAknSoftkeyExit;			txt = qtn_options_exit; }
+        };
+    }
+
+/**
+* Search service view
+*/
+RESOURCE AVKON_VIEW r_search_service_view
+    {
+    menubar = r_search_service_view_menu_bar;  
+    
+    cba = R_AVKON_SOFTKEYS_OPTIONS_EXIT;
+    }
+
+RESOURCE MENU_BAR r_search_service_view_menu_bar
+    {
+    titles=
+        {
+        MENU_TITLE { menu_pane = r_search_app_menu_pane;},
+        MENU_TITLE { menu_pane = r_search_service_view_menu_pane;}
+        };
+    }
+    
+
+RESOURCE MENU_PANE r_search_service_view_menu_pane
+    {
+    items=
+        {
+        MENU_ITEM { command = ESearchCmdOpen;			    
+                   txt = qtn_options_open;},
+                   
+        MENU_ITEM { command = ESearchCmdSearch; 
+        		   txt = qtn_options_empty_search; },
+        		   
+        //MENU_ITEM { command = ESearchCmdSettings;			    
+        //           txt = qtn_search_settings;},
+                   
+        MENU_ITEM { command = ESearchCmdHelp; 
+        			txt = qtn_options_help; }
+        };
+    }
+
+
+
+
+/**
+* Search view
+*/
+RESOURCE AVKON_VIEW r_search_view
+    {
+    menubar = r_search_view_menu_bar;  
+    cba = R_AVKON_SOFTKEYS_OPTIONS_EXIT;
+    //cba = R_AVKON_SOFTKEYS_OPTIONS_BACK;
+    }
+
+RESOURCE MENU_BAR r_search_view_menu_bar
+    {
+    titles=
+        {
+        MENU_TITLE { menu_pane = r_search_app_menu_pane;},
+        MENU_TITLE { menu_pane = r_search_view_menu_pane;}
+        };
+    }
+    
+
+RESOURCE MENU_PANE r_search_view_menu_pane
+    {
+    items=
+        {
+        
+        MENU_ITEM { command = ESearchCmdMark;			    
+                   txt = qtn_options_mark;},
+
+        MENU_ITEM { command = ESearchCmdUnMark;			    
+                   txt = qtn_options_unmark;},
+        
+        MENU_ITEM { command = ESearchCmdSearch;
+        		   txt = qtn_options_empty_search; },
+        		   
+        MENU_ITEM { command = ESearchCmdGoToMainView;
+                   txt = qtn_search_option_goto_main;},
+        //MENU_ITEM { command = ESearchCmdSettings;			    
+        //           txt = qtn_search_settings;},
+
+        MENU_ITEM { command = ESearchCmdHelp;
+                    txt = qtn_options_help; }
+        };
+    }
+
+RESOURCE AVKON_VIEW r_search_result_folder_view
+    {
+    menubar = r_search_result_folder_view_menu_bar; 
+    cba = r_softkeys_options_cancel;
+    }
+
+RESOURCE MENU_BAR r_search_result_folder_view_menu_bar
+    {
+    titles=
+        {
+        MENU_TITLE { menu_pane = r_search_app_menu_pane;},
+        MENU_TITLE { menu_pane = r_search_result_folder_view_menu_pane;}
+        };
+    }
+
+RESOURCE MENU_PANE r_search_result_folder_view_menu_pane
+    {
+    items=
+        {
+        MENU_ITEM { command = ESearchCmdOpen;			txt = qtn_options_open; },
+        MENU_ITEM { command = ESearchCmdSearch;         txt = qtn_options_new_search; },  
+        MENU_ITEM { command = ESearchCmdHelp;           txt = qtn_options_help; }
+        };
+    }
+
+    
+    
+RESOURCE DIALOG r_search_text_query_dialog
+	{
+	flags=EGeneralQueryFlags;
+	buttons=R_AVKON_SOFTKEYS_OK_CANCEL;
+    items=
+		{
+		DLG_LINE
+			{
+			type=EAknCtQuery;
+			id=EGeneralQuery;
+			control= AVKON_DATA_QUERY 
+				{ 
+				layout = EDataLayout;
+				control = EDWIN
+			        { 
+					default_input_mode=EAknEditorTextInputMode;
+					};
+				};
+			}
+		};
+	}
+
+RESOURCE CBA r_qtn_softkeys_search_mark_cancel
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = ESearchCmdSearch; txt = qtn_softkey_search; },
+        CBA_BUTTON { id = ESearchCmdCancel; txt = text_softkey_cancel; },
+        CBA_BUTTON { id = ESearchCmdMark; txt = text_softkey_mark; }
+        };
+    }
+
+RESOURCE CBA r_qtn_softkeys_search_unmark_cancel
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = ESearchCmdSearch; txt = qtn_softkey_search; },
+        CBA_BUTTON { id = ESearchCmdCancel; txt = text_softkey_cancel; },
+        CBA_BUTTON { id = ESearchCmdUnMark; txt = text_softkey_unmark; }
+        };
+    }
+
+RESOURCE CBA r_qtn_softkeys_option_mark_exit
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyExit; txt = text_softkey_exit; },
+        CBA_BUTTON { id = ESearchCmdMark; txt = text_softkey_mark; }
+        };
+    }
+ 
+RESOURCE CBA r_qtn_softkeys_option_unmark_exit
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyExit; txt = text_softkey_exit; },
+        CBA_BUTTON { id = ESearchCmdUnMark; txt = text_softkey_unmark; }
+        };
+    }
+           
+RESOURCE CBA r_softkeys_options_cancel
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = ESearchCmdCancel; txt = text_softkey_cancel; }
+        };
+    } 
+
+RESOURCE CBA r_softkeys_options_open_cancel
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = ESearchCmdCancel; txt = text_softkey_cancel; },
+        CBA_BUTTON { id = ESearchCmdOpen; txt = text_softkey_open; }
+        };
+    }
+
+RESOURCE CBA r_softkeys_options_open_back
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_back; },
+        CBA_BUTTON { id = ESearchCmdOpen; txt = text_softkey_open; }
+        };
+    }       
+
+RESOURCE TBUF   r_qtn_search_types_all
+                { buf = qtn_search_types_all; }
+
+
+RESOURCE TBUF   r_qtn_search_no_results
+				{ buf = qtn_search_no_results; }
+				
+RESOURCE TBUF   r_qtn_search_one_result
+				{ buf = qtn_search_one_result; }	
+				
+RESOURCE TBUF   r_qtn_search_multiple_results
+				{ buf = qtn_search_multiple_results; }
+
+RESOURCE TBUF   r_qtn_title_search
+                { buf = qtn_title_search; }
+
+RESOURCE TBUF   r_qtn_search_inprogress
+                { buf = qtn_search_inprogress; }
+
+RESOURCE TBUF   r_qtn_search_info_max
+                { buf = qtn_search_info_max;}
+                
+RESOURCE TBUF   r_qtn_search_error_missing
+                { buf = qtn_search_error_missing; }  
+                
+RESOURCE TBUF   r_text_softkey_option
+                { buf = text_softkey_option; }                  
+                

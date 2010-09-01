@@ -1,0 +1,52 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  hrh file
+*
+*/
+
+
+//
+// mce.hlp.hrh
+//
+
+//
+// File generated on 12:2:19 19/6/2002
+// by cshlpcmp Version 010
+//
+
+#ifndef __MCE_HLP_HRH__
+#define __MCE_HLP_HRH__
+
+
+_LIT(KMCE_HLP_MESSAGING,"MCE_HLP_MESSAGING"); //The main state of the Messaging centre
+_LIT(KMCE_HLP_SIM,"MCE_HLP_SIM"); //SIM messages view
+_LIT(KMCE_HLP_SETTINGS,"MCE_HLP_SETTINGS"); //Settings group
+_LIT(KMCE_HLP_SETTINGS_SMS,"MCE_HLP_SETTINGS_SMS"); //SMS settings
+_LIT(KMCE_HLP_SETTINGS_EMAIL,"MCE_HLP_SETTINGS_EMAIL"); //Mail settings
+_LIT(KMCE_HLP_SETTINGS_MMS,"MCE_HLP_SETTINGS_MMS"); //MMS settings
+_LIT(KMCE_HLP_SETTINGS_CB,"MCE_HLP_SETTINGS_CB"); //CBS settings 
+_LIT(KMCE_HLP_SETTINGS_WAP,"MCE_HLP_SETTINGS_WAP"); //WAP push message settings group
+_LIT(KMCE_HLP_SETTINGS_GEN,"MCE_HLP_SETTINGS_GEN"); //General messaging settings
+_LIT(KMCE_HLP_INBOX,"MCE_HLP_INBOX"); //Messaging centre Inbox
+_LIT(KMCE_HLP_DOCUMENTS,"MCE_HLP_DOCUMENTS"); //Documents folder in Messaging centre
+_LIT(KMCE_HLP_TEMPLATES,"MCE_HLP_TEMPLATES"); //Templates folder in Messaging centre
+_LIT(KMCE_HLP_FOLDER,"MCE_HLP_FOLDER"); //Users own folders in Messaging centre
+_LIT(KMCE_HLP_MAILBOX_OFFLINE,"MCE_HLP_MAILBOX_OFFLINE"); //Remote mailbox in Messaging centre, OFFLINE status
+_LIT(KMCE_HLP_MAILBOX_ONLINE,"MCE_HLP_MAILBOX_ONLINE"); //Remote mailbox in Messaging centre, ONLINE status
+_LIT(KMCE_HLP_DRAFTS,"MCE_HLP_DRAFTS"); //Drafts folders in Messaging centre
+_LIT(KMCE_HLP_SENT_ITEMS,"MCE_HLP_SENT_ITEMS"); //Sent items folder in Messaging centre
+_LIT(KMCE_HLP_OUTBOX,"MCE_HLP_OUTBOX"); //Outbox in Messaging centre
+_LIT(KMCE_HLP_DELIVERY_REPORTS,"MCE_HLP_DELIVERY_REPORTS"); //Delivery reports folder in Messaging centre
+
+#endif

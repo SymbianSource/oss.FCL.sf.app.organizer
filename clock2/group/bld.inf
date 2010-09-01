@@ -1,0 +1,55 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   The component description file
+*
+*/
+
+// System includes
+#include <platform_paths.hrh>
+
+PRJ_EXPORTS
+../rom/clockengines.iby				CORE_APP_LAYER_IBY_EXPORT_PATH( clockengines.iby )
+
+// Cenrep file
+../cenrep/keys_clockapp.xls			CENREP_XLS_EXPORT_PATH( keys_clockapp.xls )
+
+// ConfML files
+../conf/clockapp.confml				APP_LAYER_CONFML( clockapp.confml )
+../conf/clockapp_101F874D.crml		APP_LAYER_CRML( clockapp_101F874D.crml )
+../conf/clockapp_101F8876.crml		APP_LAYER_CRML( clockapp_101F8876.crml )
+
+// Backup registration file
+// Date Time Settings
+../cenrep/backup_registration.xml  	/epoc32/data/z/private/10005906/backup_registration.xml
+../cenrep/backup_registration.xml  	/epoc32/release/winscw/udeb/z/private/10005906/backup_registration.xml
+../cenrep/backup_registration.xml  	/epoc32/release/winscw/urel/z/private/10005906/backup_registration.xml
+
+// Clockserver
+../cenrep/backup_registration.xml  	/epoc32/data/z/private/200159A2/backup_registration.xml
+../cenrep/backup_registration.xml  	/epoc32/release/winscw/udeb/z/private/200159A2/backup_registration.xml
+../cenrep/backup_registration.xml  	/epoc32/release/winscw/urel/z/private/200159A2/backup_registration.xml
+
+// Clock
+../cenrep/backup_registration.xml  	/epoc32/data/z/private/10005903/backup_registration.xml
+../cenrep/backup_registration.xml  	/epoc32/release/winscw/udeb/z/private/10005903/backup_registration.xml
+../cenrep/backup_registration.xml  	/epoc32/release/winscw/urel/z/private/10005903/backup_registration.xml
+
+// Stub SIS
+../stubsis/clock2_stub.sis			/epoc32/data/Z/system/install/clock2_stub.sis
+
+// Other bld.infs
+#include "../clockengines/group/bld.inf"
+#include "../clockui/group/bld.inf"
+#include "../help/group/bld.inf"
+// End of file

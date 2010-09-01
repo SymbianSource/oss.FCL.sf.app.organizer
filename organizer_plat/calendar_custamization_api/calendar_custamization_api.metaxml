@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<api id="83cefd0e6cddd61d69ab3cb6260f7ad8" dataversion="2.0">
+<name>calendar custamization api</name>
+<description>Exposes calendar custamization apis</description>
+<type>c++</type>
+<collection>calendarui</collection>
+<libs></libs>
+<release category="domain" sinceversion=""/>
+<attributes>
+<htmldocprovided>no</htmldocprovided>
+<adaptation>no</adaptation>
+</attributes>
+</api>

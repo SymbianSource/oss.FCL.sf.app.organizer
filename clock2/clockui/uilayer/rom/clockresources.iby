@@ -1,0 +1,45 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   All the language specific resource files get exported from this file.
+*
+*/
+
+#ifndef __CLOCK_RESOURCES_IBY__
+#define __CLOCK_RESOURCES_IBY__
+
+S60_APP_RESOURCE( clock )
+S60_APP_RESOURCE( clock_loc )
+
+#ifdef __ROM_HIDE_JERUSALEM
+data=DATAZ_\resource\timezonelocalization\timezones_tel_aviv.rsc			RESOURCE_FILES_DIR\timezonelocalization\timezones.rsc
+#elif defined(FF_ROM_HIDE_FALKLAND)  
+data=DATAZ_\resource\TimeZoneLocalization\timezones_lta.rsc       			RESOURCE_FILES_DIR\TimeZoneLocalization\timezones.rsc
+#else
+data=DATAZ_\resource\timezonelocalization\timezones.rsc					RESOURCE_FILES_DIR\timezonelocalization\timezones.rsc
+#endif
+
+#ifdef FF__ROM_HIDE_ISRAEL
+data=DATAZ_\resource\timezonelocalization\timezonegroups_jerusalem.rsc		RESOURCE_FILES_DIR\timezonelocalization\timezonegroups.rsc
+#elif defined(FF_ROM_HIDE_FALKLAND)  
+data=DATAZ_\resource\TimeZoneLocalization\timezonegroups_lta.rsc  		RESOURCE_FILES_DIR\TimeZoneLocalization\timezonegroups.rsc
+#else
+data=DATAZ_\resource\timezonelocalization\timezonegroups.rsc			RESOURCE_FILES_DIR\timezonelocalization\timezonegroups.rsc
+#endif
+
+// Alarm indicator resource file.
+data=DATAZ_\resource\apps\clockindicatorpaneplugin.rsc                      APP_RESOURCE_DIR\clockindicatorpaneplugin.rsc
+
+#endif		// __CLOCK_RESOURCES_IBY__
+
+// End of file

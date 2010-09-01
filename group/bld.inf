@@ -22,8 +22,18 @@ PRJ_PLATFORMS
 DEFAULT
 
 // organizer package
+#include "../alarmengines/group/bld.inf"
 #include "../calendarengines/group/bld.inf"
-
+#include "../meetingrequestengines/group/bld.inf"
+#include "../searchfw/group/bld.inf"
+#include "../alarmui/group/bld.inf"
+#include "../calendarui/group/bld.inf"
+#include "../meetingui/group/bld.inf"
+#include "../clock2/group/bld.inf"
+#include "../notepad/group/bld.inf"
+#include "../searchui/group/bld.inf"
+#include "../organizer_plat/group/bld.inf"
+#include "../organizer_pub/group/bld.inf"
 
 PRJ_EXPORTS
 

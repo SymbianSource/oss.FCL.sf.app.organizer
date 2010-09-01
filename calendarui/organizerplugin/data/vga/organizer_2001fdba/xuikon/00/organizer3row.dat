@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<data>
+    <AppUid>E029CF57</AppUid>
+    <Provideruid>101FB657</Provideruid>
+    <ThemeUid>11001FFF</ThemeUid>
+    <ThemeFullName>Organizer3Row</ThemeFullName>
+    <ThemeShortName>orga3row</ThemeShortName>
+    <ThemeVersion>1.0</ThemeVersion>
+    <FileXML>organizer3row.xml</FileXML>
+    <FileCSS>organizer3row.css</FileCSS>
+    <FileDTD>organizer.dtd</FileDTD>
+</data>

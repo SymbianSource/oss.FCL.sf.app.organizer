@@ -11,9 +11,10 @@
 *
 * Contributors:
 *
-* Description:  Calendar state machine
+* Description:   Calendar state machine
 *
 */
+
 
 
 #ifndef CALENDELETINGSTATE_H
@@ -35,7 +36,7 @@ class CCalenDeletingState : public CCalenState
         ~CCalenDeletingState();
         
     public:
-        // From CCCalenState
+        // From CCalenState
         TBool HandleCommandL( const TCalenCommand& aCommand,
                              CCalenStateMachine& aStateMachine );
         void HandleNotificationL(const TCalenNotification& aNotification,

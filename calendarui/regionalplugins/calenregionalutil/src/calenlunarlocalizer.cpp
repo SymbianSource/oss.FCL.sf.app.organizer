@@ -16,27 +16,22 @@
 */
 
 
-
-#include <qdatetime.h>
-#include <qstringlist.h>
-#include <hbi18ndef.h>
-#include <hbglobal.h>
-
-#include <badesca.h> 
-#include <eikenv.h>
-#include <bautils.h>
-#include <data_caging_path_literals.hrh>
-
 #include "calendarui_debug.h"
 
-#include "CalenLunarLocalizer.h"
-#include "CalenLunarInfo.h"
-#include "CalenLunarLocalizedInfo.h"
-#include "CalenExtraRowFormatter.h"
-#include "OstTraceDefinitions.h"
-#ifdef OST_TRACE_COMPILER_IN_USE
-#include "calenlunarlocalizerTraces.h"
-#endif
+#include "calenlunarlocalizer.h"
+
+#include "calenlunarinfo.h"
+#include "calenlunarlocalizedinfo.h"
+#include "calenextrarowformatter.h"
+#include <calenregionalutil.rsg>
+
+#include <AknBidiTextUtils.h>
+#include <avkon.rsg>
+#include <badesca.h> 
+#include <eikenv.h>
+#include <StringLoader.h>
+#include <bautils.h>
+#include <data_caging_path_literals.hrh>
 
 //CONSTANTS
 const TInt KCharMonth = 0x6708;
@@ -47,6 +42,8 @@ const TInt KCharTwenty= 0x5eff;
 _LIT(KChineseDigits, 
      "\x0030\x4e00\x4e8c\x4e09\x56db\x4e94\x516d\x4e03\x516b\x4e5d");
 
+_LIT( KResourceChinesePluginFile, "calenregionalutil.rsc" );
+#define KResourcePath KDC_RESOURCE_FILES_DIR
 
 
 // -----------------------------------------------------------------------------
@@ -55,13 +52,14 @@ _LIT(KChineseDigits,
 //
 EXPORT_C CCalenLunarLocalizer* CCalenLunarLocalizer::NewL()
     {
-    OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_NEWL_ENTRY );
+    TRACE_ENTRY_POINT;
+    
     CCalenLunarLocalizer* self = new (ELeave) CCalenLunarLocalizer;
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop(self);
     
-    OstTraceFunctionExit0( CCALENLUNARLOCALIZER_NEWL_EXIT );
+    TRACE_EXIT_POINT;
     return self;
     }
 
@@ -71,9 +69,22 @@ EXPORT_C CCalenLunarLocalizer* CCalenLunarLocalizer::NewL()
 //
 EXPORT_C CCalenLunarLocalizer::~CCalenLunarLocalizer()
     {
-    OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_CCALENLUNARLOCALIZER_ENTRY );
+    TRACE_ENTRY_POINT;
+    
+    delete iFestivalNames;
+    delete iSolarTermNames;
+    delete iHeavenlyStemNames;
+    delete iTerrestialBranchNames;
+    delete iAnimalYearNames;
+    delete iGregorianDateFormat;
     delete iRowFormatter;
-    OstTraceFunctionExit0( CCALENLUNARLOCALIZER_CCALENLUNARLOCALIZER_EXIT );
+    
+    if( iResourceFileOffset )
+        {
+        CCoeEnv::Static()->DeleteResourceFile( iResourceFileOffset );
+        }
+    
+    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
@@ -82,8 +93,8 @@ EXPORT_C CCalenLunarLocalizer::~CCalenLunarLocalizer()
 //
 EXPORT_C CCalenLunarLocalizer::CCalenLunarLocalizer() : iEikEnv( CEikonEnv::Static() )
     {
-    OstTraceFunctionEntry0( DUP1_CCALENLUNARLOCALIZER_CCALENLUNARLOCALIZER_ENTRY );
-    OstTraceFunctionExit0( DUP1_CCALENLUNARLOCALIZER_CCALENLUNARLOCALIZER_EXIT );
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
@@ -91,147 +102,129 @@ EXPORT_C CCalenLunarLocalizer::CCalenLunarLocalizer() : iEikEnv( CEikonEnv::Stat
 // -----------------------------------------------------------------------------
 //
 EXPORT_C void CCalenLunarLocalizer::ConstructL()
-{
-	OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_CONSTRUCTL_ENTRY );
-	iRowFormatter = CCalenExtraRowFormatter::NewL();
+    {
+    TRACE_ENTRY_POINT;
+    iRowFormatter = CCalenExtraRowFormatter::NewL();
+    
+    TFileName dllName;
+    // Get the complate path of the DLL from where it is currently loaded
+    Dll::FileName( dllName );
+    
+    TFileName resourceFilename;
+    resourceFilename.Append(dllName.Mid(0,2));
+    resourceFilename.Append(KResourcePath);
+    resourceFilename.Append(KResourceChinesePluginFile);
+    BaflUtils::NearestLanguageFile( CEikonEnv::Static()->FsSession(), resourceFilename );
+    // Add the resource file.
+    iResourceFileOffset = CEikonEnv::Static()->AddResourceFileL( resourceFilename );
+    
 
-	iFestivalNames.append(hbTrId("txt_calendar_preview_title_spring_fest"));
-	iFestivalNames.append(hbTrId("txt_calendar_preview_title_lantern_fest"));
-	iFestivalNames.append(hbTrId("txt_calendar_preview_title_dragon_fest"));
-	iFestivalNames.append(hbTrId("txt_calendar_preview_title_seventh_night_fest"));
-	iFestivalNames.append(hbTrId("txt_calendar_preview_title_ghost_fest"));
-	iFestivalNames.append(hbTrId("txt_calendar_preview_title_mid_autumn_fest"));
-	iFestivalNames.append(hbTrId("txt_calendar_preview_title_double_fest"));
-	iFestivalNames.append(hbTrId("txt_calendar_preview_title_eigth_day_fest"));
-	iFestivalNames.append(hbTrId("txt_calendar_preview_title_new_year_fest"));
+    iFestivalNames = iEikEnv->ReadDesCArrayResourceL(R_CALEN_CHI_FESTIVALS);
+    iSolarTermNames = iEikEnv->ReadDesCArrayResourceL(R_CALEN_CHI_SOLAR_ITEMS);
+    iHeavenlyStemNames = iEikEnv->ReadDesCArrayResourceL(R_CALEN_CHI_HEAV_STEMS);
+    iTerrestialBranchNames = iEikEnv->ReadDesCArrayResourceL(R_CALEN_CHI_TERR_BRANCHES);
+    iAnimalYearNames = iEikEnv->ReadDesCArrayResourceL(R_CALEN_CHI_ANIMAL_YEARS);
 
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_li_chun"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_yu_shui"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_jing_zhe"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_chun_fen"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_qing_ming"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_gu_yu"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_li_xia"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_xiao_man"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_mang_zhong"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_xia_zhi"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_xiao_shu"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_da_shu"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_li_qiu"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_chu_shu"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_bai_lu"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_qiu_fen"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_han_lu"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_shaung_jiang"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_li_dong"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_xiao_xue"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_da_xue"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_dong_zhi"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_xiao_han"));
-	iSolarTermNames.append(hbTrId("txt_calendar_preview_title_da_han"));
+    iGregorianDateFormat = StringLoader::LoadL(R_QTN_DATE_USUAL_WITH_ZERO);
 
-	iHeavenlyStemNames.append(hbTrId("txt_calendar_preview_title_jia"));
-	iHeavenlyStemNames.append(hbTrId("txt_calendar_preview_title_yi"));
-	iHeavenlyStemNames.append(hbTrId("txt_calendar_preview_title_bing"));
-	iHeavenlyStemNames.append(hbTrId("txt_calendar_preview_title_ding"));
-	iHeavenlyStemNames.append(hbTrId("txt_calendar_preview_title_wu"));
-	iHeavenlyStemNames.append(hbTrId("txt_calendar_preview_title_ji"));
-	iHeavenlyStemNames.append(hbTrId("txt_calendar_preview_title_geng"));
-	iHeavenlyStemNames.append(hbTrId("txt_calendar_preview_title_xing"));
-	iHeavenlyStemNames.append(hbTrId("txt_calendar_preview_title_reng"));
-	iHeavenlyStemNames.append(hbTrId("txt_calendar_preview_title_gui"));
 
-	iTerrestialBranchNames.append(hbTrId("txt_calendar_preview_title_tbranch_zi"));
-	iTerrestialBranchNames.append(hbTrId("txt_calendar_preview_title_tbranch_chou"));
-	iTerrestialBranchNames.append(hbTrId("txt_calendar_preview_title_tbranch_yin"));
-	iTerrestialBranchNames.append(hbTrId("txt_calendar_preview_title_tbranch_mao"));
-	iTerrestialBranchNames.append(hbTrId("txt_calendar_preview_title_tbranch_chen"));
-	iTerrestialBranchNames.append(hbTrId("txt_calendar_preview_title_tbranch_si"));
-	iTerrestialBranchNames.append(hbTrId("txt_calendar_preview_title_tbranch_wu"));
-	iTerrestialBranchNames.append(hbTrId("txt_calendar_preview_title_tbranch_wei"));
-	iTerrestialBranchNames.append(hbTrId("txt_calendar_preview_title_tbranch_shen"));
-	iTerrestialBranchNames.append(hbTrId("txt_calendar_preview_title_tbranch_you"));
-	iTerrestialBranchNames.append(hbTrId("txt_calendar_preview_title_tbranch_xu"));
-	iTerrestialBranchNames.append(hbTrId("txt_calendar_preview_title_tbranch_hai"));
-
-	iAnimalYearNames.append(hbTrId("txt_calendar_preview_title_year_of_the_rat"));
-	iAnimalYearNames.append(hbTrId("txt_calendar_preview_title_year_of_the_ox"));
-	iAnimalYearNames.append(hbTrId("txt_calendar_preview_title_year_of_the_tiger"));
-	iAnimalYearNames.append(hbTrId("txt_calendar_preview_title_year_of_the_rabbit"));
-	iAnimalYearNames.append(hbTrId("txt_calendar_preview_title_year_of_the_dragon"));
-	iAnimalYearNames.append(hbTrId("txt_calendar_preview_title_year_of_the_snake"));
-	iAnimalYearNames.append(hbTrId("txt_calendar_preview_title_year_of_the_horse"));
-	iAnimalYearNames.append(hbTrId("txt_calendar_preview_title_year_of_the_sheep"));
-	iAnimalYearNames.append(hbTrId("txt_calendar_preview_title_year_of_the_monkey"));
-	iAnimalYearNames.append(hbTrId("txt_calendar_preview_title_year_of_the_rooster"));
-	iAnimalYearNames.append(hbTrId("txt_calendar_preview_title_year_of_the_dog"));
-	iAnimalYearNames.append(hbTrId("txt_calendar_preview_title_year_of_the_pig"));
-	
-	OstTraceFunctionExit0( CCALENLUNARLOCALIZER_CONSTRUCTL_EXIT );
-}
+#ifdef _DEBUG
+    // Validate assumptions
+    TInt maxStem = -1;
+    for (TInt i = 0; i < iHeavenlyStemNames->Count(); i++)
+        {
+        maxStem = Max( maxStem, iHeavenlyStemNames->MdcaPoint(i).Length() );
+        }
+    
+    TInt maxBranch = -1;
+    for (TInt i = 0; i < iTerrestialBranchNames->MdcaPoint(i).Length() ; i++)
+        {
+        maxBranch = Max( maxBranch, iTerrestialBranchNames->MdcaPoint(i).Length() );        
+        }
+    ASSERT( maxStem + maxBranch <= 100);
+#endif
+    
+    TRACE_EXIT_POINT;
+    }
 
 // -----------------------------------------------------------------------------
 // CCalenLunarLocalizer::LocalizeL
 // -----------------------------------------------------------------------------
 //
 EXPORT_C CCalenLunarLocalizedInfo* CCalenLunarLocalizer::LocalizeL( TCalenLunarInfo& aInfo )
-{
-	OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_LOCALIZEL_ENTRY );
-	CCalenLunarLocalizedInfo* localized = CCalenLunarLocalizedInfo::NewL();
-	CleanupStack::PushL( localized );
+    {
+    TRACE_ENTRY_POINT;
+   
+    
+    CCalenLunarLocalizedInfo* localized = CCalenLunarLocalizedInfo::NewL();
+    CleanupStack::PushL( localized );
 
+    if ( aInfo.HasFestival() ) 
+        {
+        localized->iFestival.Set( iFestivalNames->MdcaPoint( aInfo.iFestival ) );
+        }
+    
+    if ( aInfo.HasSolarTerm() ) 
+        {
+        localized->iSolarTerm.Set( iSolarTermNames->MdcaPoint( aInfo.iSolarTerm ) );
+        }
 
-	if ( aInfo.HasFestival() ) 
-	{
-		QString festival = iFestivalNames.at(aInfo.iFestival);
-		localized->iFestival.Set( static_cast<const TUint16*>(festival.utf16()),festival.length());
-	}
+    // Animal year
+    localized->iAnimalYear.Set( iAnimalYearNames->MdcaPoint( aInfo.AnimalYear() ) );
+    
 
-	if ( aInfo.HasSolarTerm() ) 
-	{
-		QString solarTerm = iSolarTermNames.at(aInfo.iSolarTerm);
-		localized->iSolarTerm.Set( static_cast<const TUint16*>(solarTerm.utf16()),solarTerm.length());
-	}
+    // Lunar year    
+    CPtrCArray* yearSubs = new (ELeave) CPtrCArray(2);
+    CleanupStack::PushL( yearSubs );
+    yearSubs->AppendL( iHeavenlyStemNames->MdcaPoint( aInfo.iHeavenlyStem ) );
+    yearSubs->AppendL( iTerrestialBranchNames->MdcaPoint( aInfo.iTerrestialBranch ) );
 
-	// Animal year
-	QString animalYear = iAnimalYearNames.at(aInfo.AnimalYear());
-	localized->iAnimalYear.Set( static_cast<const TUint16*>(animalYear.utf16()),animalYear.length());
+    HBufC* tmp = StringLoader::LoadLC( R_CALE_LUNAR_YEAR, *yearSubs, iEikEnv );
+#ifdef _DEBUG
+    RDebug::Print( *tmp );
+#endif
+    localized->iLunarYear = *tmp;
+    CleanupStack::PopAndDestroy( tmp );
+    CleanupStack::PopAndDestroy( yearSubs );
 
-	// Lunar year
-	QString heavenlyStemNames = iHeavenlyStemNames.at(aInfo.iHeavenlyStem);
-	QString terrestialBranchNames = iTerrestialBranchNames.at(aInfo.iTerrestialBranch);
-	QString lunarYear = hbTrId("txt_calendar_info_lunar_year").arg(heavenlyStemNames).arg(terrestialBranchNames);
-	localized->iLunarYear = static_cast<const TUint16*> (lunarYear.utf16()), lunarYear.length();
-
-	LocalizeMonthAndDayL(localized, aInfo);
-
-	QString monthAndDay = QString::fromUtf16(localized->LunarMonthAndDay().Ptr(),localized->LunarMonthAndDay().Length());
-	QString yearString = QString::fromUtf16(localized->LunarYear().Ptr(),localized->LunarYear().Length());
-	QString fullLunarDate = hbTrId("txt_calendar_info_lunar_full_date").arg(monthAndDay).arg(yearString);
-	
-	localized->iFullLunarDate = static_cast<const TUint16*> (fullLunarDate.utf16()), fullLunarDate.length();
-
-	QString format(r_qtn_date_usual_with_zero);
-	TBuf<100> gregFormatBuf;
-	gregFormatBuf = static_cast<const TUint16*> (format.utf16()), format.length();
-	
-	aInfo.iGregorianDate.FormatL( localized->iGregorianDate, gregFormatBuf );
-
-	CleanupStack::Pop( localized );
-	
-	OstTraceFunctionExit0( CCALENLUNARLOCALIZER_LOCALIZEL_EXIT );
-	return localized;
-}
+#ifdef _DEBUG
+    RDebug::Print(     localized->iLunarYear  );
+#endif
+    
+    LocalizeMonthAndDayL(localized, aInfo);
+    
+    // Full lunar date
+    CPtrCArray* subs = new (ELeave) CPtrCArray(2);
+    CleanupStack::PushL( subs );
+    subs->AppendL( localized->LunarMonthAndDay() );
+    subs->AppendL( localized->LunarYear() );
+    
+    tmp = StringLoader::LoadLC( R_CALE_LUNAR_FULL_DATE, *subs );
+    localized->iFullLunarDate = *tmp;
+    CleanupStack::PopAndDestroy( tmp );
+    CleanupStack::PopAndDestroy( subs );
+    
+    
+    aInfo.iGregorianDate.FormatL( localized->iGregorianDate, 
+                                 *iGregorianDateFormat );
+    CleanupStack::Pop( localized );
+    
+    
+    
+    TRACE_EXIT_POINT;
+    return localized;
+    }
 
 
 // -----------------------------------------------------------------------------
 // CCalenLunarLocalizer::GetExtraRowTextL
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TPtrC CCalenLunarLocalizer::GetExtraRowTextL( 
-											CCalenLunarLocalizedInfo& aLocInfo )
+EXPORT_C TPtrC CCalenLunarLocalizer::GetExtraRowTextL( CCalenLunarLocalizedInfo& aLocInfo, TInt aMaxWidth, 
+                                              const CFont& aFont, TBool aTwoLines )
     {
-    OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_GETEXTRAROWTEXTL_ENTRY );
+    TRACE_ENTRY_POINT;
+    
     RArray<CCalenLunarLocalizedInfo::TField> fields;
     CleanupClosePushL( fields );
     fields.AppendL( CCalenLunarLocalizedInfo::EFestival );
@@ -240,10 +233,15 @@ EXPORT_C TPtrC CCalenLunarLocalizer::GetExtraRowTextL(
     fields.AppendL( CCalenLunarLocalizedInfo::EAnimalYear );
     fields.AppendL( CCalenLunarLocalizedInfo::ELunarYear );
     
-    TPtrC text = iRowFormatter->FormatExtraRowInformationL( aLocInfo, fields );
-    CleanupStack::PopAndDestroy( &fields );
+    TPtrC text = iRowFormatter->FormatExtraRowInformationL( aLocInfo, fields, aMaxWidth, aFont
 
-    OstTraceFunctionExit0( CCALENLUNARLOCALIZER_GETEXTRAROWTEXTL_EXIT );
+                                                            , aTwoLines 
+
+                                                            );
+    CleanupStack::PopAndDestroy( &fields );
+    
+    
+    TRACE_EXIT_POINT;
     return text;
     }
 
@@ -253,29 +251,24 @@ EXPORT_C TPtrC CCalenLunarLocalizer::GetExtraRowTextL(
 //
 void CCalenLunarLocalizer::LocalizeMonthAndDayL(CCalenLunarLocalizedInfo* aLocInfo,
                                                 TCalenLunarInfo& aInfo)
-{
-	OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_LOCALIZEMONTHANDDAYL_ENTRY );
-	TBuf<10> month;
-	TBuf<10> day;
-	GetChineseMonth(aInfo.iLunarDate, month);
-	GetChineseDay(aInfo.iLunarDate, day);
+    {
+    // Lunar Month and Day
+    TInt dateResource = aInfo.iLunarDate.iLeapMonth ? R_CALE_LUNAR_LEAP_DATE : R_CALE_LUNAR_DATE;
+    TBuf<10> month;
+    TBuf<10> day;
+    GetChineseMonth(aInfo.iLunarDate, month);
+    GetChineseDay(aInfo.iLunarDate, day);
 
-	QString formattedString;
-	if(aInfo.iLunarDate.iLeapMonth) {
-		formattedString = hbTrId(
-						"txt_calendar_info_lunar_leap_date").arg(
-						QString((QChar*)month.Ptr(),month.Length())).arg(
-						QString((QChar*)day.Ptr(),day.Length()));
-	}else {
-		formattedString = hbTrId(
-						"txt_calendar_info_lunar_date").arg(
-						QString((QChar*)month.Ptr(),month.Length())).arg(
-						QString((QChar*)day.Ptr(),day.Length()));
-	}
-	aLocInfo->iLunarMonthAndDay = static_cast<const TUint16*> (
-							formattedString.utf16()), formattedString.length();
-	OstTraceFunctionExit0( CCALENLUNARLOCALIZER_LOCALIZEMONTHANDDAYL_EXIT );
-}
+    CPtrCArray* monthAndDaySubs = new (ELeave) CPtrCArray(2);
+    CleanupStack::PushL( monthAndDaySubs );
+    monthAndDaySubs->AppendL(month);
+    monthAndDaySubs->AppendL(day);
+    
+    HBufC* tmp = StringLoader::LoadLC( dateResource, *monthAndDaySubs );
+    aLocInfo->iLunarMonthAndDay = *tmp;
+    CleanupStack::PopAndDestroy( tmp );
+    CleanupStack::PopAndDestroy( monthAndDaySubs );
+    }
 
 // -----------------------------------------------------------------------------
 // CCalenLunarLocalizer::GetChineseMonth
@@ -284,7 +277,8 @@ void CCalenLunarLocalizer::LocalizeMonthAndDayL(CCalenLunarLocalizedInfo* aLocIn
 void CCalenLunarLocalizer::GetChineseMonth(const TChineseDate& aChineseDate,
                                            TDes& aDes)
     {
-    OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_GETCHINESEMONTH_ENTRY );
+    TRACE_ENTRY_POINT;
+
     if (aChineseDate.iMonth == 1)
         {
         aDes.Append(KCharFirstMonth); // Special character for first month
@@ -295,7 +289,8 @@ void CCalenLunarLocalizer::GetChineseMonth(const TChineseDate& aChineseDate,
         }
     
     aDes.Append(KCharMonth);
-    OstTraceFunctionExit0( CCALENLUNARLOCALIZER_GETCHINESEMONTH_EXIT );
+    
+    TRACE_EXIT_POINT;
     }
     
 // -----------------------------------------------------------------------------
@@ -305,14 +300,16 @@ void CCalenLunarLocalizer::GetChineseMonth(const TChineseDate& aChineseDate,
 void CCalenLunarLocalizer::GetChineseDay(const TChineseDate& aChineseDate,
                                          TDes& aDes)
     {
-    OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_GETCHINESEDAY_ENTRY );
+    TRACE_ENTRY_POINT;
+    
     if (aChineseDate.iDay <= 10) // day
         {
         aDes.Append(KCharChu); 
         }
     
     GetChineseDigits(aChineseDate.iDay, aDes);
-    OstTraceFunctionExit0( CCALENLUNARLOCALIZER_GETCHINESEDAY_EXIT );
+    
+    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
@@ -321,7 +318,8 @@ void CCalenLunarLocalizer::GetChineseDay(const TChineseDate& aChineseDate,
 //
 void CCalenLunarLocalizer::GetChineseDigits(TInt aNum, TDes& aDes)
     {
-    OstTraceFunctionEntry0( CCALENLUNARLOCALIZER_GETCHINESEDIGITS_ENTRY );
+    TRACE_ENTRY_POINT;
+    
     ASSERT( 0 < aNum && aNum <= 30 );
     TInt tens = aNum / 10;
     TInt ones = aNum % 10;
@@ -357,7 +355,8 @@ void CCalenLunarLocalizer::GetChineseDigits(TInt aNum, TDes& aDes)
         {
         __ASSERT_DEBUG(EFalse, User::Invariant());
         }
-    OstTraceFunctionExit0( CCALENLUNARLOCALIZER_GETCHINESEDIGITS_EXIT );
+    
+    TRACE_EXIT_POINT;
     }
 
 //EOF

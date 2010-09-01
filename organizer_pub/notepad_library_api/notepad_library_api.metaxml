@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<api id="8bb59a52167647f652906392a9fff258" dataversion="2.0">
+  <name>Notepad Library API</name>
+  <description>Provides API for storing, fetching and editing notepad memos, message templates and text files.</description>
+  <type>c++</type>
+  <collection>foundation_root_wk50</collection>
+  <libs>
+    <lib name="NpdLib.LIB" />
+  </libs>
+  <release category="public" sinceversion="0"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>no</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

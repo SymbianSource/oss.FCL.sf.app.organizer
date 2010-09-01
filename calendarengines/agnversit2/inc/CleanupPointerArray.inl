@@ -35,7 +35,7 @@ Takes a pointer to an RPointerArray and calls ResetAndDestroy on it.
 @internalTechnology
 */
 template <class T>
-inline void TCleanupPointerArray<T>::ResetAndDestroy(TAny* aPtr)
+inline void TCleanupPointerArray<class T>::ResetAndDestroy(TAny* aPtr)
 	{
 	reinterpret_cast<T *>(aPtr)->ResetAndDestroy();
 	}

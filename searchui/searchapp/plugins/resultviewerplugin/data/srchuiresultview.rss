@@ -1,0 +1,145 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    resources for srchuiresultview  
+*
+*/
+
+
+
+
+
+
+//  RESOURCE IDENTIFIER
+NAME    RESU // 4 letter ID
+
+//  Includes
+
+#include <eikon.rh>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.mbg>
+#include <avkon.loc>
+
+#include <srchuiresultview.loc>
+#include "srchuiresult.hrh"
+
+
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { }
+
+RESOURCE EIK_APP_INFO
+    {
+    }
+    
+/**
+* Menu pane used by all views
+*/	
+RESOURCE MENU_PANE r_search_app_menu_pane
+    {
+    items=
+        {
+        MENU_ITEM { command = EAknSoftkeyExit;			txt = qtn_options_exit; }
+        };
+    }
+
+/**
+* Search result view
+*/
+
+RESOURCE AVKON_VIEW r_search_result_view
+    {
+    menubar = r_search_result_view_menu_bar;  
+    cba = R_AVKON_SOFTKEYS_OPTIONS_BACK;
+    }
+
+RESOURCE MENU_BAR r_search_result_view_menu_bar
+    {
+    titles=
+        {
+        MENU_TITLE { menu_pane = r_search_app_menu_pane;},
+        MENU_TITLE { menu_pane = r_search_result_view_menu_pane;}
+        };
+    }
+
+RESOURCE MENU_PANE r_search_result_view_menu_pane
+    {
+    items=
+        {
+        MENU_ITEM { command = ESearchCmdOpen;			txt = qtn_options_open; },
+        
+        MENU_ITEM { command = ESearchCmdSearch;			txt = qtn_options_new_search; },
+        
+        //MENU_ITEM { command = ESearchCmdSettings;		txt = qtn_search_settings;},
+        
+        MENU_ITEM { command = ESearchCmdHelp;    		txt = qtn_options_help;}
+        };
+    }
+
+
+RESOURCE CBA r_softkeys_options_mskempty_back
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_back; },
+        CBA_BUTTON { id = EAknSoftkeyEmpty; txt = text_softkey_empty; }
+        };
+    }
+
+RESOURCE CBA r_softkeys_options_mskempty_cancel
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyCancel; txt = text_softkey_cancel; },
+        CBA_BUTTON { id = EAknSoftkeyEmpty; txt = text_softkey_empty; }
+        };
+    }
+
+RESOURCE CBA r_softkeys_options_open_cancel
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyCancel; txt = text_softkey_cancel; },
+        CBA_BUTTON { id = ESearchCmdOpen; txt = text_softkey_open; }
+        };
+    }
+
+RESOURCE CBA r_softkeys_options_open_back
+    {
+    buttons =
+        {
+        CBA_BUTTON { id = EAknSoftkeyOptions; txt = text_softkey_option; },
+        CBA_BUTTON { id = EAknSoftkeyBack; txt = text_softkey_back; },
+        CBA_BUTTON { id = ESearchCmdOpen; txt = text_softkey_open; }
+        };
+    }
+
+RESOURCE TBUF   r_qtn_search_no_results
+                { buf = qtn_search_no_results; }
+
+RESOURCE TBUF   r_qtn_search_single_no_results
+                { buf = qtn_search_single_no_results; }
+                
+RESOURCE TBUF   r_qtn_search_inprogress
+                { buf = qtn_search_inprogress; }
+                
+RESOURCE TBUF   r_qtn_search_fetching_results
+                { buf = qtn_search_fetching_results; }                
+
+
+                

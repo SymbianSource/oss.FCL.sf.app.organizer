@@ -359,7 +359,6 @@ void CAgsInstanceIteratorMgr::ConstructL()
 	iDefaultTypeOrder.AppendL(CCalEntry::EEvent);
 	iDefaultTypeOrder.AppendL(CCalEntry::EAppt);
 	iDefaultTypeOrder.AppendL(CCalEntry::EReminder);
-	iDefaultTypeOrder.AppendL(CCalEntry::ENote);
 	}
 
 CAgsInstanceIteratorMgr::~CAgsInstanceIteratorMgr()

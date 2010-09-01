@@ -1,0 +1,57 @@
+Exported func:
+----------------------------------
+1. NewL - Done
+2. NewLC -Done
+3. ~CNotepadApi - Done
+4. FetchMemoL -Done
+5. FetchTemplateL -Done
+11. NumberOfTemplates - Done
+12. SaveFileAsMemoL, handle - Done
+13. SaveFileAsMemoL, filename - Done
+14. SaveFileAsMemoL, filename + encoding - Done
+15. SaveFileAsMemoL, handle + encoding  - Done
+9. AddContentL - Done
+6. ExecTemplatesL - Not working, testscripter is crashing
+7. ExecFileViewerL, handle - Not working, -8 (KErrBadHandle)
+8. ExecFileViewerL, filename - Not working, -8 (KErrBadHandle)
+10. ExistsMemoL - Not working
+16. Dialog - passing, but did not understand what it is
+17. Model - passing, but did not understand what it is
+18. CreateListDialogL
+19. CreateViewerDialogL, filename
+20. CreateViewerDialogL, handle
+21. CreateViewerDialogL, Dowait
+22. CreateModelL
+23. ProbeMemoL - Not Working
+24. ExecReadOnlyTextViewerL
+25. ExecTextViewerL
+26. ExecTextEditorL
+
+Exported func:
+----------------------------------
+1. NewL - Done
+2. NewLC -Done
+3. ~CNotepadApi - Done
+4. FetchMemoL -Done
+5. FetchTemplateL -Done
+11. NumberOfTemplates - Done
+12. SaveFileAsMemoL, handle - Done
+13. SaveFileAsMemoL, filename - Done
+14. SaveFileAsMemoL, filename + encoding - Done
+15. SaveFileAsMemoL, handle + encoding  - Done
+9. AddContentL - Done
+6. ExecTemplatesL - Not working, testscripter is crashing
+7. ExecFileViewerL, handle - Not working, -8 (KErrBadHandle)
+8. ExecFileViewerL, filename - Not working, -8 (KErrBadHandle)
+10. ExistsMemoL - Not working
+16. Dialog - passing, but did not understand what it is
+17. Model - passing, but did not understand what it is
+18. CreateListDialogL
+19. CreateViewerDialogL, filename
+20. CreateViewerDialogL, handle
+21. CreateViewerDialogL, Dowait
+22. CreateModelL
+23. ProbeMemoL - Not Working
+24. ExecReadOnlyTextViewerL
+25. ExecTextViewerL
+26. ExecTextEditorL

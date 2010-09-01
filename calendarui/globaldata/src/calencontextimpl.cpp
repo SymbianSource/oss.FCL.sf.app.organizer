@@ -11,306 +11,576 @@
 *
 * Contributors:
 *
-* Description:  Calendar context, info on what's currently focused
+* Description:   Calendar context, info on what's currently focused
 *
 */
 
 
+
 //debug
 #include "calendarui_debug.h"
-#include "calencontextimpl.h"
-#include "calencontextchangeobserver.h"
-#include "calendateutils.h"
-//#include <lbsposition.h>
 
-const int KCalenDefaultTimeForViews = 480;  // 480 minutes == 8 hours == 8 am.
+#include "calencontextimpl.h"
+
+#include "calencontextchangeobserver.h"
+#include <calendateutils.h>
+#include <lbsposition.h>
+
+const TInt KCalenDefaultTimeForViews = 480;  // 480 minutes == 8 hours == 8 am.
 
 // ----------------------------------------------------------------------------
-// CalenContextImpl::CalenContextImpl
+// CCalenContextImpl::CCalenContextImpl
 // Constructor.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C CalenContextImpl::CalenContextImpl( MCalenContextChangeObserver* observer )
-: mObserver( observer ),
-  mFocusTime( -1 ),
-  mInstanceId( TCalenInstanceId::nullInstanceId() )
+CCalenContextImpl::CCalenContextImpl( MCalenContextChangeObserver* aObserver )
+: iObserver( aObserver ),
+  iFocusTime( -1 ),
+  iInstanceId( TCalenInstanceId::NullInstanceId() )
     {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CalenContextImpl::CalenContextImpl
+// CCalenContextImpl::CCalenContextImpl
 // Default Constructor.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C CalenContextImpl::CalenContextImpl()
-: mInstanceId( TCalenInstanceId::nullInstanceId() )
+CCalenContextImpl::CCalenContextImpl()
+: iInstanceId( TCalenInstanceId::NullInstanceId() )
     {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CalenContextImpl::CalenContextImpl
+// CCalenContextImpl::CCalenContextImpl
 // Copy Constructor.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C CalenContextImpl::CalenContextImpl( const CalenContextImpl& aContext )
+CCalenContextImpl::CCalenContextImpl( const CCalenContextImpl& aContext )
     {
+    TRACE_ENTRY_POINT;
+
     // When copying, set the observer to NULL because the only context that
     // should be set is accessed from the global data.
-    mObserver = NULL;
-    mFocusTime = aContext.mFocusTime;
-    mInstanceId = aContext.mInstanceId;
-    mViewId = aContext.mViewId;
+    iObserver = NULL;
+    iFocusTime = aContext.iFocusTime;
+    iInstanceId = aContext.iInstanceId;
+    iViewId = aContext.iViewId;
+
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CalenContextImpl::~CalenContextImpl
+// CCalenContextImpl::~CCalenContextImpl
 // Destructor.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-EXPORT_C CalenContextImpl::~CalenContextImpl()
-	{
-	if(mMutlipleContextIds.count())
-		{
-		mMutlipleContextIds.clear();
-		}
-	}
+CCalenContextImpl::~CCalenContextImpl()
+    {
+    TRACE_ENTRY_POINT;
+    if(iCalAlarmEntryFileName)
+        {
+        delete iCalAlarmEntryFileName;
+        iCalAlarmEntryFileName = NULL;
+        }
+    TRACE_EXIT_POINT;
+    }
 
 // ----------------------------------------------------------------------------
-// CalenContextImpl::DefaultTimeForViews
+// CCalenContextImpl::DefaultTimeForViews
 // If a view knows what day they should be looking at, but doesn't know what
 // time (for example the month view only deals in days), they should set the
 // time to this value.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-int CalenContextImpl::defaultTimeForViewsInMinnutes() const
+TTimeIntervalMinutes CCalenContextImpl::DefaultTimeForViews() const
     {
-    return KCalenDefaultTimeForViews;
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    return TTimeIntervalMinutes( KCalenDefaultTimeForViews );
     }
 
 // ----------------------------------------------------------------------------
-// CalenContextImpl::DefaultCalTimeForViewsL
+// CCalenContextImpl::DefaultCalTimeForViewsL
 // If a view has no preference as to what time/day to be focused on (e.g. when
 // a view is the first view loaded), they should set focus to this TCalTime.
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-QDateTime CalenContextImpl::defaultCalTimeForViewsL() const
+TCalTime CCalenContextImpl::DefaultCalTimeForViewsL() const
     {
-    QDateTime ret = CalenDateUtils::today();
-    QTime currentTime = ret.time();
-    currentTime.setHMS(7, 0, 0, 0);
-    ret.setTime(currentTime);
+    TRACE_ENTRY_POINT;
 
+    TTime today;
+    today.HomeTime();
+    today = CalenDateUtils::BeginningOfDay( today );
+    TCalTime ret;
+    ret.SetTimeLocalL( today + CCalenContextImpl::DefaultTimeForViews() );
+
+    TRACE_EXIT_POINT;
     return ret;
     }
 
 // ----------------------------------------------------------------------------
-// CalenContextImpl::SetFocusDateAndTimeL
+// CCalenContextImpl::SetFocusDateAndTimeL
 // Sets the focus time
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenContextImpl::setFocusDateAndTime( const QDateTime& focusDateTime)
+void CCalenContextImpl::SetFocusDateAndTimeL( const TCalTime& aFocusDateTime,
+                                                   const TVwsViewId& aViewId )
     {
-
-    mFocusDate = focusDateTime;
-    mFocusTime = focusDateTime.time().minute() + 1;
-    
-    if( mFocusTime < 0 )
-        mFocusTime = 0;
-    mInstanceId = TCalenInstanceId::nullInstanceId();
+    TRACE_ENTRY_POINT;
 
     // If this fails you're using a context that was constructed yourself.
     // Use the accessor from the global data instead, or don't try to set
     // anything on this context.
-    if(mObserver)
-        mObserver->ContextChanged();
+    ASSERT( iObserver );
+
+#ifdef _DEBUG
+    TDateTime dt = aFocusDateTime.TimeLocalL().DateTime();
+#endif
+
+    iFocusDate.SetTimeLocalL( CalenDateUtils::BeginningOfDay( aFocusDateTime.TimeLocalL() ) );
+    User::LeaveIfError( aFocusDateTime.TimeLocalL().MinutesFrom( iFocusDate.TimeLocalL(),
+                                                                 iFocusTime ) );
+    ASSERT( iFocusTime.Int() >= 0 );
+    iInstanceId = TCalenInstanceId::NullInstanceId();
+    iViewId = aViewId;
+
+    iObserver->ContextChanged();
+
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CalenContextImpl::SetFocusDateL
+// CCalenContextImpl::SetFocusDateL
 // Sets the focus date
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenContextImpl::setFocusDate( const QDateTime& focusDateTime)
+void CCalenContextImpl::SetFocusDateL( const TCalTime& aFocusDate,
+                                            const TVwsViewId& aViewId )
     {
-    mFocusDate = focusDateTime;
-    mFocusTime = -1;
-    mInstanceId = TCalenInstanceId::nullInstanceId();
+    TRACE_ENTRY_POINT;
 
     // If this fails you're using a context that was constructed yourself.
     // Use the accessor from the global data instead, or don't try to set
     // anything on this context.
-    if(mObserver)
-        mObserver->ContextChanged();
+    ASSERT( iObserver );
+
+#ifdef _DEBUG
+    TDateTime dt = aFocusDate.TimeLocalL().DateTime();
+#endif
+
+    iFocusDate.SetTimeLocalL( CalenDateUtils::BeginningOfDay( aFocusDate.TimeLocalL() ) );
+    iFocusTime = TTimeIntervalMinutes( -1 );
+    iInstanceId = TCalenInstanceId::NullInstanceId();
+    iViewId = aViewId;
+
+    iObserver->ContextChanged();
+
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
-// CalenContextImpl::SetInstanceIdL
+// CCalenContextImpl::SetInstanceIdL
 // Sets the instance id
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenContextImpl::setInstanceId( const TCalenInstanceId& aInstanceId )
+void CCalenContextImpl::SetInstanceIdL( const TCalenInstanceId& aInstanceId,
+                                             const TVwsViewId& aViewId )
     {
-
-    // Set the null date and time
-    mFocusDate = QDateTime();
-    mFocusTime = -1;
-    mInstanceId = aInstanceId;
+    TRACE_ENTRY_POINT;
 
     // If this fails you're using a context that was constructed yourself.
     // Use the accessor from the global data instead, or don't try to set
     // anything on this context.
-    if(mObserver)
-        mObserver->ContextChanged();
+    ASSERT( iObserver );
+
+    iFocusDate.SetTimeUtcL( Time::NullTTime() );
+    iFocusTime = TTimeIntervalMinutes( -1 );
+    iInstanceId = aInstanceId;
+    iViewId = aViewId;
+
+    iObserver->ContextChanged();
+
+    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
-// CalenContextImpl::SetFocusDateAndTimeAndInstanceL
+// CCalenContextImpl::SetFocusDateAndTimeAndInstanceL
 // Sets the currently focused time and instance
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void CalenContextImpl::setFocusDateAndTimeAndInstance( const QDateTime& focusDateTime,
-                                                              const TCalenInstanceId& instanceId )
+void CCalenContextImpl::SetFocusDateAndTimeAndInstanceL( const TCalTime& aFocusDateTime,
+                                                              const TCalenInstanceId& aInstanceId,
+                                                              const TVwsViewId& aViewId )
     {
-    mFocusDate = focusDateTime;
-    mFocusTime = focusDateTime.time().minute() + 1;
-    if( mFocusTime < 0 )
-		mFocusTime = 0;
-    mInstanceId = instanceId;
+    TRACE_ENTRY_POINT;
 
     // If this fails you're using a context that was constructed yourself.
     // Use the accessor from the global data instead, or don't try to set
     // anything on this context.
-    if(mObserver)
-        mObserver->ContextChanged();
+    ASSERT( iObserver );
+
+#ifdef _DEBUG
+    TDateTime dt = aFocusDateTime.TimeLocalL().DateTime();
+#endif
+
+    iFocusDate.SetTimeLocalL( CalenDateUtils::BeginningOfDay( aFocusDateTime.TimeLocalL() ) );
+    User::LeaveIfError( aFocusDateTime.TimeLocalL().MinutesFrom( iFocusDate.TimeLocalL(),
+                                                                 iFocusTime ) );
+    ASSERT( iFocusTime.Int() >= 0 );
+    iInstanceId = aInstanceId;
+    iViewId = aViewId;
+
+    iObserver->ContextChanged();
+
+    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
-// CalenContextImpl::FocusDateAndTimeL
+// CCalenContextImpl::FocusDateAndTimeL
 // Returns the focus time
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-QDateTime CalenContextImpl::focusDateAndTime() const
+TCalTime CCalenContextImpl::FocusDateAndTimeL() const
     {
-    QDateTime ret;
+    TRACE_ENTRY_POINT;
 
-    if( mFocusDate.isValid() )
+    TCalTime ret;
+
+    if( iFocusDate.TimeUtcL() != Time::NullTTime() )
         {
-        ret = mFocusDate;
+        if ( iFocusTime.Int() >= 0 )
+            {
+            ret.SetTimeLocalL( iFocusDate.TimeLocalL() + iFocusTime );
+            }
+        else
+            {
+            ret.SetTimeLocalL( iFocusDate.TimeLocalL() + DefaultTimeForViews() );
+            }
         }
     else
         {
-        ret = mInstanceId.mInstanceTime;
+        ret.SetTimeLocalL( iInstanceId.iInstanceTime );
         }
 
+    TRACE_EXIT_POINT;
     return ret;
     }
 
 // -----------------------------------------------------------------------------
-// CalenContextImpl::FocusTime
+// CCalenContextImpl::FocusTime
 // Returns the focus time
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-int CalenContextImpl::focusTime() const
+TTimeIntervalMinutes CCalenContextImpl::FocusTime() const
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
-    return mFocusTime;
+    return iFocusTime;
     }
 
 // -----------------------------------------------------------------------------
-// CalenContextImpl::InstanceId
+// CCalenContextImpl::InstanceId
 // Returns the instance id
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-TCalenInstanceId CalenContextImpl::instanceId() const
+TCalenInstanceId CCalenContextImpl::InstanceId() const
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
-    return mInstanceId;
+    return iInstanceId;
     }
 
 // -----------------------------------------------------------------------------
-// CalenContextImpl::SetMutlipleContextIds
+// CCalenContextImpl::ViewId
+// Returns the view id
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+TVwsViewId CCalenContextImpl::ViewId() const
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    return iViewId;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::SetMutlipleContextIds
 // Set multiple context ids
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void CalenContextImpl::setMutlipleContextIds(
-									QList<TCalenInstanceId>& mutlipleContextIds)
-    {
+void CCalenContextImpl::SetMutlipleContextIds(
+									RArray<TCalenInstanceId>& aMutlipleContextIds)
+	{
+    TRACE_ENTRY_POINT;
     
-    mMutlipleContextIds.clear();
-    mMutlipleContextIds = mutlipleContextIds;
+    iMutlipleContextIds.Reset();
+    iMutlipleContextIds = aMutlipleContextIds;
   
+    TRACE_EXIT_POINT;
 	}
 
 // -----------------------------------------------------------------------------
-// CalenContextImpl::RemoveMultipleContextId
+// CCalenContextImpl::RemoveMultipleContextId
 // Remove multiple context id 
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //	  
-void CalenContextImpl::removeMultipleContextId(TCalenInstanceId instanceId)
+void CCalenContextImpl::RemoveMultipleContextId(TCalenInstanceId aInstanceId)
 	{
-		
-	for(int index = 0;index < mMutlipleContextIds.count();index++)
+	TRACE_ENTRY_POINT;
+	
+	for(TInt index = 0;index < iMutlipleContextIds.Count();index++)
 		{
-		if(instanceId == mMutlipleContextIds[index])
+		if(aInstanceId == iMutlipleContextIds[index])
 			{
-			mMutlipleContextIds.removeAt(index);
+			iMutlipleContextIds.Remove(index);
 			}
 		}
 	
-    }
+    TRACE_EXIT_POINT;
+	}
 		
 // -----------------------------------------------------------------------------
-// CalenContextImpl::ResetMultipleContextIds
+// CCalenContextImpl::ResetMultipleContextIds
 // Resets all the multiple context ids
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //	
-void CalenContextImpl::resetMultipleContextIds(TInt /*aDbId*/)
+void CCalenContextImpl::ResetMultipleContextIds(TInt /*aDbId*/)
 	{
-		
-	if(mMutlipleContextIds.count())
+	TRACE_ENTRY_POINT;
+	
+	//if(iMutlipleContextIds.Count())
 		{
-		mMutlipleContextIds.clear();
+		iMutlipleContextIds.Reset();
+		iMutlipleContextIds.Close();
 		}
 	
-    }
+    TRACE_EXIT_POINT;
+	}
 		
 // -----------------------------------------------------------------------------
-// CalenContextImpl::GetMutlipleContextIds
+// CCalenContextImpl::GetMutlipleContextIds
 // Getter for multiple context ids
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //	
-QList<TCalenInstanceId>& CalenContextImpl::getMutlipleContextIds(TInt /*aDbId*/)
-	{	
-	return mMutlipleContextIds;
+RArray<TCalenInstanceId>& CCalenContextImpl::GetMutlipleContextIds(TInt /*aDbId*/)
+	{
+	TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+	
+	return iMutlipleContextIds;
 	}
 		
 // -----------------------------------------------------------------------------
-// CalenContextImpl::MutlipleContextIdsCount
+// CCalenContextImpl::MutlipleContextIdsCount
 // Returns mutliple context's count
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //	
-int CalenContextImpl::mutlipleContextIdsCount()
-	{	
-	return mMutlipleContextIds.count();
+TInt CCalenContextImpl::MutlipleContextIdsCount()
+	{
+	TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+	
+	return iMutlipleContextIds.Count();
 	}
+
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::SetLandMark
+// Sets the user selected landmark
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+void CCalenContextImpl::SetLandMark(CPosLandmark* aLandMark)
+	{
+	TRACE_ENTRY_POINT;
+	if(iLandMark)
+		{
+		delete iLandMark;	
+		}
+	iLandMark = aLandMark; 
+	TRACE_EXIT_POINT;	
+	}
+
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::GetLandMark
+// Returns the user selected landmark
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//	
+CPosLandmark* CCalenContextImpl::GetLandMark()
+	{
+	TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    
+	return(iLandMark);
+	}
+
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::ResetLandMark
+// Resets the landmark
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//	
+void CCalenContextImpl::ResetLandMark()
+	{
+	TRACE_ENTRY_POINT;
+	if(iLandMark)
+		{
+		delete iLandMark;
+		iLandMark = NULL;	
+		}
+	TRACE_EXIT_POINT;
+	}
+
+// ----------------------------------------------------------------------------
+// CCalenContextImpl::CalenCommandHandlerExtensionL
+// Dummy implementation.
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+TAny* CCalenContextImpl::CalenContextExtensionL( TUid /*aExtensionUid*/ )
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    return NULL;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::GetCalendarFileNameL
+// Get calendar file name
+// -----------------------------------------------------------------------------      
+TDesC& CCalenContextImpl::GetCalendarFileNameL() const
+    {
+    TRACE_ENTRY_POINT
+    TRACE_EXIT_POINT
+    if(iCalenFileName)
+        {
+        return *iCalenFileName;
+        }
+    else
+        {
+        return const_cast<TDesC&> (KNullDesC());
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::SetCalendarFileNameL
+// Set calendar file name to context
+// ----------------------------------------------------------------------------- 
+void CCalenContextImpl::SetCalendarFileNameL(const TDesC& aCalFileName)
+    {
+    TRACE_ENTRY_POINT
+    
+    if(iCalenFileName)
+        {
+        delete iCalenFileName;
+        iCalenFileName = NULL;
+        }
+    iCalenFileName = aCalFileName.AllocL();
+    TRACE_EXIT_POINT
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::ResetCalendarFileName
+// Resets calendar file name in context
+// ----------------------------------------------------------------------------- 
+void CCalenContextImpl::ResetCalendarFileName()
+    {
+    TRACE_ENTRY_POINT;
+    if(iCalenFileName)
+        {
+        delete iCalenFileName;
+        iCalenFileName = NULL;
+        }
+    
+    TRACE_EXIT_POINT;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::SetCalAlarmEntryFileNameL
+// Set calendar file name of Alarm entry
+// ----------------------------------------------------------------------------- 
+void CCalenContextImpl::SetCalAlarmEntryFileNameL(const TDesC& aName)
+    {
+    TRACE_ENTRY_POINT
+    if (iCalAlarmEntryFileName)
+        {
+        delete iCalAlarmEntryFileName;
+        iCalAlarmEntryFileName = NULL;
+        }
+    iCalAlarmEntryFileName = aName.AllocL();
+    TRACE_EXIT_POINT   
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::GetCalAlarmEntryFileNameL
+// Get calendar file name of Alarm entry
+// ----------------------------------------------------------------------------- 
+HBufC* CCalenContextImpl::GetCalAlarmEntryFileNameL() const
+    {
+    TRACE_ENTRY_POINT     
+    TRACE_EXIT_POINT 
+    
+    return iCalAlarmEntryFileName;   
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::ResetCalAlarmEntryFileName
+// Resets Alarm Entry file name in context
+// ----------------------------------------------------------------------------- 
+void CCalenContextImpl::ResetCalAlarmEntryFileName()
+    {
+    TRACE_ENTRY_POINT    
+    if(iCalAlarmEntryFileName)
+        {
+        delete iCalAlarmEntryFileName;
+        iCalAlarmEntryFileName = NULL;
+        }
+        
+    TRACE_EXIT_POINT 
+    }
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::ResetCalAlarmEntryFileName
+// set Alarm Entry LocalUid in context
+// ----------------------------------------------------------------------------- 
+void  CCalenContextImpl::SetCalAlarmEntryLocalUid(TCalLocalUid aLocalId)
+    {
+    TRACE_ENTRY_POINT   
+    iCalAlarmLocalUid = aLocalId;
+    TRACE_EXIT_POINT 
+    }
+    
+ 
+// -----------------------------------------------------------------------------
+// CCalenContextImpl::ResetCalAlarmEntryFileName
+// Get Alarm Entry LocalUid from context
+// ----------------------------------------------------------------------------- 
+TCalLocalUid CCalenContextImpl::CalAlarmLocalUidL() const
+    {
+    TRACE_ENTRY_POINT  
+    TRACE_EXIT_POINT 
+    return iCalAlarmLocalUid;
+    }
 // End of file

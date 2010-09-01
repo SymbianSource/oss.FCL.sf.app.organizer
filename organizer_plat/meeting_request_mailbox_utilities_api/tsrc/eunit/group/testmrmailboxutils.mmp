@@ -1,0 +1,50 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Project definition file for project testmrmailboxutils
+*
+*/
+
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET          testmrmailboxutils.dll
+TARGETTYPE      dll
+TARGETPATH      /DigiaEUnit/Tests
+UID             0x1000af5a 0x01700001
+VENDORID        VID_DEFAULT
+CAPABILITY      CAP_GENERAL_DLL
+
+SOURCEPATH              ../src
+SOURCE                  testmrmailboxutilsdllmain.cpp
+SOURCE                  testmrmailboxutils.cpp
+
+USERINCLUDE         ../inc                          //basic/inc
+
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE 		      ../../../../../inc   //organizer include
+SYSTEMINCLUDE           /epoc32/include/ecom
+SYSTEMINCLUDE           /epoc32/include/Digia/EUnit
+
+LIBRARY                 EUnit.lib
+LIBRARY                 euser.lib
+LIBRARY                 ecom.lib
+LIBRARY                 calinterimapi.lib
+LIBRARY                 caleninterimutils2.lib
+LIBRARY 		        		Msgs.lib
+LIBRARY                 imcm.lib
+LIBRARY                 muiu.lib
+
+// End of file

@@ -11,9 +11,14 @@
 *
 * Contributors:
 *
-* Description:  
- *
+* Description:	Provides cleanup item to push ResetAndDestroy calls to 
+*                cleanup stack. It is heavily used for RPointerArrays,
+*                which are used all over Symbian's CalenInterimAPI.
+*                Implementation is more or less copy-paste of
+*                cleanup item of Close method and CleanupClosePushL   
+*
 */
+
 
 
 #include "CleanupResetAndDestroy.h"

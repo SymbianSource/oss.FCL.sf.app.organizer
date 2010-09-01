@@ -1,0 +1,83 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  build file for Notepad application, note viewer application
+*		 and npdlib DLL.
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+//../inc/nmake.hlp.hrh /epoc32/include/cshelp/nmake.hlp.hrh
+//Dbms policy file for accessing the notepad.dat database. 
+
+../DBMS/101F8878.SPD /epoc32/data/z/private/100012a5/policy/101f8878.spd
+../DBMS/101F8878.SPD /epoc32/release/winscw/udeb/z/private/100012a5/policy/101f8878.spd
+../DBMS/101F8878.SPD /epoc32/release/winscw/urel/z/private/100012a5/policy/101f8878.spd
+../DBMS/backup_registration.xml /epoc32/data/z/private/10005907/backup_registration.xml
+../DBMS/backup_registration.xml /epoc32/release/winscw/udeb/z/private/10005907/backup_registration.xml
+../DBMS/backup_registration.xml /epoc32/release/winscw/urel/z/private/10005907/backup_registration.xml
+
+// new lines
+../rom/Notepad.iby 									CORE_APP_LAYER_IBY_EXPORT_PATH(notepad.iby)
+../rom/Npdviewer.iby								CORE_APP_LAYER_IBY_EXPORT_PATH(npdviewer.iby)
+../rom/Npdlib.iby										CORE_APP_LAYER_IBY_EXPORT_PATH(npdlib.iby)
+../rom/npdsmla.iby									CORE_APP_LAYER_IBY_EXPORT_PATH(npdsmla.iby)
+../rom/NotepadResources.iby				  LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(notepadresources.iby)
+
+
+// new lines
+../loc/Notepad.loc              							 APP_LAYER_LOC_EXPORT_PATH(notepad.loc)
+../loc/NpdLib.loc                  							 APP_LAYER_LOC_EXPORT_PATH(npdlib.loc)
+../loc/NpdTemp.loc                 							 APP_LAYER_LOC_EXPORT_PATH(npdtemp.loc)
+../SyncMLAdapter/loc/101F85F8.loc                APP_LAYER_LOC_EXPORT_PATH(101f85f8.loc)
+PRJ_MMPFILES
+
+
+./NpdLib.mmp
+./Notepad.mmp
+./NpdViewer.mmp
+
+#ifdef __SYNCML_DS_NOTEPAD
+../SyncMLAdapter/group/nsmldsnotepaddataprovider.mmp
+#endif // __SYNCML_DS_NOTEPAD
+
+PRJ_EXTENSIONS
+
+START EXTENSION s60/mifconv
+OPTION TARGETFILE npdlib.mif
+OPTION HEADERFILE npdlib.mbg
+OPTION SOURCES  -c8,8 qsn_fr_notepad_side_t \
+                -c8,8 qsn_fr_notepad_cont_side_t \
+                -c8,1 qgn_prop_mce_template \
+                -c8,8 qsn_fr_notepad_corner_tl \
+                -c8,8 qsn_fr_notepad_corner_tr
+END
+
+START EXTENSION s60/mifconv
+OPTION TARGETFILE notepad_aif.mif
+OPTION SOURCES -c8,8 qgn_menu_note
+END
+
+START EXTENSION s60/mifconv
+OPTION TARGETFILE npdviewer_aif.mif
+OPTION SOURCES -c8,8 qgn_menu_note
+END
+
+PRJ_TESTMMPFILES
+//  End of File  

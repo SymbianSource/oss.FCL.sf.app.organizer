@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<api id="561cc7e02558904a49383ce9a5ae1391" dataversion="2.0">
+<name>searchfw launcher api</name>
+<description>Allows clients to open searchfw and have it focus on different views, entries or dates. </description>
+<type>c++</type>
+<collection>searchfw</collection>
+<libs></libs>
+<release category="platform"/>
+<attributes>
+<htmldocprovided>no</htmldocprovided>
+<adaptation>no</adaptation>
+</attributes>
+</api>

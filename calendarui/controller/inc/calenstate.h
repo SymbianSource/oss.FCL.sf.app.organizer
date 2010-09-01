@@ -22,12 +22,12 @@
 // INCLUDES
 #include <e32base.h>
 #include <e32hashtab.h>
-#include "calennotificationhandler.h"       // TCalenNotification
+#include <calennotificationhandler.h>       // TCalenNotification
 #include "calenstatemachine.h"              // TCalenStateIndex
 
 class CCalenController;
-class CalenAsyncCallBack;
-class CalenCallbackPackage;
+class CCalenAsyncCallBack;
+class CCalenCallbackPackage;
 
 // CLASS DEFINITIONS
 
@@ -62,7 +62,7 @@ class CCalenState : public CBase
 		/**
          * Interface to get the current state
          */        
-        CCalenStateMachine::TCalenStateIndex GetCurrentState(
+        CCalenStateMachine::TCalenStateIndex CCalenState::GetCurrentState(
         									CCalenStateMachine& aStateMachine);
         
         /**
@@ -90,10 +90,10 @@ class CCalenState : public CBase
         CCalenState( CCalenController& aController, RHashSet<TCalenNotification>&  aOutstandingNotifications );
 
     private:
-        class CalenCallbackPackage : public CBase // going on heap
+        class CCalenCallbackPackage : public CBase // going on heap
             {
             public: 
-                CalenCallbackPackage( CCalenState* aSelf,
+                CCalenCallbackPackage( CCalenState* aSelf,
                                        TCalenCommand aCommand,
                                        MCalenCommandHandler* aCommandHandler);
                 
@@ -107,7 +107,7 @@ class CCalenState : public CBase
                 MCalenCommandHandler* iCommandHandler; // not own
             };
         static TInt CommandCallback( TAny* aCommandStruct );
-        CalenCallbackPackage* iCallBackPackage;
+        CCalenCallbackPackage* iCallBackPackage;
 
     protected:
         CCalenController& iController;
@@ -115,7 +115,7 @@ class CCalenState : public CBase
         CCalenStateMachine::TCalenStateIndex iPreviousState;
 
     private:
-        CalenAsyncCallBack*     iCmdCallback;
+        CCalenAsyncCallBack*     iCmdCallback;
      };
 
 

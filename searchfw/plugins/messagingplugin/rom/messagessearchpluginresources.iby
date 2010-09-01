@@ -1,0 +1,32 @@
+/*
+* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: Image description file for project plugin resources
+*
+*/
+
+
+
+#ifndef __MESSAGESSEARCHPLUGINRESOURCES_IBY__
+#define __MESSAGESSEARCHPLUGINRESOURCES_IBY__
+
+#ifdef __GENERAL_SEARCH_FRAMEWORK 
+#ifdef RD_GENERAL_SEARCH  
+
+data=DATAZ_\ECOM_RESOURCE_DIR\messagespluginresource.rsc			ECOM_RESOURCE_DIR\messagespluginresource.Rsc
+
+#endif  //RD_GENERAL_SEARCH 
+#endif //__GENERAL_SEARCH_FRAMEWORK
+
+
+#endif //__MESSAGESSEARCHPLUGINRESOURCES_IBY__

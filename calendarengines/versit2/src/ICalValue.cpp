@@ -26,7 +26,7 @@
 // User includes.
 #include "ICalKeyWords.h"		// Literals
 #include "ICalRuleSegment.h"	// CICalRuleSegment
-#include "CleanupPointerArray.h"	// For TCleanupPointerArray
+#include "CleanupPointerArray.h"   // For TCleanupPointerArray
 
 // Constants.
 

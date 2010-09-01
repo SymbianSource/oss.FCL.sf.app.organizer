@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<api id="9eaab024f9a91c145dd49d9d8b6aa1ab" dataversion="2.0">
+  <name>Calendar Settings Keys API</name>
+  <description>Provides access to the Calendar application's settings</description>
+  <type>c++</type>
+  <collection>calendarui</collection>
+  <libs>
+  </libs>
+  <release category="platform"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>no</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

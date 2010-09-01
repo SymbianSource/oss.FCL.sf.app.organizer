@@ -15,10 +15,14 @@
 *
 */
 
-// User includes.
+
+
+// INCLUDE FILES
 #include "alarmutils.h"
+
 #include "AlmAlertVariant.hrh"
 #include "pim_trace.h"
+
 #include "AlmAlarmPlayer.h"
 #include "AlmAlarmControl.h"
 #include "AlmAlarmInfo.h"
@@ -27,10 +31,9 @@
 #ifdef RD_ALMALERT__SENSOR_SUPPORT
 #include "alarmcontextfwsupport.h"
 #endif // RD_ALMALERT__SENSOR_SUPPORT
-#include "alarmalertwrapper.h"
 
-// System includes.
-// #include <almconst.h>
+#include <w32std.h>
+#include <almconst.h>
 #include <eikenv.h>
 #include <AknCapServer.h>
 #include <e32property.h>
@@ -41,41 +44,39 @@
 #include <ProfileEngineDomainConstants.h>
 #include <sbdefs.h>
 #include <coreapplicationuisdomainpskeys.h>
+#include <clockdomaincrkeys.h>
+#include <CalendarInternalCRKeys.h>
 #include <wakeupalarm.h>
 #include <calalarm.h> // KUidAgendaModelAlarmCategory - the alarm category id for calendar alarms
 #include <AknUtils.h>
+#include <hwrmpowerstatesdkpskeys.h>
+
 #ifndef SYMBIAN_CALENDAR_V2
 #include <agmalarm.h> // deprecated, use CalAlarm.h when SYMBIAN_CALENDAR_V2 flag is enabled
 #endif // SYMBIAN_CALENDAR_V2
 #include <calsession.h>
 #include <calentryview.h>
-#include <clockdomaincrkeys.h>
-#include <calendardomaincrkeys.h>
+#include <calenlauncher.h>  // for launching calendar entry view
 
-// Constants
+
+
+// CONSTANTS AND MACROS
 const TInt KAlmAlertMinSnooze( 100 );
 const TInt KAlmAlertMaxSnooze( 104 );
-const TInt KDefaultSnoozeTime( 5 ); 
-const TUint KAlarmAutoHide( 60000000 );
-const TUint KAlarmAutoHideCalendar( 30000000 );
-const TUint KKeyBlockTime( 500000 );
-const TUint KShutdownTime( 1500000 );
-const TUint KAlarmDelayTime( 1000000 );
-const TUint KInactivityResetInterval( 1000000 );
-const TInt KMaxProfileVolume( 10 );
-const TInt KNoVolume(0);
-const TInt KVolumeRampPeriod( 3000000 );
-const TUid KAlarmClockOne = { 0x101F793A };
-const TUid KCRUidProfileEngine = {0x101F8798};
-//const TUint32 KProEngActiveReminderTone     = 0x7E00001C;
-const TUint32 KProEngActiveClockAlarmTone  = 0x7E00001D;
-//const TUint32 KProEngActiveAlertVibra           = 0x7E00001E;
-const TUint32 KProEngSilenceMode = {0x80000202};
-const TUint32 KProEngActiveRingingType = {0x7E000002};
-const TUint32 KProEngActiveRingingVolume = {0x7E000008};
 
-// Literals
+const TInt KDefaultSnoozeTime( 5 ); // 5 minutes
+
+const TUint KAlarmAutoHide( 60000000 );  // 60 s
+const TUint KAlarmAutoHideCalendar( 30000000 );  // 30 s
+const TUint KKeyBlockTime( 500000 );  // 0.5 s
+const TUint KShutdownTime( 1500000 ); // 1.5 s
+const TUint KAlarmDelayTime( 1000000 ); // 1.0 s
+const TUint KInactivityResetInterval( 1000000 ); // 1.0 s
+
+const TInt KMaxProfileVolume( 10 );
+const TInt KVolumeRampPeriod( 3000000 );  // 3 seconds
 _LIT( KRngMimeType, "application/vnd.nokia.ringing-tone" );
+
 
 // ==========================================================
 // ================= MEMBER FUNCTIONS =======================
@@ -109,11 +110,10 @@ void CAlarmUtils::ConstructL()
     iAlarmInfo = new( ELeave )CAlmAlarmInfo( this );
 
     // we can still work without profile engine
-    // PIM_TRAPD_ASSERT( iProfileEng = CreateProfileEngineL(); )
+    PIM_TRAPD_ASSERT( iProfileEng = CreateProfileEngineL(); )
 
-    // iNotifierDialogController = ((CAknCapServer*)CEikonEnv::Static()->AppServer())->GlobalNoteControllerL();
-    // iNotifierDialogController->SetNoteObserver( iAlarmControl );
-    iAlarmAlert = new AlarmAlert(iAlarmControl);
+    iNotifierDialogController = ((CAknCapServer*)CEikonEnv::Static()->AppServer())->GlobalNoteControllerL();
+    iNotifierDialogController->SetNoteObserver( iAlarmControl );
 
     // create timers
     iShutdownTimer   = CPeriodic::NewL( CActive::EPriorityStandard );
@@ -155,14 +155,9 @@ CAlarmUtils::CAlarmUtils( CAlmAlarmControl* aAlarmControl,
 CAlarmUtils::~CAlarmUtils()
     {
     TRACE_ENTRY_POINT;
-    /*if( iNotifierDialogController )
+    if( iNotifierDialogController )
         {
         iNotifierDialogController->SetNoteObserver( NULL );
-        }*/
-    if( iAlarmAlert )
-        {
-        delete iAlarmAlert;
-        iAlarmAlert = NULL;
         }
 
     if( iShutdownTimer )
@@ -260,7 +255,7 @@ void CAlarmUtils::PlayAlarmSound()
     TRACE_ENTRY_POINT;
     StopAlarmSound();
     PIM_TRAPD_ASSERT( iAlarmPlayer = CAlmAlarmPlayer::NewL( this ); )
-    //SetBackLight( ETrue );
+    SetBackLight( ETrue );
     TRACE_EXIT_POINT;
     }
 
@@ -281,7 +276,7 @@ void CAlarmUtils::StopAlarmSound()
     #endif // RD_ALMALERT__SENSOR_SUPPORT
     delete iAlarmPlayer;
     iAlarmPlayer = NULL;
-    //SetBackLight( EFalse );
+    SetBackLight( EFalse );
     TRACE_EXIT_POINT;
     }
 
@@ -363,7 +358,7 @@ TBool CAlarmUtils::IsRingingTypeSilent() const
     TRACE_ENTRY_POINT;
     TBool isSilent( EFalse );
 
-    /*if( iProfileEng )
+    if( iProfileEng )
         {
         MProfile* profile = NULL;
         PIM_TRAPD_ASSERT( profile = iProfileEng->ActiveProfileL(); )
@@ -378,7 +373,7 @@ TBool CAlarmUtils::IsRingingTypeSilent() const
             profile->Release();
             }
         }
-    TRACE_EXIT_POINT;*/
+    TRACE_EXIT_POINT;
     return isSilent;
     }
 
@@ -416,51 +411,33 @@ TBool CAlarmUtils::IsOffTone() const
 // -----------------------------------------------------------------------------
 //
 void CAlarmUtils::GetAlarmSoundFilenames()
-{
-	TRACE_ENTRY_POINT;
-	CRepository* profileRepository = NULL;
-	CRepository* repository = NULL;
+    {
+    TRACE_ENTRY_POINT;
+    CRepository* repository = NULL;
 
-	if( IsClockAlarm() )
-	{
-		PIM_TRAPD_ASSERT( repository = CRepository::NewL( TUid::Uid(KCRUidClockApp) ); ) 
-		PIM_TRAPD_ASSERT( profileRepository = CRepository::NewL( 
-														KCRUidProfileEngine ); )
+    if( IsClockAlarm() )
+        {
+        PIM_TRAPD_ASSERT( repository = CRepository::NewL( KCRUidClockApp ); )
 
-		if( repository )
-		{
-			PIM_ASSERT( repository->Get( KClockAppDefaultSoundFile, 
-											iAlarmData.iDefaultAlarmTone ); )
-		}
-		if( profileRepository )
-		{
-			// TODO: Need to use KProEngActiveClockAlarmTone once its released
-			//PIM_ASSERT( profileRepository->Get( KProEngActiveClockAlarmTone , iAlarmData.iAlarmTone); )
-			PIM_ASSERT( repository->Get( KClockAppDefaultSoundFile, 
-													iAlarmData.iAlarmTone ); )
-		}
-	}
-	else
-	{
-		PIM_TRAPD_ASSERT( repository =
-				CRepository::NewL( TUid::Uid(KCRUidCalendar) ); )
-		PIM_TRAPD_ASSERT( profileRepository =
-				CRepository::NewL( KCRUidProfileEngine ); )
+        if( repository )
+            {
+            PIM_ASSERT( repository->Get( KClockAppSoundFile, iAlarmData.iAlarmTone ); )
+            PIM_ASSERT( repository->Get( KClockAppDefaultSoundFile, iAlarmData.iDefaultAlarmTone ); )
+            }
+        }
+    else
+        {
+        PIM_TRAPD_ASSERT( repository = CRepository::NewL( KCRUidCalendar ); )
 
-		if( repository )
-		{
-			PIM_ASSERT( repository->Get( KCalendarDefaultSoundFile, 
-											iAlarmData.iDefaultAlarmTone ); )
-		}
-		if( profileRepository )
-		{
-			PIM_ASSERT( profileRepository->Get( KProEngActiveClockAlarmTone, iAlarmData.iAlarmTone ); )
-		}
-	}
-	delete repository;
-	delete profileRepository;
-	TRACE_EXIT_POINT;
-}
+        if( repository )
+            {
+            PIM_ASSERT( repository->Get( KCalendarSoundFile, iAlarmData.iAlarmTone ); )
+            PIM_ASSERT( repository->Get( KCalendarDefaultSoundFile, iAlarmData.iDefaultAlarmTone ); )
+            }
+        }
+    delete repository;
+    TRACE_EXIT_POINT;
+    }
 
 // -----------------------------------------------------------------------------
 // Check if the alarm sound file is a KRngMimeType file.
@@ -509,38 +486,30 @@ void CAlarmUtils::GetProfileSettings()
     iAlarmData.iVolumeRampTime = iAlarmData.iVolume * KVolumeRampPeriod; // volume ramp only for clock alarms
 
     if( !IsClockAlarm() )
-    {
-        CRepository* repository = NULL;
-        PIM_TRAPD_ASSERT( repository = CRepository::NewL( KCRUidProfileEngine ); )
-    	
-    	TInt ringType;
-    	repository->Get( KProEngActiveRingingType , ringType);
-    	iAlarmData.iRingType = static_cast< TProfileRingingType >( ringType );
-    	
-    	TBool silentMode;
-    	TInt ringingVolume;
-    	repository->Get( KProEngSilenceMode, silentMode);
-    	if(silentMode)
-    	    {
-    	    ringingVolume = KNoVolume;
-    	    }
-    	else
-    	    {
-			// It seems the wrong key has been associated with calendar alarm tone
-			// settings. It would be changed once it's rectified by profile team.
-    	    repository->Get( KProEngActiveRingingVolume , ringingVolume );
-    	    }
-    	
-    	iAlarmData.iVolume = ringingVolume;
-    	
-    	iAlarmData.iVolumeRampTime = 0;
-    } else {
-    	TInt volumeOn = iAlarmData.iAlarm.ClientData2();
-    	if (!volumeOn) {
-    		iAlarmData.iRingType = EProfileRingingTypeSilent;
-    		iAlarmData.iVolume = KNoVolume;
-    	}
-    }
+        {
+        if( iProfileEng )
+            {
+            MProfile* profile = NULL;
+            PIM_TRAPD_ASSERT( profile = iProfileEng->ActiveProfileL(); )
+
+            if( profile )
+                {
+                const TProfileToneSettings& setting = profile->ProfileTones().ToneSettings();
+                iAlarmData.iRingType = setting.iRingingType;
+
+                // calendar alarms: if profile is "silent" -> set volume to zero
+                iAlarmData.iVolume = (iAlarmData.iRingType == EProfileRingingTypeSilent ? 0 : setting.iRingingVolume);
+
+                profile->Release();
+                }
+            }
+
+        if( iAlarmData.iRingType == EProfileRingingTypeRingingOnce )
+            {
+            iAlarmData.iRepeatValue = 1;
+            }
+        iAlarmData.iVolumeRampTime = 0;
+        }
     TRACE_EXIT_POINT;
     }
 
@@ -654,7 +623,7 @@ void CAlarmUtils::GetSnoozeTimeSetting()
         case EAlarmTypeClock:
             {
             CRepository* repository = NULL;
-            PIM_TRAPD_ASSERT( repository = CRepository::NewL( TUid::Uid(KCRUidClockApp) ); )
+            PIM_TRAPD_ASSERT( repository = CRepository::NewL( KCRUidClockApp ); )
 
             if( repository )
                 {
@@ -667,8 +636,7 @@ void CAlarmUtils::GetSnoozeTimeSetting()
         case EAlarmTypeCalendar:
             {
             CRepository* repository = NULL;
-            PIM_TRAPD_ASSERT( repository =
-            		CRepository::NewL( TUid::Uid(KCRUidCalendar) ); )
+            PIM_TRAPD_ASSERT( repository = CRepository::NewL( KCRUidCalendar ); )
 
             if( repository )
                 {
@@ -762,12 +730,11 @@ void CAlarmUtils::GetWakeupLabelL(HBufC*& aLabel)
 // 
 // -----------------------------------------------------------------------------
 //
-AlarmAlert* CAlarmUtils::NotifierDialogController()
+CNotifierDialogController* CAlarmUtils::NotifierDialogController()
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
-    // return iNotifierDialogController;
-    return iAlarmAlert;
+    return iNotifierDialogController;
     }
 
 // ---------------------------------------------------------
@@ -995,12 +962,20 @@ void CAlarmUtils::SetDeviceState(TPSGlobalSystemState aDeviceState)
 void CAlarmUtils::DeviceShutdown()
     {
     TRACE_ENTRY_POINT;
-    iShutdownTimer->Cancel();
-    if( StarterConnect() )
-        {
-        iStarter.Shutdown();
-        iStarter.Close();
-        }    
+    
+    // charging state added for the err EMDN-835CW2.
+    TInt chargingState;
+    RProperty::Get( KPSUidHWRMPowerState, KHWRMChargingStatus , chargingState );
+    
+    if( IsDeviceInAlarmState() && ( chargingState != EChargingStatusCharging ) )
+        {       
+            iShutdownTimer->Cancel();
+            if( StarterConnect() )
+                {
+                iStarter.Shutdown();
+                iStarter.Close();
+                }    
+        }
     TRACE_EXIT_POINT;
     }
 
@@ -1148,7 +1123,7 @@ void CAlarmUtils::CancelAutoSnooze()
 void CAlarmUtils::StartAccessoryObserver()
     {
     TRACE_ENTRY_POINT;    
-    // PIM_TRAPD_ASSERT( iRemConHandler->StartL(); )    
+    PIM_TRAPD_ASSERT( iRemConHandler->StartL(); )    
     TRACE_EXIT_POINT;
     }
 
@@ -1281,10 +1256,10 @@ void CAlarmUtils::AsyncShowSnoozeInfoNote()
 // Callback function for the auto snooze timer
 // ---------------------------------------------------------
 //
-TInt CAlarmUtils::SnoozeInfoCallBack(TAny* /*aPtr*/)
+TInt CAlarmUtils::SnoozeInfoCallBack(TAny* aPtr)
     {
     TRACE_ENTRY_POINT;
-    // PIM_TRAPD_ASSERT( static_cast<CAlmAlarmControl*>( aPtr )->ShowSnoozeInfoNoteL(); )
+    PIM_TRAPD_ASSERT( static_cast<CAlmAlarmControl*>( aPtr )->ShowSnoozeInfoNoteL(); )
     TRACE_EXIT_POINT;
     return 0;
     }
@@ -1649,12 +1624,11 @@ void CAlarmUtils::StartCalendarL()
     TRACE_ENTRY_POINT;
     
     iCalendarAlarmViewer = ETrue;
-    /*
+    
     CalenLauncher::ViewEntryL( iAlarmData.iLocalUid,
                                iAlarmData.iInstanceTime, iAlarmData.iCalFileName,
                                CanSnooze() ? CalenLauncher::EAlarmViewer : 
                                              CalenLauncher::EAlarmViewerNoSnooze );
-											 */
     TRACE_EXIT_POINT;
     }
 
@@ -1695,10 +1669,51 @@ TBool CAlarmUtils::IsCalendarAlarmViewer()
     return iCalendarAlarmViewer;
     }
 
-SAlarmInfo* CAlarmUtils::GetAlarmInfo()
+// ---------------------------------------------------------
+// Silence the notifying alarm 
+// ---------------------------------------------------------
+//
+void CAlarmUtils::DoSilence()
     {
-    return iAlarmInfo->GetAlarmInfo(iAlarmData.iAlarm,
-                                    iAlarmData.iAlarmType);
+    TRACE_ENTRY_POINT;
+    
+    // silence only if snoozing is possible
+    // this way user must hear the last "call"
+    if( CanSnooze() )
+        {
+        delete iAlarmPlayer;
+        iAlarmPlayer = NULL;
+        SetBackLight( EFalse );
+        
+        if( IsCalendarAlarm() )
+            {
+    
+            // calendar alarm needs extra handling due to having stop - silence
+            //simulate right softkey pressing
+            RWsSession wsSession=CCoeEnv::Static()->WsSession();
+            TKeyEvent keyEvent;
+            keyEvent.iCode = EKeyCBA2;  
+            keyEvent.iScanCode = EStdKeyDevice1;
+            keyEvent.iModifiers = 0;
+            keyEvent.iRepeats = 0;
+            wsSession.SimulateKeyEvent( keyEvent );
+            wsSession.Flush();
+            }
+        // clockalarm
+        else
+            {
+            StartAutoSnoozeTimer();
+            }
+    
+        #if defined( RD_ALMALERT__SENSOR_SUPPORT )
+        // notify the result through the context framework
+        if( iCFSupport )
+            {
+            PIM_TRAPD_ASSERT( iCFSupport->PublishAlarmResultL( EResultAlarmSilenced ); )
+            }
+        #endif // RD_ALMALERT__SENSOR_SUPPORT
+        }
+    TRACE_EXIT_POINT;     
     }
 
 // End of File

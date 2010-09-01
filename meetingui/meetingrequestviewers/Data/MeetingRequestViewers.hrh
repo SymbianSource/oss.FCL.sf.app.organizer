@@ -1,0 +1,59 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Meeting request viewers common definitions for resource and c++ files.
+*
+*/
+
+
+
+#ifndef CMRVIEWERS_HRH
+#define CMRVIEWERS_HRH
+
+#include <avkon.hrh>
+#include <MRCommands.hrh>
+
+enum EMRViewsCommands
+    {
+    EMRViewersFirstMenuItem = EMRCommandsLast,    
+    EMRCommandRespondSubmenu,
+    EMRCommandReplySubmenu,
+    EMRCommandFindItem,
+    EMRCommandFindItemSub1,
+    EMRCommandFindItemSub2,
+    EMRCommandFindItemSub3
+    };
+    
+enum 
+    {
+    EMRDescriptionItem,
+    EMRAttendeeItem
+    };
+    
+/**
+* UID of the mail viewer application
+*/
+#define KUidMailApplication 0x101F4CE4
+
+/**
+* UID of the BVA application
+*/
+#define KUidBVAApplication 0x101F4CE5
+
+/**
+* UID of the calendar application
+*/
+#define KUidCalendarApplication 0x10005901
+
+
+#endif
