@@ -65,6 +65,7 @@ CalenNativeView::CalenNativeView(MCalenServices &services) :
 	notificationArray.Append(ECalenNotifySystemTimeChanged);
 	notificationArray.Append(ECalenNotifySystemLocaleChanged);
 	notificationArray.Append(ECalenNotifyContextChanged);
+	notificationArray.Append(ECalenNotifyCloseDialogs);
 
 	mServices.RegisterForNotificationsL(this, notificationArray);
 
@@ -130,6 +131,7 @@ void CalenNativeView::goToDate()
     
 	// Create a popup with datepicker for the user to select date.
 	HbDialog *popUp = new HbDialog();
+	popUp->setParent(this);
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
 	popUp->setTimeout(HbDialog::NoTimeout);
 	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
@@ -149,6 +151,10 @@ void CalenNativeView::goToDate()
 	popUp->addAction(okAction);
 	connect(okAction, SIGNAL(triggered()), this, SLOT(goToSelectedDate()));
 	popUp->addAction(new HbAction(hbTrId("txt_common_button_cancel"), popUp));
+	
+	// Close the popup once closeDialogs() is received
+	connect(this, SIGNAL(closeDialogs()), popUp, SLOT(close()));
+	
 	popUp->open();
 	
 	OstTraceFunctionExit0( CALENNATIVEVIEW_GOTODATE_EXIT );
@@ -234,6 +240,11 @@ void CalenNativeView::HandleNotification(const TCalenNotification notification)
 		break;
 		case ECalenNotifyContextChanged: {
 			onContextChanged();
+		}
+		break;
+		case ECalenNotifyCloseDialogs: {
+			// Emit the signal to close the dialogs which are already opened
+			emit closeDialogs();
 		}
 		break;
 		default:

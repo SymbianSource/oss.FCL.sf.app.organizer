@@ -30,8 +30,8 @@
 // constructor
 // ----------------------------------------------------------------------------
 // 
-CalenEventListViewItem::CalenEventListViewItem(CalenAgendaViewWidget *parent) :
-HbListViewItem(parent),mParent(parent),mAllDayIcon(false)
+CalenEventListViewItem::CalenEventListViewItem(QGraphicsItem *parent) :
+HbListViewItem(parent)
 {
     OstTraceFunctionEntry0( CALENEVENTLISTVIEWITEM_CALENEVENTLISTVIEWITEM_ENTRY );
     
@@ -72,35 +72,10 @@ HbAbstractViewItem* CalenEventListViewItem::createItem()
 void CalenEventListViewItem::updateChildItems()
 {
     OstTraceFunctionEntry0( CALENEVENTLISTVIEWITEM_UPDATECHILDITEMS_ENTRY );
-    if(mParent->hasAllDayIcon())
-        {
-        mParent->checkEntryIcons();
-        mAllDayIcon = mParent->isAllDayIcon();
-        }
-    
     HbListViewItem::updateChildItems();
     
     OstTraceFunctionExit0( CALENEVENTLISTVIEWITEM_UPDATECHILDITEMS_EXIT );
 }
 
-// ----------------------------------------------------------------------------
-// CalenEventListViewItem::hasAllDayIcon
-// check if all day icon is there in item
-// ----------------------------------------------------------------------------
-// 
-bool CalenEventListViewItem::hasAllDayIcon()
-    {
-    return mAllDayIcon ;
-    }
-
-// ----------------------------------------------------------------------------
-// CalenEventListViewItem::setAllDayLeftIcon
-// set the all day icon 
-// ----------------------------------------------------------------------------
-// 
-void CalenEventListViewItem::setAllDayLeftIcon(bool icon)
-    {
-    mAllDayIcon = icon;
-    }
 
 // End of file

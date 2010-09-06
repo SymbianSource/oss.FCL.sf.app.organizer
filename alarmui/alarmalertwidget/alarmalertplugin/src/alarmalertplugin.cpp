@@ -155,24 +155,35 @@ HbDeviceDialogInterface *AlarmAlertPlugin::createDeviceDialog(const QString &dev
     QVariantMap::const_iterator iter = parameters.constBegin();
     int count = parameters.size();
     AlarmType alertType = OtherAlarm;
+    bool isTimedAlarm = false;
 	while (iter != parameters.constEnd()) {
 		QString key(iter.key());
 		if (alarmType == key) {
 			alertType = static_cast <AlarmType> (iter.value().toInt());
 		}
+		if (alarmIsTimed == key) {
+			isTimedAlarm = iter.value().toBool();
+		}
 		iter++;
 	}
+	
     bool loadSuccess = false;
     if (alertType == ClockAlarm) {
     	alertDocLoader->load(alarmNormalUIClockDocml, &loadSuccess);
     }else if (alertType == TodoAlarm) {
     	alertDocLoader->load(alarmNormalUITodoDocml, &loadSuccess);
     }else if(alertType == CalendarAlarm) {
-    	alertDocLoader->load(alarmNormalUICalendarDocml, &loadSuccess);
+    	if (isTimedAlarm) {
+    		alertDocLoader->load(alarmNormalUICalendarDocml, &loadSuccess);
+        } else {
+        	alertDocLoader->load(
+        			alarmNormalUINonTimedCalendarDocml, &loadSuccess);
+        }
     }
     if(!loadSuccess) {
     	qFatal("Unable to load the docml");
     }
+    // Transfer the ownership of docloader object to alarmalertdialogprivate.
     AlarmAlertDialogPrivate *alertDialog = qobject_cast<AlarmAlertDialogPrivate*> (alertDocLoader->findWidget("dialog"));
     alertDialog->setupNormalUI(alertDocLoader);
     ret = alertDialog;

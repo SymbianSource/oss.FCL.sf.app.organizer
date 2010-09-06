@@ -32,8 +32,24 @@ symbian: {
     "./conf/clockapp.confml             APP_LAYER_CONFML(clockapp.confml)" \	
     "./conf/clockapp_101F874D.crml      APP_LAYER_CRML(clockapp_101F874D.crml)" \
     "./conf/clockapp_101F8876.crml      APP_LAYER_CRML(clockapp_101F8876.crml)" \
+	# splashml
+	"data/xml/clockapplication.docml  			/epoc32/data/z/resource/hb/splashml/clockapplication.docml" \
+    "data/xml/clockapplication.splashml  		/epoc32/data/z/resource/hb/splashml/clockapplication.splashml" \
 	# stubsis is added to provide IAD
-	"./stubsis/clock_stub.sis           /epoc32/data/z/system/install/clock_stub.sis"
+	"./stubsis/clock_stub.sis           /epoc32/data/z/system/install/clock_stub.sis"  \
+	# Backup registration file
+# Date Time Settings
+"data/backup_registration.xml   /epoc32/data/z/private/10005906/backup_registration.xml" \
+"data/backup_registration.xml   /epoc32/release/winscw/udeb/z/private/10005906/backup_registration.xml" \
+"data/backup_registration.xml   /epoc32/release/winscw/urel/z/private/10005906/backup_registration.xml" \
+ # Clockserver
+"data/backup_registration.xml   /epoc32/data/z/private/200159A2/backup_registration.xml"  \
+"data/backup_registration.xml   /epoc32/release/winscw/udeb/z/private/200159A2/backup_registration.xml" \
+"data/backup_registration.xml   /epoc32/release/winscw/urel/z/private/200159A2/backup_registration.xml" \
+ # Clock
+"data/backup_registration.xml   /epoc32/data/z/private/10005903/backup_registration.xml" \
+"data/backup_registration.xml   /epoc32/release/winscw/udeb/z/private/10005903/backup_registration.xml" \
+"data/backup_registration.xml   /epoc32/release/winscw/urel/z/private/10005903/backup_registration.xml
 }
 
 # End of file   --Don't remove this.

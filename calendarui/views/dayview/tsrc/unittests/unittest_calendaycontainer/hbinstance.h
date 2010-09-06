@@ -11,56 +11,15 @@
 *
 * Contributors:
 *
-* Description: Mocked classes for testing CalenDayUtils class
+* Description: Mocked classes for testing CalenDayContainer class
 *
 */
 
-#ifndef  HBMAINWINDOW_H
-#define  HBMAINWINDOW_H
-
-#include <HbView>
-
-// Test variables
-extern QRectF gTestWindowRect;
-extern Qt::Orientation gTestOrientation;
-
-/*!
- Mocked class HbMainWindow (simulating window in unittests)
- */
-class HbMainWindow
-{   
-public:
-    HbMainWindow() {
-        mView = new HbView();
-    }
-    
-    ~HbMainWindow() {
-        if (mView) {
-            delete mView;
-            mView = 0;
-        }
-    }
-    
-    QRectF layoutRect() const {
-        return gTestWindowRect;
-    }
-    
-    Qt::Orientation orientation() const {
-        return gTestOrientation;
-    }
-    
-    HbView *HbMainWindow::currentView() const {
-        return mView;
-    }
-
-    HbView *mView;
-};
-
-#endif // HBMAINWINDOW_H
 
 #ifndef  HBINSTANCE_H
 #define  HBINSTANCE_H
 
+#include "hbmainwindow.h"
 #include <QList>
 
 /*!

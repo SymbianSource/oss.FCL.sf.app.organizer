@@ -64,6 +64,7 @@ private slots:
 	void handleAlarmSnoozeTimeChanged(int index);
 	void handleClockTypeChanged();
 	void eventMonitor(const XQSettingsKey& key, const QVariant& value);
+	void updateClockType();
 
 private:
 	void setupView();

@@ -20,19 +20,17 @@
 
 // System includes
 #include <hblistviewitem.h>
-#include "calenagendaviewwidget.h"
 
 class CalenEventListViewItem : public HbListViewItem
 {
     Q_OBJECT
-    Q_PROPERTY(bool leftAllDayIcon READ hasAllDayIcon WRITE setAllDayLeftIcon)
-
+  
 public:
     /**
      * @brief Constructor
      * @param CalenAgendaViewWidget
      */
-    CalenEventListViewItem(CalenAgendaViewWidget *parent = 0);
+    CalenEventListViewItem(QGraphicsItem *parent = 0);
     
     /**
      * @brief Destructor
@@ -49,19 +47,6 @@ public:
      */
     void updateChildItems();
     
-    /**
-     * @brief check if all day icon is present
-     */
-    bool hasAllDayIcon();
-    
-    /**
-     * @brief sets teh all day icon 
-     */
-    void setAllDayLeftIcon(bool icon = false);
-    
-private:  
-    CalenAgendaViewWidget* mParent; 
-    bool mAllDayIcon ;
 };
 
 #endif      // __CALEN_EVENT_LIST_VIEW_ITEM_H__

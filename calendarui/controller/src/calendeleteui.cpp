@@ -104,7 +104,14 @@ void CalenDeleteUi::ConstructL()
     {
     OstTraceFunctionEntry0( CALENDELETEUI_CONSTRUCTL_ENTRY );
     
-    iController.RegisterForNotificationsL( this, ECalenNotifyCancelDelete );
+    RArray<TCalenNotification> notifications;
+    notifications.Append(ECalenNotifyCancelDelete);
+    notifications.Append(ECalenNotifyCloseDialogs);
+    
+    iController.RegisterForNotificationsL( this, notifications );
+    
+    notifications.Close();
+    
     iMoreEntriesToDelete = EFalse;
     iDisplayQuery = EFalse;
     iEntriesToDelete = KEntriesToDelete;
@@ -132,6 +139,11 @@ void CalenDeleteUi::HandleNotification(const TCalenNotification aNotification )
             context.resetMultipleContextIds();          
            
             }
+        }
+    else if (aNotification == ECalenNotifyCloseDialogs )
+        {
+    	// Emit the signal to close all the dialogs which are already opened
+    	emit closeDialogs();
         }
     
     OstTraceFunctionExit0( CALENDELETEUI_HANDLENOTIFICATION_EXIT );
@@ -385,6 +397,7 @@ void CalenDeleteUi::dateQuery()
     
 	// Create a popup with datepicker to select the date.
 	HbDialog *popUp = new HbDialog();
+	popUp->setParent(this);
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
 	popUp->setTimeout(HbDialog::NoTimeout );
 	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
@@ -406,6 +419,8 @@ void CalenDeleteUi::dateQuery()
 	popUp->addAction(mDeleteAction);
 	mCancelAction = new HbAction(hbTrId("txt_common_button_cancel"),popUp);
 	popUp->addAction(mCancelAction);
+	// Close the popup once closeDialogs() is received
+	connect(this, SIGNAL(closeDialogs()), popUp, SLOT(close()));
 	// Show the popup
 	popUp->open(this, SLOT(handleDateQuery(HbAction*)));
 	
@@ -449,7 +464,7 @@ void CalenDeleteUi::handleDateQuery(HbAction* action)
 		}
 	}else {
 		// User pressed cancel
-		handleDeleteCancel();
+		iController.BroadcastNotification(ECalenNotifyDeleteFailed);
 	}
 	// Reset the member variables
 	mDeleteAction = NULL;
@@ -468,6 +483,7 @@ void CalenDeleteUi::showRepeatingEntryDeleteQuery()
     OstTraceFunctionEntry0( CALENDELETEUI_SHOWREPEATINGENTRYDELETEQUERY_ENTRY );
     
     HbDialog *popUp = new HbDialog();
+    popUp->setParent(this);
     popUp->setDismissPolicy(HbDialog::NoDismiss);
     popUp->setTimeout(HbDialog::NoTimeout);
     popUp->setAttribute( Qt::WA_DeleteOnClose, true );
@@ -491,34 +507,39 @@ void CalenDeleteUi::showRepeatingEntryDeleteQuery()
 						hbTrId("txt_calendar_title_delete_repeated_entry")));
 
     // Add cancel action
-    HbAction *cancelAction = new HbAction(
-							hbTrId("txt_common_button_cancel_singledialog"));
-    popUp->addAction(cancelAction);
+    mCancelAction = new HbAction(
+					hbTrId("txt_common_button_cancel_singledialog"));
+    popUp->addAction(mCancelAction);
     connect(editButtonList, SIGNAL(itemSelected(int)), this,
 										SLOT(handleRepeatedEntryDelete(int)));
     connect(editButtonList, SIGNAL(itemSelected(int)), popUp, SLOT(close()));
-    connect(cancelAction, SIGNAL(triggered()), this, 
-										SLOT(handleDeleteCancel()));
-    
+    // Close the popup once closeDialogs() is received
+    connect(this, SIGNAL(closeDialogs()), popUp, SLOT(close()));
     // Show the popup
-    popUp->open();
+    popUp->open(this, SLOT(handleCancelAndClose(HbAction*)));
     
     OstTraceFunctionExit0( CALENDELETEUI_SHOWREPEATINGENTRYDELETEQUERY_EXIT );
 }
 
 // ----------------------------------------------------------------------------
-// CalenDeleteUi::handleDeleteCancel
-// Handles the cancel action
+// CalenDeleteUi::handleCancelAndClose
+// Handles the cancel action and the close of the popup
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CalenDeleteUi::handleDeleteCancel()
+void CalenDeleteUi::handleCancelAndClose(HbAction* action)
 {
-    OstTraceFunctionEntry0( CALENDELETEUI_HANDLEDELETECANCEL_ENTRY );
-    
-	iController.BroadcastNotification(ECalenNotifyDeleteFailed);
-	
-	OstTraceFunctionExit0( CALENDELETEUI_HANDLEDELETECANCEL_EXIT );
+	OstTraceFunctionEntry0( CALENDELETEUI_HANDLECANCELANDCLOSE_ENTRY );
+	if(action == mCancelAction || !action) {
+		// If the user presses cancel button broadcast ECalenNotifyDeleteFailed
+		// Action will be null if the popup is closed by itself 
+		// without pressing any buttons. So in this case also notification 
+		// has to be broadcasted as ECalenNotifyDeleteFailed
+		
+		iController.BroadcastNotification(ECalenNotifyDeleteFailed);
+	}
+	mCancelAction = NULL;
+	OstTraceFunctionExit0( CALENDELETEUI_HANDLECANCELANDCLOSE_EXIT );
 }
 
 void CalenDeleteUi::handleRepeatedEntryDelete(int index)
@@ -565,6 +586,7 @@ void CalenDeleteUi::showDeleteQuery(const TDeleteConfirmationType type,
     OstTraceFunctionEntry0( CALENDELETEUI_SHOWDELETEQUERY_ENTRY );
     
     HbMessageBox *popup = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
+    popup->setParent(this);
     popup->setDismissPolicy(HbDialog::NoDismiss);
     popup->setTimeout(HbDialog::NoTimeout);
     popup->setAttribute( Qt::WA_DeleteOnClose, true );
@@ -615,6 +637,9 @@ void CalenDeleteUi::showDeleteQuery(const TDeleteConfirmationType type,
     popup->addAction(mDeleteAction);
     mCancelAction = new HbAction(hbTrId("txt_common_button_cancel"), popup); 
     popup->addAction(mCancelAction);
+    // Close the popup once closeDialogs() is received
+    connect(this, SIGNAL(closeDialogs()), popup, SLOT(close()));
+    // Show the popup
     popup->open(this, SLOT(handleDeletion(HbAction*)));
     
     OstTraceFunctionExit0( CALENDELETEUI_SHOWDELETEQUERY_EXIT );
@@ -683,9 +708,11 @@ void CalenDeleteUi::handleDeletion(HbAction* action)
 				break;
 				
 		}
-	} else {
-		// If the user presses cancel button the notification will be
-		// ECalenNotifyDeleteFailed as default.
+	} else if(!action || action == mCancelAction ) {
+		// Action will be null if the popup is closed by itself 
+		// without pressing any buttons. So in this case also notification 
+		// has to be broadcasted as ECalenNotifyDeleteFailed
+		// If the user presses cancel button also the same has to happen
 		// Notify the status
 		iController.BroadcastNotification(notification);
 	}

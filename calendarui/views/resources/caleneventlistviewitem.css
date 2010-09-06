@@ -1,9 +1,8 @@
-CalenEventListViewItem[leftAllDayIcon="false"]{
+CalenEventListViewItem{
 	layout: custom;
 }
-
-CalenEventListViewItem[leftAllDayIcon="true"]{
-	layout: custom-subjecticon;
+CalenEventListViewItem[customstretch="true"]{
+	layout: custom-stretch;
 }
 
 
@@ -34,7 +33,7 @@ CalenEventListViewItem::icon-4{
 }
 
 CalenEventListViewItem::text-1{
-		top: -var(hb-param-margin-gene-top);
+	
 		left: -var(hb-param-margin-gene-left);
     font-variant: secondary;
 		text-height: var(hb-param-text-height-secondary);
@@ -72,3 +71,26 @@ CalenEventListViewItem::text-4{
 }
 
 
+CalenEventListViewItem::text-2:landscape[customstretch="true"]{
+  top: -var(hb-param-margin-gene-top); 
+    bottom: var(hb-param-margin-gene-bottom);
+    left: -var(hb-param-margin-gene-middle-horizontal);
+    right: var(hb-param-margin-gene-middle-horizontal);
+    font-variant: primary;
+    text-height: var(hb-param-text-height-primary);
+    text-align: left; 
+    
+}
+
+CalenEventListViewItem::icon-3:landscape[customstretch="true"]{
+      right: var(hb-param-margin-gene-middle-horizontal);
+    fixed-width: var(hb-param-graphic-size-secondary);
+    fixed-height: var(hb-param-graphic-size-secondary);
+}
+
+CalenEventListViewItem::text-3:landscape[customstretch="true"]{
+    fixed-width: 40un;
+    font-variant: secondary;
+    text-height: var(hb-param-text-height-secondary);
+    text-align: left;
+}

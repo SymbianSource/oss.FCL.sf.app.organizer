@@ -60,6 +60,7 @@ protected:
 private:
 	void GetInstanceListL();
 	void checkStartTimeOfEvent(QDateTime &dateTime);
+	void tapTriggered();
 
 public slots:
 	void onTwoSecondsTimeout();

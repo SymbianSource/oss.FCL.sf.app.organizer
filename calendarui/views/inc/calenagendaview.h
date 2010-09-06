@@ -75,13 +75,6 @@ public:
     CALENAGENDAVIEW_EXPORT virtual void doPopulation();
     
     /**
-     * @brief Callback function for any notifications that has been
-     * subscribed by this view
-     * @param notification The event for which notification is being sent
-     */
-    CALENAGENDAVIEW_EXPORT void HandleNotification(const TCalenNotification notification);
-    
-    /**
      * @brief Getter function for the document loader. Called from the content
      * widget in order get its children
      */

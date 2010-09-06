@@ -156,7 +156,7 @@ void ClockMainView::setupView(
 	// Get the alarm's list.
 	mAlarmList = qobject_cast<HbListView *> (
 			mDocLoader->findWidget(CLOCK_ALARMLIST));
-
+	mAlarmList->setItemPixmapCacheEnabled(true);
 	connect(
 			mAlarmList, SIGNAL(activated(const QModelIndex &)),
 			this, SLOT(handleActivated(const QModelIndex &)));

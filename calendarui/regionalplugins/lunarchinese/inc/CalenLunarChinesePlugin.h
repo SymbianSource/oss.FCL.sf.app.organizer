@@ -42,6 +42,7 @@ class CCalenLunarInfoProvider;
 class CCalenLunarLocalizer;
 class CCalenLunarLocalizedInfo;
 class CalenRegionalInfo;
+class HbMessageBox;
 
 
 
@@ -116,6 +117,8 @@ class CCalenLunarChinesePlugin :public CCalenCustomisation,
 	    HbTranslator* iTranslator;
 	    
 	    CalenRegionalInfo* iRegionalInfo ;
+	    
+	    HbMessageBox* mPopup;
 	};
 	
 #endif //__CALENLUNARCHINESEPLUGIN_H__

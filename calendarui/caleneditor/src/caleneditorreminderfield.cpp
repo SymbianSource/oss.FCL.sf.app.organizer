@@ -143,6 +143,7 @@ void CalenEditorReminderField::removeItemFromModel()
  */
 void CalenEditorReminderField::setSavedMeetingReminderIndex()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_SETSAVEDMEETINGREMINDERINDEX_ENTRY );
 	// Get the reminder offset value.
 	int reminderOffset =
 	mCalenEditor->editedEntry()->alarm().timeOffset();
@@ -157,6 +158,7 @@ void CalenEditorReminderField::setSavedMeetingReminderIndex()
 		setCurrentIndex(ReminderAtStart); 
 	else
 		setCurrentIndex(Reminder15MinsBefore);
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_SETSAVEDMEETINGREMINDERINDEX_EXIT );
 }
 
 /*!
@@ -411,6 +413,7 @@ void CalenEditorReminderField::setDefaultAlarmForAllDay()
  */
 void CalenEditorReminderField::UpdateReminderChoicesForSameDay(QTime startTime)
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_UPDATEREMINDERCHOICESFORSAMEDAY_ENTRY );
 	QTime currentTime = QTime::currentTime();
 	int offset = currentTime.secsTo(startTime);
 
@@ -475,6 +478,7 @@ void CalenEditorReminderField::UpdateReminderChoicesForSameDay(QTime startTime)
 	mEditorForm->addConnection(mReminderItem,
 							SIGNAL(currentIndexChanged(int)), this,
 							SLOT(handleReminderIndexChanged(int)));
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_UPDATEREMINDERCHOICESFORSAMEDAY_EXIT );
 }
 
 /*!
@@ -637,6 +641,7 @@ void CalenEditorReminderField::updateReminderChoicesForAllDay(QDate referenceDat
  */
 int CalenEditorReminderField::getReminderIndexBasedOnEntryAlarm()
 {
+	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_GETREMINDERINDEXBASEDONENTRYALARM_ENTRY );
 	// Get the appropriate reminder index depending on the value of time offset.
 	AgendaAlarm actualAlarm = mCalenEditor->editedEntry()->alarm();
 	QTime referenceTime(0, 0, 0);
@@ -658,6 +663,7 @@ int CalenEditorReminderField::getReminderIndexBasedOnEntryAlarm()
 		mReminderTimeForAllDay = referenceTime.addSecs(-(offsetInMins
 				* 60));
 	}
+	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_GETREMINDERINDEXBASEDONENTRYALARM_EXIT );
 	return index;
 }
 
@@ -735,6 +741,9 @@ void CalenEditorReminderField::launchReminderTimePicker()
 	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_LAUNCHREMINDERTIMEPICKER_ENTRY );
 	
 	HbDialog *popUp = new HbDialog();
+	// Set the parent for the dialog
+	// Once the parent object is deleted the dialog will also be deleted
+	popUp->setParent(this);
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
 	popUp->setTimeout(HbDialog::NoTimeout);
 	popUp->setAttribute( Qt::WA_DeleteOnClose, true );

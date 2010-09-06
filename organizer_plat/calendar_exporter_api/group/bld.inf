@@ -26,3 +26,4 @@ DEFAULT
 PRJ_EXPORTS
 
 ../inc/CalenExporter.h     APP_LAYER_PLATFORM_EXPORT_PATH(CalenExporter.h)
+../inc/CalenExporter APP_LAYER_PLATFORM_EXPORT_PATH(CalenExporter)

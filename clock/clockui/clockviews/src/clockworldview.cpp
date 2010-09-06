@@ -143,7 +143,7 @@ void ClockWorldView::setupView(
 	HbStyleLoader::registerFilePath(":/style/hblistviewitem_color.css");
 	mCityListView->setLayoutName("citylist");
 	mCityListView->setModel(mCityListModel);
-	
+	mCityListView->setItemPixmapCacheEnabled(true);
 	// Get the toolbar/menu actions.
 	mAddCityAction = static_cast<HbAction *> (
 			mDocLoader->findObject("addCityAction"));

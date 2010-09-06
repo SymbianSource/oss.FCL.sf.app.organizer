@@ -36,15 +36,17 @@ public:
 
 public:
 	void setEventViewerItemData(const QStringList & itemData, int role);
+	void setTextItemData(int index, const QString &itemData);
+	void setIconItemData(int index, const QString &itemData);
 
 private:
 
 	HbTextItem *mPrimaryText;
 	HbTextItem *mSecondaryText;
-	HbIconItem *mPrimaryIcon;
-	HbIconItem *mSecondaryIcon;
-	HbIconItem *mPrimaryRightIcon;
 	HbIconItem *mPrimaryLeftIcon;
+	HbIconItem *mPrimaryRightIcon;
+	HbIconItem *mSecondaryLeftIcon;
+	HbIconItem *mSecondaryRightIcon;
 
 };
 

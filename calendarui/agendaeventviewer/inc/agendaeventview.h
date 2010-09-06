@@ -124,7 +124,7 @@ private:
 	AgendaEntry mOriginalAgendaEntry;
 	AgendaEntry mAgendaEntry;
 	QPointer<QPluginLoader> mNotesEditorPluginLoader;
-	CalenEditor *mCalenEditor;
+	QPointer<CalenEditor> mCalenEditor;
 	QGraphicsLinearLayout *mLinearLayout;
 
 	HbTranslator *mTranslator;
@@ -140,6 +140,8 @@ private:
 	bool mCalenEditorClosed ;
 	int mMaptileStatus; 
 	bool mNotesPluginLoaded;
+	ulong mParentId;
+	ulong mEntryIdDeleted;
 
 private:
 	friend class AgendaEventViewerPrivate;

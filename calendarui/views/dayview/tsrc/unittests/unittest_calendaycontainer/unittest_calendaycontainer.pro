@@ -37,11 +37,14 @@ DEPENDPATH  += . \
 # Input
 HEADERS +=	calendaycontainertest.h \
             calendaycontainer.h \
+            hbinstance.h \
+            hbmainwindow.h \
 			calendayutils.h \
 			calendayeventspane.h \
 			calendayitem.h \
 			calendaystatusstrip.h \
-			calendaymodel.h
+			calendaymodel.h 
+			
 
 SOURCES +=	unittest_calendaycontainer.cpp \
 			calendaycontainer.cpp  \

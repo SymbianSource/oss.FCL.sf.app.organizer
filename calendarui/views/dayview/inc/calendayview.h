@@ -92,13 +92,6 @@ public:
      */
     virtual void populationComplete();
    
-//From MCalenNotificationHandler
-    
-    /**
-     * The function handles calendar notifications.
-     */
-    virtual void HandleNotification( const TCalenNotification notification );
-
 public:
     //API
     
@@ -182,6 +175,7 @@ private: // members related to view management and gesture handling
     CalenDocLoader* mDocLoader; //!< Document loader for day view
     
     bool mIsLaunching;  //!< Indicates that view is launching first time
+    HbWidget *mGesturesAbsorber; //!<Widget that absorbs swipe and pan gestures
     
 private:    
 

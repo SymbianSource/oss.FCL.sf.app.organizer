@@ -64,7 +64,10 @@ class  CalenNativeView : public CalenView,
 	    void HandleNotification( const TCalenNotification notification );
 	    virtual void onLocaleChanged(int reason)=0;
 	    virtual void onContextChanged() {};
-
+	
+	signals:
+		void closeDialogs();
+	
 	protected slots:
 	
         void goToDate();

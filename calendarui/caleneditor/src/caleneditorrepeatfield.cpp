@@ -246,6 +246,7 @@ void CalenEditorRepeatField::populateRepeatItem(int index)
  */
 void CalenEditorRepeatField::removeRepeatUntilItem()
 {
+	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_REMOVEREPEATUNTILITEM_ENTRY );
 	mRepeatRuleType = AgendaRepeatRule::InvalidRule;
 	if (mRepeatUntilItemAdded) {
 		mEditorForm->removeConnection(mCustomRepeatUntilItem, SIGNAL(clicked()),
@@ -258,6 +259,7 @@ void CalenEditorRepeatField::removeRepeatUntilItem()
 		mRepeatUntilItemAdded = false;
 		mCustomRepeatUntilItem = 0;
 	}
+	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_REMOVEREPEATUNTILITEM_EXIT );
 }
 
 /*!
@@ -268,8 +270,6 @@ void CalenEditorRepeatField::removeRepeatUntilItem()
 void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 {
 	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_HANDLEREPEATINDEXCHANGED_ENTRY );
-	mIsBiWeekly = false;
-	mIsWorkdays = false;
 
 	HbExtendedLocale locale = HbExtendedLocale::system();
 	// Get the user role we have set for this index
@@ -291,10 +291,16 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 		repeatPropertyChange = false;
 	}
 	QDate repeatUntilDate = mRepeatUntilDate;
+	int itemIndex = CalenEditorPrivate::RepeatUntilItem;
+	if (!mCalenEditor->isReminderTimeForAllDayAdded()) {
+		itemIndex -= 1;
+	}
 	// Update the repeat type only if its has been changed
 	// ie. if the previous repeatrole is different from the current repeat role
 	if (value != mRepeatRoleValue) {
 		mRepeatRoleValue = value;
+		mIsBiWeekly = false;
+		mIsWorkdays = false;
 		switch (value) {
 			case DailyRole: {
 				if (!mRepeatUntilItemAdded) {
@@ -401,16 +407,21 @@ void CalenEditorRepeatField::handleRepeatIndexChanged(int index)
 	// the reminder choices are updated 
 	if(repeatPropertyChange || repeatUntilDate != mRepeatUntilDate) {
 		mCalenEditor->updateReminderChoices();
-		// Once the entry is changed from  non repeating to repeating 
-		// and if the alarm set is off 
-		// Then change the reminder option to the default 'one day before' 
-		// if the option is valid
-		if (mCalenEditor->isAllDayEvent() && 
-					repeatPropertyChange && mRepeatUntilItemAdded) {
-			if(!mCalenEditor->isReminderTimeForAllDayAdded() &&
-					mCalenEditor->getReminderCount() >= 3) {
-				mCalenEditor->setCurrentIndexOfReminderField(
+
+		// Once the entry is changed from  non repeating to repeating we scroll to the repeat until item.
+		if(repeatPropertyChange && mRepeatUntilItemAdded) {
+			mEditorForm->scrollTo(mCalenEditorModel->index(itemIndex, 0), HbAbstractItemView::EnsureVisible);
+			
+			// Once the entry is changed from  non repeating to repeating 
+			// and if the alarm set is off 
+			// Then change the reminder option to the default 'one day before' 
+			// if the option is valid
+			if (mCalenEditor->isAllDayEvent()) {
+				if(!mCalenEditor->isReminderTimeForAllDayAdded() &&
+						mCalenEditor->getReminderCount() >= 3) {
+					mCalenEditor->setCurrentIndexOfReminderField(
 							CalenEditorReminderField::ReminderOneDayBefore);
+				}
 			}
 		}
 	}
@@ -458,8 +469,6 @@ void CalenEditorRepeatField::insertRepeatUntilItem()
 				r_qtn_date_usual_with_zero);
 		mCustomRepeatUntilItem->setContentWidgetData("text", dateString);
 	}
-	//Scroll to repeat until item added
-	mEditorForm->scrollTo(mCalenEditorModel->index(index, 0), HbAbstractItemView::EnsureVisible);
 	OstTraceFunctionExit0( CALENEDITORREPEATFIELD_INSERTREPEATUNTILITEM_EXIT );
 }
 
@@ -481,6 +490,9 @@ void CalenEditorRepeatField::launchRepeatUntilDatePicker()
 {
 	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_LAUNCHREPEATUNTILDATEPICKER_ENTRY );
 	HbDialog *popUp = new HbDialog();
+	// Set the parent for the dialog
+	// Once the parent object is deleted the dialog will also be deleted
+	popUp->setParent(this);
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
 	popUp->setTimeout(HbDialog::NoTimeout);
 	popUp->setHeadingWidget( new HbLabel(
@@ -724,6 +736,11 @@ void CalenEditorRepeatField::saveRepeatRule()
 	// saves repeat type of entry.
 	if (mRepeatRuleType != AgendaRepeatRule::InvalidRule) {
 		AgendaRepeatRule repeatRule(mRepeatRuleType);
+
+		//Set the week start day in the repeat rule.
+		HbExtendedLocale locale = HbExtendedLocale::system();
+		AgendaRepeatRule::Day wkStart = (AgendaRepeatRule::Day)locale.startOfWeek();
+		repeatRule.setWeekStart(wkStart);
 
 		//TODO : Set the repeat from and to dates
 		QVariant dateVariant =

@@ -168,8 +168,11 @@ private slots:
             const double geoLatitude, const double geoLongitude);
 	void handleDescriptionChange(const QString description);
 	void saveAndCloseEditor();
-	void showDeleteConfirmationQuery(bool closeEditor = false);
+	void showDeletePopup();
+	void showDeleteConfirmationQuery();
+	void showDeleteOccurencePopup();
 	void handleDeleteAction();
+	void handleDeleteOccurence(int index);
 	void launchSettingsView();
 	void discardChanges();
 	void handleDescriptionAction();

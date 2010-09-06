@@ -60,7 +60,8 @@ CalenDayView::CalenDayView(MCalenServices &services) :
         mDocLoader(NULL), mIsLaunching(true), mSettingsManager(NULL),
         mRegionalInfoKey(XQSettingsKey::TargetCentralRepository,
             KCRUidCalendar, KCalendarShowRegionalInfo), mServices(services),
-        mRegionalInfoGroupBox(NULL), mGoToTodayMenuAction(NULL), mBg(NULL)
+        mRegionalInfoGroupBox(NULL), mGoToTodayMenuAction(NULL), mBg(NULL),
+        mGesturesAbsorber(NULL)
 {
     setupMenu();
 
@@ -143,6 +144,16 @@ void CalenDayView::doPopulation()
     } else {
         setupViewport();
     }
+    
+    //Set gestures absorber
+    if (!mGesturesAbsorber) {
+        mGesturesAbsorber = new HbWidget(this);
+        mGesturesAbsorber->setZValue(100);
+        mGesturesAbsorber->grabGesture(Qt::SwipeGesture);
+        mGesturesAbsorber->grabGesture(Qt::PanGesture);
+        mGesturesAbsorber->setGeometry(rect());
+        mGesturesAbsorber->installEventFilter(mContentScrollArea);
+    }
 	
     populationComplete();
 }
@@ -154,17 +165,6 @@ void CalenDayView::populationComplete()
 {
     CalenNativeView::populationComplete();
 }
-
-/*!
- \brief Reimplemented from MCalenNotificationHandler. The function handles calendar notifications
- 
- \param notification notification type
-*/
-void CalenDayView::HandleNotification(const TCalenNotification notification)
-{
-    Q_UNUSED( notification )
-}
-
 
 /*!
  \brief Sets up the view accroding to the 'xml'
@@ -284,20 +284,23 @@ void CalenDayView::getCurrentDate()
 */
 void CalenDayView::setupMenu()
 {
-    menu()->addAction(hbTrId("txt_calendar_opt_new_event"), this, SLOT(runNewMeeting()));
-    //get pointer to this position, because need to change visibility
-    mGoToTodayMenuAction = menu()->addAction(hbTrId("txt_calendar_opt_go_to_today"), this, SLOT(runGoToToday()));
-    menu()->addAction(hbTrId("txt_calendar_opt_go_to_date"), this, SLOT(goToDate()));
-    //TODO: Add id for this text
-    //"Switch to Agenda view"
-    menu()->addAction(hbTrId("txt_calendar_opt_switch_to_agenda_view"), this, SLOT(runChangeToAgendaView()));
-    //TODO: Add id for this text (lunar data)
-    //"Show lunar data"
-    if (pluginEnabled())
-    	{
+	menu()->addAction(hbTrId("txt_calendar_opt_new_event"), this, SLOT(runNewMeeting()));
+	//get pointer to this position, because need to change visibility
+	mGoToTodayMenuAction = menu()->addAction(hbTrId("txt_calendar_opt_go_to_today"), this, SLOT(runGoToToday()));
+	menu()->addAction(hbTrId("txt_calendar_opt_go_to_date"), this, SLOT(goToDate()));
+	//TODO: Add id for this text
+	//"Switch to Agenda view"
+	menu()->addAction(hbTrId("txt_calendar_opt_switch_to_agenda_view"), this, SLOT(runChangeToAgendaView()));
+	//TODO: Add id for this text (lunar data)
+	//"Show lunar data"
+	if (pluginEnabled())
+	{
 		menu()->addAction(hbTrId("txt_calendar_opt_show_lunar_data"), this, SLOT(runLunarData()));
-    	}
-    menu()->addAction(hbTrId("txt_calendar_opt_settings"), this, SLOT(launchSettingsView()));
+	}
+	menu()->addAction(hbTrId("txt_calendar_opt_settings"), this, SLOT(launchSettingsView()));
+	
+	// Close the menu once closeDialogs() is received
+	connect(this, SIGNAL(closeDialogs()), menu(), SLOT(close()));
 }
 
 /*!

@@ -396,6 +396,9 @@ void CalenEditorPrivate::showEditOccurencePopup()
 {
 	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SHOWEDITOCCURENCEPOPUP_ENTRY );
 	HbDialog *popUp = new HbDialog();
+	// Set the parent for the dialog
+	// Once the editor object is deleted the dialog will also be deleted 
+	popUp->setParent(this);
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
 	popUp->setTimeout(HbDialog::NoTimeout);
 	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
@@ -578,10 +581,7 @@ void CalenEditorPrivate::setUpView()
 			headingWidget->setHeading(hbTrId("txt_calendar_subhead_meeting"));
 		}else if(CalenAgendaUtils::isAlldayEvent(*mEditedEntry)) {
 			headingWidget->setHeading(hbTrId("txt_calendar_subhead_all_day_event"));
-		}else if (entryType == AgendaEntry::TypeTodo) {
-			headingWidget->setHeading(hbTrId("txt_calendar_subhead_to_do"));
-		}
-		
+		}		
 	}
 
 	initModel();
@@ -852,6 +852,7 @@ void CalenEditorPrivate::populateAllDayItem()
  */
 QDateTime CalenEditorPrivate::defaultTimeSameDay( )
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_DEFAULTTIMESAMEDAY_ENTRY );
 	QDateTime currentDateTime = QDateTime::currentDateTime();
 	
 	//Start time should be one hour more than current time.
@@ -883,10 +884,12 @@ QDateTime CalenEditorPrivate::defaultTimeSameDay( )
 	
 	// After adding one hour and rounding off the minutes to current time,
 	// if midnight crossover happens return default time(8:00 am) for next day
-	if(CalenDateUtils::isOnToday(currentDateTime))
+	if(CalenDateUtils::isOnToday(currentDateTime)) {
+		OstTraceFunctionExit0( CALENEDITORPRIVATE_DEFAULTTIMESAMEDAY_EXIT );
 		return currentDateTime;
-	else
+	} else {
 		return CalenDateUtils::defaultTime(currentDateTime);
+	}
 }
 
 /*!
@@ -894,6 +897,7 @@ QDateTime CalenEditorPrivate::defaultTimeSameDay( )
  */
 void CalenEditorPrivate::refreshTimeForUncheckAllDay()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_REFRESHTIMEFORUNCHECKALLDAY_ENTRY );
 	//Get the default time as 8:00 am from CalenDateUtils.
 	QDateTime fromDateTime = CalenDateUtils::defaultTime(mEditedEntry->startTime());
 	QDateTime toDateTime;
@@ -912,6 +916,7 @@ void CalenEditorPrivate::refreshTimeForUncheckAllDay()
 
 	// Set the default start time to the event.
 	mEditedEntry->setStartAndEndTime(fromDateTime, toDateTime);
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_REFRESHTIMEFORUNCHECKALLDAY_EXIT );
 }	
 
 /*!
@@ -1330,10 +1335,12 @@ void CalenEditorPrivate::closeEditor()
  */
 void CalenEditorPrivate::handleSubjectChange(const QString subject)
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLESUBJECTCHANGE_ENTRY );
 	mEditedEntry->setSummary(subject);
 	if(!mNewEntry ){
 		addDiscardAction();
 	}
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLESUBJECTCHANGE_EXIT );
 }
 
 /*!
@@ -1450,36 +1457,49 @@ void CalenEditorPrivate::handleLocationChange(const QString location,
 void CalenEditorPrivate::handleLocationEditingFinished()
 {
     OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLELOCATIONEDITINGFINISHED_ENTRY );
+    QString trimmedLocation ;
+    trimmedLocation  = mEditedEntry->location().trimmed();
     if ( !mOriginalEntry->location().isEmpty() )
     {
-       AgendaGeoValue entryGeoValue =mAgendaUtil->fetchById(mEditedEntry->id()).geoValue();
-       if ( !entryGeoValue.isNull() && (mEditedEntry->location()!=mOriginalEntry->location()) )
-       {   
-          
-           mEditedEntry->setGeoValue(entryGeoValue);
-           HbMessageBox* confirmationQuery = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
-                   
-           confirmationQuery->setDismissPolicy(HbDialog::NoDismiss);
-           confirmationQuery->setTimeout(HbDialog::NoTimeout);
-           confirmationQuery->setIconVisible(true);  
-           
-           QString displayText;
-           displayText = displayText.append(hbTrId("txt_calendar_info_location_updated_keep_existing"));
-           
-           confirmationQuery->setText(displayText);
-           
-           // Remove the default actions.
-           QList<QAction *> defaultActions = confirmationQuery->actions();
-           for (int index=0;index<defaultActions.count();index++) 
-           {
-               confirmationQuery->removeAction(defaultActions[index]);
-           }
-           
-           defaultActions.clear();
-           confirmationQuery->addAction(new HbAction(hbTrId("txt_common_button_yes")));
-           confirmationQuery->addAction(new HbAction(hbTrId("txt_common_button_no")));
-           confirmationQuery->open(this, SLOT(selectEditingFinishedAction(HbAction*)));
-       }
+        if(!trimmedLocation .isEmpty())
+        {
+            AgendaGeoValue entryGeoValue =mAgendaUtil->fetchById(mEditedEntry->id()).geoValue();
+            if ( !entryGeoValue.isNull() && (mEditedEntry->location()!=mOriginalEntry->location()) )
+            {   
+
+                mEditedEntry->setGeoValue(entryGeoValue);
+                HbMessageBox* confirmationQuery = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
+           		// Set the parent for the dialog
+		        // Once the editor object is deleted the dialog will also be deleted
+           		confirmationQuery->setParent(this);
+                confirmationQuery->setDismissPolicy(HbDialog::NoDismiss);
+                confirmationQuery->setTimeout(HbDialog::NoTimeout);
+                confirmationQuery->setIconVisible(true);  
+
+                QString displayText;
+                displayText = displayText.append(hbTrId("txt_calendar_info_location_updated_keep_existing"));
+
+                confirmationQuery->setText(displayText);
+
+                // Remove the default actions.
+                QList<QAction *> defaultActions = confirmationQuery->actions();
+                for (int index=0;index<defaultActions.count();index++) 
+                {
+                    confirmationQuery->removeAction(defaultActions[index]);
+                }
+
+                defaultActions.clear();
+                confirmationQuery->addAction(new HbAction(hbTrId("txt_common_button_yes")));
+                confirmationQuery->addAction(new HbAction(hbTrId("txt_common_button_no")));
+                confirmationQuery->open(this, SLOT(selectEditingFinishedAction(HbAction*)));
+            }
+        }
+        else
+        {
+            mEditedEntry->clearGeoValue();
+            // sets null string for the location
+            mEditedEntry->setLocation(trimmedLocation );
+        }
     }       
     OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLELOCATIONEDITINGFINISHED_EXIT );
 }
@@ -1521,9 +1541,7 @@ void CalenEditorPrivate::saveAndCloseEditor()
 {
 	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SAVEANDCLOSEEDITOR_ENTRY );
 	Action action = handleDone();
-	if (CalenEditorPrivate::ActionDelete != action) {
-		closeEditor();
-	}
+	closeEditor();
 
 	if (CalenEditorPrivate::ActionSave == action) {
 		// check if we need to launch the calendar application
@@ -1564,9 +1582,49 @@ void CalenEditorPrivate::handleDeleteAction()
 		return;
 	}else {
 		// Delete entry and close editor
-		deleteEntry(true);
+		// if editor is launched from Notes then don't delete entry
+		// Just exit from calendar editor
+		if (mOriginalEntry->id() > 0) {
+			// If user is editing single instanc then delete single instance 
+			// else delete entry
+			if (mEditRange == ThisOnly) {
+				// User wants to delete only this occurence
+				mAgendaUtil->deleteRepeatedEntry(*mOriginalEntry,
+												AgendaUtil::ThisOnly);
+			} else {
+				// Delete the entry.
+				mAgendaUtil->deleteEntry(mOriginalEntry->id());
+			}
+			closeEditor();
+		}
 	}
 	OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_HANDLEDELETEACTION_EXIT );
+}
+
+/*!
+	Deletes the entry based on the selection: This occurence or All occurences 
+ */
+void CalenEditorPrivate::handleDeleteOccurence(int index)
+{
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_HANDLEDELETEOCCURENCE_ENTRY );
+	switch (index) {
+		case 0:
+			// User wants to delete only this occurence
+			mAgendaUtil->deleteRepeatedEntry(mEntry, AgendaUtil::ThisOnly);
+			break;
+		case 1:
+			// User wants to delete all the occurences
+			// Delete the parent entry.
+			if(isChild()) {
+				AgendaEntry entryToBeDeleted = mAgendaUtil->parentEntry(mEntry);
+				mAgendaUtil->deleteEntry(entryToBeDeleted.id());
+			}else {
+				mAgendaUtil->deleteEntry(mOriginalEntry->id());
+			}
+			break;
+	}
+	closeEditor();
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLEDELETEOCCURENCE_EXIT );
 }
 
 /*!
@@ -1591,56 +1649,97 @@ void CalenEditorPrivate::discardChanges()
 }
 
 /*!
- * Show delete confirmation query
+ * Show delete confirmation query based on the entry
  */
-void CalenEditorPrivate::showDeleteConfirmationQuery(bool closeEditor)
+void CalenEditorPrivate::showDeleteConfirmationQuery()
 {
 	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SHOWDELETECONFIRMATIONQUERY_ENTRY );
+	if(mOriginalEntry->isRepeating() || isChild()) {
+		showDeleteOccurencePopup();
+	}else {
+		showDeletePopup();
+	}
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_SHOWDELETECONFIRMATIONQUERY_EXIT );
+}
+
+/*!
+ * Show delete confirmation query for repeated entries
+ */
+void CalenEditorPrivate::showDeleteOccurencePopup()
+{
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SHOWDELETEOCCURENCEPOPUP_ENTRY );
+	HbDialog *popUp = new HbDialog();
+	// Set the parent for the dialog
+	// Once the editor object is deleted the dialog will also be deleted
+	popUp->setParent(this);
+	popUp->setDismissPolicy(HbDialog::NoDismiss);
+	popUp->setTimeout(HbDialog::NoTimeout);
+	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
+	
+	QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
+	HbWidget *editWidget = new HbWidget();
+	editWidget->setLayout(layout);
+
+	HbRadioButtonList *editButtonList = new HbRadioButtonList();
+
+	QStringList list;
+	list << hbTrId("txt_calendar_info_this_occurrence_only")
+	        << hbTrId("txt_calendar_info_all_occurences");
+
+	editButtonList->setItems(list);
+
+	layout->addItem(editButtonList);
+
+	popUp->setContentWidget(editWidget);
+	popUp->setHeadingWidget(new HbLabel(hbTrId("txt_calendar_title_delete_repeated_entry")));
+
+	// Create cancel action
+	HbAction *cancelAction =
+	        new HbAction(hbTrId("txt_common_button_cancel_singledialog"));
+	popUp->addAction(cancelAction);
+	connect(editButtonList, SIGNAL(itemSelected(int)), popUp, SLOT(close()));
+	connect(editButtonList, SIGNAL(itemSelected(int)), this,
+	        SLOT(handleDeleteOccurence(int)));
+	connect(cancelAction, SIGNAL(triggered()), this, SLOT(close()));
+
+	// Show the popup
+	popUp->open();
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_SHOWDELETEOCCURENCEPOPUP_EXIT );
+}
+
+/*!
+ * Show delete confirmation query for non repeated entries
+ */
+void CalenEditorPrivate::showDeletePopup()
+{
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_SHOWDELETEPOPUP_ENTRY );
 	HbMessageBox *popup = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
+	// Set the parent for the dialog
+	// Once the editor object is deleted the dialog will also be deleted
+	popup->setParent(this);
 	popup->setDismissPolicy(HbDialog::NoDismiss);
 	popup->setTimeout(HbDialog::NoTimeout);
 	popup->setAttribute( Qt::WA_DeleteOnClose, true );
 
-	QString text = 0;
+	popup->setText(hbTrId("txt_calendar_info_delete_entry"));
 
-	switch (mOriginalEntry->type()) {
-		case AgendaEntry::TypeAppoinment:
-		case AgendaEntry::TypeEvent: {
-			if (mEditRange == ThisAndAll) {
-				text.append(hbTrId("txt_calendar_info_delete_entries"));
-			} else {
-				text.append(hbTrId("txt_calendar_info_delete_meeting"));
-			}
-			break;
-		}
-		case AgendaEntry::TypeAnniversary: {
-			text.append(hbTrId("txt_calendar_info_delete_anniversary"));
-			break;
-		}
+	QList<QAction*> list = popup->actions();
+	for(int i=0; i < list.count(); i++)
+	{
+		popup->removeAction(list[i]);
 	}
-
-	popup->setText(text);
-	
-    QList<QAction*> list = popup->actions();
-    for(int i=0; i < list.count(); i++)
-        {
-        popup->removeAction(list[i]);
-        }
 	HbAction *deleteAction = new HbAction(hbTrId("txt_common_button_delete"),
-										popup);
+	                                      popup);
 	popup->addAction(deleteAction);
 	connect(deleteAction, SIGNAL(triggered()), this, 
-										SLOT(handleDeleteAction()));
+	        SLOT(handleDeleteAction()));
 	HbAction *cancelAction = new HbAction(hbTrId("txt_common_button_cancel"), 
-											popup);
-	// Editor should not be closed for all the cases when cancel is pressed
-	if(closeEditor) {
-		connect(cancelAction, SIGNAL(triggered()), this, 
-											SLOT(closeEditor()));
-	}
+	                                      popup);
+	connect(cancelAction, SIGNAL(triggered()), this, SLOT(close()));
 	popup->addAction(cancelAction);
 	popup->open();
-	OstTraceFunctionExit0( CALENEDITORPRIVATE_SHOWDELETECONFIRMATIONQUERY_EXIT );
+
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_SHOWDELETEPOPUP_EXIT );
 }
 
 /*!
@@ -1650,7 +1749,7 @@ void CalenEditorPrivate::showDeleteConfirmationQuery(bool closeEditor)
 bool CalenEditorPrivate::isChild() const
 {
 	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ISCHILD_ENTRY );
-	return mEditedEntry->recurrenceId().toUTC().isNull();
+	return !(mEditedEntry->recurrenceId().toUTC().isNull());
 }
 
 /*!
@@ -1698,10 +1797,6 @@ CalenEditorPrivate::Action CalenEditorPrivate::handleDone()
 			}
 			OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_HANDLEDONE_EXIT );
 			return CalenEditorPrivate::ActionNothing;
-		case CalenEditorPrivate::ActionDelete:
-			showDeleteConfirmationQuery(true);
-			OstTraceFunctionExit0( DUP2_CALENEDITORPRIVATE_HANDLEDONE_EXIT );
-			return CalenEditorPrivate::ActionDelete;
 		case CalenEditorPrivate::ActionNothing:
 			return CalenEditorPrivate::ActionNothing;
 		default:
@@ -1746,34 +1841,6 @@ bool CalenEditorPrivate::saveEntry()
 	OstTraceFunctionExit0( DUP2_CALENEDITORPRIVATE_SAVEENTRY_EXIT );
 	return true;
 
-}
-
-/*!
-	Delete the entry 
-	@param closeEditor set true to close editor else default value is false
- */
-void CalenEditorPrivate::deleteEntry(bool close)
-{
-	OstTraceFunctionEntry0( CALENEDITORPRIVATE_DELETEENTRY_ENTRY );
-	// if editor is launched from Notes then don't delete entry
-	// Just exit from calendar editor
-	if (mOriginalEntry->id() > 0) {
-		// If user is editing single instanc then delete single instance 
-		// else delete entry
-		if (mEditRange == ThisOnly) {
-			// User wants to delete only this occurence
-			mAgendaUtil->deleteRepeatedEntry(*mOriginalEntry,
-			                                 AgendaUtil::ThisOnly);
-		} else {
-			// Delete the entry.
-			mAgendaUtil->deleteEntry(mOriginalEntry->id());
-		}
-
-		if (close) {
-			closeEditor();
-		}
-	}
-	OstTraceFunctionExit0( CALENEDITORPRIVATE_DELETEENTRY_EXIT );
 }
 
 /*!
@@ -1948,11 +2015,13 @@ bool CalenEditorPrivate::isReminderTimeForAllDayAdded()
  */
 bool CalenEditorPrivate::isRepeatUntilItemAdded()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_ISREPEATUNTILITEMADDED_ENTRY );
 	// For exceptional entries the repeatfield will not be present
 	// So need to check if the repeat field is there or not
 	if( mRepeatField ) {
 		return mRepeatField->isRepeatUntilItemAdded();
 	}else {
+		OstTraceFunctionExit0( CALENEDITORPRIVATE_ISREPEATUNTILITEMADDED_EXIT );
 		return false;
 	}
 }
@@ -2005,6 +2074,7 @@ void CalenEditorPrivate::setCurrentIndexOfReminderField(int index)
  */
 int CalenEditorPrivate::getReminderCount()
 {
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_GETREMINDERCOUNT_ENTRY );
 	return mReminderField->reminderItemsCount();
 }
 
@@ -2033,6 +2103,17 @@ bool CalenEditorPrivate::isAllDayFieldAdded()
  */
 void CalenEditorPrivate::forcedSaveEntry()
 {
-    saveAndCloseEditor();   
+    OstTraceFunctionEntry0( CALENEDITORPRIVATE_FORCEDSAVEENTRY_ENTRY );
+    // Check if the editor is launched completely
+    // If yes, save entry and close the editor
+    if(mEditorView) {
+		saveAndCloseEditor();
+    }else {
+    	// If the view is not launched then just emit signal dialogClosed()
+    	// When the edit popup is shown for repeating entries,
+    	// this else case will get executed
+    	emit q_ptr->dialogClosed();
+    }
+    OstTraceFunctionExit0( CALENEDITORPRIVATE_FORCEDSAVEENTRY_EXIT );
 }
 // End of file	--Don't remove this.

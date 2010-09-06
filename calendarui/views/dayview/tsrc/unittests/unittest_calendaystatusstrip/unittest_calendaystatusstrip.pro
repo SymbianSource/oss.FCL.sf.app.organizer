@@ -36,7 +36,8 @@ DEPENDPATH  += . \
 
 # Input
 HEADERS +=	calendaystatusstrip.h \
-            calendaystatusstriptest.h 
+            calendaystatusstriptest.h \
+            calendayutils.h
 			
 
 SOURCES +=	unittest_calendaystatusstrip.cpp \

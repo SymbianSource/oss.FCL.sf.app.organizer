@@ -58,7 +58,7 @@ const QString doubleSpace("  ");
 const QString space("              ");
 const QString singleHyphen("-");
 const QString customLayout("custom");
-const char *stretchLayout("stretchItem");
+const char *stretchLayout("customstretch");
 const QString toDoIcon("qtg_small_todo");
 const QString reminderIcon("qtg_mono_alarm");
 const QString locationIcon("qtg_mono_location");
@@ -79,9 +79,7 @@ mServices(services),
 mDocLoader(docLoader),
 mRegionalInfoGroupBox(NULL),
 mLongTapEventFlag(false),
-mNotesPluginLoaded(false),
-mIndex(0),
-mIconCheck(false)
+mNotesPluginLoaded(false)
 {
     OstTraceFunctionEntry0( CALENAGENDAVIEWWIDGET_CALENAGENDAVIEWWIDGET_ENTRY );
     
@@ -374,12 +372,7 @@ void CalenAgendaViewWidget::populateListWidget()
         // of items in the list. Remove the extra rows
         mListModel->removeRows(0, mListModel->rowCount() - mInstanceArray.count());
     }
-    //to set the index to first item of the list , when view refresh
-    mIndex = 0; 
-    //status reset for not setting any property
-    mIconCheck = false;
     mListModel->setColumnCount(singleColumn);
-    mIconCheck = true;
     // Add all the events to the list
     for (int index = 0; index < mInstanceArray.count(); index++) {
         // Get each of the entry details
@@ -447,10 +440,11 @@ void CalenAgendaViewWidget::setHeadingText()
 	// Append a single space
 	dayString.append(singleSpace);
 	// Set the heading
-	// Append the date which is formatted as per the locale
-	mHeadingLabel->setHeading(hbTrId(
-				"txt_calendar_subhead_1_2").arg(dayString).arg(
-				systemLocale.format(mDate.date(), r_qtn_date_usual_with_zero)));
+
+    // Append the date which is formatted as per the locale   
+    mHeadingLabel->setHeading(QString("%1 %2").arg(dayString).arg(
+        systemLocale.format(mDate.date(), r_qtn_date_usual_with_zero)));
+	
 	
 	OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_SETHEADINGTEXT_EXIT );
 }
@@ -629,12 +623,7 @@ void CalenAgendaViewWidget::addTimedEventToList(int index, AgendaEntry entry)
     }else {
     	textData<<QString(space);
     }
-    // Get the list model index and set the text and icon data
-    QModelIndex listIndex = mListModel->index(index, 0);
-    mNextEntry = false;
-    mListModel->setData(listIndex, textData, Qt::DisplayRole);
-    mNextEntry = true;
-    mListModel->setData(listIndex, iconData, Qt::DecorationRole);
+
     
     // Disable item stretching by removing the dynamic property
     HbListViewItem *listViewItem = static_cast<HbListViewItem*>
@@ -642,7 +631,10 @@ void CalenAgendaViewWidget::addTimedEventToList(int index, AgendaEntry entry)
     if (listViewItem) {
         listViewItem->setProperty(stretchLayout, false);
     }
-    
+    // Get the list model index and set the text and icon data
+    QModelIndex listIndex = mListModel->index(index, 0);
+    mListModel->setData(listIndex, textData, Qt::DisplayRole);
+    mListModel->setData(listIndex, iconData, Qt::DecorationRole);    
     OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_ADDTIMEDEVENTTOLIST_EXIT );
 }
 
@@ -795,14 +787,6 @@ void CalenAgendaViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
         	}
         }
     }
-    
-    // Get the list model index and set the text and icon data
-    QModelIndex listIndex = mListModel->index(index, 0);
-    mNextEntry = false;
-    mListModel->setData(listIndex, textData, Qt::DisplayRole);
-    mNextEntry = true;
-    mListModel->setData(listIndex, iconData, Qt::DecorationRole);
-    
     // Enable item stretching by adding the dynamic property
     HbListViewItem *listViewItem = static_cast<HbListViewItem*>
                                         (mEventsList->itemByIndex(mListModel->index(index, 0)));
@@ -815,6 +799,10 @@ void CalenAgendaViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
             listViewItem->setProperty(stretchLayout, false);
         }
     }
+    // Get the list model index and set the text and icon data
+    QModelIndex listIndex = mListModel->index(index, 0);
+    mListModel->setData(listIndex, textData, Qt::DisplayRole);
+    mListModel->setData(listIndex, iconData, Qt::DecorationRole);
     
     OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_ADDNONTIMEDEVENTTOLIST_EXIT );
 }
@@ -861,6 +849,12 @@ void CalenAgendaViewWidget::handleListItemStretching(Qt::Orientation orientation
                             // NOTE: Property name MUST match the name specified in
                             // css file, else wierd things might happen
                             listItem->setProperty(stretchLayout, true);
+                        }
+                        if (orientation == Qt::Vertical) {
+                            // Set a dynamic property to indicate that this list item
+                            // NOTE: Property name MUST match the name specified in
+                            // css file, else wierd things might happen
+                            listItem->setProperty(stretchLayout, false);
                         }
                     }
                 }
@@ -1033,9 +1027,7 @@ void CalenAgendaViewWidget::viewEntry()
     
     // Set the context
     setContextFromHighlight(entry);
-    
-    //for not setting any property again 
-    mIconCheck = false;
+
     // Launch the event viewer.
     mServices.IssueCommandL(ECalenEventView);
     
@@ -1153,6 +1145,9 @@ void CalenAgendaViewWidget::itemLongPressed(HbAbstractViewItem* listViewItem,
     connect(contextMenu, SIGNAL(aboutToClose()),
 								this, 
 								SLOT(contextMenuClosed()));
+    
+    // Close the context menu once closeDialogs() is received
+    connect(mView, SIGNAL(closeDialogs()), contextMenu, SLOT(close()));
     
     contextMenu->open(this, SLOT(contextManuTriggered(HbAction *)));
     
@@ -1279,53 +1274,5 @@ void CalenAgendaViewWidget::clearListModel()
     OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_CLEARLISTMODEL_EXIT );
     }
 
-// ----------------------------------------------------------------------------
-// CalenAgendaViewWidget::hasAllDayIcon
-// return true  if property for all day icon to set
-// ----------------------------------------------------------------------------
-//
-bool CalenAgendaViewWidget::hasAllDayIcon()
-    {
-    return mIconCheck;
-    }
-
-
-// ----------------------------------------------------------------------------
-// CalenAgendaViewWidget::checkEntryIcons
-// check if all day icon is present
-// ----------------------------------------------------------------------------
-//
-void CalenAgendaViewWidget::checkEntryIcons()
-    {
-    int index = 0;
-    //check the number of entries
-    index  = mInstanceArray.count(); 
-    // Get each of the entry details
-    AgendaEntry entry;
-     if(mIndex < index )   
-     entry = mInstanceArray[mIndex];
-     
-     mLeftAllDayIcon = false;
-     
-     if(!entry.isTimedEntry() || CalenAgendaUtils::isAlldayEvent(entry)){
-         //all day icon is not there if its a timed entry
-         mLeftAllDayIcon = true;
-         }
-     
-     //check if shift to next entry
-    if(mNextEntry)
-        mIndex++;     
-
-    }
-
-// ----------------------------------------------------------------------------
-// CalenAgendaViewWidget::isAllDayIcon
-// retirn true  if all day icon is present
-// ----------------------------------------------------------------------------
-//
-bool CalenAgendaViewWidget::isAllDayIcon()
-    {
-    return mLeftAllDayIcon;
-    }
 
 // End of file	--Don't remove this.

@@ -1,4 +1,21 @@
-// Created by TraceCompiler 2.2.3
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+* Implementation file for class ClockSettingsView.
+*
+*/
+// Created by TraceCompiler 2.2.4
 // DO NOT EDIT, CHANGES WILL BE LOST
 
 #ifndef __CLOCKSETTINGSVIEWTRACES_H__
@@ -38,8 +55,8 @@
 #define CLOCKSETTINGSVIEW_HANDLECLOCKTYPECHANGED_EXIT 0x8a003f
 #define CLOCKSETTINGSVIEW_EVENTMONITOR_ENTRY 0x8a0040
 #define CLOCKSETTINGSVIEW_EVENTMONITOR_EXIT 0x8a0041
-#define CLOCKSETTINGSVIEW_GETVIEW_ENTRY 0x8a0064
-#define CLOCKSETTINGSVIEW_GETVIEW_EXIT 0x8a0065
+#define CLOCKSETTINGSVIEW_UPDATECLOCKTYPE_ENTRY 0x8a0070
+#define CLOCKSETTINGSVIEW_UPDATECLOCKTYPE_EXIT 0x8a0071
 
 
 #endif

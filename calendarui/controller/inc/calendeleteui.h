@@ -200,13 +200,16 @@ protected:  // Methods derived from MProgressDialogCallback
      * called when a dialog is dismissed
      */
     void DialogDismissedL( const int aButtonId );
-
+    
+signals:
+	void closeDialogs();
+	
 public slots:
 
     void doCompleted( int aFirstPassError );
     void handleDateQuery(HbAction* action);
     void handleDeletion(HbAction* action);
-    void handleDeleteCancel();
+    void handleCancelAndClose(HbAction* action);
     
 private slots:
     void handleRepeatedEntryDelete(int index);

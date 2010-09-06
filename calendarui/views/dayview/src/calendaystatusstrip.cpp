@@ -22,6 +22,7 @@
 
 // User includes
 #include "calendaystatusstrip.h"
+#include "calendayutils.h"
 
 // Constants
 qreal const CalenDayStatusStrip::mMinute = 60;
@@ -123,10 +124,10 @@ void CalenDayStatusStrip::setStartEndTime(const QTime &startTime,
 }
 
 /*!
-   \brief Reimplemented function...
-   
-   Reimplemented function to draw status strip. 
-   It is based on CalenDayStatusStrip::DrawingStyle, range and color
+ \brief Reimplemented function...
+ 
+ Reimplemented function to draw status strip. 
+ It is based on CalenDayStatusStrip::DrawingStyle, range and color
  */
 void CalenDayStatusStrip::paint(
     QPainter *painter,
@@ -136,45 +137,39 @@ void CalenDayStatusStrip::paint(
     Q_UNUSED(option);
     Q_UNUSED(widget);
     
-    //calculate bubble start and end time of bubble
-    QPair<QTime, QTime> startEndEvent = 
-        calculateStartEndPostion(mStartEndEventTime.first,
-                                 mStartEndEventTime.second
-                                );
-    //calculate how big is Minute
-    qreal minuteHeight = calculateMinuteHeight(startEndEvent.first, 
-                                               startEndEvent.second
-                                              );
-
     painter->save();//   saves the painter state.
-    
 
-    //calculate how long is event in minutes
-    qreal eventMinutes = 
-           mStartEndEventTime.first.secsTo(mStartEndEventTime.second) / mMinute;
-    //calculate height and width of status stripe
+    // Calculate bubble start and end time of bubble
+    QPair<QTime, QTime> startEndEvent = calculateStartEndPostion(
+        mStartEndEventTime.first, mStartEndEventTime.second);
+    // Calculate how high is Minute
+    qreal minuteHeight = calculateMinuteHeight(startEndEvent.first,
+        startEndEvent.second);
+    // Calculate how long is event in minutes
+    qreal eventMinutes = mStartEndEventTime.first.secsTo(
+        mStartEndEventTime.second) / mMinute;
+    // Calculate height and width of status stripe
     qreal dx = size().width() - 1;
     qreal dy = eventMinutes * minuteHeight;
 
-    //calculate time from wehre it should be drawed
-    qreal startTime = 
-                 startEndEvent.first.secsTo(mStartEndEventTime.first) / mMinute;
-    //this is done because bubble can be drawed from half hour
-    startTime = startTime > 30 ? startTime - 30 : startTime;
-    //calculate status stripe height
+    // Calculate time from wehre it should be drawed
+    qreal startTime = startEndEvent.first.secsTo(mStartEndEventTime.first)
+        / mMinute;
+    // This is done because bubble positioning accuracy is 15 minutes
+    startTime = startTime > 15 ? startTime - 15 : startTime;
+    // Calculate status stripe height
     qreal startTimeHeight = startTime * minuteHeight;
 
-    //set bounding rect of drawed area
+    // Set bounding rect of drawed area
     QRectF bounding(boundingRect());
-    //set size smaller by 1px in each side
-    bounding.setRect(bounding.left() + 1, bounding.top() + startTimeHeight, 
-                     dx - 1, dy - 1
-                    );
+    // Set size smaller by 1px in each side
+    bounding.setRect(bounding.left() + 1, bounding.top() + startTimeHeight, dx
+        - 1, dy - 1);
 
-    //set clip region
+    // Set clip region
     painter->setClipRect(bounding, Qt::IntersectClip);
 
-    //prepare brush and paint
+    // Prepare brush and paint
     QBrush brush(HbColorScheme::color("qtc_cal_month_current_day"));
     painter->setBrush(brush);
     QPen pen;
@@ -185,7 +180,7 @@ void CalenDayStatusStrip::paint(
 
     painter->setPen(pen);
     QPointF startPoint(0, dy + dx);
-    
+
     switch (mDrawingStyle) {
         case StripWithLines:
             for (int i = 0; startPoint.y() > 0; i++) {
@@ -197,19 +192,20 @@ void CalenDayStatusStrip::paint(
             break;
     }
 
-    //draw rectangle
+    // Draw rectangle
     painter->drawRect(bounding);
 
-    // restore the painter
+    // Restore the painter
     painter->restore();
 }
 
 /*!
-   \brief It preapres points to draw filled polygon when StripWithLines style is
-   on.
+ \brief Prepares points to draw filled polygon when StripWithLines style is on.
  */
-QPolygonF 
-CalenDayStatusStrip::diagonalLine(QPointF startPoint, qreal dx, qreal dy)
+QPolygonF CalenDayStatusStrip::diagonalLine(
+    QPointF startPoint,
+    qreal dx,
+    qreal dy)
 {
     QPolygonF polygon;
     polygon << QPointF(startPoint.x(), startPoint.y());
@@ -220,53 +216,82 @@ CalenDayStatusStrip::diagonalLine(QPointF startPoint, qreal dx, qreal dy)
 }
 
 /*!
-    Returns time for position 0 and height in widget 
-    
-    \param startTime Start of event
-    \param endTime End of event
-    \return Draw region of bubble
-  */
- QPair<QTime,QTime> CalenDayStatusStrip::calculateStartEndPostion(
-                                                 const QTime &startTime, 
-                                                 const QTime &endTime
-                                             )
+ \brief Returns time for position 0 and height in widget 
+ 
+ \param startTime Start of event
+ \param endTime End of event
+ \return Draw region of bubble
+ */
+QPair<QTime, QTime> CalenDayStatusStrip::calculateStartEndPostion(
+    const QTime &startTime,
+    const QTime &endTime)
 {
-     
     QTime start;
     QTime end;
 
-    if (startTime.minute() < 30) {
+    if (startTime.minute() < 15) {
         start = QTime(startTime.hour(), 0);
     }
-    else {
-        start = QTime(startTime.hour(), 30);
-    }
+    else
+        if (startTime.minute() < 30) {
+            start = QTime(startTime.hour(), 15);
+        }
+        else
+            if (startTime.minute() < 45) {
+                start = QTime(startTime.hour(), 30);
+            }
+            else {
+                start = QTime(startTime.hour(), 45);
+            }
 
     if (endTime.minute() == 0) {
         end = endTime;
     }
-    else if (endTime.hour() == 23 and endTime.minute() > 30) {
-        end = QTime(endTime.hour(), 59);
-    }
-    else if (endTime.minute() <= 30) {
-        end = QTime(endTime.hour(), 30);
-    }
-    else {
-        end = QTime(endTime.hour() + 1, 0);
-    }
+    else
+        if (endTime.hour() == 23 and endTime.minute() > 45) {
+            end = QTime(endTime.hour(), 59);
+        }
+        else
+            if (endTime.minute() <= 15) {
+                end = QTime(endTime.hour(), 15);
+            }
+            else
+                if (endTime.minute() <= 30) {
+                    end = QTime(endTime.hour(), 30);
+                }
+                else
+                    if (endTime.minute() <= 45) {
+                        end = QTime(endTime.hour(), 45);
+                    }
+                    else {
+                        end = QTime(endTime.hour() + 1, 0);
+                    }
 
     return QPair<QTime, QTime> (start, end);
 }
 
 /*!
-   Calculates height of one minute from widget height, and start/end time. 
+ Calculates height of one minute from widget height, and start/end time. 
  */
-qreal CalenDayStatusStrip::calculateMinuteHeight(const QTime &start, 
-                                                   const QTime &end)
+qreal CalenDayStatusStrip::calculateMinuteHeight(
+    const QTime &start,
+    const QTime &end)
 {
     qreal min = start.secsTo(end) / mMinute;
 
-    qreal height = size().height();
+    // Events shorter than 30 minutes have bubble higher than 30 minutes,
+    // so calculate minute's height using real hour-element slot height
+    qreal height = 0.0;
+    if (min > 30) {
+        height = size().height();
+    }
+    else
+        if (min > 15) {
+            height = CalenDayUtils::instance()->hourElementHeight() / 2;
+        }
+        else {
+            height = CalenDayUtils::instance()->hourElementHeight() / 4;
+        }
 
     return height / min;
 }

@@ -106,6 +106,7 @@ private:
 	QPointF mStartPos;
 	QColor mGridLineColor;
 	bool mActiveDatesSet;
+	bool mIsGridAdjusting;
 };
 
 #endif // CALENMONTHGRID_H

@@ -26,3 +26,4 @@ DEFAULT
 PRJ_EXPORTS
 
 ../inc/CalenInterimUtils2.h     APP_LAYER_PUBLIC_EXPORT_PATH(CalenInterimUtils2.h)
+../inc/CalenInterimUtils2     APP_LAYER_PUBLIC_EXPORT_PATH(CalenInterimUtils2)

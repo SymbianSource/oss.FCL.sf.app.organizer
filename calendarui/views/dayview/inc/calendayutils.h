@@ -32,6 +32,7 @@ public:
     qreal screenWidth() const;
     qreal hourElementWidth() const;
     qreal hourElementHeight() const;
+    qreal minEventHeight() const;
     qreal contentWidth() const;
     
     Qt::Orientation orientation() const;
@@ -56,6 +57,7 @@ protected:
 private:
     qreal calculateHourElementWidth() const;
     qreal calculateHourElementHeight() const;
+    qreal calculateMinEventHeight() const;
     
 private:    // data
     
@@ -65,6 +67,7 @@ private:    // data
     
     qreal mHourElementWidth;    //!< The width of hour element
     qreal mHourElementHeight;   //!< The height of hour element
+    qreal mMinEventHeight;   //!< The minimum height of event bubble
 };
 
 #endif /* CALENDAYUTILS_H_ */

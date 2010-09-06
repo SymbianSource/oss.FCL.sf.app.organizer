@@ -1,4 +1,20 @@
-// Created by TraceCompiler 2.2.3
+/*
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+// Created by TraceCompiler 2.2.4
 // DO NOT EDIT, CHANGES WILL BE LOST
 
 #ifndef __AGENDAEVENTVIEWTRACES_H__
@@ -88,6 +104,10 @@
 #define AGENDAEVENTVIEW_UPDATEFIELDSFORTODOSTATUS_EXIT 0x8a007f
 #define AGENDAEVENTVIEW_UPDATESUBJECTANDPRIORITYDATA_ENTRY 0x8a0080
 #define AGENDAEVENTVIEW_UPDATESUBJECTANDPRIORITYDATA_EXIT 0x8a0081
+#define AGENDAEVENTVIEW_SAVEANDCLOSEEDITOR_ENTRY 0x8a0082
+#define AGENDAEVENTVIEW_SAVEANDCLOSEEDITOR_EXIT 0x8a0083
+#define AGENDAEVENTVIEW_CLOSEAGENDAEVENTVIEW_ENTRY 0x8a0084
+#define AGENDAEVENTVIEW_CLOSEAGENDAEVENTVIEW_EXIT 0x8a0085
 
 
 #endif

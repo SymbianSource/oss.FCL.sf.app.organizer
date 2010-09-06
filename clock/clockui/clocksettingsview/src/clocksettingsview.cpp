@@ -87,6 +87,9 @@ ClockSettingsView::ClockSettingsView(QObject *parent, HbTranslator *translator, 
 	connect(
 			mTimezoneClient, SIGNAL(cityUpdated()),
 			this, SLOT(updatePlaceItem()));
+	connect(
+			mTimezoneClient, SIGNAL(timechanged()),
+			this, SLOT(updateClockType()));
 
 	// Start a timer. For updating the remaining alarm time.
 	mTickTimer = new QTimer(this);
@@ -313,7 +316,7 @@ void ClockSettingsView::setupView()
 	// Get the data form.
 	mSettingsForm = static_cast<HbDataForm *> (
 			mDocLoader->findWidget(CLOCK_SETTINGS_DATA_FORM));
-
+	mSettingsForm->setItemPixmapCacheEnabled(true);
 	// Create the custom prototype.
 	QList <HbAbstractViewItem*> prototypes = mSettingsForm->itemPrototypes();
 	SettingsCustomItem *customPrototype = new SettingsCustomItem(mSettingsForm, mLaunchedByClock);
@@ -584,6 +587,25 @@ void ClockSettingsView::eventMonitor(
 		}
 	}
 	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_EVENTMONITOR_EXIT );
+}
+
+/*!
+	Slot for updating the clock type on locale change.
+ */
+void ClockSettingsView::updateClockType()
+{
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_UPDATECLOCKTYPE_ENTRY );
+	QStringList clockTypeList;
+	int clockType = mSettingsUtility->clockType(clockTypeList);
+	int zeroIndex(0);
+	if( zeroIndex == clockType ){
+		mClockTypeItem->setContentWidgetData("text", clockTypeList[0]);
+		mClockTypeItem->setContentWidgetData("additionalText", clockTypeList[1]);
+	} else {
+		mClockTypeItem->setContentWidgetData("text", clockTypeList[1]);
+		mClockTypeItem->setContentWidgetData("additionalText", clockTypeList[0]);    
+	}
+	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_UPDATECLOCKTYPE_EXIT );
 }
 
 // End of file	--Don't remove this.

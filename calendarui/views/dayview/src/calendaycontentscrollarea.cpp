@@ -39,11 +39,6 @@ const int KCalenScrollDaysTimeout = 600;
  */
 const int KCalenHScrollMoveParam = 30;  //!< Percentage
 
-/*!
- Value [degree] defines the max. angle of swipe gesture which should change day.
- */
-const qreal KCalenSwipeAngle = 30;
-
 
 /*!
  \class CalenDayContentScrollArea
@@ -279,12 +274,16 @@ bool CalenDayContentScrollArea::eventFilter(QObject *obj, QEvent *event)
         else {
             QGestureEvent* gesture = static_cast<QGestureEvent*> (event);
 
-            // Check if we get a pan gesture
-            QPanGesture *panGesture = qobject_cast<QPanGesture*> (
-                gesture->gesture(Qt::PanGesture));
+            QPanGesture *panGesture = qobject_cast<QPanGesture*>(gesture->gesture(Qt::PanGesture));
             if (panGesture) {
                 checkPanDirection(panGesture);
                 if (mPanDayDirection == ECalenPanHorizontal) {
+                    gestureEvent(gesture);
+                    handled = true;
+                }
+            }else{
+                QSwipeGesture *swipeGesture = qobject_cast<QSwipeGesture*>(gesture->gesture(Qt::SwipeGesture));
+                if (swipeGesture) {
                     gestureEvent(gesture);
                     handled = true;
                 }

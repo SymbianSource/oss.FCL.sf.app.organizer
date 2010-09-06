@@ -35,7 +35,8 @@ DEPENDPATH  += . \
                ./../../../../../inc/
 
 # Input
-HEADERS +=	calendayitem.h \
+HEADERS +=	calendayitemtest.h \
+            calendayitem.h \
             calendaystatusstrip.h \
             calendaycontainer.h \
             calendayutils.h \

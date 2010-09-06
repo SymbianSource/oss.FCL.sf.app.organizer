@@ -116,6 +116,7 @@ void NotesMainView::setupView(
 
 	// Get the list object from the document and update the model.
 	mListView = static_cast<HbListView *> (mDocLoader->findWidget("listView"));
+	mListView->setItemPixmapCacheEnabled(true);
 	Q_ASSERT_X(
 			mListView,
 			"notesmainview.cpp",
@@ -496,7 +497,9 @@ void NotesMainView::displayCollectionView()
 void NotesMainView::scrollTo(QModelIndex index)
 {
 	OstTraceFunctionEntry0( NOTESMAINVIEW_SCROLLTO_ENTRY );
-	mListView->scrollTo(index, HbAbstractItemView::EnsureVisible);
+	QModelIndex modelIndex = mListView->model()->index(
+			index.row(), index.column());
+	mListView->scrollTo(modelIndex, HbAbstractItemView::EnsureVisible);
 	OstTraceFunctionExit0( NOTESMAINVIEW_SCROLLTO_EXIT );
 }
 

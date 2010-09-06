@@ -116,6 +116,7 @@ void NotesTodoView::setupView(
 			(mDocLoader->findWidget("todoListView"));
 	// Update the list view model.
 	mListView->setModel(subModel);
+	mListView->setItemPixmapCacheEnabled(true);
 	// Setup the operations that can be done with a list view.
 	connect(
 			mListView, SIGNAL(activated(const QModelIndex &)),

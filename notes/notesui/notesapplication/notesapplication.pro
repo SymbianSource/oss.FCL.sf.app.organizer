@@ -51,6 +51,11 @@ symbian: {
 	DEPLOYMENT += notes
 	
 	SKINICON = qtg_large_notes
+	BLD_INF_RULES.prj_exports += \
+	# splashml
+	"data/xml/notesapplication.docml  			/epoc32/data/z/resource/hb/splashml/notesapplication.docml" \
+    "data/xml/notesapplication.splashml  		/epoc32/data/z/resource/hb/splashml/notesapplication.splashml"
+	
 }
 
 SOURCES += \

@@ -97,6 +97,16 @@ qreal CalenDayUtils::hourElementHeight() const
 }
 
 /*!
+ \brief minEventHeight
+ 
+ \return Minimum height of event bubble
+ */
+qreal CalenDayUtils::minEventHeight() const
+{
+    return mMinEventHeight;
+}
+
+/*!
  \brief contentWidth
  
  \return Width of content area
@@ -160,6 +170,7 @@ CalenDayUtils::CalenDayUtils() : mMainWindow(NULL)
     }
     mHourElementWidth = calculateHourElementWidth();
     mHourElementHeight = calculateHourElementHeight();
+    mMinEventHeight = calculateMinEventHeight();
 }
 
 /*!
@@ -214,4 +225,28 @@ qreal CalenDayUtils::calculateHourElementHeight() const
     prefHeight += bottomSpacer;
     
     return prefHeight;
+}
+
+/*!
+ \brief Calculates the height of hour element according to UI spec.
+ 
+ \return Calculated minimum height of event bubble
+ */
+qreal CalenDayUtils::calculateMinEventHeight() const
+{
+    HbStyle style;
+    HbDeviceProfile deviceProfile;
+
+    // Calculate minimum height of event bubble
+    qreal textHeight = 0.0;
+    qreal topSpacing = 0.0;
+    qreal bottomSpacing = 0.0;
+    style.parameter(QString("hb-param-text-height-secondary"), textHeight,
+        deviceProfile);
+    style.parameter(QString("hb-param-margin-gene-top"), topSpacing, 
+        deviceProfile);
+    style.parameter(QString("hb-param-margin-gene-bottom"), bottomSpacing, 
+        deviceProfile);
+    
+    return (topSpacing + textHeight + bottomSpacing);
 }

@@ -1789,7 +1789,9 @@ QDateTime AgendaUtilPrivate::minTime()
  */
 QDateTime AgendaUtilPrivate::maxTime()
 {
-	TTime maxTime = TCalTime::MaxTime();
+	// Returns maximum time allowed, 31.12.2100 0:00 is max so 30.12.2100 is
+	// last actual date to be used.
+	TTime maxTime = TCalTime::MaxTime() - TTimeIntervalMinutes( 1 );
 
 	// Convert it to QT
 	QDate date(
@@ -2962,14 +2964,14 @@ AgendaRepeatRule AgendaUtilPrivate::createAgendaRRuleFromTCalRRule(
 	calRRule.GetByMonthDayL(monthDays);
 	QList<int> qMonthDays;
 	for (int i = 0; i < monthDays.Count(); i++) {
-		qMonthDays.append(monthDays[i]);
+		qMonthDays.append(monthDays[i] + 1);
 	}
 	agendaRepeatRule.setByMonthDay(qMonthDays);
 
 	agendaRepeatRule.setType((AgendaRepeatRule::RuleType) (calRRule.Type()));
 	agendaRepeatRule.setInterval(calRRule.Interval());
 	TCalTime time = calRRule.Until();
-	TTime untilTime = time.TimeUtcL();
+	TTime untilTime = time.TimeLocalL();
 	QDateTime repeatUntil(QDate(untilTime.DateTime().Year(), 
 	                     untilTime.DateTime().Month() + 1, 
 	                     untilTime.DateTime().Day() + 1),
@@ -2978,7 +2980,7 @@ AgendaRepeatRule AgendaUtilPrivate::createAgendaRRuleFromTCalRRule(
 	agendaRepeatRule.setUntil(repeatUntil);
 
 	TCalTime dayStart = calRRule.DtStart();
-	TDateTime ruleStart = dayStart.TimeUtcL().DateTime();
+	TDateTime ruleStart = dayStart.TimeLocalL().DateTime();
 	QDateTime qRuleStart(QDate(ruleStart.Year(), ruleStart.Month() + 1, 
 	          ruleStart.Day() + 1),QTime(ruleStart.Hour(), ruleStart.Minute()));
 	agendaRepeatRule.setRepeatRuleStart(qRuleStart);
@@ -3029,6 +3031,7 @@ TCalRRule AgendaUtilPrivate::createTCalRRuleFromAgendaRRule(
 	repeatRule.SetDtStart(ruleStartCalTime);
 	repeatRule.SetInterval(agendaRRule.interval());
 	repeatRule.SetUntil(ruleRepeatTillTime);
+	repeatRule.SetWkSt((TDay)agendaRRule.weekStart());
 
 	QList<AgendaRepeatRule::Day> qDays = agendaRRule.byDay();
 	RArray<TDay> days;

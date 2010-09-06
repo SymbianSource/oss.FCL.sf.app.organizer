@@ -274,7 +274,7 @@ HbWidget* CalenEditorCustomItem::createCustomWidget()
 
 void CalenEditorCustomItem::launchLocationPicker()
 {
-		OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_LAUNCHLOCATIONPICKER_ENTRY );
+	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_LAUNCHLOCATIONPICKER_ENTRY );
    	if(!mAppManager)
 	{
     	mAppManager = new XQApplicationManager();
@@ -418,6 +418,9 @@ void CalenEditorCustomItem::handleDate()
 	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_HANDLEDATE_ENTRY );
 	// Create a popup with datepicker for the user to select date.
 	HbDialog *popUp = new HbDialog();
+	// Set the parent for the dialog
+	// Once the parent object is deleted the dialog will also be deleted
+	popUp->setParent(this);
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
 	popUp->setTimeout(HbDialog::NoTimeout);
 	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
@@ -455,6 +458,9 @@ void CalenEditorCustomItem::handleTime()
 	OstTraceFunctionEntry0( CALENEDITORCUSTOMITEM_HANDLETIME_ENTRY );
 	// Create a popup with time picker for the user to select time.
 	HbDialog *popUp = new HbDialog();
+	// Set the parent for the dialog
+	// Once the parent object is deleted the dialog will also be deleted
+	popUp->setParent(this);
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
 	popUp->setTimeout(HbDialog::NoTimeout);
 	popUp->setAttribute( Qt::WA_DeleteOnClose, true );

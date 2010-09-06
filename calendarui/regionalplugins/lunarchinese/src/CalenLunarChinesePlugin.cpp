@@ -130,7 +130,16 @@ CCalenLunarChinesePlugin::~CCalenLunarChinesePlugin()
 void CCalenLunarChinesePlugin::ConstructL()
 	{
     OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_CONSTRUCTL_ENTRY );
-    iServices->RegisterForNotificationsL( this, ECalenNotifyContextChanged );
+    
+    RArray<TCalenNotification> notifications;
+    notifications.Append(ECalenNotifyContextChanged);
+    notifications.Append(ECalenNotifyCloseDialogs);
+    
+    iServices->RegisterForNotificationsL( this, notifications );
+    
+    notifications.Close();
+    
+    
 	iServices->GetCommandRange( iStart, iEnd );
 	
 	// Install the translator before the CCalenLunarLocalizer is constructed
@@ -299,10 +308,14 @@ void CCalenLunarChinesePlugin::HandleNotification(
 										const TCalenNotification aNotification )
 	{
 	OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_HANDLENOTIFICATION_ENTRY );
-	if (aNotification == ECalenNotifyContextChanged)
-        {
-        TRAP_IGNORE(UpdateLocalizerInfoL());
-        }
+	if (aNotification == ECalenNotifyContextChanged) {
+		TRAP_IGNORE(UpdateLocalizerInfoL());
+	} else if(aNotification == ECalenNotifyCloseDialogs) {
+		if(mPopup){
+			//close the popup
+			mPopup->done(0);
+		}
+	}
 	OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_HANDLENOTIFICATION_EXIT );
 	}
 
@@ -359,30 +372,34 @@ OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_SHOWDETAILSL_EXIT );
 //
 void CCalenLunarChinesePlugin::ExecuteMessageDialogL(QString aMsgText)
 	{
-	OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_EXECUTEMESSAGEDIALOGL_ENTRY );
-	// Instantiate a popup
-	HbMessageBox *popup = new HbMessageBox();
-	popup->setDismissPolicy(HbDialog::NoDismiss);
-	popup->setTimeout(HbDialog::NoTimeout);
-	popup->setIconVisible(false);
-	popup->setAttribute( Qt::WA_DeleteOnClose, true );
-	
-	popup->setHeadingWidget(new HbLabel(hbTrId("txt_calendar_title_lunar_calendar")));
-	popup->setText(aMsgText);
-	
-	// Remove the default actions
-	QList<QAction*> list = popup->actions();
-	for(int i=0; i < list.count(); i++)
-	{
-		popup->removeAction(list[i]);
-	}
-	// Sets the primary action
-	popup->addAction(new HbAction(hbTrId("txt_common_button_close_singledialog"), popup));
+    OstTraceFunctionEntry0( CCALENLUNARCHINESEPLUGIN_EXECUTEMESSAGEDIALOGL_ENTRY );
 
-	// Launch popup
-	popup->open();
-	OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_EXECUTEMESSAGEDIALOGL_EXIT );
-	}
+    // Instantiate a popup
+    mPopup = new HbMessageBox();
+    mPopup->setDismissPolicy(HbDialog::NoDismiss);
+    mPopup->setTimeout(HbDialog::NoTimeout);
+    mPopup->setIconVisible(false);
+    mPopup->setAttribute(Qt::WA_DeleteOnClose, true);
+
+    mPopup->setHeadingWidget(new HbLabel(hbTrId(
+            "txt_calendar_title_lunar_calendar")));
+    mPopup->setText(aMsgText);
+
+    // Remove the default actions
+    QList<QAction*> list = mPopup->actions();
+    for (int i = 0; i < list.count(); i++)
+        {
+        mPopup->removeAction(list[i]);
+        }
+    // Sets the primary action
+    mPopup->addAction(new HbAction(hbTrId(
+            "txt_common_button_close_singledialog"), mPopup));
+
+    // Launch popup
+    mPopup->open();
+
+    OstTraceFunctionExit0( CCALENLUNARCHINESEPLUGIN_EXECUTEMESSAGEDIALOGL_EXIT );
+    }
 //EOF
 
 

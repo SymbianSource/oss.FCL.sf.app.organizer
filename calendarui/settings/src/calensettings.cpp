@@ -307,14 +307,9 @@ void CalenSettings::addWeekNumberItem()
 	// Append Show Week Number settings item
 	mShowWeekNumberItem = new HbDataFormModelItem();
 	mShowWeekNumberItem->setType(HbDataFormModelItem::ToggleValueItem);
-
-	QStringList values;
-	values << hbTrId("txt_calendar_button_no")
-			<< hbTrId("txt_calendar_button_yes");
 	mShowWeekNumberItem->setData(HbDataFormModelItem::LabelRole, 
 					QString(hbTrId("txt_calendar_setlabel_show_week_numbers")));
 	mShowWeekNumberItem->setContentWidgetData("objectName", "showWeekNumber");
-
 	mSettingsModel->appendDataFormItem(mShowWeekNumberItem);
 	mSettingsForm->addConnection(mShowWeekNumberItem, SIGNAL(clicked()), 
 									this, SLOT(handleWeekNumberChange()));
@@ -344,7 +339,6 @@ void CalenSettings::setStartDayOfWeek(const int index)
 	//set the start day of the week to locale
 	locale.SetStartOfWeek(day);
 	locale.Set();
-	updateShowWeekItem();
 }
 
 /*!
@@ -356,33 +350,38 @@ void CalenSettings::updateShowWeekItem()
 	HbExtendedLocale locale = HbExtendedLocale::system();
 	mStartOfWeek = locale.startOfWeek();
 	mShowWeekStartOnInfoItem->setContentWidgetData("currentIndex", mStartOfWeek);
-
 	// Read the value form cenrep
 	QVariant value = mSettingsManager->readItemValue(*mWeekNumberCenrepKey);
 	uint showWeekNumber = value.toUInt();
 
 	//if start day is not Monday
-	//set the show week number option dimmed ,
+	//removed the show week number option  ,
 	//else set to proper status
-	if(mStartOfWeek != HbExtendedLocale::Monday) {
-		mShowWeekNumberItem->setContentWidgetData(QString("text"), 
-									QString(hbTrId("txt_calendar_button_no")));
-		mShowWeekNumberItem->setContentWidgetData(QString("additionalText"), 
-									QString(hbTrId("txt_calendar_button_yes")));
-		mShowWeekNumberItem->setEnabled(false);
+	if (mStartOfWeek != HbExtendedLocale::Monday) {
+	    if (mWeekNumberItemAdded) {
+	       mSettingsForm->removeConnection(mShowWeekNumberItem, SIGNAL(clicked()), 
+	                this, SLOT(handleWeekNumberChange()));
+	        mSettingsModel->removeItem(mShowWeekNumberItem);
+	        mWeekNumberItemAdded = false;
+	    }
 	} else {
-		if(showWeekNumber) {
-			mShowWeekNumberItem->setContentWidgetData(QString("text"), 
-									QString(hbTrId("txt_calendar_button_yes")));
-			mShowWeekNumberItem->setContentWidgetData(QString("additionalText"), 
-									QString(hbTrId("txt_calendar_button_no")));
-		} else {
-			mShowWeekNumberItem->setContentWidgetData(QString("text"), 
-									QString(hbTrId("txt_calendar_button_no")));
-			mShowWeekNumberItem->setContentWidgetData(QString("additionalText"),
-									QString(hbTrId("txt_calendar_button_yes")));
-		}
-		mShowWeekNumberItem->setEnabled(true);
+	    //if option  "show week number is not present"
+	    //add the option in view
+	    if (!mWeekNumberItemAdded) {
+	        addWeekNumberItem();  
+	    }
+	    if (showWeekNumber) {
+	        mShowWeekNumberItem->setContentWidgetData(QString("text"),
+	                QString(hbTrId("txt_calendar_button_yes")));
+	        mShowWeekNumberItem->setContentWidgetData(QString("additionalText"),
+	                QString(hbTrId("txt_calendar_button_no")));
+	    } else {
+	        mShowWeekNumberItem->setContentWidgetData(QString("text"), 
+	                QString(hbTrId("txt_calendar_button_no")));
+	        mShowWeekNumberItem->setContentWidgetData(QString("additionalText"),
+	                QString(hbTrId("txt_calendar_button_yes")));
+	    }
+	    
 	}
 }
 // End of file

@@ -439,6 +439,10 @@ void SettingsCustomItem::launchRegSettingsView()
 
 	connect(mTimezoneClient, SIGNAL(timechanged()),
           view, SLOT(updateWeekStartOn()));
+	connect(mTimezoneClient, SIGNAL(timechanged()),
+	          view, SLOT(updateOnLocaleChanges()));
+	
+	
 	view->showView();
 	
 	OstTraceFunctionExit0( SETTINGSCUSTOMITEM_LAUNCHREGSETTINGSVIEW_EXIT );

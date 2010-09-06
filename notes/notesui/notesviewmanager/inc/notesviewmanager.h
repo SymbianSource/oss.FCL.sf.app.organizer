@@ -58,6 +58,7 @@ private:
 	void loadTodoView();
 	void loadFavoritesView();
 	void loadNoteView();
+	void updateOtherViews();
 
 private slots:
 	void loadOtherViews();
@@ -78,6 +79,8 @@ private:
 	HbAction *mDeleteAction;
 	HbAction *mCancelAction;
 	ulong mEntryId;
+	
+	bool instanceViewCreated;
 
 private:
 	Q_DISABLE_COPY(NotesViewManager)

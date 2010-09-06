@@ -421,6 +421,9 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
                     event->accept(Qt::PanGesture);
                 } else {
                     event->accept(Qt::PanGesture);
+                    // Since user tried to tap and ended up giving low pan
+                    // hence, handle it as tap
+                    tapTriggered();
                     OstTraceFunctionExit0( DUP1_CALENPREVIEWPANE_GESTUREEVENT_EXIT );
                     return;
                 }
@@ -437,6 +440,9 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
                    event->accept(Qt::PanGesture);
                }else {
                    event->accept(Qt::PanGesture);
+                   // Since user tried to tap and ended up giving low pan
+                   // hence, handle it as tap
+                   tapTriggered();
                    OstTraceFunctionExit0( DUP2_CALENPREVIEWPANE_GESTUREEVENT_EXIT );
                    return;
                }
@@ -444,18 +450,37 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
         }
     } else if(QTapGesture *tapGesture = qobject_cast<QTapGesture *>(event->gesture(Qt::TapGesture))) {
         if (tapGesture && tapGesture->state() == Qt::GestureFinished) {
-            	HbInstantFeedback::play(HbFeedback::Basic);
-                // Preview pane tapped
-            	// Stop the scrolling first
-            	stopScrolling();
-            	// Issue command to launch agenda view
-                mServices.IssueCommandL(ECalenAgendaView);
-                mView->disconnectAboutToQuitEvent();
-                event->accept(Qt::TapGesture);
+            event->accept(Qt::TapGesture);
+            // Handle the tap
+            tapTriggered();
+        }
+    }  else if(QTapAndHoldGesture *tapGesture = qobject_cast<QTapAndHoldGesture *>(event->gesture(Qt::TapAndHoldGesture))) {
+        if (tapGesture && tapGesture->state() == Qt::GestureFinished) { 
+            event->accept(Qt::TapAndHoldGesture);
+            // Handle the tap
+            tapTriggered();
         }
     }
     
     OstTraceFunctionExit0( DUP3_CALENPREVIEWPANE_GESTUREEVENT_EXIT );
+}
+
+/*!
+ Handles the tap and launches the agendaview
+ */
+void CalenPreviewPane::tapTriggered()
+{
+    OstTraceFunctionEntry0( CALENPREVIEWPANE_TAPTRIGGERED_ENTRY );
+    
+    HbInstantFeedback::play(HbFeedback::Basic);
+    // Preview pane tapped
+    // Stop the scrolling first
+    stopScrolling();
+    // Issue command to launch agenda view
+    mServices.IssueCommandL(ECalenAgendaView);
+    mView->disconnectAboutToQuitEvent();
+    
+    OstTraceFunctionExit0( CALENPREVIEWPANE_TAPTRIGGERED_EXIT );
 }
 
 /*!

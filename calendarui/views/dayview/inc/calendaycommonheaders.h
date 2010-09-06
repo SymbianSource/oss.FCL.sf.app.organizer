@@ -27,9 +27,9 @@
 const int KCalenHoursInDay = 24;
 
 /*!
- Number of time slots in hour (half of hour is defined as time slot) (UI spec)
+ Number of time slots in hour (one slot = 15 minutes) (UI spec)
  */
-const int KCalenSlotsInHour = 2;
+const int KCalenSlotsInHour = 4;
 
 /*!
  Content area (1/4 of screen) dedicated for All day events in Day View (UI spec)

@@ -21,6 +21,7 @@
 #include "calenagendautils.h"
 #include "calenconstants.h"
 #include "calendateutils.h"
+#include "calendayutils.h"
 
 namespace
 {
@@ -50,9 +51,9 @@ CalenDayInfo::~CalenDayInfo()
         iRegionList[i].Close();
     }
     iRegionList.clear();
-    iUntimedEvents.clear();//Close();
-    iTodoEvents.clear();//Close();
-    iAlldayEvents.clear();//Close();
+    iUntimedEvents.clear();
+    iTodoEvents.clear();
+    iAlldayEvents.clear();
 }
 
 /*!
@@ -63,10 +64,10 @@ void CalenDayInfo::Reset()
     for (int i = 0; i < iRegionList.count(); i++) {
         iRegionList[i].Close();
     }
-    iRegionList.clear();//Reset();
-    iUntimedEvents.clear();//Reset();
-    iTodoEvents.clear();//Reset();
-    iAlldayEvents.clear();//Reset();
+    iRegionList.clear();
+    iUntimedEvents.clear();
+    iTodoEvents.clear();
+    iAlldayEvents.clear();
 
     iUntimedSlotCount = 0;
     iFirstUntimedSlot = KFSCalStartingHour * iSlotsInHour;
@@ -87,8 +88,16 @@ void CalenDayInfo::InsertTimedEvent(const SCalenApptInfo& aItemInfo)
 
     int startIndex = SlotIndexForStartTime(aItemInfo.iStartTime);
     int endIndex = SlotIndexForEndTime(aItemInfo.iEndTime);
-    if (endIndex == startIndex) {
-        endIndex++;
+    
+    // 10.1 update: the minimum height of event is defined by UI spec.,
+    // so number of occupied slots must be verified to hold at least bubble
+    // with minimum possible height
+    qreal slotHeight = CalenDayUtils::instance()->hourElementHeight()
+        / iSlotsInHour;
+    int minSlotsInEvent = qRound((CalenDayUtils::instance()->minEventHeight()
+        / slotHeight) + 0.5);
+    if (endIndex < startIndex + minSlotsInEvent) {
+        endIndex = startIndex + minSlotsInEvent;
     }
     if (iRegionList.count() > 0) {
         // the timed events must be added in order

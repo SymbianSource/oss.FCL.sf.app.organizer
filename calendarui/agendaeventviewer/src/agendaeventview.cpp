@@ -62,10 +62,7 @@
 // Constants
 #define CHARACTER_SPACE     " "
 #define CHARACTER_HYPHEN    " - "
-
-
-//This Property is use for setting a primary left icon
-static const char *primaryLeftIconItem("leftPrimaryIconItem");
+#define DUMMY_ICON           "dummyIcon"
 
 /*!
 	\class AgendaEventView.
@@ -93,9 +90,10 @@ AgendaEventView::AgendaEventView(
 		mProgressTimer(NULL),
 		mProgressIconCount(0),
 		mMaptileStatusReceived(false),
+		mCalenEditorClosed(true),
 		mMaptileStatus(-1),
 		mNotesPluginLoaded(false),
-		mCalenEditorClosed(true)		        
+		mEntryIdDeleted(0)
 {
 	OstTraceFunctionEntry0( AGENDAEVENTVIEW_AGENDAEVENTVIEW_ENTRY );
 	mTranslator->loadCommon();
@@ -114,9 +112,6 @@ AgendaEventView::AgendaEventView(
 	// Load all the widgets.
 	mSubjectWidget = qobject_cast<AgendaEventViewerItem *> (
 			mDocLoader->findWidget(AGENDA_EVENT_VIEWER_SUBJECT_WIDGET));
-
-    //load layout that supports icon before subject label
-    mSubjectWidget->setProperty(primaryLeftIconItem,true);  
 
 	mDateTimeWidget = qobject_cast<AgendaEventViewerItem *> (
 			mDocLoader->findWidget(AGENDA_EVENT_VIEWER_DATE_TIME_WIDGET));
@@ -214,7 +209,10 @@ void AgendaEventView::execute(AgendaEntry entry,
 
 	mOriginalAgendaEntry = entry;
 	mAgendaEntry = entry;
-
+	
+	// For later reference
+	mParentId = mOwner->mAgendaUtil->parentEntry(mAgendaEntry).id();
+	
 	// Add the viewer data reading from the agenda entry.
 	addViewerData();
 	
@@ -247,11 +245,11 @@ void AgendaEventView::execute(AgendaEntry entry,
 		mMainWindow = new HbMainWindow();
 		mMainWindow->addView(mViewer);
 		mMainWindow->setCurrentView(mViewer);
-	    connect(mMainWindow,SIGNAL(orientationChanged(Qt::Orientation)),this,SLOT(changedOrientation(Qt::Orientation)));		
+	    connect(mMainWindow,SIGNAL(orientationChanged(Qt::Orientation)),this,SLOT(changedOrientation(Qt::Orientation)));
 	} else {
 		window->addView(mViewer);
 		window->setCurrentView(mViewer);
-		connect(window,SIGNAL(orientationChanged(Qt::Orientation)),this,SLOT(changedOrientation(Qt::Orientation)));		
+		connect(window,SIGNAL(orientationChanged(Qt::Orientation)),this,SLOT(changedOrientation(Qt::Orientation)));
 	}
 	
 	// Add softkey after adding view on window
@@ -419,6 +417,8 @@ void AgendaEventView::addSubjectAndPriorityData()
     getSubjectIcon(mAgendaEntry.type(),subjectIcon);
     itemList.append(subjectIcon);
     itemList.append(priorityIcon);
+    // This "DUMMY_ICON" is required only for the subject layout.
+    itemList.append(DUMMY_ICON);
     itemList.append(QString::null);
 
 	mSubjectWidget->setEventViewerItemData(itemList, Qt::DecorationRole);
@@ -441,8 +441,7 @@ void AgendaEventView::addDateTimeData()
     itemData.append(QString::null);
     itemData.append(QString::null);
     itemData.append("qtg_small_calendar");
-
-    mDateTimeWidget->setProperty(primaryLeftIconItem, false);
+    itemData.append(QString::null);
 
     mDateTimeWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
     itemData.clear();
@@ -527,21 +526,18 @@ void AgendaEventView::addLocationData()
 {
 	OstTraceFunctionEntry0( AGENDAEVENTVIEW_ADDLOCATIONDATA_ENTRY );
 	QStringList itemData;
+	itemData.append(QString::null);
+	itemData.append(QString::null);
+	itemData.append("qtg_small_location");
 	QString progressIcon(QString::null);	
 	if ( mLocationFeatureEnabled ) {
 	    getProgressIndicatorstatus(progressIcon);
 	}
 	 if( progressIcon.isNull() ) {
 	     itemData.append(QString::null);
-	     itemData.append(QString::null);
-	     itemData.append("qtg_small_location");
-	     mLocationWidget->setProperty(primaryLeftIconItem, false);
 	 }
 	 else {
-	     itemData.append("qtg_small_location");
-	     itemData.append( progressIcon );  
-	     itemData.append(QString::null);
-	     mLocationWidget->setProperty(primaryLeftIconItem, true);
+	     itemData.append( progressIcon );
 	 }
 	mLocationWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 	itemData.clear();
@@ -579,7 +575,7 @@ void AgendaEventView::addReminderData()
 	itemData.append(QString::null);
     itemData.append(QString::null);
     itemData.append("qtg_small_reminder");
-    mReminderWidget->setProperty(primaryLeftIconItem, false); 
+    itemData.append(QString::null);
 	mReminderWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 	itemData.clear();
 	itemData.append(QString::null);
@@ -601,7 +597,7 @@ void AgendaEventView::addCompletedTodoData()
 	itemData.append(QString::null);
 	itemData.append(QString::null);
 	itemData.append(QString::null);
-	mReminderWidget->setProperty(primaryLeftIconItem, true);
+	itemData.append(QString::null);
 	mReminderWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 	itemData.clear();
 	completedText = systemLocale.format(mAgendaEntry.completedDateTime().date(),
@@ -626,7 +622,7 @@ void AgendaEventView::addRepeatData()
     }else {
            itemData.append("qtg_small_repeat");
     }
-    mRepeatWidget->setProperty(primaryLeftIconItem, false);
+    itemData.append(QString::null);
 	mRepeatWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 	itemData.clear();
 	itemData.append(QString::null);
@@ -645,7 +641,7 @@ void AgendaEventView::addDescriptionData()
 	itemData.append(QString::null);
 	itemData.append(QString::null);
     itemData.append(QString::null);
-    mDescriptionWidget->setProperty(primaryLeftIconItem, true);
+    itemData.append(QString::null);
 	mDescriptionWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 	itemData.clear();
 	itemData.append(hbTrId("txt_calendar_dblist_description"));
@@ -934,6 +930,9 @@ void AgendaEventView::showDeleteOccurencePopup()
 {
 	OstTraceFunctionEntry0( AGENDAEVENTVIEW_SHOWDELETEOCCURENCEPOPUP_ENTRY );
 	HbDialog *popUp = new HbDialog();
+	// Set the parent for the dialog
+	// Once the parent object is deleted the dialog will also be deleted
+	popUp->setParent(this);
 	popUp->setDismissPolicy(HbDialog::NoDismiss);
 	popUp->setTimeout(HbDialog::NoTimeout);
 	popUp->setAttribute( Qt::WA_DeleteOnClose, true );
@@ -977,6 +976,9 @@ void AgendaEventView::showDeleteConfirmationQuery()
     OstTraceFunctionEntry0( AGENDAEVENTVIEW_SHOWDELETECONFIRMATIONQUERY_ENTRY );
     
     HbMessageBox *popup = new HbMessageBox(HbMessageBox::MessageTypeQuestion);
+	// Set the parent for the dialog
+	// Once the parent object is deleted the dialog will also be deleted
+    popup->setParent(this);
     popup->setDismissPolicy(HbDialog::NoDismiss);
     popup->setTimeout(HbDialog::NoTimeout);
     popup->setAttribute( Qt::WA_DeleteOnClose, true );
@@ -1016,7 +1018,7 @@ void AgendaEventView::showDeleteConfirmationQuery()
         popup->removeAction(list[i]);
         }
     HbAction *deleteAction = 
-					new HbAction(hbTrId("txt_calendar_button_delete"), popup);
+					new HbAction(hbTrId("txt_common_button_delete"), popup);
     popup->addAction(deleteAction);
     connect(deleteAction, SIGNAL(triggered()), this ,
 												SLOT(handleDeleteAction()));
@@ -1243,12 +1245,28 @@ void AgendaEventView::handleEntryUpdation(ulong id)
 void AgendaEventView::handleEntryDeletion(ulong id)
 {
     OstTraceFunctionEntry0( AGENDAEVENTVIEW_HANDLEENTRYDELETION_ENTRY );
-
-	if (id == mAgendaEntry.id()) {
-		// Close the agenda entry viewer
-		close();
-		mOwner->deletingCompleted();
-	}
+	// Check if the entry which is viewed has been deleted or not
+	// The first check id == mAgendaEntry.id() will fail for the following case
+    // Exceptional entry is opened in the viewer. Edit this occurence in editor.
+    // From editor delete all occurences of the entry. In this case the viewer 
+    // has the exceptional entry id which is not the same id which got deleted.
+    // Its the parent entry id. So checking if its a child and the entry deleted
+    // is the parent of this child.
+    if (id == mAgendaEntry.id() || 
+    		(!mAgendaEntry.recurrenceId().isNull() && id == mParentId)) {
+    	// If the editor is opened and the deletion is happening from editor
+    	// then there is no need to emit the signal deletingCompleted() [as the 
+    	// deletingStarted() is not been emitted already]
+    	// In this case closing of viewer will happen only once the editor 
+    	// is closed properly
+    	mEntryIdDeleted = id;
+    	if(!mCalenEditor) {
+    		// If the editor is not opened then emit deletingCompleted() 
+    		// and close the viewer
+    		mOwner->deletingCompleted();
+    		close();
+    	}
+    }
 
 	OstTraceFunctionExit0( AGENDAEVENTVIEW_HANDLEENTRYDELETION_EXIT );
 }
@@ -1278,9 +1296,26 @@ void AgendaEventView::handleCalendarEditorClosed()
 
 	// Cleanup.
     mCalenEditorClosed = true;
-	mCalenEditor->deleteLater();
 	mOwner->editingCompleted();
-
+	if(mCalenEditor) {
+		mCalenEditor->deleteLater();
+		// Check if the entry is deleted
+		if(mEntryIdDeleted) {
+			ulong currentId = mAgendaEntry.id();
+			// If the deleted entry is the same as current id then close viewer
+			// The second check is for exceptional entries which will be true,
+			// when all the occurences of the entry is deleted from the editor
+			// In this case the entry id deleted won't the same as current id
+			if(currentId == mEntryIdDeleted || mEntryIdDeleted == mParentId) {
+				// Close the viewer as the entry no longer exists
+				close();
+			}
+			// Reset the value.
+			mEntryIdDeleted = 0;
+		}
+	}
+	
+	
 	OstTraceFunctionExit0( AGENDAEVENTVIEW_HANDLECALENDAREDITORCLOSED_EXIT );
 }
 
@@ -1362,10 +1397,10 @@ void AgendaEventView::updateProgressIndicator()
         mProgressIconCount = mProgressIconCount % 10 + 1;
         iconName.append(QVariant(mProgressIconCount).toString());
         QStringList itemData;
+        itemData.append(QString::null);
+        itemData.append(QString::null);
         itemData.append("qtg_small_location");
         itemData.append(iconName);
-        itemData.append(QString::null);
-        mLocationWidget->setProperty(primaryLeftIconItem, true);
         mLocationWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
         mProgressTimer->start(100);
     }
@@ -1378,7 +1413,7 @@ void AgendaEventView::updateProgressIndicator()
             itemData.append(QString::null);
             itemData.append(QString::null);
             itemData.append("qtg_small_location");
-            mLocationWidget->setProperty(primaryLeftIconItem, false);
+            itemData.append(QString::null);
             mLocationWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
             Qt::Orientations orientation=hbInstance->allMainWindows().first()->orientation();
             mMaptilePath.clear();
@@ -1396,12 +1431,12 @@ void AgendaEventView::updateProgressIndicator()
         }
         else {
             QStringList itemData;
+            itemData.append(QString::null);
+            itemData.append(QString::null);
             itemData.append("qtg_small_location");
             QString stopIcon;
             stopIcon.append(QString("qtg_mono_search_stop"));
             itemData.append(stopIcon);
-            itemData.append(QString::null);
-            mLocationWidget->setProperty(primaryLeftIconItem, true);
             mLocationWidget->setEventViewerItemData(itemData, Qt::DecorationRole);
 
         }
@@ -1475,6 +1510,8 @@ void AgendaEventView::updateSubjectandPriorityData()
     getSubjectIcon(mAgendaEntry.type(),subjectIcon);
     itemList.append(subjectIcon);
     itemList.append(priorityIcon);
+    // This "DUMMY_ICON" is required only for the subject layout.
+    itemList.append(DUMMY_ICON);
     itemList.append(QString::null);
 
 	mSubjectWidget->setEventViewerItemData(itemList, Qt::DecorationRole);
@@ -1501,6 +1538,7 @@ void AgendaEventView::changedOrientation(Qt::Orientation orientation)
  */
 void AgendaEventView::saveAndCloseEditor()
 {
+	OstTraceFunctionEntry0( AGENDAEVENTVIEW_SAVEANDCLOSEEDITOR_ENTRY );
     if(mCalenEditorClosed){
         QObject *plugin = qobject_cast<QObject*> (
                 mNotesEditorPluginLoader->instance());
@@ -1517,6 +1555,7 @@ void AgendaEventView::saveAndCloseEditor()
             mCalenEditor->saveAndCloseEditor();
         }
     }
+    OstTraceFunctionEntry0( AGENDAEVENTVIEW_SAVEANDCLOSEEDITOR_EXIT );
 }
 
 /*!
@@ -1525,6 +1564,8 @@ void AgendaEventView::saveAndCloseEditor()
  */
 void AgendaEventView::closeAgendaEventView()
 {
-    close();  
+	OstTraceFunctionEntry0( AGENDAEVENTVIEW_CLOSEAGENDAEVENTVIEW_ENTRY );
+    close();
+    OstTraceFunctionEntry0( AGENDAEVENTVIEW_CLOSEAGENDAEVENTVIEW_EXIT );
 }
 // End of file

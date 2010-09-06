@@ -36,6 +36,10 @@ data=\epoc32\data\z\resource\qt\plugins\calendar\agendaeventviewerplugin.qtplugi
 // Stub sis
 data=DATAZ_\system\install\calendar_stub.sis             \System\Install\calendar_stub.sis
 
+data=ZRESOURCE\hb\splashml\calendar.splashml  		RESOURCE_FILES_DIR\hb\splashml\calendar.splashml
+data=ZRESOURCE\hb\splashml\calendar.docml  		RESOURCE_FILES_DIR\hb\splashml\calendar.docml
+
+
 file=ABI_DIR\BUILD_DIR\calencommonutils.dll SHARED_LIB_DIR\calencommonutils.dll
 file=ABI_DIR\BUILD_DIR\calenglobaldata.dll SHARED_LIB_DIR\calenglobaldata.dll
 file=ABI_DIR\BUILD_DIR\calencustomisationmanager.dll SHARED_LIB_DIR\calencustomisationmanager.dll

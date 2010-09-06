@@ -103,25 +103,6 @@ public:
      */
     void createNewEvent();
     
-    /**
-     * @brief check if property has to set
-     */ 
-    bool hasAllDayIcon();
-    
-    /**
-     * @brief check if all day icon is present
-     */
-    void checkEntryIcons();
-    
-    /**
-     * @brief return true if all day icon is present
-     */
-    bool isAllDayIcon();
-    
-        
-    
-    
-    
 private:
     
     /**
@@ -372,10 +353,6 @@ private:
 	 * @brief Holds notes editor plugin load info.
 	 */
 	bool mNotesPluginLoaded;
-	int mIndex;
-	bool mIconCheck; 
-	bool mNextEntry;
-	bool mLeftAllDayIcon;
 
 };
 

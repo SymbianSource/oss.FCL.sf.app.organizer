@@ -39,6 +39,7 @@ enum TCalenNotification
     ECalenNotifySettingsChanged,
     ECalenNotifyViewCreationStarted,
     ECalenNotifyDialogClosed,
+    ECalenNotifyCloseDialogs,
     ECalenNotifyCommandFailed,
     ECalenNotifyDeleteFailed,
     ECalenNotifyEntryClosed,

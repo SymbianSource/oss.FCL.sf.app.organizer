@@ -18,6 +18,7 @@
 // System includes
 #include <QGraphicsSceneEvent>
 #include <hbmainwindow.h>
+#include <hbmenu.h>
 #include <hbaction.h>
 #include <hbpangesture.h>
 #include <hbswipegesture.h>
@@ -217,20 +218,6 @@ void CalenAgendaView::refreshViewOnGoToDate()
 }
 
 // ----------------------------------------------------------------------------
-// CalenAgendaView::HandleNotification
-// Rest of the details are commented in the header
-// ----------------------------------------------------------------------------
-//    
-void CalenAgendaView::HandleNotification(const TCalenNotification notification)
-{
-    OstTraceFunctionEntry0( CALENAGENDAVIEW_HANDLENOTIFICATION_ENTRY );
-    
-    Q_UNUSED(notification)
-    // No implementation yet
-    OstTraceFunctionExit0( CALENAGENDAVIEW_HANDLENOTIFICATION_EXIT );
-}
-
-// ----------------------------------------------------------------------------
 // CalenAgendaView::docLoader
 // Rest of the details are commented in the header
 // ----------------------------------------------------------------------------
@@ -315,6 +302,8 @@ void CalenAgendaView::setupActions()
 	// Connect to the signal triggered by settings action
 	connect(settingsAction, SIGNAL(triggered()), this, SLOT(launchSettingsView()));
 	
+	// Close the menu once closeDialogs() is received
+	connect(this, SIGNAL(closeDialogs()), menu(), SLOT(close()));
 	OstTraceFunctionExit0( CALENAGENDAVIEW_SETUPACTIONS_EXIT );
 }
 

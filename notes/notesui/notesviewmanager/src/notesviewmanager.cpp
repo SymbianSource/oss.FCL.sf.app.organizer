@@ -60,7 +60,13 @@
 NotesViewManager::NotesViewManager(
 		NotesAppControllerIf &controllerIf, QObject *parent)
 :QObject(parent),
- mAppControllerIf(controllerIf)
+ mAppControllerIf(controllerIf),
+ mMainView(0),
+ mCollectionView(0),
+ mTodoView(0),
+ mFavoriteView(0),
+ mNoteView(0),
+ instanceViewCreated(false)
 {
 	OstTraceFunctionEntry0( NOTESVIEWMANAGER_NOTESVIEWMANAGER_ENTRY );
 	HbMainWindow *window = hbInstance->allMainWindows().first();
@@ -202,16 +208,12 @@ void NotesViewManager::loadNotesMainView()
 
 	// Load the application xml.
 	docLoader->load(NOTES_MAIN_VIEW_XML, &loadSuccess);
-	Q_ASSERT_X(
-			loadSuccess,
-			"notesviewmanager.cpp",
-			"Unable to load the main view app xml");
-
+	
 	// Find the main view.
 	mMainView = static_cast<NotesMainView *> (
 			docLoader->findWidget(NOTES_MAIN_VIEW));
-	Q_ASSERT_X(
-			mMainView, "notesviewmanager.cpp", "Unable to find the main view.");
+	mMainView->setParent(this);
+	
 	// Setup the view.
 	mMainView->setupView(mAppControllerIf, docLoader);
 	// Connect to main view signal for entry deletion.
@@ -241,6 +243,8 @@ void NotesViewManager::loadNotesCollectionView()
 	// Find the collection view.
 	mCollectionView = static_cast<NotesCollectionView *> (
 			docLoader->findWidget(NOTES_COLLECTION_VIEW));
+	mCollectionView->setParent(this);
+	
 	// Setup the view.
 	mCollectionView->setupView(mAppControllerIf, docLoader);
 	OstTraceFunctionExit0( NOTESVIEWMANAGER_LOADNOTESCOLLECTIONVIEW_EXIT );
@@ -264,6 +268,8 @@ void NotesViewManager::loadTodoView()
 	// Find the to-do view.
 	mTodoView = static_cast<NotesTodoView *> (
 			docLoader->findWidget(NOTES_TODO_VIEW));
+	mTodoView->setParent(this);
+	
 	// Setup the view.
 	mTodoView->setupView(mAppControllerIf, docLoader);
 	// Connect to to-do view signal for entry deletion.
@@ -290,6 +296,7 @@ void NotesViewManager::loadFavoritesView()
 	// Find the favorites view.
 	mFavoriteView = static_cast<NotesFavoriteView *> (
 			docLoader->findWidget(NOTES_FAVORITES_VIEW));
+	mFavoriteView->setParent(this);
 	// Setup the view.
 	mFavoriteView->setupView(mAppControllerIf, docLoader);
 
@@ -317,6 +324,8 @@ void NotesViewManager::loadNoteView()
 	// Find the note view.
 	mNoteView = static_cast<NotesNoteView *> (
 			docLoader->findWidget(NOTES_NOTE_VIEW));
+	mNoteView->setParent(this);
+	
 	// Setup the view.
 	mNoteView->setupView(mAppControllerIf, docLoader);
 
@@ -324,6 +333,33 @@ void NotesViewManager::loadNoteView()
 			mNoteView, SIGNAL(deleteEntry(ulong)),
 			this, SLOT(deleteEntryFromView(ulong)));
 	OstTraceFunctionExit0( NOTESVIEWMANAGER_LOADNOTEVIEW_EXIT );
+}
+
+/*!
+	Update all the other views.
+ */
+void NotesViewManager::updateOtherViews()
+{
+	if (mCollectionView) {
+		// Populate collections view.
+		mCollectionView->populateListView();
+	}
+
+	if (mTodoView) {
+		// Update the title for to-do view.
+		mTodoView->updateTitle();
+	}
+	
+	if (mNoteView) {
+		// Update the plain notes view.
+		mNoteView->updateNoteView();
+	}
+	
+	if (mFavoriteView) {
+		// Update the favorites view.
+		mFavoriteView->updateFavoriteView();
+	}
+	
 }
 
 /*!
@@ -343,6 +379,10 @@ void NotesViewManager::loadOtherViews()
 	// Load the recent notes view.
 	loadNoteView();
 
+	if (instanceViewCreated) {
+		// update other views.
+		updateOtherViews();
+	}
 	// Disconnect the signal viewReady as all the views are loaded.
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 	disconnect(
@@ -383,7 +423,7 @@ void NotesViewManager::deleteEntryFromView(ulong entryId)
 	defaultActions.clear();
 
 	// Add delete and cancel actions
-	mDeleteAction = new HbAction(hbTrId("txt_notes_button_dialog_delete"));
+	mDeleteAction = new HbAction(hbTrId("txt_common_button_delete"));
 	mCancelAction = new HbAction(hbTrId("txt_common_button_cancel"));
 
 	confirmationQuery->addAction(mDeleteAction);
@@ -413,22 +453,17 @@ void NotesViewManager::handleInstanceViewCreationCompleted(int status)
 {
 	OstTraceFunctionEntry0( NOTESVIEWMANAGER_HANDLEINSTANCEVIEWCREATIONCOMPLETED_ENTRY );
 	Q_UNUSED(status)
-
-	// Update the title for main view.
-	mMainView->updateTitle();
-
-	// Populate collections view.
-	mCollectionView->populateListView();
-
-	// Update the title for to-do view.
-	mTodoView->updateTitle();
 	
-	// Update the plain notes view.
-	mNoteView->updateNoteView();
+	instanceViewCreated = true;
 	
-	// Update the favorites view.
-	mFavoriteView->updateFavoriteView();
-	
+	if (mMainView) {
+		// Update the title for main view.
+		mMainView->updateTitle();
+	}
+
+	// update other views.
+	updateOtherViews();
+
 	// Need to emit this signal after the view is fully constructed & populated
 	// with actual data and ready to be used. So entry view & instance view
 	// needs to be created so that a new entry can also be created. Finally

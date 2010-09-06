@@ -98,7 +98,7 @@ NotesTodoEditor::NotesTodoEditor(
 
 	mDataForm = static_cast<HbDataForm *> (
 			mDocLoader->findWidget(TODO_EDITOR_DATA_FORM));
-
+	mDataForm->setItemPixmapCacheEnabled(true);
 	// Initialize the data form model.
 	initFormModel();
 
@@ -714,7 +714,7 @@ void NotesTodoEditor::handleDeleteAction()
 
 	// Add delete and cancel actions.
 	mDeleteTodoAction = new HbAction(
-			hbTrId("txt_notes_button_dialog_delete"));
+			hbTrId("txt_common_button_delete"));
 	mCancelDeleteAction = new HbAction(
 			hbTrId("txt_common_button_cancel"));
 	confirmationQuery->addAction(mDeleteTodoAction);

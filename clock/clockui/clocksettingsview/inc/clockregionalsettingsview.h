@@ -52,6 +52,7 @@ public:
 	CLOCKSETTINGSVIEW_EXPORT void showView();
 public slots:
     void updateWeekStartOn();
+    void updateOnLocaleChanges();
 private slots:
 	void handleBackAction();
 	void handleItemDisplayed(const QModelIndex &index);
@@ -68,6 +69,10 @@ private:
 	void populateFormModel();
 	QStringList weekdayList();
 	void updateWeekDays();
+	void updateTimeFormatField();
+	void updateTimeSeparatorField();
+	void updateDateFormatField();
+	void updateDateSeparatorField();
 
 
 private:

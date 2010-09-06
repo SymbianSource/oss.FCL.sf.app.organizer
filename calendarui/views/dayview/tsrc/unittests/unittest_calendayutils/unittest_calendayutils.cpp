@@ -129,7 +129,7 @@ void TestCalenDayUtils::testHourElementHeight()
 	{
 		
 		qreal hEH = mUtils->hourElementHeight();	
-		qreal myHeight = mUnit * 3 + param_value * 4;
+		qreal myHeight = mUnit* 4.1 + param_value * 2 + param_value * 2;
 				
 		QCOMPARE(hEH, myHeight);
 	}

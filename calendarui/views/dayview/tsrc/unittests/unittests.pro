@@ -28,7 +28,8 @@ SUBDIRS =  unittest_calendaycontentwidget \
            unittest_calendaymodel \
 	   unittest_calendayitemview \
 	   unittest_calendaymodelmanager \
-	   unittest_calendayview
+	   unittest_calendayview \
+	   unittest_calendaycontentscrollarea
            
 CONFIG += symbian_test
 

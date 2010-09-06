@@ -73,7 +73,9 @@ QList<CpSettingFormItemData*> DateTimeSettingsPlugin::
 							  CpItemDataHelper &itemDataHelper) const
 {
 	OstTraceFunctionEntry0( DATETIMESETTINGSPLUGIN_CREATESETTINGFORMITEMDATA_ENTRY );
-	HbIcon icon ;	
+	
+	QString datetimeIconString = "qtg_large_date_time";
+	HbIcon datetimeIcon(datetimeIconString) ;
 	
 	HbExtendedLocale locale = HbExtendedLocale::system();
 	QString timeInfo = locale.format(
@@ -88,7 +90,7 @@ QList<CpSettingFormItemData*> DateTimeSettingsPlugin::
 	QList<CpSettingFormItemData*> entryItemList;
 	CpSettingFormItemData *entryItem = new DateTimeSettingsView(
 			itemDataHelper, hbTrId("txt_cp_main_view_list_time_date"),
-			displayString,icon, 0, mTranslator);
+			displayString,datetimeIcon, 0, mTranslator);
 	entryItemList.append(entryItem);
 	OstTraceFunctionExit0( DATETIMESETTINGSPLUGIN_CREATESETTINGFORMITEMDATA_EXIT );
 	return entryItemList;

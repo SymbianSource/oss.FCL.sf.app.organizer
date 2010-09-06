@@ -127,7 +127,7 @@ bool AlarmAlertWidget::showAlarmDialog(SAlarmInfo *alarmInfo)
 
 	
 	alarmInfo->iTime.FormatL(timeString, timeFormat);
-	alarmInfo->iTime.FormatL(dateString, dateFormat); 
+	alarmInfo->iDate.FormatL(dateString, dateFormat); 
 
 	// Create a session with the device dialog server
     mDeviceDialog = CHbDeviceDialogSymbian::NewL();

@@ -23,10 +23,28 @@
 #include "agendaentry.h"
 #include "calendaycontainer.h"
 
+// System includes
+#include <HbFrameItem>
+#include <HbTextItem>
+#include <HbStyle>
+#include <HbColorScheme>
+#include <agendaentry.h>
+
+// User includes
+#include "calendaycommonheaders.h"
+#include "calendaystatusstrip.h"
+#include "calendaymodel.h"
+#include "calendayutils.h"
+#include "calenagendautils.h"
+#include "calendaycontainer.h"
+
+#ifndef __WINSCW__
 #define private public
 #define protected public
+#endif
 
 #include "calendayitem.h"
+#include "calendayitemtest.h"
 
 
 QRectF gTestWindowRect;
@@ -53,15 +71,14 @@ private slots:
     
     void testConstructors();
 private:
-    CalenDayItem *mItem;
+    CalenDayItemTest *mItem;
     CalenDayContainer *mContainer;
 };
 
 /*!
  Constructor
  */
-TestCalenDayItem::TestCalenDayItem() :
-   mItem(NULL), mContainer(NULL)
+TestCalenDayItem::TestCalenDayItem() : mItem(NULL), mContainer(NULL)
 {
 
 }
@@ -95,10 +112,11 @@ void TestCalenDayItem::cleanupTestCase()
 void TestCalenDayItem::init()
 {
     mContainer = new CalenDayContainer();
-    mItem = new CalenDayItem(mContainer);
-    
+    mItem = new CalenDayItemTest(mContainer);
+#ifndef __WINSCW__
     mItem->mBg = new HbFrameItem();
     mItem->mEventDesc = new HbTextItem(0);
+#endif
 }
 
 /*!
@@ -125,11 +143,11 @@ void TestCalenDayItem::cleanup()
 void TestCalenDayItem::testConstructors()
 {
     //1)
-    CalenDayItem *testItem = 0;
+    CalenDayItemTest *testItem = 0;
     QVERIFY(!testItem);
     
     //2)
-    testItem = new CalenDayItem(mContainer);
+    testItem = new CalenDayItemTest(mContainer);
     QVERIFY(testItem);
     delete testItem;
 }
@@ -140,59 +158,61 @@ void TestCalenDayItem::testConstructors()
  2. Test if is the same as orginal.
  */
 void TestCalenDayItem::testCreateItem()
-	{
-		HbAbstractViewItem *testItem = mItem->createItem();
-		QVERIFY(testItem);
-		delete testItem;
-	}
+{
+    HbAbstractViewItem *testItem = mItem->createItem();
+    QVERIFY(testItem);
+    delete testItem;
+}
 
 void TestCalenDayItem::testUpdateChildItems()
-	{
-		
-	}
+{
+
+}
 
 void TestCalenDayItem::testHasEventDescription()
-	{
-		QGraphicsSceneResizeEvent *event = new QGraphicsSceneResizeEvent();
-		qreal width = mItem->rect().width();
-		
-		qDebug() << "inited";
-		
-		mItem->mEventDescMinWidth = width - 4;
-		
-		qDebug() << "before resize";
-		
-		mItem->resizeEvent(event);
-		
-		qDebug() << "resize called";
-		
-		QVERIFY(mItem->hasEventDescription() == true);
-		
-		
-		mItem->mEventDescMinWidth = width + 8;
-		mItem->resizeEvent(event);
-		
-		qDebug() << "resize 2 called";
-		
-		QVERIFY(mItem->hasEventDescription() == false);
-	}
+{
+#ifndef __WINSCW__
+    QGraphicsSceneResizeEvent *event = new QGraphicsSceneResizeEvent();
+    qreal width = mItem->rect().width();
+
+    qDebug() << "inited";
+
+    mItem->mEventDescMinWidth = width - 4;
+
+    qDebug() << "before resize";
+
+    mItem->resizeEvent(event);
+
+    qDebug() << "resize called";
+
+    QVERIFY(mItem->hasEventDescription() == true);
+
+    mItem->mEventDescMinWidth = width + 8;
+    mItem->resizeEvent(event);
+
+    qDebug() << "resize 2 called";
+
+    QVERIFY(mItem->hasEventDescription() == false);
+#endif
+}
 
 void TestCalenDayItem::testHasBackgroundFrame()
-	{
-		QGraphicsSceneResizeEvent *event = new QGraphicsSceneResizeEvent();
-		qreal width = mItem->rect().width();
+{
+#ifndef __WINSCW__
+    QGraphicsSceneResizeEvent *event = new QGraphicsSceneResizeEvent();
+    qreal width = mItem->rect().width();
 
+    mItem->mFrameMinWidth = width - 4;
+    mItem->resizeEvent(event);
 
-		mItem->mFrameMinWidth = width - 4;
-		mItem->resizeEvent(event);
-	
-		QVERIFY(mItem->hasBackgroundFrame() == true);
-	
-		mItem->mFrameMinWidth = width + 8;
-		mItem->resizeEvent(event);
-	
-		QVERIFY(mItem->hasBackgroundFrame() == false);
-	}
+    QVERIFY(mItem->hasBackgroundFrame() == true);
+
+    mItem->mFrameMinWidth = width + 8;
+    mItem->resizeEvent(event);
+
+    QVERIFY(mItem->hasBackgroundFrame() == false);
+#endif
+}
 
 QTEST_MAIN(TestCalenDayItem);
 #include "unittest_calendayitem.moc"

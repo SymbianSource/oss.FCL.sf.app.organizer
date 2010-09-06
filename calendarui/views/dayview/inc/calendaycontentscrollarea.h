@@ -24,6 +24,11 @@
 // User includes
 #include "calendaycommonheaders.h"
 
+/*!
+ Value [degree] defines the max. angle of swipe gesture which should change day.
+ */
+const qreal KCalenSwipeAngle = 30;
+
 #ifdef  CALENVIEWS_DLL
 #define CALENDAYCONTENTSCROLLAREA_EXPORT Q_DECL_EXPORT
 #else

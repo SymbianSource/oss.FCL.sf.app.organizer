@@ -638,6 +638,10 @@ void CCalenController::handleServiceManagerSlot(int view, const QDateTime& dateT
 {
 	OstTraceFunctionEntry0( CCALENCONTROLLER_HANDLESERVICEMANAGERSLOT_ENTRY );
 	
+	// Broadcast the notification ECalenNotifyCloseDialogs 
+	// to close the opened dialogs if any
+	BroadcastNotification(ECalenNotifyCloseDialogs);
+	
 	if (iIsFromServiceFrmWrk) {
 		// Set the context properly
 		mContext->setFocusDateAndTime(dateTime);
@@ -646,48 +650,57 @@ void CCalenController::handleServiceManagerSlot(int view, const QDateTime& dateT
 		
 		iIsFromServiceFrmWrk = false;
 		
-	} else { // Calendar was in backgroung but now its being brought to foreground
+	} else {
+		// Calendar was in backgroung but now its being brought to foreground
+		
+		// Remove the previous view to avoid flicker
+		iViewManager->removePreviousView();
+		
 		// If current state is editing state or printing state
 		// or deleting state or sending state, then dont do anything as
 		// user might loose the data
-		CCalenStateMachine::TCalenStateIndex currentState = iStateMachine->CurrentState();
+		
+		CCalenStateMachine::TCalenStateIndex currentState = 
+												iStateMachine->CurrentState();
+		
 		if ((currentState == CCalenStateMachine::ECalenDeletingState) ||
 			(currentState == CCalenStateMachine::ECalenPrintingState) ||
 			(currentState == CCalenStateMachine::ECalenSendingState)) {
 			// simply return - we dont have anything to do
-		} 
-
-		else if (currentState == CCalenStateMachine::ECalenViewingState) {
-             if(iViewManager->isEventViewerActive()){
-		         iViewManager->closeAgendaEventView();
-		        }
+		} else if (currentState == CCalenStateMachine::ECalenViewingState) {
+			if(iViewManager->isEventViewerActive()) {
+				iViewManager->closeAgendaEventView();
+			}
+		} else if (currentState == CCalenStateMachine::ECalenEditingState) {
+			// close the editor and save the entry if application is 
+			// in background and launch the desired view
+			if(iViewManager->isEventViewerActive()) {
+				// First close editor and then viewer
+				iViewManager->saveAndCloseEditor();
+				iViewManager->closeAgendaEventView();
+			} else {
+				// If viewer is not active, just close the editor
+				iActionUi->saveAndCloseEditor();
+			}
+		} else if (currentState == CCalenStateMachine::ECalenSettingsState) {
+			iViewManager->removeSettingsView();
 		}
-		else if (currentState == CCalenStateMachine::ECalenEditingState) {
-			// close the editor and save the entry if application is in background
-            //and launch the desired view
-            if(iViewManager->isEventViewerActive()){
-                iViewManager->saveAndCloseEditor();
-                iViewManager->closeAgendaEventView();
-               }
-            else{
-                iActionUi->saveAndCloseEditor();
-            }
-		} 
-
-		else if (currentState == CCalenStateMachine::ECalenSettingsState){
-            iViewManager->removeSettingsView();
-	        }
  
 		// Set the context properly
 		mContext->setFocusDateAndTime(dateTime);
 		IssueCommandL(view);
-            
+		
 		// connect to raise the window to foreground once the view is ready
-		connect(&MainWindow(), SIGNAL(viewReady()), 
-		        this, SLOT(raiseWindow()));
+		connect(&MainWindow(), SIGNAL(viewReady()), this, SLOT(raiseWindow()));
+		
+		// Dispatches all posted events of type DeferredDelete, 
+		// i.e. empties the event queue in case any deletion is pending
+		qApp->sendPostedEvents(0, QEvent::DeferredDelete);
 	}
 
+	OstTraceFunctionExit0( CCALENCONTROLLER_HANDLESERVICEMANAGERSLOT_EXIT );
 }
+
 void CCalenController::raiseWindow()
     {
     MainWindow().raise();

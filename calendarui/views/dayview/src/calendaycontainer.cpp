@@ -277,6 +277,9 @@ void CalenDayContainer::updateTimedEventGeometry(
         eventWidth -= mLayoutValues.eventMargin;
     }
 
+    // Verify if height of event is greater than minimum (UI spec)
+    qreal minHeight = CalenDayUtils::instance()->minEventHeight();
+    eventHeight = (eventHeight < minHeight ? minHeight : eventHeight);
     QRectF eventGeometry(eventStartX, eventStartY, eventWidth, eventHeight);
     
     // Workaround to prevent size hint caching inside effectiveSizeHint

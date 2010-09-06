@@ -66,7 +66,8 @@ CalenMonthGrid::CalenMonthGrid(QGraphicsItem *parent):
 	mIsNonActiveDayFocused(false),
 	mIgnoreItemActivated(false),
 	mGridLineColor(HbColorScheme::color("qtc_cal_grid_line")),
-    mActiveDatesSet(false)
+    mActiveDatesSet(false),
+    mIsGridAdjusting(false)
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_CALENMONTHGRID_ENTRY );
     
@@ -340,7 +341,7 @@ void CalenMonthGrid::updateMonthGridWithEventIndicators(
 void CalenMonthGrid::downGesture()
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_DOWNGESTURE_ENTRY );
-    
+    mIsGridAdjusting = true;
     // Make sure that content widget is properly placed
     // We are doing this as tapping on inactive date of previous month is leading to
     // position the grid at wrong place after scrolling down. Hence, set the grid
@@ -380,8 +381,9 @@ void CalenMonthGrid::downGesture()
 void CalenMonthGrid::upGesture()
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_UPGESTURE_ENTRY );
-    
-   
+	
+    mIsGridAdjusting = true;
+
     // Set the required flags
     mDirection = up;
     mIsAtomicScroll = false;
@@ -444,6 +446,15 @@ void CalenMonthGrid::gestureEvent(QGestureEvent *event)
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_GESTUREEVENT_ENTRY );
     
+    // Dont listem for any gesture when grid is getting adjusted as listening to those was causing
+    // grid to stop abruptly i between
+    if (mIsGridAdjusting) {
+        // consume the event and return
+        qDebug()<<"RETURNING BACK";
+        event->ignore();
+        return;
+    }
+	
    if(HbPanGesture *gesture = qobject_cast<HbPanGesture *>(event->gesture(Qt::PanGesture))) {
         if (gesture->state() == Qt::GestureStarted) {
             mIsAtomicScroll = false;
@@ -542,10 +553,19 @@ void CalenMonthGrid::gestureEvent(QGestureEvent *event)
 void CalenMonthGrid::scrollingFinished()
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_SCROLLINGFINISHED_ENTRY );
-    
+
+    mIsGridAdjusting = false;
 	if (mIsPanGesture) {
 		handlePanGestureFinished();
-	} else if(!mIsAtomicScroll) {
+		// Check if still request has been made for scrolling
+		// if yes, then simply return
+		if (mDirection != invalid) {
+            mIgnoreItemActivated = false;
+            return;
+		}
+	} 
+	
+	if(!mIsAtomicScroll) {
 		QDateTime activeDate = mView->getActiveDay();
 		if(mDirection == down) { // down gesture
 			if (!mActiveDatesSet) {
@@ -579,6 +599,8 @@ void CalenMonthGrid::handlePanGestureFinished()
     OstTraceFunctionEntry0( CALENMONTHGRID_HANDLEPANGESTUREFINISHED_ENTRY );
     
 	mIsPanGesture = false;
+	// Reset the mDirection flag
+	mDirection = invalid;
 	// Get the first item that is visible
 	QList<HbAbstractViewItem *> list = visibleItems();
 	HbAbstractViewItem* item = list[0];
@@ -613,8 +635,8 @@ void CalenMonthGrid::handlePanGestureFinished()
 		// first visible item belongs to previous month
 		// Check if the date is more than half of the previous month
 		if (date.date().day() > (prevMonth.date().daysInMonth()) / 2) {
-			// we should again show the current month by scrolling upwards
-			mDirection = up;
+			// we should again show the current month by scrolling downwards
+			mDirection = down;
 			mIsAtomicScroll = true;
 			scrollContentsTo(-mStartPos,500);
 		} else {
@@ -634,12 +656,17 @@ void CalenMonthGrid::handlePanGestureFinished()
 		} else {
 			// we should again show the current month by scrolling upwards
 			mDirection = up;
+			mIsAtomicScroll = true;
 			scrollContentsTo(-mStartPos,500);
 		}
 	} else if (month == nextMonth.addMonths(1).date().month()) {
 		// first visible date belongs to next to next month
 		// hence, scroll up to show the next month
 		upGesture();
+	} else {
+        // User has panned so that exact month has been scrolled
+        // no need for any adjustment here, just append/prepend the rows
+        mIsAtomicScroll = false;
 	}
 	
 	OstTraceFunctionExit0( CALENMONTHGRID_HANDLEPANGESTUREFINISHED_EXIT );

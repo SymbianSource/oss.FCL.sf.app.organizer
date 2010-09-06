@@ -34,7 +34,7 @@
 ;
 
 ; calenexporter data input files
-"\epoc32\release\armv5\urel\calenexportertest.dll"-"$:\sys\bin\testcalenexportertest.dll"
+"\epoc32\release\armv5\urel\calenexportertest.dll"-"$:\sys\bin\calenexportertest.dll"
 "/epoc32/winscw/C/testframework/calenexportertest.cfg"	-	"c:/testframework/calenexportertest.cfg"
 ;"/epoc32/winscw/C/testframework/TestFramework.ini"	-	"c:/testframework/TestFramework.ini"
 

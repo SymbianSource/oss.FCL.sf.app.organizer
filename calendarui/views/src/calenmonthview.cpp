@@ -328,7 +328,10 @@ void CalenMonthView::doLazyLoading()
 	// Connect to the signal when options menu is shown
 	// This is required to add/remove dynamically some options
 	connect(menu(), SIGNAL(aboutToShow ()), this,
-			SLOT(addRemoveActionsInMenu()));	
+										SLOT(addRemoveActionsInMenu()));
+	// Close the menu once closeDialogs() is received
+	connect(this, SIGNAL(closeDialogs()), menu(), SLOT(close()));
+		
 	//add "show lunar data" action item ,if regional plugin is present
 	//regional plugin will add the option itself and handles it accordingly
 	//use this api after adding all action item to the menu

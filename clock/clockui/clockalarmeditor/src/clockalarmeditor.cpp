@@ -139,7 +139,7 @@ ClockAlarmEditor::ClockAlarmEditor(
 	mAlarmEditorForm = qobject_cast<HbDataForm *> (
 			loader->findWidget("alarmEditorForm"));
 
-
+	mAlarmEditorForm->setItemPixmapCacheEnabled(true);
 	// Create the alarm info structure with desired values.
 	initAlarmInfo();
 

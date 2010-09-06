@@ -332,7 +332,7 @@ void NotesNoteEditor::deleteNote()
 
 	// Add delete and cancel actions.
 	mDeleteNoteAction = new HbAction(
-			hbTrId("txt_notes_button_dialog_delete"));
+			hbTrId("txt_common_button_delete"));
 	mCancelDeleteAction = new HbAction(
 			hbTrId("txt_common_button_cancel"));
 	confirmationQuery->addAction(mDeleteNoteAction);

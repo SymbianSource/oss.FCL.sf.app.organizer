@@ -129,6 +129,7 @@ void ClockRegionalSettingsView::showView()
 	if (!mForm) {
 		qFatal("Unable to find the form");
 	}
+	mForm->setItemPixmapCacheEnabled(true);
 	connect(
 			mForm, SIGNAL(itemShown(QModelIndex)),
 			this, SLOT(handleItemDisplayed(QModelIndex)));
@@ -523,6 +524,22 @@ void ClockRegionalSettingsView::updateWeekStartOn()
 }
 
 /*!
+    update on locale changes.
+ */
+
+void ClockRegionalSettingsView::updateOnLocaleChanges()
+{
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_UPDATEONLOCALECHANGES_ENTRY );
+	
+	updateTimeFormatField();
+	updateTimeSeparatorField();
+	updateDateFormatField();
+	updateDateSeparatorField();
+	
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_UPDATEONLOCALECHANGES_EXIT );
+}
+
+/*!
     update the  week days .
  */
 void ClockRegionalSettingsView::updateWeekDays()
@@ -556,4 +573,69 @@ void ClockRegionalSettingsView::updateWeekDays()
 	}
 	OstTraceFunctionExit0( CLOCKREGIONALSETTINGSVIEW_UPDATEWEEKDAYS_EXIT );
 }
+
+/*!
+    update the  time format field.
+ */
+void ClockRegionalSettingsView::updateTimeFormatField()
+{
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_UPDATETIMEFORMATFIELD_ENTRY );
+	//for time format change
+	int index = mSettingsUtility->timeFormat(mTimeFormatStringList);
+	if (0 == index) {
+		mTimeFormatItem->setContentWidgetData("text", mTimeFormatStringList[0]);
+		mTimeFormatItem->setContentWidgetData("additionalText", mTimeFormatStringList[1]);
+	} else {
+		mTimeFormatItem->setContentWidgetData("text", mTimeFormatStringList[1]);
+		mTimeFormatItem->setContentWidgetData("additionalText", mTimeFormatStringList[0]);
+	}
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_UPDATETIMEFORMATFIELD_EXIT );
+}
+
+/*!
+    update the time separator field.
+ */
+void ClockRegionalSettingsView::updateTimeSeparatorField()
+{
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_UPDATETIMESEPARATORFIELD_ENTRY );
+	// for time separator change
+	int index = mSettingsUtility->timeSeparator(mTimeSeparatorStringList);
+	if (0 == index) {
+		mTimeSeparatorItem->setContentWidgetData("text", mTimeSeparatorStringList[0]);
+		mTimeSeparatorItem->setContentWidgetData(
+				"additionalText", mTimeSeparatorStringList[1]);
+	} else {
+		mTimeSeparatorItem->setContentWidgetData("text", mTimeSeparatorStringList[1]);
+		mTimeSeparatorItem->setContentWidgetData(
+				"additionalText", mTimeSeparatorStringList[0]);
+	}
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_UPDATETIMESEPARATORFIELD_EXIT );
+}
+
+/*!
+    update the date format field.
+ */
+void ClockRegionalSettingsView::updateDateFormatField()
+{
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_UPDATEDATEFORMATFIELD_ENTRY );
+	
+	int index = mSettingsUtility->dateFormat(mDateFormatStringList);
+	mDateFormatItem->setContentWidgetData("currentIndex",index);
+	
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_UPDATEDATEFORMATFIELD_EXIT );
+}
+
+/*!
+    update the date separator field.
+ */
+void ClockRegionalSettingsView::updateDateSeparatorField()
+{
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_UPDATEDATESEPARATORFIELD_ENTRY );
+	
+	int index = mSettingsUtility->dateSeparator(mDateSeparatorStringList);
+	mDateSeparatorItem->setContentWidgetData("currentIndex",index);
+	
+	OstTraceFunctionEntry0( CLOCKREGIONALSETTINGSVIEW_UPDATEDATESEPARATORFIELD_EXIT );
+}
+
 // End of file	--Don't remove this.

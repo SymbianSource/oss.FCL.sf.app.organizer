@@ -36,7 +36,10 @@ class HbLabel;
 class HbAction;
 class AlarmAlertDocLoader;
 
-const QString alarmNormalUICalendarDocml(":/xml/alarmalert_calendar_unlocked.docml");
+const QString alarmNormalUICalendarDocml(
+		":/xml/alarmalert_timed_calendar_unlocked.docml");
+const QString alarmNormalUINonTimedCalendarDocml(
+		":/xml/alarmalert_nontimed_calendar_unlocked.docml");
 const QString alarmNormalUIClockDocml(":/xml/alarmalert_clock_unlocked.docml");
 const QString alarmNormalUITodoDocml(":/xml/alarmalert_todo_unlocked.docml");
 
@@ -105,7 +108,7 @@ protected:
      * @brief From QGraphicsWidget
      * @see QGraphicsWidget
      */
-    void closeEvent(QCloseEvent *event);
+    void hideEvent(QHideEvent *event);
     
 signals:
 
@@ -124,7 +127,7 @@ private slots:
     /**
      * @brief Callback function for handling orientation changes
      */
-    void handleOrientationChange();
+    void handleOrientationChange(Qt::Orientation orientation);
     
     /**
      * @brief Called when the user snoozes the alarm

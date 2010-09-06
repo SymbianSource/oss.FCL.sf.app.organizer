@@ -280,6 +280,13 @@ void ClockCitySelectionListPrivate::handleAddOwnCityAction()
 		qFatal("Unable to load the document.");
 	}
 
+	if (Qt::Horizontal == window->orientation()) {
+		mAddCityDocloader->load(":/xml/clockaddcitydialog.docml",
+		                        "landscape", &success);
+	} else if (Qt::Vertical == window->orientation()) {
+		mAddCityDocloader->load(":/xml/clockaddcitydialog.docml",
+		                        "portrait", &success);
+	}
 	// Get the dialog.
 	mAddOwnCityDialog = static_cast<HbDialog *> (mAddCityDocloader->findWidget("dialog"));
 	if (!mAddOwnCityDialog) {
@@ -511,7 +518,7 @@ void ClockCitySelectionListPrivate::showCityList()
 
 	// Set the model to the list.
 	mListView->setModel(mProxyModel);
-
+	mListView->setItemPixmapCacheEnabled(true);
 	// Listen for list item activated signal.
 	connect(
 			mListView, SIGNAL(activated(QModelIndex)),

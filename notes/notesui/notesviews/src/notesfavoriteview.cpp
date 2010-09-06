@@ -118,6 +118,7 @@ void NotesFavoriteView::setupView(
 			(mDocLoader->findWidget("favoritesListView"));
 	// Update the list view model.
 	mListView->setModel(subModel);
+	mListView->setItemPixmapCacheEnabled(true);
 	// Setup the operations that can be done with a list view.
 	connect(
 			mListView, SIGNAL(released(const QModelIndex &)),

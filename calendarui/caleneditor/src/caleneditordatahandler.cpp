@@ -382,13 +382,6 @@ CalenEditorPrivate::Action CalenEditorDataHandler::shouldSaveOrDeleteOrDoNothing
 			return CalenEditorPrivate::ActionSave;
 		}
 	}
-	if (areTextItemsCleared() && !nonTextItemsEdited()) {
-		// ***** edited entry + text items emptied + non-text items not edited
-		// Even if user may have edited non-text fields, 
-		// delete the note 
-		OstTraceFunctionExit0( DUP3_CALENEDITORDATAHANDLER_SHOULDSAVEORDELETEORDONOTHING_EXIT );
-		return CalenEditorPrivate::ActionDelete;
-	}
 	// Save the note, since the text fields contain something
 	OstTraceFunctionExit0( DUP4_CALENEDITORDATAHANDLER_SHOULDSAVEORDELETEORDONOTHING_EXIT );
 	return CalenEditorPrivate::ActionSave;

@@ -31,6 +31,7 @@
             <widget name="editorHeading" type="HbLabel">
                 <enums name="alignment" value="AlignLeft|AlignLeading"/>
                 <sizehint height="var(hb-param-text-height-secondary)" type="PREFERRED" width="48un"/>
+                <fontspec name="fontSpec" role="Secondary" textheight="var(hb-param-text-height-secondary)"/>
                 <string locid="txt_notes_subhead_new_note" name="plainText"/>
             </widget>
             <widget name="favoriteIcon" type="HbLabel">

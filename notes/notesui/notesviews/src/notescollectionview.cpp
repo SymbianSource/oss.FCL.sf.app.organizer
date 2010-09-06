@@ -30,6 +30,7 @@
 #include <HbAbstractViewItem>
 #include <HbGroupBox>
 #include <HbStyleLoader>
+#include <HbParameterLengthLimiter>
 
 // User includes
 #include <agendautil.h>
@@ -123,6 +124,7 @@ void NotesCollectionView::setupView(
 	// Get the list view from the document and update the model.
 	mListView = static_cast<HbListView *> (
 			mDocLoader->findWidget("listView"));
+	mListView->setItemPixmapCacheEnabled(true);
 	connect(
 			mListView, SIGNAL(activated(const QModelIndex &)),
 			this, SLOT(handleActivated(const QModelIndex &)));
@@ -174,13 +176,14 @@ void NotesCollectionView::populateListView()
 	QStandardItemModel *model = new QStandardItemModel(this);
 	model->setColumnCount(1);
 
-	QString countString(hbTrId("txt_notes_list_note_count"));
-
 	// Add To-do's item.
 	QStandardItem *item = new QStandardItem();
 	QStringList todoStringList;
 	todoStringList.append(hbTrId("txt_notes_list_todos"));
-	todoStringList.append(countString.arg(QString::number(todosCount())));
+	todoStringList.append(
+			HbParameterLengthLimiter(
+					hbTrId("txt_notes_list_note_count")).arg(QString::number(
+							todosCount())));
 	item->setData(todoStringList, Qt::DisplayRole);
 	model->appendRow(item);
 
@@ -188,7 +191,10 @@ void NotesCollectionView::populateListView()
 	item = new QStandardItem();
 	QStringList favStringList;
 	favStringList.append(hbTrId("txt_notes_list_favorites"));
-	favStringList.append(countString.arg(mFavouriteModel->rowCount()));
+	favStringList.append(
+			HbParameterLengthLimiter(
+					hbTrId("txt_notes_list_note_count")).arg(QString::number(
+							mFavouriteModel->rowCount())));
 	item->setData(favStringList, Qt::DisplayRole);
 	model->appendRow(item);
 
@@ -197,7 +203,9 @@ void NotesCollectionView::populateListView()
 	QStringList notesStringList;
 	notesStringList.append(hbTrId("txt_notes_list_plain_notes"));
 	notesStringList.append(
-			countString.arg(QString::number(recentNotesCount())));
+			HbParameterLengthLimiter(
+					hbTrId("txt_notes_list_note_count")).arg(QString::number(
+							recentNotesCount())));
 	item->setData(notesStringList, Qt::DisplayRole);
 	model->appendRow(item);
 
@@ -224,13 +232,15 @@ void NotesCollectionView::displayAllNotesView()
 void NotesCollectionView::resetCollectionView()
 {
 	OstTraceFunctionEntry0( NOTESCOLLECTIONVIEW_RESETCOLLECTIONVIEW_ENTRY );
-	QString countString(hbTrId("txt_notes_list_note_count"));
 
 	// Update the count of to-do's.
 	QModelIndex mdlIndex = mListView->model()->index(0, 0);
 	QStringList todoStringList;
 	todoStringList.append(hbTrId("txt_notes_list_todos"));
-	todoStringList.append(countString.arg(QString::number(todosCount())));
+	todoStringList.append(
+			HbParameterLengthLimiter(
+					hbTrId("txt_notes_list_note_count")).arg(QString::number(
+							todosCount())));
 	mListView->model()->setData(mdlIndex, todoStringList, Qt::DisplayRole);
 
 	// Update the count of notes in the view.
@@ -238,7 +248,9 @@ void NotesCollectionView::resetCollectionView()
 	QStringList notesStringList;
 	notesStringList.append(hbTrId("txt_notes_list_plain_notes"));
 	notesStringList.append(
-			countString.arg(QString::number(recentNotesCount())));
+			HbParameterLengthLimiter(
+					hbTrId("txt_notes_list_note_count")).arg(QString::number(
+							recentNotesCount())));
 	mListView->model()->setData(mdlIndex, notesStringList, Qt::DisplayRole);
 	OstTraceFunctionExit0( NOTESCOLLECTIONVIEW_RESETCOLLECTIONVIEW_EXIT );
 }
@@ -369,11 +381,13 @@ void NotesCollectionView::updateFavouritesCount(
 	if( mListView->model())
 	{
 		// Update the count of notes in the view.
-		QString countString(hbTrId("txt_notes_list_note_count"));
 		QModelIndex mdlIndex = mListView->model()->index(1, 0);
 		QStringList favStringList;
 		favStringList.append(hbTrId("txt_notes_list_favorites"));
-		favStringList.append(countString.arg(mFavouriteModel->rowCount()));
+		favStringList.append(
+				HbParameterLengthLimiter(
+						hbTrId("txt_notes_list_note_count")).arg(
+								QString::number(mFavouriteModel->rowCount())));
 		mListView->model()->setData(mdlIndex, favStringList, Qt::DisplayRole);
 	}
 	OstTraceFunctionExit0( NOTESCOLLECTIONVIEW_UPDATEFAVOURITESCOUNT_EXIT );

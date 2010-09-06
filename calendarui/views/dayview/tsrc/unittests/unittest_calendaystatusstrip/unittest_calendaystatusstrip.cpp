@@ -242,26 +242,51 @@ void TestCalenStatusStrip::testCalculateStartEndTimePosition_data()
     QTest::addColumn<QTime>("testStartValue");
     QTest::addColumn<QTime>("testEndValue");
     
-    QTest::newRow("Full time start and end") <<  QTime(10,00,00)
-                                             <<  QTime(11,00,00)
-                                             <<  QTime(10,00,00)
-                                             <<  QTime(11,00,00);
-    QTest::newRow("Exactly 30min time start and end") <<  QTime(10,30,00)
-                                             <<  QTime(11,30,00)
-                                             <<  QTime(10,30,00)
-                                             <<  QTime(11,30,00);
-    QTest::newRow("More than 30min time start and end") <<  QTime(10,40,00)
-                                             <<  QTime(12,35,00)
-                                             <<  QTime(10,30,00)
-                                             <<  QTime(13,00,00);
-    QTest::newRow("time start > 30m and end > 23h30m") <<  QTime(20,35,00)
-                                             <<  QTime(23,35,00)
-                                             <<  QTime(20,30,00)
-                                             <<  QTime(23,59,00);
-    QTest::newRow("time start < 30m and end > 23h00m") <<  QTime(11,19,00)
-                                             <<  QTime(23,10,00)
-                                             <<  QTime(11,00,00)
-                                             <<  QTime(23,30,00);
+    QTest::newRow("Full time start and end")
+        <<  QTime(10,00,00)
+        <<  QTime(11,00,00)
+        <<  QTime(10,00,00)
+        <<  QTime(11,00,00);
+    QTest::newRow("Exactly 15m time start and end") 
+        << QTime(10, 15, 00)
+        << QTime(11, 15, 00)
+        << QTime(10, 15, 00)
+        << QTime(11, 15, 00);
+    QTest::newRow("More than 15m, less than 30m time start and end") 
+        <<  QTime(10,18,00)
+        <<  QTime(10,24,00)
+        <<  QTime(10,15,00)
+        <<  QTime(10,30,00);
+    QTest::newRow("Exactly 30m time start and end") 
+        << QTime(9, 30, 00)
+        << QTime(10, 30, 00)
+        << QTime(9, 30, 00)
+        << QTime(10, 30, 00);
+    QTest::newRow("More than 30m, less than 45m time start and end") 
+        <<  QTime(10,32,00)
+        <<  QTime(10,43,00)
+        <<  QTime(10,30,00)
+        <<  QTime(10,45,00);
+    QTest::newRow("Exactly 45m time start and end") 
+        << QTime(9, 45, 00)
+        << QTime(10, 45, 00)
+        << QTime(9, 45, 00)
+        << QTime(10, 45, 00);
+    QTest::newRow("More than 45m, less than 60m time start and end") 
+        <<  QTime(10,48,00)
+        <<  QTime(10,57,00)
+        <<  QTime(10,45,00)
+        <<  QTime(11,00,00);
+    QTest::newRow("time start > 45m and end > 23h45m") 
+        <<  QTime(20,47,00)
+        <<  QTime(23,55,00)
+        <<  QTime(20,45,00)
+        <<  QTime(23,59,00);
+    QTest::newRow("time start < 30m and (23h30m < end < 23h45m")
+        <<  QTime(11,19,00)
+        <<  QTime(23,38,00)
+        <<  QTime(11,15,00)
+        <<  QTime(23,45,00);
 }
 
 /*!
@@ -279,7 +304,7 @@ void TestCalenStatusStrip::testCalculateStartEndTimePosition()
     //run function
     QPair<QTime,QTime> testStartEndValue 
                      = mStatusStrip->calculateStartEndPostion(testedStartValue,
-                                                               testedEndValue);
+                         testedEndValue);
     //check data
     QCOMPARE(testStartEndValue.first,testStartValue);
     QCOMPARE(testStartEndValue.second,testEndValue);

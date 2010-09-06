@@ -26,10 +26,10 @@
             </widget>
             <widget name="emptyListLabel" type="HbLabel">
                 <real name="z" value="1"/>
-		<string locid="txt_notes_list_no_notes_available" name="plainText" value="No notes available"/>
-		<enums name="textWrapping" value="TextWordWrap"/>
-                <sizehint height="expr(var(hb-param-text-height-primary) )" type="PREFERRED"/>
+								<string locid="txt_notes_list_no_notes_available" name="plainText" value="No notes available"/>		          
                 <enums name="alignment" value="AlignVCenter|AlignHCenter"/>
+                <enums name="textWrapping" value="TextWordWrap"/>
+                <fontspec name="fontSpec" role="Primary" textheight="var(hb-param-text-height-primary)"/>
             </widget>
             <layout type="anchor">
                 <anchoritem dst="viewHeading" dstEdge="LEFT" spacing="0un" src="" srcEdge="LEFT"/>

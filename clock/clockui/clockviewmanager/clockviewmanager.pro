@@ -51,8 +51,5 @@ HEADERS += \
 		clockviewmanager.h \
 		clockdocloader.h \
 		clockviewmanagerdefines.h
-	
-RESOURCES += \
-		../../data/clock.qrc
 
 # End of file	--Don't remove this.
