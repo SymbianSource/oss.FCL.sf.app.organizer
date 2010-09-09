@@ -254,7 +254,7 @@ void CCalenMissedAlarmsContainer::CreateIconIndicesL(
     aIndexArray.AppendL( MCalenServices::ECalenMeetingIconMissed );
     aIndexArray.AppendL( MCalenServices::ECalenToDoIconMissed );
     aIndexArray.AppendL( MCalenServices::ECalenClearMissedAlarms );
-    aIndexArray.AppendL( MCalenServices::ECalenClearAllMissedAlarms )
+    aIndexArray.AppendL( MCalenServices::ECalenClearAllMissedAlarms );
    
     TRACE_EXIT_POINT;
     }
