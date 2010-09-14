@@ -1466,7 +1466,7 @@ void CCalenDayContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent
         {
         return;
         }
-    if(iView->IsEventViewLaunchedFromAlarm())
+    if(iView->IsCalenLaunchedFromExtApp())
         {
         return;
         }
@@ -1760,6 +1760,7 @@ void CCalenDayContainer::CompletePopulationL()
     UpdateStatusPaneAndExtensionsL();
 	// Hide/unhide "today" toolbar item based on the focused day
     UpdateTodayToolbarItemL();
+    iView->SetTapIgnore(EFalse);
     DrawNow();
     TRACE_EXIT_POINT;
     }

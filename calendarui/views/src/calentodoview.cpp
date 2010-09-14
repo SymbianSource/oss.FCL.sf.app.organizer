@@ -584,7 +584,7 @@ void CCalenTodoView::DynInitMenuPaneL(TInt aResourceId,          // Resource Id
                 {
                 if( Container()->MarkedCount() )
                     {
-                    aMenuPane->SetItemSpecific( ECalenDeleteCurrentEntry, ETrue );
+                    aMenuPane->SetItemSpecific( ECalenDeleteCurrentEntry, EFalse );
                     if(Container()->IsCurrentItemSelected()) // If focused list item is marked
                         {
                         aMenuPane->DeleteMenuItem( ECalenViewCurrentEntry );
@@ -593,24 +593,30 @@ void CCalenTodoView::DynInitMenuPaneL(TInt aResourceId,          // Resource Id
                     aMenuPane->DeleteMenuItem( ECalenCompleteTodo );
                     aMenuPane->DeleteMenuItem( ECalenRestoreTodo );
                     aMenuPane->DeleteMenuItem( ECalenSend );
-                    aMenuPane->DeleteMenuItem(ECalenCopyToCalendars);
-                    
-                    TBool crossout( EFalse );
-                    //When mark as done, crossout is ETrue.
-                    crossout = CheckMarkedItemCompletedL();
-                    if( crossout )
-                        {
-                        aMenuPane->SetItemSpecific(ECalenMarkUnDone, ETrue);
-                        }
-                    else
-                        {
-                        aMenuPane->SetItemSpecific(ECalenMarkDone, ETrue);
-                        }
-                    
+
                     if(Container()->MarkedCount() == 1)
                         {
                         aMenuPane->DeleteMenuItem( ECalenCmdComplete );
+                        TBool crossout( EFalse );
+                        crossout = CheckMarkedItemCompletedL();
+                        if( crossout )
+                            {
+                            aMenuPane->DeleteMenuItem( ECalenMarkDone );
+                            }
+                        else
+                            {
+                            aMenuPane->DeleteMenuItem( ECalenMarkUnDone );
+                            }
                         }
+                    else
+                        {
+                        aMenuPane->DeleteMenuItem( ECalenMarkDone );
+                        aMenuPane->DeleteMenuItem( ECalenMarkUnDone );
+                        }
+ 					if(Container()->MarkedCount() > 1)
+ 					    {
+                        aMenuPane->DeleteMenuItem( ECalenCopyToCalendars );
+ 					    }
                     }
                 else
                     {

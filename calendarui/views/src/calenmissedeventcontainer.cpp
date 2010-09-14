@@ -73,7 +73,7 @@
 #include "calennotedatautil.h"
 #include "calenentryutil.h"
 #include "CalenUid.h"   // KUidCalendar
-#include "calenlocationutil.h"
+#include <calenlocationutil.h>
 
 // LOCAL CONSTANTS AND MACROS
 _LIT( KWesternSummaryMarker, "\x200E" );

@@ -41,7 +41,7 @@
 #include "calenmissedeventcontainer.h"
 #include <calenview.h>
 #include "CalenUid.h"
-#include "calenlocationutil.h"
+#include <calenlocationutil.h>
 #include "calenentryutil.h"
 #include "CleanupResetAndDestroy.h"
 
@@ -336,6 +336,11 @@ void CCalenMissedEventView::HandleCommandL(TInt aCommand)
         case EAknSoftkeyExit: 
             {
                       
+            MCalenToolbar* toolbar = iServices.ToolbarOrNull();
+            if (toolbar)
+                {
+                toolbar->SetToolbarVisibilityL(ETrue);
+                }
             CCalenNativeView::HandleCommandL(aCommand);
             }
             break;

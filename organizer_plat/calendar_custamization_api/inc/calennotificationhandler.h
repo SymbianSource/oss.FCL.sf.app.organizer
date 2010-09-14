@@ -40,7 +40,7 @@ enum TCalenNotification
     ECalenNotifyLostAlarms,
     ECalenNotifyAlarmStopped,    
     ECalenNotifyAlarmSnoozed,
-	ECalenNotifyEventViewLaunchedFromAlarm,
+	ECalenNotifyCalenLaunchedFromExtApp,
     ECalenNotifyCmdLineLaunch,
     ECalenNotifyAvkonViewSwitchLaunch,
     ECalenNotifySettingsChanged,

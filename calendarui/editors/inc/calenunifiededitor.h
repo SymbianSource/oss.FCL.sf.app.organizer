@@ -823,6 +823,11 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
         
         CAsyncCallBack* iAsyncCallback; 
         
+        /**
+    	* True if FeatureManager is initialized.
+    	*/
+    	TBool iFeatMgrInitialized;
+        
     };
 
 /**

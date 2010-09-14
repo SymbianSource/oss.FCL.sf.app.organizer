@@ -895,6 +895,19 @@ EXPORT_C void CCalEntry::SetPhoneOwnerL(const CCalUser* aOwner)
 	iImpl->SetPhoneOwnerL(aOwner);
 	}
 
+/** Clears the Organizer and phone owner.
+@pre None.
+@post The entry's organizer and phone owner is cleared.
+@publishedPartner
+@released
+@capability None
+*/
+EXPORT_C void CCalEntry::ClearMRSpecificDataL()
+    {
+    iImpl->ClearMRSpecificDataL();
+    }
+
+
 /** Gets the organizer for this entry.
 This function creates a new CCalUser object containing the organizer data.
 
@@ -1142,6 +1155,30 @@ TUint8 CCalEntry::ShortFileIdL()
 	{
 	return iImpl->ShortFileIdL();
 	}
+
+/** Sets the user data field.
+
+@param aUserInt The userdata to be set
+@capability None
+@publishedAll
+@released
+*/
+EXPORT_C void CCalEntry::SetUserInt32L( TUint32 aUserInt )    
+    {       
+    iImpl->SetUserInt32L( aUserInt );       
+    }       
+
+/** Fetches the userdata field
+
+@publishedAll
+@released
+@capability None
+@return The Userdata field.
+*/
+EXPORT_C TUint32 CCalEntry::UserInt32L()       
+    {       
+    return iImpl->UserInt32L();       
+    }       
 
 // CCalEntryId //
 

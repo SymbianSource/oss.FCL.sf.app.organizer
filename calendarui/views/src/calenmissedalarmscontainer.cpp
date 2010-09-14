@@ -465,6 +465,10 @@ void CCalenMissedAlarmsContainer::HandlePointerEventL(
     
     TInt pointerIndex(-1);
     TBool isItem (iListBox->View()->XYPosToItemIndex(aPointerEvent.iPosition, pointerIndex));
+    if(iView->IsCalenLaunchedFromExtApp())
+        {
+        return;
+        }
 
     if(isItem == EFalse)
         {

@@ -264,6 +264,11 @@ void CCalenMissedAlarmsView::HandleCommandL(TInt aCommand)
             break;
         case EAknSoftkeyExit:
             {
+            MCalenToolbar* toolbar = iServices.ToolbarOrNull();
+            if(toolbar)
+                {
+                toolbar->SetToolbarVisibilityL(ETrue);  
+                } 
             iServices.IssueNotificationL(ECalenNotifyClearMissedAlarms);
             CCalenNativeView::HandleCommandL(aCommand);
             }

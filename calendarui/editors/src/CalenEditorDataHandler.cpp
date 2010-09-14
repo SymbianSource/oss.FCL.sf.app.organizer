@@ -30,6 +30,7 @@
 #include <calencontext.h>
 #include <caleninstanceid.h>            // TCalenInstanceId
 #include <calenservices.h>
+#include <featmgr.h>
 
 // User includes
 #include "CalenEditorDataHandler.h"
@@ -42,6 +43,7 @@
 #include "calenattachmentmodel.h"
 #include "calenunifiededitor.h"
 #include "calendarui_debug.h"
+#include "koreanlunardateutil.h"
 
 // Constants
 #define KNoOfDaysInWeek  7
@@ -146,7 +148,11 @@ void CCalenEditorDataHandler::ConstructL()
         iInstanceId = iServices.Context().InstanceId();
         }
     
-
+    // Sets up TLS, must be done before FeatureManager is used.
+    FeatureManager::InitializeLibL();
+    // Used in destructor. 
+    iFeatMgrInitialized = ETrue;
+    
     TRACE_EXIT_POINT;
     }
 
@@ -188,7 +194,15 @@ CCalenEditorDataHandler::~CCalenEditorDataHandler()
 
     delete iOriginal;
     delete iEdited;
-
+    
+	
+	// Do not call UnInitializeLib() if InitalizeLib() leaves.
+    if ( iFeatMgrInitialized )
+        {
+        // Frees the TLS. Must be done after FeatureManager is used.
+        FeatureManager::UnInitializeLib();  
+        }  
+        
     TRACE_EXIT_POINT;
     }
 
@@ -331,7 +345,8 @@ TBool CCalenEditorDataHandler::NonTextFieldsEditedL()
              IsCalendarEditedL()     ||
              IsAttachmentExists()    ||
              IsEventTypeEdited()     ||
-             AllDayFieldEdited() );
+             AllDayFieldEdited()     ||
+             LunarFieldEdited() );
     }
 
 // ---------------------------------------------------------------------------
@@ -413,196 +428,218 @@ void CCalenEditorDataHandler::WriteChangesToEntryL( CalCommon::TRecurrenceRange 
     // Repeat rule has to be modified in both cases
     if ( isNew || IsStartDateTimeEdited() || IsRepeatRuleEdited() )
         {
-
-        if ( aRepeatTarget == CalCommon::EThisOnly)
-            {
+        if ( FeatureManager::FeatureSupported( KFeatureIdKorean ) && 
+             Edited().EntryType() == CCalEntry::EAnniv &&
+             ( Edited().CalendarType() == ELunar || Edited().CalendarType() == ELunarLeap) )
+            { /* Lunar entries need special repeating dates */
+            CKoreanLunarDateUtil* dateUtil = CKoreanLunarDateUtil::NewLC(&iServices);
+            RArray<TCalTime> repeatDateList;
+            CleanupClosePushL( repeatDateList );
+            
+            /* Clear previous repeat rules */
             iEntry.ClearRepeatingPropertiesL();
-            }
-        else if ( Edited().IsRepeating() )
-            {
-            // If we're an RDate (with repeat type ERepeatOther), don't try to set an RRule,
-            // but don't clear the repeat properties either.
-            if( Edited().RepeatType() != ERepeatOther )
+            TRAPD( err, dateUtil->GetLunarYearlyRepeatsL( repeatDateList, Edited().StartDateTime().DateTime(), UseFloatingTimeL() ) );
+            
+            if( err == KErrNone )
                 {
-                TCalRRule rrule;
-
-                CalculateRepeatRuleL( Edited().StartDateTime(),
-                                      Edited().RepeatType(),
-                                      Edited().RepeatUntilDateTime(),
-                                      rrule );
-
-                iEntry.SetRRuleL( rrule );
-                
-                // As there should not be any rdates, remove any that are
-                // still present
-                RArray<TCalTime> emptyList;
-                CleanupClosePushL( emptyList );
-                iEntry.SetRDatesL( emptyList );
-                CleanupStack::PopAndDestroy(); // emptyList
+                iEntry.SetRDatesL( repeatDateList );
                 }
-            else
-                {
-                // The repeat type is ERepeatOther, therefore as 
-                // it is impossible to create an entry of type
-                // ERepeat other using the editor either the repeat until
-                // date or the start date must have been changed
-
-                // The start date/time has changed, in order for the
-                // series to maintain its pattern, any rDates and if
-                // present rRule are moved by the same offset
-                // The repeat type is ERepeatOther, so check if we have any rdates
-                RArray<TCalTime> rDateList;
-                CleanupClosePushL( rDateList );
-                iEntry.GetRDatesL( rDateList );
-                TInt count = rDateList.Count();
-
-                if ( count == 0 )
-                    {
-                    // There are no rdates so the new until and start date can be applied
-                    // directly.
-                    TCalRRule rrule;
-
-                    CalculateRepeatRuleL( Edited().StartDateTime(),
-                                      Edited().RepeatType(),
-                                      Edited().RepeatUntilDateTime(),
-                                      rrule );
-
-                    iEntry.SetRRuleL( rrule );
-                    }
-                else
-                    {
-                    // There are rDates which need to be checked.
-                    if ( IsStartDateTimeEdited() )
-                        {
-                        // Need to shift any rdates
-                        TTime editedStart = iEdited->StartDateTime();
-                        TTime origStart = iOriginal->StartDateTime();
-                        TTimeIntervalMicroSeconds offSet = editedStart.MicroSecondsFrom( origStart );
-                        for ( TInt index = 0; index < count; index++ )
-                            {
-                            TCalTime& rDateTime = rDateList[ index ];
-                            TTime shiftedTime = rDateTime.TimeUtcL();
-                            TDateTime before = shiftedTime.DateTime();
-                            shiftedTime += offSet;
-                            TDateTime after = shiftedTime.DateTime();
-                            rDateTime.SetTimeUtcL( shiftedTime ); 
-                            }
-                        }
-
-                    //  Check and fix the rDates and rRules match the 
-                    //  repeat until date and time.
-                    TTime untilTime = Edited().RepeatUntilDateTime();
-                    
-                    // Remove any rdates that are after the the repeat until date
-                    TInt count = rDateList.Count();
-                    if ( count > 0 )
-                        {
-                        TInt index = count - 1;
-                        do 
-                            {
-                            TTime lastRDate = CalenDateUtils::BeginningOfDay( rDateList[ index ].TimeLocalL() );
-                            TDateTime before = lastRDate.DateTime();
-                            if ( lastRDate > untilTime )
-                                {
-                                rDateList.Remove( index-- );
-                                }
-                            else
-                                {
-                                index = KErrNotFound;
-                                }
-                            } while ( index != KErrNotFound );
-                        }
-                    
-                    // Need to check if the end date of the
-                    // rrule needs adjusting if it exists.
-                    TCalRRule rRule;
-                    if ( iEntry.GetRRuleL( rRule ) )
-                        {
-                        count = rDateList.Count();
-                        if ( count > 0 )
-                            {
-                            // There still exists some rdates, so only need to trim 
-                            // the rrule if it exists
-                            TTime lastRDate = CalenDateUtils::BeginningOfDay( rDateList[ count - 1 ].TimeLocalL() );
-                            const TTime& origUntilDate = Original().RepeatUntilDateTime();
-                            TTime startDT = rRule.DtStart().TimeLocalL();
-                            
-                            if ( lastRDate <= origUntilDate && startDT > lastRDate )
-                                { 
-                                if ( startDT < untilTime)
-                                    {
-                                    if( origUntilDate != untilTime)
-                                    	{
-										ApplyUntilDateToRRuleL( rRule, untilTime);
-                                    	iEntry.SetRRuleL( rRule );
-                                    	}
-                                    }
-                                 else
-                                    {
-                                    // The repeat start is after the until date
-                                    // so remove any repeat information.
-                                    iEntry.ClearRepeatingPropertiesL();
-
-                                    // If the entry date has been moved past the until
-                                    // date, need to swap the an rDate for the entry.
-                                    TTime startTime = iEntry.StartTimeL().TimeLocalL();
-
-                                    if ( startTime > untilTime )
-                                        {
-                                        // Find the duration of the entry
-                                        TTime endTime = iEntry.EndTimeL().TimeLocalL();
-                                        TTimeIntervalMinutes duration;
-                                        //startTime.MinutesFrom( endTime, duration );// for bug: CMCA-745CZ4
-                                        endTime.MinutesFrom( startTime, duration );
-                                        
-                                        // Choose the first rDate as the new start time
-                                        TCalTime newStartTime = rDateList[ 0 ];
-                                        endTime = newStartTime.TimeLocalL() + duration;
-
-                                        // FIXME.
-                                        // If there is only one rDate left, the agenda model
-                                        // will crash if it is deleted.
-                                        if ( count != 0 )
-                                            {
-                                            rDateList.Remove( 0 );
-                                            }
-
-                                        TCalTime newEndTime;
-                                        if ( UseFloatingTimeL() )
-                                            {
-                                            newEndTime.SetTimeLocalFloatingL( endTime );
-                                            }
-                                        else
-                                            {
-                                            newEndTime.SetTimeLocalL( endTime );
-                                            }
-
-                                        iEntry.SetStartAndEndTimeL( newStartTime, newEndTime );
-                                        }    
-                                    }
-                                }
-                            }
-                        }
-
-                    iEntry.SetRDatesL( rDateList );
-                    }
-
-                CleanupStack::PopAndDestroy(); // rDateList
-                }
+            
+            /* Pop and destroy repeatDateList and dateUtil */
+            CleanupStack::PopAndDestroy(2);
             }
         else
             {
-            iEntry.ClearRepeatingPropertiesL();
-
-            // FIXME  As the entry is supposedly not repeating
-            // any rDates should be removed. Unforunately this
-            // is not possible at the moment because removing the 
-            // rdates will cause the agenda model to panic
-            //
-            // RArray<TCalTime> emptyList;
-            // CleanupClosePushL( emptyList );
-            // iEntry.SetRDatesL( emptyList );
-            // CleanupStack::PopAndDestroy(); // emptyList
+            if ( aRepeatTarget == CalCommon::EThisOnly)
+                {
+                iEntry.ClearRepeatingPropertiesL();
+                }
+            else if ( Edited().IsRepeating() )
+                {
+                // If we're an RDate (with repeat type ERepeatOther), don't try to set an RRule,
+                // but don't clear the repeat properties either.
+                if( Edited().RepeatType() != ERepeatOther )
+                    {
+                    TCalRRule rrule;
+                    
+                    CalculateRepeatRuleL( Edited().StartDateTime(),
+                    Edited().RepeatType(),
+                    Edited().RepeatUntilDateTime(),
+                    rrule );
+                    
+                    iEntry.SetRRuleL( rrule );
+                    
+                    // As there should not be any rdates, remove any that are
+                    // still present
+                    RArray<TCalTime> emptyList;
+                    CleanupClosePushL( emptyList );
+                    iEntry.SetRDatesL( emptyList );
+                    CleanupStack::PopAndDestroy(); // emptyList
+                    }
+                else
+                    {
+                    // The repeat type is ERepeatOther, therefore as 
+                    // it is impossible to create an entry of type
+                    // ERepeat other using the editor either the repeat until
+                    // date or the start date must have been changed
+                    
+                    // The start date/time has changed, in order for the
+                    // series to maintain its pattern, any rDates and if
+                    // present rRule are moved by the same offset
+                    // The repeat type is ERepeatOther, so check if we have any rdates
+                    RArray<TCalTime> rDateList;
+                    CleanupClosePushL( rDateList );
+                    iEntry.GetRDatesL( rDateList );
+                    TInt count = rDateList.Count();
+                    
+                    if ( count == 0 )
+                        {
+                        // There are no rdates so the new until and start date can be applied
+                        // directly.
+                        TCalRRule rrule;
+                        
+                        CalculateRepeatRuleL( Edited().StartDateTime(),
+                        Edited().RepeatType(),
+                        Edited().RepeatUntilDateTime(),
+                        rrule );
+                        
+                        iEntry.SetRRuleL( rrule );
+                        }
+                    else
+                        {
+                        // There are rDates which need to be checked.
+                        if ( IsStartDateTimeEdited() )
+                            {
+                            // Need to shift any rdates
+                            TTime editedStart = iEdited->StartDateTime();
+                            TTime origStart = iOriginal->StartDateTime();
+                            TTimeIntervalMicroSeconds offSet = editedStart.MicroSecondsFrom( origStart );
+                            for ( TInt index = 0; index < count; index++ )
+                                {
+                                TCalTime& rDateTime = rDateList[ index ];
+                                TTime shiftedTime = rDateTime.TimeUtcL();
+                                TDateTime before = shiftedTime.DateTime();
+                                shiftedTime += offSet;
+                                TDateTime after = shiftedTime.DateTime();
+                                rDateTime.SetTimeUtcL( shiftedTime ); 
+                                }
+                            }
+                        
+                        //  Check and fix the rDates and rRules match the 
+                        //  repeat until date and time.
+                        TTime untilTime = Edited().RepeatUntilDateTime();
+                        
+                        // Remove any rdates that are after the the repeat until date
+                        TInt count = rDateList.Count();
+                        if ( count > 0 )
+                            {
+                            TInt index = count - 1;
+                            do 
+                                {
+                                TTime lastRDate = CalenDateUtils::BeginningOfDay( rDateList[ index ].TimeLocalL() );
+                                TDateTime before = lastRDate.DateTime();
+                                if ( lastRDate > untilTime )
+                                    {
+                                    rDateList.Remove( index-- );
+                                    }
+                                else
+                                    {
+                                    index = KErrNotFound;
+                                    }
+                                } while ( index != KErrNotFound );
+                            }
+                        
+                        // Need to check if the end date of the
+                        // rrule needs adjusting if it exists.
+                        TCalRRule rRule;
+                        if ( iEntry.GetRRuleL( rRule ) )
+                            {
+                            count = rDateList.Count();
+                            if ( count > 0 )
+                                {
+                                // There still exists some rdates, so only need to trim 
+                                // the rrule if it exists
+                                TTime lastRDate = CalenDateUtils::BeginningOfDay( rDateList[ count - 1 ].TimeLocalL() );
+                                const TTime& origUntilDate = Original().RepeatUntilDateTime();
+                                TTime startDT = rRule.DtStart().TimeLocalL();
+                                
+                                if ( lastRDate <= origUntilDate && startDT > lastRDate )
+                                    { 
+                                    if ( startDT < untilTime)
+                                        {
+                                        if( origUntilDate != untilTime)
+                                            {
+                                            ApplyUntilDateToRRuleL( rRule, untilTime);
+                                            iEntry.SetRRuleL( rRule );
+                                            }
+                                        }
+                                    else
+                                        {
+                                        // The repeat start is after the until date
+                                        // so remove any repeat information.
+                                        iEntry.ClearRepeatingPropertiesL();
+                                        
+                                        // If the entry date has been moved past the until
+                                        // date, need to swap the an rDate for the entry.
+                                        TTime startTime = iEntry.StartTimeL().TimeLocalL();
+                                        
+                                        if ( startTime > untilTime )
+                                            {
+                                            // Find the duration of the entry
+                                            TTime endTime = iEntry.EndTimeL().TimeLocalL();
+                                            TTimeIntervalMinutes duration;
+                                            //startTime.MinutesFrom( endTime, duration );// for bug: CMCA-745CZ4
+                                            endTime.MinutesFrom( startTime, duration );
+                                            
+                                            // Choose the first rDate as the new start time
+                                            TCalTime newStartTime = rDateList[ 0 ];
+                                            endTime = newStartTime.TimeLocalL() + duration;
+                                            
+                                            // FIXME.
+                                            // If there is only one rDate left, the agenda model
+                                            // will crash if it is deleted.
+                                            if ( count != 0 )
+                                                {
+                                                rDateList.Remove( 0 );
+                                                }
+                                            
+                                            TCalTime newEndTime;
+                                            if ( UseFloatingTimeL() )
+                                                {
+                                                newEndTime.SetTimeLocalFloatingL( endTime );
+                                                }
+                                            else
+                                                {
+                                                newEndTime.SetTimeLocalL( endTime );
+                                                }
+                                            
+                                            iEntry.SetStartAndEndTimeL( newStartTime, newEndTime );
+                                            }    
+                                        }
+                                    }
+                                }
+                            }
+                        
+                        iEntry.SetRDatesL( rDateList );
+                        }
+                    
+                    CleanupStack::PopAndDestroy(); // rDateList
+                    }
+                }
+            else
+                {
+                iEntry.ClearRepeatingPropertiesL();
+                
+                // FIXME  As the entry is supposedly not repeating
+                // any rDates should be removed. Unforunately this
+                // is not possible at the moment because removing the 
+                // rdates will cause the agenda model to panic
+                //
+                // RArray<TCalTime> emptyList;
+                // CleanupClosePushL( emptyList );
+                // iEntry.SetRDatesL( emptyList );
+                // CleanupStack::PopAndDestroy(); // emptyList
+                }
             }
         }
 
@@ -635,7 +672,10 @@ void CCalenEditorDataHandler::WriteChangesToEntryL( CalCommon::TRecurrenceRange 
 
             // If edit alarm of repeating entry, we have to nudge start
             // time to instance date
-            if ( isRepeating &&  aRepeatTarget == CalCommon::EThisAndAll )
+
+            if ( isRepeating &&  aRepeatTarget == CalCommon::EThisAndAll 
+			    || Edited().EntryType() == CCalEntry::EAnniv && Edited().CalendarType() != ESolar )
+				  // this is lunar anniv
                 {
                 // nudge to instance date;
                 TTime instanceDate = iInstanceDateTime.TimeLocalL();
@@ -692,6 +732,11 @@ void CCalenEditorDataHandler::WriteChangesToEntryL( CalCommon::TRecurrenceRange 
         iEntry.SetPriorityL( priority );
         }
 
+    if (FeatureManager::FeatureSupported( KFeatureIdKorean ))
+    	{
+    	iEntry.SetUserInt32L( (TUint32)Edited().CalendarType() );	
+    	}
+    
     if ( isNew )
         {
         CCalEntry::TReplicationStatus status = CCalEntry::EOpen;
@@ -712,14 +757,15 @@ void CCalenEditorDataHandler::WriteChangesToEntryL( CalCommon::TRecurrenceRange 
             }
         iEntry.SetReplicationStatusL( status );
         }
-    
+
     /**
      * S60 settings for new entries
      */
     if ( IsCreatingNew() )
         {
-        if ( Edited().EntryType() == CCalEntry::EAnniv )
-            {
+
+        if ( Edited().EntryType() == CCalEntry::EAnniv && Edited().CalendarType() == ESolar)
+            { /* Lunar entries have different repeating */
             TCalRRule rrule( TCalRRule::EYearly );
             rrule.SetDtStart( iEntry.StartTimeL() );
             rrule.SetInterval( 1 );
@@ -1445,6 +1491,17 @@ CCalenEditorDataHandler::TError CCalenEditorDataHandler::CheckAlarmFieldsForErro
     TRACE_ENTRY_POINT;
 
     TError error = EFormErrNone;
+    
+	if (FeatureManager::FeatureSupported( KFeatureIdKorean )) 
+		{
+    	if( Edited().CalendarType() == ELunar ||
+    	    Edited().CalendarType() == ELunarLeap )
+    	    { /* Lunar entries have alarm as offset
+    	         and can't thus be erroneous */
+    	    return error;
+    	    }
+		}
+	
     // If alarm not active, no check
     if ( Edited().IsAlarmActivated() )
         {
@@ -2157,6 +2214,24 @@ TBool CCalenEditorDataHandler::AllDayFieldEdited()
     TRACE_EXIT_POINT;
     return fieldModified;
     }
+
+TBool CCalenEditorDataHandler::LunarFieldEdited()
+    {
+    TRACE_ENTRY_POINT;
+	TBool fieldModified = EFalse;
+	
+    if (FeatureManager::FeatureSupported( KFeatureIdKorean )) 
+    	{
+    	if( iOriginal->CalendarType() != iEdited->CalendarType() )
+    	    {
+    	    fieldModified = ETrue;
+    	    }
+    	}
+    	
+    TRACE_EXIT_POINT;
+    return fieldModified;
+    }
+
 
 // -----------------------------------------------------------------------------
 // CCalenEditorDataHandler::SetDefaultAlarmDateTimeL

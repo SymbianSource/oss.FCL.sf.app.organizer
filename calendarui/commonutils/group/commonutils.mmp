@@ -57,6 +57,8 @@ SOURCE          calentitlepane.cpp
 
 SOURCE          calenmulticalutil.cpp
 SOURCE          calencustomnavilabel.cpp
+SOURCE 	        KoreanCalConv.cpp
+
 
 LIBRARY         caleninterimutils2.lib
 LIBRARY         avkon.lib
@@ -99,6 +101,9 @@ LIBRARY		aknicon.lib
 LIBRARY		ws32.lib
 LIBRARY		aknlayout2scalable.lib
 LIBRARY		gdi.lib
+LIBRARY ccon.lib
+
+deffile			calencommonutils.def
 
 CAPABILITY      CAP_GENERAL_DLL
 

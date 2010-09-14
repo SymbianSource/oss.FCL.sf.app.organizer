@@ -79,10 +79,7 @@ CCalenNotifier::~CCalenNotifier()
         }
     
     iHandlers.Close();
-    
-    iBroadcastQueue.Close();
-    
-    
+  
     if( iFilnameDeleted )
         {
         delete iFilnameDeleted;
@@ -128,7 +125,10 @@ CCalenNotifier::~CCalenNotifier()
         TRAP_IGNORE(iGlobalData->CalSessionL().StopFileChangeNotification());
         iGlobalData->Release();
         }
-	TRACE_EXIT_POINT;
+    
+    iBroadcastQueue.Close();
+
+    TRACE_EXIT_POINT;
 	}
 
 // ----------------------------------------------------------------------------

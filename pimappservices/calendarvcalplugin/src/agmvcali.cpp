@@ -379,6 +379,15 @@ void CVCalToAgendaEntryConverter::ImportVCalL(CVersitParser& aParser, RPointerAr
 		CleanupStack::PopAndDestroy(geoString);
 		}
 	
+    TInt intProperty( 0 );
+    //Import UserDataInt
+    TBool integerFound = ImportIntegerPropertyL( aParser, KVersitExtUserInt,       
+                            intProperty );       
+    
+    if ( integerFound )       
+        {       
+        iEntry->SetUserInt32L( intProperty );       
+        }       
 	CleanupStack::PopAndDestroy(properties);
 	aEntryArray.AppendL(iEntry); // takes ownership of entry
 	iEntry = NULL;

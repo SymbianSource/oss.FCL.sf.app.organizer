@@ -31,6 +31,8 @@
 #include "calenattachmentmodel.h"
 #include "CleanupResetAndDestroy.h"
 #include "CalendarPrivateCRKeys.h"
+#include "KoreanLunarDateEditor.h"
+#include <featmgr.h>
 #include "CalenUid.h"
 
 // system includes
@@ -174,6 +176,14 @@ CCalenUnifiedEditor::~CCalenUnifiedEditor()
     iAsyncCallback->Cancel();
     delete iAsyncCallback;
     
+    // Do not call UnInitializeLib() if InitalizeLib() leaves.
+    if ( iFeatMgrInitialized )
+        {
+        // Frees the TLS. Must be done after FeatureManager is used.
+        FeatureManager::UnInitializeLib();  
+        }  
+
+    
     TRACE_EXIT_POINT;
     }
 
@@ -301,6 +311,11 @@ void CCalenUnifiedEditor::ConstructL()
     iIdle = CIdle::NewL( CActive::EPriorityUserInput );
     iIdle->Start( TCallBack( KeyCallBack, this) );
     iCoeEnv->AddFepObserverL( *this );
+    
+    // Sets up TLS, must be done before FeatureManager is used.
+    FeatureManager::InitializeLibL();
+    // Used in destructor. 
+    iFeatMgrInitialized = ETrue;
     
     TRACE_EXIT_POINT;
     }
@@ -1482,7 +1497,15 @@ void CCalenUnifiedEditor::CloseFormWithoutActionsL()
 SEikControlInfo CCalenUnifiedEditor::CreateCustomControlL( TInt aControlType )
     {
     TRACE_ENTRY_POINT;
-
+    if( aControlType == ECalenCtLunarDateEditor  && FeatureManager::FeatureSupported( KFeatureIdKorean ) ) 
+            {
+            SEikControlInfo controlInfo;
+            controlInfo.iControl =  new (ELeave) CKoreanLunarDateEditor(iServices);
+            controlInfo.iControl->SetParent( this );
+            controlInfo.iFlags = 0;
+            controlInfo.iTrailerTextId = 0;
+            return controlInfo;
+            }
     __ASSERT_ALWAYS( aControlType==ECalenCtDescriptionField, User::Invariant() );
 
     TRACE_EXIT_POINT;
@@ -1503,6 +1526,11 @@ MEikDialogPageObserver::TFormControlTypes
         {
         TRACE_EXIT_POINT;
         return MEikDialogPageObserver::EEdwinDerived;
+        }
+    if( aControlType == ECalenCtLunarDateEditor  && FeatureManager::FeatureSupported( KFeatureIdKorean ) )
+        {
+        TRACE_EXIT_POINT;
+        return MEikDialogPageObserver::EMfneDerived;
         }
 
     TRACE_EXIT_POINT;
@@ -2175,12 +2203,16 @@ TInt CCalenUnifiedEditor::TryToSaveEntryWithEntryChangeL( TBool aForcedExit)
         {
         if( entry->EntryTypeL() == CCalEntry::EAnniv )
             {
-            // Set yearly rule to Anniversary entry, to create Annaiversary instance yearly 
-            TCalRRule rrule( TCalRRule::EYearly );
-            TCalTime startDate;
-            rrule.SetDtStart( newInstanceStartDate );
-            rrule.SetInterval( 1 ); // once a year
-            entry->SetRRuleL( rrule );
+			if( !( FeatureManager::FeatureSupported( KFeatureIdKorean ) 
+					&& entry->UserInt32L() != ESolar ) )
+				{
+				// Set yearly rule to Anniversary entry, to create Annaiversary instance yearly 
+				TCalRRule rrule( TCalRRule::EYearly );
+				TCalTime startDate;
+				rrule.SetDtStart( newInstanceStartDate );
+				rrule.SetInterval( 1 ); // once a year
+				entry->SetRRuleL( rrule );
+				}
             }
 		}
     

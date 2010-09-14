@@ -25,6 +25,7 @@
 
 #include <caltime.h>
 #include "calennotedatautil.h"
+#include "KoreanCalConv.h"
 #include <calentry.h>
 
 
@@ -147,6 +148,19 @@ public:
      * @return RArray<TCalTime> 
      */
     IMPORT_C const RArray<TCalTime> GetRdatesL();
+
+    /**
+     * Return Lunar Calendar Type
+     * 
+     * @return TLunarCalendarType
+     */
+    IMPORT_C TLunarCalendarType CalendarType() const;
+
+	/**
+	 * @brief set Lunar Calendar Type
+	 * @param TLunarCalendarType
+	 */
+    IMPORT_C void SetCalendarTypeL(TLunarCalendarType aCalendarType);
     
 private:
     CCalenEntryUtil( CCalEntry& aEntry );
@@ -256,6 +270,14 @@ private: // data
     CCalEntry& iEntry;
     
     TInt iAttachmentCount;
+
+    TLunarCalendarType iCalendarType;
+
+    /**
+    * True if FeatureManager is initialized.
+    */
+    TBool iFeatMgrInitialized;
+    
     };
 
 #endif // CALENEDITORDATA_H

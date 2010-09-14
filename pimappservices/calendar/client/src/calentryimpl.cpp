@@ -336,6 +336,17 @@ CCalUser* CCalEntryImpl::OrganizerL()
 	return iCalOrganizer;
 	}
 
+void CCalEntryImpl::ClearMRSpecificDataL()
+    {
+    LoadFullEntryL();
+    iFullEntry->ClearMRSpecificData();  // Clear Organizer and Phone Owner.
+    if( iCalOrganizer )
+        {
+        delete iCalOrganizer;
+        iCalOrganizer = NULL;
+        }
+    }
+
 CTzRules* CCalEntryImpl::GetTzRulesL()
 	{
 	CAgnRptDef* rptDef = SimpleEntry()->RptDef();
@@ -1666,6 +1677,15 @@ TUint32 CCalEntryImpl::UserIntL()
     return SimpleEntry()->UserInt();
     }
 
+void CCalEntryImpl::SetUserInt32L( TUint32 aUserInt )   
+    {       
+    iFullEntry->SetUserDataInt( aUserInt );      
+    }  
+
+TUint32 CCalEntryImpl::UserInt32L()       
+    {       
+    return iFullEntry->UserDataInt();   
+    }       
 
 //  CCalEntryIdImpl //
 

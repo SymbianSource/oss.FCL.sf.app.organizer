@@ -279,6 +279,13 @@ public:
      * @return ETrue if modified, EFalse otherwise.
      */
     TBool AllDayFieldEdited();
+    
+    /**
+     * @brief Returns if the `Lunar event' field is modified or not.
+     * 
+     * @return ETrue if modified, EFalse otherwise.
+     */
+    TBool LunarFieldEdited();
 
     /**
      * @brief To set default Alarm date time.
@@ -595,6 +602,13 @@ private: // data
     * @brief Holds the id of the instance which is being edited currently.
     */
     TCalenInstanceId iInstanceId;
+
+
+    /**
+    * True if FeatureManager is initialized.
+    */
+    TBool iFeatMgrInitialized;
+    
     };
 
 #endif // CALENEDITORDATAHANDLER_H

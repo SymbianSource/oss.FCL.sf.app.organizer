@@ -20,7 +20,7 @@
 //debug
 #include "calendarui_debug.h"
 
-#include "calenlocationui.h"
+#include <calenlocationui.h>
 #include "calencontroller.h"
 #include <calencommands.hrh>
 #include "calenlocationactiveselector.h"

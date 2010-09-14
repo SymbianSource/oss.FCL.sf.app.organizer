@@ -593,21 +593,31 @@ void CCalenCustomisationManager::LoadPluginsBasedOnVariantL()
         case ELangEnglish_Thailand:
             needsToBeRemoved.Append(KCalenChineseImplUid);
             needsToBeRemoved.Append(KCalenVietnameseImplUid);
+            needsToBeRemoved.Append(KCalenKoreanImplUid);
             break;
         case ELangTaiwanChinese:
         case ELangHongKongChinese:
         case ELangPrcChinese:
             needsToBeRemoved.Append(KCalenThaiImplUid);
             needsToBeRemoved.Append(KCalenVietnameseImplUid);
+            needsToBeRemoved.Append(KCalenKoreanImplUid);
             break;
         case ELangVietnamese:
             needsToBeRemoved.Append(KCalenThaiImplUid);
             needsToBeRemoved.Append(KCalenChineseImplUid);
+            needsToBeRemoved.Append(KCalenKoreanImplUid);
             break;
+        case ELangKorean:
+            needsToBeRemoved.Append(KCalenChineseImplUid);
+            needsToBeRemoved.Append(KCalenVietnameseImplUid);
+            needsToBeRemoved.Append(KCalenThaiImplUid);
+            break;
+            
         default:
             needsToBeRemoved.Append(KCalenThaiImplUid);
             needsToBeRemoved.Append(KCalenChineseImplUid);
             needsToBeRemoved.Append(KCalenVietnameseImplUid);
+            needsToBeRemoved.Append(KCalenKoreanImplUid);
             break;
         }
     

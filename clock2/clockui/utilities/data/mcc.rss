@@ -2142,12 +2142,6 @@ RESOURCE MCC_ARRAY r_array
 			tzid	= 2680;
 			mcc		= 202;
 			},
-		// Europe/Belfast                
-		MOBILE_COUNTRY_CODE
-			{
-			tzid	= 2744;
-			mcc		= 234;
-			},
 		// Europe/Belgrade
 		// Belgrade, Serbia and Montenegro
 		MOBILE_COUNTRY_CODE
@@ -3689,7 +3683,7 @@ RESOURCE MCC_ARRAY r_array
 		MOBILE_COUNTRY_CODE
 			{
 			tzid	= 2744;
-			mcc		= 235;
+			mcc		= 272;
 			},
 		// Europe/London
 		// UK

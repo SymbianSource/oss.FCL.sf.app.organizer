@@ -131,6 +131,21 @@ class MCalenContext
 		 */
         virtual TVwsViewId ViewId() const = 0;
         
+        /**
+         * Sets the start and end time of the instance that has to be created.
+         * @param aStartTime The start time of the instance that has to be created.
+         * @param aEndTime The end time of the instance that has to be created.
+         */
+        virtual void SetStartAndEndTimeForNewInstance( const TTime& aStartTime,
+                                            const TTime& aEndTime ) = 0;
+        
+        /**
+         * Gets the start and end time of the instance that has to be created.
+         * @param aStartTime The start time of the instance that has to be created.
+         * @param aEndTime The end time of the instance that has to be created.
+         */
+        virtual void GetStartAndEndTimeForNewInstance( TTime& aStartTime, TTime& aEndTime ) = 0;
+            
  
 	public:			// For Mutliple Context Support    
  

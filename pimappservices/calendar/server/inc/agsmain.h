@@ -117,6 +117,7 @@ public:
 #ifdef SYMBIAN_SYSTEM_STATE_MANAGEMENT
 	const CCAgnSystemStateObserver& SystemStateObserver() const;
 #endif
+	TBool BackupRestoreInProgress();
 protected:
 	CAgnServer(TInt aPriority);
 private:
@@ -133,6 +134,7 @@ private:
 #ifdef SYMBIAN_SYSTEM_STATE_MANAGEMENT
 	CCAgnSystemStateObserver* iSystemStateObserver;
 #endif
+    TBool iBackupRestoreInProgress;
 	};
 
 // inline functions

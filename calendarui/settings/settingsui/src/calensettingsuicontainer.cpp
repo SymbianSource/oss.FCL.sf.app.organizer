@@ -1003,19 +1003,11 @@ EXPORT_C void CCalenSettingsUiContainer::HandleListBoxSelectionL( TInt aCommand 
     if ( index >= 0 )   // index is -1 if there are no items in the list
         {
         CAknSettingItem* item;
-        TDay day = static_cast<TDay>( iWeekFormat );
+        //Listbox will return the visible index
+        //So get the actual item index from visible index to get the correct item
+        TInt itemIndex = iSettingItemArray->ItemIndexFromVisibleIndex(index);
+        item = iSettingItemArray->At( itemIndex );          
 
-        // If the starting day of a week is other than Monday, "Title of week view" setting item 
-        // is  not displayed. For the item below "Week Format", the index in iSettingItemArray
-        // is one more than CurrentItemIndex().
-        if( ( day != EMonday && index >= 4 ) )
-            {
-            item = iSettingItemArray->At( index + 1);
-            }
-        else
-            {
-            item = iSettingItemArray->At( index );          
-            }
          // Open edit dialog if EAknCmdOpen, invert the value otherwise
         aPageStatus = ETrue;
         iPageStatus = aPageStatus;

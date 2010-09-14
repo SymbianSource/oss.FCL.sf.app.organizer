@@ -59,6 +59,10 @@ PRJ_EXPORTS
 ../rom/CalenLunarVietnamese_Variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(CalenLunarVietnamese_Variant.iby)
 ../rom/CalenLunarChinese_Variant.iby CUSTOMER_APP_LAYER_IBY_EXPORT_PATH(CalenLunarChinese_Variant.iby)
 
+#ifdef FF_CALDAV_SUPPORT
+//caldav plugin
+../rom/caldav.iby 						CORE_APP_LAYER_IBY_EXPORT_PATH(caldav.iby)
+#endif //FF_CALDAV_SUPPORT
 
 //stubsis is added to provide IAD
 ../stubsis/calendar_stub.sis   										/epoc32/data/z/system/install/calendar_stub.sis
@@ -132,4 +136,10 @@ PRJ_MMPFILES
 // Calendar aiw provider.
 #include "../calenaiwprovider/group/bld.inf"
 
+#include "../regionalplugins/KoreanLunar/group/bld.inf"
+
+#ifdef FF_CALDAV_SUPPORT
+//caldav ecom plugin
+#include "../caldav/group/bld.inf"
+#endif //FF_CALDAV_SUPPORT
 //EOF

@@ -110,6 +110,13 @@ private:
      */
     MCalenServices* iServices;
     
+    /**
+    * True if FeatureManager is initialized.
+    */
+    TBool iFeatMgrInitialized;
+         
+
+    
     };
 
 #endif // __CALENDEFAULTEDITORS_H__

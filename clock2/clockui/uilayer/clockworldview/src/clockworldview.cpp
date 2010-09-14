@@ -1202,9 +1202,18 @@ void CClockWorldView::AddImageL()
 	
 	iGalleryOpen = EFalse;
 	
-	// Show the navigation pane.
-	appUi->MakeNavigationPaneVisible( ETrue, EClockAppWorldViewId );
-
+	TVwsViewId viewId;
+	AppUi()->GetActiveViewId( viewId );
+	if( viewId.iViewUid == KClockAppWorldViewId )
+	    {
+        // Show the navigation pane.
+        appUi->MakeNavigationPaneVisible( ETrue, EClockAppWorldViewId );
+	    }
+	else if(viewId.iViewUid == KClockAppMainViewId )
+	    {
+        //update the title text according to the active view
+        ClockApplicationUi()->SetTitlePaneTextL( R_CLOCK_TITLE_MAIN_VIEW );
+	    }
 	// If an image is selected by the user
 	if( result )
 	    {	

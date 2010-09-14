@@ -349,6 +349,11 @@ public: // New methods
     void AddDateFieldL( TInt aHeadingResource, const TTime& aDate );
 
     /**
+     * Add a date field to the form.
+     */
+    void AddDateFieldL( const TDesC& aDate );
+
+    /**
      * Add a "date - date" field to the form.
      */
     void AddDateDateFieldL( const TTime& aStartDate, const TTime& aEndDate );
@@ -582,6 +587,11 @@ private:
      CDocumentHandler*               iDocHandler; 
 	 RArray<TTextPos> iAttachmentPosInfoArray;	// Array of start and end positions of each attachment names on the viewer
 
+    /**
+    * True if FeatureManager is initialized.
+    */
+    TBool iFeatMgrInitialized;
+	     
 	};
 
 #endif // CALENEVENTCONTAINER_H

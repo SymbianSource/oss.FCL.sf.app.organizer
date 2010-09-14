@@ -185,7 +185,7 @@ public:  // New functions
      * 
      * @return ETrue if launched from alarm popup, EFalse otherwise
      */
-    TBool IsEventViewLaunchedFromAlarm();
+    TBool IsCalenLaunchedFromExtApp();
     
     /**
      * @brief Marks that a command is being processed currently

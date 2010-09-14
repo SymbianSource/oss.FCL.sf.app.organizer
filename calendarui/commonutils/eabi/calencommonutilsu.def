@@ -151,4 +151,14 @@ EXPORTS
 	_ZN21CCalenAttachmentModel14AttachmentOpenERi @ 150 NONAME
 	_ZN21CCalenAttachmentModel16IsAttachmentOpenEv @ 151 NONAME
 	_ZN21CCalenStatusPaneUtils13ShowNaviPaneLERK7TDesC164TRgb @ 152 NONAME
+	_ZN14CKoreanCalConv17DateTimeToKoreanLERK9TDateTimeR12TChineseDate @ 153 NONAME
+	_ZN14CKoreanCalConv17KoreanToDateTimeLER12TChineseDateR9TDateTime @ 154 NONAME
+	_ZN14CKoreanCalConv4NewLEv @ 155 NONAME
+	_ZN14CKoreanCalConv5NewLCEv @ 156 NONAME
+	_ZN14CKoreanCalConv9DateRangeER12TChineseDateS1_ @ 157 NONAME
+	_ZN14CKoreanCalConv9DateRangeER9TDateTimeS1_ @ 158 NONAME
+	_ZN15CCalenEntryUtil16SetCalendarTypeLE18TLunarCalendarType @ 159 NONAME
+	_ZNK15CCalenEntryUtil12CalendarTypeEv @ 160 NONAME
+	_ZTI14CKoreanCalConv @ 161 NONAME
+	_ZTV14CKoreanCalConv @ 162 NONAME
 

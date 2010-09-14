@@ -2197,7 +2197,7 @@ void CCalenWeekContainer::HandlePointerEventL(const TPointerEvent& aPointerEvent
 
     if(AknLayoutUtils::PenEnabled())
         {
-        if(iView->IsEventViewLaunchedFromAlarm())
+        if(iView->IsCalenLaunchedFromExtApp())
             {
             return;
             }

@@ -708,7 +708,8 @@ void CCalenNativeView::CommonConstructL( TInt aViewResource )
 	notificationArray.Append(ECalenNotifyDeleteFailed);
 	notificationArray.Append(ECalenNotifyEntryDeleted);
 	notificationArray.Append(ECalenNotifyResourceChanged);
-	notificationArray.Append(ECalenNotifyEventViewLaunchedFromAlarm);
+	notificationArray.Append(ECalenNotifyCalenLaunchedFromExtApp);
+	
 	
     iServices.RegisterForNotificationsL( this,notificationArray);
     
@@ -1079,7 +1080,7 @@ void CCalenNativeView::HandleNotification(const TCalenNotification aNotification
             PIM_TRAPD_HANDLE( OnLocaleChangedL( EChangesSystemTime ) );
             }
             break;
-        case ECalenNotifyEventViewLaunchedFromAlarm:
+        case ECalenNotifyCalenLaunchedFromExtApp:
             {
             SetTapIgnore(ETrue);
             }
@@ -1361,11 +1362,11 @@ TBool CCalenNativeView::IsCommandHandlingInProgress()
     }
 
 // ----------------------------------------------------------------------------
-// CCalenNativeView::IsEventViewLaunchedFromAlarm
+// CCalenNativeView::IsCalenLaunchedFromExtApp
 // other details are commented in the header
 // ----------------------------------------------------------------------------
 // 
-TBool CCalenNativeView::IsEventViewLaunchedFromAlarm()
+TBool CCalenNativeView::IsCalenLaunchedFromExtApp()
     {
     TRACE_ENTRY_POINT;
     return iIgnoreTap;

@@ -1,0 +1,57 @@
+/*
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+#include <CalenRegionalPluginUids.h>
+#include "CalenLunarPluginUids.hrh"
+
+#include <ecom/registryinfo.rh>
+#include <calenkoreanlunar.loc>
+
+RESOURCE REGISTRY_INFO registry_info
+    {
+    dll_uid = CALENKOREANLUNARPLUGIN_DLL_UID;
+    interfaces =
+        {
+        INTERFACE_INFO
+            {
+            interface_uid = CALENUIPLUGININTERFACE_ECOM_INTERFACE_UID;
+            implementations =
+                {
+                IMPLEMENTATION_INFO
+                    {
+                    implementation_uid = CALENKOREANLUNARPLUGIN_IMPLEMENTATION_UID;
+                    version_no = 1;
+                    display_name = qtn_kor_cale_lunar_calendar;
+                    // Supported languages can be inserted as follows:
+                    // "language(1)||language(14)||language(151)
+                    // Numbers can be Symbian language codes (TLanguage)
+                    // or S60 extensions (151,161...) to them
+                    //
+                    // Plugin is loaded only when current phone language
+                    // is one of the listed languages.
+                    //
+                    // If plugin should be loaded for all languages, then
+                    // language(*) can be defined,
+                    // 65 Korean
+                    // 1 English
+                    default_data = "language(65)||language(1)";
+                    opaque_data  = "";
+                    }
+                };
+            }
+        };
+    }
+// End of file

@@ -30,6 +30,8 @@
 #include <calentry.h>
 #include <calrrule.h>
 #include <calattachment.h>
+#include <bldvariant.hrh> // for feature definitions
+#include <featmgr.h>
 
 
 // Utility functions 
@@ -139,6 +141,15 @@ CCalenEntryUtil::~CCalenEntryUtil()
     delete iSummary;
     delete iLocation;
     delete iDescription;
+    
+    // Do not call UnInitializeLib() if InitalizeLib() leaves.
+    if ( iFeatMgrInitialized )
+        {
+        // Frees the TLS. Must be done after FeatureManager is used.
+        FeatureManager::UnInitializeLib();  
+        }  
+    
+
 
     TRACE_EXIT_POINT;
     }
@@ -692,6 +703,12 @@ void CCalenEntryUtil::ConstructL( CCalEntry& aEntry,
                                    const TCalTime& aInstanceDateTime )
     {
     TRACE_ENTRY_POINT;
+    // Sets up TLS, must be done before FeatureManager is used.
+    FeatureManager::InitializeLibL();
+    // Used in destructor. 
+    iFeatMgrInitialized = ETrue;
+     
+
     iEntryType = aEntry.EntryTypeL();
     iEntryStatus = aEntry.StatusL();
     CopyDataFromEntryL( aEntry, aInstanceDateTime );
@@ -752,6 +769,10 @@ void CCalenEntryUtil::CopyDataFromEntryL( CCalEntry& aEntry, const TCalTime& aIn
             {
             TTime event = aInstanceDateTime.TimeLocalL();
             SetEventDateL( event );
+            if ( FeatureManager::FeatureSupported( KFeatureIdKorean ) )
+                {
+				SetCalendarTypeL( ( TLunarCalendarType )aEntry.UserInt32L() );
+                }
             }
             break;
 
@@ -916,13 +937,25 @@ void CCalenEntryUtil::CopyDataFromEntryL( CCalEntry& aEntry, const TCalTime& aIn
         		{
         		// If the instance matches one of the RDates
         		if( (aInstanceDateTime.TimeLocalL()) == (rdates[ index ].TimeLocalL()) )
-        			{
-        			// instanceAlarmDay = actualAlarmDay + (alarmOffsetStart - alarmOffsetInstance)
-        			deltaDays =  alarmDateTime.DaysFrom( aEntry.StartTimeL().TimeLocalL() ).Int()
-								- alarmDateTime.DaysFrom( aInstanceDateTime.TimeLocalL() ).Int();
-        			alarmDateTime += deltaDays;
-        			break;
-        			}
+                    {
+                    // instanceAlarmDay = actualAlarmDay + (alarmOffsetStart - alarmOffsetInstance)
+                    deltaDays =  alarmDateTime.DaysFrom( aEntry.StartTimeL().TimeLocalL() ).Int()
+                    - alarmDateTime.DaysFrom( aInstanceDateTime.TimeLocalL() ).Int();
+                    alarmDateTime += deltaDays;
+                    if ( FeatureManager::FeatureSupported( KFeatureIdKorean ) )
+                        {
+                        if ( aEntry.EntryTypeL() == CCalEntry::EAnniv && CalendarType() != ESolar )
+                            {
+                            alarmDateTime = aEntry.StartTimeL().TimeLocalL(); 
+                            CCalAlarm* alarm = aEntry.AlarmL();
+                            if(alarm)
+                                {
+                                alarmDateTime = aInstanceDateTime.TimeLocalL() - alarm->TimeOffset();
+                                }
+                            }
+                        }
+                    break;
+                    }
         		}
         	}        	
         SetAlarmOnL( alarmDateTime );
@@ -1038,6 +1071,33 @@ EXPORT_C const RArray<TCalTime> CCalenEntryUtil::GetRdatesL()
     return rDateList;
     
     TRACE_EXIT_POINT;
+    }
+
+// ---------------------------------------------------------------------------
+// CalenViewUtils::CalendarType
+// (other items were commented in a header)
+// ---------------------------------------------------------------------------
+//
+EXPORT_C TLunarCalendarType CCalenEntryUtil::CalendarType() const
+    { 
+	TRACE_ENTRY_POINT;
+	TRACE_EXIT_POINT;
+
+    return iCalendarType;
+    }
+
+// ---------------------------------------------------------------------------
+// CalenViewUtils::SetCalendarTypeL
+// (other items were commented in a header)
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CCalenEntryUtil::SetCalendarTypeL(TLunarCalendarType aCalendarType)
+    {
+	TRACE_ENTRY_POINT;
+
+    iCalendarType = aCalendarType;
+	TRACE_EXIT_POINT;
+
     }
 
 // End of file

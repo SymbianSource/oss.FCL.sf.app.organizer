@@ -264,8 +264,13 @@ void CCalenDbField::HandleControlStateChangeL( TInt aControlId )
             iUnifiedEditor.EditorDataHandler().SetCalendarFieldEditedL(IsCalendarEdited()
                                                             ,iPreviousColId,iCurrentColId);
             
+            
+            if(!iAsyncDBquery)
+                {
             TCallBack callback(DoAsyncShowChangeDBQueryL,this);
             iAsyncDBquery = new(ELeave) CAsyncCallBack(callback,CActive::EPriorityStandard);
+                }
+            
             iAsyncDBquery->CallBack();
             break;
             }

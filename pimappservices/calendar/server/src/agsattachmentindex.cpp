@@ -281,8 +281,7 @@ void CAgnAttachmentIndex::AddEntryL(CAgnEntry& aEntry)
 		{
 		// check every attachment
 		const CAgnAttachmentIndexItem* KAttachmentItem = iIndex[i];
-		const TInt entryCount = KAttachmentItem->Entries().Count();
-		for (TInt j = 0; j < entryCount; ++j)
+		for (TInt j = 0; j < KAttachmentItem->Entries().Count(); ++j)
 			{
 			// check every entry associated with each attachment
 			if (KEntryLocalUid == (KAttachmentItem->Entries())[j])

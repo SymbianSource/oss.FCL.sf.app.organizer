@@ -33,5 +33,6 @@ PRJ_EXPORTS
 ../inc/calenviewutils.h				APP_LAYER_PLATFORM_EXPORT_PATH( calenviewutils.h )
 ../inc/calenmulticalutil.h				APP_LAYER_PLATFORM_EXPORT_PATH( calenmulticalutil.h )
 ../inc/calenmulticaluids.hrh				APP_LAYER_PLATFORM_EXPORT_PATH( calenmulticaluids.hrh ) 
+../inc/calenlocationutil.h				APP_LAYER_PLATFORM_EXPORT_PATH( calenlocationutil.h )
 
 // End of file

@@ -1228,7 +1228,7 @@ TBool CCalenMonthContainer::UseWeeksL() const
  
         CleanupReleasePushL( *setting ) ;
 
-        if( setting->WeekFormat() == EMonday && setting->WeekNumberEnable() )
+        if( setting->WeekFormat() == EMonday && setting->WeekNumberEnable() == EWeekNumberOn )
             {
             useWeeks = ETrue;
             }
@@ -1666,7 +1666,7 @@ void CCalenMonthContainer::HandlePointerEventL(const TPointerEvent& aPointerEven
 
     if(AknLayoutUtils::PenEnabled())
         {
-        if(iView->IsEventViewLaunchedFromAlarm())
+        if(iView->IsCalenLaunchedFromExtApp())
             {
             return;
             }

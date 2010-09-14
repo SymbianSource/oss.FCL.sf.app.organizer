@@ -70,6 +70,8 @@
 #include <calcalendarinfo.h>
 #include <DocumentHandler.h>
 
+#include <bldvariant.hrh> // for feature definitions
+
 // user includes
 #include "caleneventviewcontainer.h"
 #include "caleneventview.h"
@@ -160,6 +162,13 @@ CCalenEventViewContainer::~CCalenEventViewContainer()
     //Reset the attachment posiitons array
     iAttachmentPosInfoArray.Reset();
     
+    // Do not call UnInitializeLib() if InitalizeLib() leaves.
+    if ( iFeatMgrInitialized )
+        {
+        // Frees the TLS. Must be done after FeatureManager is used.
+        FeatureManager::UnInitializeLib();  
+        }  
+    
 	TRACE_EXIT_POINT;
 	}
 
@@ -199,6 +208,12 @@ void CCalenEventViewContainer::ConstructImplL()
         
     iDocHandler->SetExitObserver( this );
     iTextEditor->EnableKineticScrollingL(ETrue);
+
+    // Sets up TLS, must be done before FeatureManager is used.
+    FeatureManager::InitializeLibL();
+    // Used in destructor. 
+    iFeatMgrInitialized = ETrue;
+     
 	TRACE_EXIT_POINT;
 	}
 
@@ -812,7 +827,14 @@ void CCalenEventViewContainer::AddFieldsL()
         case CCalEntry::EAnniv:
             {
             // date field
-            AddDateFieldL(iEventViewData->StartDateTime());
+            if ( FeatureManager::FeatureSupported( KFeatureIdKorean ) )
+                {
+                AddDateFieldL( iServices.Infobar() );
+                }
+            else
+                {
+                AddDateFieldL( iEventViewData->StartDateTime() );
+                }
             
             // against the location field in the viewer
             iTimeFieldLines = 1;
@@ -1532,6 +1554,29 @@ void CCalenEventViewContainer::AddDateFieldL(TInt aHeadingResource, const TTime&
 
     TRACE_EXIT_POINT;
     }
+
+// -----------------------------------------------------------------------------
+// CCalenEventViewContainer::AddDateFieldL
+// Add a date field to the form.
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+void CCalenEventViewContainer::AddDateFieldL( const TDesC& aDate )
+    {
+    TRACE_ENTRY_POINT;
+	if (FeatureManager::FeatureSupported( KFeatureIdKorean )) 
+		{
+		TBuf<KMaxDateLength> formattedDate;
+    	if ( aDate.Length() < KMaxDateLength && aDate.Length() > 0 )
+    		{
+    		formattedDate.Copy( aDate );
+    		}
+    	AknTextUtils::DisplayTextLanguageSpecificNumberConversion( formattedDate );
+    	SetFormatAndAddBodyL( formattedDate );
+		}
+    TRACE_EXIT_POINT;
+    }
+
 // -----------------------------------------------------------------------------
 // CCalenEventViewContainer::AddDateFieldL
 // Add a field to the form in the format "DATE - DATE".

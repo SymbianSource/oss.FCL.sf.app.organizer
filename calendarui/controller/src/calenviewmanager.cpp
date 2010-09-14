@@ -915,7 +915,7 @@ void CCalenViewManager::RequestActivationL( const TUid& aViewUid,
 		}
 	
 	// set the previous view id
-	if(cachePreviousViewId != KUidCalenEventView) 
+	if(cachePreviousViewId != KUidCalenEventView || cachePreviousViewId != iCurrentViewId.iViewUid) 
 	    {
         iPreviousViewId.iViewUid = cachePreviousViewId; 
 	    }	
@@ -1058,6 +1058,7 @@ void CCalenViewManager::HandleNotificationL( TCalenNotification aNotification )
         case ECalenNotifyEntryDeleted:
         case ECalenNotifyInstanceDeleted:    
 			{
+			iAvoidRepopulation = EFalse;
 			HandleEntryDeleteNotificationL();
 			}
 			break;

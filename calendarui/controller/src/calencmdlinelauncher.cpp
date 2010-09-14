@@ -261,6 +261,10 @@ TBool CCalenCmdLineLauncher::ProcessCommandParametersL(
           	
             if( iController.ViewManager().ViewsActivated() )
                 {
+                if(command == ECalenDayView)
+                    {
+                    iController.BroadcastNotification(ECalenNotifyCalenLaunchedFromExtApp);
+                    }
                 iController.IssueCommandL( command );
                 iController.SetLaunchFromExternalApp( ETrue );
                 }
@@ -294,7 +298,7 @@ TBool CCalenCmdLineLauncher::ProcessCommandParametersL(
 		        if( iCmdParameters.iCommandType == CCalenCmdLineParser::EStartTypeUidAlarmViewer )
               		{
                     //When event viewer launched from alarm only we need to ignore tap. (ETrue)     
-		            iController.BroadcastNotification(ECalenNotifyEventViewLaunchedFromAlarm);
+		            iController.BroadcastNotification(ECalenNotifyCalenLaunchedFromExtApp);
               		if(! iController.ViewManager().ViewsActivated() )                    
                         {
                         iController.ViewManager().ActivateDefaultViewL( KUidCalenEventView); 
@@ -305,7 +309,7 @@ TBool CCalenCmdLineLauncher::ProcessCommandParametersL(
                 else if( iCmdParameters.iCommandType == CCalenCmdLineParser::EStartTypeUidAlarmViewerNoSnooze )
                     {
                     //When event viewer launched from alarm only we need to ignore tap. (ETrue)     
-                    iController.BroadcastNotification(ECalenNotifyEventViewLaunchedFromAlarm);
+                    iController.BroadcastNotification(ECalenNotifyCalenLaunchedFromExtApp);
                     if(! iController.ViewManager().ViewsActivated() )                    
                         {
                         iController.ViewManager().ActivateDefaultViewL( KUidCalenEventView);   

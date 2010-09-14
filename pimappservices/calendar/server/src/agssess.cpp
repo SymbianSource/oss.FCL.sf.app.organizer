@@ -281,7 +281,7 @@ CAgnServerSession::~CAgnServerSession()
 */
 TBool CAgnServerSession::CheckBackupRestore()
     {
-    if(iBackupRestoreLock  
+    if((iBackupRestoreLock || iAgnServer.BackupRestoreInProgress()) 
     //All opeerations apart from the following ones are not allowed when Backup\Restore is in progress. 
     && iMessage.Function() != ECloseAgenda
     && iMessage.Function() != ECancelChangeNotification

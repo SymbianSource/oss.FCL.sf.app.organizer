@@ -655,7 +655,7 @@ void CCalenServer::CalendarInfoChangeNotificationL(
                     TPckgC<TBool> pkgMarkAsDelete(markAsdelete);
                     TRAPD(err,pkgMarkAsDelete.Set(calendarInfo->PropertyValueL(keyBuff)));
                     markAsdelete = pkgMarkAsDelete();
-                    if( markAsdelete )
+                    if( markAsdelete && (err == KErrNone))
                         {
                         // Mark the CalFile as visible.
                         calendarInfo->SetEnabled( ETrue );

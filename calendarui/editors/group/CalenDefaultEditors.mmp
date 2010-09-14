@@ -79,6 +79,9 @@ SOURCE 	    	calendbfield.cpp
 SOURCE      	calenalldayfield.cpp 
 SOURCE          calenpriorityfield.cpp
 SOURCE			calenunifiededitorcontrol.cpp
+SOURCE          KoreanLunarDateEditor.cpp
+SOURCE          KoreanLunarDateUtil.cpp
+SOURCE          KoreanLunarTypeField.cpp
 
 
 LIBRARY         caleninterimutils2.lib
@@ -117,6 +120,7 @@ LIBRARY         cdlengine.lib
 LIBRARY         aknlayout2scalable.lib
 LIBRARY         centralrepository.lib   // Central Repository
 LIBRARY			apmime.lib
+LIBRARY         ccon.lib
 
 // File logging
 LIBRARY flogger.lib

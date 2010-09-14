@@ -338,4 +338,7 @@ EXPORTS
 	?PropertyKeysL@CCalCalendarInfo@@QBEPAVCDesC8Array@@XZ @ 337 NONAME ; class CDesC8Array * CCalCalendarInfo::PropertyKeysL(void) const
 	?RemovePropertyL@CCalCalendarInfo@@QAEXABVTDesC8@@@Z @ 338 NONAME ; void CCalCalendarInfo::RemovePropertyL(class TDesC8 const &)
 	?PropertyValueL@CCalCalendarInfo@@QBEABVTDesC8@@ABV2@@Z @ 339 NONAME ; class TDesC8 const & CCalCalendarInfo::PropertyValueL(class TDesC8 const &) const
+	?SetUserInt32L@CCalEntry@@QAEXK@Z @ 340 NONAME ; void CCalEntry::SetUserInt32L(unsigned long)
+	?UserInt32L@CCalEntry@@QAEKXZ @ 341 NONAME ; unsigned long CCalEntry::UserInt32L(void)
+	?ClearMRSpecificDataL@CCalEntry@@QAEXXZ @ 342 NONAME ; void CCalEntry::ClearMRSpecificDataL(void)
 

@@ -24,6 +24,7 @@
 
 // user includes
 #include "CalenEditorDataHandler.h"
+#include "CalenEntryUtil.h"
 
 // forward declaration
 class CCalenUnifiedEditor;
@@ -35,6 +36,8 @@ class CCalenPriorityField;
 class CCalenDbField;
 class CCalenDescription;
 class MCalenServices;
+class CKoreanLunarDateEditor;
+class CKoreanLunarTypeField;
 
 /**
  * CCalenUnifiedEditorControl class declaration
@@ -169,6 +172,12 @@ NONSHARABLE_CLASS( CCalenUnifiedEditorControl ) : public CBase
          * @param aNewEventType Holds the new event type selected in editor
          */
         void OnEventTypeChangedL( CCalEntry::TType aNewEventType );
+
+        /**
+         * @brief Handles lunar event type changed 
+         * @param aNewEventType Holds the new event type selected in editor
+         */
+        void OnLunarTypeChangedL( TLunarCalendarType aNewEventType );
     
         /**
          * @brief Reads editor data mainly for collapsed editor
@@ -338,7 +347,17 @@ NONSHARABLE_CLASS( CCalenUnifiedEditorControl ) : public CBase
          *        in updating the EndTime of editor on StartTime change.
          */
         void UpdateMeetingDurationL();
-        
+
+        /**
+         * @brief Setups Lunar Fields
+         */
+        void SetupLunarFields();
+
+        /**
+         * @brief Updates Lunar Date Fields
+         */
+        void UpdateLunarDateFields();
+
     private:
  
         /**
@@ -394,6 +413,29 @@ NONSHARABLE_CLASS( CCalenUnifiedEditorControl ) : public CBase
          * @brief To update end time as per Start time change
          */
         TTimeIntervalMinutes  iMeetingInterval;
+        
+        /**
+         * @var iKoreanLunarDateEditor
+         * @brief Korean lunar data editor
+         */
+        CKoreanLunarDateEditor* iKoreanLunarDateEditor;
+        
+        /**
+         * @var iKoreanLunarTypeField
+         * @brief Korean lunar type field
+         */
+        CKoreanLunarTypeField* iKoreanLunarTypeField;
+        
+        /**
+         * @var iPrevLunarType
+         * @brief previous lunar type
+         */
+        TLunarCalendarType iPrevLunarType;
+        
+        /**
+    	* True if FeatureManager is initialized.
+    	*/
+    	TBool iFeatMgrInitialized;
         
     };
 

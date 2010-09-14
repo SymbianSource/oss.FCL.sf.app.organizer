@@ -105,6 +105,8 @@ TBool CCalenBackgroundState::HandleCommandL( const TCalenCommand& aCommand,
         case ECalenTodoView:
         case ECalenMonthView:
         case ECalenWeekView:
+        case ECalenMissedAlarmsViewFromIdle:
+        case ECalenMissedEventViewFromIdle:
             SetCurrentState(aStateMachine,CCalenStateMachine::ECalenIdleState);
             cmdUsed = ETrue;
             break;
