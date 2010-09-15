@@ -731,6 +731,31 @@ TKeyResponse CCalenUnifiedEditor::OfferKeyEventL( const TKeyEvent& aKeyEvent,
                         iServices->IssueCommandL( ECalenAddAttachment );
                         }
                     }
+                else if ( ctrlid == ECalenEditorAllDayItem )
+                    {
+                    // Tap on AllDay field, Switch the status of AllDay field  
+                    iUnifiedEditorControl->SetAllDayEventL(
+                            !( iUnifiedEditorControl->IsAllDayEvent() ) );
+                    }
+                else if ( ctrlid == ECalenEditorReminder )
+                    {
+                    TBool active;
+                    if( iUnifiedEditorControl->IsAlarmActiveInForm() )
+                        { 
+                        SetAlarmFieldOnOffL( EFalse );           
+                        active = EFalse;
+                        } 
+                    else
+                        {
+                        SetAlarmFieldOnOffL( ETrue );                
+                        active = ETrue;
+                        }
+                    iUnifiedEditorControl->CheckAlarmActive( active );
+                    }
+                else
+                    {
+                        keyResponse = CAknForm::OfferKeyEventL( aKeyEvent, aType );    
+                    }
                 break;
             case EKeyEscape:
                 // Calendar relaunched from cmd line - close viewer

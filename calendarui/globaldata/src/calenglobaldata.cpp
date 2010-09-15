@@ -1657,7 +1657,7 @@ void CCalenGlobalData::ConstructCalendarsListL()
             softDelete = pkgSoftDelete();
             }
         if( softDelete && 
-                calendarInfo->FileNameL().CompareF(CalSessionL().DefaultFileNameL()) )
+                calendarInfo->FileNameL().CompareF(KCalendarDatabaseFilePath) )
             {
             // delete caleninfo except for default calendar.
             delete calendarInfo;

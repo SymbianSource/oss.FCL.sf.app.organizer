@@ -156,9 +156,8 @@ void CCustomNaviControl::Draw(const TRect& /*aRect*/) const
     // Set the text colour we found.
     charFormat.iFontPresentation.iTextColor = TLogicalRgb(textColourFromSkin);
     charFormatMask.SetAttrib(EAttColor);
-    gc.SetPenColor(charFormat.iFontPresentation.iTextColor);
-    gc.DrawText(*(iCalendarName),TPoint(headingTextLayout.TextRect().iTl.iX, 
-                                              headingTextLayout.TextRect().iBr.iY));
+
+	headingTextLayout.DrawText( gc, *iCalendarName, ETrue, charFormat.iFontPresentation.iTextColor );
     gc.DiscardFont();
     TRACE_EXIT_POINT;
     }

@@ -1060,7 +1060,7 @@ void CCalenAlarmManager::HandleSystemTimeChangedL()
     TRACE_ENTRY_POINT;
 
     TTime currentTime = CalenDateUtils::Now();
-    TTime entryAlarmTime; 
+    TTime entryAlarmTime(Time::NullTTime()); 
     RArray<TCalLocalUid> foundlocalUids;
     RArray<TCalCollectionId> foundColIds;
     TCalLocalUid entryLocalUid;
@@ -1123,25 +1123,29 @@ void CCalenAlarmManager::GetAlarmDateTimeL( const CCalEntry& aEntry,
     
     // FIXME: leaving!
     CCalAlarm* alarm = aEntry.AlarmL();
-    CleanupStack::PushL( alarm );
-
-    switch( aEntry.EntryTypeL() )
-        {
-        case CCalEntry::ETodo:
-            aAlarmDateTime = aEntry.EndTimeL().TimeLocalL();
-            break;
-
-        case CCalEntry::EAppt:
-        case CCalEntry::EEvent:
-        case CCalEntry::EAnniv:
-        default:
-            aAlarmDateTime = aEntry.StartTimeL().TimeLocalL();
-            break;
-        }
-    aAlarmDateTime -= alarm->TimeOffset();
     
-    CleanupStack::PopAndDestroy( alarm );
+    if(alarm)
+        {
+        CleanupStack::PushL( alarm );
 
+        switch( aEntry.EntryTypeL() )
+            {
+            case CCalEntry::ETodo:
+                aAlarmDateTime = aEntry.EndTimeL().TimeLocalL();
+                break;
+
+            case CCalEntry::EAppt:
+            case CCalEntry::EEvent:
+            case CCalEntry::EAnniv:
+            default:
+                aAlarmDateTime = aEntry.StartTimeL().TimeLocalL();
+                break;
+            }
+        aAlarmDateTime -= alarm->TimeOffset();
+
+        CleanupStack::PopAndDestroy( alarm );
+        }
+   
     TRACE_EXIT_POINT;
     }
 

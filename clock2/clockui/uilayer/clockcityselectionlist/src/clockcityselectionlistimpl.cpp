@@ -344,7 +344,7 @@ TBool CClockCitySelectionListImpl::OkToExitL( TInt aButtonId )
         
         __PRINTS( "CClockCitySelectionListImpl::OkToExitL - Exit" );
         
-        return EFalse;
+        return ETrue;
         }
     
     __PRINTS( "CClockCitySelectionListImpl::OkToExitL - Exit" );
@@ -523,11 +523,7 @@ void CClockCitySelectionListImpl::DoSelectCityL( TBool aTryExit )
             // Cleanup.
             CleanupStack::PopAndDestroy( cityArray );
 
-            if( aTryExit )
-                {
-                // City is selected. We can exit the dialog now.
-                this->TryExitL( NULL );
-                }
+
             }
         // Cleanup.
         CleanupStack::PopAndDestroy( localizedCityArray );

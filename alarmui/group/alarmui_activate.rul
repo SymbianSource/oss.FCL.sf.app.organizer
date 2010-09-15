@@ -22,12 +22,20 @@
     
     <!-- Enable sensor services -->
     <elseIf>
-		<!-- Alarm is active -->
-		<not>
+		 <!-- Alarm is active -->
+        <or>
             <contextUpdated>
-                <contextRef source='AlarmUI' type='State' value='Inactive'/>
+                <contextRef source='AlarmUI' type='State' value='Clock'/>
             </contextUpdated>
-		</not>
+            <contextUpdated>
+                <contextRef source='AlarmUI' type='State' value='Calendar'/>
+            </contextUpdated>
+            <contextUpdated>
+                <contextRef source='AlarmUI' type='State' value='Unknown'/>
+            </contextUpdated>
+        
+        </or>
+
 	    <actions>
 	            <!-- Activate orientation channel (0x01) from sensor source (0x10282DF0) -->
 	            <sourceCommand uid='0x10282DF0'>

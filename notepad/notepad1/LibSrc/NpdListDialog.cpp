@@ -107,6 +107,11 @@ EXPORT_C CNotepadListDialog* CNotepadListDialog::NewL(
 //
 EXPORT_C CNotepadListDialog::~CNotepadListDialog()
     {
+    if ( iServiceHandler )
+        {
+        delete iServiceHandler;
+        iServiceHandler = NULL;
+        }
     delete iIdle;
     delete iProgressDialog; // *1*
     delete iEditorDialog;
@@ -119,12 +124,6 @@ EXPORT_C CNotepadListDialog::~CNotepadListDialog()
     iSavedSelectedKeys.Close();
     iSavedKeysAboveCurrent.Close();
     delete iEnvironmentChangeNotifier;
-    if ( iServiceHandler )
-    	{
-    	    	
-		delete iServiceHandler;
-		iServiceHandler = NULL;
-    	}
     }
 
 // -----------------------------------------------------------------------------

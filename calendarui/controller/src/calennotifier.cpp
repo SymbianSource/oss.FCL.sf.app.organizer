@@ -48,6 +48,7 @@
 const TInt KHashLength = 64;
 const TInt KBuffLength = 24;
 
+_LIT( KCalendarDatabaseFilePath, "c:calendar" );
 // ----------------------------------------------------------------------------
 // CCalenNotifier::CCalenNotifier
 // C++ default constructor.
@@ -803,9 +804,8 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
                 CleanupStack::PopAndDestroy(calendarInfo);
 
                 //remove calendar except default calendar
-                if (err == KErrNone && markAsdelete
-                        && aCalendarInfoChangeEntries[index]->FileNameL().CompareF(
-                                iGlobalData->CalSessionL().DefaultFileNameL()))
+                if (err == KErrNone && markAsdelete && aCalendarInfoChangeEntries[index]->FileNameL().CompareF(
+                               KCalendarDatabaseFilePath))
                     {
                     iFilnameDeleted = aCalendarInfoChangeEntries[index]->FileNameL().AllocL();
                     BroadcastNotification(ECalenNotifyDeleteInstanceView);

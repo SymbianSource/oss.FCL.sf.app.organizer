@@ -440,6 +440,12 @@ class CAdtUpdaterContainer : public CCoeControl, public MStartupUIPhaseObserver
 		TBool										iIsRTCInvalidAndHiddenReset;  
 		
 		CPsKeyObserver* iPSObserver;
+		/**
+		 * @var iNitzTimerActive
+		 * @brief ETrue if the 90sec KTimeout timer is started for Nitz, EFalse if 5 sec KCDTQueryTimer timer is started.
+		 */
+		TBool iNitzTimerActive;
+		
 	};	
 
 #endif 		// __ADTUPDATER_CONTAINER_H__

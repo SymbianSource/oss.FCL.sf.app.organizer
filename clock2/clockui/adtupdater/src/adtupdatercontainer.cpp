@@ -59,7 +59,8 @@ const TInt KZero( 0 );
 const TInt KFirstBootDone( 1 );
 const TInt KTimeFormatLength( 16 );				 // "20070000:090000."
 const TInt KMaxMobileCountryCode( 4 );
-
+const TInt KCDTQueryTimer( 2000000 );           // 2 seconds
+const TInt KAppBackgroundInterval( 2000000 );   // 2 seconds
 
 // Literals
 _LIT( KOneSpace, " " );
@@ -173,7 +174,11 @@ void CAdtUpdaterContainer::ConstructL( const TRect& aRect )
     
 	iIsRTCInvalidAndHiddenReset = EFalse;
 	
-    ActivateL();
+	iPeriodic = CPeriodic::NewL( EPriorityAbsoluteHigh );
+	
+	iNitzTimerActive = EFalse;
+	
+	ActivateL();
   
     __PRINTS( "CAdtUpdaterContainer::ConstructL - Exit" );
     }     
@@ -324,11 +329,11 @@ void CAdtUpdaterContainer::InformAboutNwUpdateL()
 		iListener = CAdtUpdaterListener::NewL( this );
 		iListener->WaitForNitzInfoL();
 		
-		// A 40 seconds call back timer.
+		// A 90 seconds call back timer.
 		TCallBack timerCallBack( CallBackL, this );
-		iPeriodic = CPeriodic::NewL( EPriorityAbsoluteHigh );
-		// Start the timer	
+		// Start the Nitz timer.
 		iPeriodic->Start( KTimeout, KInterval, timerCallBack );
+		iNitzTimerActive =ETrue;
 		}
 	else if( IsFirstBoot()&& PredictiveTimeEnabled())
 		{		
@@ -367,36 +372,54 @@ TInt CAdtUpdaterContainer::CallBackL( TAny* aPtr )
 	__PRINTS( "CAdtUpdaterContainer::CallBackL - Entry" );
 	
 	CAdtUpdaterContainer* selfObject = static_cast< CAdtUpdaterContainer* >( aPtr );
-	CAdtUpdaterListener* listenerObject = selfObject->Listener();
 	
-	// Callback after 40 seconds. If control reaches here, it means Nitz packet has
-	// not yet arrived and we can continue with normal bootup sequence.
-	
-	// Buf before we do that, we can do a final check with the server, just to ensure
-	// there weren't any missed notifications.
-	TBool dataAvailable = listenerObject->ConfirmDataAvailabilityL();
-	
-	if( dataAvailable )
+	if(selfObject->iNitzTimerActive)
 	    {
-	    __PRINTS( "NITZ info is available" );
-	    
-	    // Update the status to EDataAvailable
-	    selfObject->iDataAvailability = EDataAvailable;
-	    
-	    // We have data from server.
-	    listenerObject->NitzInfoAvailableL();
-	    }
-	else
+        CAdtUpdaterListener* listenerObject = selfObject->Listener();
+        
+        // Callback after 90 seconds. If control reaches here, it means Nitz packet has
+        // not yet arrived and we can continue with normal bootup sequence.
+        
+        // Buf before we do that, we can do a final check with the server, just to ensure
+        // there weren't any missed notifications.
+        TBool dataAvailable = listenerObject->ConfirmDataAvailabilityL();
+        
+        if( dataAvailable )
+            {
+            __PRINTS( "NITZ info is available" );
+            
+            // Update the status to EDataAvailable
+            selfObject->iDataAvailability = EDataAvailable;
+            
+            // We have data from server.
+            listenerObject->NitzInfoAvailableL();
+            }
+        else
+            {
+            __PRINTS( "NITZ info unavailable" );
+            
+            // Update the status to EDataNotAvailable
+            selfObject->iDataAvailability = EDataNotAvailable;
+            
+            // We don't have any data for sure.
+            selfObject->NitzInfoNotAvailableL();
+            }
+        }
+	else//CDT Query timer is active. 
 	    {
-	    __PRINTS( "NITZ info unavailable" );
-	    
-	    // Update the status to EDataNotAvailable
-	    selfObject->iDataAvailability = EDataNotAvailable;
-	    
-	    // We don't have any data for sure.
-	    selfObject->NitzInfoNotAvailableL();
-	    }
-		
+        if(selfObject->iAdtUpdaterAppUi->IsHighPriorityWindowActive())
+            {
+            //If any high priority window is active, we push the CDT to background.
+            selfObject->iAdtUpdaterAppUi->ToggleAppViewL(EFalse);
+            }
+        else if(selfObject->QueryDialogsInDisplay() && selfObject->iAdtUpdaterAppUi->IsAppInBackground()
+                && !selfObject->iAdtUpdaterAppUi->IsHighPriorityWindowActive())
+            {
+            //For every 2 sec, until ADTUpdater exits, we will check whether app is in background
+            //and bring to foreground.
+            selfObject->iAdtUpdaterAppUi->ToggleAppViewL(ETrue);
+            }
+         }
 	__PRINTS( "CAdtUpdaterContainer::CallBackL - Exit" );
 											
 	return KZero;
@@ -484,6 +507,7 @@ void CAdtUpdaterContainer::CancelAllRequests()
 		iPeriodic->Cancel();
 		}
 	
+	iNitzTimerActive = EFalse;
 	// Cancel the listener
 	if( iListener )
 		{
@@ -612,6 +636,16 @@ void CAdtUpdaterContainer::ShowQueriesL()
 	
     iPSObserver->Cancel();
     
+    if(iPeriodic->IsActive())
+        {
+        iPeriodic->Cancel();
+        }
+    TCallBack timerCallBack( CallBackL, this );
+    // Start the CDT Query timer.
+    iPeriodic->Start( KCDTQueryTimer, KAppBackgroundInterval, timerCallBack );
+
+    iNitzTimerActive = EFalse;
+    
     if(iIsRTCInvalidAndHiddenReset)
         {
         ShowDateAndTimeQueriesL();				
@@ -637,7 +671,10 @@ void CAdtUpdaterContainer::DoContinueWithNormalBootL()
 	__PRINTS( "CAdtUpdaterContainer::DoContinueWithNormalBootL - Entry" );
 	
 	// First bring the application to the foreground.
-	iAdtUpdaterAppUi->ToggleAppViewL( ETrue );	
+	if(!iAdtUpdaterAppUi->IsHighPriorityWindowActive())
+	    {
+        iAdtUpdaterAppUi->ToggleAppViewL( ETrue );
+	    }
 	// Show in FSW.
     iAdtUpdaterAppUi->HideApplicationFromFSW( EFalse );
 	// Hide the status pane.
@@ -686,6 +723,7 @@ void CAdtUpdaterContainer::ShowDateAndTimeQueriesL()
 	// Hide the status pane.
     iAdtUpdaterAppUi->HideStatusPane( ETrue );
 		
+    iQueryDialogsInDisplay = ETrue;
 	// No first boot but RTCStatus is corrupted. Ask time and date"
 		
 	// Showing Date query to user.
@@ -693,7 +731,7 @@ void CAdtUpdaterContainer::ShowDateAndTimeQueriesL()
 		
 	// Showing Time query to user.
 	ShowTimeQueryL();
-		
+	iQueryDialogsInDisplay = EFalse;
 	//Deactivate the plug-in as we are setting the date/time manually
 	DeActivateNitzPlugin();
 		
