@@ -221,6 +221,13 @@ void CalenViewManager::constructAndActivateView(int view)
 		mController.MainWindow().addView(mCalenAgendaView);
 		mController.MainWindow().setCurrentView(mCalenAgendaView);
 		mController.MainWindow().addView(mCalenAgendaViewAlt);
+	} else if (view == ECalenDayView) {
+	    mFirstView = ECalenDayView;
+	    loadDayView();
+	    ActivateDefaultViewL(ECalenDayView);
+	    // Add day view to mainwindow.
+        mController.MainWindow().addView(mCalenDayView);
+        mController.MainWindow().setCurrentView(mCalenDayView);
 	}
 	OstTraceFunctionExit0( CALENVIEWMANAGER_CONSTRUCTANDACTIVATEVIEW_EXIT );
 }
@@ -390,30 +397,32 @@ void CalenViewManager::constructOtherViews()
     
 	// Load all other views except mFirstView
 	
-	// NOTE: Right now, since Calendar has only two views, month view 
+	// NOTE: Right now, since Calendar has three views, month view, day view 
 	// and agenda view, when client launches agenda view, then there is no need
 	// to construct the month view as per UI REQ., but tomorrow if new views
 	// come after agenda view, then we need to construct those views if they are
-	// native views. Right now, there is a event viewer but its not a native
-	// view. Hence, if agenda view is launched, dont construct month view
-	if (mFirstView != ECalenAgendaView) // check if agenda view is not already loaded
-		{
+	// native views. Right now, day view will be constructed as we need to 
+    // provide an option in options menu to switch between day view and agenda view
+    // There is a event viewer but its not a native view, so no need to constrcut it
+    // It will be constrcuted on demand.
+	// Hence, if agenda view is launched, constrcut the day vuew but dont construct month view.
+    // Vice-versa for when day view is maunched as first view
+	if (mFirstView == ECalenMonthView) {
 		// Load all other views 
 		loadAgendaView();
 		
 		if (!mCalenDayView) {
 		    loadDayView();
 		}
-	}
-	else //agenda view was launched as first view
-	    {
-		// No implementation yet. UI specs not clear
-		// to be commented in with some more code once UI specs is frozen
-		// for agenda view launching as first view after it was saved as activity
-		// when it was launched from month view
-        // loadMonthView();
-        // mCalenMonthView->doLazyLoading();
-	    }
+	} else if (mFirstView == ECalenAgendaView) { //agenda view was launched as first view
+	    // Load day view
+	    if (!mCalenDayView) {
+            loadDayView();
+        }
+    } else if (mFirstView == ECalenDayView) { // Day view was launched as first view
+        // Load agenda view
+        loadAgendaView();
+    }
 
 	// Setup the settings view
 	mSettingsView = new CalenSettingsView(mController.Services());
@@ -558,7 +567,10 @@ void CalenViewManager::ActivateDefaultViewL(int defaultView)
 		mCalenMonthView->doPopulation();
 	} else if (ECalenAgendaView == defaultView) {
 		mCalenAgendaView->doPopulation();
-	}
+	} else if (ECalenDayView == defaultView) {
+        mCalenDayView->doPopulation();
+    }
+	
 	OstTraceFunctionExit0( CALENVIEWMANAGER_ACTIVATEDEFAULTVIEWL_EXIT );
 }
 

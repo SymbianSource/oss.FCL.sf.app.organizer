@@ -21,6 +21,9 @@
 #include <QGraphicsLinearLayout>
 #include <QApplication>
 
+#include <bacntf.h>                   // CEnvironmentChangeNotifier
+#include <coemain.h>                  // EActivePriorityLogonA
+
 #include <hbdataform.h>
 #include <hbmainwindow.h>
 #include <hbinstance.h>
@@ -233,6 +236,16 @@ CalenEditorPrivate::CalenEditorPrivate(AgendaUtil *agendaUtil,
 		mAgendaUtil = agendaUtil;
 		mOwnsAgendaUtil = false;
 	}
+
+	// Register for system environment changes
+	// TODO: these are temporary changes done in symbian way
+	// till we get proper QT support to listem for locale changes
+	TCallBack envCallback( EnvChangeCallbackL, this );
+	iEnvChangeNotifier =
+			CEnvironmentChangeNotifier::NewL( EActivePriorityLogonA, envCallback );
+	iEnvChangeNotifier->Start();
+	iIgnoreFirstLocaleChange = ETrue;
+	
 	OstTraceFunctionExit0( CALENEDITORPRIVATE_CALENEDITORPRIVATE_EXIT );
 }
 
@@ -285,6 +298,13 @@ CalenEditorPrivate::~CalenEditorPrivate()
 		delete mMainWindow;
 		mMainWindow = 0;
 	}
+
+	if(iEnvChangeNotifier) {
+		iEnvChangeNotifier->Cancel();
+		delete iEnvChangeNotifier;
+		iEnvChangeNotifier = 0;
+	}
+	
 	OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_CALENEDITORPRIVATE_EXIT );
 }
 
@@ -556,7 +576,10 @@ void CalenEditorPrivate::setUpView()
 
 	mCalenEditorForm = qobject_cast<HbDataForm *> (
 							mEditorDocLoader->findWidget(CALEN_EDITOR_DATAFORM));
-
+	
+    // Enable the pixmap cache for better scrolling performance
+	mCalenEditorForm->setItemPixmapCacheEnabled(true);
+	    
 	mDescriptionAction = qobject_cast<HbAction *> (
 							mEditorDocLoader->findObject(
 										CALEN_EDITOR_ADD_DESCRIPTION_ACTION));
@@ -1807,6 +1830,18 @@ CalenEditorPrivate::Action CalenEditorPrivate::handleDone()
 }
 
 /*!
+	Launch the notification dialog popup.
+ */
+void CalenEditorPrivate::launchDialog(QString title)
+{
+	OstTraceFunctionEntry0( CALENEDITORPRIVATE_LAUNCHDIALOG_ENTRY );
+	HbNotificationDialog *notificationDialog = new HbNotificationDialog();
+	notificationDialog->setTitle(title);
+	notificationDialog->setTimeout(HbPopup::ConfirmationNoteTimeout);
+	notificationDialog->show();
+	OstTraceFunctionExit0( CALENEDITORPRIVATE_LAUNCHDIALOG_EXIT );
+}
+/*!
 	Save the entry
 	\return true if entry is saved ,false otherwise
  */
@@ -1826,15 +1861,15 @@ bool CalenEditorPrivate::saveEntry()
 	}
 	if (mNewEntry) {
 		if(mEditedEntry->type() == AgendaEntry::TypeAppoinment) {
-			HbNotificationDialog::launchDialog(hbTrId("txt_calendar_dpopinfo_new_meeting_saved"));
+			launchDialog(hbTrId("txt_calendar_dpopinfo_new_meeting_saved"));
 		} else if(isAllDayEvent()) {
-			HbNotificationDialog::launchDialog(hbTrId("txt_calendar_dpopinfo_new_all_day_event_saved"));
+			launchDialog(hbTrId("txt_calendar_dpopinfo_new_all_day_event_saved"));
 		}
 	} else {
 		if(mEditedEntry->type() == AgendaEntry::TypeAppoinment) {
-			HbNotificationDialog::launchDialog(hbTrId("txt_calendar_dpopinfo_meeting_updated"));
+			launchDialog(hbTrId("txt_calendar_dpopinfo_meeting_updated"));
 		} else if(isAllDayEvent()) {
-			HbNotificationDialog::launchDialog(hbTrId("txt_calendar_dpopinfo_all_day_event_updated"));
+			launchDialog(hbTrId("txt_calendar_dpopinfo_all_day_event_updated"));
 		}
 	}
 	emit q_ptr->entrySaved();
@@ -2116,4 +2151,46 @@ void CalenEditorPrivate::forcedSaveEntry()
     }
     OstTraceFunctionExit0( CALENEDITORPRIVATE_FORCEDSAVEENTRY_EXIT );
 }
+
+
+// ----------------------------------------------------------------------------
+//  CCalenNotifier::EnvChangeCallbackL
+//  CEnvironmentChangeNotifier callback.  Calendar is only interested in:
+//  EChangesLocale              - System locale changed
+//  EChangesMidnightCrossover   - System time passed midnight
+//  EChangesSystemTime          - System time changed
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+TInt CalenEditorPrivate::EnvChangeCallbackL( TAny* aThisPtr )
+{
+    // Return value for functions used as TCallBack objects should be EFalse
+    // unless the function is intended to be called again from a timer.
+   // return EFalse;
+    return static_cast<CalenEditorPrivate*>(aThisPtr)->DoEnvChange();
+}
+// ----------------------------------------------------------------------------
+//  CCalenNotifier::DoEnvChange
+//  EnvChangeCallbackL calls this function
+// ----------------------------------------------------------------------------
+//
+TInt CalenEditorPrivate::DoEnvChange()
+{
+    if( iEnvChangeNotifier && (iEnvChangeNotifier->Change() & EChangesLocale)
+            && !iIgnoreFirstLocaleChange) {
+        mViewFromItem->populateDateTime(mEditedEntry->startTime(), true);
+        mViewToItem->populateDateTime(mEditedEntry->endTime(), false);
+        if (isAllDayEvent()) {
+        	mReminderField->setDisplayTime();
+        }
+        if (mRepeatField->isRepeatUntilItemAdded()) {
+        	mRepeatField->refreshRepeatUntilDate();
+        }
+    }
+    else {
+        iIgnoreFirstLocaleChange = EFalse;
+    }
+    return EFalse ;
+}
+
 // End of file	--Don't remove this.

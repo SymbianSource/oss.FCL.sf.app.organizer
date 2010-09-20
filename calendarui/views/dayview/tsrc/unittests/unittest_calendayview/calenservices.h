@@ -9,6 +9,8 @@
 #define CALENSERVICES_H_
 
 #include "calencontext.h"
+#include "calennotificationhandler.h"
+#include "hb_calencommands.hrh"
 
 /*!
  Mocked class MCalenServices
@@ -27,13 +29,27 @@ public:
     	}
     
     int getFirstView(){ return 0;}
-    TBool IssueCommandL( TInt aCommand  ){ Q_UNUSED(aCommand); return EFalse;}
+    bool IssueCommandL( quint32 aCommand  ){ mLastCommand  = aCommand; return true;}
     AgendaUtil* agendaInterface() {return 0;}
+    
+    void RegisterForNotificationsL( MCalenNotificationHandler* aHandler,
+                                    TCalenNotification aNotification ) {}
+    
+    virtual void RegisterForNotificationsL( MCalenNotificationHandler* aHandler,
+                                            RArray<TCalenNotification>& aNotifications )
+    {}
+    
+    void IssueNotificationL( quint32 aNotification ) { mLastCommand  = aNotification; }
+    
+    QString* InfobarTextL() {return 0;}
+    
+    quint32 lastCommand() {return mLastCommand;}
+    
+    quint32 mLastCommand;
+    MCalenContext mContext;
     
     ~MCalenServices() {
         
     }
-    
-    MCalenContext mContext;
 };
 #endif /* CALENSERVICES_H_ */

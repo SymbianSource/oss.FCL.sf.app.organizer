@@ -53,17 +53,25 @@ class CalenDayItemView : public HbWidget
     
 public:
     CalenDayItemView(MCalenServices &services, HbModelIterator *iterator, 
-        QGraphicsItem *parent) : HbWidget(parent) {
+        QGraphicsItem *parent = NULL) : HbWidget(parent) {
         Q_UNUSED(services)
         Q_UNUSED(iterator)
+        
+        mCurrentPos = QPointF(0,0);
+    } 
+    ~CalenDayItemView() {
+        
     }
     
     void scrollVertically(const QPointF &newPosition) {
-        Q_UNUSED(newPosition)
+        mCurrentPos = newPosition;
     }
 
 signals:
     void scrollPositionChanged(const QPointF&);
+    
+public:
+    QPointF mCurrentPos;
 };
 
 #endif // CALENDAYITEMVIEW_H

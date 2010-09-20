@@ -80,6 +80,7 @@ private:
 	void setActiveDates(QDate activeDate);
 	void paint(QPainter* painter, 
 	           const QStyleOptionGraphicsItem* option, QWidget* widget);
+	bool checkIfWeCanScroll(scrollDirection direction);
 	
 public slots:
 	void scrollingFinished();
@@ -107,6 +108,7 @@ private:
 	QColor mGridLineColor;
 	bool mActiveDatesSet;
 	bool mIsGridAdjusting;
+	bool mEventIndicatorNotSet;
 };
 
 #endif // CALENMONTHGRID_H

@@ -38,6 +38,7 @@
 #include <xqsettingsmanager.h>
 #include <xqsettingskey.h>
 #include <QLocale>
+#include <HbParameterLengthLimiter>
 
 // User includes
 #include "clockprivatecrkeys.h"
@@ -833,9 +834,8 @@ void ClockAlarmEditor::displayDSTRollOverNote(AlarmInfo& alarmInfo)
 	OstTraceFunctionEntry0( CLOCKALARMEDITOR_DISPLAYDSTROLLOVERNOTE_ENTRY );
 
 	QString alarmTime = alarmInfo.nextDueTime.toString(mTimeFormat);
-	QString dstRollOverText =
-	hbTrId("txt_clock_dpopinfo_alarm_will_occur_at_1_after_au");
-	QString displayText = dstRollOverText.arg(alarmTime);
+	QString displayText = HbParameterLengthLimiter(hbTrId("txt_clock_dpopinfo_alarm_will_occur_at_1_after_au"))
+			              .arg(alarmTime);
 	// show the note
 	launchDialog(displayText);
 	OstTraceFunctionExit0( CLOCKALARMEDITOR_DISPLAYDSTROLLOVERNOTE_EXIT );
@@ -874,29 +874,25 @@ void ClockAlarmEditor::displayRemainingTimeNote(AlarmInfo& alarmInfo)
 	switch ( alarmInfo.repeatType ) {
 		case Once:{
 			if( oneDayDifference ){
-				displayFormattedText =
-				hbTrId("txt_clock_note_alarm_occurs_once_only_on_next_1_a");
-				displayText = displayFormattedText.arg(dayText,alarmTimeText);
+				displayText = HbParameterLengthLimiter(hbTrId("txt_clock_note_alarm_occurs_once_only_on_next_1_a"))
+						    		 .arg(dayText).arg(alarmTimeText);
 				showDisplayText = true;
 			}
 		}
 		break;
 		case Daily:	{
-			displayFormattedText =
-				hbTrId("txt_clock_dpopinfo_alarm_occurs_every_day_at_1");
-			displayText = displayFormattedText.arg(alarmTimeText);
+			displayText = HbParameterLengthLimiter(hbTrId("txt_clock_dpopinfo_alarm_occurs_every_day_at_1"))
+					    		 .arg(alarmTimeText);
 		}
 		break;
 		case Weekly:{
-			displayFormattedText =
-				hbTrId("txt_clock_note_alarm_occurs_every_week_on_1_at_2");
-			displayText = displayFormattedText.arg(dayText,alarmTimeText);
+			displayText = HbParameterLengthLimiter(hbTrId("txt_clock_note_alarm_occurs_every_week_on_1_at_2"))
+					    		  .arg(dayText).arg(alarmTimeText);
 		}
 		break;
 		case Workday:{
-			displayFormattedText =
-				hbTrId("txt_clock_note_alarm_occurs_workdays_at_1");
-			displayText = displayFormattedText.arg(alarmTimeText);
+			displayText = HbParameterLengthLimiter(hbTrId("txt_clock_note_alarm_occurs_workdays_at_1"))
+					    		 .arg(alarmTimeText);
 		}
 		break;
 		default:
@@ -906,7 +902,6 @@ void ClockAlarmEditor::displayRemainingTimeNote(AlarmInfo& alarmInfo)
 		showDisplayText = true;
 	}
 
-	QString remainingTimeText;
 	// Dislpay the second note.
 	if (!oneDayDifference) {
 		QDateTime alarmDateTime(alarmInfo.alarmDateTime,alarmInfo.nextDueTime);
@@ -931,41 +926,33 @@ void ClockAlarmEditor::displayRemainingTimeNote(AlarmInfo& alarmInfo)
 
 		QString hourText;
 		QString minutesText;
-		QString formattedText;
+		QString remainingTimeText;
 		// Alarm is with in 1 day. Choose the appropriate strings
 		// to be displayed
 		switch( remainingHours ) {
 			case KOneHour:{
 				if ( KOneMinute == remainingMinutes ) {
-					formattedText =
-					hbTrId("txt_clock_dpopinfo_time_to_alarm_1_hr_and_2_min");
-					remainingTimeText = formattedText.arg(
-							hourText.setNum(remainingHours),
-							minutesText.setNum(remainingMinutes));
+					remainingTimeText =
+					HbParameterLengthLimiter(hbTrId("txt_clock_dpopinfo_time_to_alarm_1_hr_and_2_min"))
+					.arg(hourText.setNum(remainingHours)).arg(minutesText.setNum(remainingMinutes));
 				}
 				else {
-					formattedText =
-						hbTrId("txt_clock_dpopinfo_time_to_alarm_1_hr_and_2_mins");
-					remainingTimeText = formattedText.arg(
-							hourText.setNum(remainingHours),
-							minutesText.setNum(remainingMinutes));
+					remainingTimeText =
+						HbParameterLengthLimiter(hbTrId("txt_clock_dpopinfo_time_to_alarm_1_hr_and_2_mins"))
+						.arg(hourText.setNum(remainingHours)).arg(minutesText.setNum(remainingMinutes));
 				}
 			}
 			break;
 			default:{
 				if ( KOneMinute == remainingMinutes ) {
-					formattedText =
-						hbTrId("txt_clock_dpopinfo_time_to_alarm_1_hrs_and_2_min");
-					remainingTimeText = formattedText.arg(
-							hourText.setNum(remainingHours),
-							minutesText.setNum(remainingMinutes));
+					remainingTimeText =
+						HbParameterLengthLimiter(hbTrId("txt_clock_dpopinfo_time_to_alarm_1_hrs_and_2_min"))
+						.arg(hourText.setNum(remainingHours)).arg(minutesText.setNum(remainingMinutes));
 				}
 				else {
-					formattedText =
-						hbTrId("txt_clock_dpopinfo_time_to_alarm_1_hrs_and_2_mins");
-					remainingTimeText = formattedText.arg(
-							hourText.setNum(remainingHours),
-							minutesText.setNum(remainingMinutes));
+					remainingTimeText =
+						HbParameterLengthLimiter(hbTrId("txt_clock_dpopinfo_time_to_alarm_1_hrs_and_2_mins"))
+						.arg(hourText.setNum(remainingHours)).arg(minutesText.setNum(remainingMinutes));
 				}
 			}
 			break;

@@ -22,7 +22,7 @@ MOC_DIR = moc
 CONFIG += qtestlib
 CONFIG += symbian_test
 CONFIG += hb
-				
+
 INCLUDEPATH += . \
                ../../../inc/ \
 
@@ -31,8 +31,7 @@ DEPENDPATH  += . \
                ../../../src/  
 
 # Input
-HEADERS +=	calendaymodelmanager.h \ 
-            calendaycontentwidgetheaders.h \
+HEADERS +=	calendayitemview.h \
 			calendaycontentwidget.h 
 			
 

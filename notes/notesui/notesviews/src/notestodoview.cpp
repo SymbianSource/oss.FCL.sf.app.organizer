@@ -282,10 +282,10 @@ void NotesTodoView::handleItemLongPressed(
 			hbTrId("txt_common_menu_delete"));
 
 	if (AgendaEntry::TypeTodo == entry.type()) {
-		if (AgendaEntry::TodoNeedsAction == entry.status()) {
+		if (AgendaEntry::TodoCompleted != entry.status()) {
 			mTodoStatusAction = contextMenu->addAction(
 					hbTrId("txt_notes_menu_mark_as_done"));
-		} else if (AgendaEntry::TodoCompleted == entry.status()) {
+		} else {
 			mTodoStatusAction =
 					contextMenu->addAction(
 							hbTrId("txt_notes_menu_mark_as_not_done"));
@@ -337,9 +337,9 @@ void NotesTodoView::markTodoStatus()
 
 	QDateTime currentDateTime = QDateTime::currentDateTime();
 
-	if (AgendaEntry::TodoNeedsAction == entry.status()) {
+	if (AgendaEntry::TodoCompleted != entry.status()) {
 		mAgendaUtil->setCompleted(entry, true, currentDateTime);
-	} else if (AgendaEntry::TodoCompleted == entry.status()) {
+	} else {
 		mAgendaUtil->setCompleted(entry, false, currentDateTime);
 	}
 	OstTraceFunctionExit0( NOTESTODOVIEW_MARKTODOSTATUS_EXIT );

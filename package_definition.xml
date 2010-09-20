@@ -138,10 +138,10 @@
    </component>
   </collection>
   <collection id="pimappservices" name="PIM Application Services" level="services">
-   <component id="calendar" name="Calendar" introduced="9.2" purpose="optional">
+   <component id="calendar" name="Calendar" introduced="9.2" purpose="optional" filter="s60">
     <unit version="2" bldFile="pimappservices/calendar/group" mrp="pimappservices/calendar/group/app-engines_calendar.mrp"/>
    </component>
-   <component id="calendarvcalplugin" name="Calendar vCal Plugin" introduced="8.1" purpose="optional" class="plugin">
+   <component id="calendarvcalplugin" name="Calendar vCal Plugin" introduced="8.1" purpose="optional" class="plugin" filter="s60">
     <unit version="2" bldFile="pimappservices/calendarvcalplugin/group" mrp="pimappservices/calendarvcalplugin/group/app-engines_agnversit2.mrp"/>
    </component>
    <component id="appenginesdocs" name="Application Engines Documentation" purpose="development" class="doc">
@@ -149,13 +149,13 @@
    </component>
   </collection>
   <collection id="pimappsupport" name="PIM Application Support" level="support">
-   <component id="vcardandvcal" name="vCard and vCal" introduced="ER5" purpose="optional">
+   <component id="vcardandvcal" name="vCard and vCal" introduced="ER5" purpose="optional" filter="s60">
     <unit bldFile="pimappsupport/vcardandvcal/group" mrp="pimappsupport/vcardandvcal/group/app-services_versit.mrp"/>
    </component>
-   <component id="chinesecalendarconverter" name="Chinese Calendar Converter" introduced="6.1" purpose="optional">
+   <component id="chinesecalendarconverter" name="Chinese Calendar Converter" introduced="6.1" purpose="optional" filter="s60">
     <unit bldFile="pimappsupport/chinesecalendarconverter/group" mrp="pimappsupport/chinesecalendarconverter/group/app-services_calcon.mrp"/>
    </component>
-   <component id="chinesecalendaralg" name="Chinese Calendar Algorithm" introduced="^2" purpose="optional" class="plugin">
+   <component id="chinesecalendaralg" name="Chinese Calendar Algorithm" introduced="^2" purpose="optional" class="plugin" filter="s60">
     <unit bldFile="pimappsupport/chinesecalendaralg/group" mrp="pimappsupport/chinesecalendaralg/group/app-services_chinesecalendaralgorithm.mrp"/>
    </component>
   </collection>

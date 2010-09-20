@@ -44,6 +44,7 @@ symbian: {
 	TARGET.CAPABILITY += ALL -TCB
 	TARGET.EPOCALLOWDLLDATA = 1
 	TARGET.UID3 = 0x2002BCE6
+	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
 	LIBS += \
 		-lclockalarmclient \
@@ -53,7 +54,8 @@ symbian: {
 		-lclocksettingsview \
 		-lclockcityselectionlist \
 		-lclockwidget \
-                -lclockwidgetplugin
+		-lclockwidgetplugin \
+		-lxqsettingsmanager
 }
 
 SOURCES += \

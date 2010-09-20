@@ -154,21 +154,15 @@ void CalenAgendaView::doPopulation()
     // Set self as the current view
     // mServices.MainWindow().setCurrentView(this);
     
-    // Dont override the soft key behavior if day view is the first view
-    if (ECalenAgendaView != mServices.getFirstView()) {
+    // Dont override the soft key behavior if day view or agenda view is the first view
+    if (ECalenMonthView == mServices.getFirstView()) {
 		mSoftKeyAction = new HbAction(Hb::BackNaviAction);
 		setNavigationAction(mSoftKeyAction);
 		// Connect to the signal triggered by clicking on back button.
 		connect(mSoftKeyAction, SIGNAL(triggered()), this,
 		        SLOT(launchMonthView()));
-		if (mSwitchToDayViewAction) {
-			mSwitchToDayViewAction->setVisible(true);
-				}
-	} else {
-		if (mSwitchToDayViewAction) {
-			mSwitchToDayViewAction->setVisible(false);
-		}
 	}
+    
     // Initialize the content widget
     mAgendaViewWidget->showWidget();
     
@@ -240,10 +234,16 @@ void CalenAgendaView::gestureEvent(QGestureEvent *event)
     if(HbSwipeGesture *gesture = qobject_cast<HbSwipeGesture *>(event->gesture(Qt::SwipeGesture))) {
         if (gesture->state() == Qt::GestureStarted) {
             if(QSwipeGesture::Left == gesture->sceneHorizontalDirection()) {
-                mServices.IssueCommandL(ECalenShowNextDay);
+                // Check if we can swipe
+                if (checkIfWeCanSwipe(mDate, false)) {
+                    mServices.IssueCommandL(ECalenShowNextDay);
+                }
                 event->accept(Qt::SwipeGesture);
             } else if(QSwipeGesture::Right == gesture->sceneHorizontalDirection()) {
-                mServices.IssueCommandL(ECalenShowPrevDay);
+                // Check if we can swipe
+                if (checkIfWeCanSwipe(mDate, true)) {
+                    mServices.IssueCommandL(ECalenShowPrevDay);
+                }
                event->accept(Qt::SwipeGesture);
             }
         }

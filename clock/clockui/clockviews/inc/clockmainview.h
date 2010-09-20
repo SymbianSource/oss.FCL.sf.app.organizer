@@ -40,6 +40,8 @@ class TimezoneClient;
 class SettingsUtility;
 class ClockAlarmListModel;
 class ClockWidget;
+class XQSettingsManager;
+class XQSettingsKey;
 
 class ClockMainView : public HbView
 {
@@ -71,6 +73,7 @@ private slots:
 	void selectedMenuAction(HbAction *action);
 	void handleMenuClosed();
     void saveActivity();
+    void eventMonitor(const XQSettingsKey& key, const QVariant& value);
 
 private:
 	void setmodel();
@@ -104,6 +107,9 @@ private:
 	ClockDocLoader *mDocLoader;
 	ClockAppControllerIf *mAppControllerIf;
 	ClockAlarmListModel *mAlarmListModel;
+	
+	XQSettingsManager *mSettingsManager;
+	XQSettingsKey *mClockTypeSettingsKey;
 
 	int            mSelectedItem;
 	bool           mHideAlarmList;

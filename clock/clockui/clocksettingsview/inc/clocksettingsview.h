@@ -93,6 +93,7 @@ private:
 	TimezoneClient *mTimezoneClient;	
 	XQSettingsManager *mSettingsManager;
 	XQSettingsKey *mAlarmSnoozeTimeKey;
+	XQSettingsKey *mClockTypeKey;
 	QHash<int, int> mAlarmSnoozeTimeHash;
 	HbTranslator *mTranslator;
 	bool mLaunchedByClock;

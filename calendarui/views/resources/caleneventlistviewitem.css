@@ -1,7 +1,7 @@
-CalenEventListViewItem{
+CalenEventListViewItem[layoutName="custom"]{
 	layout: custom;
 }
-CalenEventListViewItem[customstretch="true"]{
+CalenEventListViewItem[layoutName="custom"][customstretch="true"]{
 	layout: custom-stretch;
 }
 

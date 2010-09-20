@@ -32,6 +32,8 @@
 #endif
 
 class TimezoneClient;
+class XQSettingsKey;
+class XQSettingsManager;
 
 class SETTINGSUTILITY_EXPORT SettingsUtility : public QObject
 {
@@ -87,10 +89,14 @@ private:
 	QStringList mTimeSeparatorList;
 	QStringList mClockTypeList;
 	QStringList mTimeFormatList;
+	QStringList mDisplayDateFormatList;
 	QStringList mDateFormatList;
 	QStringList mDateSeparatorList;
 	QStringList mAutoUpdateValueList;
 	QStringList mSnoozeValueList;
+	
+	XQSettingsManager *mSettingsManager;
+	XQSettingsKey *mClockTypeSettingsKey;
 };
 
 #endif // SETTINGSUTILITY_H

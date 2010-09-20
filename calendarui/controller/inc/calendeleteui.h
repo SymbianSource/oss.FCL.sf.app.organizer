@@ -21,6 +21,7 @@
 
 // System Includes
 #include <QObject>
+#include<QPointer>
 #include <e32base.h>
 #include <hbdatetimepicker.h>
 #include <agendautil.h>
@@ -237,7 +238,7 @@ private: // data
     bool iIsDeleting; // True, if asynchronous delete is running
     QDateTime iStartTime;
     QDateTime iEndTime;
-    HbDateTimePicker *mDatePicker;
+    QPointer<HbDateTimePicker> mDatePicker;
     HbAction *mDeleteAction;
     HbAction *mCancelAction;
     // Confirmation note id is stored here. Note is shown when asynchronous

@@ -22,6 +22,7 @@
 #include <QStandardItemModel>
 #include <QStandardItem>
 #include <HbIcon>
+#include <HbParameterLengthLimiter>
 
 // User includes
 #include "clockalarmlistmodel.h"
@@ -191,10 +192,12 @@ QString ClockAlarmListModel::calculateRemainingTime(AlarmInfo alarmInfo)
 			case 1: {
 				if (1 == minleft) {
 					formatTimeNote =
-						hbTrId("txt_clock_main_view_setlabel_in_1hr_2min");
+							HbParameterLengthLimiter(hbTrId("txt_clock_main_view_setlabel_in_1hr_2min"))
+							.arg(QString::number(hourleft)).arg(QString::number(minleft));
 				} else {
 					formatTimeNote =
-						hbTrId("txt_clock_main_view_setlabel_in_1hr_2mins");
+							HbParameterLengthLimiter(hbTrId("txt_clock_main_view_setlabel_in_1hr_2mins"))
+							.arg(QString::number(hourleft)).arg(QString::number(minleft));
 				}
 			}
 			break;
@@ -202,21 +205,21 @@ QString ClockAlarmListModel::calculateRemainingTime(AlarmInfo alarmInfo)
 			default: {
 				if (1 == minleft) {
 					formatTimeNote =
-						hbTrId("txt_clock_main_view_setlabel_in_1hrs_2min");
+						HbParameterLengthLimiter(hbTrId("txt_clock_main_view_setlabel_in_1hrs_2min"))
+						.arg(QString::number(hourleft)).arg(QString::number(minleft));
 				} else {
 					formatTimeNote =
-						hbTrId("txt_clock_main_view_setlabel_in_1hrs_2mins");
+						HbParameterLengthLimiter(hbTrId("txt_clock_main_view_setlabel_in_1hrs_2mins"))
+						.arg(QString::number(hourleft)).arg(QString::number(minleft));
 				}
 			}
 		}
-		timeNote = formatTimeNote.arg(
-				QString::number(hourleft), QString::number(minleft));
 	} else {
-		formatTimeNote = hbTrId("txt_clock_main_view_setlabel_in_1days");
-		timeNote = formatTimeNote.arg(QString::number(dayleft));
+		formatTimeNote = HbParameterLengthLimiter(hbTrId("txt_clock_main_view_setlabel_in_1days"))
+				         .arg(QString::number(dayleft));
 	}
 	OstTraceFunctionExit0( CLOCKALARMLISTMODEL_CALCULATEREMAININGTIME_EXIT );
-	return timeNote;
+	return formatTimeNote;
 }
 
 /*!
@@ -439,9 +442,8 @@ QStringList ClockAlarmListModel::getDisplayStringListforAlarmItem(
 		repeatTypeString.append(
 		    hbTrId("txt_clock_main_view_dblist_daily_val_workdays"));
 	} else if (Weekly == alarmInfo.repeatType) {
-		repeatTypeString.append(hbTrId("txt_clock_main_view_setlabel_every_1"));
-		repeatTypeString =
-			repeatTypeString.arg(alarmInfo.alarmDateTime.toString("dddd"));
+		repeatTypeString.append( HbParameterLengthLimiter(hbTrId("txt_clock_main_view_setlabel_every_1"))
+					.arg(alarmInfo.alarmDateTime.toString("dddd")));
 	} else {
 		if (QDate::currentDate() == alarmInfo.alarmDateTime) {
 			repeatTypeString.append(

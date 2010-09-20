@@ -339,6 +339,22 @@ void CalenEditorCustomItem::populateDateTime(QDateTime defaultDateTime, bool isF
 												r_qtn_date_usual_with_zero));
 	mPushButtonTime->setText(mLocale.format(defaultDateTime.time(), 
 												r_qtn_time_usual_with_zero));
+												
+	// If the date/time pickers for start date/end date are open and 
+	// locale changes happen, we need to refresh them with proper date/time formats
+	if(!(mDatePicker.isNull())) {
+		mDatePicker->setDisplayFormat(CalenDateUtils::dateFormatString());
+		mDatePicker->setDate(mDate);
+	}
+	if(!(mTimePicker.isNull())) {
+		if(mLocale.timeStyle() == HbExtendedLocale::Time12) {
+			mTimePicker->setDisplayFormat("hh:mm ap");	
+		}else {
+			mTimePicker->setDisplayFormat("hh:mm");
+		}
+		mTimePicker->setTime(mTime);
+	}
+		
 	OstTraceFunctionExit0( CALENEDITORCUSTOMITEM_POPULATEDATETIME_EXIT );
 }
 
@@ -440,6 +456,7 @@ void CalenEditorCustomItem::handleDate()
 	mDatePicker = new HbDateTimePicker(mDate, popUp);
 	mDatePicker->setMinimumDate(mMinDate);
 	mDatePicker->setMaximumDate(mMaxDate);
+	mDatePicker->setDisplayFormat(CalenDateUtils::dateFormatString());
 	mDatePicker->setDate(mDate);
 	popUp->setContentWidget(mDatePicker);
 	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"), popUp);

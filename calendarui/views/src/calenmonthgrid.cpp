@@ -67,14 +67,14 @@ CalenMonthGrid::CalenMonthGrid(QGraphicsItem *parent):
 	mIgnoreItemActivated(false),
 	mGridLineColor(HbColorScheme::color("qtc_cal_grid_line")),
     mActiveDatesSet(false),
-    mIsGridAdjusting(false)
+    mIsGridAdjusting(false),
+    mEventIndicatorNotSet(false)
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_CALENMONTHGRID_ENTRY );
     
 	setScrollDirections(Qt::Vertical);
 	setRowCount(KNumOfVisibleRows);
 	setColumnCount(KCalenDaysInWeek);
-	setLongPressEnabled(false);
 	setItemRecycling(false);
 	setSelectionMode(HbGridView::NoSelection);
 	setUniformItemSizes(true);
@@ -83,6 +83,9 @@ CalenMonthGrid::CalenMonthGrid(QGraphicsItem *parent):
 	setEnabledAnimations(HbAbstractItemView::None);
 	setFrictionEnabled(false);
 	setFlag(QGraphicsItem::ItemHasNoContents, false);
+	
+	// Enable the pixmap cache for better scrolling performance
+	setItemPixmapCacheEnabled(true);
 	
 	// Disable the rows and columns swapping on orientation change
 	setSwapDimensionsOnOrientationChange(false);
@@ -234,15 +237,16 @@ void CalenMonthGrid::updateMonthGridModel(QList<CalenMonthData> &monthDataArray,
 	    connect(
 	            HbTheme::instance(), SIGNAL(changed()),
 	            gridItemPrototype, SLOT(handleThemeChange()));
-	    
-		// Set the mode and the prototype
-		setModel(mModel,gridItemPrototype);
 		
 		// Register the widgetml and css files
 		HbStyleLoader::registerFilePath(":/");
 		
 		// Set the layout name
 		setLayoutName("calendarCustomGridItem");
+		
+		// Set the mode and the prototypec --> set it after setting layout name and 
+		// other things as it will avoid unnecessary polish calls
+        setModel(mModel,gridItemPrototype);
 	} else {
 		// Since, we have finished setData, Now unblock the signals
 		mModel->blockSignals(false);
@@ -309,6 +313,11 @@ void CalenMonthGrid::updateMonthGridWithInActiveMonths(
 	connect(this, SIGNAL(activated(const QModelIndex &)), this,
 						SLOT(itemActivated(const QModelIndex &)));
 	
+	// Check if we need to set the event indicators
+	if(mEventIndicatorNotSet) {
+	    mEventIndicatorNotSet = false;
+	    updateMonthGridWithEventIndicators(monthDataArray);
+	}
 	OstTraceFunctionExit0( CALENMONTHGRID_UPDATEMONTHGRIDWITHINACTIVEMONTHS_EXIT );
 }
 
@@ -321,15 +330,22 @@ void CalenMonthGrid::updateMonthGridWithEventIndicators(
     OstTraceFunctionEntry0( CALENMONTHGRID_UPDATEMONTHGRIDWITHEVENTINDICATORS_ENTRY );
     
 	int count(monthDataArray.count());
-	for(int i = 0; i < count; i++) {
-		// Check if the day has events
-		if (monthDataArray[i].HasEvents()) {
-			QModelIndex itemIndex = mModel->index(i,0);
-			QVariant itemData = itemIndex.data(Qt::UserRole + 1);
-			QVariantList list = itemData.toList();
-			list.replace(CalendarNamespace::CalendarMonthEventRole, true);
-			mModel->itemFromIndex(itemIndex)->setData(list);
-		}
+	
+	// Check if model is updated with all the dates
+	// If not, return false for later updation
+	if(count == mModel->rowCount()) {
+        for(int i = 0; i < count; i++) {
+            // Check if the day has events
+            if (monthDataArray[i].HasEvents()) {
+                QModelIndex itemIndex = mModel->index(i,0);
+                QVariant itemData = itemIndex.data(Qt::UserRole + 1);
+                QVariantList list = itemData.toList();
+                list.replace(CalendarNamespace::CalendarMonthEventRole, true);
+                mModel->itemFromIndex(itemIndex)->setData(list);
+            }
+        }
+	} else {
+	    mEventIndicatorNotSet = true;
 	}
 	
 	OstTraceFunctionExit0( CALENMONTHGRID_UPDATEMONTHGRIDWITHEVENTINDICATORS_EXIT );
@@ -446,7 +462,7 @@ void CalenMonthGrid::gestureEvent(QGestureEvent *event)
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_GESTUREEVENT_ENTRY );
     
-    // Dont listem for any gesture when grid is getting adjusted as listening to those was causing
+    // Dont listen for any gesture when grid is getting adjusted as listening to those was causing
     // grid to stop abruptly i between
     if (mIsGridAdjusting) {
         // consume the event and return
@@ -468,18 +484,9 @@ void CalenMonthGrid::gestureEvent(QGestureEvent *event)
                 // Use our defined threshold temporarily till scrollarea 
                 // frm orbit side is made clever enough not to scroll in other direction
                 // apart frm the registered scroll direction
-                QPointF delta = gesture->delta();
-                // Check the current orientation of the device and
-                // swap the vertical and horizontal distances in landscape
-                qreal horizontalDiff = 0.0;
-                qreal verticalDiff = 0.0;
-                if (hbInstance->allMainWindows().at(0)->orientation() == Qt::Vertical) {
-                    horizontalDiff = delta.x();
-                    verticalDiff = delta.y();
-                } else {
-                    horizontalDiff = delta.y();
-                    verticalDiff = delta.x();
-                }
+                QPointF delta = gesture->sceneOffset();
+                qreal horizontalDiff = delta.x();
+                qreal verticalDiff = delta.y();
                 if (abs(horizontalDiff) > MAX_PAN_DIRECTION_THRESHOLD) {
                     // Now see if y coord diff has crossed threshold
                     if (verticalDiff > MAX_PAN_DIRECTION_THRESHOLD) {
@@ -537,6 +544,15 @@ void CalenMonthGrid::gestureEvent(QGestureEvent *event)
             }
         }
     }
+   
+   // Check if we can scroll
+   if (!checkIfWeCanScroll(mDirection)) {
+       // We cannot scroll, return back
+       mIsPanGesture = false;
+       mIgnoreItemActivated = false;
+       mDirection = invalid;
+       event->accept(Qt::PanGesture);
+   }
    
    if (mDirection!= invalid) {
         // Call the parent class to perform the pan gesture
@@ -922,11 +938,15 @@ void CalenMonthGrid::itemActivated(const QModelIndex &index)
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_ITEMACTIVATED_ENTRY );
     
-	if (mIgnoreItemActivated) {
+    QList<CalenMonthData >& monthDataList = mView->monthDataList();
+    // Chekc if we need to ignore the event or the newly tapped date is
+    // not valid date
+	if (mIgnoreItemActivated || !(CalenDateUtils::isValidDay(monthDataList[index.row()].Day()))) {
 		mIgnoreItemActivated = false;
 		OstTraceFunctionExit0( CALENMONTHGRID_ITEMACTIVATED_EXIT );
 		return;
 	}
+	
 	mIsNonActiveDayFocused = false;
 	// Check if the same item has been tapped twice
 	if (mCurrentRow == index.row()) {
@@ -956,7 +976,6 @@ void CalenMonthGrid::itemActivated(const QModelIndex &index)
 		// Check if inactive date is tapped
 		QDateTime activeMonth = mView->getActiveDay();
 		int month = activeMonth.date().month();
-		QList<CalenMonthData >& monthDataList = mView->monthDataList();
 		if(month != monthDataList[mCurrentRow].Day().date().month()){
 			// Set the flag
 			mIsNonActiveDayFocused = true;
@@ -1150,7 +1169,6 @@ void CalenMonthGrid::orientationChanged(Qt::Orientation newOrientation)
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_ORIENTATIONCHANGED_ENTRY );
     
-    Q_UNUSED(newOrientation)
 	// We are overriding this function to avoid the default behavior of
 	// hbgridview on orientation change as it swaps the row and column counts
 	// Calculate the proper index to be scrolled to
@@ -1268,6 +1286,34 @@ void CalenMonthGrid::paint(QPainter* painter,
 	painter->setPen(oldPen);
 	
 	OstTraceFunctionExit0( CALENMONTHGRID_PAINT_EXIT );
+}
+
+/*!
+ Function to check if scrolling is allowed. This function will make an effect
+ only when you are going to month that is not supported by us.
+ */
+bool CalenMonthGrid::checkIfWeCanScroll(scrollDirection direction)
+{
+    OstTraceFunctionEntry0( CALENMONTHGRID_CHECKIFWECANSCROLL_ENTRY );
+    
+    bool value = true;
+    
+    // Get the current active Date
+    QDateTime activeDate = mView->getActiveDay();
+    // if direction is up, then check if the next month is
+    // not January, 2101
+    if (direction == up) {
+        QDateTime nextMonth = activeDate.addMonths(1);
+        value = CalenDateUtils::isValidDay(nextMonth);
+    } else if (direction == down) { // if direction is up, then check if the next month is
+        // not December, 1899
+        QDateTime prevMonth = activeDate.addMonths(-1);
+        value = CalenDateUtils::isValidDay(prevMonth);
+    }
+    
+    OstTraceFunctionExit0( CALENMONTHGRID_CHECKIFWECANSCROLL_EXIT );
+    
+    return value;
 }
 
 /*!

@@ -36,7 +36,8 @@ symbian: {
 	LIBS += -lagendainterface \
 			-lcalencommonutils \
                         -lxqservice \
-			-lcalenlauncher
+			-lcalenlauncher \
+			-lbafl
 			
 	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 }
@@ -57,7 +58,7 @@ HEADERS +=	../../organizer_plat/calendar_editor_api/inc/caleneditor.h \
             caleneditorreminderfield.h \
             caleneditorrepeatfield.h \
             caleneditordatahandler.h
-            
+         
 RESOURCES += caleneditor.qrc
 
 TRANSLATIONS += caleneditor.ts

@@ -1,10 +1,10 @@
 /*
-* Copyright (c) 2002-2004 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
-* under the terms of the License "Symbian Foundation License v1.0"
+* under the terms of "Eclipse Public License v1.0"
 * which accompanies this distribution, and is available
-* at the URL "http://www.symbianfoundation.org/legal/sfl-v10.html".
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
 *
 * Initial Contributors:
 * Nokia Corporation - initial contribution.
@@ -15,7 +15,7 @@
 *                cleanup stack. It is heavily used for RPointerArrays,
 *                which are used all over Symbian's CalenInterimAPI.
 *                Implementation is more or less copy-paste of
-*                cleanup item of Close method and CleanupClosePushL   
+*                cleanup item of Close method and CleanupClosePushL  
 *
 */
 

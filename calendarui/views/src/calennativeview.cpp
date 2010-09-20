@@ -52,7 +52,8 @@
 CalenNativeView::CalenNativeView(MCalenServices &services) :
 	mServices(services),
 	mEntriesInDataBase(false),
-	mIsCapturedScreenShotValid(false)
+	mIsCapturedScreenShotValid(false),
+	mDatePicker(0)
 {
     OstTraceFunctionEntry0( CALENNATIVEVIEW_CALENNATIVEVIEW_ENTRY );
     
@@ -123,6 +124,18 @@ void CalenNativeView::deleteAllEntries()
 }
 
 /*!
+ Refreshes the already open date picker with proper 
+ date format as per current locale settings.
+ */
+ void CalenNativeView::refreshDatePicker()
+{
+	if(!(mDatePicker.isNull())) {
+		mDatePicker->setDisplayFormat(CalenDateUtils::dateFormatString());
+		mDatePicker->setDate(QDate::currentDate());
+	}
+}
+
+/*!
  Slot to handle gotodate
  */
 void CalenNativeView::goToDate()
@@ -144,6 +157,7 @@ void CalenNativeView::goToDate()
 	// Set the date range.
 	mDatePicker->setMinimumDate(CalenDateUtils::minTime().date());
 	mDatePicker->setMaximumDate(CalenDateUtils::maxTime().date());
+	mDatePicker->setDisplayFormat(CalenDateUtils::dateFormatString());
 	mDatePicker->setDate(QDate::currentDate());
 	
 	popUp->setContentWidget(mDatePicker);
@@ -231,6 +245,7 @@ void CalenNativeView::HandleNotification(const TCalenNotification notification)
     
 	switch (notification) {
 		case ECalenNotifySystemLocaleChanged: {
+			refreshDatePicker();
 			onLocaleChanged(EChangesLocale);
 		}
 		break;
@@ -332,4 +347,26 @@ void CalenNativeView::saveActivity()
        }
    OstTraceFunctionExit0( CALENNATIVEVIEW_SAVEACTIVITY_EXIT );
  }
+
+/*!
+ Function to tell if we can perform swipe effect on the preview pane.
+ This will affect when the next preview pane that is not going to 
+ come has valid date or not
+ */
+bool CalenNativeView::checkIfWeCanSwipe(QDateTime& date, bool rightGesture)
+{
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_CHECKIFWECANSWIPE_ENTRY );
+    
+    bool value;
+    // For right gesture, see if previous day is valid or not
+    if (rightGesture) {
+        value = CalenDateUtils::isValidDay(date.addDays(-1));
+    } else { // For left gesture, see if next day is valid or not
+        value = CalenDateUtils::isValidDay(date.addDays(1));
+    }
+    
+    OstTraceFunctionExit0( CALENNATIVEVIEW_CHECKIFWECANSWIPE_EXIT );
+    
+    return value;
+}
 //End Of File

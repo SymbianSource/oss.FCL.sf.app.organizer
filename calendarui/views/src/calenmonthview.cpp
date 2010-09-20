@@ -1569,72 +1569,76 @@ void CalenMonthView::handlePreviewPaneGesture(bool rightGesture)
 {
     OstTraceFunctionEntry0( CALENMONTHVIEW_HANDLEPREVIEWPANEGESTURE_ENTRY );
     
-	QGraphicsLinearLayout* viewLayout = static_cast<QGraphicsLinearLayout *>
-												(widget()->layout());
-	
-	// Set the effect in progress flags for next and previous panes
-	// For current pane, we would have set it in gestureEvent() function
-	mPrevPreviewPane->effectStarted();
-	mNextPreviewPane->effectStarted();
-	
-	if(rightGesture) {
-		// Need to bring up the previous day preview pane
-		// Create the effect on mCurrPreviewPane to slide to right side
-		mPrevPaneParent->setVisible(true);
-		if (mOrientation == Qt::Vertical) {
-			HbEffect::add(mCurrPaneLayoutWidget,
-						  ":/fxml/portrait_preview_pane_hide_on_right_gesture",
-						  "hide");
-			HbEffect::add(mPrevPaneLayoutWidget,
-						  ":/fxml/portrait_preview_pane_show_on_right_gesture",
-						  "show");
-		} else {
-			HbEffect::add(mCurrPaneLayoutWidget,
-						  ":/fxml/landscape_preview_pane_hide_on_right_gesture",
-						  "hide");
-			HbEffect::add(mPrevPaneLayoutWidget,
-						  ":/fxml/landscape_preview_pane_show_on_right_gesture",
-						  "show");
-		}
-		// Start the effects
-		HbEffect::start(mCurrPaneLayoutWidget, "hide");
-		HbEffect::start(mPrevPaneLayoutWidget, "show", 
-										this, "handleRightEffectCompleted");
-		
-		//Remove the mCurrPreviewPane from the layout and add mPrevPreviewPane
-		// to the layout
-		viewLayout->removeAt(1);
-		viewLayout->addItem(mPrevPaneParent);
-	} else {
-		// Need to bring up the previous day preview pane
-		// Create the effect on mCurrPreviewPane to slide to left side
-		mNextPaneParent->setVisible(true);
-		if (mOrientation == Qt::Vertical) {
-			HbEffect::add(mCurrPaneLayoutWidget,
-						  ":/fxml/portrait_preview_pane_hide_on_left_gesture",
-						  "hide");
-			HbEffect::add(mNextPaneLayoutWidget,
-						  ":/fxml/portrait_preview_pane_show_on_left_gesture",
-						  "show");
-		} else {
-			HbEffect::add(mCurrPaneLayoutWidget,
-						  ":/fxml/landscape_preview_pane_hide_on_left_gesture",
-						  "hide");
-			HbEffect::add(mNextPaneLayoutWidget,
-						  ":/fxml/landscape_preview_pane_show_on_left_gesture",
-						  "show");
-		}
-		
-		// Start the effects
-		HbEffect::start(mCurrPaneLayoutWidget, "hide");
-		HbEffect::start(mNextPaneLayoutWidget, "show", 
-										this, "handleLeftEffectCompleted");
-		
-		//Remove the mCurrPreviewPane from the layout and add mNextPreviewPane
-		// to the layout
-		viewLayout->removeAt(1);
-		viewLayout->addItem(mNextPaneParent);
-	}
+    // Check if we can swipe, if yes, then proceed, else, do nothing
+    if (checkIfWeCanSwipe(mDate, rightGesture)) {
+    
+        QGraphicsLinearLayout* viewLayout = static_cast<QGraphicsLinearLayout *>
+                                                    (widget()->layout());
+        
+        // Set the effect in progress flags for next and previous panes
+        // For current pane, we would have set it in gestureEvent() function
+        mPrevPreviewPane->effectStarted();
+        mNextPreviewPane->effectStarted();
+        
+        if(rightGesture) {
+            // Need to bring up the previous day preview pane
+            // Create the effect on mCurrPreviewPane to slide to right side
+            mPrevPaneParent->setVisible(true);
+            if (mOrientation == Qt::Vertical) {
+                HbEffect::add(mCurrPaneLayoutWidget,
+                              ":/fxml/portrait_preview_pane_hide_on_right_gesture",
+                              "hide");
+                HbEffect::add(mPrevPaneLayoutWidget,
+                              ":/fxml/portrait_preview_pane_show_on_right_gesture",
+                              "show");
+            } else {
+                HbEffect::add(mCurrPaneLayoutWidget,
+                              ":/fxml/landscape_preview_pane_hide_on_right_gesture",
+                              "hide");
+                HbEffect::add(mPrevPaneLayoutWidget,
+                              ":/fxml/landscape_preview_pane_show_on_right_gesture",
+                              "show");
+            }
+            // Start the effects
+            HbEffect::start(mCurrPaneLayoutWidget, "hide");
+            HbEffect::start(mPrevPaneLayoutWidget, "show", 
+                                            this, "handleRightEffectCompleted");
+            
+            //Remove the mCurrPreviewPane from the layout and add mPrevPreviewPane
+            // to the layout
+            viewLayout->removeAt(1);
+            viewLayout->addItem(mPrevPaneParent);
+        } else {
+            // Need to bring up the previous day preview pane
+            // Create the effect on mCurrPreviewPane to slide to left side
+            mNextPaneParent->setVisible(true);
+            if (mOrientation == Qt::Vertical) {
+                HbEffect::add(mCurrPaneLayoutWidget,
+                              ":/fxml/portrait_preview_pane_hide_on_left_gesture",
+                              "hide");
+                HbEffect::add(mNextPaneLayoutWidget,
+                              ":/fxml/portrait_preview_pane_show_on_left_gesture",
+                              "show");
+            } else {
+                HbEffect::add(mCurrPaneLayoutWidget,
+                              ":/fxml/landscape_preview_pane_hide_on_left_gesture",
+                              "hide");
+                HbEffect::add(mNextPaneLayoutWidget,
+                              ":/fxml/landscape_preview_pane_show_on_left_gesture",
+                              "show");
+            }
+            
+            // Start the effects
+            HbEffect::start(mCurrPaneLayoutWidget, "hide");
+            HbEffect::start(mNextPaneLayoutWidget, "show", 
+                                            this, "handleLeftEffectCompleted");
+            
+            //Remove the mCurrPreviewPane from the layout and add mNextPreviewPane
+            // to the layout
+            viewLayout->removeAt(1);
+            viewLayout->addItem(mNextPaneParent);
+        }
+    }
 	
 	OstTraceFunctionExit0( CALENMONTHVIEW_HANDLEPREVIEWPANEGESTURE_EXIT );
 }
@@ -1795,4 +1799,5 @@ void CalenMonthView::updateDayLabel()
     
     OstTraceFunctionExit0( CALENMONTHVIEW_UPDATEDAYLABEL_EXIT );
 }
+
 // End of file  --Don't remove this.

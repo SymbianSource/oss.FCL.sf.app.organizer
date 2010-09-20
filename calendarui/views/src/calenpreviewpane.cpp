@@ -395,27 +395,17 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
             // to know the direciton of the pan, until then we need
             // calculate the direction explicitly
             // Get to know the direction of the gesture
-            QPointF delta = gesture->delta();
-            // Check the current orientation of the device and
-            // swap the vertical and horizontal distances in landscape
-            qreal horizontalDiff = 0.0;
-            qreal verticalDiff = 0.0;
-            if (hbInstance->allMainWindows().at(0)->orientation() == Qt::Vertical) {
-                horizontalDiff = delta.x();
-                verticalDiff = delta.y();
-            } else {
-                horizontalDiff = delta.y();
-                verticalDiff = delta.x();
-            }
+            QPointF delta = gesture->sceneOffset();
+            // Check the horizontal and vertical offsets
+            qreal horizontalDiff = delta.x();
+            qreal verticalDiff = delta.y();
             if (abs(verticalDiff) > MAX_PAN_DIRECTION_THRESHOLD) {
                 // Now see if x coord diff has crossed threshold
                 if (horizontalDiff > MAX_PAN_DIRECTION_THRESHOLD) {
-                    mIsGestureHandled = true;
                     // right gesture
                     mView->handlePreviewPaneGesture(true);
                     event->accept(Qt::PanGesture);
                 } else if (horizontalDiff < -MAX_PAN_DIRECTION_THRESHOLD){
-                    mIsGestureHandled = true;
                     // left gesture
                     mView->handlePreviewPaneGesture(false);
                     event->accept(Qt::PanGesture);
@@ -429,12 +419,10 @@ void CalenPreviewPane::gestureEvent(QGestureEvent *event)
                 }
             } else if (abs(verticalDiff) < MAX_PAN_DIRECTION_THRESHOLD) {
                if (horizontalDiff > MIN_PAN_DIRECTION_THRESHOLD) {
-                   mIsGestureHandled = true;
                    // right gesture
                    mView->handlePreviewPaneGesture(true);
                    event->accept(Qt::PanGesture);
                } else if (horizontalDiff < -MIN_PAN_DIRECTION_THRESHOLD){
-                   mIsGestureHandled = true;
                    // left gesture
                    mView->handlePreviewPaneGesture(false);
                    event->accept(Qt::PanGesture);

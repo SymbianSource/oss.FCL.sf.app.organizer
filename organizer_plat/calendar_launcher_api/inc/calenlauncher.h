@@ -29,7 +29,8 @@ Q_OBJECT
 public:
 	enum CalenView{
 			MonthView = 0,
-			AgendaView
+			AgendaView,
+			DayView
 		};
     CalenLauncher(QObject* parent = 0);
     ~CalenLauncher();

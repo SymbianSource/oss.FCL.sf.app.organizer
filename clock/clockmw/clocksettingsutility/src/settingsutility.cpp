@@ -20,7 +20,10 @@
 #include <e32std.h>
 #include <QTime>
 #include <QDateTime>
+#include <xqsettingsmanager.h>
+#include <xqsettingskey.h>
 #include <HbGlobal>
+#include <clockdomaincrkeys.h>
 
 // User includes
 #include "settingsutility.h"
@@ -44,12 +47,20 @@ SettingsUtility::SettingsUtility(QObject *parent)
 {
 	OstTraceFunctionEntry0( SETTINGSUTILITY_SETTINGSUTILITY_ENTRY );
 	mTimeSeparatorList << tr(".") << tr(":");
-	mClockTypeList << hbTrId("txt_clock_button_digital") << hbTrId("txt_clock_button_analog");
+	mClockTypeList << hbTrId("txt_clock_button_analog") << hbTrId("txt_clock_button_digital");
 	mTimeFormatList << hbTrId("txt_clk_setlabel_val_24_hour") << hbTrId("txt_clk_setlabel_val_12_hour");
-	mDateFormatList << hbTrId("txt_clk_setlabel_val_dd_mm_yyyy") << hbTrId("txt_clk_setlabel_val_mm_dd_yyyy") << hbTrId("txt_clk_setlabel_val_yyyy_mm_dd");
+	mDisplayDateFormatList << hbTrId("txt_clk_setlabel_val_dd_mm_yyyy") << hbTrId("txt_clk_setlabel_val_mm_dd_yyyy") << hbTrId("txt_clk_setlabel_val_yyyy_mm_dd");
+	mDateFormatList << tr("dd mm yyyy") << tr("mm dd yyyy") << tr("yyyy mm dd");
 	mDateSeparatorList << tr(".") << tr(":") << tr("/") << tr("-");
 	mAutoUpdateValueList << tr("ON") << tr("OFF");
 	mSnoozeValueList << tr("5 minutes") << tr("15 minutes") << tr(" 30 minutes") << tr("1 hour");
+	
+	mSettingsManager = new XQSettingsManager(this);
+	mClockTypeSettingsKey = new XQSettingsKey(
+							XQSettingsKey::TargetCentralRepository,
+							KCRUidClockApp,
+							KClockType);
+		
 	OstTraceFunctionExit0( SETTINGSUTILITY_SETTINGSUTILITY_EXIT );
 }
 
@@ -59,7 +70,11 @@ SettingsUtility::SettingsUtility(QObject *parent)
 SettingsUtility::~SettingsUtility()
 {
 	OstTraceFunctionEntry0( DUP1_SETTINGSUTILITY_SETTINGSUTILITY_ENTRY );
-	// Nothing.
+	if(mSettingsManager) {
+		delete mSettingsManager;
+	}
+	// Delete the cenrep key
+	delete mClockTypeSettingsKey;
 	OstTraceFunctionExit0( DUP1_SETTINGSUTILITY_SETTINGSUTILITY_EXIT );
 }
 
@@ -118,16 +133,16 @@ int SettingsUtility::timeFormat(QStringList &format)
 void SettingsUtility::setClockType(const QString &type)
 {
 	OstTraceFunctionEntry0( SETTINGSUTILITY_SETCLOCKTYPE_ENTRY );
-	TLocale locale;
-
+	// Check the type and set the cenrep value
 	if (type == mClockTypeList.at(0)) {
-	    locale.SetClockFormat(EClockDigital);
-    } else if (type == mClockTypeList.at(1)) {
-	    locale.SetClockFormat(EClockAnalog);
-    } else {
+		// The value set for Analogue type is 0
+		mSettingsManager->writeItemValue(*mClockTypeSettingsKey, 0);
+	} else if (type == mClockTypeList.at(1)) {
+		// The value set for Digital type is 1
+		mSettingsManager->writeItemValue(*mClockTypeSettingsKey, 1);
+	} else {
     	// Nothing to do.
     }
-	locale.Set();
 	OstTraceFunctionExit0( SETTINGSUTILITY_SETCLOCKTYPE_EXIT );
 }
 
@@ -137,21 +152,17 @@ void SettingsUtility::setClockType(const QString &type)
 int SettingsUtility::clockType(QStringList &list)
 {
 	OstTraceFunctionEntry0( SETTINGSUTILITY_CLOCKTYPE_ENTRY );
-	TLocale locale;
-	int value = -1;
 
-	if (EClockAnalog == locale.ClockFormat()) {
-	    value = 1;
-    } else if (EClockDigital == locale.ClockFormat()){
-    	value = 0;
-    } else {
-    	// Nothing to do.
-    }
-
+	int clockType = -1;
+	// Read the clocktype value from the cenrep
+	// 0 is for Analogue type and 1 for Digital
+	QVariant value = mSettingsManager->readItemValue(*mClockTypeSettingsKey);
+	clockType = value.toInt();
+	
 	list = mClockTypeList;
-
 	OstTraceFunctionExit0( SETTINGSUTILITY_CLOCKTYPE_EXIT );
-	return value;
+	
+	return clockType;
 }
 
 /*!
@@ -212,8 +223,8 @@ void SettingsUtility::setDateFormat(const QString &format)
 	TLocale locale;
 	int index;
 
-	for (index = 0; index < mDateFormatList.count(); ++index) {
-		if (format == mDateFormatList.at(index)) {
+	for (index = 0; index < mDisplayDateFormatList.count(); ++index) {
+		if (format == mDisplayDateFormatList.at(index)) {
 			break;
 		}
 	}
@@ -261,7 +272,7 @@ int SettingsUtility::dateFormat(QStringList &format)
 			break;
 	}
 
-	format = mDateFormatList;
+	format = mDisplayDateFormatList;
 
 	OstTraceFunctionExit0( SETTINGSUTILITY_DATEFORMAT_EXIT );
 	return index;

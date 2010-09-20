@@ -26,8 +26,6 @@
 
 // Forward declarations
 class QGraphicsLinearLayout;
-class CalenDayModelManager;
-
 
 class CalenDayContentWidget : public HbWidget
 {
@@ -45,12 +43,11 @@ public:
     };
 
 public:
-    CalenDayContentWidget(CalenDayModelManager &modelManager,
-        QGraphicsItem *parent = 0);
+    CalenDayContentWidget(QGraphicsItem *parent = 0);
     ~CalenDayContentWidget();
 
-    void add(HbWidget* item, CalenWidgetPosition where = ECalenLastWidget);
-    HbWidget* take(CalenWidgetPosition which);
+    void add(HbWidget *item, CalenWidgetPosition where = ECalenLastWidget);
+    HbWidget *take(CalenWidgetPosition which);
     void remove(CalenWidgetPosition which);
 
 signals:
@@ -60,16 +57,11 @@ signals:
 public slots:
     void relayoutWidgets(CalenScrollDirection scrollTo);
     void widgetScrolled(const QPointF &newPos);
-    
-protected:
-    void initializeViews();
 
 private:
-    QGraphicsLinearLayout* mLayout; //!< Linear layout for day views
+    QGraphicsLinearLayout *mLayout; //!< Linear layout for day views
 
-    QList<HbWidget*> mWidgets; //!< List of widget instances
-    
-    CalenDayModelManager &mModelManager;  //!< Reference to model manager
+    QList<HbWidget *> mWidgets; //!< List of widget instances
 };
 
 #endif /* CALENDAYCONTENTWIDGET_H_ */

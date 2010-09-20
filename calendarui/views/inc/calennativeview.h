@@ -26,6 +26,8 @@
 #endif
 
 //  System includes
+#include <QObject>
+#include <QPointer>
 #include <hblabel.h>
 #include <hblistwidget.h>
 #include <hbabstractviewitem.h>
@@ -64,10 +66,11 @@ class  CalenNativeView : public CalenView,
 	    void HandleNotification( const TCalenNotification notification );
 	    virtual void onLocaleChanged(int reason)=0;
 	    virtual void onContextChanged() {};
-	
+	    virtual bool checkIfWeCanSwipe(QDateTime& date, bool rightGesture);
+	    
 	signals:
-		void closeDialogs();
-	
+			void closeDialogs();
+
 	protected slots:
 	
         void goToDate();
@@ -81,7 +84,9 @@ class  CalenNativeView : public CalenView,
 	     * 
 	     */
 	    void saveActivity();
-	    
+     private:
+	void refreshDatePicker();
+	
     protected:
     
         MCalenServices	&mServices; // not owned.
@@ -89,7 +94,7 @@ class  CalenNativeView : public CalenView,
         QVariantHash    mScreenShotMetadata; // Screenshot
         bool mEntriesInDataBase;
     private:
-        HbDateTimePicker	*mDatePicker;
+        QPointer<HbDateTimePicker> mDatePicker;
         bool                mIsCapturedScreenShotValid; // to check if the captured screenshot is valid
 	};
 

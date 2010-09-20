@@ -18,4 +18,5 @@ EXPORTS
 	?futureOf@CalenDateUtils@@SA?AVQDateTime@@ABV2@H@Z @ 17 NONAME ; class QDateTime CalenDateUtils::futureOf(class QDateTime const &, int)
 	?now@CalenDateUtils@@SA?AVQDateTime@@XZ @ 18 NONAME ; class QDateTime CalenDateUtils::now(void)
 	?isAlldayEvent@CalenAgendaUtils@@SA_NABVAgendaEntry@@@Z @ 19 NONAME ; bool CalenAgendaUtils::isAlldayEvent(class AgendaEntry const &)
+	?dateFormatString@CalenDateUtils@@SA?AVQString@@XZ @ 20 NONAME ; class QString CalenDateUtils::dateFormatString(void)
 

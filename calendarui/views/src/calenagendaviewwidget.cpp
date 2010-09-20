@@ -319,7 +319,10 @@ void CalenAgendaViewWidget::initChildWidgets()
     
     // TODO : remove this line after gestures are available
     mEventsList->installEventFilter(mView);
-
+    
+    // Enable the pixmap cache for better scrolling performance
+    mEventsList->setItemPixmapCacheEnabled(true);
+        
     // Connect to the long press and activation signals
     connect(mEventsList, SIGNAL(longPressed(HbAbstractViewItem*, const QPointF&)),
             this, SLOT(itemLongPressed(HbAbstractViewItem*, const QPointF&)));

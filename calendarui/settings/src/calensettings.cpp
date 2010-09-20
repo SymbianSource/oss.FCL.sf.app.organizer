@@ -57,6 +57,9 @@ CalenSettings::CalenSettings(MCalenServices& services, HbDataForm *form, QObject
 	mShowRegionalInfoKey = new XQSettingsKey(
 			XQSettingsKey::TargetCentralRepository,
 			KCRUidCalendar, KCalendarShowRegionalInfo);
+	
+	// Enable the pixmap cache for better scrolling performance
+	mSettingsForm->setItemPixmapCacheEnabled(true);
 }
 
 /*!
@@ -310,9 +313,10 @@ void CalenSettings::addWeekNumberItem()
 	mShowWeekNumberItem->setData(HbDataFormModelItem::LabelRole, 
 					QString(hbTrId("txt_calendar_setlabel_show_week_numbers")));
 	mShowWeekNumberItem->setContentWidgetData("objectName", "showWeekNumber");
-	mSettingsModel->appendDataFormItem(mShowWeekNumberItem);
 	mSettingsForm->addConnection(mShowWeekNumberItem, SIGNAL(clicked()), 
 									this, SLOT(handleWeekNumberChange()));
+	mSettingsModel->appendDataFormItem(mShowWeekNumberItem);
+
 }
 
 /*!

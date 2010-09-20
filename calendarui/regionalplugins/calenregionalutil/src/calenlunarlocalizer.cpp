@@ -21,6 +21,7 @@
 #include <qstringlist.h>
 #include <hbi18ndef.h>
 #include <hbglobal.h>
+#include <hbparameterlengthlimiter.h>
 
 #include <badesca.h> 
 #include <eikenv.h>
@@ -184,36 +185,52 @@ EXPORT_C CCalenLunarLocalizedInfo* CCalenLunarLocalizer::LocalizeL( TCalenLunarI
 	if ( aInfo.HasFestival() ) 
 	{
 		QString festival = iFestivalNames.at(aInfo.iFestival);
-		localized->iFestival.Set( static_cast<const TUint16*>(festival.utf16()),festival.length());
+		localized->iFestival.Set( 
+			static_cast<const TUint16*>(festival.utf16()),festival.length());
 	}
 
 	if ( aInfo.HasSolarTerm() ) 
 	{
 		QString solarTerm = iSolarTermNames.at(aInfo.iSolarTerm);
-		localized->iSolarTerm.Set( static_cast<const TUint16*>(solarTerm.utf16()),solarTerm.length());
+		localized->iSolarTerm.Set( 
+			static_cast<const TUint16*>(solarTerm.utf16()),solarTerm.length());
 	}
 
 	// Animal year
 	QString animalYear = iAnimalYearNames.at(aInfo.AnimalYear());
-	localized->iAnimalYear.Set( static_cast<const TUint16*>(animalYear.utf16()),animalYear.length());
+	localized->iAnimalYear.Set( 
+		static_cast<const TUint16*>(animalYear.utf16()),animalYear.length());
 
 	// Lunar year
 	QString heavenlyStemNames = iHeavenlyStemNames.at(aInfo.iHeavenlyStem);
-	QString terrestialBranchNames = iTerrestialBranchNames.at(aInfo.iTerrestialBranch);
-	QString lunarYear = hbTrId("txt_calendar_info_lunar_year").arg(heavenlyStemNames).arg(terrestialBranchNames);
-	localized->iLunarYear = static_cast<const TUint16*> (lunarYear.utf16()), lunarYear.length();
+	QString terrestialBranchNames = 
+						iTerrestialBranchNames.at(aInfo.iTerrestialBranch);
+	QString lunarYear = HbParameterLengthLimiter(
+						hbTrId("txt_calendar_info_lunar_year")).arg(
+						heavenlyStemNames).arg(terrestialBranchNames);
+	localized->iLunarYear = 
+			static_cast<const TUint16*> (lunarYear.utf16()), lunarYear.length();
 
 	LocalizeMonthAndDayL(localized, aInfo);
 
-	QString monthAndDay = QString::fromUtf16(localized->LunarMonthAndDay().Ptr(),localized->LunarMonthAndDay().Length());
-	QString yearString = QString::fromUtf16(localized->LunarYear().Ptr(),localized->LunarYear().Length());
-	QString fullLunarDate = hbTrId("txt_calendar_info_lunar_full_date").arg(monthAndDay).arg(yearString);
+	QString monthAndDay = 
+			QString::fromUtf16(localized->LunarMonthAndDay().Ptr(),
+								localized->LunarMonthAndDay().Length());
+	QString yearString = 
+			QString::fromUtf16(localized->LunarYear().Ptr(),
+								localized->LunarYear().Length());
+	QString fullLunarDate = HbParameterLengthLimiter(
+							hbTrId("txt_calendar_info_lunar_full_date")).arg(
+							monthAndDay).arg(yearString);
 	
-	localized->iFullLunarDate = static_cast<const TUint16*> (fullLunarDate.utf16()), fullLunarDate.length();
+	localized->iFullLunarDate = 
+			static_cast<const TUint16*> (fullLunarDate.utf16()), 
+													fullLunarDate.length();
 
 	QString format(r_qtn_date_usual_with_zero);
 	TBuf<100> gregFormatBuf;
-	gregFormatBuf = static_cast<const TUint16*> (format.utf16()), format.length();
+	gregFormatBuf = 
+			static_cast<const TUint16*> (format.utf16()), format.length();
 	
 	aInfo.iGregorianDate.FormatL( localized->iGregorianDate, gregFormatBuf );
 
@@ -262,13 +279,13 @@ void CCalenLunarLocalizer::LocalizeMonthAndDayL(CCalenLunarLocalizedInfo* aLocIn
 
 	QString formattedString;
 	if(aInfo.iLunarDate.iLeapMonth) {
-		formattedString = hbTrId(
-						"txt_calendar_info_lunar_leap_date").arg(
+		formattedString = HbParameterLengthLimiter(hbTrId(
+						"txt_calendar_info_lunar_leap_date")).arg(
 						QString((QChar*)month.Ptr(),month.Length())).arg(
 						QString((QChar*)day.Ptr(),day.Length()));
 	}else {
-		formattedString = hbTrId(
-						"txt_calendar_info_lunar_date").arg(
+		formattedString = HbParameterLengthLimiter(hbTrId(
+						"txt_calendar_info_lunar_date")).arg(
 						QString((QChar*)month.Ptr(),month.Length())).arg(
 						QString((QChar*)day.Ptr(),day.Length()));
 	}

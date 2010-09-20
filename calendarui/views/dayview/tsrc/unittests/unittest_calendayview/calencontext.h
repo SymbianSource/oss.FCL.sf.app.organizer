@@ -52,6 +52,13 @@ public:
 		{
 		return QDateTime(QDate(2000, 10, 10));
 		}
+    
+	void setFocusDateAndTimeAndInstance( const QDateTime& focusDateTime,
+                                         const TCalenInstanceId& aInstanceId )
+    {
+        Q_UNUSED(focusDateTime);
+        Q_UNUSED(aInstanceId);
+    }
 
 	};
 

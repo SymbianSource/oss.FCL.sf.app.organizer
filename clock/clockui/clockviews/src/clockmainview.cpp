@@ -29,6 +29,9 @@
 #include <HbColorScheme>
 #include <HbApplication> // hbapplication
 #include <HbActivityManager> // activity manager
+#include <xqsettingsmanager.h>
+#include <xqsettingskey.h>
+#include <clockdomaincrkeys.h>
 
 // User includes
 #include "clockmainview.h"
@@ -86,6 +89,12 @@ ClockMainView::~ClockMainView()
 		delete mAlarmListModel;
 		mAlarmListModel = 0;
 	}
+	if (mSettingsManager) {
+		delete mSettingsManager;
+	}
+	// Delete cenrep key
+	delete mClockTypeSettingsKey;
+	
 	HbStyleLoader::unregisterFilePath(
 			":/style/clockalarmlistitemprototype.css");
 	HbStyleLoader::unregisterFilePath(
@@ -279,6 +288,16 @@ void ClockMainView::setupAfterViewReady()
 	connect(
 			mTimezoneClient, SIGNAL(cityUpdated()),
 			this, SLOT(updatePlaceLabel()));
+	
+	// Connect for the clock type changes to refresh the view
+	mSettingsManager = new XQSettingsManager(this);
+	mClockTypeSettingsKey = new XQSettingsKey(
+							XQSettingsKey::TargetCentralRepository,
+							KCRUidClockApp,
+							KClockType);
+	mSettingsManager->startMonitoring(*mClockTypeSettingsKey);
+	connect(mSettingsManager, SIGNAL(valueChanged(XQSettingsKey, QVariant)),
+				this, SLOT(eventMonitor(XQSettingsKey, QVariant)));
 	
 	OstTraceFunctionExit0( CLOCKMAINVIEW_SETUPAFTERVIEWREADY_EXIT );
 }
@@ -495,6 +514,24 @@ void ClockMainView::removeSnoozedAlarm()
 	}
 	OstTraceFunctionExit0( CLOCKMAINVIEW_REMOVESNOOZEDALARM_EXIT );
 }
+
+/*!
+	Slot which is called when the value changes in cenrep.
+
+	\param key The key which got changed in cenrep.
+	\param value The new value of that key.
+ */
+void ClockMainView::eventMonitor(
+		const XQSettingsKey& key, const QVariant& value)
+{
+	OstTraceFunctionEntry0( CLOCKMAINVIEW_EVENTMONITOR_ENTRY );
+	if (key.uid() == KCRUidClockApp && key.key() == KClockType) {
+		// Update view
+		updateView();
+	}
+	OstTraceFunctionExit0( CLOCKMAINVIEW_EVENTMONITOR_EXIT );
+}
+
 
 void ClockMainView::updateView()
 {
@@ -761,9 +798,9 @@ void ClockMainView::updateClockWidget()
     int index = mSettingsUtility->clockType(clockType);
     int zeroIndex(0);
     if(zeroIndex == index){
-    	mClockWidget->setClockType(ClockWidget::ClockTypeDigital);
-    } else {
     	mClockWidget->setClockType(ClockWidget::ClockTypeAnalog);
+    } else {
+    	mClockWidget->setClockType(ClockWidget::ClockTypeDigital);
     }
     
     QStringList timeFormat;

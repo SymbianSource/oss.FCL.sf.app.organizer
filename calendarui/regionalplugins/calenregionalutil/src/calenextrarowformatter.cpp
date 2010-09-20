@@ -20,6 +20,7 @@
 
 #include <badesca.h> 
 #include <eikenv.h>
+#include <hbparameterlengthlimiter.h>
 
 #include "calendarui_debug.h"
 #include "CalenExtraRowFormatter.h"
@@ -222,15 +223,14 @@ EXPORT_C TPtrC CCalenExtraRowFormatter::FormatExtraRowInformationL(
 	
 	// Format all fields to single row 
 	QString textDataString;
-	textDataString = hbTrId(
-						"txt_calendar_preview_title_123242526").arg(
+	textDataString = HbParameterLengthLimiter(
+							hbTrId("txt_calendar_preview_title_123242526")).arg(
 							textDataStringList.at(0)).arg(
-								separator).arg(
-									textDataStringList.at(1)).arg(
-										textDataStringList.at(2)).arg(
-											textDataStringList.at(3)).arg(
-												textDataStringList.at(4));
-
+							separator).arg(textDataStringList.at(1)).arg(
+							separator).arg(textDataStringList.at(2)).arg(
+							separator).arg(textDataStringList.at(3)).arg(
+							separator).arg(textDataStringList.at(4));
+	
 	iText = static_cast<const TUint16*> (
 							textDataString.utf16()), textDataString.length();
 

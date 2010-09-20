@@ -48,6 +48,10 @@ void CalenServiceProvider::launchCalendarApp(const QDateTime& date, int viewId)
 			// Launch the agenda view
 			mController->handleServiceManagerSlot(ECalenAgendaView, date);
 			break;
+		case CalenLauncher::DayView:
+	    // Launch the day view
+	    mController->handleServiceManagerSlot(ECalenDayView, date);
+	    break;
 		default:
 			// Keep Quiet
 			break;

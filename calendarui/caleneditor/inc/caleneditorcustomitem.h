@@ -88,8 +88,8 @@ private:
 	HbPushButton *mRepeatUntilWidget;
 	HbPushButton *mReminderTimeWidget;
 
-	HbDateTimePicker *mDatePicker;
-	HbDateTimePicker *mTimePicker;
+	QPointer<HbDateTimePicker> mDatePicker;
+	QPointer<HbDateTimePicker> mTimePicker;
 
 	HbExtendedLocale mLocale;
 	

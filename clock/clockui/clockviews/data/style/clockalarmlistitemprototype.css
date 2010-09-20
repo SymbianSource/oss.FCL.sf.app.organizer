@@ -3,7 +3,6 @@ ClockAlarmListItemPrototype{
 }
 
 ClockAlarmListItemPrototype::icon-1{
-    top: -var(hb-param-margin-gene-middle-vertical);
     fixed-width: var(hb-param-graphic-size-secondary);
     fixed-height: var(hb-param-graphic-size-secondary);
     left: -6.5un;

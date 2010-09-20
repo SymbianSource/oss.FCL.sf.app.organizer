@@ -120,6 +120,11 @@ public:
     static QDateTime defaultTime( const QDateTime& date );
     
     static QDateTime futureOf(const QDateTime& dateTime, int numOfDays);
+	
+    /**
+     * @return the dateformat based current locale settings.
+     */
+    static  QString dateFormatString();
     
    
 private:

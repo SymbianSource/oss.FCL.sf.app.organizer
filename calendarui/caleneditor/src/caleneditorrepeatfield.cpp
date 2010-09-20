@@ -96,6 +96,7 @@ CalenEditorRepeatField::CalenEditorRepeatField(CalenEditorPrivate* calenEditor,
 	mRepeatItem(0),
 	mRepeatComboBox(0),
 	mCustomRepeatUntilItem(0),
+	mDatePicker(0),
 	mRepeatRoleValue(0),
 	mIsBiWeekly(false),
 	mIsWorkdays(false),
@@ -489,6 +490,7 @@ bool CalenEditorRepeatField::isRepeatUntilItemAdded()
 void CalenEditorRepeatField::launchRepeatUntilDatePicker()
 {
 	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_LAUNCHREPEATUNTILDATEPICKER_ENTRY );
+	QDate minDate;
 	HbDialog *popUp = new HbDialog();
 	// Set the parent for the dialog
 	// Once the parent object is deleted the dialog will also be deleted
@@ -502,36 +504,26 @@ void CalenEditorRepeatField::launchRepeatUntilDatePicker()
 	if (mDatePicker) {
 		mDatePicker = 0;
 	}
+	mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
+
 	if (mRepeatRuleType == AgendaRepeatRule::DailyRule) {
-		QDate minDate = mCalenEditor->editedEntry()->endTime().date().addDays(1);
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
-		mDatePicker->setMinimumDate(minDate);
-		mDatePicker->setMaximumDate(CalenDateUtils::maxTime().date());
-		mDatePicker->setDate(mRepeatUntilDate);
+		minDate = mCalenEditor->editedEntry()->endTime().date().addDays(1);
 	} else if (mRepeatRuleType == AgendaRepeatRule::WeeklyRule) {
-		QDate minDate;
 		if (!mIsBiWeekly || mIsWorkdays) {
 			minDate = mCalenEditor->editedEntry()->endTime().date().addDays(7);
 		} else {
 			minDate = mCalenEditor->editedEntry()->endTime().date().addDays(14);
 		}
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
-		mDatePicker->setMinimumDate(minDate);
-		mDatePicker->setMaximumDate(CalenDateUtils::maxTime().date());
-		mDatePicker->setDate(mRepeatUntilDate);
 	} else if (mRepeatRuleType == AgendaRepeatRule::MonthlyRule) {
-		QDate minDate = mCalenEditor->editedEntry()->endTime().date().addMonths(1);
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
-		mDatePicker->setMinimumDate(minDate);
-		mDatePicker->setMaximumDate(CalenDateUtils::maxTime().date());
-		mDatePicker->setDate(mRepeatUntilDate);
+		minDate = mCalenEditor->editedEntry()->endTime().date().addMonths(1);
 	} else if (mRepeatRuleType == AgendaRepeatRule::YearlyRule) {
-		QDate minDate = mCalenEditor->editedEntry()->endTime().date().addYears(1);
-		mDatePicker = new HbDateTimePicker(mRepeatUntilDate, popUp);
-		mDatePicker->setMinimumDate(minDate);
-		mDatePicker->setMaximumDate(CalenDateUtils::maxTime().date());
-		mDatePicker->setDate(mRepeatUntilDate);
+		minDate = mCalenEditor->editedEntry()->endTime().date().addYears(1);
 	}
+	
+	mDatePicker->setMinimumDate(minDate);
+	mDatePicker->setMaximumDate(CalenDateUtils::maxTime().date());
+	mDatePicker->setDisplayFormat(CalenDateUtils::dateFormatString());
+	mDatePicker->setDate(mRepeatUntilDate);
 	popUp->setContentWidget(mDatePicker);
 	
 	HbAction *okAction = new HbAction(hbTrId("txt_common_button_ok"));
@@ -543,6 +535,21 @@ void CalenEditorRepeatField::launchRepeatUntilDatePicker()
 }
 
 /*!
+	Refreshes the repeat until date picker when locale with proper date format
+ */
+void CalenEditorRepeatField::refreshRepeatUntilDate()
+{
+	HbExtendedLocale locale = HbExtendedLocale::system();
+        QString dateString = locale.format(mRepeatUntilDate,
+                                r_qtn_date_usual_with_zero);
+        mCustomRepeatUntilItem->setContentWidgetData("text", dateString);
+     
+        if(!(mDatePicker.isNull())) {
+		mDatePicker->setDisplayFormat(CalenDateUtils::dateFormatString());
+		mDatePicker->setDate(mRepeatUntilDate);
+	}
+}
+/*!
 	Sets the repeat until date on the repeat until item
  */
 void CalenEditorRepeatField::setRepeatUntilDate()
@@ -550,13 +557,9 @@ void CalenEditorRepeatField::setRepeatUntilDate()
 	OstTraceFunctionEntry0( CALENEDITORREPEATFIELD_SETREPEATUNTILDATE_ENTRY );
 	//Get the previous date which was set
 	QDate previousDate = mRepeatUntilDate;
-	mRepeatUntilDate = mDatePicker->date();
-	if (mRepeatUntilDate.isValid()) {
-		HbExtendedLocale locale = HbExtendedLocale::system();
-		QString dateString = locale.format(mRepeatUntilDate,
-									r_qtn_date_usual_with_zero);
-		mCustomRepeatUntilItem->setContentWidgetData("text", dateString);
-	}
+	 mRepeatUntilDate = mDatePicker->date();
+         if (mRepeatUntilDate.isValid()) 
+		refreshRepeatUntilDate();
 	mCalenEditor->updateReminderChoices();
 	// If the entry's  repeatuntil date is changed from past to a future date
 	// And if the alarm set set is off 

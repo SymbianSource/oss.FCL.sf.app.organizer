@@ -6,7 +6,7 @@
         <meshitem src="text-1" srcEdge="RIGHT" dst="text-2" dstEdge="LEFT" />
  
 		<!-- For the alarm repeat icon item -->
-		<meshitem src="icon-1" srcEdge="TOP" dst="text-1" dstEdge="BOTTOM" />
+		<meshitem src="icon-1" srcEdge="BOTTOM" dst="text-4" dstEdge="BOTTOM" />
 		<meshitem src="icon-1" srcEdge="RIGHT" dst="text-1" dstEdge="RIGHT" />
 		
 		<!-- For the alarm remiainting time item -->

@@ -55,6 +55,9 @@ public:
     void scrollTo(
         const QModelIndex &index,
         HbAbstractItemView::ScrollHint hint = EnsureVisible);
+    
+    HbMenu *contextMenu() const;
+    void setContextMenu(HbMenu *contextMenu);
 
 public slots:
 

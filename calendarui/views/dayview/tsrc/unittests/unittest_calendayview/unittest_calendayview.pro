@@ -25,12 +25,17 @@ CONFIG += hb
 				
 INCLUDEPATH += . \
                ../../../inc/ \
-               ../../../../../inc/
+               ../../../../inc/ \
+               ../../../../traces/ \
+               ../../../../../inc/ \
+               
 
 DEPENDPATH  += . \
                ../../../inc/ \
                ../../../src/ \
-               ../../../../../inc/
+               ../../../../inc/ \
+               ../../../../src/ \
+               ../../../../../inc/ 
 
 # Input
 HEADERS +=	hbeffect.h \
@@ -50,12 +55,24 @@ HEADERS +=	hbeffect.h \
 			calendaycontentscrollarea.h \
 			calendayhourscrollarea.h \
 			calendayutils.h \
-			calendateutils.h \
 			calendayview.h \
-			calencommon.h
+			calencommon.h \
+			calendayitemview.h \
+			calendaycontainer.h \
+			calendayeventspane.h \
+			calendayitem.h \
+			calendaystatusstrip.h
 
 SOURCES +=	unittest_calendayview.cpp \
-			calendayview.cpp 
+			calendayview.cpp \
+			calennativeview.cpp \
+			calendaycontentwidget.cpp \
+            calendayitemview.cpp \
+            calendayutils.cpp \
+            calendaycontainer.cpp \
+            calendayeventspane.cpp \
+            calendayitem.cpp \
+            calendaystatusstrip.cpp
 
 symbian : {
 	TARGET.CAPABILITY = CAP_APPLICATION
@@ -64,7 +81,8 @@ symbian : {
     INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
     
         LIBS += -lagendainterface \
-    		-lxqsettingsmanager
+    		-lxqsettingsmanager \
+    		-lcalencommonutils
 }
 
 # End of file	--Don't remove this.

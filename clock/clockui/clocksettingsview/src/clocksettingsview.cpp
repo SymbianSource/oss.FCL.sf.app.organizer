@@ -105,10 +105,14 @@ ClockSettingsView::ClockSettingsView(QObject *parent, HbTranslator *translator, 
 			XQSettingsKey::TargetCentralRepository,
 			KCRUidClockApp,
 			KClockAppSnoozeTime);
-	
-	// Start the monitoring for the alarm snooze time key.
+	// Create the key for clock type.
+	mClockTypeKey = new XQSettingsKey(
+			XQSettingsKey::TargetCentralRepository,
+			KCRUidClockApp,
+			KClockType);
+	// Start the monitoring for the alarm snooze time key and clock type.
 	mSettingsManager->startMonitoring(*mAlarmSnoozeTimeKey);
-
+	mSettingsManager->startMonitoring(*mClockTypeKey);
 	// Listen to the key value changes.
 	connect(
 			mSettingsManager, SIGNAL(valueChanged(XQSettingsKey, QVariant)),
@@ -125,7 +129,6 @@ ClockSettingsView::~ClockSettingsView()
 	if (mDocLoader) {
 		delete mDocLoader;
 	}
-	
 	// Remove the translator
     if (mTranslator) {
         delete mTranslator;
@@ -134,12 +137,16 @@ ClockSettingsView::~ClockSettingsView()
     if(mSettingsUtility){
     	delete mSettingsUtility;
     }
+	if(mSettingsManager) {
+		delete mSettingsManager;
+	}
+	// Delete cenrep keys
+	delete mAlarmSnoozeTimeKey;
+	delete mClockTypeKey;
 	
 	if(mSettingsModel){
 		delete mSettingsModel;
 	}
-		
-
 	OstTraceFunctionExit0( DUP1_CLOCKSETTINGSVIEW_CLOCKSETTINGSVIEW_EXIT );
 }
 
@@ -454,8 +461,8 @@ void ClockSettingsView::populateModel()
     }
     mClockTypeItem->setContentWidgetData("objectName", "clockType");
     mSettingsForm->addConnection(
-            mClockTypeItem, SIGNAL(clicked()),
-            this, SLOT(handleClockTypeChanged()));
+					mClockTypeItem, SIGNAL(clicked()),
+					this, SLOT(handleClockTypeChanged()));
     
     // Add the alarm snooze time item.
 	mAlarmSnoozeItem = mSettingsModel->appendDataFormItem(
@@ -558,8 +565,7 @@ void ClockSettingsView::handleAlarmSnoozeTimeChanged(int index)
 void ClockSettingsView::handleClockTypeChanged()
 {
 	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_HANDLECLOCKTYPECHANGED_ENTRY );
-	mSettingsUtility->setClockType(
-			mClockTypeItem->contentWidgetData("text").toString());
+	mSettingsUtility->setClockType(mClockTypeItem->contentWidgetData("text").toString());
 	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_HANDLECLOCKTYPECHANGED_EXIT );
 }
 
@@ -573,17 +579,23 @@ void ClockSettingsView::eventMonitor(
 		const XQSettingsKey& key, const QVariant& value)
 {
 	OstTraceFunctionEntry0( CLOCKSETTINGSVIEW_EVENTMONITOR_ENTRY );
-	if (key.uid() == KCRUidClockApp && key.key() == KClockAppSnoozeTime) {
-		if (mSettingsManager->error() == XQSettingsManager::NoError) {
+	if (key.uid() == KCRUidClockApp) {
+		// Update the snooze time
+		if(key.key() == KClockAppSnoozeTime) {
+			if (mSettingsManager->error() == XQSettingsManager::NoError) {
 
-			bool success;
-			int alarmSnoozeTime = value.toInt(&success);
-			
-			if (success) {
-				mAlarmSnoozeItem->setContentWidgetData(
-						"currentIndex", mAlarmSnoozeTimeHash.key(
-								alarmSnoozeTime));
+				bool success;
+				int alarmSnoozeTime = value.toInt(&success);
+
+				if (success) {
+					mAlarmSnoozeItem->setContentWidgetData(
+							"currentIndex", mAlarmSnoozeTimeHash.key(
+									alarmSnoozeTime));
+				}
 			}
+		}else if(key.key() == KClockType) {
+			// Update the clock type when its changed
+			updateClockType();
 		}
 	}
 	OstTraceFunctionExit0( CLOCKSETTINGSVIEW_EVENTMONITOR_EXIT );

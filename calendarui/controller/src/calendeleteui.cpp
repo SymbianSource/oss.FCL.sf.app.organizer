@@ -107,6 +107,7 @@ void CalenDeleteUi::ConstructL()
     RArray<TCalenNotification> notifications;
     notifications.Append(ECalenNotifyCancelDelete);
     notifications.Append(ECalenNotifyCloseDialogs);
+    notifications.Append(ECalenNotifySystemLocaleChanged);
     
     iController.RegisterForNotificationsL( this, notifications );
     
@@ -115,6 +116,7 @@ void CalenDeleteUi::ConstructL()
     iMoreEntriesToDelete = EFalse;
     iDisplayQuery = EFalse;
     iEntriesToDelete = KEntriesToDelete;
+    mDatePicker = 0;
     
     OstTraceFunctionExit0( CALENDELETEUI_CONSTRUCTL_EXIT );
     }
@@ -128,24 +130,33 @@ void CalenDeleteUi::ConstructL()
 void CalenDeleteUi::HandleNotification(const TCalenNotification aNotification )
     {
     OstTraceFunctionEntry0( CALENDELETEUI_HANDLENOTIFICATION_ENTRY );
-
-    if( aNotification == ECalenNotifyCancelDelete)
-        {
-        if(iMutlipleContextIdsCount)
-            {
-            // get the context
-            MCalenContext& context = iController.context();
-            // reset the multiple contexts
-            context.resetMultipleContextIds();          
-           
-            }
+    switch(aNotification)  {
+    	case ECalenNotifyCancelDelete:  {
+        	if(iMutlipleContextIdsCount)
+           	 {
+           		 // get the context
+          		  MCalenContext& context = iController.context();
+           		 // reset the multiple contexts
+          		  context.resetMultipleContextIds();          
+           	 }
+		break;
         }
-    else if (aNotification == ECalenNotifyCloseDialogs )
-        {
-    	// Emit the signal to close all the dialogs which are already opened
-    	emit closeDialogs();
+    	case ECalenNotifyCloseDialogs:  {
+    		// Emit the signal to close all the dialogs which are already opened
+    		emit closeDialogs();
+		break;
         }
-    
+	case ECalenNotifySystemLocaleChanged: {
+		//Refresh the date picker of Date query when deleting entries before date
+		if(!(mDatePicker.isNull())) {
+			mDatePicker->setDisplayFormat(CalenDateUtils::dateFormatString());
+			mDatePicker->setDate(QDate::currentDate());
+		}
+		break;
+	}
+	default:
+		break;
+    }
     OstTraceFunctionExit0( CALENDELETEUI_HANDLENOTIFICATION_EXIT );
     }
 
@@ -411,6 +422,7 @@ void CalenDeleteUi::dateQuery()
 	mDatePicker = new  HbDateTimePicker(popUp);
 	mDatePicker->setMinimumDate(CalenDateUtils::minTime().date());
 	mDatePicker->setMaximumDate(currentDate);
+	mDatePicker->setDisplayFormat(CalenDateUtils::dateFormatString());
 	mDatePicker->setDate(currentDate);
 
 	popUp->setContentWidget(mDatePicker);  

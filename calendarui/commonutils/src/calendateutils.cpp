@@ -23,6 +23,8 @@
 #include "calendateutils.h"
 #include <agendautil.h>
 
+#include <hbextendedlocale.h>
+
 //  LOCAL CONSTANTS AND MACROS
 const int KDefaultStartTime(8);    // 8 am ( 0 to 23 hour scale)
 
@@ -266,4 +268,42 @@ const int KDefaultStartTime(8);    // 8 am ( 0 to 23 hour scale)
      result.setTime(dateTime.time());
      return result;
      }
+ 
+ /*!
+	 Retruns the dateformat based current locale settings.
+  */
+ QString CalenDateUtils::dateFormatString()
+ {
+	 HbExtendedLocale locale = HbExtendedLocale::system();
+ 
+	 QString dateFormat;
+	 switch (locale.dateStyle()) {
+		 case HbExtendedLocale::American:
+			 dateFormat.append("MM");
+			 dateFormat.append(locale.dateSeparator(1));
+			 dateFormat.append("dd");
+			 dateFormat.append(locale.dateSeparator(1));
+			 dateFormat.append("yyyy");
+			 break;
+ 
+		 case HbExtendedLocale::European:
+			 dateFormat.append("dd");
+			 dateFormat.append(locale.dateSeparator(1));
+			 dateFormat.append("MM");
+			 dateFormat.append(locale.dateSeparator(1));
+			 dateFormat.append("yyyy");
+			 break;
+ 
+		 case HbExtendedLocale::Japanese:
+			 dateFormat.append("yyyy");
+			 dateFormat.append(locale.dateSeparator(1));
+			 dateFormat.append("MM");
+			 dateFormat.append(locale.dateSeparator(1));
+			 dateFormat.append("dd");
+			 break;
+	 }
+ 
+	 return dateFormat;
+ }
+ 
 // End of File

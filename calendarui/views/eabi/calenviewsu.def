@@ -267,4 +267,6 @@ EXPORTS
 	_ZThn8_N22CalenDayHourScrollAreaD1Ev @ 266 NONAME
 	_ZThn8_N25CalenDayContentScrollAreaD0Ev @ 267 NONAME
 	_ZThn8_N25CalenDayContentScrollAreaD1Ev @ 268 NONAME
+	_ZN14CalenMonthGrid18checkIfWeCanScrollE15scrollDirection @ 269 NONAME
+	_ZN21CalenThickLinesDrawer6polishER17HbStyleParameters @ 270 NONAME
 

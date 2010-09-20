@@ -207,4 +207,6 @@ EXPORTS
 	?getActiveDay@CalenMonthView@@QAE?AVQDateTime@@XZ @ 206 NONAME ; class QDateTime CalenMonthView::getActiveDay(void)
 	?addRemoveActionsInMenu@CalenMonthView@@AAEXXZ @ 207 NONAME ; void CalenMonthView::addRemoveActionsInMenu(void)
 	??1CalenDayContentScrollArea@@UAE@XZ @ 208 NONAME ; CalenDayContentScrollArea::~CalenDayContentScrollArea(void)
+	?polish@CalenThickLinesDrawer@@MAEXAAVHbStyleParameters@@@Z @ 209 NONAME ; void CalenThickLinesDrawer::polish(class HbStyleParameters &)
+	?checkIfWeCanScroll@CalenMonthGrid@@AAE_NW4scrollDirection@@@Z @ 210 NONAME ; bool CalenMonthGrid::checkIfWeCanScroll(enum scrollDirection)
 

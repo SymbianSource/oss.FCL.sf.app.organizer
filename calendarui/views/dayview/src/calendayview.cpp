@@ -29,6 +29,7 @@
 #include <HbStyleLoader>
 #include <HbGroupBox>
 #include <HbExtendedLocale>
+#include <HbModelIterator>
 #include <agendautil.h>
 
 // User includes
@@ -41,6 +42,7 @@
 #include "calendaycontentscrollarea.h"
 #include "calendaycontentwidget.h"
 #include "calendayhourscrollarea.h"
+#include "calendayitemview.h"
 #include "calendaymodelmanager.h"
 #include "CalenUid.h"
 #include "CalendarPrivateCRKeys.h"
@@ -70,8 +72,9 @@ CalenDayView::CalenDayView(MCalenServices &services) :
     mSettingsManager = new XQSettingsManager(this);
     mSettingsManager->startMonitoring(mRegionalInfoKey);
 
-    //setup Back functionality
-    if (ECalenDayView != mServices.getFirstView()) {
+    //setup Back functionality, launch the month view only when it is
+	// the first view
+    if (ECalenMonthView == mServices.getFirstView()) {
         HbAction* action = new HbAction(Hb::BackNaviAction, this);
         setNavigationAction(action);
         // Connect to the signal triggered by clicking on back button.
@@ -208,9 +211,10 @@ void CalenDayView::setupView(CalenDocLoader* docLoader)
         = static_cast<CalenDayContentScrollArea *> (mDocLoader->findWidget(
             CALEN_DAYVIEW_CONTENTSCROLLAREA));
     // Pass parent object to mContentWidget to install event filters on parent
-    mContentWidget = new CalenDayContentWidget(*mModelManager, mContentScrollArea);
+    mContentWidget = new CalenDayContentWidget(mContentScrollArea);
     mContentScrollArea->setContentWidget(mContentWidget);
-
+    
+    initializeViews();
     setupSlots();
     
     // Set up regional info if variant is correct
@@ -353,6 +357,57 @@ void CalenDayView::setupSlots()
 
     connect(mSettingsManager, SIGNAL(valueChanged(XQSettingsKey, QVariant)),
         this, SLOT(showHideRegionalInformationChanged(XQSettingsKey, QVariant)));
+}
+
+/*!
+   \brief Initializes internal views.
+   
+   CalenDayView uses 3 child views which represent previous, current and next days.
+   This assures that swiping to prev/next day works smoothly, because population
+   of data is done earlier.
+*/
+void CalenDayView::initializeViews()
+{
+    // Create item views
+    HbModelIterator *iterator(0);
+
+    iterator = new HbModelIterator(&mModelManager->getModel(
+        CalenDayModelManager::PreviousDay));
+    CalenDayItemView *prevItemView = new CalenDayItemView(
+        mModelManager->getServices(), iterator, 0);
+
+    iterator = new HbModelIterator(&mModelManager->getModel(
+        CalenDayModelManager::CurrentDay));
+    CalenDayItemView *currItemView = new CalenDayItemView(
+        mModelManager->getServices(), iterator, 0);
+
+    iterator = new HbModelIterator(&mModelManager->getModel(
+        CalenDayModelManager::NextDay));
+    CalenDayItemView *nextItemView = new CalenDayItemView(
+        mModelManager->getServices(), iterator, 0);
+
+    // Connect views with widgetScrolled SLOT to support simultanous vertical scrolling
+    connect(prevItemView, SIGNAL(scrollPositionChanged(const QPointF&)), mContentWidget,
+        SLOT(widgetScrolled(const QPointF&)));
+    connect(currItemView, SIGNAL(scrollPositionChanged(const QPointF&)), mContentWidget,
+        SLOT(widgetScrolled(const QPointF&)));
+    connect(nextItemView, SIGNAL(scrollPositionChanged(const QPointF&)), mContentWidget,
+        SLOT(widgetScrolled(const QPointF&)));
+    
+    // Close menu once closeDialogs() is received
+    connect(this, SIGNAL(closeDialogs()), prevItemView->contextMenu(), SLOT(close()));
+    connect(this, SIGNAL(closeDialogs()), currItemView->contextMenu(), SLOT(close()));
+    connect(this, SIGNAL(closeDialogs()), nextItemView->contextMenu(), SLOT(close()));
+
+    // Install event filters to receive events necessary for gesture handling
+    prevItemView->installEventFilter(mContentScrollArea);
+    currItemView->installEventFilter(mContentScrollArea);
+    nextItemView->installEventFilter(mContentScrollArea);
+
+    // Add views to layout
+    mContentWidget->add(prevItemView);
+    mContentWidget->add(currItemView);
+    mContentWidget->add(nextItemView);
 }
 
 /*!

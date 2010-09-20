@@ -127,6 +127,14 @@ void CalenThickLinesDrawer::paint(QPainter* painter,
 }
 
 /*!
+ Overriding the base class function to avoid searching for widgetml/css files
+ */
+void CalenThickLinesDrawer::polish(HbStyleParameters &params)
+{
+    Q_UNUSED(params);
+}
+
+/*!
  Slot to handle the change in theme
  */
 void CalenThickLinesDrawer::handleThemeChange()

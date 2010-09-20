@@ -367,10 +367,10 @@ void NotesMainView::handleItemLongPressed(
 						hbTrId("txt_notes_menu_make_it_as_todo_note"));
 
 	} else if (AgendaEntry::TypeTodo == entry.type()) {
-		if (AgendaEntry::TodoNeedsAction == entry.status()) {
+		if (AgendaEntry::TodoCompleted != entry.status()) {
 			mTodoStatusAction = contextMenu->addAction(
 					hbTrId("txt_notes_menu_mark_as_done"));
-		} else if (AgendaEntry::TodoCompleted == entry.status()) {
+		} else {
 			mTodoStatusAction = contextMenu->addAction(
 					hbTrId("txt_notes_menu_mark_as_not_done"));
 		}
@@ -426,9 +426,9 @@ void NotesMainView::markTodoStatus()
 
 	QDateTime currentDateTime = QDateTime::currentDateTime();
 
-	if (AgendaEntry::TodoNeedsAction == entry.status()) {
+	if (AgendaEntry::TodoCompleted != entry.status()) {
 		mAgendaUtil->setCompleted(entry, true, currentDateTime);
-	} else if (AgendaEntry::TodoCompleted == entry.status()) {
+	} else {
 		mAgendaUtil->setCompleted(entry, false, currentDateTime);
 	}
 

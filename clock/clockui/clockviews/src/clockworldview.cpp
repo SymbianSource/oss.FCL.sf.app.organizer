@@ -26,6 +26,7 @@
 #include <HbAction>
 #include <HbStyleLoader>
 #include <HbListView>
+#include <HbParameterLengthLimiter>
 
 // User includes
 #include "clockworldview.h"
@@ -648,15 +649,15 @@ QVariantList ClockWorldView::getCityListDisplayString(
 	if ( hours && minutes ) {
 		if (hours == 1) {
 			displayFormat =
-					hbTrId("txt_clock_dblist_daily_val_1_hr_2_mins");
-			offsetString = displayFormat.arg(hours).arg(minutes);
-			offsetDifference += offsetString;
+					HbParameterLengthLimiter(hbTrId("txt_clock_dblist_daily_val_1_hr_2_mins"))
+					.arg(QString::number(hours)).arg(QString::number(minutes));
+			offsetDifference += displayFormat;
 		}
 		else {
 			displayFormat =
-					hbTrId("txt_clock_dblist_daily_val_1_hrs_2_mins");
-			offsetString = displayFormat.arg(hours).arg(minutes);
-			offsetDifference += offsetString;
+					HbParameterLengthLimiter(hbTrId("txt_clock_dblist_daily_val_1_hrs_2_mins"))
+					.arg(QString::number(hours)).arg(QString::number(minutes));
+			offsetDifference += displayFormat;
 		}
 	}
 	else if ( hours ){

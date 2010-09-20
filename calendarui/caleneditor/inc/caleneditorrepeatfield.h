@@ -53,7 +53,8 @@ public:
 	void updateRepeatChoices();
 	void saveRepeatRule();
 	bool isRepeatUntilItemAdded();
-	QDate repeatUntilDate();          
+	QDate repeatUntilDate();
+	void refreshRepeatUntilDate();
 
 private:
 	void insertRepeatUntilItem();
@@ -88,7 +89,7 @@ private:
 	HbDataFormModelItem* mRepeatItem;
 	HbComboBox *mRepeatComboBox;
 	HbDataFormModelItem *mCustomRepeatUntilItem;
-	HbDateTimePicker* mDatePicker;
+	QPointer<HbDateTimePicker> mDatePicker;
 	QDate mRepeatUntilDate;
 	AgendaRepeatRule::RuleType mRepeatRuleType;
 	int mRepeatRoleValue;

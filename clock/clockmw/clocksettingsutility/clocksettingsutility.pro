@@ -32,9 +32,11 @@ symbian: {
 	TARGET.EPOCALLOWDLLDATA = 1
 	TARGET.CAPABILITY = CAP_GENERAL_DLL
 	TARGET.UID3 = 0x2002E6B3
-
+	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
+	
 	LIBS += -leuser \
 	        -ltimezoneclient \
+	        -lxqsettingsmanager
 }
 
 SOURCES += settingsutility.cpp

@@ -162,6 +162,8 @@ private:
      */
     void setupSlots();
     
+    void initializeViews();
+    
 private: // members related to view management and gesture handling
     
     CalenDayModelManager* mModelManager;

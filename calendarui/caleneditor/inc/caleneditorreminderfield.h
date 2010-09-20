@@ -91,7 +91,7 @@ private:
 	HbDataFormModel* mCalenEditorModel;
 	HbDataFormModelItem* mReminderItem;
 	HbDataFormModelItem *mCustomReminderTimeItem;
-	HbDateTimePicker *mTimePicker;
+	QPointer<HbDateTimePicker> mTimePicker;
 	QTime mReminderTimeForAllDay;
 	QHash<int, int> mReminderHash;
 	bool mReminderTimeAdded;

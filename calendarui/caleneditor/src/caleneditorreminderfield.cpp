@@ -59,6 +59,7 @@ CalenEditorReminderField::CalenEditorReminderField(
 	 mEditorForm(form), 
 	 mCalenEditorModel(model),
 	 mCustomReminderTimeItem(0),
+	 mTimePicker(0),
 	 mReminderTimeAdded(false)
 {
 	OstTraceFunctionEntry0( CALENEDITORREMINDERFIELD_CALENEDITORREMINDERFIELD_ENTRY );
@@ -245,8 +246,10 @@ void CalenEditorReminderField::populateReminderItem(bool newEntry)
 			if (!repeatingEntry && sameDay && (currentTime.addSecs(offsetInMins * 60) >= mCalenEditor->editedEntry()->startTime().time())) {
 				setCurrentIndex(ReminderOff); //Alarm has expired already, so making it off.
 				//The slot for index 0 is not called, since after UpdateReminderChoicesForSameDay()
-				//index is 0 itself and there is no change. So explicitly calling it here.
-				handleReminderIndexChanged(0); 
+				//index is 0 itself and there is no change. So explicitly setting the reminder here.
+				reminder.setTimeOffset(mReminderHash.value(ReminderOff));
+				reminder.setAlarmSoundName(QString(" "));
+				mCalenEditor->editedEntry()->setAlarm(reminder);
 			}
 			else {
 				setSavedMeetingReminderIndex();
@@ -710,6 +713,17 @@ void CalenEditorReminderField::setDisplayTime()
 			mReminderTimeForAllDay,
 			r_qtn_time_usual_with_zero);
 	mCustomReminderTimeItem->setContentWidgetData("text", timeString);
+	
+	// If the reminder time picker is open and locale changes happen,
+	// we need to refresh them dynamically with proper time formats
+	if(!(mTimePicker.isNull())) {
+		if(locale.timeStyle() == HbExtendedLocale::Time12) {
+			mTimePicker->setDisplayFormat("hh:mm ap");	
+		}else {
+			mTimePicker->setDisplayFormat("hh:mm");
+		}
+		mTimePicker->setTime(mReminderTimeForAllDay);
+	}
 	OstTraceFunctionExit0( CALENEDITORREMINDERFIELD_SETDISPLAYTIME_EXIT );
 }
 

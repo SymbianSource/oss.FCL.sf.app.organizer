@@ -210,7 +210,7 @@ void NotesModel::updateSourceModel(ulong id)
 				NotesNamespace::StatusRole).value<int>();
 
 		if (entry.status() == entryStatus) {
-			if (AgendaEntry::TodoNeedsAction == entryStatus) {
+			if (AgendaEntry::TodoCompleted != entryStatus) {
 				// Make sure that the old model index is removed.
 				mSourceModel->removeRow(foundIndex.row());
 				mInCompTodoCount--;
@@ -218,7 +218,7 @@ void NotesModel::updateSourceModel(ulong id)
 				// Now insert the to-do.
 				insertInCompTodoToModel(foundIndex, id);
 
-			} else if (AgendaEntry::TodoCompleted == entryStatus) {
+			} else {
 				// Make sure that the old model index is removed.
 				mSourceModel->removeRow(foundIndex.row());
 				mCompTodoCount--;
@@ -228,7 +228,7 @@ void NotesModel::updateSourceModel(ulong id)
 
 			}
 		} else {
-			if (AgendaEntry::TodoNeedsAction == entryStatus) {
+			if (AgendaEntry::TodoCompleted != entryStatus) {
 				// Here the to-do was marked completed. Hence we need to remove
 				// the incompleted to-do and insert a completed to-do.
 				mSourceModel->removeRow(foundIndex.row());
@@ -237,7 +237,7 @@ void NotesModel::updateSourceModel(ulong id)
 				// Now insert the completed to-do.
 				insertCompTodoToModel(foundIndex, id);
 
-			} else if (AgendaEntry::TodoCompleted == entryStatus) {
+			} else {
 				// Here the to-do was marked incompleted. Hence we need to
 				// remove the completed to-do and insert an incompleted to-do.
 				mSourceModel->removeRow(foundIndex.row());
@@ -292,11 +292,11 @@ void NotesModel::addEntryToModel(ulong id)
 		notify = insertNoteToModel(indexToNotify, id);
 
 	} else if (AgendaEntry::TypeTodo == entry.type()) {
-		if (AgendaEntry::TodoNeedsAction == entry.status()) {
+		if (AgendaEntry::TodoCompleted != entry.status()) {
 			// Try to insert the to-do at its appropriate position.
 			notify = insertInCompTodoToModel(indexToNotify, id);
 
-		} else if (AgendaEntry::TodoCompleted == entry.status()) {
+		} else {
 			// Try to insert the to-do at its appropriate position.
 			insertCompTodoToModel(indexToNotify, id);
 		}
@@ -340,7 +340,7 @@ void NotesModel::removeEntryFromModel(ulong id)
 			} else if (entryType == AgendaEntry::TypeTodo) {
 				if (entryStatus == AgendaEntry::TodoCompleted) {
 					mCompTodoCount--;
-				} else if (entryStatus == AgendaEntry::TodoNeedsAction) {
+				} else {
 					mInCompTodoCount--;
 				}
 			}
@@ -436,7 +436,7 @@ void NotesModel::modifyEntryInModel(ulong id, int row)
 		} else {
 			stringList << entry.summary();
 		}
-		if (AgendaEntry::TodoNeedsAction == entry.status()) {
+		if (AgendaEntry::TodoCompleted != entry.status()) {
 			// Read due date from agenda entry
 			QString displayText;
 			QString timeText(hbTrId("txt_notes_dblist_val_due_on_1"));
@@ -595,10 +595,18 @@ void NotesModel::appendInCompTodosToModel(QList<AgendaEntry> &agendaEntryList)
 		AgendaEntry entry = agendaEntryList[idIter];
 
 		if (AgendaEntry::TypeTodo != entry.type()) {
+			// delete the inserted row in the model
+			mSourceModel->removeRow(modelIter);
+			// decrement the iterator
+			modelIter--;
 			continue;
 		}
 
-		if (AgendaEntry::TodoNeedsAction != entry.status()) {
+		if (AgendaEntry::TodoCompleted == entry.status()) {
+			// delete the inserted row in the model
+			mSourceModel->removeRow(modelIter);
+			// decrement the iterator
+			modelIter--;
 			continue;
 		}
 
@@ -624,7 +632,7 @@ void NotesModel::appendInCompTodosToModel(QList<AgendaEntry> &agendaEntryList)
 			stringList << entry.summary();
 		}
 
-		if (AgendaEntry::TodoNeedsAction == entry.status()) {
+		if (AgendaEntry::TodoCompleted != entry.status()) {
 			// Read due date from agenda entry
 			QString displayText;
 			QString timeText(hbTrId("txt_notes_dblist_val_due_on_1"));
@@ -897,7 +905,7 @@ bool NotesModel::insertInCompTodoToModel(QModelIndex &index, ulong id)
 			} else {
 				stringList << entry.summary();
 			}
-			if (AgendaEntry::TodoNeedsAction == entry.status()) {
+			if (AgendaEntry::TodoCompleted != entry.status()) {
 				// Read due date from agenda entry
 				QString displayText;
 				QString timeText(hbTrId("txt_notes_dblist_val_due_on_1"));

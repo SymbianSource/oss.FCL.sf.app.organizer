@@ -1,3 +1,20 @@
+##
+# This is Default Licence added by TraceCompiler
+# Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+# All rights reserved.
+# This component and the accompanying materials are made available
+# under the terms of "Eclipse Public License v1.0"
+# which accompanies this distribution, and is available
+# at the URL "http://www.eclipse.org/legal/epl-v10.html".
+#
+# Initial Contributors:
+# Nokia Corporation - initial contribution.
+#
+# Contributors:
+#
+# Description: 
+#
+##
 #Fixed group and trace id definitions. If this file is removed, the identifiers are rebuilt.
 [GROUP]TRACE_FLOW=0x8a
 [TRACE]TRACE_FLOW[0x8A]_CALENEDITORCUSTOMITEM_CALENEDITORCUSTOMITEM_ENTRY=0x9f
@@ -161,6 +178,8 @@
 [TRACE]TRACE_FLOW[0x8A]_CALENEDITORPRIVATE_ISREMINDERTIMEFORALLDAYADDED_ENTRY=0x92
 [TRACE]TRACE_FLOW[0x8A]_CALENEDITORPRIVATE_ISREPEATUNTILITEMADDED_ENTRY=0x15c
 [TRACE]TRACE_FLOW[0x8A]_CALENEDITORPRIVATE_ISREPEATUNTILITEMADDED_EXIT=0x15d
+[TRACE]TRACE_FLOW[0x8A]_CALENEDITORPRIVATE_LAUNCHDIALOG_ENTRY=0x169
+[TRACE]TRACE_FLOW[0x8A]_CALENEDITORPRIVATE_LAUNCHDIALOG_EXIT=0x16a
 [TRACE]TRACE_FLOW[0x8A]_CALENEDITORPRIVATE_LAUNCHSETTINGSVIEW_ENTRY=0x6e
 [TRACE]TRACE_FLOW[0x8A]_CALENEDITORPRIVATE_LAUNCHSETTINGSVIEW_EXIT=0x6f
 [TRACE]TRACE_FLOW[0x8A]_CALENEDITORPRIVATE_OPENEDITOR_ENTRY=0x28

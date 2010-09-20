@@ -28,6 +28,7 @@
 //user includes
 #include <AgendaEntry>
 #include <caleneditor.h>
+#include "calennotificationhandler.h"
 
 #include "caleneditorcommon.h"
 
@@ -52,6 +53,7 @@ class CalenEditorCustomItem;
 class CalenEditorReminderField;
 class CalenEditorRepeatField;
 class CalenEditorDataHandler;
+class CEnvironmentChangeNotifier;		// Receive system event notifications
 
 // Constants
 const int KNoOfDaysInWeek = 7;
@@ -116,6 +118,16 @@ public:
 	bool isEditRangeThisOnly();
 	bool isAllDayFieldAdded();
 	void forcedSaveEntry();
+
+	/**
+	 * Called from CEnvironmentChangeNotifier when the
+	 * system environment changes
+	 * @param aThisPtr self pointer
+	 * @return EFalse
+	 */
+	static TInt EnvChangeCallbackL( TAny* aThisPtr );
+	TInt DoEnvChange();
+	
 private:
 	void edit(const QFile &handle, bool launchCalendar);
 	void edit(AgendaEntry entry, bool launchCalendar);
@@ -157,6 +169,7 @@ private:
 	void enableFromTotimeFileds(bool, QDateTime, QDateTime);
 	QDateTime defaultTimeSameDay( );
 	void refreshTimeForUncheckAllDay();
+	void launchDialog(QString title);
 	
 private slots:
 	void handleSubjectChange(const QString subject);
@@ -229,7 +242,10 @@ private:
 	bool mOwnsAgendaUtil;
 	bool mLaunchCalendar;
 	bool mMenuItemAdded;
-	
+
+	// Notifications about locale and time changes
+	CEnvironmentChangeNotifier* iEnvChangeNotifier;
+	bool iIgnoreFirstLocaleChange;
 private:
 	friend class CalenEditor;
 #ifdef TESTCALENEDITOR

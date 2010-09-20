@@ -26,6 +26,7 @@
 #include "calendayitemview.h"
 #include "calendayutils.h"
 #include "calendaycontainer.h"
+#include "calendayitemview.h"
 #include "calendayinfo.h"
 #include "calendaymodel.h"
 #include "calenservices.h"
@@ -85,6 +86,26 @@ void CalenDayItemView::scrollTo(
     HbAbstractItemView::ScrollHint hint)
 {
     HbAbstractItemView::scrollTo(index, hint);
+}
+
+/*!
+ \brief Gets context menu of ItemView
+ 
+ \return Context menu
+ */
+HbMenu *CalenDayItemView::contextMenu() const
+{
+    return mContextMenu;
+}
+
+/*!
+ \brief Sets context menu of ItemView
+ 
+ \param contextMenu Context menu
+ */
+void CalenDayItemView::setContextMenu(HbMenu *contextMenu)
+{
+    mContextMenu = contextMenu;
 }
 
 /*!

@@ -17,13 +17,10 @@
 
 // System includes
 #include <QGraphicsLinearLayout>
-#include <HbModelIterator>
 
 // User includes
-#include "calendaymodelmanager.h"
 #include "calendaycontentwidget.h"
 #include "calendayitemview.h"
-#include "calendaycontentscrollarea.h"
 
 /*!
  \class CalenDayContentWidget
@@ -33,16 +30,12 @@
 /*!
  \brief Constructor
  
- \param modelManager Day View model manager
  \param parent The parent of central widget
  */
-CalenDayContentWidget::CalenDayContentWidget(
-    CalenDayModelManager &modelManager,
-    QGraphicsItem *parent) :
-    HbWidget(parent), mLayout(NULL), mModelManager(modelManager)
+CalenDayContentWidget::CalenDayContentWidget(QGraphicsItem *parent) :
+    HbWidget(parent), mLayout(NULL)
 {
     mWidgets.clear();
-    initializeViews();
 }
 
 /*!
@@ -62,31 +55,33 @@ CalenDayContentWidget::~CalenDayContentWidget()
  \param item Widget to be added
  \param where Place where widget should be added (as first/last item)
  */
-void CalenDayContentWidget::add(HbWidget* item, CalenWidgetPosition where)
+void CalenDayContentWidget::add(HbWidget *item, CalenWidgetPosition where)
 {
-    // Create linear, horizontal layout if not exist
-    if (!mLayout) {
-        mLayout = new QGraphicsLinearLayout(Qt::Horizontal, NULL);
-        mLayout->setContentsMargins(0.0, 0.0, 0.0, 0.0);
-        mLayout->setSpacing(0.0);
-    }
-
-    switch (where) {
-        case ECalenFirstWidget: {
-            mLayout->insertItem(0, item);
-            mWidgets.insert(0, item);
-            break;
+    if (item) {
+        // Create linear, horizontal layout if not exist
+        if (!mLayout) {
+            mLayout = new QGraphicsLinearLayout(Qt::Horizontal, NULL);
+            mLayout->setContentsMargins(0.0, 0.0, 0.0, 0.0);
+            mLayout->setSpacing(0.0);
         }
-        case ECalenLastWidget:
-        default: {
-            mLayout->addItem(item);
-            mWidgets.append(item);
-        }
-    }
 
-    // If layout has no parent - apply it to central widget
-    if (mLayout && !mLayout->parentLayoutItem()) {
-        setLayout(mLayout);
+        switch (where) {
+            case ECalenFirstWidget: {
+                mLayout->insertItem(0, item);
+                mWidgets.insert(0, item);
+                break;
+            }
+            case ECalenLastWidget:
+            default: {
+                mLayout->addItem(item);
+                mWidgets.append(item);
+            }
+        }
+
+        // If layout has no parent - apply it to central widget
+        if (mLayout && !mLayout->parentLayoutItem()) {
+            setLayout(mLayout);
+        }
     }
 }
 
@@ -100,22 +95,25 @@ void CalenDayContentWidget::add(HbWidget* item, CalenWidgetPosition where)
  */
 HbWidget* CalenDayContentWidget::take(CalenWidgetPosition which)
 {
-    Q_ASSERT(mLayout);
-
-    HbWidget* itemToTake = NULL;
-    switch (which) {
-        case ECalenFirstWidget: {
-            itemToTake = mWidgets.takeFirst();
-            break;
+    HbWidget *itemToTake = NULL;
+    if (mWidgets.count() > 0) {
+        switch (which) {
+            case ECalenFirstWidget: {
+                itemToTake = mWidgets.takeFirst();
+                break;
+            }
+            case ECalenLastWidget: {
+                itemToTake = mWidgets.takeLast();
+                break;
+            }
+            default: {
+                // do nothing
+            }
         }
-        case ECalenLastWidget:
-        default: {
-            itemToTake = mWidgets.takeLast();
-        }
-    }
 
-    if (itemToTake) {
-        mLayout->removeItem(itemToTake);
+        if (mLayout && itemToTake) {
+            mLayout->removeItem(itemToTake);
+        }
     }
 
     return itemToTake;
@@ -130,22 +128,8 @@ HbWidget* CalenDayContentWidget::take(CalenWidgetPosition which)
  */
 void CalenDayContentWidget::remove(CalenWidgetPosition which)
 {
-    Q_ASSERT(mLayout);
-
-    HbWidget* itemToRemove = NULL;
-    switch (which) {
-        case ECalenFirstWidget: {
-            itemToRemove = mWidgets.takeFirst();
-            break;
-        }
-        case ECalenLastWidget:
-        default: {
-            itemToRemove = mWidgets.takeLast();
-        }
-    }
-
+    HbWidget *itemToRemove = take(which);
     if (itemToRemove) {
-        mLayout->removeItem(itemToRemove);
         delete itemToRemove;
     }
 }
@@ -163,17 +147,20 @@ void CalenDayContentWidget::remove(CalenWidgetPosition which)
  */
 void CalenDayContentWidget::relayoutWidgets(CalenScrollDirection scrollTo)
 {
-    HbWidget* widget = NULL;
+    HbWidget *widget = NULL;
     switch (scrollTo) {
         case ECalenScrollToNext: {
             widget = take(ECalenFirstWidget);
             add(widget, ECalenLastWidget);
             break;
         }
-        case ECalenScrollToPrev:
-        default: {
+        case ECalenScrollToPrev: {
             widget = take(ECalenLastWidget);
             add(widget, ECalenFirstWidget);
+        }
+        case ECalenScrollNoDayChange: 
+        default: {
+            // do nothing
         }
     }
     emit widgetsRelayoutFinished(scrollTo);
@@ -192,55 +179,6 @@ void CalenDayContentWidget::widgetScrolled(const QPointF &newPos)
         view->scrollVertically(newPos);
     }
     emit scrollPositionChanged(newPos);
-}
-
-/*!
- \brief Initializes content widgets and adds them to layout.
- 
- \param parent Parent object 
- */
-void CalenDayContentWidget::initializeViews()
-{
-    // Create item views
-    HbModelIterator *iterator(0);
-
-    iterator = new HbModelIterator(&mModelManager.getModel(
-        CalenDayModelManager::PreviousDay));
-    CalenDayItemView *prevItemView = new CalenDayItemView(
-        mModelManager.getServices(), iterator, 0);
-
-    iterator = new HbModelIterator(&mModelManager.getModel(
-        CalenDayModelManager::CurrentDay));
-    CalenDayItemView *currItemView = new CalenDayItemView(
-        mModelManager.getServices(), iterator, 0);
-
-    iterator = new HbModelIterator(&mModelManager.getModel(
-        CalenDayModelManager::NextDay));
-    CalenDayItemView *nextItemView = new CalenDayItemView(
-        mModelManager.getServices(), iterator, 0);
-
-    // Connecting views with widgetScrolled SLOT 
-    // to support simultanous vertical scrolling
-    connect(prevItemView, SIGNAL(scrollPositionChanged(const QPointF&)), this,
-        SLOT(widgetScrolled(const QPointF&)));
-    connect(currItemView, SIGNAL(scrollPositionChanged(const QPointF&)), this,
-        SLOT(widgetScrolled(const QPointF&)));
-    connect(nextItemView, SIGNAL(scrollPositionChanged(const QPointF&)), this,
-        SLOT(widgetScrolled(const QPointF&)));
-
-    if (parentItem()) {
-        // Install event filters to receive events necessary for gesture handling
-        CalenDayContentScrollArea* scrollArea =
-            static_cast<CalenDayContentScrollArea*> (parentItem());
-        prevItemView->installEventFilter(scrollArea);
-        currItemView->installEventFilter(scrollArea);
-        nextItemView->installEventFilter(scrollArea);
-    }
-
-    // Add views to layout
-    add(prevItemView);
-    add(currItemView);
-    add(nextItemView);
 }
 
 // End of File

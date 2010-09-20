@@ -44,7 +44,10 @@ private slots:
 private:
 	void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 	           QWidget* widget);
-		
+
+protected:
+	void polish(HbStyleParameters &params);
+	
 private:
 	QColor mGridBorderColor;
 	CalendarNamespace::WidgetType typeOfWidget;
