@@ -68,8 +68,4 @@
 "/epoc32/release/armv5/urel/clocksettingsviewplugin.dll"					- "!:/sys/bin/clocksettingsviewplugin.dll"
 "/epoc32/data/z/resource/qt/plugins/clock/clocksettingsviewplugin.qtplugin"		- "!:/resource/qt/plugins/clock/clocksettingsviewplugin.qtplugin"
 
-"/epoc32/release/armv5/urel/ftudatetimewizard.dll"						- "!:/sys/bin/ftudatetimewizard.dll"
-"/epoc32/data/z/resource/qt/plugins/FTU/ftudatetimewizard.qtplugin"		- "!:/resource/qt/plugins/FTU/ftudatetimewizard.qtplugin"
-"/epoc32/data/z/fturesources/plugins/wizardproviders/ftudatetimewizard.manifest"               - "!:/fturesources/plugins/wizardproviders/ftudatetimewizard.manifest"
-
 ;END OF FILE

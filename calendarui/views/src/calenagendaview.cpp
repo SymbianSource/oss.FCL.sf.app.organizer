@@ -23,7 +23,7 @@
 #include <hbpangesture.h>
 #include <hbswipegesture.h>
 #include <hbapplication.h> // hbapplication
-#include <hbactivitymanager.h> // Activity Manager
+
 
 // User includes
 #include "calenagendaview.h"
@@ -51,7 +51,8 @@ mSoftKeyAction(NULL),
 mGoToTodayAction(NULL),
 mSwitchToDayViewAction(NULL),
 mActionTaken(false),
-mIsAboutToQuitEventConnected(false)
+mIsAboutToQuitEventConnected(false),
+mDayViewActivated(false)
 {
     OstTraceFunctionEntry0( CALENAGENDAVIEW_CALENAGENDAVIEW_ENTRY );
     
@@ -113,14 +114,10 @@ void CalenAgendaView::setupView(CalenDocLoader *docLoader)
     // in all views
    mServices.OfferMenu(menu());
 	
-	// get a poitner to activity manager
-	HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
-
-	// clean up any previous versions of this activity, if any, i.e. activityName, from the activity manager. 
+    // clean up any previous versions of this activity, if any, i.e. activityName, 
 	// Ignore return value, first boot would always return False. bool declared 
 	// only for debugging purpose.
-	bool ok = activityManager->removeActivity(activityName);
-	
+	bool ok = removeActivity();
 	OstTraceFunctionExit0( DUP1_CALENAGENDAVIEW_SETUPVIEW_EXIT );
 }
 
@@ -132,7 +129,7 @@ void CalenAgendaView::setupView(CalenDocLoader *docLoader)
 void CalenAgendaView::doPopulation()
     {
     OstTraceFunctionEntry0( CALENAGENDAVIEW_DOPOPULATION_ENTRY );
-    
+    mDayViewActivated = false;
     // The content widget has not been constructed. Don't do anything
     if (!mAgendaViewWidget) {
         OstTraceFunctionExit0( CALENAGENDAVIEW_DOPOPULATION_EXIT );
@@ -180,7 +177,7 @@ void CalenAgendaView::doPopulation()
 
     // Population is complete, issue a notification
     populationComplete();
-    
+    captureScreenshot(true);
     OstTraceFunctionExit0( DUP1_CALENAGENDAVIEW_DOPOPULATION_EXIT );
     }
 
@@ -313,7 +310,7 @@ void CalenAgendaView::setupActions()
 //    
 void CalenAgendaView::createNewEvent()
 {
-    captureScreenshot(true);
+ 
     mAgendaViewWidget->createNewEvent();
 }
 
@@ -375,7 +372,7 @@ void CalenAgendaView::launchMonthView()
 void CalenAgendaView::launchDayView()
 {
     OstTraceFunctionEntry0( CALENAGENDAVIEW_LAUNCHDAYVIEW_ENTRY );
-    
+    mDayViewActivated = true;
     // Issue the command to launch the day view
     mServices.IssueCommandL(ECalenDayView);
     
@@ -389,9 +386,12 @@ void CalenAgendaView::launchDayView()
 void CalenAgendaView::clearListModel()
     {
     OstTraceFunctionEntry0( CALENAGENDAVIEW_CLEARLISTMODEL_ENTRY );
-    
+    // do not disconnect if day view is open
+    // save the agenda view as an activity
+    if(!mDayViewActivated){
 	// day view is removed from the list disconnect for aboutToQuit events
     disconnectAboutToQuitEvent();
+    }
     mAgendaViewWidget->clearListModel();
     
     OstTraceFunctionExit0( CALENAGENDAVIEW_CLEARLISTMODEL_EXIT );

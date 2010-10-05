@@ -75,6 +75,21 @@ public:
 };
 
 /*!
+ Mocked class CalenTimedEventInfo
+ */
+class CalenTimedEventInfo
+{
+public:
+    CalenTimedEventInfo() {
+            
+    }
+    
+    ~CalenTimedEventInfo() {
+        
+    }
+};
+
+/*!
  Mocked class CalenDayInfo
  */
 class CalenDayInfo
@@ -96,9 +111,23 @@ public:
         
     }
 
-    void Reset() {}
+    void Reset() 
+    {
+        mList.clear();
+        iAlldayEvents.clear();
+    }
 
-    void InsertTimedEvent( const SCalenApptInfo& aItemInfo ) {Q_UNUSED(aItemInfo);}
+    void InsertTimedEvent( const SCalenApptInfo& aItemInfo ) 
+    {
+        Q_UNUSED(aItemInfo);
+        CalenTimeRegion region;
+                
+        region.iStartSlot = 10;
+        region.iEndSlot = 13;
+        region.iColumns << CalenTimeColumn();
+        
+        mList  << region;
+    }
 	
 	
     void GetLocation( const SCalenApptInfo& aItemInfo, int& aStartSlot,
@@ -113,7 +142,7 @@ public:
     
     int AlldayCount() 
     {
-        return 0;
+        return iAlldayEvents.count();
     }
     
     const QList<CalenTimeRegion>& RegionList() const 
@@ -124,18 +153,14 @@ public:
     void InsertAlldayEvent( const SCalenApptInfo& aItemInfo )
     {
         Q_UNUSED(aItemInfo)
-            
-        CalenTimeRegion region;
         
-        region.iStartSlot = 10;
-        region.iEndSlot = 13;
-        region.iColumns << CalenTimeColumn();
-        
-        mList  << region;
+        CalenTimedEventInfo info;
+        iAlldayEvents.append(info);
     }
     
 public:
     QList<CalenTimeRegion> mList;
+    QList<CalenTimedEventInfo> iAlldayEvents;
 };
 
 #endif // CALENDAYINFO_H

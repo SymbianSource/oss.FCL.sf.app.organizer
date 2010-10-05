@@ -31,7 +31,8 @@
 #include <HbGroupBox>
 #include <HbListViewItem>
 #include <hbapplication> // hbapplication
-#include <hbactivitymanager> // hbactivitymanager
+#include <AfActivityStorage.h>
+
 
 // User includes
 #include <agendautil.h>
@@ -99,7 +100,10 @@ void NotesMainView::setupView(
 		NotesAppControllerIf &controllerIf, NotesDocLoader *docLoader)
 {
 	OstTraceFunctionEntry0( NOTESMAINVIEW_SETUPVIEW_ENTRY );
-
+    // Get a pointer to activity storage
+	mActivityStorage = new AfActivityStorage(this);
+    
+    
 	mDocLoader = docLoader;
 	mAppControllerIf = &controllerIf;
 	mNotesModel = mAppControllerIf->notesModel();
@@ -157,14 +161,11 @@ void NotesMainView::setupView(
 	HbListViewItem *prototype = mListView->listItemPrototype();
 	prototype->setGraphicsSize(HbListViewItem::SmallIcon);
 	
-	// Get a pointer to activity Manager
-	HbActivityManager* activityManager =
-			qobject_cast<HbApplication*>(qApp)->activityManager();
 
-	// clean up any previous versions of this activity from the activity manager
+	// clean up any previous versions of this activity 
 	// ignore return value as the first boot would always return a false
 	// bool declared on for debugging purpose
-	bool ok = activityManager->removeActivity(notes);
+	bool ok = removeActivity();
 
 	// connect main view for the first time to recieve aboutToQuit signal
 	connect(
@@ -769,9 +770,7 @@ void NotesMainView::captureScreenShot(bool captureScreenShot)
 void NotesMainView::saveActivity()
 {
 	OstTraceFunctionEntry0( NOTESMAINVIEW_SAVEACTIVITY_ENTRY );
-	// Get a pointer to activity Manager
-	HbActivityManager* activityManager =
-			qobject_cast<HbApplication*>(qApp)->activityManager();
+
 	
 	// check if a valid screenshot is already captured
 	if (!mIsScreenShotCapruted) {
@@ -788,12 +787,19 @@ void NotesMainView::saveActivity()
 	stream << NotesNamespace::NotesMainViewId;
 
 	// add the activity to the activity manager
-	bool ok = activityManager->addActivity(
+	bool ok = mActivityStorage->saveActivity(
 			notes, serializedActivity, mScreenShot);
+
 	if (!ok) {
 		qFatal("Add failed" );
 	}
 	OstTraceFunctionExit0( NOTESMAINVIEW_SAVEACTIVITY_EXIT );
 }
 
+bool NotesMainView::removeActivity()
+{
+    OstTraceFunctionEntry0( NOTESMAINVIEW_REMOVEACTIVITY_ENTRY );
+    OstTraceFunctionExit0( NOTESMAINVIEW_REMOVEACTIVITY_EXIT);
+    return mActivityStorage->removeActivity(notes);
+}
 // End of file	--Don't remove this.

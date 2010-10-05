@@ -45,7 +45,8 @@ symbian: {
 	LIBS += \
 		-lagendainterface \
 		-lnotesmodel \
-		-lnotesviews
+		-lnotesviews \
+		-lafservice 
 }
 
 SOURCES += \

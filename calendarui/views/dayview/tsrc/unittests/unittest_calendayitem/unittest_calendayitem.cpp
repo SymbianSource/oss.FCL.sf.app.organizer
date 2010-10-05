@@ -68,6 +68,8 @@ private slots:
     void testUpdateChildItems();
     void testHasEventDescription();
     void testHasBackgroundFrame();
+    void testSetDescription();
+    void testSetStatusStrip();
     
     void testConstructors();
 private:
@@ -164,9 +166,142 @@ void TestCalenDayItem::testCreateItem()
     delete testItem;
 }
 
+/*!
+ Test function for updating child items
+ 1. Test if child items are updated 
+ 2. Just for coverage testing
+ */
 void TestCalenDayItem::testUpdateChildItems()
 {
+#ifndef __WINSCW__
+    //1)
+    mItem->mUpdated = false;
+    mItem->updateChildItems();
+    QCOMPARE(mItem->mUpdated, true);
+    
+    //2)
+    mItem->mUpdated = true;
+    mItem->updateChildItems();
+    QCOMPARE(mItem->mUpdated, true);
+#endif
+}
 
+/*!
+ Test setting description of entry
+ 1. Setting description if only location is set
+ 2. Setting description if location and summary are set
+ 3. Setting description if location and summary are not set
+ 4. Setting description if summary is set and event is for all day
+ 5. Setting description if location and summary are set and event is 
+ for all day
+ */
+void TestCalenDayItem::testSetDescription()
+{
+#ifndef __WINSCW__
+    AgendaEntry entry;
+    QString location("testLocation");
+    QString summary("testSummary");
+
+    //1)
+    entry.setLocation(location);
+    entry.setSummary("");
+    mItem->setDescription(entry, false);
+    QCOMPARE(mItem->mEventDesc->text(), location);
+
+    //2)
+    entry.setLocation(location);
+    entry.setSummary(summary);
+    mItem->setDescription(entry, false);
+    QString expected(summary);
+    expected.append(", ");
+    expected.append(location);
+    QCOMPARE(mItem->mEventDesc->text(), expected);
+
+    //3)
+    entry.setLocation("");
+    entry.setSummary("");
+    mItem->setDescription(entry, false);
+    QCOMPARE(mItem->mEventDesc->text(), hbTrId("txt_calendar_dblist_unnamed"));
+
+    //4)
+    entry.setLocation("");
+    entry.setSummary(summary);
+    mItem->setDescription(entry, true);
+    expected = "";
+    for (int i = 0; i < summary.count(); i++) {
+        expected.append(QString(summary.at(i)) + "\n");
+    }
+    QCOMPARE(mItem->mEventDesc->text(), expected);
+
+    //5)
+    entry.setLocation(location);
+    entry.setSummary(summary);
+    mItem->setDescription(entry, true);
+    QString description(summary + ", " + location);
+    expected = "";
+    for (int i = 0; i < description.count(); i++) {
+        expected.append(QString(description.at(i)) + "\n");
+    }
+    if (summary.count()) {
+        expected.remove(2 * summary.count() - 1, 1);
+    }
+    QCOMPARE(mItem->mEventDesc->text(), expected);
+#endif
+}
+
+/*!
+ Test setting status strip
+ 1. Setting status strip for event 
+ 2. Setting status strip for all day event
+ 3. Setting status strip for confirmed event
+ 4. Setting status strip for tentative event
+ 5. Setting status strip for cancelled event
+ */
+void TestCalenDayItem::testSetStatusStrip()
+{
+#ifndef __WINSCW__
+    AgendaEntry entry;
+    QDateTime startTimeIn(QDate(12, 07, 2010), QTime(7, 0));
+    QDateTime endTimeIn(QDate(12, 07, 2010), QTime(10, 0));
+
+    //1)
+    entry.setStartAndEndTime(startTimeIn, endTimeIn);
+    mItem->setStatusStrip(entry, false);
+
+    QDateTime startTime;
+    QDateTime endTime;
+    QDateTime currentDateTime;
+    currentDateTime.setDate(mItem->container()->date());
+    CalenDayUtils::instance()->getEventValidStartEndTime(startTime, endTime,
+        entry, currentDateTime);
+    QPair<QTime, QTime> startEndTime = mItem->mColorStripe->startEndTime();
+    QCOMPARE(startEndTime.first, startTime.time());
+    QCOMPARE(startEndTime.second, endTime.time());
+
+    //2)
+    mItem->setStatusStrip(entry, true);
+    startEndTime = mItem->mColorStripe->startEndTime();
+    QCOMPARE(startEndTime.first, startTime.time());
+    QCOMPARE(startEndTime.second, endTime.time().addSecs(-1));
+
+    //3)
+    entry.setStatus(AgendaEntry::Confirmed);
+    mItem->setStatusStrip(entry, false);
+    QCOMPARE(CalenDayStatusStrip::Filled, 
+        mItem->mColorStripe->drawingStyle());
+
+    //4)
+    entry.setStatus(AgendaEntry::Tentative);
+    mItem->setStatusStrip(entry, false);
+    QCOMPARE(CalenDayStatusStrip::StripWithLines, 
+        mItem->mColorStripe->drawingStyle());
+
+    //5)
+    entry.setStatus(AgendaEntry::Cancelled);
+    mItem->setStatusStrip(entry, false);
+    QCOMPARE(CalenDayStatusStrip::OnlyFrame, 
+        mItem->mColorStripe->drawingStyle());
+#endif
 }
 
 void TestCalenDayItem::testHasEventDescription()

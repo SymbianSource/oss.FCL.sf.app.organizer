@@ -173,10 +173,10 @@ ClockAlarmEditor::ClockAlarmEditor(
 		mVirtualKeyboard = new HbAbstractVkbHost(mAlarmEditorView);
     }
 	connect(
-			mVirtualKeyboard, SIGNAL(keypadOpened()),
+			mVirtualKeyboard, SIGNAL(aboutToOpen()),
 			this, SLOT(handleKeypadOpen()));
 	connect(
-			mVirtualKeyboard, SIGNAL(keypadClosed()),
+			mVirtualKeyboard, SIGNAL(aboutToClose()),
 			this, SLOT(handleKeypadClosed()));
 
 

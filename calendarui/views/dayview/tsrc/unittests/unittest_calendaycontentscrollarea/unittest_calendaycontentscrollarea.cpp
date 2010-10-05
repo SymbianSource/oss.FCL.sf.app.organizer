@@ -18,7 +18,6 @@
 #include <QGraphicsScene>
 #include <QtTest/QtTest>
 #include <QGesture>
-#include <QPanGesture>
 
 #include <HbStyleLoader>
 #include <HbWidget>
@@ -62,6 +61,8 @@ private slots:
     void testHorizontalSwipe();
     void testMoveFinished();
     void testOrientationChanged();
+    void testCheckPanDirection();
+    void testSetGetDisallowedScrollDirection();
 
 private:
     CalenDayContentScrollArea *mContentScrollArea;
@@ -367,6 +368,7 @@ void TestCalenDayContentScrollArea::testEvent()
  1. Test moveTo, day not changed
  2. Test moveTo, day changed to next
  3. Test moveTo, day changed to prev
+ 4. Test moveTo, disallowed directon
  */
 void TestCalenDayContentScrollArea::testMoveTo()
 {
@@ -388,7 +390,7 @@ void TestCalenDayContentScrollArea::testMoveTo()
     QCOMPARE(abs(pos.y()), abs(mContentScrollArea->contentWidget()->pos().y()));
     QCOMPARE(mContentScrollArea->mMoveDirection, ECalenScrollNoDayChange);
     
-    //2)
+    //3)
     newPos = QPointF(-20,0);
     mContentScrollArea->mMoveDirection = ECalenScrollToNext;
     mContentScrollArea->moveTo(newPos);
@@ -396,6 +398,15 @@ void TestCalenDayContentScrollArea::testMoveTo()
     QCOMPARE(abs(mContentScrollArea->contentWidget()->pos().x()), abs(pos.x()));
     QCOMPARE(abs(mContentScrollArea->contentWidget()->pos().y()), abs(pos.y()));
     QCOMPARE(mContentScrollArea->mMoveDirection, ECalenScrollNoDayChange);
+    
+    //4)
+    newPos = QPointF(20,0);
+    pos = mContentScrollArea->contentWidget()->pos();
+    mContentScrollArea->mDisallowedDirection = ECalenScrollToNext;
+    mContentScrollArea->mMoveDirection = ECalenScrollToNext;
+    mContentScrollArea->moveTo(newPos);
+    QCOMPARE(abs(mContentScrollArea->contentWidget()->pos().x()), abs(pos.x()));
+    QCOMPARE(abs(mContentScrollArea->contentWidget()->pos().y()), abs(pos.y()));
 #endif /* __WINSCW__ */
 }
 
@@ -457,6 +468,81 @@ void TestCalenDayContentScrollArea::testOrientationChanged()
     mContentScrollArea->orientationChanged(Qt::Vertical);
     QCOMPARE(mContentScrollArea->mOrientation, Qt::Vertical);
 #endif /* __WINSCW__ */
+}
+
+/*!
+ Test checkPanDirection function
+ 1) test pan direction, gesture cancelled, vertical orientation
+ 2) test pan direction, gesture started, vertical orientation, vertical movement
+ 3) test pan direction, gesture started, vertical orientation, horizontal movement
+ 4) test pan direction, gesture started, horizontal orientation, vertical movement
+ 5) test pan direction, gesture started, horizontal orientation, horizontal movement
+ */
+void TestCalenDayContentScrollArea::testCheckPanDirection()
+{
+#ifndef __WINSCW__
+    QPanGesture *gesture = new QPanGesture();
+    
+    //1)
+    gesture->setOffset(QPointF(10, 100));
+    gTestGestureState = Qt::GestureCanceled;
+    mContentScrollArea->mPanDayDirection = CalenDayContentScrollArea::ECalenPanNotSet;
+    mContentScrollArea->mOrientation = Qt::Vertical;
+    mContentScrollArea->checkPanDirection(gesture);
+    QCOMPARE(mContentScrollArea->mPanDayDirection, CalenDayContentScrollArea::ECalenPanNotSet);
+
+    // Cases 2-5 temporarily unavailable
+/*
+    //2)
+    gesture->setOffset(QPointF(10, 100));
+    gTestGestureState = Qt::GestureStarted;
+    mContentScrollArea->mPanDayDirection = CalenDayContentScrollArea::ECalenPanNotSet;
+    mContentScrollArea->mOrientation = Qt::Vertical;
+    mContentScrollArea->checkPanDirection(gesture);
+    QCOMPARE(mContentScrollArea->mPanDayDirection, CalenDayContentScrollArea::ECalenPanVertical);
+    
+    //3)
+    gesture->setOffset(QPointF(100, 10));
+    gTestGestureState = Qt::GestureStarted;
+    mContentScrollArea->mPanDayDirection = CalenDayContentScrollArea::ECalenPanNotSet;
+    mContentScrollArea->mOrientation = Qt::Vertical;
+    mContentScrollArea->checkPanDirection(gesture);
+    QCOMPARE(mContentScrollArea->mPanDayDirection, CalenDayContentScrollArea::ECalenPanHorizontal);
+    
+    //4)
+    gesture->setOffset(QPointF(10, 100));
+    gTestGestureState = Qt::GestureStarted;
+    mContentScrollArea->mPanDayDirection = CalenDayContentScrollArea::ECalenPanNotSet;
+    mContentScrollArea->mOrientation = Qt::Horizontal;
+    mContentScrollArea->checkPanDirection(gesture);
+    QCOMPARE(mContentScrollArea->mPanDayDirection, CalenDayContentScrollArea::ECalenPanHorizontal);
+    
+    //5)
+    gesture->setOffset(QPointF(100, 10));
+    gTestGestureState = Qt::GestureStarted;
+    mContentScrollArea->mPanDayDirection = CalenDayContentScrollArea::ECalenPanNotSet;
+    mContentScrollArea->mOrientation = Qt::Horizontal;
+    mContentScrollArea->checkPanDirection(gesture);
+    QCOMPARE(mContentScrollArea->mPanDayDirection, CalenDayContentScrollArea::ECalenPanVertical);
+*/
+#endif /* __WINSCW__ */
+}
+
+/*!
+ Test setter and getter for disallowed direction
+ 1) test setter
+ 2) test getter
+ */
+void TestCalenDayContentScrollArea::testSetGetDisallowedScrollDirection()
+{
+    QCOMPARE(mContentScrollArea->mDisallowedDirection, ECalenScrollNoDayChange);
+    
+    //1)
+    mContentScrollArea->setDisallowedScrollDirection(ECalenScrollToNext);
+    QCOMPARE(mContentScrollArea->mDisallowedDirection, ECalenScrollToNext);
+    
+    //2)
+    QCOMPARE(mContentScrollArea->disallowedScrollDirection(), ECalenScrollToNext);
 }
 
 QTEST_MAIN(TestCalenDayContentScrollArea);

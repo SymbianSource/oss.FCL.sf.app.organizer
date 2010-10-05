@@ -17,6 +17,11 @@
 #include <QGraphicsItem>
 #include <QtTest/QtTest>
 
+#ifndef __WINSCW__
+#define private public
+#define protected public
+#endif
+
 #include "calendayhourelementtest.h"
 #include "calendayhourscrollarea.h"
 
@@ -46,6 +51,7 @@ private slots:
     void testSetGetTime();
     void testPaint_data();
     void testPaint();
+    void testLocaleChanged();
 
 private:
     CalenDayHourElementTest *mHourElement;
@@ -178,7 +184,7 @@ void TestCalenDayHourElement::testPaint_data()
  */
 void TestCalenDayHourElement::testPaint()
 {
-    
+    //1)
     //get data to test
     QFETCH(QDateTime, testedValue); 
     QFETCH(QString, testName); 
@@ -205,8 +211,48 @@ void TestCalenDayHourElement::testPaint()
      
 #ifdef SAVE_IMAGES
     //save drawed image
-    img.save("c:/unittest/TestCalenDayHourElement_testPaint_" + testName + ".jpg");
-     
+    img.save("c:/unittest/TestCalenDayHourElement_testPaint_" + testName + ".jpg");   
+#endif
+    
+    //2)
+    QDateTime currentDateTime = QDateTime::currentDateTime();
+    int currentHour = currentDateTime.time().hour();
+    mHourElement->setTime(QTime(currentHour + 1, 0 ));
+    //fill image with grey color to have better filings with look of "paper"
+    painter.fillRect(0,0,size.width(),size.height(),QColor(Qt::gray));
+    //run paint
+    mHourElement->paint(&painter,option,0);
+
+#ifdef SAVE_IMAGES
+    //save drawed image
+    img.save("c:/unittest/TestCalenDayHourElement_testPaint_" + testName + "2.jpg");
+#endif
+
+    //3)
+#ifndef __WINSCW__
+    mHourElement->mContainer = NULL;    
+    //fill image with grey color to have better filings with look of "paper"
+    painter.fillRect(0,0,size.width(),size.height(),QColor(Qt::gray));
+    //run paint
+    mHourElement->paint(&painter,option,0);
+    
+#ifdef SAVE_IMAGES
+    //save drawed image
+    img.save("c:/unittest/TestCalenDayHourElement_testPaint_" + testName + "3.jpg");
+#endif
+
+#endif
+}
+
+/*!
+ Test function for localChanged method
+ */
+void TestCalenDayHourElement::testLocaleChanged() 
+{
+#ifndef __WINSCW__
+    mHourElement->mTimeTextItem->setText(QString(""));
+    mHourElement->localeChanged();
+    QVERIFY(mHourElement->mTimeTextItem->text() != QString(""));
 #endif
 }
 

@@ -24,6 +24,8 @@
 #include <QImage>
 #include <QPair>
 
+#include "calendayutils.h"
+
 const qreal WIDGET_WIDTH = 50;
 const qreal WIDGET_HEIGHT = 150;
 
@@ -185,9 +187,12 @@ void TestCalenStatusStrip::testSetGetDrawingStyle()
    Test setting and getting start and end time of event
    1)Set end and start of event
    2)Change values
+   3)Setting event shorter than 300 seconds
+   4)Setting event for 300 seconds
  */
 void TestCalenStatusStrip::testStartEndTime()
 {
+    //1)
     QPair<QTime, QTime> startEndTime;
     startEndTime.first = QTime(12,12,12);
     startEndTime.second = QTime(15,15,15);
@@ -197,12 +202,28 @@ void TestCalenStatusStrip::testStartEndTime()
     QCOMPARE(mStatusStrip->startEndTime().first,startEndTime.first);
     QCOMPARE(mStatusStrip->startEndTime().second,startEndTime.second);
     
+    //2)
     startEndTime.first = QTime(1,1,1);
     startEndTime.second = QTime(5,5,5);
     
     mStatusStrip->setStartEndTime(startEndTime.first,startEndTime.second);
     
     QCOMPARE(mStatusStrip->startEndTime().first,startEndTime.first);
+    QCOMPARE(mStatusStrip->startEndTime().second,startEndTime.second);
+    
+    //3)
+    // if time less than 300 seconds set it to 300 seconds (5 minutes)
+    startEndTime.first = QTime(0,0,0);
+    startEndTime.second = QTime(0,4,59);
+    mStatusStrip->setStartEndTime(startEndTime.first,startEndTime.second);
+    startEndTime.second = QTime(startEndTime.first.hour(),
+        startEndTime.first.minute() + 5);
+    QCOMPARE(mStatusStrip->startEndTime().second,startEndTime.second);
+
+    //4)
+    // check if ok for 300 seconds
+    startEndTime.second = QTime(0,5,00);
+    mStatusStrip->setStartEndTime(startEndTime.first,startEndTime.second);
     QCOMPARE(mStatusStrip->startEndTime().second,startEndTime.second);
 }
 
@@ -314,6 +335,8 @@ void TestCalenStatusStrip::testCalculateStartEndTimePosition()
    Test calculating minute height based on widget height and given time.
    1)Calculate on given time
    2)Change time of event
+   3)For event longer than 15 minutes
+   4)For event shorter than or equal to 15 minutes
  */
 void TestCalenStatusStrip::testCalculateMinuteHegiht()
 {   
@@ -331,6 +354,20 @@ void TestCalenStatusStrip::testCalculateMinuteHegiht()
     testedValue = mStatusStrip->calculateMinuteHeight(QTime(10,00,0),
                                                       QTime(11,30,0));
     testValue = WIDGET_HEIGHT / (qreal)90;
+    QCOMPARE(testedValue,testValue);
+    
+    //3)
+    testedValue = mStatusStrip->calculateMinuteHeight(QTime(10,00,0),
+                                                      QTime(10,29,0));
+    testValue = CalenDayUtils::instance()->hourElementHeight() 
+                    / ((qreal)2 * (qreal)29);
+    QCOMPARE(testedValue,testValue);
+    
+    //4)
+    testedValue = mStatusStrip->calculateMinuteHeight(QTime(10,00,0),
+                                                      QTime(10,15,0));
+    testValue = CalenDayUtils::instance()->hourElementHeight() 
+                    / ((qreal)4 * (qreal)15);
     QCOMPARE(testedValue,testValue);
 }
 
@@ -370,7 +407,64 @@ void TestCalenStatusStrip::testPaint()
     img.save("c:/unittest/TestCalenStatusStrip_testPaint.jpg");
     
 #endif
+    
+    //2)
+    //preapre data needed to draw on widget
+    startEndTime.first = QTime(10,59,0);
+    startEndTime.second = QTime(11,0,00);
 
+    //set event time
+    mStatusStrip->setStartEndTime(startEndTime.first,startEndTime.second);
+
+    //resize widget to be bigger than (0,0)
+    mStatusStrip->resize(WIDGET_WIDTH,WIDGET_HEIGHT);
+    size = mStatusStrip->size().toSize();
+
+    //create image that will simulate widget where painting should be done
+    QImage img2(size, QImage::Format_RGB32);
+    //create painter which will be used to paint
+    QPainter painter2(&img2);
+    //fill image with white color to have better filings with look of "paper"
+    painter2.fillRect(0,0,size.width(),size.height(),QColor(Qt::white));
+    // set drawing style
+    mStatusStrip->setDrawingStyle(CalenDayStatusStrip::StripWithLines);
+    //run paint
+    mStatusStrip->paint(&painter2,0);
+
+#ifdef SAVE_IMAGES
+    //save drawed image
+    img2.save("c:/unittest/TestCalenStatusStrip_testPaintTC2.jpg");
+
+#endif
+
+    //3)
+    //preapre data needed to draw on widget
+    startEndTime.first = QTime(10,59,0);
+    startEndTime.second = QTime(11,0,00);
+
+    //set event time
+    mStatusStrip->setStartEndTime(startEndTime.first,startEndTime.second);
+
+    //resize widget to be bigger than (0,0)
+    mStatusStrip->resize(WIDGET_WIDTH,WIDGET_HEIGHT);
+    size = mStatusStrip->size().toSize();
+
+    //create image that will simulate widget where painting should be done
+    QImage img3(size, QImage::Format_RGB32);
+    //create painter which will be used to paint
+    QPainter painter3(&img3);
+    //fill image with white color to have better filings with look of "paper"
+    painter3.fillRect(0,0,size.width(),size.height(),QColor(Qt::white));
+    // set drawing style
+    mStatusStrip->setDrawingStyle(CalenDayStatusStrip::OnlyFrame);
+    //run paint
+    mStatusStrip->paint(&painter3,0);
+
+#ifdef SAVE_IMAGES
+    //save drawed image
+    img3.save("c:/unittest/TestCalenStatusStrip_testPaintTC3.jpg");
+
+#endif
 }
 
 QTEST_MAIN(TestCalenStatusStrip);

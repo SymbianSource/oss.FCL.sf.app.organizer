@@ -22,8 +22,13 @@
 #include <QGraphicsScene>
 #include <hbstyleloader.h>
 
+#define private public
+
 #include "calendayhourscrollarea.h"
 
+// Test variables
+bool gTestLocaleChanged = false;
+bool gTestUpdatePerformed = false;
 const qreal WIDGET_WIDTH = 300;
 const qreal WIDGET_HEIGHT = 1000;
 
@@ -45,6 +50,8 @@ private slots:
     void testSetGetDateTime();
     void testScrollToHour();
     void testscrollVertically();
+    void testLocaleChanged();
+    void testUpdateTimeIndicator();
 
 private:
     CalenDayHourScrollArea *mHourScrollArea;
@@ -225,7 +232,7 @@ void TestCalenDayHourScrollArea::testscrollVertically()
     //create painter which will be used to paint
     QPainter painter;
 
-    //0
+    //1
     mHourScrollArea->scrollVertically(QPoint(10,250));
     painter.begin(&img);
     painter.setRenderHint(QPainter::Antialiasing);
@@ -236,7 +243,7 @@ void TestCalenDayHourScrollArea::testscrollVertically()
     //save drawed image
     img.save("c:/unittest/TestCalenDayHourScrollArea_testscrollVertically_250.png");
 #endif
-    //1
+    //2
     mHourScrollArea->scrollVertically(QPoint(10,500));
     painter.begin(&img);
     painter.setRenderHint(QPainter::Antialiasing);
@@ -247,7 +254,7 @@ void TestCalenDayHourScrollArea::testscrollVertically()
     //save drawed image
     img.save("c:/unittest/TestCalenDayHourScrollArea_testscrollVertically_500.png");
 #endif    
-    //2
+    //3
     mHourScrollArea->scrollVertically(QPoint(10,2000));
     painter.begin(&img);
     painter.setRenderHint(QPainter::Antialiasing);
@@ -259,6 +266,81 @@ void TestCalenDayHourScrollArea::testscrollVertically()
     img.save("c:/unittest/TestCalenDayHourScrollArea_testscrollVertically_2000.png");
 #endif
     scene.removeItem(mHourScrollArea);
+}
+
+/*!
+   \brief It tests localeChanged slot
+   1) test if localeChanged was called on hour elements
+   2) test if nothing changes if there are no hour elements
+ */
+void TestCalenDayHourScrollArea::testLocaleChanged()
+{
+    //1)
+    gTestLocaleChanged = false;
+    mHourScrollArea->localeChanged();
+    QCOMPARE(gTestLocaleChanged, true);
+    
+    //2)
+    gTestLocaleChanged = false;
+    // clear the list of elements
+    mHourScrollArea->mHourElements.clear();
+    QCOMPARE(mHourScrollArea->mHourElements.count(), 0);
+    mHourScrollArea->localeChanged();
+    QCOMPARE(gTestLocaleChanged, false);
+}
+    
+/*!
+   \brief It tests updateTimeIndicator slot
+   1) hour elements > 0, update not performed for day before yesterday
+   2) hour elements > 0, update performed for current day
+   3) hour elements > 0, update not performed for day after tomorrow
+   4) hour elements = 0, update not performed for day before yesterday
+   5) hour elements = 0, update not performed for current day
+   6) hour elements = 0, update not performed for day after tomorrow
+ */
+void TestCalenDayHourScrollArea::testUpdateTimeIndicator()
+{
+    QDateTime currentDateTime = QDateTime::currentDateTime();
+    
+    //1)
+    gTestUpdatePerformed = false;
+    mHourScrollArea->setDateTime(currentDateTime.addDays(-2));
+    mHourScrollArea->updateTimeIndicator();
+    QCOMPARE(gTestUpdatePerformed, false);
+    
+    //2)
+    gTestUpdatePerformed = false;
+    mHourScrollArea->setDateTime(currentDateTime);
+    mHourScrollArea->updateTimeIndicator();
+    QCOMPARE(gTestUpdatePerformed, true);
+    
+    //3)
+    gTestUpdatePerformed = false;
+    mHourScrollArea->setDateTime(currentDateTime.addDays(2));
+    mHourScrollArea->updateTimeIndicator();
+    QCOMPARE(gTestUpdatePerformed, false);
+    
+    // clear the list of elements
+    mHourScrollArea->mHourElements.clear();
+    QCOMPARE(mHourScrollArea->mHourElements.count(), 0);
+    
+    //4)
+    gTestUpdatePerformed = false;
+    mHourScrollArea->setDateTime(currentDateTime.addDays(-2));
+    mHourScrollArea->updateTimeIndicator();
+    QCOMPARE(gTestUpdatePerformed, false);
+    
+    //5)
+    gTestUpdatePerformed = false;
+    mHourScrollArea->setDateTime(currentDateTime);
+    mHourScrollArea->updateTimeIndicator();
+    QCOMPARE(gTestUpdatePerformed, false);
+    
+    //6)
+    gTestUpdatePerformed = false;
+    mHourScrollArea->setDateTime(currentDateTime.addDays(2));
+    mHourScrollArea->updateTimeIndicator();
+    QCOMPARE(gTestUpdatePerformed, false);
 }
 
 QTEST_MAIN(TestCalenDayHourScrollArea);

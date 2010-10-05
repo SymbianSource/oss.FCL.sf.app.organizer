@@ -57,7 +57,7 @@ const int KCalenHScrollMoveParam = 30;  //!< Percentage
  */
 CalenDayContentScrollArea::CalenDayContentScrollArea(QGraphicsItem *parent) :
     HbScrollArea(parent), mPanDayDirection(ECalenPanNotSet), mIsMoving(false),
-    mMoveDirection(ECalenScrollNoDayChange)
+    mMoveDirection(ECalenScrollNoDayChange), mDisallowedDirection(ECalenScrollNoDayChange)
 { 
 #ifdef CALENDAYVIEW_PANNING_ENABLED
     grabGesture(Qt::PanGesture);
@@ -87,6 +87,27 @@ CalenDayContentScrollArea::CalenDayContentScrollArea(QGraphicsItem *parent) :
  */
 CalenDayContentScrollArea::~CalenDayContentScrollArea()
 {
+}
+
+/*!
+ \brief Returns disallowed scroll direction (if defined)
+ 
+ \return Disallowed scroll direction
+ */
+CalenScrollDirection CalenDayContentScrollArea::disallowedScrollDirection() const
+{
+    return mDisallowedDirection;
+}
+
+/*!
+ \brief Sets disallowed scroll direction
+ 
+ \param direction Disallowed scroll direction to be set
+ */
+void CalenDayContentScrollArea::setDisallowedScrollDirection(
+    const CalenScrollDirection direction)
+{
+    mDisallowedDirection = direction;
 }
 
 /*!
@@ -376,16 +397,23 @@ void CalenDayContentScrollArea::checkPanDirection(QPanGesture *panGesture)
  */
 void CalenDayContentScrollArea::moveTo(const QPointF &newPosition, int time)
 {
-    // Connect to scrollingEnded SIGNAL to get feedback when scrolling ends
-    connect(this, SIGNAL(scrollingEnded()), this, SLOT(moveFinished()));
+    bool canMove(true);
+    if (mDisallowedDirection != ECalenScrollNoDayChange) {
+        canMove = (mMoveDirection != mDisallowedDirection);
+    }
     
-    // Scroll the content to new position and set isMoving flag
-    scrollContentsTo(newPosition, time);
-    mIsMoving = true;
-    
-    // Emit signal that moving has just started
-    if (mMoveDirection != ECalenScrollNoDayChange) {
-        emit scrollAreaMoveStarted(mMoveDirection);
+    if (canMove) {
+        // Connect to scrollingEnded SIGNAL to get feedback when scrolling ends
+        connect(this, SIGNAL(scrollingEnded()), this, SLOT(moveFinished()));
+        
+        // Scroll the content to new position and set isMoving flag
+        scrollContentsTo(newPosition, time);
+        mIsMoving = true;
+        
+        // Emit signal that moving has just started
+        if (mMoveDirection != ECalenScrollNoDayChange) {
+            emit scrollAreaMoveStarted(mMoveDirection);
+        }
     }
 }
 

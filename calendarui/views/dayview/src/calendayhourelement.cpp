@@ -49,41 +49,24 @@ const int KCalenTimeFormatLength = 5;
 CalenDayHourElement::CalenDayHourElement(
     const QTime &time,
     QGraphicsItem *parent) :
-    HbWidget(parent), mHour(time)
+    HbWidget(parent), mHour(time), mTimeTextItem(NULL), mAmpmTextItem(NULL)
 {
     // Necessary when widget implements own paint method
     setFlag(QGraphicsItem::ItemHasNoContents, false);
-
+    
     HbDeviceProfile deviceProfile;
     mUnitInPixels = deviceProfile.unitValue();
+    mHour = time;
 
     // Initialize hour line color
-    mHourLineColor = HbColorScheme::color(KCalenHourLineColor);
-
-    // Create text items
-    HbExtendedLocale systemLocale = HbExtendedLocale::system();
-
-    // Get current time format and (if there's a need) separate time from am/pm text
-    QChar timeSeparator = ' ';
-    QStringList timeTextList = systemLocale.format(time,
-        r_qtn_time_usual_with_zero).split(timeSeparator);
-
-    // If needed, prepend '0' to get proper time format: [0-9][0-9]:[0-9][0-9]
-    QString timeString = timeTextList[0];
-    if (timeString.length() < KCalenTimeFormatLength) {
-        timeString.prepend('0');
-    }
-
-    QString ampmString = "";
-    if (timeTextList.count() > 1) {
-        ampmString = timeTextList[1].toLower();
-    }
-
-    HbTextItem* timeTextItem = new HbTextItem(timeString, this);
-    HbTextItem* ampmTextItem = new HbTextItem(ampmString, this);
-
-    HbStyle::setItemName(timeTextItem, QLatin1String("time"));
-    HbStyle::setItemName(ampmTextItem, QLatin1String("ampm"));
+    mHourLineColor = HbColorScheme::color(KCalenHourLineColor); 
+    
+    mTimeTextItem = new HbTextItem(this);
+    mAmpmTextItem = new HbTextItem(this);
+    HbStyle::setItemName(mTimeTextItem, QLatin1String("time"));
+    HbStyle::setItemName(mAmpmTextItem, QLatin1String("ampm"));
+    
+    setupWithLocale();
 
     // Parent container is needed to update widget's time
     mContainer = static_cast<CalenDayHourScrollArea*> (parent);
@@ -94,7 +77,6 @@ CalenDayHourElement::CalenDayHourElement(
  */
 CalenDayHourElement::~CalenDayHourElement()
 {
-
 }
 
 /*!
@@ -170,6 +152,44 @@ void CalenDayHourElement::setTime(const QTime &time)
 QTime CalenDayHourElement::time() const
 {
     return mHour;
+}
+
+/*!
+ \brief SLOT updates control when system locale changes
+ */
+void CalenDayHourElement::localeChanged()
+{
+    setupWithLocale();
+    repolish();
+}
+
+/*!
+ \brief Sets up internal data using current system locale.
+ */
+void CalenDayHourElement::setupWithLocale()
+{
+    HbDeviceProfile deviceProfile;
+
+    // Create text items
+    HbExtendedLocale systemLocale = HbExtendedLocale::system();
+
+    // Get current time format and (if there's a need) separate time from am/pm text
+    QChar timeSeparator = ' ';
+    QStringList timeTextList = systemLocale.format(mHour, r_qtn_time_usual_with_zero).split(timeSeparator);
+
+    // If needed, prepend '0' to get proper time format: [0-9][0-9]:[0-9][0-9]
+    QString timeString = timeTextList[0];
+    if (timeString.length() < KCalenTimeFormatLength) {
+        timeString.prepend('0');
+    }
+
+    QString ampmString = "";
+    if (timeTextList.count() > 1) {
+        ampmString = timeTextList[1].toLower();
+    }
+    
+    mTimeTextItem->setText(timeString);
+    mAmpmTextItem->setText(ampmString);
 }
 
 // End of File

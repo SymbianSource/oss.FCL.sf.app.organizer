@@ -1172,7 +1172,9 @@ void AgendaEventView::close()
 			this, SLOT(close()));
 
 	window->removeView(mViewer);
-	if (AgendaEntry::TypeTodo == mAgendaEntry.type()) {
+	// For To-do, if due date is in future, we retain it there. 
+	// All the past incompleted to-dos will come on today.
+	if ((AgendaEntry::TypeTodo == mAgendaEntry.type()) && (mAgendaEntry.startTime().date() <= QDate::currentDate())) {
 	    mAgendaEntry.setStartAndEndTime(
 	            CalenDateUtils::today(), CalenDateUtils::today());
 	}

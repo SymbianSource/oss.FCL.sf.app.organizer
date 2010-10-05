@@ -23,5 +23,6 @@ SUBDIRS +=  ../agenda_interface_api/tsrc \
 			../clock_settingsview_plugin_api/tsrc
 
 CONFIG += ordered
+CONFIG += symbian_test
 
 # End of file	--Don't remove this

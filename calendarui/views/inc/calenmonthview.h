@@ -69,7 +69,6 @@ public:  // From CCalenView
 	void doLazyLoading();
 	void handleGridItemActivated();
 	void setContextForActiveDay(int index);
-	QDateTime getCurrentDay();
 	QDateTime getActiveDay();
 	int rowsInPrevMonth();
 	int rowsInFutMonth();
@@ -158,7 +157,6 @@ private:
 	HbLabel *mSixthWeekLabel;
 	QList<CalenMonthData> mMonthDataArray;
 	QDateTime mDate;
-	QDateTime mCurrentDay;
 	QDateTime mFirstDayOfGrid;
 	QDateTime mLastDayOfGrid;
 	int mTotalNumOfGridItems;

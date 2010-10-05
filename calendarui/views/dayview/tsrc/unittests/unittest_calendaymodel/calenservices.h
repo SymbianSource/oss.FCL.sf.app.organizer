@@ -43,6 +43,8 @@ public:
     
     QList<AgendaEntry> createEntryIdListForDay(const QDateTime &date,AgendaUtil::FilterFlags filter)
     {
+        Q_UNUSED(date);
+        Q_UNUSED(filter);
         QList<AgendaEntry> agenda;
         AgendaEntry entry;
         agenda << entry;

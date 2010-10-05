@@ -31,7 +31,7 @@
 #include <agendautil.h>
 #include <agendaentry.h>
 #include <hbapplication.h> // hbapplication
-#include <hbactivitymanager.h> //Activity Manager
+
 
 //user includes
 #include "calenmonthview.h"
@@ -83,7 +83,6 @@ CalenMonthView::CalenMonthView(MCalenServices &services) :
 	mOrientation = mServices.MainWindow().orientation();
 	// Read the date from the context
 	mDate = mServices.Context().focusDateAndTime();
-	mCurrentDay = mDate;
 
 	// Create the settings manager instance and settings key for week number
 	mSettingsManager = new XQSettingsManager(this);
@@ -240,13 +239,11 @@ void CalenMonthView::setupView(CalenDocLoader *docLoader)
 	
 	
 	mIsFirstTimeLoad = true;
-	// get a pointner to activity manager
-	HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
 
-	// clean up any previous versions of this activity, if any, i.e. activityName, from the activity manager. 
+	// clean up any previous versions of this activity, if any, i.e. activityName
 	// Ignore return value, first boot would always return False. bool declared 
 	// only for debugging purpose.
-	bool ok = activityManager->removeActivity(activityName);
+	bool ok = removeActivity();
 
 	OstTraceFunctionExit0( CALENMONTHVIEW_SETUPVIEW_EXIT );
 }
@@ -940,17 +937,6 @@ void CalenMonthView::setDate()
 }
 
 /*!
- Returns the currDay(Today)
- */
-QDateTime CalenMonthView::getCurrentDay()
-{
-    OstTraceFunctionEntry0( CALENMONTHVIEW_GETCURRENTDAY_ENTRY );
-    
-	OstTraceFunctionExit0( CALENMONTHVIEW_GETCURRENTDAY_EXIT );
-	return mCurrentDay;
-}
-
-/*!
  Returns the active day(currently focussed day)
  */
 QDateTime CalenMonthView::getActiveDay()
@@ -1448,11 +1434,10 @@ void CalenMonthView::launchDayView()
     OstTraceFunctionEntry0( CALENMONTHVIEW_LAUNCHDAYVIEW_ENTRY );
     
 	mServices.IssueCommandL(ECalenDayView);
-	// day view launched now, disconnect to get the call backs for saveActivity 
-	// on aboutToQuit signal
-	disconnectAboutToQuitEvent();
-	
-	OstTraceFunctionExit0( CALENMONTHVIEW_LAUNCHDAYVIEW_EXIT );
+	// day view launched now, captre the screen shot of month view 
+    captureScreenshot(true);
+  
+    OstTraceFunctionExit0( CALENMONTHVIEW_LAUNCHDAYVIEW_EXIT );
 }
 
 /*!
@@ -1660,12 +1645,9 @@ QDateTime CalenMonthView::firstDayOfGrid()
 void CalenMonthView::onLocaleChanged(int reason)
 {
     OstTraceFunctionEntry0( CALENMONTHVIEW_ONLOCALECHANGED_ENTRY );
-    
-    if ((reason & EChangesSystemTime) 
-    		|| (reason & EChangesMidnightCrossover)) {
-		mCurrentDay = CalenDateUtils::today();
-	}
-	OstTraceFunctionExit0( CALENMONTHVIEW_ONLOCALECHANGED_EXIT );
+	Q_UNUSED(reason);
+	return;
+    OstTraceFunctionExit0( CALENMONTHVIEW_ONLOCALECHANGED_EXIT );
 }
 
 /*!

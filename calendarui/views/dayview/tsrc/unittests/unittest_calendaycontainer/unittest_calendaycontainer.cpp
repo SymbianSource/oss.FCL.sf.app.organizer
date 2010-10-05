@@ -22,9 +22,9 @@
 
 #include "calendayinfo.h"
 #include "calendaymodel.h"
+#include "calendayitem.h"
 
 #define private public
-
 
 #include "calendaycontainertest.h"
 
@@ -51,6 +51,7 @@ private slots:
 
     void testConstructors();
     void testSetGetDayInfo();
+    void testSetGetDate();
     void testItemAdded();
     void testItemRemoved();
     void testReset();
@@ -182,11 +183,30 @@ void TestCalenDayContainer::testSetGetDayInfo()
 }
 
 /*!
+   Test function to check set and get date
+   1) Test setDate()
+   2) Test date()
+ */
+void TestCalenDayContainer::testSetGetDate() 
+{
+    QDate today = QDate::currentDate();
+    
+    //1)
+    mContainer->setDate(today);
+    QCOMPARE(mContainer->mDate, today);
+    
+    //2)
+    QCOMPARE(mContainer->date(), today);
+}
+
+/*!
    Function not implemented
  */
 void TestCalenDayContainer::testItemAdded()
 {
-    //function dosen't do nothing. It will be updated after code changes
+    // function does nothing - just check function call
+    CalenDayItem *item = new CalenDayItem(mContainer);
+    mContainer->itemAdded(1, item, false);
 }
 
 /*!
@@ -194,7 +214,9 @@ void TestCalenDayContainer::testItemAdded()
  */
 void TestCalenDayContainer::testItemRemoved()
 {
-    //function dosen't do nothing. It will be updated after code changes
+    // function does nothing - just check function call
+    CalenDayItem *item = new CalenDayItem(mContainer);
+    mContainer->itemRemoved(item, false);
 }
 
 /*!

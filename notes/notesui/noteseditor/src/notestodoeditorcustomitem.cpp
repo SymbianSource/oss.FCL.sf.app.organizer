@@ -97,6 +97,7 @@ HbWidget* NotesTodoEditorCustomItem::createCustomWidget()
 
 	switch(itemType) {
 		case HbDataFormModelItem::CustomItemBase + DueDateItemOffset: {
+            setProperty("alarmdateItem",false);
 			mDueDateItem = new HbPushButton();
 			mDueDateItem->setObjectName("dueDateItem");
 			connect(
@@ -107,6 +108,8 @@ HbWidget* NotesTodoEditorCustomItem::createCustomWidget()
 		}
 
 		case HbDataFormModelItem::CustomItemBase + AlarmDateItemOffset: {
+		
+            setProperty("alarmdateItem",true);
 			// Adding two push buttions.
 			HbWidget *widget = new HbWidget();
 			QGraphicsLinearLayout *layout =

@@ -22,6 +22,8 @@
 #include <HbApplication>
 #include <HbActivityManager>
 #include <HbToolBar>
+#include <AfActivation.h>
+#include <AfActivityStorage.h>
 
 // User includes
 #include "clockviewmanager.h"
@@ -56,12 +58,14 @@ ClockViewManager::ClockViewManager(
 {
     OstTraceFunctionEntry0( CLOCKVIEWMANAGER_CLOCKVIEWMANAGER_ENTRY );
     // Activity Reason from Activity Manager
-    int activityReason = qobject_cast<HbApplication*>(qApp)->activateReason();
-    
-    if (Hb::ActivationReasonActivity == activityReason) {
+    AfActivation *activation = new AfActivation();
+
+    if (Af::ActivationReasonActivity == activation->reason()) {
         // Application is started from an activity
 		// extract activity data
-        QVariant data = qobject_cast<HbApplication*>(qApp)->activateData();
+        AfActivityStorage *activitystorage = new AfActivityStorage();
+        QVariant data = activitystorage->activityData(activation->name());
+        delete activitystorage;
         // restore state from activity data
         QByteArray serializedModel = data.toByteArray();
         QDataStream stream(&serializedModel, QIODevice::ReadOnly);
@@ -92,7 +96,7 @@ ClockViewManager::ClockViewManager(
                 window, SIGNAL(viewReady()),
                 this, SLOT(loadOtherViews()));
     }
-
+delete activation;
 OstTraceFunctionExit0( CLOCKVIEWMANAGER_CLOCKVIEWMANAGER_EXIT );
 }
 

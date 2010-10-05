@@ -47,7 +47,8 @@ symbian : {
 					-lbafl \
 					-lagendainterface \
 					-lagendaeventviewer \
-					-lxqserviceutil
+					-lxqserviceutil \
+					-lafservice 
 						
  	TARGET.UID3 = 0x10282F25					  
   TARGET.CAPABILITY = CAP_GENERAL_DLL

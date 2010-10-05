@@ -31,21 +31,21 @@ class QDateTime;
  * them to the appropriate place (i.e. the action ui classes).
  */
 class MCalenContext
-	{
+{
 public:
 	QDateTime focusDateAndTime()
 		{
-		return QDateTime(QDate(2000, 10, 10));
+		return mFocusedDate;
 		}
 
 	void setFocusDate(const QDateTime& focusDateTime)
 		{
-		Q_UNUSED(focusDateTime);
+	    mFocusedDate = focusDateTime;;
 		}
 
 	void setFocusDateAndTime(const QDateTime& focusDateTime)
 		{
-		Q_UNUSED(focusDateTime);
+		mFocusedDate = focusDateTime;
 		}
 
 	QDateTime defaultCalTimeForViewsL()
@@ -56,11 +56,16 @@ public:
 	void setFocusDateAndTimeAndInstance( const QDateTime& focusDateTime,
                                          const TCalenInstanceId& aInstanceId )
     {
-        Q_UNUSED(focusDateTime);
         Q_UNUSED(aInstanceId);
+        mFocusedDate = focusDateTime;
     }
 
-	};
+private:
+    QDateTime mFocusedDate;
+	
+};
+
+
 
 #endif // CALENCONTEXT_H
 // End of file

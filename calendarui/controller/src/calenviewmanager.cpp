@@ -21,7 +21,8 @@
 #include <hbinstance.h>
 #include <hbapplication.h> // hbapplication
 #include <xqserviceutil.h> // service utils
-
+#include <afactivation.h>
+#include <AfActivityStorage.h>
 //user includes
 #include "calenviewmanager.h"
 #include "calencontroller.h"
@@ -86,23 +87,22 @@ CalenViewManager::CalenViewManager( CCalenController& aController)
 void CalenViewManager::SecondPhaseConstruction()
 {
     OstTraceFunctionEntry0( CALENVIEWMANAGER_SECONDPHASECONSTRUCTION_ENTRY );
-    
-    // Check the Application Startup reason from Activity Manager
-    int activityReason = qobject_cast<HbApplication*>(qApp)->activateReason();
-    
+
     // Check if calendar is launched thru XQService framework
     bool isFromServiceFrmWrk = XQServiceUtil::isService(); // Since activateReason 
     //of hbapplication is not returning right value if the activity is started 
     //as services so using the above line temporarily untill a fix is available in 
-    // hbappliacation. Need to remove this line after the fix is available for hbapplcation
-
-    
-    if (Hb::ActivationReasonActivity == activityReason) // Check if application is started 
+    // hbappliac
+    AfActivation *activation = new AfActivation();
+    if(Af::ActivationReasonActivity == activation->reason())
     // as an activity
         {
         // Application is started from an activity
         // Extract activity data
-        QVariant data = qobject_cast<HbApplication*>(qApp)->activateData();
+        AfActivityStorage *activitystorage = new AfActivityStorage();
+        QVariant data = activitystorage->activityData(activation->name());
+        delete activitystorage;
+
         // Restore state from activity data
         QByteArray serializedModel = data.toByteArray();
         QDataStream stream(&serializedModel, QIODevice::ReadOnly);
@@ -153,8 +153,8 @@ void CalenViewManager::SecondPhaseConstruction()
         mController.MainWindow().addView(mCalenMonthView);
         mController.MainWindow().setCurrentView(mCalenMonthView);
     }
-    
-
+    //delete the activity intsance
+    delete activation;
     OstTraceFunctionExit0( CALENVIEWMANAGER_SECONDPHASECONSTRUCTION_EXIT );
 }
 
@@ -1015,10 +1015,11 @@ void CalenViewManager::handleEntriesChanged(QList<ulong> ids)
 	Q_UNUSED(ids);
 	HbView *currentview = mController.MainWindow().currentView();
 	if((mCalenMonthView == currentview)||(mCalenDayView == currentview)||
-                                            (mCalenAgendaView == currentview ))
+                                            (mCalenAgendaView == currentview )||(mCalenAgendaViewAlt == currentview))
 	    {
         activateCurrentView();
 	    }
+	delete currentview;
 }
 
 // ----------------------------------------------------------------------------

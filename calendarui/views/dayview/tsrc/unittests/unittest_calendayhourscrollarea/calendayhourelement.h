@@ -11,7 +11,7 @@
  *
  * Contributors:
  *
- * Description:  Day view control of calendar
+ * Description: Mocked class CalenDayHourElement
  *
  */
 
@@ -20,47 +20,55 @@
 
 // System includes
 #include <QTime>
-#include <QPen>
 #include <HbWidget>
-#include <HbTextItem>
 
-// User includes
+// Test variables
+extern bool gTestLocaleChanged;
+extern bool gTestUpdatePerformed;
 
-
-// Forward declarations
-class CalenDayHourScrollArea;
-
+// Mocked class
 class CalenDayHourElement : public HbWidget
 {
 Q_OBJECT
 
 public:
 
-    CalenDayHourElement(const QTime &time, QGraphicsItem *parent = 0);
-    virtual ~CalenDayHourElement();
+    CalenDayHourElement(const QTime &time, QGraphicsItem *parent = 0) : HbWidget(parent) {
+        mHour = time;
+    }
+    virtual ~CalenDayHourElement() {
+        
+    }
 
     void paint(
         QPainter * painter,
         const QStyleOptionGraphicsItem * option,
-        QWidget * widget);
+        QWidget * widget) {
+        Q_UNUSED(painter)
+        Q_UNUSED(option)
+        Q_UNUSED(widget)
+    }
 
-    void setTime(const QTime &time);
-    QTime time() const;
+    void setTime(const QTime &time) {
+        mHour = time;
+    }
+    
+    QTime time() const {
+        return mHour;
+    }
+    
+    void update(const QRectF &rect = QRectF()) {
+        Q_UNUSED(rect)
+        gTestUpdatePerformed = true;
+    }
     
 public slots:
-    void localeChanged();
+    void localeChanged() {
+        gTestLocaleChanged = true;
+    }
 
 private:
-    void setupWithLocale();
-
-private:
-    const CalenDayHourScrollArea *mContainer;
     QTime mHour;
-    QColor mHourLineColor;
-    qreal mUnitInPixels;
-    
-    HbTextItem *mTimeTextItem;  //!< Text item for displaying time
-    HbTextItem *mAmpmTextItem;  //!< Test item for displaying am/pm
 };
 
 #endif // CALENDAYHOURELEMENT_H

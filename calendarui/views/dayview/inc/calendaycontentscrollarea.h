@@ -55,6 +55,9 @@ public:
         ECalenPanVertical,
         ECalenPanHorizontal
     };
+    
+    CalenScrollDirection disallowedScrollDirection() const;
+    void setDisallowedScrollDirection(const CalenScrollDirection direction); 
 
 signals:
     void scrollAreaMoveStarted(CalenScrollDirection scrollTo);
@@ -99,6 +102,11 @@ private:    // data
      \brief Scroll area horizontal move direction
      */
     CalenScrollDirection mMoveDirection;
+    
+    /*!
+     \brief Scroll area horizontal move disallowed direction
+     */
+    CalenScrollDirection mDisallowedDirection;
 };
 
 #endif /* CALENDAYCONTENTSCROLLAREA_H_ */

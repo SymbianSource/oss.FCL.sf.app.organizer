@@ -22,6 +22,7 @@
 // User includes
 #include "test_calenviewerservice.h"
 
+/*
 int main(int argc, char *argv[])
 {
 	HbApplication app(argc, argv);
@@ -41,5 +42,8 @@ int main(int argc, char *argv[])
 	QMetaObject::invokeMethod(&app, "aboutToQuit", Qt::DirectConnection);
 	return ret;
 }
+*/
+
+QTEST_MAIN ( TestCalenViewerService )
 
 // End of file	--Don't remove this.

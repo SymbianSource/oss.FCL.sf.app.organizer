@@ -148,7 +148,7 @@ void CalenDayModelManager::refreshSingleModel(CalenDayModelManager::ModelDay day
         }
             break;
         case NextDay: {
-            mModels[PreviousDay]->refreshModel(mCurrentDayTime.addDays(1));
+            mModels[NextDay]->refreshModel(mCurrentDayTime.addDays(1));
         }
             break;
         default:

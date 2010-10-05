@@ -19,5 +19,7 @@ TEMPLATE = subdirs
 SUBDIRS += unittest_agendautil
 		    	
 CONFIG += ordered
+CONFIG += qtestlib
+CONFIG += symbian_test
 
 # End of file	--Don't remove this

@@ -11,18 +11,18 @@
  *
  * Contributors:
  *
- * Description:  Day view control of calendar
+ * Description: CalenDayItemView implementation
  *
  */
 
-//System includes
+// System includes
 #include <QGesture>
 #include <QGraphicsLinearLayout>
 #include <HbAbstractViewItem>
 #include <HbInstance>
 #include <HbAction>
 
-//User includes
+// User includes
 #include "calendayitemview.h"
 #include "calendayutils.h"
 #include "calendaycontainer.h"
@@ -172,8 +172,7 @@ void CalenDayItemView::modelReset()
             mInfo->InsertTimedEvent(apptInfo);
         }
         else
-            if (CalenAgendaUtils::isAlldayEvent(entry)) //all-day event
-            {
+            if (CalenAgendaUtils::isAlldayEvent(entry)) { //all-day event
                 apptInfo.iAllDay = true;
                 mInfo->InsertAlldayEvent(apptInfo);
             }
@@ -200,6 +199,8 @@ void CalenDayItemView::scrollVertically(const QPointF &newPosition)
  \brief This function is called when a touch press event is received 
  within Abstract view item that is representing index.
  Currently it does nothing.
+ 
+ \param index Index of pressed item
  */
 void CalenDayItemView::itemPressed(const QModelIndex &index)
 {
@@ -210,6 +211,8 @@ void CalenDayItemView::itemPressed(const QModelIndex &index)
  \brief This function is called when a touch release event is received 
  within Abstract view item that is representing index.
  Currently it does nothing.
+ 
+ \param index Index of released item
  */
 void CalenDayItemView::itemReleased(const QModelIndex &index)
 {
@@ -219,7 +222,7 @@ void CalenDayItemView::itemReleased(const QModelIndex &index)
 /*!
  \brief This function is called when the item specified by index is activated by the user.
  
- \param position Not used.
+ \param index Index of activated item
  */
 void CalenDayItemView::itemActivated(const QModelIndex &index)
 {
@@ -306,11 +309,6 @@ void CalenDayItemView::setupSlots()
             SLOT(modelAboutToBeReset()));
         QObject::connect(this->model(), SIGNAL(modelReset()), this,
             SLOT(modelReset()));
-    }
-    if (mContainer) {
-        // Connect with base class to enable handling item press by model index
-        QObject::connect(mContainer, SIGNAL(itemCreated(HbAbstractViewItem *)),
-            this, SLOT(itemCreated(HbAbstractViewItem*)));
     }
     QObject::connect(this, SIGNAL(pressed(const QModelIndex&)), this,
         SLOT(itemPressed(const QModelIndex&)));

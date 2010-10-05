@@ -176,8 +176,6 @@ void CalenMonthGrid::updateMonthGridModel(QList<CalenMonthData> &monthDataArray,
 		loopEnd = dataCount;
 	}
 	
-	QDateTime currDate = mView->getCurrentDay();
-	QDateTime currDateTime = CalenDateUtils::beginningOfDay(currDate);
 	QDateTime activeDay = mView->getActiveDay();
 	QDateTime activeDateTime = CalenDateUtils::beginningOfDay(activeDay);
 	
@@ -205,7 +203,7 @@ void CalenMonthGrid::updateMonthGridModel(QList<CalenMonthData> &monthDataArray,
 		}
 
 		// Check for current day
-		if (currDateTime == CalenDateUtils::beginningOfDay(dateTime)) {
+		if (QDate::currentDate() == dateTime.date()) {
 			// Set the underline attribute to true
 			itemData << true;
 		} else {			
@@ -262,14 +260,10 @@ void CalenMonthGrid::updateMonthGridModel(QList<CalenMonthData> &monthDataArray,
 		// two calls have been  made to scrollTo(), one with top
 		// visible item and other with bottom visible item
 		// Calculate the first visible item in the grid
-		QModelIndex firstVisibleIndex = mModel->index(indexToBeScrolled - 
-								(KNumOfVisibleRows * KCalenDaysInWeek - 1), 0);
-		scrollTo(firstVisibleIndex);
-		
 		
 		// Calculate the last visible item in the grid
 		QModelIndex lastVisibleIndex = mModel->index(indexToBeScrolled, 0);
-		scrollTo(lastVisibleIndex);
+		scrollTo(lastVisibleIndex, HbAbstractItemView::PositionAtBottom);
 	}
 	
 	OstTraceFunctionExit0( CALENMONTHGRID_UPDATEMONTHGRIDMODEL_EXIT );
@@ -293,17 +287,12 @@ void CalenMonthGrid::updateMonthGridWithInActiveMonths(
 	int rowsInPrevMonth = mView->rowsInPrevMonth();
 	
 	// Calculate the proper index to be scrolled to
-	int itemToBeScrolled = rowsInPrevMonth * KCalenDaysInWeek;
+		
+	int itemToBeScrolled = ((rowsInPrevMonth + KNumOfVisibleRows) * 
+								   KCalenDaysInWeek) - 1;
 	QModelIndex indexToBeScrolled = mModel->index(itemToBeScrolled, 0);
 	mIsAtomicScroll = true;
-	scrollTo(indexToBeScrolled);
-		
-	// Scroll to proper index
-	itemToBeScrolled = ((rowsInPrevMonth + KNumOfVisibleRows) * 
-								   KCalenDaysInWeek) - 1;
-	indexToBeScrolled = mModel->index(itemToBeScrolled, 0);
-	mIsAtomicScroll = true;
-	scrollTo(indexToBeScrolled);
+	scrollTo(indexToBeScrolled, HbAbstractItemView::PositionAtBottom);
 	
 	// Update the sart position of the content widget
 	mStartPos = mContentWidget->pos();
@@ -340,8 +329,10 @@ void CalenMonthGrid::updateMonthGridWithEventIndicators(
                 QModelIndex itemIndex = mModel->index(i,0);
                 QVariant itemData = itemIndex.data(Qt::UserRole + 1);
                 QVariantList list = itemData.toList();
-                list.replace(CalendarNamespace::CalendarMonthEventRole, true);
-                mModel->itemFromIndex(itemIndex)->setData(list);
+				if (list.count() > CalendarNamespace::CalendarMonthEventRole ) { 
+	                list.replace(CalendarNamespace::CalendarMonthEventRole, true);
+        	        mModel->itemFromIndex(itemIndex)->setData(list);
+				}
             }
         }
 	} else {
@@ -758,8 +749,6 @@ void CalenMonthGrid::handlePrependingRows(QList<CalenMonthData > &monthDataList)
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_HANDLEPREPENDINGROWS_ENTRY );
     
-	QDateTime currDate = mView->getCurrentDay();
-	QDateTime currDateTime = CalenDateUtils::beginningOfDay( currDate );
 	int rowsInPrevMonth = mView->rowsInPrevMonth();
 	// Add the new days
 	int countToBeAdded = rowsInPrevMonth * KCalenDaysInWeek;
@@ -783,7 +772,7 @@ void CalenMonthGrid::handlePrependingRows(QList<CalenMonthData > &monthDataList)
 		itemData << false;
 		
 		// Check for current day
-		if  (currDateTime == CalenDateUtils::beginningOfDay( dateTime )) {
+		if (QDate::currentDate() == dateTime.date()) {
 			// Set the underline icon attribute
 			itemData << true;
 		} else {
@@ -881,8 +870,6 @@ void CalenMonthGrid::handleAppendingRows(QList<CalenMonthData > &monthDataList)
 {
     OstTraceFunctionEntry0( CALENMONTHGRID_HANDLEAPPENDINGROWS_ENTRY );
     
-	QDateTime currDate = mView->getCurrentDay();
-	QDateTime currDateTime = CalenDateUtils::beginningOfDay( currDate );
 	int rowsInFutMonth = mView->rowsInFutMonth();
 	int countToBeAdded = rowsInFutMonth * KCalenDaysInWeek;
 	int lastVisibleIndex = monthDataList.count() - countToBeAdded;
@@ -906,7 +893,7 @@ void CalenMonthGrid::handleAppendingRows(QList<CalenMonthData > &monthDataList)
 		itemData << false;
 		
 		// Check for current day
-		if (currDateTime == CalenDateUtils::beginningOfDay( dateTime )) {
+		if (QDate::currentDate() == dateTime.date()) {
 			// Set the underline icon attribute
 			itemData << true;
 		} else {
@@ -1160,42 +1147,6 @@ void CalenMonthGrid::setCurrentIdex(int index)
 	itemActivated(mModel->index(index, 0));
 	
 	OstTraceFunctionExit0( CALENMONTHGRID_SETCURRENTIDEX_EXIT );
-}
-
-/*!
- Function to override the default behavior of hbgridview on orientation change
- */
-void CalenMonthGrid::orientationChanged(Qt::Orientation newOrientation)
-{
-    OstTraceFunctionEntry0( CALENMONTHGRID_ORIENTATIONCHANGED_ENTRY );
-    
-	// We are overriding this function to avoid the default behavior of
-	// hbgridview on orientation change as it swaps the row and column counts
-	// Calculate the proper index to be scrolled to
-	int rowsInPrevMonth;
-    int itemToBeScrolled;
-    QModelIndex indexToBeScrolled;
-	if (newOrientation == Qt::Horizontal) {
-		rowsInPrevMonth = mView->rowsInPrevMonth();
-		itemToBeScrolled = rowsInPrevMonth * KCalenDaysInWeek;
-		indexToBeScrolled = mModel->index(itemToBeScrolled, 0);
-		mIsAtomicScroll = true;
-		scrollTo(indexToBeScrolled);
-	} else {
-		rowsInPrevMonth = mView->rowsInPrevMonth();
-		itemToBeScrolled = rowsInPrevMonth * KCalenDaysInWeek;
-		indexToBeScrolled = mModel->index(itemToBeScrolled, 0);
-		mIsAtomicScroll = true;
-		scrollTo(indexToBeScrolled);
-		
-		itemToBeScrolled = ((rowsInPrevMonth + KNumOfVisibleRows) * 
-				KCalenDaysInWeek) - 1;
-		indexToBeScrolled = mModel->index(itemToBeScrolled, 0);
-		mIsAtomicScroll = true;
-		scrollTo(indexToBeScrolled);
-	}
-	
-	OstTraceFunctionExit0( CALENMONTHGRID_ORIENTATIONCHANGED_EXIT );
 }
 
 /*!

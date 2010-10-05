@@ -1053,6 +1053,7 @@ void TestAgendaUtil::unCompletedTodo()
 	QCOMPARE(completedTime, unCompletedTodo.completedDateTime());
 }
 
+/*
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
@@ -1066,6 +1067,9 @@ int main(int argc, char *argv[])
 	int res = QTest::qExec(&tc, 3, pass);
 	return res;
 }
+*/
+
+QTEST_MAIN ( TestAgendaUtil )
 
 #include "unittest_agendautil.moc"
 

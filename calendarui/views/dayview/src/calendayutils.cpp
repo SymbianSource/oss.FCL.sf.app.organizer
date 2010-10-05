@@ -140,23 +140,31 @@ HbMainWindow* CalenDayUtils::mainWindow()
     return mMainWindow;
 }
 
-/*!
- \brief getEventValidStartEndTime
- \brief Get event's valid start/end time from agenda entry.
+/*
+ * Get event's start/end time fromm agenda entry.
+ * Start/end time are validated to be within the current day (the case of
+ * multi-day events)
+ * @param start [out] valid start time
+ * @param end [out] valid end time
+ * @param entry [in] agenda entry asociated with the event.
+ * @param currentDate [in] current date
  */
-void CalenDayUtils::getEventValidStartEndTime( QDateTime& start, QDateTime& end, 
-                                    const AgendaEntry& entry, QDateTime& currentDate )
+void CalenDayUtils::getEventValidStartEndTime(
+    QDateTime& start,
+    QDateTime& end,
+    const AgendaEntry& entry,
+    QDateTime& currentDate)
 {
     start = entry.startTime();
     end = entry.endTime();
-    
-    if ( !CalenDateUtils::onSameDay( start, currentDate ) ) {
-        start = CalenDateUtils::beginningOfDay( currentDate );
+
+    if (!CalenDateUtils::onSameDay(start, currentDate)) {
+        start = CalenDateUtils::beginningOfDay(currentDate);
     }
-    
-    if ( !CalenDateUtils::onSameDay( end, currentDate ) ) {
-       QDateTime tommorrow( currentDate.addDays( 1 ));
-       end = CalenDateUtils::beginningOfDay( tommorrow ).addSecs( -60 );
+
+    if (!CalenDateUtils::onSameDay(end, currentDate)) {
+        QDateTime tommorrow(currentDate.addDays(1));
+        end = CalenDateUtils::beginningOfDay(tommorrow).addSecs(-60);
     }
 }
 

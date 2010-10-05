@@ -42,6 +42,7 @@ class ClockAlarmListModel;
 class ClockWidget;
 class XQSettingsManager;
 class XQSettingsKey;
+class AfActivityStorage;
 
 class ClockMainView : public HbView
 {
@@ -81,6 +82,7 @@ private:
 	void removeSnoozedAlarm();
 	void updateDateLabel();
 	void updateClockWidget();
+	bool removeActivity();
 
 private:
 	QTimer *mTickTimer;
@@ -110,6 +112,8 @@ private:
 	
 	XQSettingsManager *mSettingsManager;
 	XQSettingsKey *mClockTypeSettingsKey;
+	
+	AfActivityStorage *mActivityStorage;
 
 	int            mSelectedItem;
 	bool           mHideAlarmList;

@@ -23,50 +23,64 @@
 
 #include "calendaycommonheaders.h"
 
+extern CalenScrollDirection gDisallowedDirection;
+
 // Class declaration
 class CalenDayContentScrollArea : public HbScrollArea
-	{
+{
 Q_OBJECT
 
 public:
-	CalenDayContentScrollArea(QGraphicsItem *parent = 0)
-		{
-		Q_UNUSED(parent);
-		}
-	virtual ~CalenDayContentScrollArea()
-		{
-		}
+    CalenDayContentScrollArea(QGraphicsItem *parent = 0)
+    {
+        Q_UNUSED(parent);
+    }
+    
+    virtual ~CalenDayContentScrollArea()
+    {
+    }
+    
+    CalenScrollDirection disallowedScrollDirection() const
+    {
+        return gDisallowedDirection;
+    }
 
-	signals:
-	void scrollAreaMoveStarted(CalenScrollDirection scrollTo);
-	void scrollAreaMoveFinished(CalenScrollDirection scrollTo);
+    void setDisallowedScrollDirection(const CalenScrollDirection direction)
+    {
+        gDisallowedDirection = direction;
+    }
+
+signals:
+    void scrollAreaMoveStarted(CalenScrollDirection scrollTo);
+    void scrollAreaMoveFinished(CalenScrollDirection scrollTo);
 
 public slots:
-	void scrollToMiddleWidget()
-		{
-		}
+    void scrollToMiddleWidget()
+    {
+    }
 
 protected:
-	bool scrollByAmount(const QPointF &delta)
-		{
-		Q_UNUSED(delta);
-		return false;
-		}
+    bool scrollByAmount(const QPointF &delta)
+    {
+        Q_UNUSED(delta);
+        return false;
+    }
 
-	void gestureEvent(QGestureEvent *event)
-		{
-		Q_UNUSED(event);
-		}
-	bool eventFilter(QObject *obj, QEvent *event)
-		{
-		Q_UNUSED(obj);Q_UNUSED(event);
-		return false;
-		}
-	bool event(QEvent *e)
-		{
-		Q_UNUSED(e);
-		return false;
-		}
-	};
+    void gestureEvent(QGestureEvent *event)
+    {
+        Q_UNUSED(event);
+    }
+    bool eventFilter(QObject *obj, QEvent *event)
+    {
+        Q_UNUSED(obj);
+        Q_UNUSED(event);
+        return false;
+    }
+    bool event(QEvent *e)
+    {
+        Q_UNUSED(e);
+        return false;
+    }
+};
 
 #endif /* CALENDAYCONTENTSCROLLAREA_H_ */

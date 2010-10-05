@@ -19,6 +19,8 @@
 #ifndef CALENDAYCOMMONHEADERS_H_
 #define CALENDAYCOMMONHEADERS_H_
 
+#include <QDate>
+
 // Constants defined by UI spec.
 
 /*!

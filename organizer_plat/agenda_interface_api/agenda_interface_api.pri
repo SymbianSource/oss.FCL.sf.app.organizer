@@ -18,3 +18,4 @@ PUBLIC_HEADERS += agenda_interface_api/inc/AgendaEntry
 PUBLIC_HEADERS += agenda_interface_api/inc/agendautil.h
 PUBLIC_HEADERS += agenda_interface_api/inc/AgendaUtil
 PUBLIC_HEADERS += agenda_interface_api/inc/agendainterfacedefines.h
+PUBLIC_HEADERS += agenda_interface_api/inc/calenmulticaluids.h

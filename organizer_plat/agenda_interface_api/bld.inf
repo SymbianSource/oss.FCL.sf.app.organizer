@@ -30,4 +30,4 @@ inc/AgendaEntry APP_LAYER_PLATFORM_EXPORT_PATH(AgendaEntry)
 inc/agendautil.h APP_LAYER_PLATFORM_EXPORT_PATH(agendautil.h)
 inc/AgendaUtil APP_LAYER_PLATFORM_EXPORT_PATH(AgendaUtil)
 inc/agendainterfacedefines.h APP_LAYER_PLATFORM_EXPORT_PATH(agendainterfacedefines.h)
-
+inc/calenmulticaluids.h APP_LAYER_PLATFORM_EXPORT_PATH(calenmulticaluids.h)

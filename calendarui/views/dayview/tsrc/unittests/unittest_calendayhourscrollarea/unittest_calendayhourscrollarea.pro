@@ -47,7 +47,6 @@ HEADERS +=	calendayhourelement.h \
 			
 
 SOURCES +=	unittest_calendayhourscrollarea.cpp \
-			calendayhourelement.cpp \
 			calendayhourscrollarea.cpp \
 			calendayutils.cpp
 

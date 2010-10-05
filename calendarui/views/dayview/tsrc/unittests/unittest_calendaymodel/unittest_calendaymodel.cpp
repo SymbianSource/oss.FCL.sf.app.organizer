@@ -105,6 +105,7 @@ void TestCalenDayModel::cleanup()
  Test function for constructors
  1. Test if model is not initialized
  2. Test if model is correcty created
+ 3. Test if model is created but not initialized
  */
 void TestCalenDayModel::testConstructors()
 {
@@ -117,6 +118,13 @@ void TestCalenDayModel::testConstructors()
     QVERIFY(testModel);
     
     delete testModel;
+    testModel = 0;
+    //3)
+    QDateTime invalidDate = QDateTime::fromString("Invalid text");
+    testModel = new CalenDayModel(invalidDate, *mServices);
+    
+    QVERIFY(testModel);
+    QVERIFY(testModel->modelDate().isValid() == false);
 }
 
 void TestCalenDayModel::testRowCount()
@@ -125,19 +133,37 @@ void TestCalenDayModel::testRowCount()
 		QCOMPARE(mModel->rowCount(QModelIndex()), 1);
 	}
 
+/*!
+   Test if it return good model data
+   1)Test invalid model index
+   2)Index is bigger than entry values
+   3)Index is valid and there is entry value
+   4)Wrong role
+ */
 void TestCalenDayModel::testData()
 	{
+    
+    
 		mModel->refreshModel(QDateTime());
 		
+		//1)
 		QVariant var = mModel->data(QModelIndex(), Qt::UserRole + 1);
-		QString typeName(var.typeName());
-		QCOMPARE(typeName, QString());
-		mModel->refreshModel(QDateTime());
+		QCOMPARE(var, QVariant());
 		
-		var = mModel->data(QModelIndex(), Qt::UserRole + 1);
-		typeName = QString(var.typeName());
-		QCOMPARE(typeName, QString(""));
+		//2)
+		QModelIndex index = mModel->index(5);
 		
+		var = mModel->data(index, Qt::UserRole + 1);
+		QCOMPARE(var, QVariant());
+		
+		//3)
+		index = mModel->index(0);
+		var = mModel->data(index, Qt::UserRole + 1);
+		QCOMPARE(var.canConvert<AgendaEntry> (),true);
+		
+		//4)
+		var = mModel->data(index, Qt::UserRole + 10);
+		QCOMPARE(var, QVariant());
 	}
 
 void TestCalenDayModel::testRefreshModel()

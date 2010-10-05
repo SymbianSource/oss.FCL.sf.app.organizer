@@ -32,6 +32,7 @@
 #include <xqsettingsmanager.h>
 #include <xqsettingskey.h>
 #include <clockdomaincrkeys.h>
+#include <AfActivityStorage.h>//activity
 
 // User includes
 #include "clockmainview.h"
@@ -118,7 +119,8 @@ void ClockMainView::setupView(
 	OstTraceFunctionEntry0( CLOCKMAINVIEW_SETUPVIEW_ENTRY );
 	mDocLoader = docLoader;
 	mAppControllerIf = &controllerIf;
-
+    //initialize the activity 
+	mActivityStorage = new AfActivityStorage(this);
 	mTimezoneClient = controllerIf.timezoneClient();
 	mSettingsUtility = controllerIf.settingsUtility();
 	mAlarmClient = controllerIf.alarmClient();
@@ -212,6 +214,8 @@ void ClockMainView::setupView(
 	mDayLabel->setTextColor(mLabelColorGroup);
 	mPlaceLabel = static_cast<HbLabel *> (mDocLoader->findObject("placetext"));
 	mPlaceLabel->setTextColor(mLabelColorGroup);
+	mPlaceLabel->setAlignment(Qt::AlignLeft);
+	mPlaceLabel->setTextWrapping(Hb::TextNoWrap);
 	mDstIcon = static_cast<HbLabel *> (mDocLoader->findObject("dstIcon"));
 	mClockWidget = static_cast<ClockWidget*> (
 			mDocLoader->findObject(CLOCK_WIDGET));
@@ -228,13 +232,12 @@ void ClockMainView::setupView(
 			window, SIGNAL(orientationChanged(Qt::Orientation)),
 			this, SLOT(checkOrientationAndLoadSection(Qt::Orientation)));
 	
-    // Get a pointer to activity Manager
-    HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
+
   
-    // clean up any previous versions of this activity from the activity manager.
+    // clean up any previous versions of this activity.
     // ignore return value as the first boot would always return a false
     // bool declared on for debugging purpose
-    bool ok = activityManager->removeActivity(clockMainView);
+    bool ok = removeActivity();
 
 	// connect for the aboutToQuit events on application Exit as to call saveActivity
     connect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()), this, SLOT(saveActivity()));
@@ -542,6 +545,7 @@ void ClockMainView::updateView()
 	updateDateLabel();
 	// Update clock widget.
 	updateClockWidget();
+	captureScreenShot(false);
 	OstTraceFunctionExit0( CLOCKMAINVIEW_UPDATEVIEW_EXIT );
 }
 
@@ -837,8 +841,6 @@ void ClockMainView::captureScreenShot(bool captureScreenShot)
 void ClockMainView::saveActivity()
 {
    OstTraceFunctionEntry0( CLOCKMAINVIEW_SAVEACTIVITY_ENTRY );
-   // Get a pointer to activity Manager
-   HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
  	// check if a valid screenshot is already captured
    if (!mIsScreenShotCapruted)  {
        mScreenShot.clear();
@@ -851,10 +853,20 @@ void ClockMainView::saveActivity()
    stream << MainView;
  
    // add the activity to the activity manager
-   bool ok = activityManager->addActivity(clockMainView, serializedActivity, mScreenShot);
+   bool ok = mActivityStorage->saveActivity(clockMainView, serializedActivity, mScreenShot);
    if ( !ok ) {
        qFatal("Add failed" );
    }
    OstTraceFunctionExit0( CLOCKMAINVIEW_SAVEACTIVITY_EXIT );
 }
+
+/*!
+ Function to remove the activity 
+ */
+bool ClockMainView::removeActivity()
+    {
+    OstTraceFunctionEntry0( CLOCKMAINVIEW_REMOVEACTIVITY_ENTRY );
+    OstTraceFunctionExit0( CLOCKMAINVIEW_REMOVEACTIVITY_EXIT );
+    return mActivityStorage->removeActivity(clockMainView);
+    }
 // End of file	--Don't remove.

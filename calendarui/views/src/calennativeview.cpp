@@ -26,6 +26,7 @@
 #include <vwsdef.h>
 #include <hbactivitymanager.h> //Activity Manager
 #include <hbapplication.h> //hbapplication
+#include <afactivitystorage.h>
 
 //user includes
 #include <CalenUid.h>
@@ -58,7 +59,8 @@ CalenNativeView::CalenNativeView(MCalenServices &services) :
     OstTraceFunctionEntry0( CALENNATIVEVIEW_CALENNATIVEVIEW_ENTRY );
     
 	setTitle(hbTrId("txt_calendar_title_calendar"));
-
+	 //initialize the activity 
+	mActivityStorage = new AfActivityStorage(this);
 	// Create services API and register for notifications
 	RArray<TCalenNotification> notificationArray;
 	CleanupClosePushL(notificationArray);
@@ -322,10 +324,6 @@ void CalenNativeView::captureScreenshot(bool captureScreenShot)
 void CalenNativeView::saveActivity()
  {
    OstTraceFunctionEntry0( CALENNATIVEVIEW_SAVEACTIVITY_ENTRY );
-    
-   // Get a pointer to activity manager 
-   HbActivityManager* activityManager = qobject_cast<HbApplication*>(qApp)->activityManager();
- 
    // check if alerady a valid screen shot is captured
    if (!mIsCapturedScreenShotValid) {
        mScreenShotMetadata.clear(); // remove any screenshot captured earlier
@@ -339,9 +337,8 @@ void CalenNativeView::saveActivity()
  
    bool ok(false);
    // Save activity
-   ok = activityManager->addActivity(activityName, serializedActivity, mScreenShotMetadata);
-
-   // Check is activity saved sucessfully
+   ok = mActivityStorage->saveActivity(activityName,serializedActivity,mScreenShotMetadata);
+    // Check is activity saved sucessfully
    if ( !ok )  {
        qFatal("Add failed" ); // Panic is activity is not saved successfully
        }
@@ -369,4 +366,14 @@ bool CalenNativeView::checkIfWeCanSwipe(QDateTime& date, bool rightGesture)
     
     return value;
 }
+
+/*!
+ Function to remove the activity 
+ */
+bool CalenNativeView::removeActivity()
+    {
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_REMOVEACTIVITY_ENTRY );
+    OstTraceFunctionEntry0( CALENNATIVEVIEW_REMOVEACTIVITY_EXIT );
+    return mActivityStorage->removeActivity(activityName);
+    }
 //End Of File

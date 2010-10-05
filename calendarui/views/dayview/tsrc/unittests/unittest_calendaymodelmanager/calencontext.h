@@ -24,6 +24,8 @@
 class TCalenInstanceId;
 class QDateTime;
 
+extern QDateTime CURRENT_DATE;
+
 // INCLUDES
 
 // CLASS DEFINITIONS
@@ -36,7 +38,7 @@ class MCalenContext
 public :
     QDateTime focusDateAndTime()
     	{
-			return QDateTime(QDate(2000, 10, 10));
+			return CURRENT_DATE;
     	}
 		
     };

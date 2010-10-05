@@ -41,6 +41,7 @@ class AgendaUtil;
 class NotesSortFilterProxyModel;
 class NotesEditor;
 class AgendaEventViewer;
+class AfActivityStorage;
 
 class NotesMainView : public HbView
 {
@@ -59,7 +60,11 @@ public:
 
 signals:
 	void deleteEntry(ulong entryId);
-
+private :
+	/*
+	 * remove the activity
+	 */
+	bool removeActivity();
 private slots:
 	void createNewNote();
 	void handleItemReleased(const QModelIndex &index);
@@ -113,6 +118,7 @@ private:
 	bool 			mIsLongTop;
 	bool			mIsScreenShotCapruted; // check if the screenshot captured is valid
 	QVariantHash	mScreenShot; // screenshot
+	AfActivityStorage *mActivityStorage;;
 };
 
 #endif // NOTESMAINVIEW_H

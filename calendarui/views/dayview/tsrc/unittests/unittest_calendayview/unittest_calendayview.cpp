@@ -24,6 +24,9 @@
 
 #include "calendayview.h"
 
+qint32 LOCALE_CHANGED;
+CalenScrollDirection gDisallowedDirection = ECalenScrollNoDayChange;
+
 class TestCalenDayView : public QObject
 {
 Q_OBJECT
@@ -48,6 +51,9 @@ private slots:
     void testRunNewMeeting();
     void testRunGoToToday();
     void testChangeView();
+    void testOnLocaleChanged();
+    void testGetCurrentDate();
+    void testIsDateValid();
     
     
 private:
@@ -248,7 +254,8 @@ void TestCalenDayView::testRunGoToToday()
     
     mView->runGoToToday();
     
-    QVERIFY(mServices.lastCommand() == ECalenGotoToday); 
+    QVERIFY(mServices.lastCommand() != 0);
+    QVERIFY(mServices.Context().focusDateAndTime() == CalenDateUtils::today());
 #endif /*__WINSCW__*/
 }
 
@@ -264,6 +271,87 @@ void TestCalenDayView::testChangeView()
     mView->changeView(ECalenAgendaView);
     
     QVERIFY(mServices.lastCommand() == ECalenAgendaView); 
+}
+
+/*!
+   Test function for onLocaleChanged
+   1)Test if after system time change date change also
+   2)Test if after midnight crosover date change also
+   3)In above also check i locale change run in scroll area, should no
+   4)Check if locale change run in scroll area after set EChangeLocale
+ */
+void TestCalenDayView::testOnLocaleChanged()
+{
+#ifndef __WINSCW__
+    QDateTime testDate = QDateTime(QDate(2000, 10, 10));
+    //1)
+    mServices.Context().setFocusDateAndTime(testDate);
+    mView->getCurrentDate();
+    QCOMPARE(mView->mDate,testDate);
+    mView->onLocaleChanged(EChangesSystemTime);
+    QCOMPARE(mView->mDate,CalenDateUtils::today());
+
+    //2)
+    mServices.Context().setFocusDateAndTime(testDate);
+    mView->getCurrentDate();
+    QCOMPARE(mView->mDate,testDate);
+    mView->onLocaleChanged(EChangesMidnightCrossover);
+    QCOMPARE(mView->mDate,CalenDateUtils::today());
+    
+    //3)
+    mServices.Context().setFocusDateAndTime(testDate);
+    mView->getCurrentDate();
+    mView->onLocaleChanged(EChangesSystemTime);
+    QCOMPARE(mView->mDate,CalenDateUtils::today());
+    
+    //1)
+    mServices.Context().setFocusDateAndTime(testDate);
+    mView->getCurrentDate();
+    mView->onLocaleChanged(EChangesLocale);
+    QCOMPARE(LOCALE_CHANGED,1);
+#endif /*__WINSCW__*/
+}
+
+/*!
+   Test function for getCurrentDate.
+   
+   Check if date given by context is good
+ */
+void TestCalenDayView::testGetCurrentDate()
+{
+#ifndef __WINSCW__
+    QDateTime testDate = QDateTime(QDate(2000, 10, 10), QTime(0, 0));
+    mServices.Context().setFocusDateAndTime(testDate);
+    mView->getCurrentDate();
+    QCOMPARE(mView->mDate,testDate);
+#endif /*__WINSCW__*/
+}
+
+/*!
+ Test function for checkDate helper function.
+ 
+ 1) date supported
+ 2) lowest supported date
+ 3) highest supported date
+ */
+void TestCalenDayView::testIsDateValid()
+{
+#ifndef __WINSCW__
+    //1)
+    mView->mDate = QDateTime(QDate(2010, 9, 22), QTime(0, 0));
+    mView->isDateValid();
+    QCOMPARE(gDisallowedDirection, ECalenScrollNoDayChange);
+
+    //2)
+    mView->mDate = QDateTime(QDate(1900, 1, 1), QTime(0, 0));
+    mView->isDateValid();
+    QCOMPARE(gDisallowedDirection, ECalenScrollToPrev);
+
+    //3)
+    mView->mDate = QDateTime(QDate(2100, 12, 30), QTime(0, 0));
+    mView->isDateValid();
+    QCOMPARE(gDisallowedDirection, ECalenScrollToNext);
+#endif /*__WINSCW__*/
 }
 
 QTEST_MAIN(TestCalenDayView);

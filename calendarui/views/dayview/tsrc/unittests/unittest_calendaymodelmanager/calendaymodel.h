@@ -41,9 +41,10 @@ class CalenDayModel : public QAbstractListModel
 public:
 	CalenDayModel(const QDateTime &date, MCalenServices &services,
 						QObject *parent = 0){
-							Q_UNUSED(date);
 							Q_UNUSED(services);
 							Q_UNUSED(parent);
+							mModelRefreshed = 0;
+							mModelDate = date;
 						}
 	
     // from QAbstractListModel
@@ -58,12 +59,20 @@ public:
     }
     
 	void refreshModel(const QDateTime &date){
-		Q_UNUSED(date);
+		mModelDate = date;
+		mModelRefreshed++;
 	}
 	
 	QDateTime modelDate(){
-		return QDateTime(QDate(2000, 10, 10));
+		return mModelDate;
 	}
+	
+	//return info how much time model was refreshed
+	quint32 modelRefreshed() {return mModelRefreshed;}
+	
+private:
+	quint32 mModelRefreshed;
+	QDateTime mModelDate;
 };
 
 #endif //CALENDAYMODEL_H

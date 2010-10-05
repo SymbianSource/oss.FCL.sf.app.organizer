@@ -40,7 +40,8 @@ symbian: {
 	
 	LIBS += \
 		-lclockviews \
-		-lclockwidget
+		-lclockwidget \
+		-lafservice 
 }
 
 SOURCES += \

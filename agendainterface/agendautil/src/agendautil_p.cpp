@@ -1272,12 +1272,14 @@ AgendaEntry AgendaUtilPrivate::parentEntry(AgendaEntry& entry)
 			CCalEntry* calEntry = iCalEntryView->FetchL(entry.id());
 
 			if (calEntry) {
+				CleanupStack::PushL(calEntry);
 				// Get all the entries with same global Uid.
 				RPointerArray<CCalEntry> entries;
 				CleanupResetAndDestroyPushL(entries);
 				iCalEntryView->FetchL(calEntry->UidL(), entries);
 				parentEntry = createAgendaEntryFromCalEntry(*entries[0]);
 				CleanupStack::PopAndDestroy(&entries);
+				CleanupStack::PopAndDestroy(calEntry);
 			}
 	)
 
@@ -1950,8 +1952,11 @@ AgendaEntry AgendaUtilPrivate::createAgendaEntryFromCalEntry(
 		entry.addAttendee(attendee);
 	}
 
+// TODO: Right now we are not adding category to agendaEntry.
+// Will be handled later when we have some usecase with category.
+/*
 	// Categories.
-	const RPointerArray<CCalCategory> calCategories = calEntry.CategoryListL();
+	const RPointerArray<CCalCategory>& calCategories = calEntry.CategoryListL();
 
 	for (int i = 0; i < calCategories.Count(); i++) {
 		AgendaCategory category;
@@ -1967,7 +1972,7 @@ AgendaEntry AgendaUtilPrivate::createAgendaEntryFromCalEntry(
 				static_cast<AgendaCategory::CategoryType>(categoryType));
 		entry.addCategory(category);
 	}
-
+*/
 	// Id.
 	entry.d->m_id = calEntry.LocalUidL();
 
@@ -2255,7 +2260,6 @@ bool AgendaUtilPrivate::addAttendeesToEntry(
 				CCalAttendee* attendee = CCalAttendee::NewL(
 						TPtrC(reinterpret_cast<const TUint16*>(
 								attendees.at(i).address().utf16())));
-				CleanupStack::PushL(attendee);
 				attendee->SetCommonNameL(
 						TPtrC(reinterpret_cast<const TUint16*>(
 								attendees.at(i).commonName().utf16())));
@@ -2266,7 +2270,6 @@ bool AgendaUtilPrivate::addAttendeesToEntry(
 				attendee->SetStatusL(static_cast<CCalAttendee::TCalStatus>(
 						attendees.at(i).status()));
 				entry.AddAttendeeL(attendee);
-				CleanupStack::PopAndDestroy(attendee);
 			}
 	)
 	return (iError == KErrNone);
@@ -2288,13 +2291,11 @@ bool AgendaUtilPrivate::addCategoriesToEntry(
 					CCalCategory* category = CCalCategory::NewL(
 							static_cast<CCalCategory::TCalCategoryType>(type));
 					entry.AddCategoryL(category);
-					delete category;
 				} else {
 					TPtrC categoryName = TPtrC(reinterpret_cast<const TUint16*>(
 							categories.at(i).extendedCategoryName().utf16()));
 					CCalCategory* category = CCalCategory::NewL(categoryName);
 					entry.AddCategoryL(category);
-					delete category;
 				}
 			}
 	)

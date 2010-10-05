@@ -39,7 +39,8 @@ symbian: {
 			-lcalencommonutils \
 			-lcalensettings \
 			-lagendainterface \
-			-lxqsettingsmanager
+			-lxqsettingsmanager \
+			-lafservice 
 
     TARGET.UID3 = 0x10282F26
     TARGET.CAPABILITY = CAP_GENERAL_DLL

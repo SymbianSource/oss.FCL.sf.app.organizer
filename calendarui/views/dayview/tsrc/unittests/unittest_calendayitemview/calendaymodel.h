@@ -43,18 +43,47 @@ public:
 	{
         Q_UNUSED(date)
         Q_UNUSED(parent)
-        Q_UNUSED(date)
+        Q_UNUSED(services)
 	};
+	
+	void Reset() 
+    {
+	    mEntryList.clear();
+    }
+	
+	bool insertRows(int num, int row, const QModelIndex &aparent)
+	{
+	    Q_UNUSED(row);
+	    Q_UNUSED(aparent);
+	    AgendaEntry entry;
+	    if ( !num ) {
+	        entry.setType( AgendaEntry::TypeAppoinment ); //or reminder 
+	        // non all day event
+	        entry.setStartAndEndTime( QDateTime(QDate(2010,07,12),QTime(0,0)), 
+                QDateTime(QDate(2010,07,12),QTime(1,0)) );
+	    }
+	    else {
+	        entry.setType( AgendaEntry::TypeEvent );
+	        // all day event
+	        entry.setStartAndEndTime( QDateTime(QDate(2010,07,12),QTime(0,0)), 
+	            QDateTime(QDate(2010,07,13),QTime(0,0)) );
+	    }
+	    mEntryList.append(QVariant::fromValue(entry));
+	    return true;
+	}
 	
     // from QAbstractListModel
 	int rowCount(const QModelIndex &parent = QModelIndex()) const
 	{
-	    return 0;
+	    Q_UNUSED(parent)
+        return mEntryList.count();
 	}
-    QVariant data(const QModelIndex &index, int role) const
+    
+	QVariant data(const QModelIndex &index, int role) const
     {
-        Q_UNUSED(index)
-        Q_UNUSED(role)
+        if ( role == CalenDayEntry ) {
+            return mEntryList.at(index.row());
+        }
         return QVariant();
     }
     
@@ -65,7 +94,8 @@ public:
 	
 	QDateTime modelDate() const
 	    {return QDateTime();}
-
+	
+	QVariantList mEntryList;
 };
 
 #endif //CALENDAYMODEL_H

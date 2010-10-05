@@ -164,6 +164,8 @@ private:
     
     void initializeViews();
     
+    void isDateValid();
+    
 private: // members related to view management and gesture handling
     
     CalenDayModelManager* mModelManager;

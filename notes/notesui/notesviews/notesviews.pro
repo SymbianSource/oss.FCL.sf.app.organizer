@@ -46,7 +46,8 @@ symbian: {
 		-lagendainterface \
 		-lnotesmodel \
 		-lnoteseditor \
-		-lagendaeventviewer
+		-lagendaeventviewer \
+		-lafservice 
 }
 
 SOURCES += \

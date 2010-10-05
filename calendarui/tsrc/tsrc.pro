@@ -21,7 +21,10 @@ TEMPLATE = subdirs
 SUBDIRS += unittest_calenviewerservice \
 			unittest_calencommonutils \
 			../views/dayview/tsrc \
+
+CONFIG += qtestlib
+CONFIG += symbian_test
+CONFIG += ordered			
 			
-CONFIG += ordered
 
 # End of file	--Don't remove this

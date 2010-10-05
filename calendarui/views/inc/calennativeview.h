@@ -40,6 +40,7 @@ const int WORKAROUND_TO_LIMIT_MAX_SPEED=8000;
 
 class MCalenServices;
 class HbDateTimePicker;
+class AfActivityStorage;
 
 class  CalenNativeView : public CalenView,
                         public MCalenNotificationHandler
@@ -67,6 +68,11 @@ class  CalenNativeView : public CalenView,
 	    virtual void onLocaleChanged(int reason)=0;
 	    virtual void onContextChanged() {};
 	    virtual bool checkIfWeCanSwipe(QDateTime& date, bool rightGesture);
+	    /**
+	     * removeActivity  removes the current view from the  activity
+	     * 
+	     */
+	    bool removeActivity();
 	    
 	signals:
 			void closeDialogs();
@@ -88,7 +94,7 @@ class  CalenNativeView : public CalenView,
 	void refreshDatePicker();
 	
     protected:
-    
+        AfActivityStorage *mActivityStorage;
         MCalenServices	&mServices; // not owned.
         int             mActivityId; // Recent Activity ID, currently it holdes wither of ECalenMonthView or ECalenAgendaView
         QVariantHash    mScreenShotMetadata; // Screenshot

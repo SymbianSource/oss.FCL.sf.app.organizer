@@ -115,6 +115,13 @@ CalenDayView::~CalenDayView()
 void CalenDayView::onLocaleChanged(int reason)
 {
     Q_UNUSED( reason )
+    if ((reason & EChangesSystemTime) || (reason & EChangesMidnightCrossover)) {
+        mDate = CalenDateUtils::today();
+    }
+    
+    if ((reason & EChangesLocale)) {
+        mHourScrollArea->localeChanged();
+    }
 }
 
 /*!
@@ -130,6 +137,8 @@ void CalenDayView::doPopulation()
     //Set date and time for hour scroll area. 
     //It's later used by hour element to display timeline
     mHourScrollArea->setDateTime(mDate);
+    
+    isDateValid();
     
     //set in menu go to today visible
     QDateTime currentDateTime = QDateTime::currentDateTime();
@@ -238,15 +247,19 @@ void CalenDayView::onBack()
 */
 void CalenDayView::dayChangeStarted(CalenScrollDirection direction)
 {
-    if (direction == ECalenScrollToNext) {
-        mDate = mDate.addDays(1);	
-    }
-    else {
-        mDate = mDate.addDays(-1);
+    switch (direction) {
+        case ECalenScrollToNext:
+            mDate = mDate.addDays(1);
+            break;
+        case ECalenScrollToPrev:
+            mDate = mDate.addDays(-1);
+            break;
+        default:
+            break;
     }
     
-    //set in menu go to today visible
-    QDateTime currentDateTime = QDateTime::currentDateTime();
+    // Update the visibility of 'Go to today' option in menu
+	QDateTime currentDateTime = QDateTime::currentDateTime();
     if (mGoToTodayMenuAction and currentDateTime.date() == mDate.date()) {
         mGoToTodayMenuAction->setVisible(false);
     }
@@ -273,6 +286,8 @@ void CalenDayView::dayChanged(CalenScrollDirection direction)
 {
     mModelManager->viewsScrollingFinished(direction);
 	mHourScrollArea->setDateTime(mDate);
+	mHourScrollArea->updateTimeIndicator();
+	isDateValid();
 }
 
 /*!
@@ -411,6 +426,25 @@ void CalenDayView::initializeViews()
 }
 
 /*!
+ \brief Checks current date and if previous/next days are valid.
+ 
+ Checks if previous/next day is in range of supported dates: 1900-01-01 - 2100-12-30
+ */
+void CalenDayView::isDateValid()
+{
+    // Fix to ou1cimx1#583805: user shouldnot be able to scroll 
+    // before 01/01/1900 and after 30/12/2100
+    mContentScrollArea->setDisallowedScrollDirection(ECalenScrollNoDayChange);
+    if (!CalenDateUtils::isValidDay(mDate.addDays(-1))) {
+        mContentScrollArea->setDisallowedScrollDirection(ECalenScrollToPrev);
+    }
+    else
+        if (!CalenDateUtils::isValidDay(mDate.addDays(1))) {
+            mContentScrollArea->setDisallowedScrollDirection(ECalenScrollToNext);
+        }
+}
+
+/*!
    \brief This slot triggers new meeting creation view
 */
 void CalenDayView::runNewMeeting()
@@ -510,26 +544,7 @@ void CalenDayView::showHideRegionalInformationChanged(
                 CalenPluginLabel *regionalInfo = new CalenPluginLabel(
                     mServices, this);
                 regionalInfo->setFontSpec(HbFontSpec(HbFontSpec::Primary));
-
-                // Set margins in groupbox according to UI spec
-                HbStyle style;
-                HbDeviceProfile deviceProfile;
-                qreal leftMargin = 0.0;
-                qreal rightMargin = 0.0;
-                qreal topMargin = 0.0;
-                qreal bottomMargin = 0.0;
-                style.parameter(QString("hb-param-margin-gene-left"),
-                    leftMargin, deviceProfile);
-                style.parameter(QString("hb-param-margin-gene-right"),
-                    rightMargin, deviceProfile);
-                style.parameter(QString("hb-param-margin-gene-top"), topMargin,
-                    deviceProfile);
-                style.parameter(QString("hb-param-margin-gene-bottom"),
-                    bottomMargin, deviceProfile);
-                regionalInfo->setContentsMargins(leftMargin, topMargin,
-                    rightMargin, bottomMargin);
                 mRegionalInfoGroupBox->setContentWidget(regionalInfo);
-
                 mVLayout->insertItem(1, mRegionalInfoGroupBox);
             }
             QString *pluginString = pluginText();

@@ -37,7 +37,8 @@ const TInt KMaxlength=30;
 // ---------------------------------------------------------
 //
 AlarmAlertWidget::AlarmAlertWidget(AlarmAlertObserver *observer) :
-    mObserver(observer)
+    mObserver(observer),
+    mDeviceDialog(NULL)
 {
 	OstTraceFunctionEntry0( ALARMALERTWIDGET_ALARMALERTWIDGET_ENTRY );
 	OstTraceFunctionExit0( ALARMALERTWIDGET_ALARMALERTWIDGET_EXIT );
@@ -185,7 +186,9 @@ void AlarmAlertWidget::dismissAlarmDialog()
 {
     OstTraceFunctionEntry0( ALARMALERTWIDGET_DISMISSALARMDIALOG_ENTRY );
     // Dismiss the dialog
-    mDeviceDialog->Cancel();
+    if(mDeviceDialog) {
+		mDeviceDialog->Cancel();
+    }
     OstTraceFunctionExit0( ALARMALERTWIDGET_DISMISSALARMDIALOG_EXIT );
 }
 

@@ -25,7 +25,8 @@
 #include <HbMessageBox>
 #include <HbAction>
 #include <hbapplication> // hbapplication
-#include <hbactivitymanager> // hbactivitymanager
+#include <AfActivation.h>
+#include <AfActivityStorage.h>
 
 // User includes
 #include "notesviewmanager.h"
@@ -74,13 +75,15 @@ NotesViewManager::NotesViewManager(
 	mAgendaUtil = mAppControllerIf.agendaUtil();
 
 	// Check the Application Startup reason from Activity Manager
-	int activityReason = qobject_cast<HbApplication*>(qApp)->activateReason();
+	 AfActivation *activation = new AfActivation();
 	
 	// Check if application is started from an application
-	if (Hb::ActivationReasonActivity == activityReason) {
+	if (Af::ActivationReasonActivity == activation->reason()) {
 		// Application is started from an activity
 		// extract activity data
-		QVariant data = qobject_cast<HbApplication*>(qApp)->activateData();
+	    AfActivityStorage *activitystorage = new AfActivityStorage();
+        QVariant data = activitystorage->activityData(activation->name());
+        delete activitystorage;
 		// Restore state from activity data
 		QByteArray serializedModel = data.toByteArray();
 		QDataStream stream(&serializedModel, QIODevice::ReadOnly);
@@ -100,7 +103,8 @@ NotesViewManager::NotesViewManager(
 			// Load the main view at the start up.
 			loadNotesMainView();
 		}
-
+	//delet the activity instance
+	delete activation;
 	connect(
 			mAgendaUtil, SIGNAL(instanceViewCreationCompleted(int)),
 			this,SLOT(handleInstanceViewCreationCompleted(int)));

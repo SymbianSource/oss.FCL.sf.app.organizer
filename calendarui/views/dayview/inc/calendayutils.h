@@ -39,17 +39,11 @@ public:
     
     HbMainWindow* mainWindow();
     
-    /**
-     * Get event's start/end time fromm agenda entry.
-     * Start/end time are validated to be within the current day (the case of
-     * multi-day events)
-     * @param start [out] valid start time
-     * @param end [out] valid end time
-     * @param entry [in] agenda entry asociated with the event.
-     * @param currentDate [in] current date
-     */
-    void getEventValidStartEndTime( QDateTime& start, QDateTime& end,
-                                   const AgendaEntry& entry, QDateTime& currentDate );
+    void getEventValidStartEndTime(
+        QDateTime& start,
+        QDateTime& end,
+        const AgendaEntry& entry,
+        QDateTime& currentDate);
     
 protected:
     CalenDayUtils();

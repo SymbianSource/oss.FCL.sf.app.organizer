@@ -32,7 +32,7 @@ DEPENDPATH  += . \
                ../../../src/  
 
 # Input
-HEADERS +=	calendaymodel.h
+HEADERS +=	calendaymodel.h 
 
 SOURCES +=	unittest_calendaymodel.cpp \
 			calendaymodel.cpp

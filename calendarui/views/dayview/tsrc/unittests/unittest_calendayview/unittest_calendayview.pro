@@ -61,7 +61,7 @@ HEADERS +=	hbeffect.h \
 			calendaycontainer.h \
 			calendayeventspane.h \
 			calendayitem.h \
-			calendaystatusstrip.h
+			calendaystatusstrip.h 
 
 SOURCES +=	unittest_calendayview.cpp \
 			calendayview.cpp \
@@ -82,7 +82,8 @@ symbian : {
     
         LIBS += -lagendainterface \
     		-lxqsettingsmanager \
-    		-lcalencommonutils
+    		-lcalencommonutils \
+                -lafservice            
 }
 
 # End of file	--Don't remove this.

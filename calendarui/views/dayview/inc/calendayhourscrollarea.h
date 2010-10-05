@@ -47,9 +47,11 @@ public:
     QDateTime dateTime() const;
     
     void scrollToHour(int hour);
-
+    
 public slots:
     void scrollVertically(const QPointF &newPosition);
+    void localeChanged();
+    void updateTimeIndicator();
     
 private:
     QDateTime mDateTime;

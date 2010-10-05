@@ -65,7 +65,6 @@ public:
 	int getCurrentIndex();
 
 protected:
-	void orientationChanged(Qt::Orientation newOrientation);
 	void gestureEvent(QGestureEvent *event);
 		
 private:

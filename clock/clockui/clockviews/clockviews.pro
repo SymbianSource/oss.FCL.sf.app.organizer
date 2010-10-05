@@ -55,7 +55,8 @@ symbian: {
 		-lclockcityselectionlist \
 		-lclockwidget \
 		-lclockwidgetplugin \
-		-lxqsettingsmanager
+		-lxqsettingsmanager \
+		-lafservice 
 }
 
 SOURCES += \

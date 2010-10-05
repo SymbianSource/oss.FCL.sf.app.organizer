@@ -39,7 +39,8 @@ HEADERS +=	hbstyle.h \
             hbdeviceprofile.h \
 			hbinstance.h \
 			calendayutils.h \
-			calendaycommonheaders.h
+			calendaycommonheaders.h \
+			agendaentry.h
 			
 
 SOURCES +=	unittest_calendayutils.cpp \

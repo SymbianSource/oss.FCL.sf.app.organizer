@@ -73,20 +73,6 @@ CalenDayHourScrollArea::~CalenDayHourScrollArea()
 }
 
 /*!
- \brief SLOT scrolls the view vertically to new position.
- 
- \param newPosition New position
- */
-void CalenDayHourScrollArea::scrollVertically(const QPointF &newPosition)
-{
-    QPointF currentPos = contentWidget()->pos();
-    if (abs(newPosition.y()) != abs(currentPos.y())) {
-        currentPos.setY(newPosition.y());
-        scrollContentsTo(currentPos, 0);
-    }
-}
-
-/*!
  \brief Sets date and time for this container.  
  
  \param dateTime new date and time
@@ -95,6 +81,7 @@ void CalenDayHourScrollArea::setDateTime(const QDateTime &dateTime)
 {
     mDateTime = dateTime;
 }
+
 /*!
  \brief Returns date and time assigned to current view.
 */
@@ -127,6 +114,51 @@ void CalenDayHourScrollArea::scrollToHour(int hour)
     }
     
     scrollContentsTo(newPos);
+}
+
+/*!
+ \brief SLOT scrolls the view vertically to new position.
+ 
+ \param newPosition New position
+ */
+void CalenDayHourScrollArea::scrollVertically(const QPointF &newPosition)
+{
+    QPointF currentPos = contentWidget()->pos();
+    if (abs(newPosition.y()) != abs(currentPos.y())) {
+        currentPos.setY(newPosition.y());
+        scrollContentsTo(currentPos, 0);
+    }
+}
+
+/*!
+ \brief SLOT updates time/date representation when system locale are changed.
+ */
+void CalenDayHourScrollArea::localeChanged() 
+{
+    for (int i = 0; i < mHourElements.count(); i++) {
+        mHourElements.at(i)->localeChanged();
+        mHourElements.at(i)->update(mHourElements.at(i)->rect());
+    }
+}
+
+/*!
+ \brief SLOT refreshes time indicator if current day is displayed.
+ 
+ Time indicator should also be updated if transition between prev/next
+ day was done previously: failure ou1cimx1#565650 fixed
+ */
+void CalenDayHourScrollArea::updateTimeIndicator()
+{
+    QDateTime currentDateTime = QDateTime::currentDateTime();
+    
+    bool updateNeeded = mDateTime.date() >= currentDateTime.date().addDays(-1);
+    updateNeeded = updateNeeded && mDateTime.date() <= currentDateTime.date().addDays(1);
+    
+    if (updateNeeded) {
+        for (int i = 0; i < mHourElements.count(); i++) {
+            mHourElements.at(i)->update(mHourElements.at(i)->rect());
+        }
+    }
 }
 
 // End of File
