@@ -136,6 +136,25 @@ TInt CClockNitzPlugin::GetPluginUid()
 	}
 
 // ---------------------------------------------------------
+// CClockNitzPlugin::GetDataIfAvailable
+// rest of the details are commented in the header
+// ---------------------------------------------------------
+//	
+void CClockNitzPlugin::GetDataIfAlreadyAvailableL()
+	{
+	__PRINTS( "CClockNitzPlugin::GetDataIfAlreadyAvailableL - Entry" );
+	
+	if( iNitzPluginImpl )
+	    {
+	    // Get the Nitz data if it is available
+	    iNitzPluginImpl->GetDataIfAlreadyAvailableL();
+	    }
+	
+	__PRINTS( "CClockNitzPlugin::GetDataIfAlreadyAvailableL - Exit" );
+	
+	}
+
+// ---------------------------------------------------------
 // CClockNitzPlugin::NotifyNITZInfoChangeL
 // rest of the details are commented in the header
 // ---------------------------------------------------------

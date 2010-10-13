@@ -317,7 +317,7 @@ void CCalenRepeatField::SetRepeatUntilLineDimmedL( const TBool& aDimmed )
         if( repUntilCtrl )
             {
             // Delete RepeatUntil line from From
-            iUnifiedEditor.DeleteLine( ECalenEditorRepeatUntil, EFalse );
+            iUnifiedEditor.DeleteLine( ECalenEditorRepeatUntil, ETrue );
             }
         }
     else

@@ -69,17 +69,10 @@ class CAdtUpdaterAppUi : public CAknAppUi
 		void ToggleAppViewL( TBool aForeground );
 		
 		/**
-		 * @brief Checks whether adtupdater app is in background by window group id
+		 * @brief Checks whether app is in background by window group id
 		 * @return ETrue if the application is in background and EFalse if it is in foreground.
-		 */
+		 */ 
 		TBool IsAppInBackground();
-		
-		/**
-		 * @brief Checks whether any high priority window like call is active.
-		 * @return ETrue if the high priority window is active and EFalse otherwise.
-		 */
-		TBool IsHighPriorityWindowActive();
-		
 		/**
 		* @brief Hides the status pane of the application.
 		* @param aHide ETrue if status pane has to be hidden.
@@ -100,13 +93,9 @@ class CAdtUpdaterAppUi : public CAknAppUi
 		* @brief The container object.
 		*/
 		CAdtUpdaterContainer*			iContainer;
-	
 	private:
+		 // the id of the application's window group
 		 
-		/**
-		 * @var iAdtWgId
-		 * @brief The id of the application's window group.
-		 */
 		TInt iAdtWgId;
 
 	};

@@ -20,7 +20,7 @@
 //debug
 #include "calendarui_debug.h"
 
-#include <calenlocationui.h>
+#include "calenlocationui.h"
 #include "calencontroller.h"
 #include <calencommands.hrh>
 #include "calenlocationactiveselector.h"
@@ -193,7 +193,7 @@ TBool CCalenLocationUi::HandleCommandL( const TCalenCommand& aCommand )
             break;
 	    case ECalenShowLocationQuery:
 	        {
-	        TInt userResponse = ShowDefineLocationQueryL();
+	        TInt userResponse = ShowDefineLocationQuery();
 	        if(userResponse)
 	            {
 	            isGetLocationAndSave = ETrue;
@@ -772,7 +772,7 @@ void CCalenLocationUi::ShowAddressUpdatedNoticeL()
 //  Queries user to validate the location frm maps or not
 // -----------------------------------------------------------------------------
 //  
-TInt CCalenLocationUi::ShowDefineLocationQueryL()
+TInt CCalenLocationUi::ShowDefineLocationQuery()
     {
     TRACE_ENTRY_POINT;
     

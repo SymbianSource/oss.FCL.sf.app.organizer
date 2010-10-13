@@ -438,6 +438,8 @@ void CAgnAlarmActive::FindAndQueueNextAlarmL(TBool aSysTimeHasChanged)
 		
 		if ( now < lastAlarm )
 			{
+		    // We need to consider 2 sec window to make sure that same alarm
+		    // is not queued again.
 			now += TTimeIntervalSeconds(2);
 			}
 		}
@@ -468,6 +470,9 @@ void CAgnAlarmActive::QueueNextAlarmL(CArrayFixFlat<TAgnSortInstance>* aAlarmedI
 		
 		if ( now < lastAlarm )
 			{
+			// We need to consider 2 sec window to make sure that same alarm
+		    // is not queued again.
+
 			now += TTimeIntervalSeconds(2);
 			}			
 		}

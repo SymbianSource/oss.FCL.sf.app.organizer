@@ -15,7 +15,7 @@
 *
 */
 
-#include <calenlocationutil.h>
+#include "calenlocationutil.h"
 #include <mnproviderfinder.h>
 #include <aknPopup.h>
 #include <eikenv.h>

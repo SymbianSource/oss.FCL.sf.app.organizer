@@ -111,7 +111,7 @@ CMultiCalUiDialogModel::~CMultiCalUiDialogModel()
 // Rest of the details are commented in header.
 // ----------------------------------------------------------------------------
 //
-void CMultiCalUiDialogModel::SetCalEntryL(
+void CMultiCalUiDialogModel::SetCalEntry(
         const RPointerArray<CCalEntry>& aCalEntries)
     {
     TRACE_ENTRY_POINT

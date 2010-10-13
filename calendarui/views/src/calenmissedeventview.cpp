@@ -41,7 +41,7 @@
 #include "calenmissedeventcontainer.h"
 #include <calenview.h>
 #include "CalenUid.h"
-#include <calenlocationutil.h>
+#include "calenlocationutil.h"
 #include "calenentryutil.h"
 #include "CleanupResetAndDestroy.h"
 
@@ -155,6 +155,13 @@ CCalenView::TNextPopulationStep CCalenMissedEventView::ActiveStepL()
         	    {
                 RedrawStatusPaneL();
         	    }
+        	
+        	//no tool bar in missed event view
+        	MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
+        	    if(toolbar && toolbar->IsVisible())
+        	      {
+        	      toolbar->SetToolbarVisibilityL(EFalse);  
+        	      } 
         	nextStep = CCalenView::EDone;
         	}
         	break;
@@ -253,11 +260,11 @@ void CCalenMissedEventView::DoDeactivateImpl()
     TRACE_ENTRY_POINT;
     
     iPreviousViewId.iViewUid = KNullUid;
-    /*MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
+    MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
     if(toolbar)
         {
         toolbar->SetToolbarVisibilityL(ETrue);  
-        }*/
+        }
 
         
     TRACE_EXIT_POINT;
@@ -317,30 +324,16 @@ void CCalenMissedEventView::HandleCommandL(TInt aCommand)
             CCalenNativeView::HandleCommandL(aCommand);         
         	}
             break;
-        case EAknSoftkeyClose:
-            {
-            MCalenToolbar* toolbar = iServices.ToolbarOrNull(); 
-            if(toolbar)
-                {
-                toolbar->SetToolbarVisibilityL(ETrue);  
-                }
-            iServices.IssueNotificationL(ECalenNotifyMissedEventViewClosed);
-            break;
-            }
-            
+        case EAknSoftkeyClose:   
         case EAknSoftkeyBack:
-			{		
+			{
+		
 	        iServices.IssueNotificationL(ECalenNotifyMissedEventViewClosed);
 			break;
 			}
         case EAknSoftkeyExit: 
             {
                       
-            MCalenToolbar* toolbar = iServices.ToolbarOrNull();
-            if (toolbar)
-                {
-                toolbar->SetToolbarVisibilityL(ETrue);
-                }
             CCalenNativeView::HandleCommandL(aCommand);
             }
             break;

@@ -30,8 +30,6 @@ NAME    CALE
 #include <avkon.loc>
 #include <calencommands.hrh>            // Calendar commands
 
-#include "KoreanLunarDateEditor.rh"
-#include <calenkoreanlunar.loc>
 #include "CalenDefaultEditors.hrh"
 #include "CalendarVariant.hrh"
 #include "calendar.hrh"
@@ -128,32 +126,6 @@ RESOURCE ARRAY r_calen_repeat_popup_items
         LBUF
             {
             txt = qtn_cale_other;
-            }
-        };
-    }
-
-// ---------------------------------------------------------
-//
-//    r_korean_lunar_type_popup_items
-//    Define items of "Solar/lunar:" popup list.
-//
-// ---------------------------------------------------------
-//
-RESOURCE ARRAY r_korean_lunar_type_popup_items
-    {
-    items=
-        {
-        LBUF
-            {
-            txt = qtn_kor_cale_note_type_solar;
-            },
-        LBUF
-            {
-            txt = qtn_kor_cale_note_type_lunar;
-            },
-        LBUF
-            {
-            txt = qtn_kor_cale_note_type_leap;
             }
         };
     }
@@ -1734,61 +1706,6 @@ RESOURCE ARRAY r_description_list_query_array
         LBUF { txt = qtn_cale_om_descript_new; },
         LBUF { txt = qtn_cale_om_descript_exist; }
         };
-    }
-    
-// ---------------------------------------------------------
-//
-//    r_korean_lunar_date_editor_line
-//    Define Lunar "Date:" line
-//
-// ---------------------------------------------------------
-//
-RESOURCE DLG_LINE r_korean_lunar_date_editor_line
-    {
-    type = ECalenCtLunarDateEditor;
-    prompt = qtn_cale_anniversary_start_date;
-    id = EKoreanLunarAniversityStart; // was ecalendata tms.
-    control = KOREAN_LUNAR_DATE_EDITOR
-        {
-	    flags = 0;
-        };
-    }
-
-// ---------------------------------------------------------
-//
-//    r_korean_lunar_noteview_type_line
-//    Define "solar/lunar/leap:" line of Note Form
-//
-// ---------------------------------------------------------
-//
-RESOURCE DLG_LINE r_korean_lunar_noteview_type_line
-    {
-    type = EAknCtPopupField;
-    prompt = qtn_kor_cale_note_type;
-    id = EKoreanLunarTypeSelectSolarLunarLeap;
-    // means that OK-Key works - IMPORTANT!
-    itemflags = EEikDlgItemTakesEnterKey | EEikDlgItemOfferAllHotKeys;
-    control = POPUP_FIELD
-        {
-        flags = 0;
-        width = 8; // in characters  
-        other = " "; // Dummy
-        };
-    }
-
-RESOURCE TBUF r_kor_cale_note_offset_unit
-    {
-    buf = qtn_kor_cale_note_offset_unit;
-    }
-
-RESOURCE TBUF r_qtn_kor_cale_viewer_alarm_offset
-    {
-    buf = qtn_kor_cale_viewer_alarm_offset;
-    }
-
-RESOURCE TBUF r_qtn_kor_cale_viewer_alarm_offset_time
-    {
-    buf = qtn_kor_cale_viewer_alarm_offset_time;
     }
 
 // End of File

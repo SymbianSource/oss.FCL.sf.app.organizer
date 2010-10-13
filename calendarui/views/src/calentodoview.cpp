@@ -584,7 +584,7 @@ void CCalenTodoView::DynInitMenuPaneL(TInt aResourceId,          // Resource Id
                 {
                 if( Container()->MarkedCount() )
                     {
-                    aMenuPane->SetItemSpecific( ECalenDeleteCurrentEntry, EFalse );
+                    aMenuPane->SetItemSpecific( ECalenDeleteCurrentEntry, ETrue );
                     if(Container()->IsCurrentItemSelected()) // If focused list item is marked
                         {
                         aMenuPane->DeleteMenuItem( ECalenViewCurrentEntry );
@@ -593,30 +593,24 @@ void CCalenTodoView::DynInitMenuPaneL(TInt aResourceId,          // Resource Id
                     aMenuPane->DeleteMenuItem( ECalenCompleteTodo );
                     aMenuPane->DeleteMenuItem( ECalenRestoreTodo );
                     aMenuPane->DeleteMenuItem( ECalenSend );
-
-                    if(Container()->MarkedCount() == 1)
+                    aMenuPane->DeleteMenuItem(ECalenCopyToCalendars);
+                    
+                    TBool crossout( EFalse );
+                    //When mark as done, crossout is ETrue.
+                    crossout = CheckMarkedItemCompletedL();
+                    if( crossout )
                         {
-                        aMenuPane->DeleteMenuItem( ECalenCmdComplete );
-                        TBool crossout( EFalse );
-                        crossout = CheckMarkedItemCompletedL();
-                        if( crossout )
-                            {
-                            aMenuPane->DeleteMenuItem( ECalenMarkDone );
-                            }
-                        else
-                            {
-                            aMenuPane->DeleteMenuItem( ECalenMarkUnDone );
-                            }
+                        aMenuPane->SetItemSpecific(ECalenMarkUnDone, ETrue);
                         }
                     else
                         {
-                        aMenuPane->DeleteMenuItem( ECalenMarkDone );
-                        aMenuPane->DeleteMenuItem( ECalenMarkUnDone );
+                        aMenuPane->SetItemSpecific(ECalenMarkDone, ETrue);
                         }
- 					if(Container()->MarkedCount() > 1)
- 					    {
-                        aMenuPane->DeleteMenuItem( ECalenCopyToCalendars );
- 					    }
+                    
+                    if(Container()->MarkedCount() == 1)
+                        {
+                        aMenuPane->DeleteMenuItem( ECalenCmdComplete );
+                        }
                     }
                 else
                     {
@@ -735,14 +729,14 @@ void CCalenTodoView::DoActivateImplL( const TVwsViewId& /*aPrevViewId*/,
 
     RedrawStatusPaneL(); // Set a text to title pane.
     
-    /*MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
+    MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
     if(toolbarImpl) 
         {
         CAknToolbar& toolbar = toolbarImpl->Toolbar();
 
         // dim clear and clear all toolbar buttons
         toolbar.SetItemDimmed(ECalenGotoToday,ETrue,ETrue);
-        }*/
+        }
     iEventViewCommandHandled = EFalse;
     
     TRACE_EXIT_POINT;
@@ -757,7 +751,7 @@ void CCalenTodoView::DoDeactivateImpl()
     {
     TRACE_ENTRY_POINT;
     
-    /*MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
+    MCalenToolbar* toolbarImpl = iServices.ToolbarOrNull();
     if(toolbarImpl) 
         {
         CAknToolbar& toolbar = toolbarImpl->Toolbar();
@@ -767,7 +761,7 @@ void CCalenTodoView::DoDeactivateImpl()
             // dim clear and clear all toolbar buttons
             toolbar.SetItemDimmed(ECalenGotoToday,EFalse,ETrue);
             }
-        }*/
+        }
     
     // Remove all markings when the view is deactivated.
     static_cast< CCalenTodoContainer* > ( iContainer )->MarkAllL( 

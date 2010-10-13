@@ -665,9 +665,6 @@ void CAgendaEntryToVCalConverter::AddEntryPropertiesL(CCalEntry* aEntry, CVersit
 		CCalAttachment* attach = aEntry->AttachmentL(ii);
 		AddAttachmentPropertyL(aParser, *attach);
 		}
-	
-    TInt userDataInt = aEntry->UserInt32L();       
-    AddIntegerPropertyL( aParser, KVersitExtUserInt, userDataInt );       
 	}
 
 

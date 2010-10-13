@@ -76,7 +76,7 @@ class CCalenAttachmentUi : public CBase,
          */
         void ConstructL();
         
-        void CheckDRMStatusL(const TDesC& aFileName,TBool& aProtection);
+        void CheckDRMStatus(const TDesC& aFileName,TBool& aProtection);
         
     public:
         
@@ -229,12 +229,12 @@ class CCalenAttachmentUi : public CBase,
         /**
          * Compares the binary data for the text files.
          */
-        TBool CompareContentOfTextFilesL(const TDesC& aSelectedFile,const TDesC& aAlreadyAttachedFile);
+        TBool CompareContentOfTextFiles(const TDesC& aSelectedFile,const TDesC& aAlreadyAttachedFile);
         
         /**
          * Remove the temporary file after attaching the attachtment to tht entry.
          */
-        void RemoveTemporaryFilesL();
+        void RemoveTemporaryFiles();
         
     private:
         

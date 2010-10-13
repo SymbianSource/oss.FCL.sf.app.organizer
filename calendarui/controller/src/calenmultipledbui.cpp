@@ -45,8 +45,6 @@
 #include <featmgr.h>
 #include <hlplch.h>
 #include <csxhelp/cale.hlp.hrh>
-#include <calencontext.h>
-#include <calenservices.h>
 
 // User includes
 #include "calendarui_debug.h"
@@ -287,11 +285,7 @@ CCalenMultipleDbUi::~CCalenMultipleDbUi()
         delete iCalendarInfoOriginal;
         iCalendarInfoOriginal = NULL;
         }
-if(iCalEditedDefaultName)
-        {
-        delete iCalEditedDefaultName;
-        iCalEditedDefaultName = NULL;
-        }
+
     TRACE_EXIT_POINT;
     }
 
@@ -693,11 +687,6 @@ TInt CCalenMultipleDbUi::UpdateOnAddOrEditL(TBool aItemAdded)
 	TInt retError = KErrNone;
     
 	iDbEditor = NULL;
-	if(iCalEditedDefaultName)
-	    {
-        delete iCalEditedDefaultName;
-        iCalEditedDefaultName = NULL;
-	    }
     
     if(aItemAdded)
         {
@@ -775,7 +764,6 @@ TInt CCalenMultipleDbUi::EditItemL()
     
     iCalendarInfoEdited = calendarInfoList[currentIndex];
     
-    iCalEditedDefaultName = calendarInfoList[currentIndex]->FileNameL().AllocL();
     CleanupStack::PopAndDestroy(&calendarInfoList);
     
     //Take a copy of original before editing
@@ -1426,22 +1414,7 @@ void CCalenMultipleDbUi::HandleNotification(
         case ECalenNotifyCalendarInfoCreated:
         case ECalenNotifyCalendarInfoUpdated:
             {
-            MCalenContext& context = iController.Services().Context();
-            TDesC& aConflictCalendarName  = context.GetCalendarFileNameL();
-            TBool isSameFileEdited = EFalse;
-            if(iCalEditedDefaultName)
-                {
-                if(!iCalEditedDefaultName->CompareF(aConflictCalendarName))
-                    {
-                    isSameFileEdited = ETrue; 
-                    }
-                else
-                    {
-                    isSameFileEdited = EFalse;
-                    }
-                }
-            
-            if (iDbEditor && isSameFileEdited)
+            if (iDbEditor)
                 {
                 iConflictOccured = ETrue;
                 iDbEditor->SetConflict(CCalenMultiDBEditor::EConflictUpdate);
@@ -1450,28 +1423,7 @@ void CCalenMultipleDbUi::HandleNotification(
             break;
         case ECalenNotifyCalendarFileDeleted:
             {
-            RPointerArray<CCalCalendarInfo> calendarInfoList;
-            TBool isSameFileDeleted = EFalse;
-            iController.GetAllCalendarInfoL(calendarInfoList);
-            CleanupClosePushL(calendarInfoList);
-            if(iCalEditedDefaultName)
-                {
-                for(TInt i=0; i<calendarInfoList.Count(); i++)
-                    {
-                    if(!iCalEditedDefaultName->CompareF(calendarInfoList[i]->FileNameL()))
-                        {
-                        isSameFileDeleted = EFalse;
-                        break;
-                        }
-                    else
-                        {
-                        isSameFileDeleted = ETrue;
-                        }
-                    }
-                }
-            CleanupStack::PopAndDestroy(&calendarInfoList);
-            
-            if (iDbEditor && isSameFileDeleted)
+            if (iDbEditor)
                 {
                 iConflictOccured = ETrue;
                 iDbEditor->SetConflict(CCalenMultiDBEditor::EConflictDelete);
@@ -1483,7 +1435,7 @@ void CCalenMultipleDbUi::HandleNotification(
         }
 
     // refresh calendar list
-    TRAP_IGNORE(UpdateListboxL());
+    UpdateListboxL();
 
     TRACE_EXIT_POINT;
     }

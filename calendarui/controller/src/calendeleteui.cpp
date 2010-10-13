@@ -41,7 +41,7 @@
 #include <calcalendarinfo.h>
 #include <calentoolbar.h>
 #include <akntoolbar.h>
-#include <calenattachmentmodel.h>
+#include <CalenAttachmentModel.h>
 
 #include "calendarui_debug.h"           // Debug
 #include "calendeleteui.h"

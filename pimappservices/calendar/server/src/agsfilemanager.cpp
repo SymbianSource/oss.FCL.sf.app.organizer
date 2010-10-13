@@ -1239,11 +1239,14 @@ TBool CAgnServFile::SetCalendarInfoL(const CAgnCalendarInfo& aCalendarInfo)
     fileName.Append(parser.NameAndExt());
     if(iIsFileDisabled)
         {
-        iAgnServer.AlarmServer().SetAlarmStatusForCalendarFile(fileName, EAlarmStatusDisabled); 
+        iAgnServer.AlarmServer().AlarmDeleteByCalendarFile(fileName, EAllAlarms);
         }
     else
         {
-        QueueAlarmsImmediately();
+    	if (iStore && iModel)
+    		{
+    		TRAP_IGNORE(iModel->QueueNextAlarmImmediatelyL());	
+    		}
         }
     
     User::LeaveIfError(iStore->Commit());

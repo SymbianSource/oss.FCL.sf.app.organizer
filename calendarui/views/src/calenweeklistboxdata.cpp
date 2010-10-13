@@ -214,7 +214,7 @@ void CCalenWeekLBData::DrawFormatted( TListItemProperties aProperties,   // Item
                                       const TDesC* aText,                // Drawing item text
                                       const TRect& aItemRect,            // Item rectangle
                                       const TColors& aColors,            // Item colors
-                                      TBool /*aHighlight */) const
+                                      TBool aHighlight ) const
     {
     TRACE_ENTRY_POINT;
     
@@ -227,7 +227,7 @@ void CCalenWeekLBData::DrawFormatted( TListItemProperties aProperties,   // Item
 
     TInt lastSubCell(CellCount() - 1);
     // mark highlight as "not done" only if we need to draw the highlight
-//    TBool highlightDone( aHighlight ? EFalse : ETrue );
+    TBool highlightDone( aHighlight ? EFalse : ETrue );
 
     if(!font)
         {
@@ -277,12 +277,11 @@ void CCalenWeekLBData::DrawFormatted( TListItemProperties aProperties,   // Item
                     aGc.SetBrushStyle(CGraphicsContext::ENullBrush);
                     }
 
-                //Focus is removed in Week View
-                /*if(!highlightDone && aHighlight 
+                if(!highlightDone && aHighlight 
                    && subcell == iHilightedSubCell+1)
                     {
                     highlightDone = DrawHighlight( bRect, aGc, ETrue );
-                    }*/
+                    }
 
                 switch(hourData.DataType())
                     {
@@ -298,12 +297,11 @@ void CCalenWeekLBData::DrawFormatted( TListItemProperties aProperties,   // Item
                     break;
                     }
 
-                //Focus is removed in Week View
                 // draw non-skinned highlight
-                /*if(!highlightDone && aHighlight && subcell == iHilightedSubCell +1)
+                if(!highlightDone && aHighlight && subcell == iHilightedSubCell +1)
                     {
                     highlightDone = DrawHighlight( bRect, aGc, EFalse );
-                    }*/
+                    }
                 }
             break;
 

@@ -435,10 +435,6 @@ EXPORT_C TBool CCalenController::IssueCommandL( TInt aCommand )
 	    {
 	    SetFasterAppFlag( ETrue );
 	    aCommand = ECalenFasterAppExit;
-        if( iViewManager->CalenToolbar() )
-            {
-            iViewManager->CalenToolbar()->SetToolbarVisibilityL(ETrue);
-            }
 	    }
     else if( aCommand == EAknCmdExit || aCommand == EEikCmdExit
              || aCommand == EAknSoftkeyExit )

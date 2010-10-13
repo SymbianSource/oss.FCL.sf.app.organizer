@@ -74,6 +74,11 @@ class CClockNitzPlugin : public CClockTimeSourceInterface
 		TInt GetPluginUid();
 		
 		/**
+		* @brief Get the data if available already.
+		*/
+		void GetDataIfAlreadyAvailableL();
+		
+		/**
 		* @brief Notifies any client in case NITZ info is received
 		*/
 		void NotifyNITZInfoChangeL();

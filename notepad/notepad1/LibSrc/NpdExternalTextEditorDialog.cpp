@@ -413,15 +413,14 @@ void CNotepadExternalTextDialog::DynInitMenuBarL(TInt aResourceId, CEikMenuBar* 
 // -----------------------------------------------------------------------------
 //
 TInt CNotepadExternalTextDialog::DoSearchL(CFindItemEngine::TFindItemSearchCase aCase)
-    {
-    CFindItemDialog* dialog = CFindItemDialog::NewL( iEditor->Text()->Read(0), aCase );
-    dialog->EnableSingleClick( ETrue );
-    dialog->SetCallSubMenuVisibility( EFalse ); // Click-To-Call
-    TInt ret = dialog->ExecuteLD();
-    TBuf<128> test = _L("FI returned: ");
-    test.AppendNum(ret);
-    iEikonEnv->InfoMsg(test);
-    return ret;
+	{
+		CFindItemDialog* dialog = CFindItemDialog::NewL( iEditor->Text()->Read(0), aCase );
+	    dialog->EnableSingleClick( ETrue );
+	    TInt ret = dialog->ExecuteLD();
+	    TBuf<128> test = _L("FI returned: ");
+	    test.AppendNum(ret);
+	    iEikonEnv->InfoMsg(test);
+		return ret;
 	}
 	
 // End of File  

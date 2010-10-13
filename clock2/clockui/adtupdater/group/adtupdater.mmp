@@ -26,7 +26,7 @@ TARGETPATH			/sys/bin
 
 // Uid and Capability information
 UID					0x100039CE 0x2001114C
-CAPABILITY          CAP_APPLICATION
+CAPABILITY          CAP_APPLICATION AllFiles SwEvent
 
 // Stack options
 EPOCSTACKSIZE		0x10000

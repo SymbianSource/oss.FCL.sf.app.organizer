@@ -49,6 +49,9 @@ const TInt KAlarmPriority( 3095 );  // Priority for global note queue
 const TUint KAlarmAutoShutdown( 60000000 );  // 60 s
 const TUint KShutdownTime( 1500000 ); // 1.5 s
 
+const TInt KErrDuplicateAlarm( -1001 ); // error code
+
+
 // ==========================================================
 // ================= MEMBER FUNCTIONS =======================
 
@@ -505,6 +508,11 @@ void CAlmAlarmControl::ShowAlarm()
 
                 HBufC* text = NULL;
 
+				if(!err && iAlarmUtils->CheckForDuplicateAlarm())
+					{
+					err = KErrDuplicateAlarm;
+					}
+				
                 if( !err )
                 {
                     TRAP( err, iAlarmUtils->GetAlarmLabelL( text ); )
@@ -528,8 +536,12 @@ void CAlmAlarmControl::ShowAlarm()
                     // disable silence and snooze key if alarm can't be snoozed anymore
                     cba |= iAlarmUtils->CanSnooze() ? 0 : EHideSnooze | ENoSilence;
                     // show "Open" MSK for calendar alarms if the security lock is not active
-                    cba |= iAlarmUtils->IsCalendarAlarm() && !iAlarmUtils->IsSecurityLockActive() ? EMskOpen : 0;
-
+                    cba |= iAlarmUtils->IsCalendarAlarm() && !iAlarmUtils->IsSecurityLockActive() ? EMskOpen : 0; 
+					                  
+					if(iAlarmUtils->IsCalendarAlarm())
+                        {
+                    	iAlarmUtils->StoreCurrentCalendarAlarmData();
+						}
                     // request alarm dialog
                     TBuf<1> time;
                     TRAP( err, iGlobalNoteId = iAlarmUtils->NotifierDialogController()->DisplayAlarmL( cba, *text, time/*not used*/ ) );

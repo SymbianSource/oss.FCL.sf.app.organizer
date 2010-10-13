@@ -44,7 +44,7 @@
 #include "calendaycontainer.h"
 #include "calensend.h"
 #include "calentitlepane.h"
-#include <calenlocationutil.h>
+#include "calenlocationutil.h"
 #include <CalenInterimUtils2.h>
 #include "calendar.hrh"
 #include "CalenUid.h"

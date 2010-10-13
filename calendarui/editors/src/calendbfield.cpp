@@ -264,13 +264,8 @@ void CCalenDbField::HandleControlStateChangeL( TInt aControlId )
             iUnifiedEditor.EditorDataHandler().SetCalendarFieldEditedL(IsCalendarEdited()
                                                             ,iPreviousColId,iCurrentColId);
             
-            
-            if(!iAsyncDBquery)
-                {
             TCallBack callback(DoAsyncShowChangeDBQueryL,this);
             iAsyncDBquery = new(ELeave) CAsyncCallBack(callback,CActive::EPriorityStandard);
-                }
-            
             iAsyncDBquery->CallBack();
             break;
             }
@@ -388,7 +383,6 @@ const TDesC& CCalenDbField::GetCalendarNameForEntryL()
     TRACE_EXIT_POINT
     return *iCalendarFileName;
     }
-
 // -----------------------------------------------------------------------------
 // CCalenDbField::GetCalendarNameForEntryL
 // get calendar index for the entry

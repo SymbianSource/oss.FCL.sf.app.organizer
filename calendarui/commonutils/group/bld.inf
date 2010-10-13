@@ -22,11 +22,11 @@
 PRJ_EXPORTS
 ../inc/calenentryutil.h				|../../inc/calenentryutil.h
 ../inc/calennotedatautil.h			|../../inc/calennotedatautil.h
+../inc/calenlocationutil.h          |../../inc/calenlocationutil.h
 ../inc/calenattachmentutils.h       |../../inc/calenattachmentutils.h
 ../inc/calenattachmentinfo.h    	|../../inc/calenattachmentinfo.h
 ../inc/calenattachmentmodel.h   	|../../inc/calenattachmentmodel.h
 ../inc/calentitlepane.h				|../../inc/calentitlepane.h
-../inc/KoreanCalConv.h				|../../inc/KoreanCalConv.h
 PRJ_MMPFILES
 commonutils.mmp
 

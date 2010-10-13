@@ -267,7 +267,6 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
          */
         void  ActivateL();
         
-        void HandleCalendarDeleteL();
     private:
        
         /**
@@ -531,7 +530,7 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
          * updates the dbid into cenrep for the later use,
          * next time editor will show this db in the editor (bu default)
          */
-        void ModifyDbFieldL();
+        void ModifyDbField();
         
         /**
          * @brief Try to save the enty with new entry type
@@ -662,7 +661,7 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
           *        exceptional entry/single instance of recurrent entry
           *  
           */
-         void HideFieldsForEditSingleInstanceL();
+         void HideFieldsForEditSingleInstance();
          
          static TInt AsyncProcessCommandL(TAny* aThisPtr); 
          
@@ -822,11 +821,6 @@ NONSHARABLE_CLASS( CCalenUnifiedEditor ) : public CAknForm,
         TBool isReplaceLocation;        
         
         CAsyncCallBack* iAsyncCallback; 
-        
-        /**
-    	* True if FeatureManager is initialized.
-    	*/
-    	TBool iFeatMgrInitialized;
         
     };
 

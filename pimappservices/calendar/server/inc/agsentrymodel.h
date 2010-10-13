@@ -146,6 +146,7 @@ public:
 	void NextAlarmForServerL(const TTime& aNow,CArrayFixFlat<TAgnSortInstance>& aAlarmedIds);
 	void NextFewAlarmsForServerL(const TTime& aStartDateTime,const TTime& aEndDateTime,CArrayFixFlat<TAgnSortInstance>& aAlarmedIds,const TInt aMaxNumberOfAlarms);
 	void FindAndQueueNextFewAlarmsL();
+	void QueueNextAlarmImmediatelyL();
 	void SetUpdateAlarmL(TBool aUpdateAlarm);
 #ifdef SYMBIAN_SYSTEM_STATE_MANAGEMENT
 	void DeleteAlarmsAndRequeueSessionAlarmL();

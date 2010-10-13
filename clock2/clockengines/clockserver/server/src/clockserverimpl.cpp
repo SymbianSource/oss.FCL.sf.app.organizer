@@ -174,6 +174,33 @@ TInt CClkSrvImpl::ActivateAllProtocolsL()
     for( TInt index( KZeroIndex ); index < count; index++ )
 		 {	
 		 returnVal = ActivateProtocolL( plugInArray[ index ]->ImplementationUid().iUid );		 			
+		 if(returnVal == KErrNone)
+		     {
+		     // Let's fetch the data if already available.Here we are fetching the NITZ
+		     // data from telephony server for first boot only, first time NITZ data is reliable.
+		     // First Boot NITZ data would be used by adtupdater application.
+		     // Get the first boot status from cenrep. If it is the first boot, get the NITZ packet already available
+		     TBool staleBoot( EFalse );
+
+		     CRepository* cenRep( NULL );
+
+		     TRAPD( errorVal, cenRep = CRepository::NewL( KCRUidStartup ) );
+
+		     if( errorVal == KErrNone )
+		         {
+		         errorVal = cenRep->Get( KStartupFirstBoot, staleBoot );
+		         }
+
+		     // Cleanup.
+		     delete cenRep;
+		     cenRep = NULL;
+
+		     if(!staleBoot)
+		         {
+		         iTimeSourceObjArray[index]->GetDataIfAlreadyAvailableL(); 
+		         }
+
+		     }
 		 }
     // Cleanup.
     plugInArray.ResetAndDestroy();

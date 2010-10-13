@@ -70,6 +70,12 @@ class CClockNitzListener : public CActive
         * @return an error code
         */
         TInt GetCurrentNITZInfoL( RMobilePhone::TMobilePhoneNITZ& aNitzInfo );
+        
+        /**
+         * @brief Gets the available NITZ information.Notifiy any client in case NITZ info
+         * is already available with telephony server.
+         */
+        void FetchDataIfAlreadyAvailableL();
 
         /**
         * @brief Notifies the observer whenever the NITZ information changes

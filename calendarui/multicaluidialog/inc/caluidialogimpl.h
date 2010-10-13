@@ -218,7 +218,7 @@ NONSHARABLE_CLASS(CCalUiDialogImpl) : public CAknDialog, public MEikListBoxObser
         * @param aPtr
         * @return TInt
         */
-        static TInt DoAsyncExitL(TAny* aPtr);
+        static TInt DoAsyncExit(TAny* aPtr);
         
         
     private: // data

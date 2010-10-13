@@ -139,6 +139,51 @@ TInt CClockNitzListener::GetCurrentNITZInfoL( RMobilePhone::TMobilePhoneNITZ& aN
 	}
 
 // ---------------------------------------------------------
+// CClockNitzListener::FetchDataIfAlreadyAvailableL
+// rest of the details are commented in the header
+// ---------------------------------------------------------
+//
+void CClockNitzListener::FetchDataIfAlreadyAvailableL()
+    {
+
+    __PRINTS( "CClockNitzListener::FetchDataIfAlreadyAvailableL - Entry" );
+
+    //Get the NITZ information if it is already available 
+    TInt retVal( KErrNone );
+    retVal = iPhone.GetNITZInfo(iNitzInfo);
+    __PRINT( "CClockNitzListener::FetchDataIfAlreadyAvailableL GetNITZInfo : errorVal %d", retVal);
+
+    if( KErrNone == retVal ) 
+        {
+        // Check if the contents of the NITZ packet are valid.
+        // i.e if you can construct a TDateTime object using NITZ info.
+        TDateTime dateTime;
+        dateTime.Set( iNitzInfo.Year(),
+                TMonth( iNitzInfo.Month() ),
+                iNitzInfo.Day(),
+                iNitzInfo.Hour(),
+                iNitzInfo.Minute(),
+                iNitzInfo.Second(),
+                iNitzInfo.MicroSecond() );
+
+        __PRINT( "CClockNitzListener::Nitz year %d",iNitzInfo.Year() );
+        __PRINT( "CClockNitzListener::Nitz month %d",iNitzInfo.Month() );
+        __PRINT( "CClockNitzListener::Nitz day %d",iNitzInfo.Day() );
+        __PRINT( "CClockNitzListener::Nitz Hour %d",iNitzInfo.Hour() );
+        __PRINT( "CClockNitzListener::Nitz Minute %d",iNitzInfo.Minute() );
+        __PRINT( "CClockNitzListener::Nitz Second %d",iNitzInfo.Second() );
+
+        if( KErrNone == CheckDateTimeVal( dateTime ) )
+            {
+            __PRINTS( "CClockNitzListener::FetchDataIfAlreadyAvailableL : Valid NitzInfo available. Notify the observer");
+            // We have valid NitzInfo. Notify the observer
+            NotifyObserverL();
+            }
+        }
+
+    __PRINTS( "CClockNitzListener::FetchDataIfAlreadyAvailableL - Exit" );
+    }
+// ---------------------------------------------------------
 // CClockNitzListener::RunL
 // rest of the details are commented in the header
 // ---------------------------------------------------------

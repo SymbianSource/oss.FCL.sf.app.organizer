@@ -197,7 +197,7 @@ NONSHARABLE_CLASS( CCalenLocationUi ) : public CBase,
 		* hard key is pressed.
 		* @return 	User response
 		**/
-        TInt ShowDefineLocationQueryL();
+        TInt ShowDefineLocationQuery();
         
         
     private: // data

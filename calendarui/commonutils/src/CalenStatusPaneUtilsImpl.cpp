@@ -162,7 +162,7 @@ void CCalenStatusPaneUtilsImpl::HideNaviPane()
          {
          CCoeControl* coeRes = iNaviLabel->DecoratedControl();
          CCustomNaviControl *actualLabel = static_cast<CCustomNaviControl*>(coeRes);
-         actualLabel->SetCalendarNameAndColorL(aName, aColor);
+         actualLabel->SetCalendarNameAndColor(aName, aColor);
          actualLabel->DrawDeferred();
          iNaviContainer->ReplaceL(*iNaviLabel, *iNaviLabel);
          }

@@ -34,7 +34,7 @@
 #include "caleneventviewcontainer.h"
 #include <calenview.h>
 #include "CalenUid.h"
-#include <calenlocationutil.h>
+#include "calenlocationutil.h"
 #include "calenentryutil.h"
 #include "calendar.hrh"
 #include <finditem.hrh>
@@ -901,4 +901,3 @@ void CCalenEventView::HideNaviPane()
     }
 
 //end of file
-

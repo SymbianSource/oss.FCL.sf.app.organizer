@@ -369,12 +369,15 @@ void CCalenTodoContainer::ConstructImplL()
 
     /*// Save empty text and set null for list box.
     // It is made not to display "No data".
-    iEmptyListText = iListBox->View()->EmptyListText()->AllocL();*/
+    iEmptyListText = iListBox->View()->EmptyListText()->AllocL();
+    //iListBox->View()->SetListEmptyTextL( KNullDesC );*/
     
-    //set NULL string so that "no entries" is not shown 
-    //until the list is populated
-    iListBox->View()->SetListEmptyTextL( KNullDesC );
-    
+    // Set text for empty listbox
+    HBufC* emptyText = StringLoader::LoadLC(R_CALEN_QTN_CALE_NO_EVENTS,
+                                            iEikonEnv);
+    iListBox->View()->SetListEmptyTextL( *emptyText ); //Whenever listbox is empty, it will set with this empty text.
+    CleanupStack::PopAndDestroy(emptyText);
+
     TRACE_EXIT_POINT;
     }
 
@@ -573,13 +576,7 @@ void CCalenTodoContainer::CreateEntryItertorL()
     CleanupStack::PopAndDestroy( listDes );
     CleanupStack::PopAndDestroy( &calendarInfoList ); 
     iListBox->HandleItemAdditionL();
-    
-    //Whenever listbox is empty, it will set with this empty text.
-    HBufC* emptyText = StringLoader::LoadLC(R_CALEN_QTN_CALE_NO_EVENTS,
-                                            iEikonEnv);
-    iListBox->View()->SetListEmptyTextL( *emptyText ); 
-    CleanupStack::PopAndDestroy(emptyText);
-
+    //iListBox->View()->SetListEmptyTextL( *iEmptyListText );
 
     TRACE_EXIT_POINT;
     }
@@ -1251,7 +1248,6 @@ void CCalenTodoContainer::CompletePopulationL()
     // Now we know if the view is empty or not we can update the CBA buttons.
     static_cast<CCalenTodoView*>( iView )->UpdateCBAButtonsL();
     UpdateStatusPaneAndExtensionsL();
-    UpdateTodayToolbarItemL();
 
     TRACE_EXIT_POINT;
     }

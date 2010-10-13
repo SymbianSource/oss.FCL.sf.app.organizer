@@ -377,7 +377,4 @@ EXPORTS
 	??0CAgnCalendarInfo@@IAE@XZ @ 376 NONAME ; CAgnCalendarInfo::CAgnCalendarInfo(void)
 	?ExternalizePropertiesL@CAgnCalendarInfo@@QBEXAAVCFileStore@@PBV1@@Z @ 377 NONAME ; void CAgnCalendarInfo::ExternalizePropertiesL(class CFileStore &, class CAgnCalendarInfo const *) const
 	?SetState@CAgnCalendarInfoProperty@@QAEXW4TState@1@@Z @ 378 NONAME ; void CAgnCalendarInfoProperty::SetState(enum CAgnCalendarInfoProperty::TState)
-	?UserDataInt@CAgnEntry@@QBEKXZ @ 379 NONAME ; unsigned long CAgnEntry::UserDataInt(void) const
-	?SetUserDataInt@CAgnEntry@@QAEXK@Z @ 380 NONAME ; void CAgnEntry::SetUserDataInt(unsigned long)
-	?ClearMRSpecificData@CAgnEntry@@QAEXXZ @ 381 NONAME ; void CAgnEntry::ClearMRSpecificData(void)
-
+	

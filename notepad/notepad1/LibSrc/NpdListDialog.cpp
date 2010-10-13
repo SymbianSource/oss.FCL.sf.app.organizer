@@ -107,11 +107,6 @@ EXPORT_C CNotepadListDialog* CNotepadListDialog::NewL(
 //
 EXPORT_C CNotepadListDialog::~CNotepadListDialog()
     {
-    if ( iServiceHandler )
-        {
-        delete iServiceHandler;
-        iServiceHandler = NULL;
-        }
     delete iIdle;
     delete iProgressDialog; // *1*
     delete iEditorDialog;
@@ -124,6 +119,12 @@ EXPORT_C CNotepadListDialog::~CNotepadListDialog()
     iSavedSelectedKeys.Close();
     iSavedKeysAboveCurrent.Close();
     delete iEnvironmentChangeNotifier;
+    if ( iServiceHandler )
+    	{
+    	    	
+		delete iServiceHandler;
+		iServiceHandler = NULL;
+    	}
     }
 
 // -----------------------------------------------------------------------------
@@ -976,7 +977,6 @@ void CNotepadListDialog::DynInitMenuPaneL(
             TKeyArrayFix itemKey(0,ECmpTUint);
             TInt ignore;
             TInt itemMarked = iListBox->SelectionIndexes()->Find( currIndex, itemKey, ignore );
-			
             if ( memoCount > 0 && 
                 ( markCount == 0 || IsNotepad() || IsTemplates()) )
                 {
@@ -984,21 +984,15 @@ void CNotepadListDialog::DynInitMenuPaneL(
                 InsertSendMenuItemAfterL( *iSendUi, *aMenuPane, 
                     ENotepadCmdOpen );
                 }
-				
             if ( memoCount == 0 )
                 {
-                aMenuPane->DeleteMenuItem( ENotepadCmdDelete );
+                aMenuPane->DeleteMenuItem(ENotepadCmdDelete);
                 }
-				
-            //delete 'Open' item from Option list at the following situations:
-            //no memo,have item marked,user select the 'New note'
-            if ( ( memoCount == 0 ) || ( markCount >= 1 ) || 
-                    ( ( currIndex == 0 ) && IsNotepad() ) )
+            if ( (memoCount == 0) ||  ( markCount >= 1  ) )
                 {
                 // this must after InsertSendMenuItemAfterL
-                aMenuPane->DeleteMenuItem( ENotepadCmdOpen );
+                aMenuPane->DeleteMenuItem(ENotepadCmdOpen);
                 }
-				
             if ( markCount >= 1 && IsNoteListDialog() && ( memoCount > 0 ) )
                 {
                 aMenuPane->SetItemSpecific( ENotepadCmdSend, EFalse );
@@ -1077,7 +1071,7 @@ void CNotepadListDialog::ProcessCommandL(TInt aCommandId)
     switch ( aCommandId )
         {
         case ENotepadCmdOpen: // Open memo
-            OnCmdOpenL( iListBox->CurrentItemIndex() );
+            OnCmdOpenL(iListBox->CurrentItemIndex());
             break;
         case ENotepadCmdAdd:
            OnCmdAddL();

@@ -29,7 +29,7 @@
 #include <e32math.h>
 
 #include <asshddefs.h>
-#define KUserDataInt 4 
+
 
 //---------------------------------- CAgnEntry ------------------------------------------
 
@@ -411,11 +411,6 @@ data is not included in the comparison, except for the replication status.
 		return EFalse;
 		}
 	
-    if ( UserDataInt() != aEntry.UserDataInt() )     
-        {       
-        return EFalse;       
-        }   
-    
 	return ETrue;
 	}
 
@@ -692,15 +687,9 @@ void CAgnEntry::ExternalizeEntryL(RWriteStream& aStream, TBool aToBuffer) const
 
     // Set the user integer of the stream.
 	aStream.WriteInt32L( UserInt() );
-
-    TInt skipCount( 0 );
-    //skip count(4) for UserDataInt is added
-    //to read those many bytes after fixed length of agmentry.
-    skipCount += KUserDataInt; 
-    
-    // Number of bytes until end of entry 
-    aStream.WriteUint32L( skipCount );
-    aStream.WriteInt32L( UserDataInt() );      
+	
+	// future DC proofing
+	aStream.WriteUint32L(0); // number of bytes until end of entry
 	}
 
 
@@ -839,18 +828,13 @@ The presence of this function means that the standard templated operator>>()
 	// Set the user integer of this entry from the stream.
 	SetUserInt(aStream.ReadInt32L());
 	
+	// future DC proofing
 	size = aStream.ReadUint32L(); // number of bytes until end of entry
-	
-	if ( size >= KUserDataInt )       
-        {       
-        SetUserDataInt( aStream.ReadInt32L() );
-		size -= KUserDataInt;
-        }  
 	while (size > 0)
 		{
-			aStream.ReadUint8L(); // ignore data
-			size--;
-		}     
+		aStream.ReadUint8L(); // ignore data
+		size--;
+		}
 	}
 
 EXPORT_C CAgnEntry* CAgnEntry::CloneL() const
@@ -1023,8 +1007,6 @@ not loaded then it isn't loaded and copied
 		HBufC8* guid = aSource.Guid().AllocL();
 		SetGuid(guid);
 		}		
-	// copy int       
-	iUserDataInt = aSource.UserDataInt();   
 	}
 	
 EXPORT_C CCalEntry::TReplicationStatus CAgnEntry::ReplicationStatus() const
@@ -1252,27 +1234,6 @@ EXPORT_C void CAgnEntry::SetPhoneOwnerL(CAgnAttendee* aAttendee)
 	iPhoneOwner = aAttendee;
 	}
 
-EXPORT_C void CAgnEntry::ClearMRSpecificData()
-    {
-    // clears the iMeetingOrganizer and iAttendeeList.
-    if( iMeetingOrganizer )
-        {
-        delete iMeetingOrganizer;
-        iMeetingOrganizer = NULL;
-
-        }
-    if( iPhoneOwner )
-        {
-        iPhoneOwner = NULL;
-        }
-
-    if( iAttendeeList )
-        {
-        iAttendeeList->ResetAndDestroy();
-        delete iAttendeeList;
-        iAttendeeList = NULL;
-        }
-    }
 
 EXPORT_C void CAgnEntry::SetDTStampUtcL(const TTime& aDTStampUtc)
 /**
@@ -2125,13 +2086,3 @@ TBool CAgnEntry::IsFlagSet(TFlags aFlag) const
 	{
 	return (iFlags & aFlag);
 	}
-
-EXPORT_C void CAgnEntry::SetUserDataInt( TUint32 aUserInt )       
-    {       
-    iUserDataInt = aUserInt;       
-    }       
-
-EXPORT_C TUint32 CAgnEntry::UserDataInt() const       
-    {       
-    return iUserDataInt;       
-    }       

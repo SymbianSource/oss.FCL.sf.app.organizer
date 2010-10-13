@@ -3450,3 +3450,8 @@ CAgnAlarm& CAgnEntryModel::Alarm()
     {
     return *iAlarm;
 	}
+
+void CAgnEntryModel::QueueNextAlarmImmediatelyL()
+	{
+	iAlarm->FindAndQueueNextAlarmL(EFalse);
+	}

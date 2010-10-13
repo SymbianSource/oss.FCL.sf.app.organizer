@@ -439,34 +439,11 @@ TKeyResponse CCalenMultiDBEditor::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEv
     {
     TRACE_ENTRY_POINT;
     TKeyResponse keyResponse(EKeyWasNotConsumed);
-    TInt ctrlid=IdOfFocusControl();
 
     if (aType == EEventKey)
        {
        switch (aKeyEvent.iCode)
         	{
-            case EKeyOK:
-                if( ctrlid == ECalenMultiDbColor)
-                    {
-                    GetColorL();
-                    }
-                else if ( ctrlid == ECalenMultiDbHiddenVisible )
-                    {
-                    iCalendarStatus = iCalendarInfo.Enabled();
-                    if( ECalenMultiDbHidden == iCalendarStatus )
-                        {
-                        SetVisiblityFieldL( ECalenMultiDbVisible ); 
-                        iCalendarStatus = ECalenMultiDbVisible;
-                        iCalendarInfo.SetEnabled(iCalendarStatus);
-                        }
-                    else
-                        {
-                        SetVisiblityFieldL( ECalenMultiDbHidden );
-                        iCalendarStatus = ECalenMultiDbHidden;
-                        iCalendarInfo.SetEnabled(iCalendarStatus);
-                        }
-                    }
-                break;
         	case EKeyEscape:
 			    TryExitL( EAknCmdExit );
         		keyResponse = EKeyWasConsumed;
@@ -645,7 +622,7 @@ void CCalenMultiDBEditor::FocusChanged(TDrawNow /*aDrawNow*/)
     if(IsFocused() && !iNoneChoosen)
         {
         iColVal = iChoosenColor.Value();
-        TRAP_IGNORE(iPicture->SetRgbColorsL(iChoosenColor));
+        iPicture->SetRgbColorsL(iChoosenColor);
         GetLineByLineAndPageIndex(1, 0)->DrawNow();
         }
     

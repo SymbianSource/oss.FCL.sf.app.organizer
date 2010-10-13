@@ -159,7 +159,7 @@ TBool CCalenAttachmentUi::HandleCommandL(const TCalenCommand& aCommand)
                 {                                
                 iAttachmentModel->Reset();
                 iController.BroadcastNotification(ECalenNotifyAttachmentRemoved);
-                RemoveTemporaryFilesL();
+                RemoveTemporaryFiles();
                 }                    
             else
                 {
@@ -222,7 +222,7 @@ void CCalenAttachmentUi::DoHandleNotificationL(const TCalenNotification aNotific
                 iAttachmentModel->Reset();
                 } 
             // clear calendar editor's folder
-            RemoveTemporaryFilesL();
+            RemoveTemporaryFiles();
             iAttachmentInfoIntialized = EFalse;
             }
             break;            
@@ -251,7 +251,7 @@ void CCalenAttachmentUi::DoHandleNotificationL(const TCalenNotification aNotific
                     // add attachments to the entry being viewed in event viewer
                     AddAttachmentsToEntryL();
                     // clear calendar editor's folder
-                    RemoveTemporaryFilesL();
+                    RemoveTemporaryFiles();
                     
                     iAttachmentModel->Reset();
                     }
@@ -566,7 +566,7 @@ void CCalenAttachmentUi::AddAttachmentL(const TDesC& aSourceFilePath)
         }
     
     TBool isAlreadyExists = IsDuplicateNameL(parsedFileName);
-    CheckDRMStatusL(aSourceFilePath,drmProtected);
+    CheckDRMStatus(aSourceFilePath,drmProtected);
     
     if(drmProtected || isAlreadyExists)
         {
@@ -835,7 +835,7 @@ void CCalenAttachmentUi::DialogDismissedL( TInt aButtonId )
 // CCalenAttachmentUi::CheckDRMStatus()
 // -----------------------------------------------------------------------------
 // 
-void CCalenAttachmentUi::CheckDRMStatusL( const TDesC& aFileName,TBool& aProtection )
+void CCalenAttachmentUi::CheckDRMStatus( const TDesC& aFileName,TBool& aProtection )
     {
     TRACE_ENTRY_POINT;
     
@@ -920,7 +920,7 @@ TBool CCalenAttachmentUi::IsDuplicateNameL(const TDesC& aSelectedFile)
 // Compares the binary data of already attached and currently selected text file.
 // -----------------------------------------------------------------------------
 // 
-TBool CCalenAttachmentUi::CompareContentOfTextFilesL( const TDesC& aSelectedFile,
+TBool CCalenAttachmentUi::CompareContentOfTextFiles( const TDesC& aSelectedFile,
                                     const TDesC& aAlreadyAttachedFile)
     {
     TRACE_ENTRY_POINT;
@@ -983,7 +983,7 @@ TBool CCalenAttachmentUi::CompareContentOfTextFilesL( const TDesC& aSelectedFile
 // removes the temporary files, those we have added to temp path.
 // -----------------------------------------------------------------------------
 // 
-void CCalenAttachmentUi::RemoveTemporaryFilesL()
+void CCalenAttachmentUi::RemoveTemporaryFiles()
     {
     TRACE_ENTRY_POINT;
     

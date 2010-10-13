@@ -95,7 +95,6 @@ LIBRARY         ws32.lib
 // For cover display support:
 LIBRARY eikdlg.lib
 LIBRARY estor.lib
-LIBRARY featmgr.lib
 LIBRARY missedalarmstore.lib
 
 LIBRARY         starterclient.lib

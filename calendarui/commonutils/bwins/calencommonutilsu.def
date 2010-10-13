@@ -138,12 +138,3 @@ EXPORTS
 	?AttachmentOpen@CCalenAttachmentModel@@QAEXAAH@Z @ 137 NONAME ; void CCalenAttachmentModel::AttachmentOpen(int &)
 	?IsAttachmentOpen@CCalenAttachmentModel@@QAEHXZ @ 138 NONAME ; int CCalenAttachmentModel::IsAttachmentOpen(void)
 	?ShowNaviPaneL@CCalenStatusPaneUtils@@QAEPAVCAknNavigationDecorator@@ABVTDesC16@@VTRgb@@@Z @ 139 NONAME ; class CAknNavigationDecorator * CCalenStatusPaneUtils::ShowNaviPaneL(class TDesC16 const &, class TRgb)
-	?DateTimeToKoreanL@CKoreanCalConv@@QAEXABVTDateTime@@AAVTChineseDate@@@Z @ 140 NONAME ; void CKoreanCalConv::DateTimeToKoreanL(class TDateTime const &, class TChineseDate &)
-	?DateRange@CKoreanCalConv@@QAEXAAVTDateTime@@0@Z @ 141 NONAME ; void CKoreanCalConv::DateRange(class TDateTime &, class TDateTime &)
-	?CalendarType@CCalenEntryUtil@@QBE?AW4TLunarCalendarType@@XZ @ 142 NONAME ; enum TLunarCalendarType CCalenEntryUtil::CalendarType(void) const
-	?SetCalendarTypeL@CCalenEntryUtil@@QAEXW4TLunarCalendarType@@@Z @ 143 NONAME ; void CCalenEntryUtil::SetCalendarTypeL(enum TLunarCalendarType)
-	?DateRange@CKoreanCalConv@@QAEXAAVTChineseDate@@0@Z @ 144 NONAME ; void CKoreanCalConv::DateRange(class TChineseDate &, class TChineseDate &)
-	?KoreanToDateTimeL@CKoreanCalConv@@QAEXAAVTChineseDate@@AAVTDateTime@@@Z @ 145 NONAME ; void CKoreanCalConv::KoreanToDateTimeL(class TChineseDate &, class TDateTime &)
-	?NewL@CKoreanCalConv@@SAPAV1@XZ @ 146 NONAME ; class CKoreanCalConv * CKoreanCalConv::NewL(void)
-	?NewLC@CKoreanCalConv@@SAPAV1@XZ @ 147 NONAME ; class CKoreanCalConv * CKoreanCalConv::NewLC(void)
-

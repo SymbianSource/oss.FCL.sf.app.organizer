@@ -128,21 +128,6 @@ public:  // from MCalenContext
      * this will be TCalenInstanceId::NullInstanceIdL()
      */
     TCalenInstanceId InstanceId() const;
-    
-    /**
-     * Sets the start and end time of the instance that has to be created.
-     * @param aStartTime The start time of the instance that has to be created.
-     * @param aEndTime The end time of the instance that has to be created.
-     */
-    void SetStartAndEndTimeForNewInstance( const TTime& aStartTime,
-                                        const TTime& aEndTime );
-    
-    /**
-     * Gets the start and end time of the instance that has to be created.
-     * @param aStartTime The start time of the instance that has to be created.
-     * @param aEndTime The end time of the instance that has to be created.
-     */
-    void GetStartAndEndTimeForNewInstance( TTime& aStartTime, TTime& aEndTime );
 
     /**
      * Gets the id of the currently active view.
@@ -270,10 +255,6 @@ private:  // Data
     HBufC* iCalenFileName;
     HBufC* iCalAlarmEntryFileName;
     TCalLocalUid iCalAlarmLocalUid;
-	
-	// The new instance's start and end time
-    TTime iNewInstStartTime;
-	TTime iNewInstEndTime;
     };
 
 #endif // CALENCONTEXTIMPL_H

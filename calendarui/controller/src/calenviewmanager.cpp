@@ -640,7 +640,7 @@ TBool  CCalenViewManager::HandleCommandL( const TCalenCommand& aCommand )
             RequestActivationL(KUidCalenDayView);
 
 			// dim "today" toolbar item since focus is on today            
-            //iToolbar->Toolbar().SetItemDimmed( ECalenGotoToday, ETrue, ETrue);
+            iToolbar->Toolbar().SetItemDimmed( ECalenGotoToday, ETrue, ETrue);
             }
             break;
 
@@ -1058,7 +1058,6 @@ void CCalenViewManager::HandleNotificationL( TCalenNotification aNotification )
         case ECalenNotifyEntryDeleted:
         case ECalenNotifyInstanceDeleted:    
 			{
-			iAvoidRepopulation = EFalse;
 			HandleEntryDeleteNotificationL();
 			}
 			break;
@@ -1624,14 +1623,15 @@ void CCalenViewManager::HandleSystemTimeChangeNotificationL()
     {
     TRACE_ENTRY_POINT;
     
+    if( iController.IsFasterAppFlagEnabled() )
+        {
         //Set the context whenever system time is changed
         TUid newViewUid = iSetting->DefaultView();
         MCalenContext& context = iController.Services().Context();
         TCalTime focusTime = context.DefaultCalTimeForViewsL();
         context.SetFocusDateAndTimeL( focusTime,
                                       TVwsViewId( KUidCalendar, newViewUid ));
-    if( iController.IsFasterAppFlagEnabled() )
-        {
+
         // reset tha flag iAvoidRepopulation to refresh the view whenever
         // system time is changed
         iAvoidRepopulation = EFalse;

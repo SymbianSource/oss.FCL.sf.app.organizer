@@ -21,7 +21,6 @@
 #include "calennotedatautil.h"
 #include "calenentryutil.h"
 #include "calenunifiededitor.h"
-#include "calenentryutil.h"
 
 // system includes
 #include <CalenDefaultEditorsData.rsg>
@@ -42,8 +41,6 @@
 #include <calencontext.h>
 #include <caleninstanceid.h>
 #include "CleanupResetAndDestroy.h"
-#include <bldvariant.hrh> // for feature definitions
-#include <featmgr.h>
 
 // debug
 #include "calendarui_debug.h"
@@ -98,14 +95,6 @@ CCalenDefaultEditors::~CCalenDefaultEditors()
     TRACE_ENTRY_POINT;
 
     iResourceLoader.Close();
-    // Do not call UnInitializeLib() if InitalizeLib() leaves.
-    if ( iFeatMgrInitialized )
-        {
-        // Frees the TLS. Must be done after FeatureManager is used.
-        FeatureManager::UnInitializeLib();  
-        }  
-    
-
 
     TRACE_EXIT_POINT;
     }
@@ -138,13 +127,6 @@ void CCalenDefaultEditors::ConstructL()
     BaflUtils::NearestLanguageFile(  CCoeEnv::Static()->FsSession(), resource );
     TInt err = iResourceLoader.Open( resource );
     __ASSERT_ALWAYS( err == KErrNone, Panic( EPanicCalenDefaultEditorsResourceLoading ) );
-    
-    // Sets up TLS, must be done before FeatureManager is used.
-    FeatureManager::InitializeLibL();
-    // Used in destructor. 
-    iFeatMgrInitialized = ETrue;
-     
-
 
     TRACE_EXIT_POINT;
     }
@@ -300,19 +282,8 @@ TInt CCalenDefaultEditors::LaunchEditorL(CCalEntry& aEntry, const TAgnEntryUiInP
     // For repeat type, EThisAndAll start Date/Time is first instance Date/Time.
     TAgnEntryUiInParams inParamsCopy( aInParams );
     if( aRepeatType  == CalCommon::EThisAndAll )
-        { 
-        // remove for lunar entries
-        if ( FeatureManager::FeatureSupported( KFeatureIdKorean ) )
-            {
-             if ( !(aEntry.EntryTypeL() == CCalEntry::EAnniv && aEntry.UserInt32L() != ESolar) )
-                {
-                inParamsCopy.iInstanceDate.SetTimeLocalL( aEntry.StartTimeL().TimeLocalL() ); 
-                }
-            }
-        else // normal case
-            {
-            inParamsCopy.iInstanceDate.SetTimeLocalL( aEntry.StartTimeL().TimeLocalL() );
-            }
+        {
+        inParamsCopy.iInstanceDate.SetTimeLocalL( aEntry.StartTimeL().TimeLocalL() ); 
         }
 
     switch ( aEntry.EntryTypeL() )

@@ -1228,7 +1228,7 @@ TBool CCalenMonthContainer::UseWeeksL() const
  
         CleanupReleasePushL( *setting ) ;
 
-        if( setting->WeekFormat() == EMonday && setting->WeekNumberEnable() == EWeekNumberOn )
+        if( setting->WeekFormat() == EMonday && setting->WeekNumberEnable() )
             {
             useWeeks = ETrue;
             }

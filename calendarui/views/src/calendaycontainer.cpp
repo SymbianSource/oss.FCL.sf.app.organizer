@@ -279,13 +279,7 @@ void CCalenDayContainer::CreateListBoxDataL()
     SetContextFromHighlightL();
 
     DestroyInstanceListL();
-    
-    HBufC* emptyText = StringLoader::LoadLC(R_CALEN_QTN_CALE_NO_EVENTS,
-                                                   iEikonEnv);
-    //Whenever listbox is empty, it will set with this empty text.
-    iListBox->View()->SetListEmptyTextL( *emptyText ); 
-    CleanupStack::PopAndDestroy(emptyText);
-    
+
     iListBox->HandleItemAdditionL(); // Is this causing unnecessary draw?
 
     iListBox->View()->SetDisableRedraw(EFalse);
@@ -1860,22 +1854,30 @@ TBool CCalenDayContainer::IsEventHasMapLocationL()
 	MCalenContext& context = iServices.Context();
 	TCalLocalUid instanceId = context.InstanceId().iEntryLocalUid;
 	
-	CCalEntry* entry = iServices.EntryViewL(context.InstanceId().iColId)->FetchL(instanceId);
-	CleanupStack::PushL(entry);
-	CCalGeoValue* geoValue = entry->GeoValueL();
-	CleanupStack::PopAndDestroy(entry);
-	if(geoValue)
-		{
-		delete geoValue;
-		// Event has saved map location, put "Show on Map"
-		TRACE_EXIT_POINT;
-		return 	ETrue;
-		}
+	if(instanceId > 0)
+	    {
+        CCalEntry* entry = iServices.EntryViewL(context.InstanceId().iColId)->FetchL(instanceId);
+        CleanupStack::PushL(entry);
+        CCalGeoValue* geoValue = entry->GeoValueL();
+        CleanupStack::PopAndDestroy(entry);
+        if(geoValue)
+            {
+            delete geoValue;
+            // Event has saved map location, put "Show on Map"
+            TRACE_EXIT_POINT;
+            return 	ETrue;
+            }
+        else
+            {
+            TRACE_EXIT_POINT;
+            return EFalse;
+            }
+	    }
 	else
-		{
-		TRACE_EXIT_POINT;
-		return EFalse;
-		}
+	    {
+	    TRACE_EXIT_POINT;
+	    return EFalse;
+	    }
 	}
 	
 // ----------------------------------------------------------------------------
@@ -1888,16 +1890,19 @@ TBool CCalenDayContainer::IsEventHasNoLocationTextL()
 	MCalenContext& context = iServices.Context();
 	TCalLocalUid instanceId = context.InstanceId().iEntryLocalUid;
 	
-	CCalEntry* entry = iServices.EntryViewL(context.InstanceId().iColId)->FetchL(instanceId);
-	CleanupStack::PushL(entry);
-	TPtrC location = entry->LocationL();
-	
 	TBool ret = EFalse;
-	if(!location.Length())
-		{
-		ret = ETrue;
-		}
-	CleanupStack::PopAndDestroy(entry);
+	if(instanceId > 0)
+	    {
+        CCalEntry* entry = iServices.EntryViewL(context.InstanceId().iColId)->FetchL(instanceId);
+        CleanupStack::PushL(entry);
+        TPtrC location = entry->LocationL();
+        if(!location.Length())
+            {
+            ret = ETrue;
+            }
+        CleanupStack::PopAndDestroy(entry);
+	    }
+	
 	TRACE_EXIT_POINT;
 	return ret;
 	}

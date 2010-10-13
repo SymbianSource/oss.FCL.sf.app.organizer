@@ -24,7 +24,7 @@
 #include <CalenDefaultEditorsData.rsg>
 #include <calendateutils.h>
 #include <calenservices.h>
-#include <featmgr.h>
+
 // user includes
 #include "calenunifiededitorcontrol.h"
 #include "calenunifiededitor.h"
@@ -37,9 +37,6 @@
 #include "calenpriorityfield.h"
 #include "calendbfield.h"
 #include "CalenDescription.h"
-#include "KoreanLunarDateEditor.h"
-#include "KoreanLunarTypeField.h"
-
 
 // debug
 #include "calendarui_debug.h"
@@ -84,18 +81,6 @@ CCalenUnifiedEditorControl::~CCalenUnifiedEditorControl()
     delete iDbField;
     delete iDescription;
     
-    if( iKoreanLunarTypeField )
-        {
-        delete iKoreanLunarTypeField;
-        }
-        
-    // Do not call UnInitializeLib() if InitalizeLib() leaves.
-    if ( iFeatMgrInitialized )
-        {
-        // Frees the TLS. Must be done after FeatureManager is used.
-        FeatureManager::UnInitializeLib();  
-        }  
-    
     TRACE_EXIT_POINT;
     }
 
@@ -115,16 +100,6 @@ void CCalenUnifiedEditorControl::ConstructL(MCalenServices& aServices)
     iPriorityField = CCalenPriorityField::NewL( iUnifiedEditor );
     iDbField = CCalenDbField::NewL( iUnifiedEditor,aServices );
     iDescription = CCalenDescription::NewL( iUnifiedEditor );
-    
-    // Sets up TLS, must be done before FeatureManager is used.
-    FeatureManager::InitializeLibL();
-    // Used in destructor. 
-    iFeatMgrInitialized = ETrue;
-    
-	if( FeatureManager::FeatureSupported( KFeatureIdKorean ) )
-        {
-        iKoreanLunarTypeField =  CKoreanLunarTypeField::NewL( iUnifiedEditor );
-        }   
     
     TRACE_EXIT_POINT;    
     }
@@ -220,7 +195,7 @@ void CCalenUnifiedEditorControl::SetDataToEditorL(TBool onLocaleUpdate)
                 
                 User::LeaveIfError( entryEndTime.MinutesFrom( entryStartTime, duration ) );
                 
-                ReadRruleL(firstRDate,rruleEndTime);                                           
+                ReadRrule(firstRDate,rruleEndTime);                                           
                 
                 if( firstRDate <= entryStartTime)
                     {                    
@@ -367,13 +342,6 @@ void CCalenUnifiedEditorControl::InitDefaultEditorsL()
       }
     CleanupStack::PopAndDestroy( &calendarInfoList );
     
-    
-    if( CCalEntry::EAnniv == iUnifiedEditor.GetEntryType() 
-	     && FeatureManager::FeatureSupported( KFeatureIdKorean ) )
-        {
-        iKoreanLunarTypeField->PreLayoutDynInitL();
-        }
-
     iDescription->InitDescritpionFieldLayoutL();
     
     TRACE_EXIT_POINT;
@@ -388,64 +356,40 @@ void CCalenUnifiedEditorControl::AddDefaultBirthDayEditorL()
     {
     TRACE_ENTRY_POINT;
     // event type, subject, date & year,more details
-
-     TInt prevItem = 0;
-     prevItem=ECalenEditorSubject;
     
-     if(FeatureManager::FeatureSupported( KFeatureIdKorean ))
-    	 {
-    	 iUnifiedEditor.InsertFieldL( R_KOREAN_LUNAR_NOTEVIEW_TYPE_LINE,
-    	 EKoreanLunarTypeSelectSolarLunarLeap, ECalenEditorSubject );
-    	 prevItem=EKoreanLunarTypeSelectSolarLunarLeap;   	 
-    	 }
-    	 
-     TLunarCalendarType type =  iUnifiedEditor.Edited().CalendarType();
-     
-     if( type != ESolar && FeatureManager::FeatureSupported( KFeatureIdKorean ))
-    	{
-    	iUnifiedEditor.InsertFieldL( R_KOREAN_LUNAR_DATE_EDITOR_LINE,
-    								 EKoreanLunarAniversityStart, prevItem );
-    	prevItem=EKoreanLunarAniversityStart;
-    		
-        TTime birthDayYear = iUnifiedEditor.Edited().EventDateTime();
-        SetDateField( ECalenEditorStartDate, birthDayYear, ETrue );
-    	}
+    RPointerArray<CCalCalendarInfo> calendarInfoList; 
+    iUnifiedEditor.GetServices().GetAllCalendarInfoL(calendarInfoList);
+    CleanupClosePushL( calendarInfoList );
+
+    if( calendarInfoList.Count() > 1 )
+        {
+        iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
+            ECalenEditorDBName, ECalenEditorSubject );
+
+        iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
+            ECalenEditorStartDate, ECalenEditorDBName );
+        }
     else
-    	{
-    	 RPointerArray<CCalCalendarInfo> calendarInfoList; 
-    	 iUnifiedEditor.GetServices().GetAllCalendarInfoL(calendarInfoList);
-    	 CleanupClosePushL( calendarInfoList );
+        {
+        iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
+            ECalenEditorStartDate, ECalenEditorSubject );
+        }
 
-    	 if( calendarInfoList.Count() > 1 )
-    	 	{
-    	    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
-    	             					 ECalenEditorDBName, prevItem );
-    	    prevItem = ECalenEditorDBName;
-    	    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
-    	             					 ECalenEditorStartDate, prevItem );
-    	    prevItem=ECalenEditorStartDate;
-    	    }
-    	 else
-    	    {
-    	    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
-    	             					 ECalenEditorStartDate, prevItem );
-    	    prevItem = ECalenEditorStartDate;
-    	    }
+    CleanupStack::PopAndDestroy( &calendarInfoList );
+    
+    // "Start Date" Label should be "Date of Birth" for Birthday
+    iUnifiedEditor.SetControlCaptionL( ECalenEditorStartDate,
+                    R_QTN_CALEN_EDITOR_DATE_OF_BIRTH );
 
-    	 CleanupStack::PopAndDestroy( &calendarInfoList );
-    	     
-    	 // "Start Date" Label should be "Date of Birth" for Birthday
-    	 iUnifiedEditor.SetControlCaptionL( ECalenEditorStartDate,
-    	                     				R_QTN_CALEN_EDITOR_DATE_OF_BIRTH );
-    	 }
-    	
-
-     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_REMINDER_ITEM,
-                    ECalenEditorReminder, prevItem );
-
+    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_REMINDER_ITEM,
+                    ECalenEditorReminder, ECalenEditorStartDate );
 
     iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_PLACE_ITEM,
                     ECalenEditorPlace, ECalenEditorReminder );
+/*    iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_PEOPLE_ITEM,
+                    ECalenEditorPeople, ECalenEditorPlace );
+*/   /* iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_DB_NAME_ITEM,
+                    ECalenEditorDBName, ECalenEditorPlace );*/
 
     // TODO: Uncomment this when enabling attachment support
     // Replace ECalenEditorDBName with ECalenEditorAttachment in the next statement
@@ -620,47 +564,17 @@ void CCalenUnifiedEditorControl::SetDateField( TInt aControlId, const TTime& aTi
     {
     TRACE_ENTRY_POINT;
 
-    TBool useLunarDate = EFalse;
-    if(aControlId == ECalenEditorStartDate 
-	  && FeatureManager::FeatureSupported( KFeatureIdKorean ))
-       	{
-        if( CCalEntry::EAnniv == iUnifiedEditor.GetEntryType() )
-        	{
-        	TLunarCalendarType type =  iUnifiedEditor.Edited().CalendarType();
-        	if( type != ESolar )
-        		{
-        		useLunarDate = ETrue;
-        		}
-        	}
-       	}
-    
-    if(useLunarDate || aControlId == EKoreanLunarAniversityStart 
-	    && FeatureManager::FeatureSupported( KFeatureIdKorean ) )
-    	{
-    	CKoreanLunarDateEditor* dateField = NULL;
-    	    dateField = static_cast<CKoreanLunarDateEditor*>( iUnifiedEditor.ControlOrNull( EKoreanLunarAniversityStart ) );
-    	    if( dateField )
-    	        {
-    	        dateField->SetDate(aTime, EFalse);
-    	        }
-    	    if ( aDoDraw )
-			{
-			dateField->DrawDeferred();
-			}
-    	}
-    else
+    CEikDateEditor* dateField = NULL;
+    dateField = static_cast<CEikDateEditor*>( iUnifiedEditor.ControlOrNull( aControlId ) );
+    if( dateField )
         {
-    	CEikDateEditor* dateField = NULL;
-    	dateField = static_cast<CEikDateEditor*>( iUnifiedEditor.ControlOrNull( aControlId ) );
-    	if( dateField )
-    	    {
-    	    dateField->SetDate( aTime );
-    	    if( aDoDraw )
-    	        {
-    	        dateField->DrawDeferred();
-    	        }
-    	    }
-    	}
+        dateField->SetDate( aTime );
+        if( aDoDraw )
+            {
+            dateField->DrawDeferred();
+            }
+        }
+
     TRACE_EXIT_POINT;
     }
 
@@ -761,7 +675,7 @@ TBool CCalenUnifiedEditorControl::IsAllDayEvent()
 // To Set AllDay field value
 // -----------------------------------------------------------------------------
 //
-void CCalenUnifiedEditorControl::SetAllDayEventL( TBool aActive )
+void CCalenUnifiedEditorControl::SetAllDayEvent( TBool aActive )
     {
     TRACE_ENTRY_POINT;
     
@@ -807,19 +721,6 @@ void CCalenUnifiedEditorControl::HandleControlStateChangeL( TInt aControlId )
             iDbField->HandleControlStateChangeL( aControlId );
             }
             break;
-        case EKoreanLunarTypeSelectSolarLunarLeap:
-        	{
-        	if (FeatureManager::FeatureSupported( KFeatureIdKorean ))
-        		{
-        		iKoreanLunarTypeField->HandleControlStateChangeL( aControlId );
-        		}
-        	}
-            break;
-        case EKoreanLunarAniversityStart:
-        	{
-        	iKoreanLunarDateEditor->HandleControlStateChangeL( aControlId );
-        	}
-        	  
         default:
             break;
         }
@@ -849,7 +750,6 @@ void CCalenUnifiedEditorControl::PrepareForFocusTransitionL( TInt aFocusedId )
             
         case ECalenEditorStartTime:    
         case ECalenEditorStartDate:
-        case EKoreanLunarAniversityStart:
             {
             ReadStartDateTimeFromEditorL( ETrue, aFocusedId );
             UpdateMeetingDurationL();
@@ -904,8 +804,6 @@ void CCalenUnifiedEditorControl::PrepareForFocusTransitionL( TInt aFocusedId )
             break;
         case ECalenEditorDescription:
             break;
-        case EKoreanLunarTypeSelectSolarLunarLeap:
-        	break;
         default:
             break;
         }
@@ -946,44 +844,6 @@ void CCalenUnifiedEditorControl::OnEventTypeChangedL( CCalEntry::TType aNewEvent
     }
 
 // -----------------------------------------------------------------------------
-// CCalenUnifiedEditorControl::OnLunarTypeChangedL
-// Handles lunar type changed
-// -----------------------------------------------------------------------------
-//
-void CCalenUnifiedEditorControl::OnLunarTypeChangedL( TLunarCalendarType aNewEventType )
-    {
-    TRACE_ENTRY_POINT;
-    if( FeatureManager::FeatureSupported( KFeatureIdKorean ) )
-        {
-    	TLunarCalendarType oldType = iUnifiedEditor.Edited().CalendarType();
-    	if(oldType != aNewEventType)
-    		{
-    		iUnifiedEditor.Edited().SetCalendarTypeL(aNewEventType);
-    		if(aNewEventType == ESolar)
-    			{
-    			iUnifiedEditor.DeleteLine(EKoreanLunarAniversityStart, ETrue);
-				iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
-						  					 ECalenEditorStartDate, EKoreanLunarTypeSelectSolarLunarLeap );
-				iUnifiedEditor.SetControlCaptionL( ECalenEditorStartDate,
-												   R_QTN_CALEN_EDITOR_DATE_OF_BIRTH );
-				SetDataToEditorL();
-    			}
-			else
-                {
-                if(oldType == ESolar)
-                    {
-                    iUnifiedEditor.DeleteLine(ECalenEditorStartDate, ETrue);
-                    iUnifiedEditor.InsertFieldL( R_KOREAN_LUNAR_DATE_EDITOR_LINE,
-                    EKoreanLunarAniversityStart, EKoreanLunarTypeSelectSolarLunarLeap );
-                    SetDataToEditorL();
-                    }
-    			}
-    		}
-    	}
-    TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
 // CCalenUnifiedEditorControl::DeletePreviousEntryTypeFieldsL
 // Delete previous entry type fields on selcting 
 // the new entry type
@@ -998,28 +858,15 @@ void CCalenUnifiedEditorControl::DeletePreviousEntryTypeFieldsL()
         case CCalEntry::EEvent:
             {
             // Delete AllDay, StartDate, EndDate, and Place fields
-            iUnifiedEditor.DeleteLine( ECalenEditorAllDayItem, EFalse );
-            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, EFalse );
-            iUnifiedEditor.DeleteLine( ECalenEditorEndDate, EFalse );
-            iUnifiedEditor.DeleteLine( ECalenEditorPlace, EFalse );
+            iUnifiedEditor.DeleteLine( ECalenEditorAllDayItem, ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorEndDate, ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorPlace, ETrue );
             }
             break;
         case CCalEntry::EAnniv:
             {
-          	TLunarCalendarType type =  iUnifiedEditor.Edited().CalendarType();
-			if( type != ESolar && FeatureManager::FeatureSupported( KFeatureIdKorean ) )
-				{
-				iUnifiedEditor.DeleteLine( EKoreanLunarAniversityStart, EFalse );
-                }
-            else
-				{
-				iUnifiedEditor.DeleteLine( ECalenEditorStartDate, EFalse );
-            	}
-			
-			if(FeatureManager::FeatureSupported( KFeatureIdKorean ))
-				{
-				iUnifiedEditor.DeleteLine( EKoreanLunarTypeSelectSolarLunarLeap, EFalse );
-				}
+            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, ETrue );
             }
             break;
         case CCalEntry::EAppt:
@@ -1027,26 +874,26 @@ void CCalenUnifiedEditorControl::DeletePreviousEntryTypeFieldsL()
             if( iUnifiedEditor.Edited().IsAllDayEvent() ) 
                 {
                 // Delete, AllDay event fields from Editor
-                iUnifiedEditor.DeleteLine( ECalenEditorAllDayItem, EFalse );
+                iUnifiedEditor.DeleteLine( ECalenEditorAllDayItem, ETrue );
                 }
             else
                 {
                 // Delete, Non-AllDay event fields from Editor
-                iUnifiedEditor.DeleteLine( ECalenEditorAllDayItem, EFalse );
-                iUnifiedEditor.DeleteLine( ECalenEditorStartTime, EFalse );
-                iUnifiedEditor.DeleteLine( ECalenEditorEndTime, EFalse );
+                iUnifiedEditor.DeleteLine( ECalenEditorAllDayItem, ETrue );
+                iUnifiedEditor.DeleteLine( ECalenEditorStartTime, ETrue );
+                iUnifiedEditor.DeleteLine( ECalenEditorEndTime, ETrue );
                 }
-            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, EFalse );
-            iUnifiedEditor.DeleteLine( ECalenEditorEndDate, EFalse );
-            iUnifiedEditor.DeleteLine( ECalenEditorPlace, EFalse );
+            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorEndDate, ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorPlace, ETrue );
 				
 				
             }
             break;
         case CCalEntry::ETodo:
             {
-            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, EFalse );
-            iUnifiedEditor.DeleteLine( ECalenEditorPriority, EFalse );
+            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, ETrue );
+            iUnifiedEditor.DeleteLine( ECalenEditorPriority, ETrue );
             }
             break;
         default:
@@ -1075,15 +922,15 @@ void CCalenUnifiedEditorControl::DeleteExtendedEntryFields( CCalEntry::TType aPr
                 
         if( alarmTimeCtrl )
             {
-            iUnifiedEditor.DeleteLine( ECalenEditorReminderTime, EFalse );
+            iUnifiedEditor.DeleteLine( ECalenEditorReminderTime, ETrue );
             }
         if( alarmDateCtrl )
             {
-            iUnifiedEditor.DeleteLine( ECalenEditorReminderDate, EFalse );
+            iUnifiedEditor.DeleteLine( ECalenEditorReminderDate, ETrue );
             }
         }
 
-    iUnifiedEditor.DeleteLine( ECalenEditorReminder,EFalse );
+    iUnifiedEditor.DeleteLine( ECalenEditorReminder );
     
     /*CCoeControl* PeopleFieldCtrl = iUnifiedEditor.ControlOrNull( ECalenEditorPeople );
     if( PeopleFieldCtrl )
@@ -1094,18 +941,18 @@ void CCalenUnifiedEditorControl::DeleteExtendedEntryFields( CCalEntry::TType aPr
     CCoeControl* dbNameCtrl = iUnifiedEditor.ControlOrNull( ECalenEditorDBName );
     if( dbNameCtrl )
         {
-        iUnifiedEditor.DeleteLine( ECalenEditorDBName,EFalse );
+        iUnifiedEditor.DeleteLine( ECalenEditorDBName );
         }
     // TODO: Uncomment this when enabling attachment support
-    iUnifiedEditor.DeleteLine( ECalenEditorAttachment,EFalse );
+    iUnifiedEditor.DeleteLine( ECalenEditorAttachment );
     
-    iUnifiedEditor.DeleteLine( ECalenEditorDescription,EFalse );
+    iUnifiedEditor.DeleteLine( ECalenEditorDescription );
     
     // To-Do do not have place field
     CCoeControl* editorPlaceCtrl = iUnifiedEditor.ControlOrNull( ECalenEditorPlace );
     if( editorPlaceCtrl )
         {
-        iUnifiedEditor.DeleteLine( ECalenEditorPlace,EFalse );
+        iUnifiedEditor.DeleteLine( ECalenEditorPlace );
         }
     
     // Anniversary & To-Do entry, do not have Repeat field
@@ -1117,11 +964,11 @@ void CCalenUnifiedEditorControl::DeleteExtendedEntryFields( CCalEntry::TType aPr
         CCoeControl* repeatUntilCtrl = iUnifiedEditor.ControlOrNull( ECalenEditorRepeatUntil );
         if( repeatCtrl )
             {
-            iUnifiedEditor.DeleteLine( ECalenEditorRepeat,EFalse );
+            iUnifiedEditor.DeleteLine( ECalenEditorRepeat );
             }
         if( repeatUntilCtrl )
             {
-            iUnifiedEditor.DeleteLine( ECalenEditorRepeatUntil,EFalse );
+            iUnifiedEditor.DeleteLine( ECalenEditorRepeatUntil );
             }
         }
     }
@@ -1213,16 +1060,6 @@ void CCalenUnifiedEditorControl::ReadDataFromEditorL( TBool aContinueOnError )
             iRepeatField->ReadDataFromFormL( aContinueOnError );
             }
         }
-    
-    if( iUnifiedEditor.GetEntryType() == CCalEntry::EAnniv 
-        &&  FeatureManager::FeatureSupported( KFeatureIdKorean ) )
-    	{
-    	CCoeControl* lunarcaltype = iUnifiedEditor.ControlOrNull( EKoreanLunarTypeSelectSolarLunarLeap );
-    	if( lunarcaltype )
-    		{
-    	    iKoreanLunarTypeField->ReadDataFromFormL( aContinueOnError );
-    	    }
-    	}
     
     iDbField->ReadDataFromFormL( aContinueOnError );
     
@@ -1414,20 +1251,6 @@ TTime CCalenUnifiedEditorControl::GetEndDateTimeL()
 TTime CCalenUnifiedEditorControl::ReadTimeField( TInt aControlId )
     {
     TRACE_ENTRY_POINT;
-
-    if(aControlId == ECalenEditorStartDate && FeatureManager::FeatureSupported( KFeatureIdKorean ))
-		{
-		if( CCalEntry::EAnniv == iUnifiedEditor.GetEntryType() )
-			{
-			TLunarCalendarType type =  iUnifiedEditor.Edited().CalendarType();
-			if( type != ESolar )
-				{
-				aControlId = EKoreanLunarAniversityStart;
-				TRACE_EXIT_POINT;
-				return static_cast<CKoreanLunarDateEditor*>( iUnifiedEditor.Control( aControlId ) )->Date();
-				}
-			}
-		}
     TRACE_EXIT_POINT;
     return static_cast<CEikTTimeEditor*>( iUnifiedEditor.Control( aControlId ) )->GetTTime();
     }
@@ -1440,21 +1263,6 @@ TTime CCalenUnifiedEditorControl::ReadTimeField( TInt aControlId )
 TTime CCalenUnifiedEditorControl::ReadDateField( TInt aControlId )
     {
     TRACE_ENTRY_POINT;
-
-    if(aControlId == ECalenEditorStartDate && FeatureManager::FeatureSupported( KFeatureIdKorean ))
-    	{
-    	if( CCalEntry::EAnniv == iUnifiedEditor.GetEntryType() )
-    		{
-    		TLunarCalendarType type =  iUnifiedEditor.Edited().CalendarType();
-    		if( type != ESolar )
-    			{
-    			aControlId = EKoreanLunarAniversityStart;
-				TRACE_EXIT_POINT;
-    			return static_cast<CKoreanLunarDateEditor*>( iUnifiedEditor.Control( aControlId ) )->Date();
-    			}
-    		}
-    	}
-    	
     TRACE_EXIT_POINT;
     return static_cast<CEikDateEditor*>( iUnifiedEditor.Control( aControlId ) )->Date();
     }
@@ -1547,23 +1355,14 @@ void CCalenUnifiedEditorControl::UpdateLinesOnLocaleChangeL()
             
         case CCalEntry::EAnniv:
             {
-            TLunarCalendarType type =  iUnifiedEditor.Edited().CalendarType();
-            if( type != ESolar && FeatureManager::FeatureSupported( KFeatureIdKorean ))
-				{
-				iUnifiedEditor.DeleteLine( EKoreanLunarAniversityStart, EFalse );
-				iUnifiedEditor.InsertFieldL( R_KOREAN_LUNAR_DATE_EDITOR_LINE,
-								EKoreanLunarAniversityStart, EKoreanLunarTypeSelectSolarLunarLeap );
-                }
-            else
-                {
-            	iUnifiedEditor.DeleteLine( ECalenEditorStartDate, EFalse );
-            	iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
-                ECalenEditorStartDate, ECalenEditorEventType );
-            	// "Start Date" Label should be "Date of Birth" for Birthday
-            	iUnifiedEditor.SetControlCaptionL( ECalenEditorStartDate,
-                            						   R_QTN_CALEN_EDITOR_DATE_OF_BIRTH );
-               	}
-
+            iUnifiedEditor.DeleteLine( ECalenEditorStartDate, EFalse );
+            iUnifiedEditor.InsertFieldL( R_CALEN_EDITOR_START_DATE_ITEM, 
+                    ECalenEditorStartDate, ECalenEditorEventType );
+            
+            // "Start Date" Label should be "Date of Birth" for Birthday
+            iUnifiedEditor.SetControlCaptionL( ECalenEditorStartDate,
+                            R_QTN_CALEN_EDITOR_DATE_OF_BIRTH );
+            
             }
             break;
             
@@ -1660,12 +1459,10 @@ const TDesC& CCalenUnifiedEditorControl::GetCalendarNameForEntryL()
     
     return iDbField->GetCalendarNameForEntryL();
     }
-
 TInt CCalenUnifiedEditorControl::GetCalendarNameForEntryL(const TDesC& aCalendarFileName)
     {
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
-    
     return iDbField->GetCalendarNameForEntryL(aCalendarFileName);
     }
 
@@ -1734,7 +1531,7 @@ void CCalenUnifiedEditorControl::UpdateEndTimeL()
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void CCalenUnifiedEditorControl::ReadRruleL(TTime& firstRdatestartTime, TTime& endTime)
+void CCalenUnifiedEditorControl::ReadRrule(TTime& firstRdatestartTime, TTime& endTime)
     {   
     TRACE_ENTRY_POINT;
     

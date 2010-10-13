@@ -55,7 +55,6 @@ const TUid KUidCalenShowAlarmStopOnlyCba = { 0x00000005 };
 const TUid KCalenThaiImplUid = {0x102823A7};
 const TUid KCalenChineseImplUid = {0x102823A5};
 const TUid KCalenVietnameseImplUid = {0x102823A6};
-const TUid KCalenKoreanImplUid = {0x200100A2};
 
 #endif // CALENUID_H
 

@@ -44,7 +44,7 @@ public:
     * @param aName  Calendar name
     * @param aColor Calendar color
     */
-    void SetCalendarNameAndColorL(const TDesC& aName, const TRgb aColor);
+    void SetCalendarNameAndColor(const TDesC& aName, const TRgb aColor);
     
 private: 
 	

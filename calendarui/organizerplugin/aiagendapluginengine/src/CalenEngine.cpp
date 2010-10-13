@@ -30,13 +30,14 @@
 #include <calsession.h>
 #include <calcalendarinfo.h>
 #include <calcalendariterator.h>
+#include <calenmulticaluids.hrh>
 
 enum TCalenEnginePanic
     {
     EMultipleCommands = 0
     };
 
-
+const TInt KBuffLength = 24;
 
 // -----------------------------------------------------------------------------
 // ?implementation_description
@@ -188,7 +189,19 @@ void CCalenEngine::GetAllCalendarInfoL( )
     for(CCalCalendarInfo* calendarInfo = calIter->FirstL() ;
         calendarInfo != NULL ; calendarInfo = calIter->NextL() )
         {
-        if(calendarInfo->Enabled())
+        TBuf8<KBuffLength> keyBuff;
+        // Mark the meta property as SoftDeleted
+        keyBuff.Zero();
+        keyBuff.AppendNum(EMarkAsDelete);
+        TBool softDelete = EFalse;
+        TPckgC<TBool> pkgSoftDelete( softDelete );
+        TRAPD(err,pkgSoftDelete.Set(calendarInfo->PropertyValueL(keyBuff)));
+        if( KErrNone == err )
+            {
+            softDelete = pkgSoftDelete();
+            }
+        
+        if(!softDelete && calendarInfo->Enabled() )            
             {
             TCalInfo calInfo;
             calInfo.iFileName = calendarInfo->FileNameL();

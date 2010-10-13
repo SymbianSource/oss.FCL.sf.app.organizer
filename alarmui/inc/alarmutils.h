@@ -481,6 +481,19 @@ public:
     */
     TBool IsCalendarAlarmViewer();
 
+	    
+    /**
+    * Stores details of current calendar alarm. i.e LUID, file name and original expiry time
+    */
+    void StoreCurrentCalendarAlarmData();
+
+    /**
+    * Comapres details of current calendar alarm with previous calendar alarm.(LUID, file name and original expiry time)
+	* @return ETrue if alarm is duplicate of previous alarm ,EFalse otherwise.
+    */	
+    
+    TBool CheckForDuplicateAlarm();
+
 private:
 
     /**
@@ -788,6 +801,22 @@ enum TCalViewCreateStatus
    * Calendar Alarm Viewer flag
    */
    TBool iCalendarAlarmViewer; 
+   
+   /**
+   * Stores local UID of expired calendar event
+   */
+   TCalLocalUid iPrevLocalUid;
+   
+   /**
+   * Stores filename of expired calendar event
+   */
+   TBuf<256> iPrevCalFileName;
+
+   /**
+   * Stores org expiry time of expired calendar alarm
+   */
+   TTime iPrevAlarmOriginalExpiryTime;
+
     };
 
 #endif  // ALARMUTILS_H

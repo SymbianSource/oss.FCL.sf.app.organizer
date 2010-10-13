@@ -422,7 +422,4 @@ EXPORTS
 	_ZTV16CAgnCalendarInfo @ 421 NONAME
 	_ZTV24CAgnCalendarInfoProperty @ 422 NONAME
 	_ZNK24CAgnCalendarInfoProperty5StateEv @ 423 NONAME
-	_ZN9CAgnEntry14SetUserDataIntEm @ 424 NONAME
-	_ZNK9CAgnEntry11UserDataIntEv @ 425 NONAME
-	_ZN9CAgnEntry19ClearMRSpecificDataEv @ 426 NONAME
 

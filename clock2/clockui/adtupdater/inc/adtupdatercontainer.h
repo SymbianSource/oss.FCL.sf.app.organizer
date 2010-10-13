@@ -345,12 +345,6 @@ class CAdtUpdaterContainer : public CCoeControl, public MStartupUIPhaseObserver
           * @return TBool
           */
          TBool PredictiveTimeEnabled();
-         
-         /**
-          * @brief  Checks if automatic time update is ON
-          * @return TBool ETrue : if automatic time update is ON
-          */
-         TBool isAutomaticTimeUpdateON();
   
 	private:       //Data members
 		
@@ -445,6 +439,7 @@ class CAdtUpdaterContainer : public CCoeControl, public MStartupUIPhaseObserver
 		 * @brief ETrue if the 90sec KTimeout timer is started for Nitz, EFalse if 5 sec KCDTQueryTimer timer is started.
 		 */
 		TBool iNitzTimerActive;
+		
 		
 	};	
 

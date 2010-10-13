@@ -444,10 +444,10 @@ void CClockAppUi::CheckUpdatesComplete( TInt aErrorCode, TInt aAvailableUpdates 
 // rest of the details commented in the header
 // ---------------------------------------------------------
 //
-void CClockAppUi::UpdateComplete( TInt /*aErrorCode*/, CIAUpdateResult* aResult )
+void CClockAppUi::UpdateComplete( TInt aErrorCode, CIAUpdateResult* aResult )
     {
     __PRINTS( "CClockAppUi::UpdateComplete - Entry" );
-    //Comment out the aErrorCode when Prints are enabled
+    
     __PRINT( "aErrorCode: %d", aErrorCode );
 
     delete aResult; // Ownership was transferred, so this must be deleted by the client

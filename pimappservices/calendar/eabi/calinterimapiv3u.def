@@ -408,7 +408,4 @@ EXPORTS
 	_ZN16CCalCalendarInfo15RemovePropertyLERK6TDesC8 @ 407 NONAME
 	_ZNK16CCalCalendarInfo13PropertyKeysLEv @ 408 NONAME
 	_ZNK16CCalCalendarInfo14PropertyValueLERK6TDesC8 @ 409 NONAME
-	_ZN9CCalEntry10UserInt32LEv @ 410 NONAME
-	_ZN9CCalEntry13SetUserInt32LEm @ 411 NONAME
-	_ZN9CCalEntry20ClearMRSpecificDataLEv @ 412 NONAME
 

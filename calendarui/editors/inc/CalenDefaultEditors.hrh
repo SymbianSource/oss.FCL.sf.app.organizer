@@ -34,11 +34,11 @@
 #define KToDoMaxMinute                  59
 #define KToDoMaxHour                    23
 
-enum TCalenEditorMenuPaneCommands
+enum //
     {
     // THIS RANGE SHOULD NOT OVERLAP WITH CALENDAR RANGE
     //always hidden, allows easy adding of items to beginning of menu
-    ECalenCommandFirstMenuItem = 5000, 
+    ECalenCmdFirstMenuItem = 5000, 
 
     /* Description data commands */
     ECalenCmdAddDescription,
@@ -82,8 +82,7 @@ enum //TTodoPopupMenuCommands
 
 enum //TCalenNoteCustomControls
     {
-    ECalenCtDescriptionField = KAknCtLastControlId + 1,
-    ECalenCtLunarDateEditor
+    ECalenCtDescriptionField = KAknCtLastControlId + 1
     };
 
 enum //TCalenNoteFormConstant
@@ -97,6 +96,28 @@ enum //TCalenNoteFormConstant
     };
     
     /* Constants */
+
+enum // TCalenMinTime
+    {
+    ECalenMinDay = 0,
+    ECalenMinMonth = 0,
+    ECalenMinYear = 1900,
+    ECalenMinSecond = 0,
+    ECalenMinMinute = 0,
+    ECalenMinHour = 0,
+    ECalenMinAnnivYear = 1900
+    };
+
+enum // TCalenMaxTime
+    {
+    ECalenMaxDay = 29,
+    ECalenMaxMonth = 11,
+    ECalenMaxYear = 2100,
+    ECalenMaxSecond = 59,
+    ECalenMaxMinute = 59,
+    ECalenMaxHour = 23,
+    ECalenMaxAnnivYear = 2100 // FIXME, could be removed?
+    };
 
 /**
  * Date representing forever value in Repeat until field.
@@ -135,9 +156,7 @@ enum //TCalenUnifiedEditorItem
     ECalenEditorPeople,
     ECalenEditorDBName,
     ECalenEditorAttachment,
-    ECalenEditorDescription,
-    EKoreanLunarAniversityStart,
-    EKoreanLunarTypeSelectSolarLunarLeap
+    ECalenEditorDescription
     };
 
 

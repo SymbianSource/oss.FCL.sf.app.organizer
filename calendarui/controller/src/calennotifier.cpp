@@ -45,10 +45,12 @@
 #include "calenstatemachine.h"
 #include "calencontroller.h"
 
+
 const TInt KHashLength = 64;
 const TInt KBuffLength = 24;
 
 _LIT( KCalendarDatabaseFilePath, "c:calendar" );
+
 // ----------------------------------------------------------------------------
 // CCalenNotifier::CCalenNotifier
 // C++ default constructor.
@@ -80,7 +82,10 @@ CCalenNotifier::~CCalenNotifier()
         }
     
     iHandlers.Close();
-  
+    
+    iBroadcastQueue.Close();
+    
+    
     if( iFilnameDeleted )
         {
         delete iFilnameDeleted;
@@ -123,13 +128,10 @@ CCalenNotifier::~CCalenNotifier()
     if( iGlobalData )
         {
         // stop listening for calendar file change notifications
-        TRAP_IGNORE(iGlobalData->CalSessionL().StopFileChangeNotification());
+        iGlobalData->CalSessionL().StopFileChangeNotification();
         iGlobalData->Release();
         }
-    
-    iBroadcastQueue.Close();
-
-    TRACE_EXIT_POINT;
+	TRACE_EXIT_POINT;
 	}
 
 // ----------------------------------------------------------------------------
@@ -803,7 +805,6 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
 
                 CleanupStack::PopAndDestroy(calendarInfo);
 
-                //remove calendar except default calendar
                 if (err == KErrNone && markAsdelete && aCalendarInfoChangeEntries[index]->FileNameL().CompareF(
                                KCalendarDatabaseFilePath))
                     {
@@ -814,7 +815,7 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
                                        
                     delete iFilnameDeleted;
                     iFilnameDeleted = NULL;
-                    }
+                    }				
                 else
                     {
                     BroadcastNotification(ECalenNotifyCalendarInfoUpdated);

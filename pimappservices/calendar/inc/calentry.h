@@ -274,7 +274,6 @@ public:
 	IMPORT_C CCalUser* OrganizerL() const;
 	IMPORT_C void SetPhoneOwnerL(const CCalUser* aOwner);
 	IMPORT_C CCalUser* PhoneOwnerL() const;
-	IMPORT_C void CCalEntry::ClearMRSpecificDataL();
 
 	// Attachments
 	IMPORT_C void AddAttachmentL(CCalAttachment& aAttachment);
@@ -319,9 +318,6 @@ public:
 
 	IMPORT_C TCalTime FindRptUntilTimeL(TInt aCount);
     
-    IMPORT_C void SetUserInt32L( TUint32 aUserInt );
-    IMPORT_C TUint32 UserInt32L();
-
 public:
 	// Internal APIs
 	static CCalEntry* NewL(CCalEntryImpl* aImpl);

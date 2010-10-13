@@ -151,6 +151,45 @@ TBool CCalenCmdLineLauncher::ProcessCommandParametersL(
     // If aTail is set, other app starts Calendar
     if( aTail.Length() )
         {
+        
+
+        // Interpret 8bit data as 16bit unicode data
+        //lint -e{826} Disable the lint warning of the pointer sizes being different
+        const TText* buf = reinterpret_cast<const TText*> (aTail.Ptr());
+        TPtrC ptr(buf, aTail.Length() / (TInt) sizeof(TText));
+
+        // create cmd line parser
+        CCalenCmdLineParser* parser = CCalenCmdLineParser::NewL();
+        CleanupStack::PushL(parser);
+        // parse parameters
+        parser->ParseCommandLineL(ptr);
+        iCmdParameters = parser->CommandLineParameters();
+        CleanupStack::PopAndDestroy(); // parser
+        
+        if( iCmdParameters.iCommandType == CCalenCmdLineParser::EStartTypeUidAlarmViewer 
+                || iCmdParameters.iCommandType == CCalenCmdLineParser::EStartTypeUidAlarmViewerNoSnooze)
+                
+           {  
+            // disable the MSK feature when the same events editor is opened whose alarm is expiring.
+           if(iController.IsEditorActive())
+                {
+                TCalLocalUid uid( iCmdParameters.iLocalUid );
+                TCalCollectionId colId = iGlobalData->CalSessionL( iCmdParameters.iCalenFileName ).CollectionIdL();
+      
+                // get the context
+                MCalenContext& context = iController.Services().Context();
+                TCalLocalUid entryUid = context.InstanceId().iEntryLocalUid;
+                TCalCollectionId collectionId  = context.InstanceId().iColId;
+       
+                if(entryUid == uid && colId == collectionId)
+                    {
+                    return ETrue;
+                    }
+                }
+           }
+        
+        
+        
         // If we are displaying a dialog, then Calendar is obviously already open
         // If we have been launched with cmd line parameters, we need to close the
         // open dialog and deal with the command line.  An example of this would be that
@@ -170,19 +209,6 @@ TBool CCalenCmdLineLauncher::ProcessCommandParametersL(
             //close all open dialogs in asynchronous way
             iShutter->ShutDialogsL();
             }
-
-        // Interpret 8bit data as 16bit unicode data
-        //lint -e{826} Disable the lint warning of the pointer sizes being different
-        const TText* buf = reinterpret_cast<const TText*> (aTail.Ptr());
-        TPtrC ptr(buf, aTail.Length() / (TInt) sizeof(TText));
-
-        // create cmd line parser
-        CCalenCmdLineParser* parser = CCalenCmdLineParser::NewL();
-        CleanupStack::PushL(parser);
-        // parse parameters
-        parser->ParseCommandLineL(ptr);
-        iCmdParameters = parser->CommandLineParameters();
-        CleanupStack::PopAndDestroy(); // parser
         }
 
     // If we are launched to a specific view, find and activate it.

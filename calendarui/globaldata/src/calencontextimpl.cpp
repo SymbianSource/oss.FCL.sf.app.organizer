@@ -309,36 +309,6 @@ TCalenInstanceId CCalenContextImpl::InstanceId() const
     }
 
 // -----------------------------------------------------------------------------
-// CCalenContextImpl::SetStartAndEndTimeForNewInstance
-// Sets the start and end time of the instance that has to be created.
-// (other items were commented in a header).
-// -----------------------------------------------------------------------------
-//
-void CCalenContextImpl::SetStartAndEndTimeForNewInstance( const TTime& aStartTime,
-                                                      const TTime& aEndTime )
-    {
-	TRACE_ENTRY_POINT;
-    iNewInstStartTime = aStartTime;
-    iNewInstEndTime = aEndTime;
-	TRACE_EXIT_POINT;
-    }
- 
-// -----------------------------------------------------------------------------
-// CCalenContextImpl::GetStartAndEndTimeForNewInstance
-// Gets the start and end time of the instance that has to be created.
-// (other items were commented in a header).
-// -----------------------------------------------------------------------------
-//
-void CCalenContextImpl::GetStartAndEndTimeForNewInstance( TTime& aStartTime,
-                                                        TTime& aEndTime )
-    {
-	TRACE_ENTRY_POINT;
-    aStartTime = iNewInstStartTime;
-    aEndTime = iNewInstEndTime;
-	TRACE_EXIT_POINT;
-    }
-
-// -----------------------------------------------------------------------------
 // CCalenContextImpl::ViewId
 // Returns the view id
 // (other items were commented in a header).
@@ -505,14 +475,7 @@ TDesC& CCalenContextImpl::GetCalendarFileNameL() const
     {
     TRACE_ENTRY_POINT
     TRACE_EXIT_POINT
-    if(iCalenFileName)
-        {
-        return *iCalenFileName;
-        }
-    else
-        {
-        return const_cast<TDesC&> (KNullDesC());
-        }
+    return *iCalenFileName;
     }
 
 // -----------------------------------------------------------------------------

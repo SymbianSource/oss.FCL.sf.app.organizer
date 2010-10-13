@@ -165,7 +165,6 @@ public:
 	IMPORT_C CAgnAttendee* Organizer() const;
 	IMPORT_C void SetPhoneOwnerL(CAgnAttendee* aOwner); // takes ownership
 	IMPORT_C CAgnAttendee* PhoneOwner() const;
-	IMPORT_C void ClearMRSpecificData();
 	void CreateAttendeeListL();
 	
 	// attachments
@@ -204,10 +203,7 @@ public:
 	// User integer.
 	IMPORT_C void SetUserInt( TUint32 aUserInt );
 	IMPORT_C TUint32 UserInt() const;
-	
-    IMPORT_C void SetUserDataInt( TUint32 aUserInt );
-    IMPORT_C TUint32 UserDataInt() const;
-
+		
 private:
 	// following enums for internal use only	
 	enum TFlags
@@ -255,8 +251,7 @@ private:
 	TUint8							iReplicationStatus;
 	TUint16							iFlags;
 	TReal							iLatitude;
-	TReal						    iLongitude;
-	TUint32                         iUserDataInt;   
+	TReal							iLongitude;
 	};
 
 #endif

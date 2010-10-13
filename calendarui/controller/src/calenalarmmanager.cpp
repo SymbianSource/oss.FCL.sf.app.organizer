@@ -980,42 +980,39 @@ TBool CCalenAlarmManager::ClearOneMissedAlarmL( TInt aEntryLocalUid, TCalCollect
 void CCalenAlarmManager::UpdateMissedAlarmsListL()
     {
     TRACE_ENTRY_POINT;
-       
+    
+    RPointerArray<CMissedAlarm> missedAlarmStorelist;      
+    CleanupResetAndDestroyPushL( missedAlarmStorelist );   
+    iMissedAlarmStore->GetL(missedAlarmStorelist); 
+    
     TUint32 newCount;
     // update the missed alarms count
     iMissedAlarmStore->CountL(newCount);
-	
-    // Need atleast one missed alarm to perform this
-    if(newCount>0)
+    
+    TCalenInstanceId instanceId;
+    TInt entryLocalUid;
+    TTime instanceTime;
+    
+    //Retreiving the latest missed alarm array entry
+    CMissedAlarm* missedAlarm = missedAlarmStorelist[newCount-1];             
+    entryLocalUid = missedAlarm->iLuid;
+    instanceTime = missedAlarm->iInstanceTime;
+    
+    CCalSession &session = iController.Services().SessionL( missedAlarm->iCalFileName );
+    // pack instance ids of the missed alarm instances
+    TRAP_IGNORE(instanceId = TCalenInstanceId::CreateL( entryLocalUid,
+                                                    instanceTime, 0 ));
+    instanceId.iColId = session.CollectionIdL();
+    iMissedAlarmList.Append(instanceId);
+    CleanupStack::PopAndDestroy(); // missedAlarmStorelist
+    
+    // if iMissedAlarmList count is greater than maximum missed alarms(10)
+    // remove the old missed alarm(index = 0) from the list
+    if(iMissedAlarmList.Count()>KMaxMissedAlarms)
         {
-        RPointerArray<CMissedAlarm> missedAlarmStorelist;      
-    	CleanupResetAndDestroyPushL( missedAlarmStorelist );   
-        TCalenInstanceId instanceId;
-        TInt entryLocalUid;
-        TTime instanceTime;
-
-		iMissedAlarmStore->GetL(missedAlarmStorelist); 
-        
-        //Retreiving the latest missed alarm array entry
-        CMissedAlarm* missedAlarm = missedAlarmStorelist[newCount-1];             
-        entryLocalUid = missedAlarm->iLuid;
-        instanceTime = missedAlarm->iInstanceTime;
-        
-        CCalSession &session = iController.Services().SessionL( missedAlarm->iCalFileName );
-        // pack instance ids of the missed alarm instances
-        TRAP_IGNORE(instanceId = TCalenInstanceId::CreateL( entryLocalUid,
-                                                        instanceTime, 0 ));
-        instanceId.iColId = session.CollectionIdL();
-        iMissedAlarmList.Append(instanceId);
-        CleanupStack::PopAndDestroy(); // missedAlarmStorelist
-        
-        // if iMissedAlarmList count is greater than maximum missed alarms(10)
-        // remove the old missed alarm(index = 0) from the list
-        if(iMissedAlarmList.Count()>KMaxMissedAlarms)
-            {
-            iMissedAlarmList.Remove(0);
-            }
+        iMissedAlarmList.Remove(0);
         }
+    
     TRACE_EXIT_POINT;
     }
 
@@ -1123,29 +1120,27 @@ void CCalenAlarmManager::GetAlarmDateTimeL( const CCalEntry& aEntry,
     
     // FIXME: leaving!
     CCalAlarm* alarm = aEntry.AlarmL();
-    
     if(alarm)
         {
-        CleanupStack::PushL( alarm );
+	    CleanupStack::PushL( alarm );
 
-        switch( aEntry.EntryTypeL() )
-            {
-            case CCalEntry::ETodo:
-                aAlarmDateTime = aEntry.EndTimeL().TimeLocalL();
-                break;
+	    switch( aEntry.EntryTypeL() )
+	        {
+	        case CCalEntry::ETodo:
+	            aAlarmDateTime = aEntry.EndTimeL().TimeLocalL();
+	            break;
 
-            case CCalEntry::EAppt:
-            case CCalEntry::EEvent:
-            case CCalEntry::EAnniv:
-            default:
-                aAlarmDateTime = aEntry.StartTimeL().TimeLocalL();
-                break;
-            }
-        aAlarmDateTime -= alarm->TimeOffset();
-
-        CleanupStack::PopAndDestroy( alarm );
+	        case CCalEntry::EAppt:
+	        case CCalEntry::EEvent:
+	        case CCalEntry::EAnniv:
+	        default:
+	            aAlarmDateTime = aEntry.StartTimeL().TimeLocalL();
+	            break;
+	        }
+	    aAlarmDateTime -= alarm->TimeOffset();
+    
+	    CleanupStack::PopAndDestroy( alarm );
         }
-   
     TRACE_EXIT_POINT;
     }
 

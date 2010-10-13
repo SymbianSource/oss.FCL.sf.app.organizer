@@ -1206,7 +1206,6 @@ TInt CNotepadEditorDialog::DoSearchL(CFindItemEngine::TFindItemSearchCase aCase)
     {
     CFindItemDialog* dialog = CFindItemDialog::NewL( iEditor->Text()->Read( 0 ), aCase );
     dialog->EnableSingleClick( ETrue );
-    dialog->SetCallSubMenuVisibility( EFalse ); // Click-To-Call
     TInt ret = dialog->ExecuteLD();
     return ret;
     }

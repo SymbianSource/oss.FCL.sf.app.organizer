@@ -28,10 +28,6 @@
 const TInt KOrdinalPosition( 0 );
 const TInt KOrdinalPriority( 0 );
 
-// Uid of phoneapp
-const TUid KPhoneUid  = {0x100058B3};
-
-
 // Literals
 
 // ---------------------------------------------------------
@@ -167,30 +163,6 @@ TBool CAdtUpdaterAppUi::IsAppInBackground()
     return EFalse;
     }
 
-// ---------------------------------------------------------
-// CAdtUpdaterAppUi::IsHighPriorityWindowActive
-// rest of the details are commented in the header
-// ---------------------------------------------------------
-//
-TBool CAdtUpdaterAppUi::IsHighPriorityWindowActive()
-    {
-    __PRINTS( "CCAdtUpdaterAppUi::IsHighPriorityWindowActive - Entry" );
-    // Gets the window group id of the app coming in foreground
-    TInt activeWgId = iCoeEnv->WsSession().GetFocusWindowGroup();
-    TApaTaskList taskList(iCoeEnv->WsSession());
-    
-    //In future, if any other high priority window will be there, then 
-    //add that particular UID in the below check.
-    //Note: Key Lock and alarm are not handled here as these windows already 
-    //have high priority than CDT. In callui window group, the window - when
-    //call is answered, has a low priority, that's why callui is handled here.
-    __PRINTS( "CCAdtUpdaterAppUi::IsHighPriorityWindowActive - Exit" );
-    if(activeWgId == taskList.FindApp(KPhoneUid).WgId())
-        {
-        return ETrue;
-        }
-    return EFalse;
-    }
 // ---------------------------------------------------------
 // CAdtUpdaterAppUi::ToggleAppViewL
 // rest of the details are commented in the header

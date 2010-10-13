@@ -31,9 +31,6 @@
 #include "calenattachmentmodel.h"
 #include "CleanupResetAndDestroy.h"
 #include "CalendarPrivateCRKeys.h"
-#include "KoreanLunarDateEditor.h"
-#include <featmgr.h>
-#include "CalenUid.h"
 
 // system includes
 #include <coemain.h>
@@ -70,7 +67,6 @@
 #include <caleninstanceid.h>            // TCalenInstanceId
 #include <calenservices.h>
 #include <calcalendarinfo.h>
-#include <vwsdef.h>
 
 // debug
 #include "calendarui_debug.h"
@@ -175,14 +171,6 @@ CCalenUnifiedEditor::~CCalenUnifiedEditor()
     
     iAsyncCallback->Cancel();
     delete iAsyncCallback;
-    
-    // Do not call UnInitializeLib() if InitalizeLib() leaves.
-    if ( iFeatMgrInitialized )
-        {
-        // Frees the TLS. Must be done after FeatureManager is used.
-        FeatureManager::UnInitializeLib();  
-        }  
-
     
     TRACE_EXIT_POINT;
     }
@@ -312,11 +300,6 @@ void CCalenUnifiedEditor::ConstructL()
     iIdle->Start( TCallBack( KeyCallBack, this) );
     iCoeEnv->AddFepObserverL( *this );
     
-    // Sets up TLS, must be done before FeatureManager is used.
-    FeatureManager::InitializeLibL();
-    // Used in destructor. 
-    iFeatMgrInitialized = ETrue;
-    
     TRACE_EXIT_POINT;
     }
 
@@ -398,27 +381,22 @@ void CCalenUnifiedEditor::HandleNotification( TCalenNotification aNotification )
             break;
         case ECalenNotifyCalendarFileDeleted:
             {
-            TRAP_IGNORE(HandleCalendarDeleteL());
-            }
-            break;
-        default:
-            break;
-        }
-    TRACE_EXIT_POINT;
-    }
-	
-	
-void CCalenUnifiedEditor::HandleCalendarDeleteL()
-    {
             TPtrC fileNamePtr = iServices->Context().GetCalendarFileNameL();
-    TInt index = iUnifiedEditorControl->GetCalendarNameForEntryL(fileNamePtr);
+            TInt index = KErrNotFound;
+			TRAP_IGNORE(index = iUnifiedEditorControl->GetCalendarNameForEntryL(fileNamePtr));
             if(index == KErrNotFound)
                 {
                 DisplayErrorMsgL( CCalenEditorDataHandler::EFormErrDbConflictEntryDeleted );
                 iEntryUiOutParams.iAction = EMeetingDeleted;
                 TryExitL( KCalenButtonIdCloseForm );
+                }
+            }
+            break;
+        default:
+            break;
         }
     
+    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
@@ -569,7 +547,7 @@ TBool CCalenUnifiedEditor::OkToExitL( TInt aButtonId )
                     SetAllDayFieldL( ETrue );
                     active = ETrue;
                     }
-                iUnifiedEditorControl->SetAllDayEventL( active );
+                iUnifiedEditorControl->SetAllDayEvent( active );
                 
                 }
             break;
@@ -730,31 +708,6 @@ TKeyResponse CCalenUnifiedEditor::OfferKeyEventL( const TKeyEvent& aKeyEvent,
                         {
                         iServices->IssueCommandL( ECalenAddAttachment );
                         }
-                    }
-                else if ( ctrlid == ECalenEditorAllDayItem )
-                    {
-                    // Tap on AllDay field, Switch the status of AllDay field  
-                    iUnifiedEditorControl->SetAllDayEventL(
-                            !( iUnifiedEditorControl->IsAllDayEvent() ) );
-                    }
-                else if ( ctrlid == ECalenEditorReminder )
-                    {
-                    TBool active;
-                    if( iUnifiedEditorControl->IsAlarmActiveInForm() )
-                        { 
-                        SetAlarmFieldOnOffL( EFalse );           
-                        active = EFalse;
-                        } 
-                    else
-                        {
-                        SetAlarmFieldOnOffL( ETrue );                
-                        active = ETrue;
-                        }
-                    iUnifiedEditorControl->CheckAlarmActive( active );
-                    }
-                else
-                    {
-                        keyResponse = CAknForm::OfferKeyEventL( aKeyEvent, aType );    
                     }
                 break;
             case EKeyEscape:
@@ -1038,7 +991,7 @@ void CCalenUnifiedEditor::PreLayoutDynInitL()
     iUnifiedEditorControl->MakeUnifiedEditorL();
     // Hides Entry type and Calendar Field for exceptional entry/single
     // instance of recurrent entry.
-    HideFieldsForEditSingleInstanceL();
+    HideFieldsForEditSingleInstance();
 
     TRACE_EXIT_POINT;         
     }
@@ -1258,7 +1211,7 @@ void CCalenUnifiedEditor::HandleDialogPageEventL( TInt aEventID )
         else if ( focusControl == ECalenEditorAllDayItem )
             {
             // Tap on AllDay field, Switch the status of AllDay field  
-            iUnifiedEditorControl->SetAllDayEventL(
+            iUnifiedEditorControl->SetAllDayEvent(
                     !( iUnifiedEditorControl->IsAllDayEvent() ) );
             }
         else if ( focusControl == ECalenEditorReminder )
@@ -1522,15 +1475,7 @@ void CCalenUnifiedEditor::CloseFormWithoutActionsL()
 SEikControlInfo CCalenUnifiedEditor::CreateCustomControlL( TInt aControlType )
     {
     TRACE_ENTRY_POINT;
-    if( aControlType == ECalenCtLunarDateEditor  && FeatureManager::FeatureSupported( KFeatureIdKorean ) ) 
-            {
-            SEikControlInfo controlInfo;
-            controlInfo.iControl =  new (ELeave) CKoreanLunarDateEditor(iServices);
-            controlInfo.iControl->SetParent( this );
-            controlInfo.iFlags = 0;
-            controlInfo.iTrailerTextId = 0;
-            return controlInfo;
-            }
+
     __ASSERT_ALWAYS( aControlType==ECalenCtDescriptionField, User::Invariant() );
 
     TRACE_EXIT_POINT;
@@ -1551,11 +1496,6 @@ MEikDialogPageObserver::TFormControlTypes
         {
         TRACE_EXIT_POINT;
         return MEikDialogPageObserver::EEdwinDerived;
-        }
-    if( aControlType == ECalenCtLunarDateEditor  && FeatureManager::FeatureSupported( KFeatureIdKorean ) )
-        {
-        TRACE_EXIT_POINT;
-        return MEikDialogPageObserver::EMfneDerived;
         }
 
     TRACE_EXIT_POINT;
@@ -2115,17 +2055,11 @@ TBool CCalenUnifiedEditor::TryToSaveNoteL()
 
     if ( error == CCalenEditorDataHandler::EFormErrNone ) 
         {
-		ModifyDbFieldL();//default calendar code
+		ModifyDbField();//default calendar code
         EditorDataHandler().WriteChangesToEntryL( iRepeatType );
         
         TCalTime newInstanceStartDate, newInstanceEndDate;
         CalculateNewInstanceStartAndEndDateL( newInstanceStartDate, newInstanceEndDate );
-        if(EditorDataHandler().IsRepeatRuleEdited() && !IsCreatingNewEntry())
-        	{
-            MCalenContext& context = iServices->Context();
-            TCalenInstanceId instanceId = context.InstanceId();
-			context.SetFocusDateAndTimeL(newInstanceStartDate,TVwsViewId( KUidCalendar, KUidCalenEventView));
-            }
 
         TInt saveErr( 0 );
         TBool dbChange = iEditorDataHandler->IsCalendarEditedL();
@@ -2228,16 +2162,12 @@ TInt CCalenUnifiedEditor::TryToSaveEntryWithEntryChangeL( TBool aForcedExit)
         {
         if( entry->EntryTypeL() == CCalEntry::EAnniv )
             {
-			if( !( FeatureManager::FeatureSupported( KFeatureIdKorean ) 
-					&& entry->UserInt32L() != ESolar ) )
-				{
-				// Set yearly rule to Anniversary entry, to create Annaiversary instance yearly 
-				TCalRRule rrule( TCalRRule::EYearly );
-				TCalTime startDate;
-				rrule.SetDtStart( newInstanceStartDate );
-				rrule.SetInterval( 1 ); // once a year
-				entry->SetRRuleL( rrule );
-				}
+            // Set yearly rule to Anniversary entry, to create Annaiversary instance yearly 
+            TCalRRule rrule( TCalRRule::EYearly );
+            TCalTime startDate;
+            rrule.SetDtStart( newInstanceStartDate );
+            rrule.SetInterval( 1 ); // once a year
+            entry->SetRRuleL( rrule );
             }
 		}
     
@@ -2321,7 +2251,7 @@ void CCalenUnifiedEditor::TryToSaveNoteOnForcedExitL()
             {
             EditorDataHandler().ForceValidValuesL( iHasChosenRepeatType? iRepeatType 
                                                                                   : CalCommon::EThisAndAll );
-            ModifyDbFieldL();//Default Calendar code
+            ModifyDbField();//Default Calendar code
             EditorDataHandler().WriteChangesToEntryL( iHasChosenRepeatType? iRepeatType
                                                                                   : CalCommon::EThisAndAll );
 
@@ -3224,7 +3154,7 @@ void CCalenUnifiedEditor::VerifyCollectionIdL(const TCalCollectionId aColId)
 // modifies the DB filed in cenrep if user has edited it.
 // -----------------------------------------------------------------------------
 //
-void CCalenUnifiedEditor::ModifyDbFieldL()
+void CCalenUnifiedEditor::ModifyDbField()
     {
     if(IsCreatingNewEntry())
         {                
@@ -3246,7 +3176,7 @@ void CCalenUnifiedEditor::ModifyDbFieldL()
 // instance of recurrent entry.
 // -----------------------------------------------------------------------------
 //
-void CCalenUnifiedEditor::HideFieldsForEditSingleInstanceL()
+void CCalenUnifiedEditor::HideFieldsForEditSingleInstance()
     {
     TRACE_ENTRY_POINT;
     

@@ -59,7 +59,7 @@ const TInt KZero( 0 );
 const TInt KFirstBootDone( 1 );
 const TInt KTimeFormatLength( 16 );				 // "20070000:090000."
 const TInt KMaxMobileCountryCode( 4 );
-const TInt KCDTQueryTimer( 2000000 );           // 2 seconds
+const TInt KCDTQueryTimer( 5000000 );           // 5 seconds
 const TInt KAppBackgroundInterval( 2000000 );   // 2 seconds
 
 // Literals
@@ -178,7 +178,7 @@ void CAdtUpdaterContainer::ConstructL( const TRect& aRect )
 	
 	iNitzTimerActive = EFalse;
 	
-	ActivateL();
+    ActivateL();
   
     __PRINTS( "CAdtUpdaterContainer::ConstructL - Exit" );
     }     
@@ -407,19 +407,13 @@ TInt CAdtUpdaterContainer::CallBackL( TAny* aPtr )
         }
 	else//CDT Query timer is active. 
 	    {
-        if(selfObject->iAdtUpdaterAppUi->IsHighPriorityWindowActive())
+        //For every 2 sec, until ADTUpdater exits, we will check whether app is in background
+        //and bring to foreground.
+        if(selfObject->QueryDialogsInDisplay() && selfObject->iAdtUpdaterAppUi->IsAppInBackground())
             {
-            //If any high priority window is active, we push the CDT to background.
-            selfObject->iAdtUpdaterAppUi->ToggleAppViewL(EFalse);
-            }
-        else if(selfObject->QueryDialogsInDisplay() && selfObject->iAdtUpdaterAppUi->IsAppInBackground()
-                && !selfObject->iAdtUpdaterAppUi->IsHighPriorityWindowActive())
-            {
-            //For every 2 sec, until ADTUpdater exits, we will check whether app is in background
-            //and bring to foreground.
             selfObject->iAdtUpdaterAppUi->ToggleAppViewL(ETrue);
             }
-         }
+       }
 	__PRINTS( "CAdtUpdaterContainer::CallBackL - Exit" );
 											
 	return KZero;
@@ -470,21 +464,10 @@ void CAdtUpdaterContainer::NitzInfoAvailableL( STimeAttributes aTimeAttributes, 
 		
 		// Cancel all requests and timers.
 		CancelAllRequests();
-		//set nitz info only if automatic time update is ON
-		if(isAutomaticTimeUpdateON())
-		    {
-            // Display the Nitz info.
-            DisplayNitzInfoL();
-		    }
-		else
-		    {
-            //do not set the nitz info if the user has 
-            //set date/time or changed automatic time update 
-            //to OFF before 90 seconds
-            // Marking this boot as first boot.
-		    MarkFirstBoot();
-		    }
-
+		
+		// Display the Nitz info.
+		DisplayNitzInfoL();
+		
 		// We're done. Exit the application.
 		iAdtUpdaterAppUi->Exit();
 		}
@@ -671,41 +654,35 @@ void CAdtUpdaterContainer::DoContinueWithNormalBootL()
 	__PRINTS( "CAdtUpdaterContainer::DoContinueWithNormalBootL - Entry" );
 	
 	// First bring the application to the foreground.
-	if(!iAdtUpdaterAppUi->IsHighPriorityWindowActive())
-	    {
-        iAdtUpdaterAppUi->ToggleAppViewL( ETrue );
-	    }
+	iAdtUpdaterAppUi->ToggleAppViewL( ETrue );	
 	// Show in FSW.
     iAdtUpdaterAppUi->HideApplicationFromFSW( EFalse );
 	// Hide the status pane.
     iAdtUpdaterAppUi->HideStatusPane( ETrue );
-
-    TBool timeSaved(ETrue);
-    TBool dateSaved(ETrue);
-    //show date/time queries only if automatic time update is ON
-    if(isAutomaticTimeUpdateON())
-        {
-        //Deactivating Nitz
-        DeActivateNitzPlugin();
-
-        iQueryDialogsInDisplay = ETrue;
+	
+	//Deactivating Nitz
+	DeActivateNitzPlugin();
+	
+    TBool timeSaved;
+    TBool dateSaved;
     
-        // First the country/city list.
-        ShowCountryAndCityListsL(); 
-        // Then query date.
-        timeSaved = ShowDateQueryL();
-        // Then query time.
-        dateSaved = ShowTimeQueryL();
+    iQueryDialogsInDisplay = ETrue;
     
-        iQueryDialogsInDisplay = EFalse;
-    
-        }
-    // Modify the FirstBoot flag.
-    if( timeSaved && dateSaved )
-        {
-        MarkFirstBoot();
-        }
-
+	// First the country/city list.
+	ShowCountryAndCityListsL(); 
+	// Then query date.
+	timeSaved = ShowDateQueryL();
+    // Then query time.
+	dateSaved = ShowTimeQueryL();
+	
+	iQueryDialogsInDisplay = EFalse;
+	
+	// Modify the FirstBoot flag.
+	if( timeSaved && dateSaved )
+		{
+		MarkFirstBoot();
+		}	
+	
     __PRINTS( "CAdtUpdaterContainer::ContinueWithNormalBootL - Exit" );
 	}
 	
@@ -723,7 +700,6 @@ void CAdtUpdaterContainer::ShowDateAndTimeQueriesL()
 	// Hide the status pane.
     iAdtUpdaterAppUi->HideStatusPane( ETrue );
 		
-    iQueryDialogsInDisplay = ETrue;
 	// No first boot but RTCStatus is corrupted. Ask time and date"
 		
 	// Showing Date query to user.
@@ -731,7 +707,7 @@ void CAdtUpdaterContainer::ShowDateAndTimeQueriesL()
 		
 	// Showing Time query to user.
 	ShowTimeQueryL();
-	iQueryDialogsInDisplay = EFalse;
+		
 	//Deactivate the plug-in as we are setting the date/time manually
 	DeActivateNitzPlugin();
 		
@@ -1589,31 +1565,6 @@ void CAdtUpdaterContainer::DeActivateNitzPlugin()
 	__PRINTS( "CAdtUpdaterContainer::DeActivateNitzPlugin - Exit" );
 	}
 
-// ---------------------------------------------------------
-// CAdtUpdaterListener::isAutomaticTimeUpdateON
-// Check if automatic time update value is ON
-// ---------------------------------------------------------
-//
-
-TBool CAdtUpdaterContainer::isAutomaticTimeUpdateON()
-    {
-    __PRINTS( "CAdtUpdaterContainer::isAutomaticTimeUpdateON - Entry" );
-    
-    RClkSrvInterface clkSrvInterface;
-    
-    TBool timeUpdateOn( EFalse );
-    if(KErrNone ==  clkSrvInterface.Connect())
-        {
-    __PRINTS( "connection to clock server was successful" );
-    // get the value of AutoTimeUpdate setting
-    clkSrvInterface.IsAutoTimeUpdateOn( timeUpdateOn );   
-    clkSrvInterface.Close();
-        }
-
-    __PRINTS( "CAdtUpdaterContainer::isAutomaticTimeUpdateON - Exit" );
-    return timeUpdateOn;
-    }
-
 // -----------------------------------------------------
 // CAdtUpdaterContainer::Listener
 // rest of the details are commented in the header
@@ -1702,11 +1653,6 @@ TBool CAdtUpdaterContainer::PredictiveTimeEnabled()
      return value;
      } 
 
-// ---------------------------------------------------------------------------
-// CAdtUpdaterContainer::PredictiveTimeEnabled()
-// 
-// ---------------------------------------------------------------------------
-//
 CPsKeyObserver::CPsKeyObserver( TUid aCategory, TUint aKey, TInt aTargetValue , MStartupUIPhaseObserver* aObsever)
   : CActive( EPriorityStandard ), iCategory( aCategory ),
     iKey( aKey ), iTargetValue(aTargetValue), iStartupUIPhaseObserver(aObsever)

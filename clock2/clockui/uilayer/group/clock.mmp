@@ -30,13 +30,7 @@ CAPABILITY			CAP_APPLICATION PowerMgmt
 
 // Stack and heap options
 EPOCSTACKSIZE   	0x5000
-#ifdef WINSCW
-	EPOCHEAPSIZE        0x20000 0x400000
-#else
-	EPOCHEAPSIZE        0x20000 0x1000000
-#endif
-
-
+EPOCHEAPSIZE    	0x20000 0x1000000
 
 // Source information
 SOURCEPATH			../clockmainview/src

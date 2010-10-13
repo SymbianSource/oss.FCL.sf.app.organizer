@@ -70,8 +70,6 @@
 #include <calcalendarinfo.h>
 #include <DocumentHandler.h>
 
-#include <bldvariant.hrh> // for feature definitions
-
 // user includes
 #include "caleneventviewcontainer.h"
 #include "caleneventview.h"
@@ -162,13 +160,6 @@ CCalenEventViewContainer::~CCalenEventViewContainer()
     //Reset the attachment posiitons array
     iAttachmentPosInfoArray.Reset();
     
-    // Do not call UnInitializeLib() if InitalizeLib() leaves.
-    if ( iFeatMgrInitialized )
-        {
-        // Frees the TLS. Must be done after FeatureManager is used.
-        FeatureManager::UnInitializeLib();  
-        }  
-    
 	TRACE_EXIT_POINT;
 	}
 
@@ -208,12 +199,6 @@ void CCalenEventViewContainer::ConstructImplL()
         
     iDocHandler->SetExitObserver( this );
     iTextEditor->EnableKineticScrollingL(ETrue);
-
-    // Sets up TLS, must be done before FeatureManager is used.
-    FeatureManager::InitializeLibL();
-    // Used in destructor. 
-    iFeatMgrInitialized = ETrue;
-     
 	TRACE_EXIT_POINT;
 	}
 
@@ -540,7 +525,7 @@ void CCalenEventViewContainer::HandlePointerEventL(const TPointerEvent& aPointer
                             textView->FindXyPosL(aPointerEvent.iPosition,*posInfo);
                         
                             // Check if it is tapped on any attachment name, if yes then open that attachment
-                            CheckAndOpenTappedAttachmentL(posInfo);
+                            CheckAndOpenTappedAttachment(posInfo);
                             delete posInfo;
                             }
                         }
@@ -827,14 +812,7 @@ void CCalenEventViewContainer::AddFieldsL()
         case CCalEntry::EAnniv:
             {
             // date field
-            if ( FeatureManager::FeatureSupported( KFeatureIdKorean ) )
-                {
-                AddDateFieldL( iServices.Infobar() );
-                }
-            else
-                {
-                AddDateFieldL( iEventViewData->StartDateTime() );
-                }
+            AddDateFieldL(iEventViewData->StartDateTime());
             
             // against the location field in the viewer
             iTimeFieldLines = 1;
@@ -1554,29 +1532,6 @@ void CCalenEventViewContainer::AddDateFieldL(TInt aHeadingResource, const TTime&
 
     TRACE_EXIT_POINT;
     }
-
-// -----------------------------------------------------------------------------
-// CCalenEventViewContainer::AddDateFieldL
-// Add a date field to the form.
-// (other items were commented in a header).
-// -----------------------------------------------------------------------------
-//
-void CCalenEventViewContainer::AddDateFieldL( const TDesC& aDate )
-    {
-    TRACE_ENTRY_POINT;
-	if (FeatureManager::FeatureSupported( KFeatureIdKorean )) 
-		{
-		TBuf<KMaxDateLength> formattedDate;
-    	if ( aDate.Length() < KMaxDateLength && aDate.Length() > 0 )
-    		{
-    		formattedDate.Copy( aDate );
-    		}
-    	AknTextUtils::DisplayTextLanguageSpecificNumberConversion( formattedDate );
-    	SetFormatAndAddBodyL( formattedDate );
-		}
-    TRACE_EXIT_POINT;
-    }
-
 // -----------------------------------------------------------------------------
 // CCalenEventViewContainer::AddDateFieldL
 // Add a field to the form in the format "DATE - DATE".
@@ -2656,7 +2611,7 @@ void CCalenEventViewContainer::HandleServerAppExit( TInt aReason)
 // (other items were commented in a header).
 // ----------------------------------------------------------------------------
 //
-void CCalenEventViewContainer::CheckAndOpenTappedAttachmentL(TTmPosInfo2* posInfo)
+void CCalenEventViewContainer::CheckAndOpenTappedAttachment(TTmPosInfo2* posInfo)
     {
     // iterate through iAttachmentPosInfoArray to see if posInfo falls in any of the range
     TInt attachmentToBeOpened = -1;

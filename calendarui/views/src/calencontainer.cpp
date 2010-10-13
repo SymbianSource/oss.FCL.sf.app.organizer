@@ -866,8 +866,7 @@ void CCalenContainer::UpdateTodayToolbarItemL()
     TBool hideItem(EFalse);
     if( currentFocusedDayTime.Day() == todayDateTime.Day()  
         && currentFocusedDayTime.Month() == todayDateTime.Month()
-        && currentFocusedDayTime.Year() == todayDateTime.Year() 
-        && iView->Id() == KUidCalenDayView )
+        && currentFocusedDayTime.Year() == todayDateTime.Year() )
         {
         hideItem = ETrue;
         }

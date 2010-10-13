@@ -655,7 +655,7 @@ void CCalenServer::CalendarInfoChangeNotificationL(
                     TPckgC<TBool> pkgMarkAsDelete(markAsdelete);
                     TRAPD(err,pkgMarkAsDelete.Set(calendarInfo->PropertyValueL(keyBuff)));
                     markAsdelete = pkgMarkAsDelete();
-                    if( markAsdelete && (err == KErrNone))
+                    if( markAsdelete && err == KErrNone )
                         {
                         // Mark the CalFile as visible.
                         calendarInfo->SetEnabled( ETrue );
@@ -692,4 +692,5 @@ void CCalenServer::CalendarInfoChangeNotificationL(
         }
     TRACE_EXIT_POINT;
     }
+
 // End of File

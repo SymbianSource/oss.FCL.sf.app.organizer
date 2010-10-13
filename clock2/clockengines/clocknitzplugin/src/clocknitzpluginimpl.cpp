@@ -246,6 +246,24 @@ void CClockNitzPluginImpl::NotifyOnNITZInfoChange( TInterfaceAttribute /*aInterf
 	}
 
 // ---------------------------------------------------------
+// CClockNitzPluginImpl::GetDataIfAlreadyAvailable
+// rest of the details are commented in the header
+// ---------------------------------------------------------
+//		
+void CClockNitzPluginImpl::GetDataIfAlreadyAvailableL()
+	{
+	__PRINTS( "CClockNitzPluginImpl::GetDataIfAlreadyAvailableL - Entry" );
+	
+	// Fetch the Nitz information if it is already available
+	if( iNitzSrv )
+	    {
+	    iNitzSrv->FetchDataIfAlreadyAvailableL();
+	    }
+
+	__PRINTS( "CClockNitzPluginImpl::GetDataIfAlreadyAvailableL - Exit" );
+	}
+
+// ---------------------------------------------------------
 // CClockNitzPluginImpl::NotifyNITZInfoChange
 // rest of the details are commented in the header
 // ---------------------------------------------------------

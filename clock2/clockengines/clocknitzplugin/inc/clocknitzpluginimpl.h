@@ -71,6 +71,11 @@ class CClockNitzPluginImpl : public CBase
 		*/
 		void NotifyNITZInfoChangeL();
 		
+		/**
+		 * @brief  Gets the available NITZ information
+		 */
+		void GetDataIfAlreadyAvailableL();
+		
 	private:		// New functions
 	
 		/**

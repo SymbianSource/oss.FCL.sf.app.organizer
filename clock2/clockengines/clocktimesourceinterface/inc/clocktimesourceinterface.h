@@ -74,6 +74,11 @@ class CClockTimeSourceInterface : public CBase
 		* @return TInt The Uid of the plugin.
 		*/
 		IMPORT_C virtual TInt GetPluginUid() = 0;
+		
+		/**
+		 * @brief Gets the time attributes if it is already available with source.
+		 */
+		virtual void GetDataIfAlreadyAvailableL() = 0;
 						
 	private:		// New functions
 	

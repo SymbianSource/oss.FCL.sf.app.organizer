@@ -72,7 +72,7 @@ CCustomNaviControl::~CCustomNaviControl()
 // CCustomNaviControl::SetCalendarNameAndColor
 // Sets the Calendar name and Color.
 // ----------------------------------------------------------------------------    
-void CCustomNaviControl::SetCalendarNameAndColorL(const TDesC& aName, const TRgb aColor)
+void CCustomNaviControl::SetCalendarNameAndColor(const TDesC& aName, const TRgb aColor)
     {
     TRACE_ENTRY_POINT;
     delete iCalendarName;

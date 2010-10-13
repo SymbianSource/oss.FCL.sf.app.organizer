@@ -152,13 +152,6 @@ void CCalenMissedAlarmsContainer::ConstructImplL()
     iListBox->Model()->SetOwnershipType(ELbmDoesNotOwnItemArray);
     iListBox->View()->SetListEmptyTextL( KNullDesC );
     iFirstTap = EFalse;
-    
-    //Set toolbar visibility to false, bcoz this view is not using the ToolBar
-    MCalenToolbar* toolbar = iServices.ToolbarOrNull();
-    if(toolbar)
-        {
-        toolbar->SetToolbarVisibilityL(EFalse);  
-        }
 
     TRACE_EXIT_POINT;
     }
@@ -408,17 +401,17 @@ void CCalenMissedAlarmsContainer::HandleResourceChange(TInt aType)
 
     if ( aType == KAknsMessageSkinChange || aType == KEikDynamicLayoutVariantSwitch )
         {
-        SizeChanged();
-	      /*TRect main_pane;
-	      AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, main_pane );
-	      SetRect( main_pane );
-	      if(iListBox)
-	        {
-	        TRect mainPane;
-	        AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, mainPane );
-	        TRect bgContextRect( TPoint(0, 0), mainPane.Size() );
-	        iListBox->SetRect( bgContextRect );
-	        }*/
+//        SizeChanged();
+    TRect main_pane;
+    AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, main_pane );
+    SetRect( main_pane );
+    if(iListBox)
+        {
+        TRect mainPane;
+        AknLayoutUtils::LayoutMetricsRect( AknLayoutUtils::EMainPane, mainPane );
+        TRect bgContextRect( TPoint(0, 0), mainPane.Size() );
+        iListBox->SetRect( bgContextRect );
+        }
 
         // refresh
         TRAPD(error,iView->BeginRepopulationL());

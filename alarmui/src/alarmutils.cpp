@@ -50,6 +50,8 @@
 #include <calalarm.h> // KUidAgendaModelAlarmCategory - the alarm category id for calendar alarms
 #include <AknUtils.h>
 #include <hwrmpowerstatesdkpskeys.h>
+#include <startupdomainpskeys.h>
+
 
 #ifndef SYMBIAN_CALENDAR_V2
 #include <agmalarm.h> // deprecated, use CalAlarm.h when SYMBIAN_CALENDAR_V2 flag is enabled
@@ -967,14 +969,14 @@ void CAlarmUtils::DeviceShutdown()
     TInt chargingState;
     RProperty::Get( KPSUidHWRMPowerState, KHWRMChargingStatus , chargingState );
     
-    if( IsDeviceInAlarmState() && ( chargingState != EChargingStatusCharging ) )
+    if( IsDeviceInAlarmState() && ( chargingState == EChargingStatusNotConnected ) )
         {       
-            iShutdownTimer->Cancel();
-            if( StarterConnect() )
-                {
-                iStarter.Shutdown();
-                iStarter.Close();
-                }    
+        iShutdownTimer->Cancel();
+        if( StarterConnect() )
+            {
+            iStarter.Shutdown();
+            iStarter.Close();
+            }    
         }
     TRACE_EXIT_POINT;
     }
@@ -1640,10 +1642,13 @@ TBool CAlarmUtils::IsSecurityLockActive()
     {
     TRACE_ENTRY_POINT;
     TInt keyVal( 0 );
+    TInt currentBootupQueriesStatus(0);
     TBool retVal( EFalse );
 
     PIM_ASSERT( RProperty::Get( KPSUidCoreApplicationUIs, KCoreAppUIsAutolockStatus, keyVal ); )
-    if( keyVal > EAutolockOff )
+    PIM_ASSERT(RProperty::Get(KPSUidStartup,KPSStartupUiPhase,currentBootupQueriesStatus ); )
+    
+    if( (keyVal > EAutolockOff) || (currentBootupQueriesStatus != EStartupUiPhaseAllDone ) )
         {
         retVal = ETrue;
         }
@@ -1716,4 +1721,47 @@ void CAlarmUtils::DoSilence()
     TRACE_EXIT_POINT;     
     }
 
+// ---------------------------------------------------------
+// Check if the alarm is duplicate calendar alarm
+// Rest of the details in header file
+// ---------------------------------------------------------
+//
+TBool CAlarmUtils::CheckForDuplicateAlarm()
+    {
+	TRACE_ENTRY_POINT;
+    TBool ret = EFalse;
+    if(IsCalendarAlarm())
+        {
+        TTime currAlarmOrigExpTime = iAlarmData.iAlarm.OriginalExpiryTime();
+
+        if(currAlarmOrigExpTime == iPrevAlarmOriginalExpiryTime && iPrevLocalUid == iAlarmData.iLocalUid 
+			&& !iPrevCalFileName.CompareF(iAlarmData.iCalFileName) )
+            {    
+            TInt& count = iAlarmData.iAlarm.ClientData1();
+            if( (count >= KAlmAlertMinSnooze && 
+                count <= KAlmAlertMaxSnooze ))
+                {
+                ret = ETrue;
+                }
+            }
+        }
+	TRACE_EXIT_POINT;
+    return ret;
+    }
+
+
+// ---------------------------------------------------------
+// Store details of current alarm for future comparison when next calendar alarm comes.
+// Rest of the details in header file
+// ---------------------------------------------------------
+//
+void CAlarmUtils::StoreCurrentCalendarAlarmData()
+	{
+	TRACE_ENTRY_POINT;
+	iPrevLocalUid					= iAlarmData.iLocalUid;  
+    iPrevCalFileName 				= iAlarmData.iCalFileName;
+	iPrevAlarmOriginalExpiryTime 	= iAlarmData.iAlarm.OriginalExpiryTime();
+	TRACE_EXIT_POINT;
+	}
+	
 // End of File
