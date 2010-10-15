@@ -70,6 +70,6 @@ HEADERS += \
 				
 RESOURCES += agendaeventviewer.qrc
 
-TRANSLATIONS += caleneventviewer.ts
+TRANSLATIONS += eventviewer.ts
 
 # End of file	--Don't remove this.

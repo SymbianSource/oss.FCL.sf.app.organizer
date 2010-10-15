@@ -91,6 +91,7 @@ class CCalenEditUi : public QObject,
 		
 		void handleEntrySaved();
 		void handleDialogClosed();
+		void handleForcedExit();
         
     private: // data
         

@@ -25,6 +25,9 @@
 #include "caleneventlistviewitemTraces.h"
 #endif
 
+// Constants
+const char *stretchLayout("customstretch");
+
 // ----------------------------------------------------------------------------
 // CalenEventListViewItem::CalenEventListViewItem
 // constructor
@@ -72,6 +75,13 @@ HbAbstractViewItem* CalenEventListViewItem::createItem()
 void CalenEventListViewItem::updateChildItems()
 {
     OstTraceFunctionEntry0( CALENEVENTLISTVIEWITEM_UPDATECHILDITEMS_ENTRY );
+    
+    QVariant itemData = modelIndex().data(Qt::UserRole + 1);
+    bool stretch = itemData.toBool();
+    // Set this stretchy to the view item
+    setProperty(stretchLayout, stretch);
+    
+    // Call parent handler
     HbListViewItem::updateChildItems();
     
     OstTraceFunctionExit0( CALENEVENTLISTVIEWITEM_UPDATECHILDITEMS_EXIT );

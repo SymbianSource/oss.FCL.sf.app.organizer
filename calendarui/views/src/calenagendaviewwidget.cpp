@@ -58,7 +58,6 @@ const QString doubleSpace("  ");
 const QString space("              ");
 const QString singleHyphen("-");
 const QString customLayout("custom");
-const char *stretchLayout("customstretch");
 const QString toDoIcon("qtg_small_todo");
 const QString reminderIcon("qtg_mono_alarm");
 const QString locationIcon("qtg_mono_location");
@@ -629,11 +628,9 @@ void CalenAgendaViewWidget::addTimedEventToList(int index, AgendaEntry entry)
 
     
     // Disable item stretching by removing the dynamic property
-    HbListViewItem *listViewItem = static_cast<HbListViewItem*>
-                                        (mEventsList->itemByIndex(mListModel->index(index, 0)));
-    if (listViewItem) {
-        listViewItem->setProperty(stretchLayout, false);
-    }
+    QModelIndex currIndex = mListModel->index(index, 0);
+    mListModel->itemFromIndex(currIndex)->setData(false);
+    
     // Get the list model index and set the text and icon data
     QModelIndex listIndex = mListModel->index(index, 0);
     mListModel->setData(listIndex, textData, Qt::DisplayRole);
@@ -791,21 +788,19 @@ void CalenAgendaViewWidget::addNonTimedEventToList(int index, AgendaEntry entry)
         }
     }
     // Enable item stretching by adding the dynamic property
-    HbListViewItem *listViewItem = static_cast<HbListViewItem*>
-                                        (mEventsList->itemByIndex(mListModel->index(index, 0)));
+    QModelIndex currentIndex = mListModel->index(index, 0);
+    
     Qt::Orientation orientation = mServices.MainWindow().orientation();
     // Apply stretch only for landscape orientation
-    if (listViewItem) {
-        if (Qt::Horizontal == orientation) {
-            listViewItem->setProperty(stretchLayout, true);
-        } else {
-            listViewItem->setProperty(stretchLayout, false);
-        }
+    if (Qt::Horizontal == orientation) {
+        mListModel->itemFromIndex(currentIndex)->setData(true);
+    } else {
+        mListModel->itemFromIndex(currentIndex)->setData(false);
     }
+    
     // Get the list model index and set the text and icon data
-    QModelIndex listIndex = mListModel->index(index, 0);
-    mListModel->setData(listIndex, textData, Qt::DisplayRole);
-    mListModel->setData(listIndex, iconData, Qt::DecorationRole);
+    mListModel->setData(currentIndex, textData, Qt::DisplayRole);
+    mListModel->setData(currentIndex, iconData, Qt::DecorationRole);
     
     OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_ADDNONTIMEDEVENTTOLIST_EXIT );
 }
@@ -843,32 +838,27 @@ void CalenAgendaViewWidget::handleListItemStretching(Qt::Orientation orientation
                 case AgendaEntry::TypeAnniversary:
                 {
                     // Get the list view item corresponding to the index
-                    HbListViewItem *listItem = static_cast<HbListViewItem*>
-                                                (mEventsList->itemByIndex(mListModel->index(index, 0)));
-                    if (listItem) {
-                        if (orientation == Qt::Horizontal) {
-                            // Set a dynamic property to indicate that this list item
-                            // must be stretched in landscape.
-                            // NOTE: Property name MUST match the name specified in
-                            // css file, else wierd things might happen
-                            listItem->setProperty(stretchLayout, true);
-                        }
-                        if (orientation == Qt::Vertical) {
-                            // Set a dynamic property to indicate that this list item
-                            // NOTE: Property name MUST match the name specified in
-                            // css file, else wierd things might happen
-                            listItem->setProperty(stretchLayout, false);
-                        }
+                    QModelIndex currIndex = mListModel->index(index, 0);
+                    
+                    if (orientation == Qt::Horizontal) {
+                        // Set a dynamic property to indicate that this list item
+                        // must be stretched in landscape.
+                        // NOTE: Property name MUST match the name specified in
+                        // css file, else wierd things might happen
+                        mListModel->itemFromIndex(currIndex)->setData(true);
+                    }
+                    if (orientation == Qt::Vertical) {
+                        // Set a dynamic property to indicate that this list item
+                        // NOTE: Property name MUST match the name specified in
+                        // css file, else wierd things might happen
+                        mListModel->itemFromIndex(currIndex)->setData(false);
                     }
                 }
                     break;
                 default:
                 {
-                    HbListViewItem *listItem = static_cast<HbListViewItem*>
-                                                (mEventsList->itemByIndex(mListModel->index(index, 0)));
-                    if (listItem) {
-                        listItem->setProperty(stretchLayout, false);
-                    }
+                    QModelIndex currIndex = mListModel->index(index, 0);
+                    mListModel->itemFromIndex(currIndex)->setData(false);
                     break;
                 }
             }
@@ -936,15 +926,16 @@ void CalenAgendaViewWidget::showHideRegionalInformation()
 			HbLabel *pluginInfoLabel = qobject_cast <HbLabel *> 
 									(mRegionalInfoGroupBox->contentWidget());
 			pluginInfoLabel->setPlainText(*pluginString);
+			pluginInfoLabel->setTextWrapping(Hb::TextNoWrap);
+			pluginInfoLabel->setElideMode(Qt::ElideRight);
+		}else {
+			if (mRegionalInfoGroupBox) {
+				mRegionalPluginLayout->removeItem(mRegionalInfoGroupBox);
+				delete mRegionalInfoGroupBox;
+				mRegionalInfoGroupBox = NULL;
+			}
 		}
-    } else {
-        if (mRegionalInfoGroupBox) {
-        	mRegionalPluginLayout->removeItem(mRegionalInfoGroupBox);
-            delete mRegionalInfoGroupBox;
-            mRegionalInfoGroupBox = NULL;
-        }
-    }
-	
+	}
 	OstTraceFunctionExit0( CALENAGENDAVIEWWIDGET_SHOWHIDEREGIONALINFORMATION_EXIT );
 }
 

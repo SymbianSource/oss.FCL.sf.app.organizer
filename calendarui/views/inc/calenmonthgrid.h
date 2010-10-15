@@ -104,6 +104,7 @@ private:
 	QGraphicsWidget* mContentWidget;
 	QList<QString> mLocalisedDates;
 	QPointF mStartPos;
+	qreal mFutureMonthHeight;
 	QColor mGridLineColor;
 	bool mActiveDatesSet;
 	bool mIsGridAdjusting;

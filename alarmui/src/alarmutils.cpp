@@ -260,7 +260,7 @@ void CAlarmUtils::PlayAlarmSound()
     TRACE_ENTRY_POINT;
     StopAlarmSound();
     PIM_TRAPD_ASSERT( iAlarmPlayer = CAlmAlarmPlayer::NewL( this ); )
-    //SetBackLight( ETrue );
+    SetBackLight( ETrue );
     TRACE_EXIT_POINT;
     }
 
@@ -281,7 +281,7 @@ void CAlarmUtils::StopAlarmSound()
     #endif // RD_ALMALERT__SENSOR_SUPPORT
     delete iAlarmPlayer;
     iAlarmPlayer = NULL;
-    //SetBackLight( EFalse );
+    SetBackLight( EFalse );
     TRACE_EXIT_POINT;
     }
 

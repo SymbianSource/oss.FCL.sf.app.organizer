@@ -470,9 +470,10 @@ void NotesMainView::handleEditingCompleted(bool status)
 
 	// Cleanup.
 	mNotesEditor->deleteLater();
-	// set captured screenshot as invalid as the control is returned back 
-	// to the main view
-	captureScreenShot(false);
+	//save the activity
+	//if app closed from task switcher ot red key
+	captureScreenShot(true);
+	saveActivity();
 	OstTraceFunctionExit0( NOTESMAINVIEW_HANDLEEDITINGCOMPLETED_EXIT );
 }
 

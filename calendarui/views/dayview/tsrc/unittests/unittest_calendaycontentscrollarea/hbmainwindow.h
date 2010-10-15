@@ -29,6 +29,8 @@ extern Qt::Orientation gTestOrientation;
  */
 class HbMainWindow : public QObject
 {
+    Q_OBJECT
+    
 public:
     HbMainWindow()
     {

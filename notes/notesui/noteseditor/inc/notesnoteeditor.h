@@ -63,6 +63,8 @@ private slots:
 	void handleCalendarEditorClosed();
 	void handleNewNoteAction();
 	void selectedAction(HbAction *action);
+	void forcedExit();
+	  
 
 private:
 	HbView *mEditor;
@@ -89,6 +91,7 @@ private:
 	bool mEntrySavedInCalendar;
 	bool mDiscardChangesActionActive;
 	bool mIgnoreFirstContentChange;
+	bool mForcedExit;
 private:
 	friend class NotesEditorPrivate;
 };

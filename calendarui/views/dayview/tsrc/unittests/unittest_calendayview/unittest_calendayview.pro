@@ -78,6 +78,9 @@ symbian : {
 	TARGET.CAPABILITY = CAP_APPLICATION
     MMP_RULES += "USERINCLUDE ."
     
+    BLD_INF_RULES.prj_testexports += \
+    "./rom/unittest_calendayview.iby        CORE_APP_LAYER_IBY_EXPORT_PATH(unittest_calendayview.iby)"
+    
     INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
     
         LIBS += -lagendainterface \

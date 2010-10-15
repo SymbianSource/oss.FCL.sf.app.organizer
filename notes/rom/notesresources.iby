@@ -24,6 +24,7 @@
 S60_APP_RESOURCE(notes)
 data=DATAZ_/QT_TRANSLATIONS_DIR/notes.qm QT_TRANSLATIONS_DIR/notes.qm
 data=DATAZ_/QT_TRANSLATIONS_DIR/noteseditor.qm QT_TRANSLATIONS_DIR/noteseditor.qm
+data=DATAZ_/QT_TRANSLATIONS_DIR/todoeditor.qm QT_TRANSLATIONS_DIR/todoeditor.qm
 
 #endif			// __NOTESRESOURCES_IBY__
 

@@ -39,6 +39,7 @@
 #include <xqsettingskey.h>
 #include <QLocale>
 #include <HbParameterLengthLimiter>
+#include <HbApplication>
 
 // User includes
 #include "clockprivatecrkeys.h"
@@ -84,6 +85,7 @@ ClockAlarmEditor::ClockAlarmEditor(
  mStartOfWeek(0),
  mAlarmDayItemInserted(false),
  mIsQuickAlarm(true),
+ mForcedExit(false),
  mAlarmEditorForm(0),
  mAlarmEditorModel(0),
  mAlarmTimeItem(0),
@@ -208,6 +210,10 @@ void ClockAlarmEditor::showAlarmEditor()
 	HbMainWindow *window = hbInstance->allMainWindows().first();
 	window->addView(mAlarmEditorView);
 	window->setCurrentView(mAlarmEditorView);
+	//if editor is open in background, and user close the app from task switcher
+	//entry should get saved
+	connect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()),
+	        this, SLOT(forcedExit()));
 	OstTraceFunctionExit0( CLOCKALARMEDITOR_SHOWALARMEDITOR_EXIT );
 }
 
@@ -239,8 +245,9 @@ void ClockAlarmEditor::handleDoneAction()
 	mAlarmDayItemInserted = false;
 
 	emit alarmSet();
-
-	closeAlarmEditor();
+	if(!mForcedExit){
+	    closeAlarmEditor();
+	}
 	OstTraceFunctionExit0( CLOCKALARMEDITOR_HANDLEDONEACTION_EXIT );
 }
 
@@ -758,15 +765,17 @@ void ClockAlarmEditor::setAlarm(
 	// Check if DST rule gets applied in 24hrs.
 	displayDSTRolloverNote = mTimezoneClient->checkForDstChange(alarmInfo);
 
-	if (displayDSTRolloverNote) {
-		// display DST rollover note
-		displayDSTRollOverNote(alarmInfo);
+	//don't display any note if forced exit
+	if(!mForcedExit){
+	    if (displayDSTRolloverNote) {
+	        // display DST rollover note
+	        displayDSTRollOverNote(alarmInfo);
+	    }
+	    else {
+	        // display remaining time note
+	        displayRemainingTimeNote(alarmInfo);
+	    }
 	}
-	else {
-		// display remaining time note
-		displayRemainingTimeNote(alarmInfo);
-	}
-
 	// Save previous alarm time.
 	setPreviosAlarmTime(alarmTime);
 	OstTraceFunctionExit0( CLOCKALARMEDITOR_SETALARM_EXIT );
@@ -1072,5 +1081,18 @@ void ClockAlarmEditor::sortAlarmDaysList(QStringList& alarmDaysList)
         alarmDaysList.append(alarmDayText);
     }
     OstTraceFunctionExit0( CLOCKALARMEDITOR_SORTALARMDAYSLIST_EXIT );
+}
+
+
+/*!
+ * slot calls if app closed from task switcher or red key.
+ * saved the created entry
+ */
+void ClockAlarmEditor::forcedExit()
+{
+    OstTraceFunctionEntry0( CLOCKALARMEDITOR_FORCEDEXIT_ENTRY );
+    mForcedExit = true;   
+    handleDoneAction();
+    OstTraceFunctionExit0( CLOCKALARMEDITOR_FORCEDEXIT_EXIT );
 }
 // End of file	--Don't remove this.

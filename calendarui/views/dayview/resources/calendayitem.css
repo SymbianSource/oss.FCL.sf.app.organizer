@@ -1,13 +1,21 @@
-CalenDayItem {
-    layout: noIconLayout;
+CalenDayItem[backgroundFrame][eventDescription][backgroundType=EStaticBackground]{
+    layout: default; /*all elements are placed on layout*/
 }
 
-CalenDayItem[!eventDescription][!backgroundFrame] {
-    layout: noIconNoTextNoBkgLayout;
+CalenDayItem[backgroundFrame][!eventDescription][backgroundType=EStaticBackground]{
+    layout: backgroundStripe;
 }
 
-CalenDayItem[!eventDescription][backgroundFrame] {
-    layout: noIconNoTextLayout;
+CalenDayItem[backgroundFrame][eventDescription][backgroundType=EFloatingBackground]{
+    layout: stripeText;
+}
+
+CalenDayItem[backgroundFrame][!eventDescription][backgroundType=EFloatingBackground]{
+    layout: stripeWithMargins;
+}
+
+CalenDayItem[!backgroundFrame][!eventDescription]{
+    layout: stripeNoMargins;
 }
 
 CalenDayItem::eventDescription {

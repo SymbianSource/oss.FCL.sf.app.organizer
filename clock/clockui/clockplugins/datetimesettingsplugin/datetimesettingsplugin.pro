@@ -56,7 +56,7 @@ symbian: {
 }
 
 plugin.sources = datetimesettingsplugin.dll
-plugin.path = \resource\qt\plugins\controlpanel
+plugin.path = /resource/qt/plugins/controlpanel
 DEPLOYMENT += plugin
 
 # End of file	--Don't remove this.

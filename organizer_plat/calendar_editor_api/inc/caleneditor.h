@@ -70,6 +70,7 @@ signals:
 	void entrySaved();
 	void dialogClosed();
 	void calendarLaunchFailed(int error);
+	void forcedExit();
 
 private:
 	CalenEditorPrivate *d_ptr;

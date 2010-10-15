@@ -195,6 +195,18 @@ void CalenContextImpl::setFocusDateAndTimeAndInstance( const QDateTime& focusDat
     }
 
 // -----------------------------------------------------------------------------
+// CalenContextImpl::setStartDateAndTimeForNewInstance
+// Sets start date and time that should be used for creating new instance.
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+void CalenContextImpl::setStartDateAndTimeForNewInstance(
+    const QDateTime &startDateTime)
+    {
+    mDateTimeForNewInstance = startDateTime;
+    }
+
+// -----------------------------------------------------------------------------
 // CalenContextImpl::FocusDateAndTimeL
 // Returns the focus time
 // (other items were commented in a header).
@@ -240,6 +252,17 @@ TCalenInstanceId CalenContextImpl::instanceId() const
     TRACE_ENTRY_POINT;
     TRACE_EXIT_POINT;
     return mInstanceId;
+    }
+
+// -----------------------------------------------------------------------------
+// CalenContextImpl::startDateAndTimeForNewInstance
+// Returns start date and time that should be used for creating new instance.
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+QDateTime CalenContextImpl::startDateAndTimeForNewInstance() const
+    {
+    return mDateTimeForNewInstance;
     }
 
 // -----------------------------------------------------------------------------

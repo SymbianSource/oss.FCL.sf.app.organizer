@@ -35,7 +35,19 @@ class CalenDayItem : public HbAbstractViewItem
     Q_OBJECT
     Q_PROPERTY( bool eventDescription READ hasEventDescription )
     Q_PROPERTY( bool backgroundFrame READ hasBackgroundFrame )
-    
+    Q_PROPERTY( BackgroundType backgroundType READ backgroundType )
+    Q_ENUMS( BackgroundType )
+
+public:
+    //Due to HbFrameItem size limitation (2047px) in case when we have long lasting
+    //events, background item has the same height as screen and needs to be scrolled
+    //along with the view. By default background type is set as static but final decision
+    //is made when handling resize event i.e. when geomtry of event is already known.
+    enum BackgroundType{
+        EStaticBackground,
+        EFloatingBackground
+    };
+
 public:
     CalenDayItem(const CalenDayContainer *container);
     virtual ~CalenDayItem();
@@ -43,8 +55,15 @@ public:
     void updateChildItems();
     bool hasEventDescription() const { return mEventDesc->isVisible(); }
     bool hasBackgroundFrame() const { return mBg->isVisible(); }
+    BackgroundType backgroundType() const { return mBackgroundType; }
     const CalenDayContainer *container() const { return mContainer; }
+
+public slots:
+    void scrollBackground(const QPointF &pos);
     
+signals:
+    void backgroundTypeChanged(const CalenDayItem *item);
+
 protected:
     void resizeEvent(QGraphicsSceneResizeEvent *event);
 
@@ -62,6 +81,8 @@ private:
 
     CalenDayStatusStrip *mColorStripe;
     const CalenDayContainer *mContainer;
+    
+    BackgroundType mBackgroundType;
 };
 
 #endif // CALENDAYITEM_H

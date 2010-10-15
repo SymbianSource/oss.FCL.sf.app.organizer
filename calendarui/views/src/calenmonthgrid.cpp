@@ -377,7 +377,11 @@ void CalenMonthGrid::downGesture()
     
     // Start the scrolling
     QPointF targetPos(0.0, 0.0);
-    scrollContentsTo(targetPos,500);
+    if (floor(targetPos.y()) != floor(mContentWidget->pos().y())) {
+        scrollContentsTo(targetPos,500);
+    } else {
+        scrollingFinished();
+    }
     
     OstTraceFunctionExit0( CALENMONTHGRID_DOWNGESTURE_EXIT );
 }
@@ -407,9 +411,13 @@ void CalenMonthGrid::upGesture()
     }
     
     // Start the scrolling
-    QPointF targetPos(0.0, mStartPos.y() - size().height());
-    scrollContentsTo(-targetPos,500);
-	
+    QPointF targetPos(0.0, mStartPos.y() - mFutureMonthHeight);
+    if (floor(targetPos.y()) != floor(mContentWidget->pos().y())) {\
+        scrollContentsTo(-targetPos,500);
+    } else {
+        scrollingFinished();
+    }
+    // scrollContentsTo(-targetPos,500);
     OstTraceFunctionExit0( CALENMONTHGRID_UPGESTURE_EXIT );
 }
 
@@ -468,6 +476,7 @@ void CalenMonthGrid::gestureEvent(QGestureEvent *event)
             if (!mIsPanGesture) {
                 mDirection = invalid;
                 mStartPos = mContentWidget->pos();
+                mFutureMonthHeight = abs(mContentWidget->geometry().bottomRight().y() - geometry().bottomRight().y());
                 // TODO: This work around till framework provides an api
                 // to know the direciton of the pan, until then we need
                 // calculate the direction explicitly
@@ -590,6 +599,7 @@ void CalenMonthGrid::scrollingFinished()
 		mDirection = invalid;
 		mActiveDatesSet = false;
 	} else {
+	    mIsGridAdjusting = false;
         mIsAtomicScroll = false;
         mDirection = invalid;
 	}
@@ -654,23 +664,11 @@ void CalenMonthGrid::handlePanGestureFinished()
 		// first visible date belong to previous to previous month
 		// hence, scroll down to bring the previous month
 		downGesture();
-	} else if (month == nextMonth.date().month()) {
-		// first visible item belongs to next month
-		// Check if the date is more than half of the next month
-		if (date.date().day() > (nextMonth.date().daysInMonth()) / 2) {
-			// up gesture to bring the next month
-			upGesture();
-		} else {
-			// we should again show the current month by scrolling upwards
-			mDirection = up;
-			mIsAtomicScroll = true;
-			scrollContentsTo(-mStartPos,500);
-		}
-	} else if (month == nextMonth.addMonths(1).date().month()) {
-		// first visible date belongs to next to next month
-		// hence, scroll up to show the next month
-		upGesture();
-	} else {
+	} else if (month == nextMonth.date().month() || 
+	        month == nextMonth.addMonths(1).date().month()) {
+	    // up gesture to bring the next month
+	    upGesture();
+	}  else {
         // User has panned so that exact month has been scrolled
         // no need for any adjustment here, just append/prepend the rows
         mIsAtomicScroll = false;
@@ -973,9 +971,11 @@ void CalenMonthGrid::itemActivated(const QModelIndex &index)
 			if (activeMonth.date().month() == 
 			        nonActiveFocusedDay.date().month()) {
 				mDirection = up;
+				mFutureMonthHeight = abs(mContentWidget->geometry().bottomRight().y() - geometry().bottomRight().y());
 				// up gesture
 				upGesture();
-			} else {
+			} else if (nonActiveFocusedDay.date().month() ==
+			        activeMonth.addMonths(-2).date().month()){
 				mDirection = down;
 				// down gesture
 				downGesture();

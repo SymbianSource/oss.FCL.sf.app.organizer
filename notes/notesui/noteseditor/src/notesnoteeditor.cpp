@@ -30,6 +30,7 @@
 #include <HbMenu>
 #include <CalenEditor>
 #include <HbMessageBox>
+#include <HbApplication>
 
 // User includes
 #include "notesnoteeditor.h"
@@ -67,7 +68,8 @@ NotesNoteEditor::NotesNoteEditor(NotesEditorPrivate *owner, QObject *parent)
  mOwner(owner),
  mEntrySavedInCalendar(false),
  mDiscardChangesActionActive(false),
- mIgnoreFirstContentChange(false)
+ mIgnoreFirstContentChange(false),
+ mForcedExit(false)
 {
 	OstTraceFunctionEntry0( NOTESNOTEEDITOR_NOTESNOTEEDITOR_ENTRY );
 	mDocLoader = new NotesEditorDocLoader;
@@ -194,7 +196,12 @@ void NotesNoteEditor::execute(AgendaEntry entry)
 	Q_UNUSED(entry)
 
 	HbExtendedLocale locale = HbExtendedLocale::system();
-
+	  
+	//if editor is open in background, and user close the app from task switcher
+    //entry should get saved
+    connect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()),
+            this, SLOT(forcedExit()));
+    
 	if (!mOwner->mNewEntry) {
 		mTextEditor->setPlainText(mOwner->mModifiedNote.description());
 
@@ -267,7 +274,11 @@ QString NotesNoteEditor::getDescription()
 void NotesNoteEditor::markNoteAsTodo()
 {
 	OstTraceFunctionEntry0( NOTESNOTEEDITOR_MARKNOTEASTODO_ENTRY );
-	mOwner->markNoteAsTodo();
+	//if editor is open in background, and user close the app from task switcher
+    //entry should get saved
+    disconnect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()),
+            this, SLOT(forcedExit()));
+    mOwner->markNoteAsTodo();
 	OstTraceFunctionExit0( NOTESNOTEEDITOR_MARKNOTEASTODO_EXIT );
 }
 
@@ -280,7 +291,11 @@ void NotesNoteEditor::saveNote()
 {
 	OstTraceFunctionEntry0( NOTESNOTEEDITOR_SAVENOTE_ENTRY );
 	bool status = false;
-
+    //if editor is open in background, and user close the app from task switcher
+    //entry should get saved
+    disconnect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()),
+            this, SLOT(forcedExit()));
+    
 	if (!mOwner->mSaveEntry) {
 		// We don't save the note, since the note was modified by an external
 		// entity. We just Display a message box alerting the user about this
@@ -595,4 +610,14 @@ void NotesNoteEditor::selectedAction(HbAction *action)
 	OstTraceFunctionExit0( NOTESNOTEEDITOR_SELECTEDACTION_EXIT );
 }
 
+/*!
+    Slot to handle entry when app exit from red key or task switcher.
+ */
+void NotesNoteEditor::forcedExit()
+{
+    OstTraceFunctionEntry0( NOTESNOTEEDITOR_FORCEDEXIT_ENTRY );
+    mForcedExit = true;
+    saveNote();
+    OstTraceFunctionExit0( NOTESNOTEEDITOR_FORCEDEXIT_EXIT );
+}
 // End of file	--Don't remove this.

@@ -38,8 +38,9 @@
 #include "calenagendautils.h"
 #include "calendaycontainer.h"
 
-#ifndef __WINSCW__
+
 #define private public
+#ifndef __WINSCW__
 #define protected public
 #endif
 
@@ -70,6 +71,8 @@ private slots:
     void testHasBackgroundFrame();
     void testSetDescription();
     void testSetStatusStrip();
+    void testFloatingBackground();
+    void testScrollBackground();
     
     void testConstructors();
 private:
@@ -141,6 +144,7 @@ void TestCalenDayItem::cleanup()
  Test function for constructors
  1. Test if content widget is not initialized
  2. Test if content widget is correcty created
+ 3. Test whether connection to container has been established properly
  */
 void TestCalenDayItem::testConstructors()
 {
@@ -151,6 +155,10 @@ void TestCalenDayItem::testConstructors()
     //2)
     testItem = new CalenDayItemTest(mContainer);
     QVERIFY(testItem);
+    
+    //3)
+    QCOMPARE(testItem->connectedSlots(SIGNAL(backgroundTypeChanged(const CalenDayItem*))), 1);
+    
     delete testItem;
 }
 
@@ -349,5 +357,105 @@ void TestCalenDayItem::testHasBackgroundFrame()
 #endif
 }
 
+
+/*!
+ Test floating background functionality 
+ 1. Event is higher then screen (background starts to float) 
+ 2. Orientation changed
+ 3. Event is higher then screen but item is already set as floating
+ 4. Event's layout switches from floating to static
+ 5. Static event remains smaller then screen height
+ */
+void TestCalenDayItem::testFloatingBackground()
+{
+#ifndef __WINSCW__
+    qRegisterMetaType<CalenDayItemTest*>("const CalenDayItem*");
+    
+    QSignalSpy spy(mItem, SIGNAL(backgroundTypeChanged(const CalenDayItem*)));
+    int emittedSignalsCount = 0;
+
+    //1)Event is higher then screen (background starts to float)
+    gTestWindowRect = QRectF(0, 0, 320, 640);
+    mItem->mBackgroundType = CalenDayItem::EStaticBackground;
+    mItem->resize(30, 1000);
+    int bgHeight = mItem->mBg->rect().height();
+    int screenHeight = CalenDayUtils::instance()->screenHeight();
+
+    QCOMPARE(bgHeight, screenHeight);
+    QCOMPARE(mItem->mBackgroundType, CalenDayItem::EFloatingBackground);
+    QCOMPARE(spy.count(), ++emittedSignalsCount);
+    
+    //2)Orientation changed
+    gTestWindowRect = QRectF(0, 0, 640, 320);
+    mItem->mBackgroundType = CalenDayItem::EStaticBackground;
+    mItem->resize(30, 1001);
+    bgHeight = mItem->mBg->rect().height();
+    screenHeight = CalenDayUtils::instance()->screenHeight();
+    
+    QCOMPARE(bgHeight, screenHeight);
+    QCOMPARE(mItem->mBackgroundType, CalenDayItem::EFloatingBackground);
+    QCOMPARE(spy.count(), ++emittedSignalsCount);
+    
+    //3)Event is higher then screen but item is already set as floating
+    mItem->resize(30, 1000);
+    bgHeight = mItem->mBg->rect().height();
+    screenHeight = CalenDayUtils::instance()->screenHeight();
+    
+    QCOMPARE(bgHeight, screenHeight);
+    QCOMPARE(mItem->mBackgroundType, CalenDayItem::EFloatingBackground);
+    QCOMPARE(spy.count(), emittedSignalsCount);
+    
+   //4)Event's layout switches from floating to static
+    mItem->setGeometry(0, 0, 30, 100);
+    QCOMPARE(mItem->mBackgroundType, CalenDayItem::EStaticBackground);
+    QCOMPARE(spy.count(), ++emittedSignalsCount);
+    
+    //5)Static event remains smaller then screen height
+    mItem->setGeometry(0, 0, 30, 200);
+    QCOMPARE(mItem->mBackgroundType, CalenDayItem::EStaticBackground);
+    QCOMPARE(spy.count(), emittedSignalsCount);
+#endif
+}
+
+/*!
+ Test scrolling background slot 
+ 1. Position of background doesn't go out of events rectangle
+ 2. Position of background is out of the top edge
+ 3. Position of background is out of the bottom edge
+ */
+void TestCalenDayItem::testScrollBackground()
+{
+#ifndef __WINSCW__
+    gTestWindowRect = QRectF(0, 0, 240, 480);
+    mItem->setGeometry(0, 0, 30, 1000);
+    
+    //1)Position of background doesn't go out of events rectangle
+    QPointF pos(0, 50);
+    mItem->scrollBackground(pos);
+    int screenHeight = CalenDayUtils::instance()->screenHeight();
+    int bgHeight = mItem->mBg->rect().height();
+    
+    QCOMPARE(bgHeight, screenHeight);
+    QVERIFY(gTestWindowRect.contains(mItem->mBg->rect()));
+    
+    //2)Position of background is out of the top edge
+    pos = QPointF(0, -50);
+    mItem->scrollBackground(pos);
+    bgHeight = mItem->mBg->rect().height();
+    
+    QCOMPARE(bgHeight, screenHeight);
+    QVERIFY(gTestWindowRect.contains(mItem->mBg->rect()));
+
+    //3)Position of background is out of the bottom edge
+    pos = QPointF(0, 300);
+    mItem->scrollBackground(pos);
+    bgHeight = mItem->mBg->rect().height();
+    
+    QCOMPARE(bgHeight, screenHeight);
+    QVERIFY(gTestWindowRect.contains(mItem->mBg->rect()));   
+#endif
+}
+
 QTEST_MAIN(TestCalenDayItem);
+
 #include "unittest_calendayitem.moc"

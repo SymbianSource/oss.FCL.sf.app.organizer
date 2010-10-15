@@ -43,7 +43,17 @@
 
 class CalenDayItemTest : public CalenDayItem
 {
+
 public:
+    CalenDayItemTest::CalenDayItemTest():
+        CalenDayItem(0)
+    {}
+
+    CalenDayItemTest::CalenDayItemTest(const CalenDayItemTest&):
+        CalenDayItem(0)
+    {
+    }
+    
     CalenDayItemTest::CalenDayItemTest(const CalenDayContainer *container) :
                 CalenDayItem(container)
     {
@@ -74,7 +84,15 @@ public:
         // to prevent minimum size hint caching inside effectiveSizeHint
         setMinimumWidth(stripeWidth);
 #endif
+        connect(this, SIGNAL(backgroundTypeChanged(const CalenDayItem*)), container, SLOT(updateFloatingItemsList(const CalenDayItem*)));
+    }
+    
+    int connectedSlots(const char * signal)
+    {
+        return receivers(signal);
     }
 };
+
+Q_DECLARE_METATYPE(CalenDayItemTest*)
 
 #endif

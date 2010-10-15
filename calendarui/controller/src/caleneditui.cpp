@@ -109,12 +109,19 @@ TBool CCalenEditUi::HandleCommandL( const TCalenCommand& aCommand )
     TInt command = aCommand.Command();
     MCalenContext& context = iController.Services().Context();
     AgendaEntry editedEntry;
-    QDateTime newEntryDateTime = iController.context().focusDateAndTime();
-   
-    // Check if it is not on same day and set the default time and date accordingly.
-    bool isSameDay = CalenDateUtils::isOnToday(newEntryDateTime);
-    if (!isSameDay) {
-    	newEntryDateTime = CalenDateUtils::defaultTime(newEntryDateTime);
+    
+    QDateTime newEntryDateTime = iController.context().startDateAndTimeForNewInstance();
+    if (newEntryDateTime.isValid()) {
+        // Use start date and time from context, reset it before next usage
+        iController.context().setStartDateAndTimeForNewInstance(QDateTime());
+    } else {
+        // Use focused date and time from context
+        newEntryDateTime = iController.context().focusDateAndTime();
+        // Check if it is not on same day and set the default time and date accordingly.
+        bool isSameDay = CalenDateUtils::isOnToday(newEntryDateTime);
+        if (!isSameDay) {
+            newEntryDateTime = CalenDateUtils::defaultTime(newEntryDateTime);
+        }
     }
     switch ( command )
         {
@@ -123,6 +130,7 @@ TBool CCalenEditUi::HandleCommandL( const TCalenCommand& aCommand )
 			iEditor->create(newEntryDateTime, false, CalenEditor::TypeAppointment );
 		    connect(iEditor, SIGNAL(entrySaved()), this, SLOT(handleEntrySaved()));
 		    connect(iEditor, SIGNAL(dialogClosed()), this, SLOT(handleDialogClosed()));
+		    connect(iEditor, SIGNAL(forcedExit()), this, SLOT(handleForcedExit()));
             break;
         case ECalenEditCurrentEntry:            
             editedEntry = iController.Services().agendaInterface()->fetchById(
@@ -139,6 +147,7 @@ TBool CCalenEditUi::HandleCommandL( const TCalenCommand& aCommand )
             	iEditor->edit(editedEntry, false);
             	connect(iEditor, SIGNAL(entrySaved()), this, SLOT(handleEntrySaved()));
             	connect(iEditor, SIGNAL(dialogClosed()), this, SLOT(handleDialogClosed()));
+            	connect(iEditor, SIGNAL(forcedExit()), this, SLOT(handleForcedExit()));
             }
             break;
         default:
@@ -203,6 +212,20 @@ void CCalenEditUi::HandleNotification(const TCalenNotification aNotification )
 //
 void CCalenEditUi::saveAndCloseEditor()
     {
+    OstTraceFunctionEntry0( CCALENEDITUI_SAVEANDCLOSEEDITOR_ENTRY );
     iEditor->saveAndCloseEditor();
+    OstTraceFunctionExit0( CCALENEDITUI_SAVEANDCLOSEEDITOR_EXIT );
+    }
+
+// ----------------------------------------------------------------------------
+// CCalenEditUi::handleForcedExit
+// notification for forced exit
+// ----------------------------------------------------------------------------
+//
+void CCalenEditUi::handleForcedExit()
+    {
+    OstTraceFunctionEntry0( CCALENEDITUI_HANDLEFORCEDEXIT_ENTRY );
+    iController.Services().IssueNotificationL(ECalenNotifyForcedExit);
+    OstTraceFunctionExit0( CCALENEDITUI_HANDLEFORCEDEXIT_EXIT);
     }
 // End of file

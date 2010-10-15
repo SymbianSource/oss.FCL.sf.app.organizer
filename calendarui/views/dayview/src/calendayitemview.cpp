@@ -21,6 +21,7 @@
 #include <HbAbstractViewItem>
 #include <HbInstance>
 #include <HbAction>
+#include <HbTapGesture>
 
 // User includes
 #include "calendayitemview.h"
@@ -192,6 +193,33 @@ void CalenDayItemView::scrollVertically(const QPointF &newPosition)
     if (abs(newPosition.y()) != abs(currentPos.y())) {
         currentPos.setY(newPosition.y());
         scrollContentsTo(currentPos, 0);
+    }
+}
+
+/*!
+ \brief Handles gesture events in CalenDayItemView.
+ 
+ Handles Tap gesture and launches the editor with given start position.
+ 
+ \param event Gesture event
+ */
+void CalenDayItemView::gestureEvent(QGestureEvent *event)
+{
+    HbTapGesture *tapGesture = qobject_cast<HbTapGesture*> (event->gesture(
+        Qt::TapGesture));
+
+    if (tapGesture) {
+        if (tapGesture->state() == Qt::GestureFinished) {
+            QPointF pos = tapGesture->scenePosition();
+            QDateTime dateTime = mContainer->dateTimeAtPos(pos);
+            if (dateTime.isValid()) {
+                mServices.Context().setStartDateAndTimeForNewInstance(dateTime);
+                TRAP_IGNORE( mServices.IssueCommandL(ECalenNewMeeting); );
+            }
+        }
+    }
+    else {
+        HbAbstractItemView::gestureEvent(event);
     }
 }
 

@@ -80,6 +80,13 @@ class MCalenContext
          */
         virtual void setFocusDateAndTimeAndInstance( const QDateTime& focusDateTime,
                                                       const TCalenInstanceId& aInstanceId ) = 0;
+        
+        /**
+         * Sets start date and time that should be used for creating new instance.
+         * 
+         * @param startDateTime Start date and time for new instance
+         */
+        virtual void setStartDateAndTimeForNewInstance(const QDateTime &startDateTime) = 0;
 
     // Getters
         /**
@@ -103,6 +110,14 @@ class MCalenContext
          * this will be TCalenInstanceId::NullInstanceIdL()
          */
         virtual TCalenInstanceId instanceId() const = 0;
+        
+        /**
+         * Returns start date and time that should be used for creating new instance.
+         * Check isValid() to verify if returnd value is valid.
+         * 
+         * @return Start date and time for new instance
+         */
+        virtual QDateTime startDateAndTimeForNewInstance() const = 0;
 
  public: // For Mutliple Context Support    
  

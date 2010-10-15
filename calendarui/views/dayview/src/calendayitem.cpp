@@ -22,6 +22,7 @@
 #include <HbStyle>
 #include <HbColorScheme>
 #include <agendaentry.h>
+#include <QGraphicsSceneMoveEvent>
 
 // User includes
 #include "calendaycommonheaders.h"
@@ -36,8 +37,9 @@
  \brief Constructor.
  */
 CalenDayItem::CalenDayItem(const CalenDayContainer *container) :
-    mContainer(container), mUpdated(false), mBg(0), mEventDesc(0),
-        mColorStripe(0), mEventDescMinWidth(0.0), mFrameMinWidth(0.0)
+    mUpdated(false), mEventDescMinWidth(0.0), mFrameMinWidth(0.0),
+	mBg(0), mEventDesc(0), mColorStripe(0),
+	mContainer(container), mBackgroundType(EStaticBackground)
 {
 }
 
@@ -45,12 +47,14 @@ CalenDayItem::CalenDayItem(const CalenDayContainer *container) :
  \brief Constructor.
  */
 CalenDayItem::CalenDayItem(const CalenDayItem & source) :
-    HbAbstractViewItem(source), mContainer(source.container()),
-        mUpdated(false), mBg(0), mEventDesc(0), mColorStripe(0),
-        mEventDescMinWidth(0.0), mFrameMinWidth(0.0)
+    HbAbstractViewItem(source), 
+        mUpdated(false), mEventDescMinWidth(0.0),
+		mFrameMinWidth(0.0), mBg(0), mEventDesc(0),
+		mColorStripe(0), mContainer(source.container()),
+        mBackgroundType(EStaticBackground)
 {
-    mBg = new HbFrameItem("qtg_fr_cal_meeting_bg", HbFrameDrawer::NinePieces,
-        this);
+    mBg = new HbFrameItem("qtg_fr_cal_meeting_bg", HbFrameDrawer::NinePieces, this);
+    
     mEventDesc = new HbTextItem(this);
     // TODO: probably ElideLeft needed for mirrored layout
     mEventDesc->setElideMode(Qt::ElideRight);
@@ -74,6 +78,8 @@ CalenDayItem::CalenDayItem(const CalenDayItem & source) :
     // Minimum width is assured by widgetml and css, additionally called here 
     // to prevent minimum size hint caching inside effectiveSizeHint
     setMinimumWidth(stripeWidth);
+    
+    connect(this, SIGNAL(backgroundTypeChanged(const CalenDayItem*)), mContainer, SLOT(updateFloatingItemsList(const CalenDayItem*)));
 }
 
 /*!
@@ -210,16 +216,24 @@ void CalenDayItem::resizeEvent(QGraphicsSceneResizeEvent *event)
     Q_UNUSED(event)
 
     qreal width = rect().width();
+    qreal height = rect().height();
+    
+    //Backround height can't be bigger the screen. If event is long enough
+    //backround will start to float together with view content.
+    mBg->setMaximumHeight(CalenDayUtils::instance()->screenHeight());
 
     HbDeviceProfile deviceProfile;
     if (width < mEventDescMinWidth) {
         mColorStripe->setPreferredWidth(KCalenMinTimeStripWidth
             * deviceProfile.unitValue());
+        mBg->setMaximumWidth(KCalenMinEventWidth
+            * deviceProfile.unitValue());        
         mEventDesc->hide();
     }
     else {
         mColorStripe->setPreferredWidth(KCalenTimeStripWidth
             * deviceProfile.unitValue());
+        mBg->setMaximumWidth(CalenDayUtils::instance()->screenWidth());
         mEventDesc->show();
     }
 
@@ -229,9 +243,65 @@ void CalenDayItem::resizeEvent(QGraphicsSceneResizeEvent *event)
     else {
         mBg->show();
     }
+    
+    //If following condition is fulfilled then background item needs to be
+    //switched to floating one.
+    if (height > CalenDayUtils::instance()->screenHeight()) {
+
+        //If background item is floating then it needs to be removed from
+        //layout (see css & widgetml). In this case we need to take care of setting its
+        //geometry by ourselves.
+        QRectF newRect = rect();
+        qreal baseY = pos().y();
+        qreal mappedY = mapFromScene(pos()).y();
+        qreal normalizedY = mappedY - baseY; //aligns background to the top of viewport
+        //Check whether background won't go out of the event's rectangle
+        if(normalizedY < newRect.top()){
+            normalizedY = newRect.top();
+        }
+        newRect.setY(normalizedY);
+        mBg->setGeometry(newRect);
+
+        //Notify the container about background type change.
+        //From now on this object is going to receive information
+        //about scrolling.
+        if (mBackgroundType == EStaticBackground) {
+            mBackgroundType = EFloatingBackground;
+            emit backgroundTypeChanged(this);
+        }
+    }else if (mBackgroundType == EFloatingBackground) {
+        mBackgroundType = EStaticBackground;
+        emit backgroundTypeChanged(this);
+    }
 
     // Necessary to switch layout
     repolish();
+}
+
+/*!
+ \brief This slot is triggered when backround type is set as EFloatingBackground.
+        It allows to scroll backround along with view content.
+ 
+ \param pos Positoin to which backround needs to be scrolled.
+ */
+void CalenDayItem::scrollBackground(const QPointF &pos)
+{
+    qreal newY = mapFromParent(pos).y();
+    //margin to ensure that rounded corners will stay hidden
+    const qreal margin = 5.0;
+
+    if (newY > rect().top() && newY + mBg->rect().height() < rect().bottom()) {
+
+        mBg->setY(newY - margin);
+    }
+    else if (newY < rect().top()) { //condition for top boundary
+
+        mBg->setY(rect().top());
+    
+    }else if (newY + mBg->rect().height() > rect().bottom()) { //condition for bottom boundary
+
+        mBg->setY(rect().bottom() - mBg->rect().height());
+    }
 }
 
 // End of File

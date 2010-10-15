@@ -22,9 +22,11 @@
 
 #include <hbabstractitemview.h>
 #include <hbmenu.h>
+#include <QGesture>
 
 #ifndef __WINSCW__
 #define private public
+#define protected public
 #endif
 
 #include "calendayitemview.h"
@@ -58,6 +60,8 @@ private slots:
     void testSetContextMenu();
     void testContextMenu();
     void testModelReset();
+    void testGestureEvent();
+    
 private:
     MCalenServices   mMCalenServices;
     CalenDayItemView *mCalenDayItemView;
@@ -283,6 +287,37 @@ void TestCalenItemView::testModelReset()
     mCalenDayItemView->mInfo = NULL;
     mCalenDayItemView->modelReset();
     QVERIFY(mCalenDayItemView->mInfo == NULL);
+#endif
+}
+
+/*!
+ Test gestureEvent
+ 1. Test with non-tap gesture
+ 2. Test with tap gesture
+ */
+void TestCalenItemView::testGestureEvent()
+{
+#ifndef __WINSCW__
+    QGestureEvent *gestureEvent = NULL;
+
+    //1)
+    QList<QGesture*> list;
+    QPanGesture *panGesture = new QPanGesture();
+    list.append(panGesture);
+    gestureEvent = new QGestureEvent(list);
+    mCalenDayItemView->gestureEvent(gestureEvent);
+    
+    delete gestureEvent;
+    gestureEvent = NULL;
+    
+    //2)
+    QTapGesture *tapGesture = new QTapGesture();
+    list.append(tapGesture);
+    gestureEvent = new QGestureEvent(list);
+    mCalenDayItemView->gestureEvent(gestureEvent);
+    
+    delete gestureEvent;
+    gestureEvent = NULL;
 #endif
 }
 

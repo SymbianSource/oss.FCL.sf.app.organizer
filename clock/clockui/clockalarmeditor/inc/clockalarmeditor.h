@@ -72,6 +72,7 @@ private slots:
 	void handleDescriptionChanged(const QString &text);
 	void handleKeypadOpen();
 	void handleKeypadClosed();
+	void forcedExit();
 
 signals:
 	void alarmSet();
@@ -99,6 +100,7 @@ private:
 	int mStartOfWeek;
 	bool mAlarmDayItemInserted;
 	bool mIsQuickAlarm;
+	bool mForcedExit;
 	QString mTimeFormat;
 	QTime mOldAlarmTime;
 

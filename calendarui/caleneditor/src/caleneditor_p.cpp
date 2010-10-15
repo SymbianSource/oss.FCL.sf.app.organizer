@@ -48,12 +48,13 @@
 #include <hbradiobuttonlist.h>
 #include <hbnotificationdialog.h>
 #include <hbtranslator.h>
-
+#include <HbApplication>
 // User includes
 #include <CalenLauncher>
 #include <agendaentry.h>
 #include <agendautil.h>
 #include <caleneditor.h>
+#include <maptileservice.h>
 
 #include "caleneditor_p.h"
 #include "caleneditorcustomitem.h"
@@ -216,12 +217,14 @@ CalenEditorPrivate::CalenEditorPrivate(AgendaUtil *agendaUtil,
 									mOriginalEntry(NULL),
 									mEditedEntry(NULL),
 									mTranslator(new HbTranslator("caleneditor")),
+									mMaptileService(0),
 									mNewEntry(true),
 									mDescriptionItemAdded(false),
 									mIsChild(false),
 									mIsAllDayItemAdded(false),
 									mLaunchCalendar(false),
-									mMenuItemAdded(false)
+									mMenuItemAdded(false),
+									mKeepExistingLocation(false)
 {
 	OstTraceFunctionEntry0( CALENEDITORPRIVATE_CALENEDITORPRIVATE_ENTRY );
 	// First get the q-pointer.
@@ -303,6 +306,11 @@ CalenEditorPrivate::~CalenEditorPrivate()
 		iEnvChangeNotifier->Cancel();
 		delete iEnvChangeNotifier;
 		iEnvChangeNotifier = 0;
+	}
+	
+	if(mMaptileService){
+	    delete mMaptileService;
+	    mMaptileService=0;
 	}
 	
 	OstTraceFunctionExit0( DUP1_CALENEDITORPRIVATE_CALENEDITORPRIVATE_EXIT );
@@ -546,7 +554,11 @@ void CalenEditorPrivate::showEditor(AgendaEntry entry)
 	mEditorView->setNavigationAction(mSoftKeyAction);
 	connect(mSoftKeyAction, SIGNAL(triggered()), this,
 	        SLOT(saveAndCloseEditor()));
-
+	//if editor is open in background, and user close the app from task switcher
+	//entry should get saved
+    connect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()),
+            this, SLOT(forcedExit()));
+    
 	// Create the data handler
 	mDataHandler = new CalenEditorDataHandler(this,mEditedEntry, mOriginalEntry);
 	OstTraceFunctionExit0( CALENEDITORPRIVATE_SHOWEDITOR_EXIT );
@@ -1534,12 +1546,43 @@ void CalenEditorPrivate::selectEditingFinishedAction(HbAction* action)
 {
     OstTraceFunctionEntry0( CALENEDITORPRIVATE_SELECTEDITINGFINISHEDACTION_ENTRY );
     HbMessageBox* dlg = static_cast<HbMessageBox*>(sender());    
-
+    // mKeepExistingLocation true , if user confirms yes otherwise false.
+    // This boolean value will be saved  into maptile database only when user save the entry.
+    mKeepExistingLocation = true;
     if (action == dlg->actions().at(1))
     {           
         mEditedEntry->clearGeoValue();
-    } 
+        mKeepExistingLocation = false;
+    }
+    if(!mMaptileService)
+    {
+        mMaptileService= new MapTileService();
+    }
     OstTraceFunctionExit0( CALENEDITORPRIVATE_SELECTEDITINGFINISHEDACTION_EXIT );
+}
+
+/*!
+    MapTileService setting.
+    \A valid location changed , update the user setting to maptileservice
+    User selected action will be saved as part of location maptile database
+ */
+void CalenEditorPrivate::updateToMapTileService()
+{      
+    //mMaptileService will be created only when  a valid location edited , 
+    //and  Confirmation dialog appears with action "yes" and "No" .
+    if(mMaptileService) {        
+        if (mMaptileService->isLocationFeatureEnabled(
+                MapTileService::AppTypeCalendar)) {
+            MapTileService::AddressType addressType;
+            addressType = MapTileService::AddressPlain;
+            int eventId = mEntry.id();
+            //This exported api takes care to save the user selected action into maptile database.            
+            mMaptileService->keepExistingLocation(eventId, addressType,mKeepExistingLocation);
+        }
+       
+        delete mMaptileService;
+        mMaptileService = 0;          
+   }  
 }
 
 /*!
@@ -1814,6 +1857,8 @@ CalenEditorPrivate::Action CalenEditorPrivate::handleDone()
 	// TODO: Need to check entry status here. EntryStillExistsL
 	switch (mDataHandler->shouldSaveOrDeleteOrDoNothing(mLaunchCalendar)) {
 		case CalenEditorPrivate::ActionSave:
+		    //Entry edited , update  to maptile service database,		   
+		    updateToMapTileService();
 			if (saveEntry()) {
 				OstTraceFunctionExit0( CALENEDITORPRIVATE_HANDLEDONE_EXIT );
 				return CalenEditorPrivate::ActionSave;
@@ -1835,10 +1880,14 @@ CalenEditorPrivate::Action CalenEditorPrivate::handleDone()
 void CalenEditorPrivate::launchDialog(QString title)
 {
 	OstTraceFunctionEntry0( CALENEDITORPRIVATE_LAUNCHDIALOG_ENTRY );
-	HbNotificationDialog *notificationDialog = new HbNotificationDialog();
-	notificationDialog->setTitle(title);
-	notificationDialog->setTimeout(HbPopup::ConfirmationNoteTimeout);
-	notificationDialog->show();
+	//dont show any dialog if exit is not normal
+	//exit app either from task switcher or red key
+	if(!mForcedExit){
+	    HbNotificationDialog *notificationDialog = new HbNotificationDialog();
+	    notificationDialog->setTitle(title);
+	    notificationDialog->setTimeout(HbPopup::ConfirmationNoteTimeout);
+	    notificationDialog->show();
+	}
 	OstTraceFunctionExit0( CALENEDITORPRIVATE_LAUNCHDIALOG_EXIT );
 }
 /*!
@@ -1859,7 +1908,11 @@ bool CalenEditorPrivate::saveEntry()
 			mAgendaUtil->store(*mEditedEntry);
 		}
 	}
-	if (mNewEntry) {
+	
+	//if entry is saved in the background by forced exit,
+	// no notification should be shown
+	//handled in launchDialog function
+	if (mNewEntry ) {
 		if(mEditedEntry->type() == AgendaEntry::TypeAppoinment) {
 			launchDialog(hbTrId("txt_calendar_dpopinfo_new_meeting_saved"));
 		} else if(isAllDayEvent()) {
@@ -2176,6 +2229,7 @@ TInt CalenEditorPrivate::EnvChangeCallbackL( TAny* aThisPtr )
 //
 TInt CalenEditorPrivate::DoEnvChange()
 {
+    OstTraceFunctionEntry0( CALENEDITORPRIVATE_DOENVCHANGE_ENTRY );
     if( iEnvChangeNotifier && (iEnvChangeNotifier->Change() & EChangesLocale)
             && !iIgnoreFirstLocaleChange) {
         mViewFromItem->populateDateTime(mEditedEntry->startTime(), true);
@@ -2190,7 +2244,22 @@ TInt CalenEditorPrivate::DoEnvChange()
     else {
         iIgnoreFirstLocaleChange = EFalse;
     }
+     OstTraceFunctionExit0( CALENEDITORPRIVATE_DOENVCHANGE_EXIT );
     return EFalse ;
+  
+}
+
+/*!
+    Slot to handle entry when app exit from red key or task switcher.
+ */
+void CalenEditorPrivate::forcedExit()
+{
+    OstTraceFunctionEntry0( CALENEDITORPRIVATE_FORCEDEXIT_ENTRY );
+    mForcedExit = true;
+    emit q_ptr->forcedExit() ;
+    //save the created entry 
+    forcedSaveEntry();
+    OstTraceFunctionExit0( CALENEDITORPRIVATE_FORCEDEXIT_EXIT );
 }
 
 // End of file	--Don't remove this.

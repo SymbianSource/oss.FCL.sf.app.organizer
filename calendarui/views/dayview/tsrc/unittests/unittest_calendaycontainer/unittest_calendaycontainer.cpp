@@ -22,7 +22,7 @@
 
 #include "calendayinfo.h"
 #include "calendaymodel.h"
-#include "calendayitem.h"
+#include "calendayeventspane.h"
 
 #define private public
 
@@ -34,6 +34,7 @@ QDateTime    MOCK_EVENTS_DATE;
 // Test variables
 QRectF gTestWindowRect = QRectF(0, 0, 10, 20);
 Qt::Orientation gTestOrientation = Qt::Vertical;
+QSizeF gTestContainerSize = QSizeF(100, 500);
 
 class TestCalenDayContainer : public QObject
 {
@@ -57,10 +58,12 @@ private slots:
     void testReset();
     void testViewResized();
     void testOrientationChanged();
+    void testupdateFloatingItemsList();
     void testCreateDefaultPrototype();
     void testGetTimedEventLayoutValues();
     void testCreateTouchEventAbsorbers();
     void testCrateAbsorberBetweenSlots();
+    void testDateTimeAtPos();
     
 
 private:
@@ -249,7 +252,7 @@ void TestCalenDayContainer::testViewResized()
 }
 
 /*!
-   It test change of orientation based on count of absorbers
+   It tests change of orientation based on count of absorbers
  */
 void TestCalenDayContainer::testOrientationChanged()
 {
@@ -259,6 +262,46 @@ void TestCalenDayContainer::testOrientationChanged()
    mContainer->orientationChanged(Qt::Vertical);
    
    QVERIFY(mContainer->mAbsorbers.count() != 0);
+}
+
+/*!
+   Test function that maintains floating items list
+   1) Null pointer check
+   2) Floating item notification received
+   3) The same floating item notification received
+   4) Static item notification received
+ */
+void TestCalenDayContainer::testupdateFloatingItemsList()
+{
+
+    CalenDayItemViewTest *itemView = new CalenDayItemViewTest(mContainer, new HbModelIterator());
+    //CalenDayContainer *container = itemView->mContainer;
+    const int floatingItemsCount = mContainer->mFloatingItemsList.count();
+    const int connectedSlotsCount = itemView->connectedSlots(SIGNAL(scrollPositionChanged(const QPointF&)));
+    
+    // 1) Test null pointer
+    mContainer->updateFloatingItemsList(0);
+    //Nothing happend, list remains unchanged
+    QCOMPARE(mContainer->mFloatingItemsList.count(), floatingItemsCount);
+    QCOMPARE(itemView->connectedSlots(SIGNAL(scrollPositionChanged(const QPointF&))), connectedSlotsCount);
+    
+    // 2) Floating item notification received
+    CalenDayItemTest *item = new CalenDayItemTest(mContainer);
+    item->mBackgroundType = CalenDayItem::EFloatingBackground;
+    mContainer->updateFloatingItemsList(item);
+    QCOMPARE(mContainer->mFloatingItemsList.count(), floatingItemsCount + 1);
+    QCOMPARE(itemView->connectedSlots(SIGNAL(scrollPositionChanged(const QPointF&))), connectedSlotsCount + 1);
+    
+    // 3) The same floating item notification received
+    mContainer->updateFloatingItemsList(item);
+    QCOMPARE(mContainer->mFloatingItemsList.count(), floatingItemsCount + 1);
+    QCOMPARE(itemView->connectedSlots(SIGNAL(scrollPositionChanged(const QPointF&))), connectedSlotsCount + 1);
+    
+    // 4) Static item notification received
+    item->mBackgroundType = CalenDayItem::EStaticBackground;
+    mContainer->updateFloatingItemsList(item);
+    QCOMPARE(mContainer->mFloatingItemsList.count(), floatingItemsCount);
+    QCOMPARE(itemView->connectedSlots(SIGNAL(scrollPositionChanged(const QPointF&))), connectedSlotsCount);
 }
 
 /*!
@@ -321,6 +364,38 @@ void TestCalenDayContainer::testCrateAbsorberBetweenSlots()
     testValue = mContainer->crateAbsorberBetweenSlots(0,1,false);
     QVERIFY(testValue);
     delete testValue;
+}
+
+/*!
+ Test dateTimeAtPos
+ 1. Position outside control
+ 2. Position in control, first half of hour (0-30 min)
+ 3. Position in control, second half of hour (30-60 min)
+ */
+void TestCalenDayContainer::testDateTimeAtPos()
+{
+    mContainer->setDate(QDate(2010, 10, 1));
+    mContainer->viewResized(gTestContainerSize);
+
+    QRectF geometry = mContainer->mEventsPaneElements.at(0)->geometry();
+    qreal halfHour = geometry.height() / 2;
+    
+    //1)
+    QPointF point(50, geometry.top() - 10);
+    QDateTime dateTime = mContainer->dateTimeAtPos(point);
+    QVERIFY(!dateTime.isValid());
+    
+    //2)
+    point = QPointF(50, geometry.top() + halfHour - 1);
+    dateTime = mContainer->dateTimeAtPos(point);
+    QVERIFY(dateTime.isValid());
+    QCOMPARE(dateTime.time(), QTime(0, 0));
+    
+    //3)
+    point = QPointF(50, geometry.top() + halfHour + 1);
+    dateTime = mContainer->dateTimeAtPos(point);
+    QVERIFY(dateTime.isValid());
+    QCOMPARE(dateTime.time(), QTime(0, 30));
 }
 
 

@@ -999,7 +999,6 @@ bool TimezoneClient::checkForDstChange(AlarmInfo& alarmInfo)
 	int ruleMatchIndex( KNoDifference );
 
 	TTimeIntervalSeconds secondsDifference;
-	TTime ruleMatchTime;
 
 	// Fetch lowest time offset for the year residing at aTime.
 	// This is used to determine if DST is on.
@@ -1048,9 +1047,6 @@ bool TimezoneClient::checkForDstChange(AlarmInfo& alarmInfo)
 			TTime tempTime( sevenDays );
 			TTime newTime( ruleTime.Int64() + tempTime.Int64() );
 
-			TTimeIntervalDays temp;
-			temp = newTime.DaysFrom( ruleTime );
-
 			if ( ( secondsDifference.Int() >= KNoDifference ) &&
 					( newTime > alarmTime) &&
 					( actualisedRule.iTimeOfChange < alarmTime ) &&
@@ -1058,7 +1054,6 @@ bool TimezoneClient::checkForDstChange(AlarmInfo& alarmInfo)
 				// If there is a match, save the index and break.
 				// We've got the rule and there's no need to continue with other rules.
 				ruleMatchIndex = ruleIndex;
-				ruleMatchTime = actualisedRule.iTimeOfChange;
 				break;
 			}
 		}

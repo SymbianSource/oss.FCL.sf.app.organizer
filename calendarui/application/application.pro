@@ -17,11 +17,11 @@
 TEMPLATE = app
 TARGET = calendar
 DEPENDPATH += ./src \
- 		./inc \
-		../controller/data
+			  ./inc \
+			  ../controller/data
 		
-INCLUDEPATH += ..\controller\inc \
-							 ..\inc
+INCLUDEPATH += ../controller/inc \
+			   ../inc
 
 CONFIG += hb
 
@@ -37,21 +37,18 @@ symbian: {
 	"../conf/calendarUI.confml				APP_LAYER_CONFML(calendarUI.confml)" \
 	"../conf/calendarUI_101F874B.crml		APP_LAYER_CRML(calendarUI_101F874B.crml)" \
 	# stubsis is added to provide IAD
-	"../stubsis/calendar_stub.sis             /epoc32/data/z/system/install/calendar_stub.sis" \
+	"../stubsis/calendar_stub.sis			/epoc32/data/z/system/install/calendar_stub.sis" \
 	# splashml
-	"resources/calendar.docml  			/epoc32/data/z/resource/hb/splashml/calendar.docml" \
-        "resources/calendar.splashml  		/epoc32/data/z/resource/hb/splashml/calendar.splashml" \
+	"resources/calendar.docml				/epoc32/data/z/resource/hb/splashml/calendar.docml" \
+    "resources/calendar.splashml			/epoc32/data/z/resource/hb/splashml/calendar.splashml" \
 	# backup_registration.xml
-	"data/backup_registration.xml             /epoc32/data/z/private/10005901/backup_registration.xml" \
-	"data/backup_registration.xml             /epoc32/release/winscw/urel/z/private/10005901/backup_registration.xml" \
-	"data/backup_registration.xml             /epoc32/release/winscw/udeb/z/private/10005901/backup_registration.xml"
-
-	
-
+	"data/backup_registration.xml			/epoc32/data/z/private/10005901/backup_registration.xml" \
+	"data/backup_registration.xml			/epoc32/release/winscw/urel/z/private/10005901/backup_registration.xml" \
+	"data/backup_registration.xml			/epoc32/release/winscw/udeb/z/private/10005901/backup_registration.xml"
 
 	LIBS += -lcalencontroller \
-		-lxqservice \ 
-		-lxqserviceutil
+			-lxqservice \ 
+			-lxqserviceutil
 
     TARGET.UID3 = 0x10005901
     
@@ -60,7 +57,6 @@ symbian: {
     TARGET.EPOCSTACKSIZE = 0x14000
     TARGET.EPOCHEAPSIZE = 0x200000  0x4000000
 
-    	
     INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 
     CONFIG += service
@@ -72,11 +68,11 @@ symbian: {
 
 # Input
 HEADERS += calenserviceprovider.h \
-			calenapplication.h
+		   calenapplication.h
 
 SOURCES += main.cpp \
-		 calenapplication.cpp \
-	     calenserviceprovider.cpp	
+		   calenapplication.cpp \
+		   calenserviceprovider.cpp	
 
 RESOURCES += calendar.qrc
 

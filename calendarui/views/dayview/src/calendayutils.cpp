@@ -77,6 +77,18 @@ qreal CalenDayUtils::screenWidth() const
 }
 
 /*!
+ \brief screenHeight
+ 
+ \return Height of main window's screen
+ */
+qreal CalenDayUtils::screenHeight() const
+{
+    ASSERT(mMainWindow);
+    
+    return mMainWindow->layoutRect().height();
+}
+
+/*!
  \brief hourElementWidth
  
  \return Width of hour element
@@ -222,7 +234,7 @@ qreal CalenDayUtils::calculateHourElementHeight() const
     qreal textHeight = 0.0;
     qreal verticalSpacing = 0.0;
         
-    qreal bottomSpacer = 4.1 * unitInPixels;
+    qreal bottomSpacer = 5 * unitInPixels;
     style.parameter(QString("hb-param-text-height-secondary"), textHeight, 
         deviceProfile);
     style.parameter(QString("hb-param-margin-gene-middle-vertical"), 

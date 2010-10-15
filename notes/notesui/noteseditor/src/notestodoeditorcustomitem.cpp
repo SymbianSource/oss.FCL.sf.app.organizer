@@ -209,7 +209,7 @@ void NotesTodoEditorCustomItem::launchTimePicker()
 	mTimePickerDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 
 	// Set the heading for the dialog.
-	HbLabel * timeLabel = new HbLabel("Time", mTimePickerDialog);
+	HbLabel * timeLabel = new HbLabel(hbTrId("txt_calendar_title_alarm_time"), mTimePickerDialog);
 	mTimePickerDialog->setHeadingWidget(timeLabel);
 	// Create the tumbler.
 	HbDateTimePicker *timePicker = new HbDateTimePicker(mTimePickerDialog);
@@ -252,7 +252,7 @@ void NotesTodoEditorCustomItem::launchDatePicker()
 	mDatePickerDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 	
 	// Set the heading for the dialog.
-	HbLabel * timeLabel = new HbLabel("Date", mDatePickerDialog);
+	HbLabel * timeLabel = new HbLabel(hbTrId("txt_calendar_title_alarm_date"), mDatePickerDialog);
 	mDatePickerDialog->setHeadingWidget(timeLabel);
 
 	// Create the tumbler.
@@ -322,7 +322,7 @@ void NotesTodoEditorCustomItem::selectDueDate()
 		mNotesTodoeditorPvt->dateFormatString()));
 
 	// Set the heading text
-	HbLabel *label = new HbLabel(hbTrId("txt_notes_formlabel_due_date"));
+	HbLabel *label = new HbLabel(hbTrId("txt_calendar_title_due_date"));
 	mDatePickerDialog->setHeadingWidget(label);
 
 	// Set the tumbler as the content widget.

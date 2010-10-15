@@ -98,6 +98,13 @@ class CalenContextImpl : public MCalenContext
          */
         void setFocusDateAndTimeAndInstance( const QDateTime& focusDateTime,
                                               const TCalenInstanceId& aInstanceId);
+        
+        /**
+         * Sets start date and time that should be used for creating new instance.
+         * 
+         * @param startDateTime Start date and time for new instance
+         */
+        void setStartDateAndTimeForNewInstance(const QDateTime &startDateTime);
 
     // Getters
         /**
@@ -120,7 +127,14 @@ class CalenContextImpl : public MCalenContext
          * this will be TCalenInstanceId::NullInstanceIdL()
          */
         TCalenInstanceId instanceId() const;
-
+        
+        /**
+         * Returns start date and time that should be used for creating new instance.
+         * Check isValid() to verify if returnd value is valid.
+         * 
+         * @return Start date and time for new instance
+         */
+        QDateTime startDateAndTimeForNewInstance() const;
         
 public:	// Multiple Context support
 		
@@ -167,6 +181,10 @@ public:	// Multiple Context support
         // Multiple context ids
         QList<TCalenInstanceId> mMutlipleContextIds;
         
+        /**
+         * Indicates if default time should be used for new instance creation.
+         */
+        QDateTime mDateTimeForNewInstance;
     };
 
 #endif // CALENCONTEXTIMPL_H

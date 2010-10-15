@@ -118,7 +118,7 @@ private:
 	bool 			mIsLongTop;
 	bool			mIsScreenShotCapruted; // check if the screenshot captured is valid
 	QVariantHash	mScreenShot; // screenshot
-	AfActivityStorage *mActivityStorage;;
+	AfActivityStorage *mActivityStorage;
 };
 
 #endif // NOTESMAINVIEW_H

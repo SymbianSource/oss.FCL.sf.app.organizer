@@ -69,6 +69,7 @@ HEADERS += \
 RESOURCES += \
 		noteseditor.qrc
 		
-TRANSLATIONS += noteseditor.ts		
+TRANSLATIONS += noteseditor.ts \
+		todoeditor.ts		
 
 # End of file	--Don't remove this.

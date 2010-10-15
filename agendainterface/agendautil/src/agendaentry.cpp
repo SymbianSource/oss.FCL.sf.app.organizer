@@ -2068,6 +2068,7 @@ bool AgendaEntry::operator==(const AgendaEntry& other) const
 			&& d->m_repeatRule == other.d->m_repeatRule
 			&& d->m_startTime == other.d->m_startTime
 			&& d->m_summaryText == other.d->m_summaryText
+			&& d->m_dtStamp == other.d->m_dtStamp
 			&& d->m_lastModTime == other.d->m_lastModTime
 			&& d->m_entryStatus == other.d->m_entryStatus
 			&& d->m_favourite == other.d->m_favourite
@@ -2094,6 +2095,7 @@ AgendaEntryPrivate::AgendaEntryPrivate() : ref(1)
 	m_favourite = 0;
 	m_alarm = AgendaAlarm();
 	m_geoValue = AgendaGeoValue();
+	m_dtStamp  = m_completedDateTime= m_lastModTime = m_startTime = m_endTime = QDateTime();
 }
 
 bool AgendaEntryPrivate::deleteCategory(const AgendaCategory& category)

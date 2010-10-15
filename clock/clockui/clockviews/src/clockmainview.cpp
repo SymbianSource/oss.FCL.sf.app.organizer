@@ -524,9 +524,10 @@ void ClockMainView::removeSnoozedAlarm()
 	\param key The key which got changed in cenrep.
 	\param value The new value of that key.
  */
-void ClockMainView::eventMonitor(
-		const XQSettingsKey& key, const QVariant& value)
+void ClockMainView::eventMonitor(const XQSettingsKey& key, const QVariant& value)
 {
+	Q_UNUSED(value)
+	
 	OstTraceFunctionEntry0( CLOCKMAINVIEW_EVENTMONITOR_ENTRY );
 	if (key.uid() == KCRUidClockApp && key.key() == KClockType) {
 		// Update view

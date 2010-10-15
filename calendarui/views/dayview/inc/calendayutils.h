@@ -30,6 +30,7 @@ public:
     ~CalenDayUtils();
     
     qreal screenWidth() const;
+    qreal screenHeight() const;
     qreal hourElementWidth() const;
     qreal hourElementHeight() const;
     qreal minEventHeight() const;

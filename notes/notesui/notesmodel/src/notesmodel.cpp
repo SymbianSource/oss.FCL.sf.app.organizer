@@ -515,9 +515,12 @@ void NotesModel::appendNotesToModel(QList<AgendaEntry> &agendaEntryList)
 		QString modifiedText;
 
 		// Show the creation time if entry is not modified.
-		if (entry.dtStamp().isValid()) {
-			QDateTime creationDateTime = entry.dtStamp();
-
+        // Modified time will be equal to creation time if the entry is newly created
+        QDateTime creationDateTime = entry.dtStamp();
+        QDateTime modifiedDateTime = entry.lastModifiedDateTime();
+        
+        if (creationDateTime.isValid() && modifiedDateTime.isValid() &&
+                modifiedDateTime == creationDateTime) {
 			// If created on today,show only creation time otherwise show the
 			// creation date.
 			if ((QDate::currentDate()) == creationDateTime.date()) {
@@ -532,8 +535,6 @@ void NotesModel::appendNotesToModel(QList<AgendaEntry> &agendaEntryList)
 						creationDateTime.date().toString(dateFormatString());
 			}
 		} else {
-			QDateTime modifiedDateTime = entry.lastModifiedDateTime();
-
 			// If modified on today,show only modified time otherwise show the
 			// modified date.
 			if ((QDate::currentDate()) == modifiedDateTime.date() ) {
@@ -777,9 +778,15 @@ bool NotesModel::insertNoteToModel(QModelIndex &index, ulong id)
 	QString modifiedText;
 
 	// Show the creation time if entry is not modified.
-	if (entry.dtStamp().isValid()) {
-		QDateTime creationDateTime = entry.dtStamp();
-
+	// Modified time will be equal to creation time if the entry is newly created
+	QDateTime creationDateTime = entry.dtStamp();
+	QDateTime modifiedDateTime = entry.lastModifiedDateTime();
+	
+	if (creationDateTime.isValid() && modifiedDateTime.isValid() &&
+	        modifiedDateTime == creationDateTime
+	       /* creationDateTime.time().hour() == modifiedDateTime.time().hour() &&
+	        creationDateTime.time().minute() == modifiedDateTime.time().minute() &&
+	        creationDateTime.time().second() == modifiedDateTime.time().second()*/) {
 		// If created on today,show only creation time otherwise show the
 		// creation date.
 		if ((QDate::currentDate()) == creationDateTime.date()) {
@@ -794,8 +801,6 @@ bool NotesModel::insertNoteToModel(QModelIndex &index, ulong id)
 					creationDateTime.date().toString(dateFormatString());
 		}
 	} else {
-		QDateTime modifiedDateTime = entry.lastModifiedDateTime();
-
 		// If modified on today,show only modified time otherwise show the
 		// modified date.
 		if ((QDate::currentDate()) == modifiedDateTime.date() ) {

@@ -53,8 +53,9 @@
 CalenNativeView::CalenNativeView(MCalenServices &services) :
 	mServices(services),
 	mEntriesInDataBase(false),
-	mIsCapturedScreenShotValid(false),
-	mDatePicker(0)
+	mDatePicker(0),
+    mIsCapturedScreenShotValid(false),
+    mForcedExit(false)
 {
     OstTraceFunctionEntry0( CALENNATIVEVIEW_CALENNATIVEVIEW_ENTRY );
     
@@ -69,7 +70,7 @@ CalenNativeView::CalenNativeView(MCalenServices &services) :
 	notificationArray.Append(ECalenNotifySystemLocaleChanged);
 	notificationArray.Append(ECalenNotifyContextChanged);
 	notificationArray.Append(ECalenNotifyCloseDialogs);
-
+	notificationArray.Append(ECalenNotifyForcedExit);
 	mServices.RegisterForNotificationsL(this, notificationArray);
 
 	CleanupStack::PopAndDestroy(&notificationArray);
@@ -96,7 +97,17 @@ void CalenNativeView::populationComplete()
     
 	// Population is complete, issue the notification
 	mServices.IssueNotificationL(ECalenNotifyViewPopulationComplete);
-	
+	//if entry is created in editor, and app closed from either 
+	// task switcher or red key
+	//latest entry should be shown in activity
+	//provide uinfo to user that entry get saved
+	if(mForcedExit){
+	    captureScreenshot(true);
+	    saveActivity();    
+	}
+	else{
+	    captureScreenshot(false);
+	}
 	OstTraceFunctionExit0( CALENNATIVEVIEW_POPULATIONCOMPLETE_EXIT );
 }
 
@@ -262,6 +273,10 @@ void CalenNativeView::HandleNotification(const TCalenNotification notification)
 		case ECalenNotifyCloseDialogs: {
 			// Emit the signal to close the dialogs which are already opened
 			emit closeDialogs();
+		}
+		break;
+		case ECalenNotifyForcedExit:{
+            mForcedExit = true;
 		}
 		break;
 		default:

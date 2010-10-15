@@ -45,6 +45,7 @@ private slots:
 
     void testInstance();
     void testScreenWidth();
+    void testScreenHeight();
     void testHourElementWidth();
     void testHourElementHeight();
     void testContentWidth();
@@ -120,6 +121,12 @@ void TestCalenDayUtils::testScreenWidth()
     QVERIFY(sw == gTestWindowRect.width());
 }
 
+void TestCalenDayUtils::testScreenHeight()
+{
+    qreal sw = mUtils->screenHeight();
+    QVERIFY(sw == gTestWindowRect.height());
+}
+
 void TestCalenDayUtils::testHourElementWidth()
 {
     qreal hEW = mUtils->hourElementWidth();
@@ -133,7 +140,7 @@ void TestCalenDayUtils::testHourElementHeight()
 {
 
     qreal hEH = mUtils->hourElementHeight();
-    qreal myHeight = mUnit * 4.1 + param_value * 2 + param_value * 2;
+    qreal myHeight = mUnit * 5 + param_value * 2 + param_value * 2;
 
     QCOMPARE(hEH, myHeight);
 }

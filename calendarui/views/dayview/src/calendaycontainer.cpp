@@ -53,9 +53,10 @@
  Sets container initial geometry, creates hours area widgets.
  \param parent Parent object
  */
-CalenDayContainer::CalenDayContainer(QGraphicsItem *parent) :
+CalenDayContainer::CalenDayContainer(QGraphicsObject *parent) :
     HbAbstractItemContainer(parent), mGeometryUpdated(false), mInfo(0)
 {
+    mEventsPaneElements.clear();
     getTimedEventLayoutValues(mLayoutValues);
 
     QGraphicsLinearLayout* timeLinesLayout = new QGraphicsLinearLayout(
@@ -67,6 +68,7 @@ CalenDayContainer::CalenDayContainer(QGraphicsItem *parent) :
             element->setDrawTopLine(true);
         }
         timeLinesLayout->addItem(element);
+        mEventsPaneElements.append(element);
     }
     timeLinesLayout->setContentsMargins(0.0, 0.0, 0.0, 0.0);
     timeLinesLayout->setSpacing(0.0);
@@ -434,11 +436,6 @@ void CalenDayContainer::setDate(const QDate &date)
     mDate = date;
 }
 
-// -----------------------------------------------------------------------------
-// date()
-// Returns date of the container.
-// -----------------------------------------------------------------------------
-//
 /*!
  \brief Returns date of the container.
  
@@ -447,6 +444,43 @@ void CalenDayContainer::setDate(const QDate &date)
 const QDate &CalenDayContainer::date() const
 {
     return mDate;
+}
+
+/*!
+ \brief Calculates date and time for scene position given by parameter.
+ If date and time for given position cannot be calculated, invalid dateTime is returned.
+ The accuracy of returned time is 30 minutes. 
+ 
+ \sa pos Position in scene.
+ */
+QDateTime CalenDayContainer::dateTimeAtPos(const QPointF &pos)
+{
+    QPointF pointPos = mapFromScene(pos);
+    QDateTime dateTime;
+    int hour = -1;
+    int minutes = 0;
+    for (int i = 0; i < mEventsPaneElements.count(); i++) {
+        QRectF paneGeometry = mEventsPaneElements.at(i)->geometry();
+        if (paneGeometry.contains(pointPos)) {
+            hour = i;
+            QRectF firstHalf(paneGeometry.left(), paneGeometry.top(),
+                paneGeometry.width(), paneGeometry.height() / 2);
+            if (firstHalf.contains(pointPos)) {
+                minutes = 0;
+            }
+            else {
+                minutes = 30;
+            }
+            break;
+        }
+    }
+
+    if (hour >= 0) {
+        dateTime.setDate(mDate);
+        dateTime.setTime(QTime(hour, minutes));
+    }
+
+    return dateTime;
 }
 
 /*!
@@ -542,6 +576,41 @@ TouchEventAbsorber *CalenDayContainer::crateAbsorberBetweenSlots(
     }
 
     return absorber;
+}
+
+/*!
+ \brief This slot is called when backround type of item changes. It maintains mFloatingItemsList.
+ Thanks that scroll events are propagated only to items that might be interested in getting such
+ information.
+ 
+ \a item Pointer to the item that reported backround type change.
+ */
+void CalenDayContainer::updateFloatingItemsList(const CalenDayItem *item)
+{    
+    if(!item){
+        return;
+    }
+
+    bool isItemOnList = mFloatingItemsList.contains(item);
+    
+    switch(item->backgroundType()){
+        
+        case CalenDayItem::EFloatingBackground:
+            
+            if(!isItemOnList){
+                connect(itemView(), SIGNAL(scrollPositionChanged(const QPointF&)), item, SLOT(scrollBackground(const QPointF&)));
+                mFloatingItemsList.append(item);
+            }
+            break;
+        
+        case CalenDayItem::EStaticBackground:
+            
+            if(isItemOnList){
+                disconnect(itemView(), SIGNAL(scrollPositionChanged(const QPointF&)), item, SLOT(scrollBackground(const QPointF&)));
+                mFloatingItemsList.removeOne(item);
+            }
+            break;
+    }
 }
 
 

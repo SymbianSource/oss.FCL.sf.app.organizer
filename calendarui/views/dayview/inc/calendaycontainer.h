@@ -27,6 +27,8 @@
 // Forward declarations
 class CalenDayInfo;
 class TouchEventAbsorber;
+class CalenDayEventsPane;
+class CalenDayItem;
 
 // Class declaration
 class CalenDayContainer : public HbAbstractItemContainer
@@ -34,7 +36,7 @@ class CalenDayContainer : public HbAbstractItemContainer
     Q_OBJECT
 
 public:
-    CalenDayContainer(QGraphicsItem *parent = 0);
+    CalenDayContainer(QGraphicsObject *parent = 0);
     ~CalenDayContainer();
 
     void itemAdded(int index, HbAbstractViewItem *item, bool animate);
@@ -46,9 +48,12 @@ public:
     CalenDayInfo* dayInfo();
     void setDate(const QDate &date);
     const QDate &date() const;
+    
+    QDateTime dateTimeAtPos(const QPointF &pos);
 
 public slots:
     void orientationChanged(Qt::Orientation orientation);
+    void updateFloatingItemsList(const CalenDayItem *item);
 
 protected:
     HbAbstractViewItem * createDefaultPrototype() const;
@@ -102,6 +107,8 @@ private:
     LayoutValues mLayoutValues; //!< Keeps layout values, see LayoutValues class
     QList<TouchEventAbsorber*> mAbsorbers; //!< Keeps needed touch absorbers
     QDate mDate; //!< Keeps date currently associated with this container
+    QList<const CalenDayItem*> mFloatingItemsList; //!<Stores list of items that have floating background.
+	QList<CalenDayEventsPane*> mEventsPaneElements; //!< List of event panes
 };
 
 

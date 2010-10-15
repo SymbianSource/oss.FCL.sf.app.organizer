@@ -51,8 +51,7 @@ mSoftKeyAction(NULL),
 mGoToTodayAction(NULL),
 mSwitchToDayViewAction(NULL),
 mActionTaken(false),
-mIsAboutToQuitEventConnected(false),
-mDayViewActivated(false)
+mIsAboutToQuitEventConnected(false)
 {
     OstTraceFunctionEntry0( CALENAGENDAVIEW_CALENAGENDAVIEW_ENTRY );
     
@@ -129,7 +128,7 @@ void CalenAgendaView::setupView(CalenDocLoader *docLoader)
 void CalenAgendaView::doPopulation()
     {
     OstTraceFunctionEntry0( CALENAGENDAVIEW_DOPOPULATION_ENTRY );
-    mDayViewActivated = false;
+    
     // The content widget has not been constructed. Don't do anything
     if (!mAgendaViewWidget) {
         OstTraceFunctionExit0( CALENAGENDAVIEW_DOPOPULATION_EXIT );
@@ -177,7 +176,7 @@ void CalenAgendaView::doPopulation()
 
     // Population is complete, issue a notification
     populationComplete();
-    captureScreenshot(true);
+   
     OstTraceFunctionExit0( DUP1_CALENAGENDAVIEW_DOPOPULATION_EXIT );
     }
 
@@ -310,7 +309,7 @@ void CalenAgendaView::setupActions()
 //    
 void CalenAgendaView::createNewEvent()
 {
- 
+    captureScreenshot(true);
     mAgendaViewWidget->createNewEvent();
 }
 
@@ -372,7 +371,7 @@ void CalenAgendaView::launchMonthView()
 void CalenAgendaView::launchDayView()
 {
     OstTraceFunctionEntry0( CALENAGENDAVIEW_LAUNCHDAYVIEW_ENTRY );
-    mDayViewActivated = true;
+    
     // Issue the command to launch the day view
     mServices.IssueCommandL(ECalenDayView);
     
@@ -386,12 +385,9 @@ void CalenAgendaView::launchDayView()
 void CalenAgendaView::clearListModel()
     {
     OstTraceFunctionEntry0( CALENAGENDAVIEW_CLEARLISTMODEL_ENTRY );
-    // do not disconnect if day view is open
-    // save the agenda view as an activity
-    if(!mDayViewActivated){
+    
 	// day view is removed from the list disconnect for aboutToQuit events
     disconnectAboutToQuitEvent();
-    }
     mAgendaViewWidget->clearListModel();
     
     OstTraceFunctionExit0( CALENAGENDAVIEW_CLEARLISTMODEL_EXIT );

@@ -19,10 +19,12 @@ TEMPLATE = lib
 CONFIG += hb
 TARGET = caleneditor
 DEFINES += CALENEDITOR_LIB
+
 INCLUDEPATH += ./src \
 			./inc \
 			./traces \
-			..\inc
+			../inc
+
 DEPENDPATH += ./src \
 			  ./inc \
 			  ./data
@@ -35,20 +37,21 @@ symbian: {
 	
 	LIBS += -lagendainterface \
 			-lcalencommonutils \
-                        -lxqservice \
+            -lxqservice \
 			-lcalenlauncher \
-			-lbafl
+			-lbafl\
+			-lmaptileservice
 			
 	INCLUDEPATH += $$APP_LAYER_SYSTEMINCLUDE
 }
 
 SOURCES += caleneditor.cpp \
-					caleneditorcustomitem.cpp \
-					caleneditor_p.cpp \
-					caleneditordocloader.cpp \
-					caleneditorreminderfield.cpp \
-					caleneditorrepeatfield.cpp \
-					caleneditordatahandler.cpp
+		   caleneditorcustomitem.cpp \
+		   caleneditor_p.cpp \
+		   caleneditordocloader.cpp \
+		   caleneditorreminderfield.cpp \
+		   caleneditorrepeatfield.cpp \
+		   caleneditordatahandler.cpp
 					
 HEADERS +=	../../organizer_plat/calendar_editor_api/inc/caleneditor.h \
             caleneditorcustomitem.h \

@@ -341,6 +341,15 @@ void NotesFavoriteView::markNoteAsNotFavourite()
 		entry.setFavourite(0);
 	}
 	mAgendaUtil->store(entry);
+	
+		// Show the soft notification.
+	HbNotificationDialog *notificationDialog = new HbNotificationDialog();
+	notificationDialog->setTimeout(
+			HbNotificationDialog::ConfirmationNoteTimeout);
+	notificationDialog->setTitle(
+			hbTrId("txt_notes_dpopinfo_removed_from_favorites"));
+	notificationDialog->show();
+	
 	OstTraceFunctionExit0( NOTESFAVORITEVIEW_MARKNOTEASNOTFAVOURITE_EXIT );
 }
 

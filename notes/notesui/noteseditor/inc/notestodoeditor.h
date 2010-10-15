@@ -39,6 +39,7 @@ class HbDateTimePicker;
 class HbDialog;
 class HbGroupBox;
 class HbDataFormModelItem;
+class HbTranslator;
 class AgendaEntry;
 class NotesEditorPrivate;
 class NotesEditorDocLoader;
@@ -71,6 +72,7 @@ private:
 	void addMenu();
 	bool validAlarmSet();
 	void addDiscardChangesAction();
+	void saveActivity();
 
 private slots:
 	void saveTodo();
@@ -80,7 +82,7 @@ private slots:
 	void handleDeleteAction();
 	void handleDiscardChangesAction();
 	void selectedAction(HbAction *action);
-
+	void forcedExit();
 private:
 	NotesEditorPrivate* mOwner;
 
@@ -102,11 +104,15 @@ private:
 	HbAction *mDeleteTodoAction;
 	HbAction *mCancelDeleteAction;
 	HbGroupBox *mSubHeading;
-
+	
+	HbTranslator *mTranslator;
+	
 	NotesEditorDocLoader *mDocLoader;
+	
 
 	int mDescriptionItemIndex;
 	bool mDiscardChangesActive;
+	bool mForcedExit;
 private:
 	friend class NotesEditorPrivate;
 };

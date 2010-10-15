@@ -19,6 +19,10 @@
 #define CALENDAYCONTAINERTEST_H
 
 #include <QObject>
+#include <HbModelIterator>
+#include <HbAbstractItemView>
+
+#include "calendayitem.h"
 #include "calendaycontainer.h"
 
 class CalenDayContainerTest : public CalenDayContainer
@@ -26,12 +30,50 @@ class CalenDayContainerTest : public CalenDayContainer
     Q_OBJECT
 
 public:
-    CalenDayContainerTest(QGraphicsItem *parent = 0)
+    CalenDayContainerTest(QGraphicsObject *parent = 0)
     : CalenDayContainer(parent)
     {
         
     }
     
+    
+    friend class TestCalenDayContainer;
+};
+
+class CalenDayItemTest : public CalenDayItem
+{
+    Q_OBJECT
+
+public:
+    CalenDayItemTest(const CalenDayContainer *container)
+    : CalenDayItem(container)
+    {
+        
+    }
+    
+    friend class TestCalenDayContainer;
+};
+
+class CalenDayItemViewTest : public HbAbstractItemView
+{
+public:
+    CalenDayItemViewTest(HbAbstractItemContainer *container,
+                       HbModelIterator *iterator,
+                       QGraphicsItem *parent = 0)
+    : HbAbstractItemView(container, iterator, parent)
+    {
+    }
+    
+    int connectedSlots(const char * signal)
+    {
+        return receivers(signal);
+    }
+    
+    void scrollTo(const QModelIndex &index, ScrollHint hint = EnsureVisible)
+    {
+        Q_UNUSED(index)
+        Q_UNUSED(hint)
+    }
     
     friend class TestCalenDayContainer;
 };

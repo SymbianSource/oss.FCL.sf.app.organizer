@@ -15,14 +15,14 @@
 *
 */
 
-#ifndef UNITTEST_CALENDAYITEM_IBY
-#define UNITTEST_CALENDAYITEM_IBY
+#ifndef UNITTEST_CALENDAYVIEW_IBY
+#define UNITTEST_CALENDAYVIEW_IBY
 
-S60_APP_EXE(unittest_calendayitem)
-S60_APP_RESOURCE(unittest_calendayitem)
+S60_APP_EXE(unittest_calendayview)
+S60_APP_RESOURCE(unittest_calendayview)
 
 // Application registration file.
 data=DATAZ_\private\10003a3f\import\apps\unittest_calendayview_reg.rsc		\private\10003a3f\import\apps\unittest_calendayview_reg.rsc
 
 
-#endif		// UNITTEST_CALENDAYITEM_IBY
+#endif		// UNITTEST_CALENDAYVIEW_IBY

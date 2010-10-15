@@ -54,7 +54,7 @@ class CalenEditorReminderField;
 class CalenEditorRepeatField;
 class CalenEditorDataHandler;
 class CEnvironmentChangeNotifier;		// Receive system event notifications
-
+class MapTileService;
 // Constants
 const int KNoOfDaysInWeek = 7;
 
@@ -117,7 +117,7 @@ public:
 	int getReminderCount();
 	bool isEditRangeThisOnly();
 	bool isAllDayFieldAdded();
-	void forcedSaveEntry();
+	
 
 	/**
 	 * Called from CEnvironmentChangeNotifier when the
@@ -170,6 +170,7 @@ private:
 	QDateTime defaultTimeSameDay( );
 	void refreshTimeForUncheckAllDay();
 	void launchDialog(QString title);
+	void updateToMapTileService();
 	
 private slots:
 	void handleSubjectChange(const QString subject);
@@ -195,6 +196,8 @@ private slots:
 	void closeEditor();
 	void handleLocationEditingFinished();
 	void selectEditingFinishedAction(HbAction* action);	
+	void forcedSaveEntry();
+	void forcedExit();
 	
 private:
 	enum EditRange {
@@ -234,7 +237,7 @@ private:
 	HbAction *mDescriptionAction;
 	HbMainWindow *mMainWindow;
 	HbTranslator *mTranslator;
-	
+	MapTileService *mMaptileService;
 	bool mNewEntry;
 	bool mDescriptionItemAdded;
 	bool mIsChild;
@@ -242,7 +245,8 @@ private:
 	bool mOwnsAgendaUtil;
 	bool mLaunchCalendar;
 	bool mMenuItemAdded;
-
+	bool mKeepExistingLocation;
+	bool mForcedExit;
 	// Notifications about locale and time changes
 	CEnvironmentChangeNotifier* iEnvChangeNotifier;
 	bool iIgnoreFirstLocaleChange;

@@ -18,6 +18,8 @@
 
 // System includes
 #include <QDateTime>
+#include <QInputContext>
+
 #include <HbApplication>
 #include <HbLineEdit>
 #include <HbMainWindow>
@@ -38,6 +40,8 @@
 #include <HbDialog>
 #include <HbGroupBox>
 #include <HbMessageBox>
+#include <HbTranslator>
+#include <HbApplication>
 
 // User includes
 #include "notestodoeditor.h"
@@ -75,10 +79,15 @@ NotesTodoEditor::NotesTodoEditor(
  mOwner(owner),
  mReminderEnabler(0),
  mReminderItem(0),
+ mTranslator(0),
  mDescriptionItemIndex(5),
- mDiscardChangesActive(false)
+ mDiscardChangesActive(false),
+ mForcedExit(false)
 {
 	OstTraceFunctionEntry0( NOTESTODOEDITOR_NOTESTODOEDITOR_ENTRY );
+	
+	mTranslator = new HbTranslator("todoeditor");
+
 	mDocLoader = new NotesEditorDocLoader;
 	Q_ASSERT(mDocLoader);
 
@@ -111,6 +120,13 @@ NotesTodoEditor::NotesTodoEditor(
 	QList <HbAbstractViewItem*> prototypes = mDataForm->itemPrototypes();
 	prototypes.append(customItem);
 	mDataForm->setItemPrototypes(prototypes);
+
+	//if editor is open in background, and user close the app from task switcher
+	//entry should get saved
+    connect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()),
+             this, SLOT(forcedExit()));
+
+
 	OstTraceFunctionExit0( NOTESTODOEDITOR_NOTESTODOEDITOR_EXIT );
 }
 
@@ -126,6 +142,15 @@ NotesTodoEditor::~NotesTodoEditor()
 
 	mDocLoader->reset();
 	delete mDocLoader;
+	
+	if (mTranslator) {
+	    delete mTranslator;
+	    mTranslator = 0;
+	}
+	
+	if(mEditor){
+	    delete mEditor;
+	}
 	OstTraceFunctionExit0( DUP1_NOTESTODOEDITOR_NOTESTODOEDITOR_EXIT );
 }
 
@@ -265,7 +290,7 @@ void NotesTodoEditor::addDiscardChangesAction()
 {
 	OstTraceFunctionEntry0( NOTESTODOEDITOR_ADDDISCARDCHANGESACTION_ENTRY );
 	if(!mDiscardChangesActive) {
-		mDiscardAction = new HbAction(hbTrId("txt_notes_opt_discard_changes"));
+		mDiscardAction = new HbAction(hbTrId("txt_calendar_opt_discard_changes"));
 
 		mEditor->menu()->addAction(mDiscardAction);
 
@@ -298,14 +323,14 @@ void NotesTodoEditor::execute(AgendaEntry entry)
 		// Insert description item
 		insertDescriptionItem();
 
-		mDescriptionAction->setText(hbTrId("txt_notes_opt_remove_description"));
+		mDescriptionAction->setText(hbTrId("txt_calendar_opt_remove_description"));
 		viewMenu->addAction(mDescriptionAction);
 
 		connect(
 				mDescriptionAction, SIGNAL(triggered()),
 				this, SLOT(handleRemoveDescriptionAction()));
 	} else {
-		mDescriptionAction->setText(hbTrId("txt_notes_opt_add_description"));
+		mDescriptionAction->setText(hbTrId("txt_calendar_opt_add_description"));
 		viewMenu->addAction(mDescriptionAction);
 
 		connect(
@@ -315,9 +340,9 @@ void NotesTodoEditor::execute(AgendaEntry entry)
 
 	// Update the sub heading based on the new /existing entry
 	if (mOwner->mNewEntry) {
-		mSubHeading->setHeading(hbTrId("txt_notes_subhead_new_todo"));
+		mSubHeading->setHeading(hbTrId("txt_calendar_subhead_new_todo"));
 	} else {
-		mSubHeading->setHeading(hbTrId("txt_notes_subhead_todo"));
+		mSubHeading->setHeading(hbTrId("txt_calendar_subhead_todo"));
 	}
 
 	// Store the current view and set our view as the current view.
@@ -406,7 +431,7 @@ void NotesTodoEditor::insertDueDateItem()
 			(HbDataFormModelItem::CustomItemBase + DueDateItemOffset);
 
 	mDueDateItem = mFormModel->appendDataFormItem(
-			itemType, hbTrId("txt_notes_formlabel_due_date"),
+			itemType, hbTrId("txt_calendar_formlabel_due_date"),
 			mFormModel->invisibleRootItem());
 
 	QString dueDateText;
@@ -436,7 +461,7 @@ void NotesTodoEditor::insertReminderToggle()
 			tr(""), mFormModel->invisibleRootItem());
 
 	mReminderEnabler->setContentWidgetData(
-			QString("text"), QString(hbTrId("txt_notes_formlabel_alarm")));
+			QString("text"), QString(hbTrId("txt_calendar_formlabel_alarm")));
 
 	if (!mOwner->mModifiedNote.alarm().isNull()) {
 		mReminderEnabler->setContentWidgetData("checkState",Qt::Checked);
@@ -462,7 +487,7 @@ void NotesTodoEditor::handleReminderItem(int checked)
 		(HbDataFormModelItem::CustomItemBase + AlarmDateItemOffset);
 
 		mReminderItem = mFormModel->insertDataFormItem(
-				3,itemType,hbTrId("txt_notes_formlabel_alarm_date_and_time"));
+				3,itemType,hbTrId("txt_calendar_formlabel_alarm_date_and_time"));
 
 		// Set alarm time to the buttton.
 		QString alarmTimeText;
@@ -536,13 +561,13 @@ void NotesTodoEditor::insertPriorityItem()
 	OstTraceFunctionEntry0( NOTESTODOEDITOR_INSERTPRIORITYITEM_ENTRY );
 	mPriorityItem = mFormModel->appendDataFormItem(
 			HbDataFormModelItem::ComboBoxItem,
-			hbTrId("txt_notes_setlabel_priority"),
+			hbTrId("txt_calendar_setlabel_priority"),
 			mFormModel->invisibleRootItem());
 
 	QStringList priorityList;
-	priorityList << hbTrId("txt_notes_setlabel_priority_val_high")
-				 << hbTrId("txt_notes_setlabel_priority_val_normal")
-				 << hbTrId("txt_notes_setlabel_priority_val_low");
+	priorityList << hbTrId("txt_calendar_setlabel_repeat_val_high")
+				 << hbTrId("txt_calendar_setlabel_repeat_val_normal")
+				 << hbTrId("txt_calendar_setlabel_repeat_val_low");
 	mPriorityItem->setContentWidgetData(QString("items"), priorityList);
 
 	int priority = mOwner->mModifiedNote.priority();
@@ -567,11 +592,13 @@ void NotesTodoEditor::insertDescriptionItem()
 	OstTraceFunctionEntry0( NOTESTODOEDITOR_INSERTDESCRIPTIONITEM_ENTRY );
 	mDescriptionItem = mFormModel->appendDataFormItem(
 			HbDataFormModelItem::TextItem,
-			hbTrId("txt_notes_formlabel_val_description"),
+			hbTrId("txt_calendar_formlabel_description"),
 			mFormModel->invisibleRootItem());
 
 	mDescriptionItemIndex =
 			mFormModel->indexFromItem(mDescriptionItem).row();
+	
+	QModelIndex modelIndex = mFormModel->indexFromItem(mDescriptionItem);
 
 	mDescriptionItem->setContentWidgetData("maxRows", MaxRowsInTextItem);
 	mDescriptionItem->setContentWidgetData(
@@ -580,6 +607,27 @@ void NotesTodoEditor::insertDescriptionItem()
 	mDataForm->addConnection(
 			mDescriptionItem, SIGNAL(textChanged(const QString)),
 			this, SLOT(updateDescription(const QString)));
+	
+	HbDataFormViewItem* view_Item = static_cast<HbDataFormViewItem*>(
+	        static_cast<HbAbstractItemView*>(mDataForm)->itemByIndex(modelIndex));
+	mDataForm->scrollTo(modelIndex,HbAbstractItemView::PositionAtCenter);
+	
+	if(view_Item) {	
+        HbLineEdit* lineEdit = static_cast<HbLineEdit*>(view_Item->dataItemContentWidget());
+        if ( lineEdit ) {
+        
+            lineEdit->setFocus(Qt::OtherFocusReason);
+            
+            QInputContext *ic = qApp->inputContext();
+                if (ic) {
+                    QEvent *openEvent = new QEvent(QEvent::RequestSoftwareInputPanel);
+                    ic->filterEvent(openEvent);
+                    delete openEvent;
+                }
+        }
+      	
+	}	
+		
 	OstTraceFunctionExit0( NOTESTODOEDITOR_INSERTDESCRIPTIONITEM_EXIT );
 }
 
@@ -618,7 +666,11 @@ void NotesTodoEditor::saveTodo()
 		disconnect(
 				action, SIGNAL(triggered()),
 				this, SLOT(saveTodo()));
-
+	    //if editor is open in background, and user close the app from task switcher
+	    //entry should get saved
+	    disconnect(qobject_cast<HbApplication*>(qApp), SIGNAL(aboutToQuit()),
+	            this, SLOT(forcedExit()));
+	    
 		mOwner->editingCompleted(status);
 	}
 	OstTraceFunctionExit0( NOTESTODOEDITOR_SAVETODO_EXIT );
@@ -649,7 +701,7 @@ void NotesTodoEditor::handleAddDescriptionAction()
 	insertDescriptionItem();
 
 	// Update the text in the menu action.
-	mDescriptionAction->setText(hbTrId("txt_notes_opt_remove_description"));
+	mDescriptionAction->setText(hbTrId("txt_calendar_opt_remove_description"));
 
 	disconnect(
 			mDescriptionAction, SIGNAL(triggered()),
@@ -675,7 +727,7 @@ void NotesTodoEditor::handleRemoveDescriptionAction()
 	mFormModel->removeItem(mFormModel->item(mDescriptionItemIndex));
 
 	// Update the text in the menu action.
-	mDescriptionAction->setText(hbTrId("txt_notes_opt_add_description"));
+	mDescriptionAction->setText(hbTrId("txt_calendar_opt_add_description"));
 
 	disconnect(
 			mDescriptionAction, SIGNAL(triggered()),
@@ -750,5 +802,18 @@ void NotesTodoEditor::selectedAction(HbAction *action)
 	}
 	OstTraceFunctionExit0( NOTESTODOEDITOR_SELECTEDACTION_EXIT );
 }
+
+/*!
+    Slot to handle entry when app exit from red key or task switcher.
+ */
+void NotesTodoEditor::forcedExit()
+{
+    OstTraceFunctionEntry0( NOTESTODOEDITOR_FORCEDEXIT_ENTRY );
+    mForcedExit = true;
+    saveTodo();
+    OstTraceFunctionExit0( NOTESTODOEDITOR_FORCEDEXIT_EXIT );
+}
+
+
 
 // End of file	--Don't remove this.

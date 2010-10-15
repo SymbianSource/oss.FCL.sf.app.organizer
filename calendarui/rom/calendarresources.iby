@@ -26,7 +26,7 @@
 S60_APP_RESOURCE(calendar)
 data=DATAZ_/QT_TRANSLATIONS_DIR/calendar.qm			QT_TRANSLATIONS_DIR/calendar.qm
 data=DATAZ_/QT_TRANSLATIONS_DIR/caleneditor.qm			QT_TRANSLATIONS_DIR/caleneditor.qm
-data=DATAZ_/QT_TRANSLATIONS_DIR/caleneventviewer.qm			QT_TRANSLATIONS_DIR/caleneventviewer.qm
+data=DATAZ_/QT_TRANSLATIONS_DIR/eventviewer.qm			QT_TRANSLATIONS_DIR/eventviewer.qm
 data=DATAZ_/QT_TRANSLATIONS_DIR/calenregional.qm			QT_TRANSLATIONS_DIR/calenregional.qm
 
 #endif // CALENDARRESOURCE_IBY

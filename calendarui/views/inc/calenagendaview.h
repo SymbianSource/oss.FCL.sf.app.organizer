@@ -179,7 +179,7 @@ private:
     QPointF mTapPoint;
     bool    mActionTaken;
     bool    mIsAboutToQuitEventConnected; // bool to check if agenda view is registered to get aboutToQuit signals
-    bool    mDayViewActivated;
+   
 };
 
 #endif /* CALENAGENDAVIEW_H */

@@ -578,10 +578,20 @@ void CalenMonthView::showHideRegionalInformation()
 			QString *pluginString = pluginText();
 			mPrevRegionalInfo->setPlainText(*pluginString);
 			mPrevRegionalInfo->setTextColor(mPreviewHeadingColor);
+			mPrevRegionalInfo->setTextWrapping(Hb::TextNoWrap);
+			mPrevRegionalInfo->setElideMode(Qt::ElideRight);
+			
 			mCurrRegionalInfo->setPlainText(*pluginString);
 			mCurrRegionalInfo->setTextColor(mPreviewHeadingColor);
+			mCurrRegionalInfo->setTextWrapping(Hb::TextNoWrap);
+			mCurrRegionalInfo->setElideMode(Qt::ElideRight);
+			
+			
 			mNextRegionalInfo->setPlainText(*pluginString);
 			mNextRegionalInfo->setTextColor(mPreviewHeadingColor);
+			mNextRegionalInfo->setTextWrapping(Hb::TextNoWrap);
+			mNextRegionalInfo->setElideMode(Qt::ElideRight);
+			
 		} else {
 			if (mPrevRegionalInfo) {
 				mPrevPaneLayout->removeItem(mPrevRegionalInfo);
@@ -1646,7 +1656,6 @@ void CalenMonthView::onLocaleChanged(int reason)
 {
     OstTraceFunctionEntry0( CALENMONTHVIEW_ONLOCALECHANGED_ENTRY );
 	Q_UNUSED(reason);
-	return;
     OstTraceFunctionExit0( CALENMONTHVIEW_ONLOCALECHANGED_EXIT );
 }
 

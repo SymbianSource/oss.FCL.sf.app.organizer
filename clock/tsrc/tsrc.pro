@@ -15,6 +15,17 @@
 # This is the project specification file clock test code
 #
 
-# include test components here
+TEMPLATE = subdirs
+
+SUBDIRS += \
+					unittest_clockengines \
+					unittest_settingsutility \
+					unittest_alarmclient \
+					unittest_timezoneclient
+					
+		
+CONFIG += qtestlib
+CONFIG += symbian_test
+CONFIG += ordered
 
 # End of file	--Don't remove this

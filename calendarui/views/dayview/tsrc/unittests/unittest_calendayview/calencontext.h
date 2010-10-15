@@ -59,9 +59,15 @@ public:
         Q_UNUSED(aInstanceId);
         mFocusedDate = focusDateTime;
     }
+	
+	void setStartDateAndTimeForNewInstance(const QDateTime &startDateTime)
+    {
+	    mStartDateTime = startDateTime;
+    }
 
 private:
     QDateTime mFocusedDate;
+    QDateTime mStartDateTime;
 	
 };
 

@@ -59,11 +59,10 @@
 CalenDayView::CalenDayView(MCalenServices &services) :
     CalenNativeView(services), mContentScrollArea(NULL), mContentWidget(NULL),
         mHourScrollArea(NULL), mVLayout(NULL), mMainContainer(NULL),
-        mDocLoader(NULL), mIsLaunching(true), mSettingsManager(NULL),
-        mRegionalInfoKey(XQSettingsKey::TargetCentralRepository,
-            KCRUidCalendar, KCalendarShowRegionalInfo), mServices(services),
-        mRegionalInfoGroupBox(NULL), mGoToTodayMenuAction(NULL), mBg(NULL),
-        mGesturesAbsorber(NULL)
+        mDocLoader(NULL), mIsLaunching(true), mGesturesAbsorber(NULL), 
+		mSettingsManager(NULL), mRegionalInfoKey(XQSettingsKey::TargetCentralRepository,
+        KCRUidCalendar, KCalendarShowRegionalInfo), mServices(services),
+        mRegionalInfoGroupBox(NULL), mGoToTodayMenuAction(NULL), mBg(NULL)
 {
     setupMenu();
 
@@ -544,6 +543,8 @@ void CalenDayView::showHideRegionalInformationChanged(
                 CalenPluginLabel *regionalInfo = new CalenPluginLabel(
                     mServices, this);
                 regionalInfo->setFontSpec(HbFontSpec(HbFontSpec::Primary));
+                regionalInfo->setTextWrapping(Hb::TextNoWrap);
+                regionalInfo->setElideMode(Qt::ElideRight);
                 mRegionalInfoGroupBox->setContentWidget(regionalInfo);
                 mVLayout->insertItem(1, mRegionalInfoGroupBox);
             }

@@ -129,7 +129,7 @@ void ClockCitySelectionListPrivate::populateListModel()
 	mListModel->removeRows(0,infoList.count()-1);
 	mListModel->insertRows(0, infoList.count());
 	mListModel->setColumnCount(1);
-
+	
 	for (int iter = 0; iter < infoList.count(); iter++) {
 		QModelIndex index = mListModel->index(iter, 0);
 
@@ -304,7 +304,7 @@ void ClockCitySelectionListPrivate::handleAddOwnCityAction()
 		addTimeZoneField();
 	}
 	
-	mCountryComboBox = static_cast<HbComboBox *> (mAddCityDocloader->findWidget("counrtyCombobox"));
+	mCountryComboBox = static_cast<HbComboBox *> (mAddCityDocloader->findWidget("countryCombobox"));
 	addCountryListField();
 	
 	mOkAction = static_cast<HbAction *> (mAddCityDocloader->findObject("okAction"));

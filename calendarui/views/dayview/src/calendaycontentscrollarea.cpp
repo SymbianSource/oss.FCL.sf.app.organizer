@@ -32,13 +32,14 @@
  */
 const int KCalenScrollDaysTimeout = 600;
 
+#ifdef CALENDAYVIEW_PANNING_ENABLED
 /*!
  Value [%] defines how long (depending on content area width) should horizontal
  pan gesture be to change day to previous/next.
  If the gesture is shorter - current view is not changed.
  */
 const int KCalenHScrollMoveParam = 30;  //!< Percentage
-
+#endif
 
 /*!
  \class CalenDayContentScrollArea

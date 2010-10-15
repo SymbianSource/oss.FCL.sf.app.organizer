@@ -102,6 +102,7 @@ class  CalenNativeView : public CalenView,
     private:
         QPointer<HbDateTimePicker> mDatePicker;
         bool                mIsCapturedScreenShotValid; // to check if the captured screenshot is valid
+        bool mForcedExit;
 	};
 
 #endif  // CALENNATIVEVIEW_H

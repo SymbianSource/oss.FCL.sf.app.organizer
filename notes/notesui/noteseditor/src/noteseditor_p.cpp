@@ -502,11 +502,11 @@ bool NotesEditorPrivate::saveNote()
 		if (mNewEntry) {
 			if (AgendaEntry::TypeNote == mModifiedNote.type()) {
 				mModifiedNote.setDescription(description);
-				mModifiedNote.setLastModifiedDateTime(
-						QDateTime(QDate::currentDate(), QTime::currentTime()));
 				// Set the creation time as DTStamp time
-				mModifiedNote.setDTStamp(
-						QDateTime(QDate::currentDate(), QTime::currentTime()));
+				QDateTime currDateTime = QDateTime::currentDateTime();
+				mModifiedNote.setDTStamp(currDateTime);
+				// Set the same for last modified date as well
+				mModifiedNote.setLastModifiedDateTime(currDateTime);
 			} else if (AgendaEntry::TypeTodo == mModifiedNote.type()) {
 				mModifiedNote.setSummary(description);
 				mModifiedNote.setDescription(description);
@@ -516,9 +516,11 @@ bool NotesEditorPrivate::saveNote()
 			}
 			// Now save the entry.
 			mNoteId = mAgendaUtil->store(mModifiedNote);
-			if (mNoteId) {
+	         //if application exit from task switcher or red key
+	            //don't show any notfication
+			if (mNoteId && !mNoteEditor->mForcedExit) {
 				showNotification(
-						hbTrId("txt_notes_dpopinfo_new_note_saved"));
+						hbTrId("txt_notes_dpopinfo_note_saved"));
 			}
 		} else {
 			if (mOriginalNote.type() != mModifiedNote.type()) {
@@ -537,12 +539,13 @@ bool NotesEditorPrivate::saveNote()
 				}
 			} else {
 				mModifiedNote.setDescription(description);
-				mModifiedNote.setLastModifiedDateTime(
-						QDateTime(QDate::currentDate(), QTime::currentTime()));
+				mModifiedNote.setLastModifiedDateTime(QDateTime::currentDateTime());
 
 				if (isNoteEdited()) {
 					ulong updateStatus = mAgendaUtil->store(mModifiedNote);
-					if (updateStatus) {
+		            //if application exit from task switcher or red key
+		            //don't show any notfication
+					if (updateStatus && !mNoteEditor->mForcedExit ) {
 						showNotification(
 								hbTrId("txt_notes_dpopinfo_note_saved"));
 					}
@@ -577,10 +580,12 @@ bool NotesEditorPrivate::saveTodo()
 		if (isTodoEdited()) {
 			// Add the new to-do.
 			mNoteId = mAgendaUtil->store(mModifiedNote);
-			if (mNoteId) {
+			//if application exit from task switcher or red key
+			//don't show any notfication
+			if (mNoteId && !mTodoEditor->mForcedExit) {
 				status = true;
 				showNotification(
-						hbTrId("txt_notes_dpopinfo_new_todo_note_saved"));
+						hbTrId("txt_notes_dpopinfo_note_saved"));
 			}
 		}
 	} else {
@@ -610,9 +615,11 @@ bool NotesEditorPrivate::saveTodo()
 				}
 			}
 		}
-		if (status) {
+        //if application exit from task switcher or red key
+        //don't show any notfication
+		if (status && !mTodoEditor->mForcedExit) {
 			showNotification(
-					hbTrId("txt_notes_dpopinfo_todo_note_saved"));
+					hbTrId("txt_notes_dpopinfo_note_saved"));
 		}
 	}
 

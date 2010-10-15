@@ -67,7 +67,8 @@ enum TCalenNotification
     ECalenNotifyThaiPluginDisabled,
     ECalenNotifyUserDefined3,
     ECalenNotifyUserDefined4,
-    ECalenNotifyLast  
+    ECalenNotifyLast,
+    ECalenNotifyForcedExit
     };
 
 /**

@@ -23,16 +23,23 @@
 
 class MCalenContext
 {
-    public:
-    MCalenContext() {}
-    
-    void setFocusDateAndTimeAndInstance( const QDateTime& focusDateTime,
-                                         const TCalenInstanceId& aInstanceId )
+public:
+    MCalenContext()
+    {
+    }
+
+    void setFocusDateAndTimeAndInstance(
+        const QDateTime& focusDateTime,
+        const TCalenInstanceId& aInstanceId)
     {
         Q_UNUSED(focusDateTime);
         Q_UNUSED(aInstanceId);
     }
-    
+
+    void setStartDateAndTimeForNewInstance(const QDateTime &startDateTime)
+    {
+        Q_UNUSED(startDateTime);
+    }
 };
 
 #endif

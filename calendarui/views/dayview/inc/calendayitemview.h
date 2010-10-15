@@ -66,6 +66,9 @@ public slots:
     void modelReset();
 
     void scrollVertically(const QPointF &newPosition);
+    
+public:
+    void gestureEvent(QGestureEvent *event);
 
 private slots:
 

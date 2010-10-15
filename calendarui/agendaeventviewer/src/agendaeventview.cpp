@@ -83,7 +83,7 @@ AgendaEventView::AgendaEventView(
 		QObject(parent),
 		mMainWindow(NULL),
 		mOwner(owner),
-		mTranslator(new HbTranslator("caleneventviewer")),
+		mTranslator(new HbTranslator("eventviewer")),
 		mReminderWidgetAdded(true),
 		mMaptilePath(NULL),
 		mMaptileService(NULL),
@@ -320,9 +320,9 @@ void AgendaEventView::addMenuItem()
 		mMarkTodoAction = new HbAction(this);
 		if (mAgendaEntry.status() == AgendaEntry::TodoCompleted) {
 			mMarkTodoAction->setText(
-								hbTrId("txt_calendar_menu_mark_as_not_done"));
+								hbTrId("txt_calendar_opt_mark_as_not_done"));
 		} else {
-			mMarkTodoAction->setText(hbTrId("txt_calendar_menu_mark_as_done"));
+			mMarkTodoAction->setText(hbTrId("txt_calendar_opt_mark_as_done"));
 		}
 		connect(mMarkTodoAction, SIGNAL(triggered()), this,
 		        SLOT(markTodoStatus()));
@@ -1005,10 +1005,6 @@ void AgendaEventView::showDeleteConfirmationQuery()
         text.append(hbTrId("txt_calendar_info_delete_todo_note"));
         break;
         }
-        case AgendaEntry::TypeNote: {
-        text.append(hbTrId("txt_calendar_info_delete_anniversary"));
-        break;
-        }
     }
     popup->setText(text);
     
@@ -1055,14 +1051,14 @@ void AgendaEventView::markTodoStatus()
 	// Set the to-do status using the agenda util.
 	if (AgendaEntry::TodoCompleted != mAgendaEntry.status()) {
 		// Update the menu text to mark to-do as undone.
-		mMarkTodoAction->setText(hbTrId("txt_calendar_menu_mark_as_not_done"));
+		mMarkTodoAction->setText(hbTrId("txt_calendar_opt_mark_as_not_done"));
 		mAgendaEntry.setStatus(AgendaEntry::TodoCompleted);
 		mAgendaEntry.setCompletedDateTime(currentDateTime);
 		mOwner->mAgendaUtil->setCompleted(mAgendaEntry, true, currentDateTime);
 	} else {
 		
 		// Update the menu text to mark to-do as done.
-		mMarkTodoAction->setText(hbTrId("txt_calendar_menu_mark_as_done"));
+		mMarkTodoAction->setText(hbTrId("txt_calendar_opt_mark_as_done"));
 		mAgendaEntry.setStatus(AgendaEntry::TodoNeedsAction);
 		mOwner->mAgendaUtil->setCompleted(mAgendaEntry, false, currentDateTime);
 	}

@@ -882,98 +882,87 @@ void AgendaUtilPrivate::markDatesWithEvents(QDateTime rangeStart,
 
 	// Parse thru the list and mark the dates which have events
 	for (int i = 0; i < instanceList.Count(); i++) {
-		CCalEntry::TType type = instanceList[i]->Entry().EntryTypeL();
-		// Get the start time and end time of the events
-		TCalTime startCalTime = instanceList[i]->StartTimeL();
-		TCalTime endCalTime = instanceList[i]->EndTimeL();
-		TDateTime startDateTime = startCalTime.TimeLocalL().DateTime();
-		TDateTime endDateTime = endCalTime.TimeLocalL().DateTime();
-		QDate startDate(startDateTime.Year(), startDateTime.Month()+1,
-						startDateTime.Day() + 1);
-        QDate endDate(endDateTime.Year(), endDateTime.Month()+1,
-                        endDateTime.Day() + 1);
-		if (type == CCalEntry::EEvent || type == CCalEntry::EAppt ||
-				type == CCalEntry::EReminder) {
-			if(endsAtStartOfDay(instanceList[i], endCalTime.TimeLocalL())) {
-				TDateTime endDateTime = endCalTime.TimeLocalL().DateTime();
-				// prevent problems with items ending tomorrow at 00:00
-				endDateTime.SetMinute(endDateTime.Minute() - 1);
-				TTime time(endDateTime);
-				// If it is ending before the start of the grid 
-				if (time <= startDateForInstanceSearch.TimeLocalL()) {
-					continue;
-				}
-			}
-        // Mark the required dates frm start date to end date
-        int numOfDays = 0;
-        //check if the start date of the entry is before the start day of the grid
-        if(startDate < rangeStart.date()){
-            if(endDate<=rangeEnd.date()){
-                //if the end date of entry is lying in the grid ,
-                //then mark the entry from start day of the grid to the end date of the entry
-                numOfDays = rangeStart.date().daysTo(endDate);
-            }
-            else{
-                //if end date of the entry is greater then the last date of grid, 
-                //then mark all the date of the grid with the entry 
-               numOfDays = rangeStart.daysTo(rangeEnd);
-            }
-            // Check if the event is all-day
-            if (instanceList[i]->Entry().EntryTypeL() == CCalEntry::EEvent) {
-                // no need to consider the date on which it ends
-                // reduce days count by 1
-                numOfDays--;
-                }
-            //start the entries from the first day of the grid
-            for (int j = 0; j <= numOfDays; j++) {
-                QDate date = rangeStart.date().addDays(j);
-                if (date <= rangeEnd.date()) {
-                    dates.append(date);
-                } else {
-                    break;
-                }
-            }
-        }
-        //if the start date of the entry is lying inside the grid
-        else{
-            if(endDate<=rangeEnd.date()){
-                //if the end date of entry is lying in the grid ,
-                //then mark the entry from start date of the entry to the end date of the entry
-                numOfDays = startDate.daysTo(endDate);
-            }
-            else{
-                //if end date of the entry is greater then the last date of grid, 
-                //then mark all the date from start date of the entry to the end date of the grid 
-                numOfDays = startDate.daysTo(rangeEnd.date()); 
-            }
-            // Check if the event is all-day
-            if (instanceList[i]->Entry().EntryTypeL() == CCalEntry::EEvent) {
-                // no need to consider the date on which it ends
-                // reduce days count by 1
-                numOfDays--;
-                }
-            for (int j = 0; j <= numOfDays; j++) {
-                QDate date = startDate.addDays(j);
-                if (date <= rangeEnd.date()) {
-                    dates.append(date);
-                } else {
-                    break;
-                }
-            }   
-        }
-    } else if (type == CCalEntry::EAnniv) {
-        if (startDate <= rangeEnd.date()) {
-            dates.append(startDate);
-        }
-    } else if (type == CCalEntry::ETodo) {
-            // if start time is less that today, then mark it for today
-            if (startDate < QDate::currentDate()) {
-                dates.append(QDate::currentDate());
-            } else {
-                dates.append(startDate);
-            }
-        }
-    }
+	    CCalEntry::TType type = instanceList[i]->Entry().EntryTypeL();
+	    // Get the start time and end time of the events
+	    TCalTime startCalTime = instanceList[i]->StartTimeL();
+	    TCalTime endCalTime = instanceList[i]->EndTimeL();
+	    TDateTime startDateTime = startCalTime.TimeLocalL().DateTime();
+	    TDateTime endDateTime = endCalTime.TimeLocalL().DateTime();
+	    QDate startDate(startDateTime.Year(), startDateTime.Month()+1,
+	            startDateTime.Day() + 1);
+	    QDate endDate(endDateTime.Year(), endDateTime.Month()+1,
+	            endDateTime.Day() + 1);
+	    if (type == CCalEntry::EEvent || type == CCalEntry::EAppt ||
+	            type == CCalEntry::EReminder) {
+	        if(endsAtStartOfDay(instanceList[i], endCalTime.TimeLocalL())) {
+	            TDateTime endDateTime = endCalTime.TimeLocalL().DateTime();
+	            // prevent problems with items ending tomorrow at 00:00
+	            endDateTime.SetMinute(endDateTime.Minute() - 1);
+	            TTime time(endDateTime);
+	            endDate = endDate.addDays(-1);
+	            // If it is ending before the start of the grid 
+	            if (time <= startDateForInstanceSearch.TimeLocalL()) {
+	                continue;
+	            }
+	        }
+	        // Mark the required dates frm start date to end date
+	        int numOfDays = 0;
+	        //check if the start date of the entry is before the start day of the grid
+	        if(startDate < rangeStart.date()){
+	            if(endDate<=rangeEnd.date()){
+	                //if the end date of entry is lying in the grid ,
+	                //then mark the entry from start day of the grid to the end date of the entry
+	                numOfDays = rangeStart.date().daysTo(endDate);
+	            }
+	            else{
+	                //if end date of the entry is greater then the last date of grid, 
+	                //then mark all the date of the grid with the entry 
+	                numOfDays = rangeStart.daysTo(rangeEnd);
+	            }
+	            //start the entries from the first day of the grid
+	            for (int j = 0; j <= numOfDays; j++) {
+	                QDate date = rangeStart.date().addDays(j);
+	                if (date <= rangeEnd.date()) {
+	                    dates.append(date);
+	                } else {
+	                    break;
+	                }
+	            }
+	        }
+	        //if the start date of the entry is lying inside the grid
+	        else{
+	            if(endDate<=rangeEnd.date()){
+	                //if the end date of entry is lying in the grid ,
+	                //then mark the entry from start date of the entry to the end date of the entry
+	                numOfDays = startDate.daysTo(endDate);
+	            }
+	            else{
+	                //if end date of the entry is greater then the last date of grid, 
+	                //then mark all the date from start date of the entry to the end date of the grid 
+	                numOfDays = startDate.daysTo(rangeEnd.date()); 
+	            }
+	            for (int j = 0; j <= numOfDays; j++) {
+	                QDate date = startDate.addDays(j);
+	                if (date <= rangeEnd.date()) {
+	                    dates.append(date);
+	                } else {
+	                    break;
+	                }
+	            }   
+	        }
+	    } else if (type == CCalEntry::EAnniv) {
+	        if (startDate <= rangeEnd.date()) {
+	            dates.append(startDate);
+	        }
+	    } else if (type == CCalEntry::ETodo) {
+	        // if start time is less that today, then mark it for today
+	        if (startDate < QDate::currentDate()) {
+	            dates.append(QDate::currentDate());
+	        } else {
+	            dates.append(startDate);
+	        }
+	    }
+	}
     CleanupStack::PopAndDestroy(&instanceList);
 }
 
@@ -2139,7 +2128,7 @@ void AgendaUtilPrivate::createCCalEntryFromAgendaEntry(AgendaEntry &agendaEntry,
 				TDateTime tempDateTime(dateTime.date().year(),
 						static_cast<TMonth> (dateTime.date().month() - 1),
 						dateTime.date().day() - 1, dateTime.time().hour(),
-						dateTime.time().minute(), 0, 0);
+						dateTime.time().minute(), dateTime.time().second(), 0);
 				TTime tempTime(tempDateTime);
 				calTime.SetTimeLocalL(tempTime);
 				calEntry.SetLastModifiedDateL(calTime);
@@ -2151,7 +2140,7 @@ void AgendaUtilPrivate::createCCalEntryFromAgendaEntry(AgendaEntry &agendaEntry,
 				creationDateTime(dtStamp.date().year(),
 						static_cast<TMonth> (dtStamp.date().month() - 1),
 						dtStamp.date().day() - 1, dtStamp.time().hour(),
-						dtStamp.time().minute(), 0, 0);
+						dtStamp.time().minute(), dtStamp.time().second(), 0);
 				TTime creationTTime(creationDateTime);
 				creationCalTime.SetTimeLocalL(creationTTime);
 				calEntry.SetDTStampL(creationCalTime);
