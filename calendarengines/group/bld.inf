@@ -28,6 +28,9 @@ PRJ_MMPFILES
 #include "../calenimp/group/bld.inf"
 #include "../calenlauncher/group/bld.inf"
 
+#ifdef FF_CALDAV_SUPPORT
+#include "../caldav/group/bld.inf"
+#endif //FF_CALDAV_SUPPORT
 
 
 PRJ_TESTMMPFILES
