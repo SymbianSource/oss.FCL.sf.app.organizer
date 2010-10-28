@@ -136,8 +136,6 @@ PRJ_MMPFILES
 // Calendar aiw provider.
 #include "../calenaiwprovider/group/bld.inf"
 
-#include "../regionalplugins/KoreanLunar/group/bld.inf"
-
 #ifdef FF_CALDAV_SUPPORT
 //caldav ecom plugin
 #include "../caldav/group/bld.inf"
