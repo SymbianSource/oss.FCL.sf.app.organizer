@@ -1,0 +1,89 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  This is a project specification file for Calendar's Active
+ *                Idle 2 plugin.
+ *
+*/
+
+#include <platform_paths.hrh>
+#include "../inc/aicalendarplugin2uids.hrh"
+#include <data_caging_paths.hrh>
+
+
+TARGET          aicalendarplugin2.dll
+TARGETTYPE      PLUGIN
+
+// ECom Dll recognition UID followed by the unique UID for this dll
+UID             0x10009D8D  AI_UID_DLL_CALENDARPLUGIN
+
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+
+// Plugin
+SOURCEPATH      ../src
+SOURCE          aicalendarplugin2.cpp
+SOURCE          aicalendarplugin2data.cpp
+SOURCE          aicalendarplugin2constantdata.cpp
+SOURCE          aicalendarplugin2eventitem.cpp
+SOURCE          aicalendarplugin2eventstrings.cpp
+SOURCE          aicalendarplugin2focusdata.cpp
+
+SOURCEPATH      ../data
+
+// ECom resource
+START RESOURCE  aicalendarplugin2.rss
+TARGET          aicalendarplugin2.rsc
+END
+
+// loc strings resource
+START RESOURCE          aicalendarplugin2res.rss
+HEADER
+TARGET                  aicalendarplugin2res.rsc
+TARGETPATH              RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../data
+USERINCLUDE     ../../aiagendapluginengine/inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+// AI / Calendar
+LIBRARY         aiutils.lib
+// S60 / Symbian
+LIBRARY         avkon.lib
+
+// -------------------------
+// for "manual" image publishing: removed when
+// theme UI resourse publish works
+LIBRARY         aknskins.lib
+LIBRARY         egul.lib
+LIBRARY         fbscli.lib 
+LIBRARY         aknicon.lib
+// -------------------------
+
+LIBRARY         commonengine.lib
+LIBRARY         bafl.lib
+LIBRARY         euser.lib
+LIBRARY         cone.lib
+LIBRARY         ecom.lib
+LIBRARY         apparc.lib
+LIBRARY         apgrfx.lib
+LIBRARY         calinterimapi.lib
+
+DEFFILE         aicalendarplugin2.def
+
+// End of File
+

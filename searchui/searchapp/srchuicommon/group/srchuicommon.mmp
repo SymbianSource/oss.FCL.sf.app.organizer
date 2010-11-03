@@ -1,0 +1,60 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:      This is project specification file for the srchserviceview
+*
+*/
+
+
+
+
+
+
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+TARGET        srchuicommon.dll
+TARGETTYPE    dll
+UID           0x1000008e 0x1028240F
+
+LANGUAGE_IDS
+CAPABILITY 	CAP_GENERAL_DLL
+
+SOURCEPATH    ../src
+SOURCE        srchuiresfolder.cpp
+
+USERINCLUDE   ../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY       euser.lib
+LIBRARY       avkon.lib eikcore.lib eiksrv.lib  cone.lib //for CAknView
+LIBRARY       eikcoctl.lib //For CEikMenuPane
+LIBRARY       bafl.lib //For CDesC16ArrayFlat
+LIBRARY 	  eikctl.lib efsrv.lib 
+LIBRARY 	  aknicon.lib
+LIBRARY 	  gdi.lib
+
+LIBRARY 	  aknskins.lib aknskinsrv.lib aknswallpaperutils.lib egul.lib 
+
+     #if defined(ARMCC)
+         DEFFILE ../eabi/srchuicommon.def
+     #elif defined( WINSCW )
+         DEFFILE ../bwins/srchuicommon.def
+     #elif defined( WINS )
+         DEFFILE ../bwins/srchuicommon.def
+     #else
+         DEFFILE ../bmarm/srchuicommon.def
+     #endif
+
+//EXPORTFROZEN

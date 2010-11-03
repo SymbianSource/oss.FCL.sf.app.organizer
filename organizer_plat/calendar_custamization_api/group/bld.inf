@@ -1,0 +1,41 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    File that exports the files belonging to calen custamization API
+*
+*/
+
+
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+../inc/calencustomisation.h             APP_LAYER_PLATFORM_EXPORT_PATH(calencustomisation.h)
+../inc/calencustomisation.inl           APP_LAYER_PLATFORM_EXPORT_PATH(calencustomisation.inl)
+../inc/calenservices.h                  APP_LAYER_PLATFORM_EXPORT_PATH(calenservices.h)
+../inc/calencommandhandler.h            APP_LAYER_PLATFORM_EXPORT_PATH(calencommandhandler.h)
+../inc/calencommandhandler.inl          APP_LAYER_PLATFORM_EXPORT_PATH(calencommandhandler.inl)
+../inc/calencommands.hrh                APP_LAYER_PLATFORM_EXPORT_PATH(calencommands.hrh)
+../inc/calencontext.h                   APP_LAYER_PLATFORM_EXPORT_PATH(calencontext.h)
+../inc/caleninstanceid.h                APP_LAYER_PLATFORM_EXPORT_PATH(caleninstanceid.h)
+../inc/CalenInstanceId.inl              APP_LAYER_PLATFORM_EXPORT_PATH(CalenInstanceId.inl)
+../inc/calennotificationhandler.h       APP_LAYER_PLATFORM_EXPORT_PATH(calennotificationhandler.h)
+../inc/calentoolbar.h                   APP_LAYER_PLATFORM_EXPORT_PATH(calentoolbar.h)
+../inc/calenview.h                      APP_LAYER_PLATFORM_EXPORT_PATH(calenview.h)
+../inc/mcalenpreview.h              	APP_LAYER_PLATFORM_EXPORT_PATH(mcalenpreview.h)
+../inc/calendarvariant.hrh              APP_LAYER_PLATFORM_EXPORT_PATH(calendarvariant.hrh)

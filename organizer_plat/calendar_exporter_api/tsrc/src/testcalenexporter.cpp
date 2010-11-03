@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -24,7 +24,7 @@
 //  EXTERNAL INCLUDES
 #include <EUnitMacros.h>
 #include <calsession.h>
-//#include <CalEntry.h>				// CCalEntry
+#include <CalEntry.h>				// CCalEntry
 
 #include <DelimitedPathSegment8.h>
 #include <UTF.H>

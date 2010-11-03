@@ -20,10 +20,10 @@ DEFAULT
 #include "../chinesecalendaralg/group/bld.inf"
 
 // chinese calendar converter package
-#include "../chinesecalendarconverter/group/bld.inf"
+#include "../chinesecalendarconverter/group/BLD.INF"
 
 // vcal parser components
-#include "../vcardandvcal/group/bld.inf"
+#include "../vcardandvcal/group/BLD.INF"
 
 PRJ_EXPORTS
 

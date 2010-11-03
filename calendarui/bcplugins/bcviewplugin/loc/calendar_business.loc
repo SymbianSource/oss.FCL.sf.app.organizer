@@ -1,0 +1,78 @@
+/*
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   This is a localisation file for Calendar
+*                A _loc file is the one and only place where the logical
+*                strings to be localised are defined
+*
+*/
+
+
+// LOCALISATION STRINGS
+
+// d: Menu item for deleting a note
+// l: list_single_pane_t1_cp2
+// r: TB9.2
+//
+#define qtn_cale_om_delete  "Delete"
+
+// d: Menu item for select meeting.
+// l: list_single_pane_t1_cp2
+// r: TB9.2
+//
+#define qtn_calendar_opt_select "Select"
+
+// d: To-do text in day view if several todos
+// d: %N is the number of todos
+// l: list_single_recal_day_pane_t2
+// r: TB9.2
+//
+#define qtn_calendar_tasks_today  "%N pending to-dos" 
+
+// d: Format for a location in preview popup in day view
+// l: list_recal_day_event_pane_cp01_t1
+// r: TB9.2
+//
+#define qtn_calendar_location_parenthesis  "(%U)"
+
+// d: Text for all day events in day view
+// l: list_recal_day_event_pane_cp01_t1
+// r: TB9.2
+//
+#define qtn_calendar_all_day_expanded  "All-day event"
+
+// d: If meeting does not have a name specified this text is dispalyed
+// d: in the preview popup
+// l: list_recal_day_event_pane_cp01_t1
+// r: TB9.2
+//
+#define qtn_calendar_day_event_unnamed  "Unnamed"
+
+// d: Text for unnamed events in day view
+// l: list_recal_day_event_pane_cp01_t1
+// r: TB9.2
+//
+#define qtn_calendar_day_unnamed  "Unnamed"
+
+// d: Command in stylus popup menu.
+// d: Marked the To-Do item done in List View and Preview popup.
+// l: list_single_touch_menu_pane_t1
+// r: TB9.2
+//
+#define qtn_calendar_opt_mark_done "Mark as done" 
+
+// d: New entry text in visual selection area
+// l: list_recal_day_event_pane_cp01_t1
+// r: TB9.2
+//
+#define qtn_calendar_day_new_entry "New entry"

@@ -120,9 +120,8 @@ EXPORT_C void AgmDebug::DebugLogEntryL(CAgnEntry& aEntry, TAgmEntryDumpLevel aEn
 		case CCalEntry::EAppt: 		entryTypeBuf.Copy(_L("Appointment")); break;
 		case CCalEntry::EReminder: 	entryTypeBuf.Copy(_L("Reminder")); break;
 		case CCalEntry::ETodo: 		entryTypeBuf.Copy(_L("Todo")); break;
-		case CCalEntry::EEvent: 	entryTypeBuf.Copy(_L("Event")); break;
-		case CCalEntry::EAnniv: 	entryTypeBuf.Copy(_L("Anniversary")); break;
-		case CCalEntry::ENote:      entryTypeBuf.Copy(_L("Note")); break;   
+		case CCalEntry::EEvent: 		entryTypeBuf.Copy(_L("Event")); break;
+		case CCalEntry::EAnniv: 		entryTypeBuf.Copy(_L("Anniversary")); break;
 		}
 		
 	// Entry Time Mode

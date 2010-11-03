@@ -23,7 +23,7 @@
 #include <asshdalarm.h>
 #endif //SYMBIAN_SKIPPED_CALENDAR_ALARMS
 #ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
-#include <asshdalarmcal.h>
+#include <ASShdAlarmCal.h>
 #endif //SYMBIAN_ENABLE_SPLIT_HEADERS
 #include "agmsortcriteria.h"
 
@@ -461,7 +461,7 @@ EXPORT_C CCalFindInstanceSettings* CCalFindInstanceSettings::NewL(CalCommon::TCa
 	}
 
 CCalFindInstanceSettings::CCalFindInstanceSettings(CalCommon::TCalViewFilter aFilter, const CalCommon::TCalTimeRange& aTimeRange) :
-	iTimeRange(aTimeRange), iFilter(aFilter), iPriorityRange(0, KMaxTUint), iFavouriteFilter(0, 0)
+	iTimeRange(aTimeRange), iFilter(aFilter), iPriorityRange(0, KMaxTUint)
 #ifdef SYMBIAN_CALENDAR_ENHANCEDSEARCHANDSORT
 , iSortCriteria(NULL)
 #endif
@@ -580,29 +580,7 @@ const CalCommon::TCalPriorityRange& CCalFindInstanceSettings::PriorityRange() co
 	return iPriorityRange;
 	}
 
-/** Specifies the favourite filter in CCalInstanceView::FindInstanceL.
-@param aUserIntValue The value of favourite attribute that will be filtered.
-@param aUserIntMask Specifies which bits are validate in the search.
-@pre None
-@post The favourite filter of this CCalFindInstanceSettings object has been updated.
-@publishedPartner
-@prototype
-@capability None
-*/
-EXPORT_C void CCalFindInstanceSettings::SetFavouriteFilter(
-		const CalCommon::TCalFavouriteFilter& aFavouriteFilter)
-	{
-	iFavouriteFilter = aFavouriteFilter;
-	}
-	
-const CalCommon::TCalFavouriteFilter& CCalFindInstanceSettings::FavouriteFilter() const
-	{
-	return iFavouriteFilter;
-	}
-
 #ifdef SYMBIAN_CALENDAR_ENHANCEDSEARCHANDSORT
-
-
 /** Return the reference of sort criteria which defines the sort order of the instances 
     returned by CCalInstanceView::FindInstanceL. If sort criteria is not defined the 
     default sort order will apply.

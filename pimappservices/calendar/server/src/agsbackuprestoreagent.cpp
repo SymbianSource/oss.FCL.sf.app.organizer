@@ -16,9 +16,9 @@
 #include "agsbackuprestoreagent.h"
 #include <connect/sbdefs.h> // For conn::EBURNormal etc.
 
-CAgnServBackupRestoreAgent* CAgnServBackupRestoreAgent::NewL(CAgnServFileMgr& aFileMgr)
+CAgnServBackupRestoreAgent* CAgnServBackupRestoreAgent::NewL(CAgnServFileMgr& aFileMgr,TBool& aBackupRestoreInProgress)
 	{
-	CAgnServBackupRestoreAgent* self = new(ELeave) CAgnServBackupRestoreAgent(aFileMgr);
+	CAgnServBackupRestoreAgent* self = new(ELeave) CAgnServBackupRestoreAgent(aFileMgr,aBackupRestoreInProgress);
 	return self;
 	}
 
@@ -28,8 +28,8 @@ CAgnServBackupRestoreAgent::~CAgnServBackupRestoreAgent()
 	iBackupRestoreNotification.Close();
 	}
 
-CAgnServBackupRestoreAgent::CAgnServBackupRestoreAgent(CAgnServFileMgr& aFileMgr)
-	: CActive(CActive::EPriorityStandard), iFileMgr(aFileMgr)
+CAgnServBackupRestoreAgent::CAgnServBackupRestoreAgent(CAgnServFileMgr& aFileMgr, TBool& aBackupRestoreInProgress)
+	: CActive(CActive::EPriorityStandard), iFileMgr(aFileMgr),iBackupRestoreInProgress(aBackupRestoreInProgress)
 	{
 	CActiveScheduler::Add(this);
 	
@@ -90,20 +90,24 @@ void CAgnServBackupRestoreAgent::RunL()
 		{
 		if ( newState& (conn::EBURBackupPartial | conn::EBURBackupFull) && !BackupInProgress())
             {
+            iBackupRestoreInProgress = ETrue;
             iFileMgr.CloseScheduledFilesImmediately();
             iFileMgr.BackupReStoreChanged(MCalChangeCallBack2::EBackupStart);
             }
         else if (newState & (conn::EBURRestoreFull | conn::EBURRestorePartial)&& !RestoreInProgress())
             {
+            iBackupRestoreInProgress = ETrue;
             iFileMgr.CloseScheduledFilesImmediately();
             iFileMgr.BackupReStoreChanged(MCalChangeCallBack2::ERestoreStart);      
             }
         else if (newState & (conn::EBURNormal | conn::EBURUnset) && BackupInProgress())
             {
+            iBackupRestoreInProgress = EFalse;
             iFileMgr.BackupReStoreChanged(MCalChangeCallBack2::EBackupEnd); 
             }
         else if (newState & (conn::EBURNormal | conn::EBURUnset) && RestoreInProgress())
             {
+            iBackupRestoreInProgress = EFalse;
             iFileMgr.BackupReStoreChanged(MCalChangeCallBack2::ERestoreEnd); 
             }
 		iCurrentState = newState;

@@ -29,13 +29,13 @@
 #include <e32math.h>
 
 #include <asshddefs.h>
-
+#define KUserDataInt 4 
 
 //---------------------------------- CAgnEntry ------------------------------------------
 
 EXPORT_C CAgnEntry* CAgnEntry::NewL(CCalEntry::TType aType)
 	{
-	__ASSERT_ALWAYS(aType>=CCalEntry::EAppt && aType<=CCalEntry::ENote, Panic(EAgmErrBadTypeEntry));
+	__ASSERT_ALWAYS(aType>=CCalEntry::EAppt && aType<=CCalEntry::EAnniv, Panic(EAgmErrBadTypeEntry));
 	// allocate a CAgnEntry object, which invokes the CAgnSimpleEntry new operator, but passing no allocator
 	// this makes the CAgnSimpleEntry new operator use the default new operator
 	
@@ -52,8 +52,7 @@ EXPORT_C CAgnEntry* CAgnEntry::NewL(RReadStream& aStream)
 	
 	__ASSERT_ALWAYS(type==CCalEntry::EAppt || type==CCalEntry::EEvent ||
 					type==CCalEntry::EAnniv || type==CCalEntry::ETodo ||
-					type==CCalEntry::EReminder || type == CCalEntry::ENote,
-					User::Leave(KErrCorrupt));
+					type==CCalEntry::EReminder, User::Leave(KErrCorrupt));
 
 	CAgnEntry* entry = CAgnEntry::NewL(type);
 	CleanupStack::PushL(entry);
@@ -238,9 +237,9 @@ data is not included in the comparison, except for the replication status.
 		
 	// Compare the user integer.
 	if (UserInt() != aEntry.UserInt())
-		{
-		return EFalse;
-		}	
+	    {
+	    return EFalse;
+	    }	
 	
 	if ( DTStampUtcL() != aEntry.DTStampUtcL() )
 		{
@@ -412,6 +411,11 @@ data is not included in the comparison, except for the replication status.
 		return EFalse;
 		}
 	
+    if ( UserDataInt() != aEntry.UserDataInt() )     
+        {       
+        return EFalse;       
+        }   
+    
 	return ETrue;
 	}
 
@@ -686,11 +690,17 @@ void CAgnEntry::ExternalizeEntryL(RWriteStream& aStream, TBool aToBuffer) const
 			}
 		}
 
-	// Set the user integer of the stream.
+    // Set the user integer of the stream.
 	aStream.WriteInt32L( UserInt() );
-	
-	// future DC proofing
-	aStream.WriteUint32L(0); // number of bytes until end of entry
+
+    TInt skipCount( 0 );
+    //skip count(4) for UserDataInt is added
+    //to read those many bytes after fixed length of agmentry.
+    skipCount += KUserDataInt; 
+    
+    // Number of bytes until end of entry 
+    aStream.WriteUint32L( skipCount );
+    aStream.WriteInt32L( UserDataInt() );      
 	}
 
 
@@ -829,13 +839,18 @@ The presence of this function means that the standard templated operator>>()
 	// Set the user integer of this entry from the stream.
 	SetUserInt(aStream.ReadInt32L());
 	
-	// future DC proofing
 	size = aStream.ReadUint32L(); // number of bytes until end of entry
+	
+	if ( size >= KUserDataInt )       
+        {       
+        SetUserDataInt( aStream.ReadInt32L() );
+		size -= KUserDataInt;
+        }  
 	while (size > 0)
 		{
-		aStream.ReadUint8L(); // ignore data
-		size--;
-		}
+			aStream.ReadUint8L(); // ignore data
+			size--;
+		}     
 	}
 
 EXPORT_C CAgnEntry* CAgnEntry::CloneL() const
@@ -1008,6 +1023,8 @@ not loaded then it isn't loaded and copied
 		HBufC8* guid = aSource.Guid().AllocL();
 		SetGuid(guid);
 		}		
+	// copy int       
+	iUserDataInt = aSource.UserDataInt();   
 	}
 	
 EXPORT_C CCalEntry::TReplicationStatus CAgnEntry::ReplicationStatus() const
@@ -1235,6 +1252,27 @@ EXPORT_C void CAgnEntry::SetPhoneOwnerL(CAgnAttendee* aAttendee)
 	iPhoneOwner = aAttendee;
 	}
 
+EXPORT_C void CAgnEntry::ClearMRSpecificData()
+    {
+    // clears the iMeetingOrganizer and iAttendeeList.
+    if( iMeetingOrganizer )
+        {
+        delete iMeetingOrganizer;
+        iMeetingOrganizer = NULL;
+
+        }
+    if( iPhoneOwner )
+        {
+        iPhoneOwner = NULL;
+        }
+
+    if( iAttendeeList )
+        {
+        iAttendeeList->ResetAndDestroy();
+        delete iAttendeeList;
+        iAttendeeList = NULL;
+        }
+    }
 
 EXPORT_C void CAgnEntry::SetDTStampUtcL(const TTime& aDTStampUtc)
 /**
@@ -1855,9 +1893,9 @@ Sets the user integer for this entry.
 @internalComponent
 */
 EXPORT_C void CAgnEntry::SetUserInt( TUint32 aUserInt )
-	{
-	CAgnSimpleEntry::SetUserInt(aUserInt);
-	}
+    {
+    CAgnSimpleEntry::SetUserInt(aUserInt);
+    }
 
 /**
 Gets the user integer of this entry.
@@ -1866,9 +1904,9 @@ Gets the user integer of this entry.
 @internalComponent
 */
 EXPORT_C TUint32 CAgnEntry::UserInt() const
-	{
-	return CAgnSimpleEntry::UserInt();
-	}
+    {
+    return CAgnSimpleEntry::UserInt();
+    }
 
 EXPORT_C void CAgnEntry::ExternalizeToBufferL(RWriteStream& aWriteStream) const
 /** Used for passing the data to the between client and server
@@ -2010,18 +2048,6 @@ EXPORT_C void CAgnEntry::SetGeoValueL(const TReal& aLatitude, const TReal& aLong
 // verify entry is valid before storing it
 EXPORT_C void CAgnEntry::VerifyBeforeStoreL()
 	{
-	// check for entry type note
-	if( Type() == CCalEntry::ENote  && !StartTime().IsSet())
-		{
-		// read the modfication time from simple entry
-		TAgnCalendarTime agnStartTime;
-		agnStartTime.SetUtcL(CAgnSimpleEntry::LastModifiedDateUtc());
-
-		TAgnCalendarTime agnEndTime = agnStartTime;
-		// set the modification time as start and end time
-		CAgnSimpleEntry::SetStartAndEndTimeL(agnStartTime, agnEndTime);
-		}
-
 	//Check entry time
 	if ( Type() != CCalEntry::ETodo )
 		{
@@ -2099,3 +2125,13 @@ TBool CAgnEntry::IsFlagSet(TFlags aFlag) const
 	{
 	return (iFlags & aFlag);
 	}
+
+EXPORT_C void CAgnEntry::SetUserDataInt( TUint32 aUserInt )       
+    {       
+    iUserDataInt = aUserInt;       
+    }       
+
+EXPORT_C TUint32 CAgnEntry::UserDataInt() const       
+    {       
+    return iUserDataInt;       
+    }       

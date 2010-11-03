@@ -35,8 +35,6 @@
 #include <caltime.h>
 #include <calprogresscallback.h>
 
-#include "alarmcommon.h"
-
 // FORWARD DECLARATIONS
 
 class CCalSession;
@@ -51,7 +49,6 @@ class CAlarmContextFwSupport;
 class MProfileEngine;
 class CNotifierDialogController;
 class CAknAlarmService;
-class AlarmAlert;
 
 // CLASS DECLARATION
 
@@ -71,7 +68,6 @@ public: // data types
         {
         EAlarmTypeClock = 0,
         EAlarmTypeCalendar,
-        EAlarmTypeTodo,
         EAlarmTypeOther
         };
 
@@ -244,8 +240,7 @@ public:
     * @since S60 3.2
     * @return Pointer to CNotifierDialogController.
     */
-    // CNotifierDialogController* NotifierDialogController();
-    AlarmAlert *NotifierDialogController();
+    CNotifierDialogController* NotifierDialogController();
 
     /**
     * Stop the active alarm and reset the snooze count.
@@ -265,7 +260,11 @@ public:
     * @since S60 3.2
     **/
     void DoSnooze();
-
+    /**
+    * Silence the active alarm.
+    * @since tb9.2
+    **/
+    void DoSilence();    
     /**
     * Checks if this alarm can be shown in "alarm" or in "charging" state.
     * @since S60 3.2
@@ -481,13 +480,19 @@ public:
 	* @return ETrue if viewer is open.
     */
     TBool IsCalendarAlarmViewer();
-    
+
+	    
     /**
-     * @brief Gets the alarm information for the alarm that is
-     * about to expire
-     * @return The alarm information 
-     */
-    SAlarmInfo* GetAlarmInfo();
+    * Stores details of current calendar alarm. i.e LUID, file name and original expiry time
+    */
+    void StoreCurrentCalendarAlarmData();
+
+    /**
+    * Comapres details of current calendar alarm with previous calendar alarm.(LUID, file name and original expiry time)
+	* @return ETrue if alarm is duplicate of previous alarm ,EFalse otherwise.
+    */	
+    
+    TBool CheckForDuplicateAlarm();
 
 private:
 
@@ -638,8 +643,7 @@ private:  // data
     * Pointer to global note API.
     * Not own.
     */
-    // CNotifierDialogController* iNotifierDialogController;
-    AlarmAlert* iAlarmAlert;
+    CNotifierDialogController* iNotifierDialogController;
 
     /**
     * Plays alarm tones according to user settings.
@@ -797,6 +801,22 @@ enum TCalViewCreateStatus
    * Calendar Alarm Viewer flag
    */
    TBool iCalendarAlarmViewer; 
+   
+   /**
+   * Stores local UID of expired calendar event
+   */
+   TCalLocalUid iPrevLocalUid;
+   
+   /**
+   * Stores filename of expired calendar event
+   */
+   TBuf<256> iPrevCalFileName;
+
+   /**
+   * Stores org expiry time of expired calendar alarm
+   */
+   TTime iPrevAlarmOriginalExpiryTime;
+
     };
 
 #endif  // ALARMUTILS_H

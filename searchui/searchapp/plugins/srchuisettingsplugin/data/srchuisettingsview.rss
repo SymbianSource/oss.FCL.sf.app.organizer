@@ -1,0 +1,226 @@
+/*
+* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:     resources for srchuisettingsview
+*
+*/
+
+
+
+
+
+//  RESOURCE IDENTIFIER
+NAME    SETT // 4 letter ID
+
+//  INCLUDES
+#include <appinfo.rh>
+#include <eikon.rh>
+#include <avkon.rh>
+#include <eikon.rsg>
+#include <avkon.rsg>
+#include <avkon.hrh>
+#include <avkonicons.hrh>
+#include <avkon.mbg>
+#include <avkon.loc>
+#include <CLFContentListing.rh>
+#include <CLFContentListing.hrh>
+
+// FileListModel path definitions
+#include <PathConfiguration.hrh>
+
+#include "srchuisettingsview.hrh"
+
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { }
+
+RESOURCE EIK_APP_INFO
+    {
+    }
+
+
+// ---------------------------------------------------------
+//
+//      r_qtn_clk_sett_date
+//      Date setting title
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_sui_sett_limit
+    {
+    buf = "Limit";    //qtn_sui_sett_limit;
+    }
+RESOURCE TBUF r_qtn_sui_sett_granularity
+    {
+    buf = "Granularity";    //qtn_sui_sett_granularity;
+    }
+RESOURCE TBUF r_qtn_sui_sett_shorttimer
+    {
+    buf = "Short Timer";    //qtn_sui_sett_shorttimer;
+    }
+RESOURCE TBUF r_qtn_sui_sett_longtimer
+    {
+    buf = "Long Timer";    //qtn_sui_sett_longtimer;
+    }
+    
+
+//  RESOURCE DEFINITIONS
+// ---------------------------------------------------------
+//
+//      r_clk_date_time_sett_view
+//      Defines hotkeys, menubar and cba
+//      of Date & Time settings view AknView.
+//
+// ---------------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_sui_sett_view
+    {
+    menubar = r_sui_sett_menubar;
+    cba = R_AVKON_SOFTKEYS_OPTIONS_BACK;
+    }
+    
+//  RESOURCE DEFINITIONS
+// ---------------------------------------------------------
+//
+//      r_clk_date_time_sett_menubar
+//      Defines menubar of Date & Time dialog.
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_sui_sett_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_sui_option_popupmenu;
+            }
+        };
+    }
+
+//  RESOURCE DEFINITIONS
+// ---------------------------------------------------------
+//
+//      r_clk_date_time_option_popupmenu
+//      Defines option popup menu.
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_sui_option_popupmenu
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = ESUISettOpenCmd;
+            txt = qtn_options_open;
+            },
+                   
+        MENU_ITEM { command = ESearchCmdHelp; 
+        			txt = qtn_options_help; },
+        			
+        MENU_ITEM
+            {
+            command = ESUISettExitCmd;
+            txt = qtn_options_exit;    //qtn_wclk_sett_exit;
+            }
+        };
+    }
+
+//  RESOURCE DEFINITIONS
+// ---------------------------------------------------------
+//
+//      r_date_time_popup_list
+//      Used in popup setting.
+//
+// ---------------------------------------------------------
+//
+//
+RESOURCE POPUP_SETTING_LIST r_sui_popup_list
+    {
+    flags = 0;//EAknPopupSettingListFlagAllowsUserDefinedEntry;
+    }
+
+//  RESOURCE DEFINITIONS
+// ---------------------------------------------------------
+//
+//      r_date_time_popup_page
+//      Used in popup setting.
+//
+// ---------------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_sui_popup_page
+    {
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL;
+    menubar = R_AVKON_MENUPANE_EMPTY;
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_sui_popup_list;
+    }
+
+
+//  RESOURCE DEFINITIONS
+// ---------------------------------------------------------
+//
+//      r_date_time_date_frmt_array
+//      Used in date format popup setting.
+//
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_sui_limit_array
+    {
+    items =
+        {
+        LBUF { txt = "20"; },
+        LBUF { txt = "30"; },
+        LBUF { txt = "50"; },
+        LBUF { txt = "100"; }
+        };
+    }
+RESOURCE ARRAY r_sui_granularity_array
+    {
+    items =
+        {
+        LBUF { txt = "5"; },
+        LBUF { txt = "10"; },
+        LBUF { txt = "20"; }
+        };
+    }
+RESOURCE ARRAY r_sui_shorttimer_array
+    {
+    items =
+        {
+        LBUF { txt = "2"; },
+        LBUF { txt = "3"; },
+        LBUF { txt = "5"; }
+        };
+    }
+RESOURCE ARRAY r_sui_longtimer_array
+    {
+    items =
+        {
+        LBUF { txt = "20"; },
+        LBUF { txt = "30"; },
+        LBUF { txt = "50"; }
+        };
+    }        
+
+
+   
+//  RESOURCE DEFINITIONS
+// ---------------------------------------------------------
+//      r_qtn_set_folder_datim
+//      Date time view caption
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_set_folder_sui { buf = "In Device Search"; }

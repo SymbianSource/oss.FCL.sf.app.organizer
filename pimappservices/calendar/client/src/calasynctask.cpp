@@ -192,6 +192,10 @@ void CCalAsyncTaskManager::RunL()
 		if (iAction==EFilterCategory && progress==KErrNone)
 			{
 			TRAP(progress,GetFilteredEntryL());
+		     if( progress != KErrNone )
+		         {
+                 iAction = ENoAction;
+		         }
 			}
 		CompleteRequest(progress);
 		}

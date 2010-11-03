@@ -1,0 +1,30 @@
+/*
+* Copyright (c) 2009-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Image description file for project bcviewplugin
+*
+*/
+
+#ifndef  __BCVIEWPLUGINRESOURCES_IBY__
+#define  __BCVIEWPLUGINRESOURCES_IBY__
+
+#ifdef FF_CALENDAR_DAY_VIEW
+
+data=DATAZ_\APP_BITMAP_DIR\businesscalendar.MIF            APP_BITMAP_DIR\businesscalendar.mif
+data=DATAZ_\RESOURCE_FILES_DIR\bcviewplugingui.rsc    RESOURCE_FILES_DIR\bcviewplugingui.rsc
+
+#endif //FF_CALENDAR_DAY_VIEW
+
+#endif // __BCVIEWPLUGINRESOURCES_IBY__
+
+// end of file

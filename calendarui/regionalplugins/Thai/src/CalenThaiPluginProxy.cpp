@@ -11,9 +11,10 @@
 *
 * Contributors:
 *
-* Description:
+* Description: Class for ImplementationTable.
 *
 */
+
 //debug
 #include "calendarui_debug.h"
 

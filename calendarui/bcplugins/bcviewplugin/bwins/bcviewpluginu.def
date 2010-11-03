@@ -1,0 +1,4 @@
+EXPORTS
+	?ImplementationGroupProxy@@YAPBUTImplementationProxy@@AAH@Z @ 1 NONAME ; struct TImplementationProxy const * ImplementationGroupProxy(int &)
+	?NewAndSwapL@CCalenTitlePane@@SAPAV1@PAVCEikStatusPane@@@Z @ 2 NONAME ; class CCalenTitlePane * CCalenTitlePane::NewAndSwapL(class CEikStatusPane *)
+

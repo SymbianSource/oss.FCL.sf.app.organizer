@@ -12,16 +12,21 @@
 * Contributors:
 *
 * Description:   DLL containing Calen regional util
-*
+ *
 */
+
+
 
 #ifndef CALENREGIONALUTIL_IBY
 #define CALENREGIONALUTIL_IBY
 
-file=ABI_DIR\BUILD_DIR\calenregionalutil.dll				SHARED_LIB_DIR\calenregionalutil.dll
-data=DATAZ_\private\10005901\SolarItems						private\10005901\SolarItems
 
+
+
+file=ABI_DIR\BUILD_DIR\calenregionalutil.dll 			SHARED_LIB_DIR\calenregionalutil.dll
+data=DATAZ_\RESOURCE_FILES_DIR\calenregionalutil.rsc    	RESOURCE_FILES_DIR\calenregionalutil.rsc
+data=DATAZ_\private\10005901\SolarItems 			private\10005901\SolarItems
 #endif  // CALENREGIONALUTIL_IBY
 
+
 // End of File
- 

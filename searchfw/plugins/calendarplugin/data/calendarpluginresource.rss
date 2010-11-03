@@ -1,0 +1,57 @@
+/*
+* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Resources of calendarplugin.
+*
+*/
+
+
+
+//  RESOURCE IDENTIFIER
+NAME    CLPN // 4 letter ID
+
+//  Includes
+
+#include <eikon.rh>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.mbg>
+#include <avkon.loc>
+#include <calendarsearchplugin.loc>
+
+
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { }
+
+RESOURCE EIK_APP_INFO
+    {
+    }
+    
+
+RESOURCE TBUF   r_qtn_search_types_calendar
+                { buf = qtn_search_types_calendar; }
+
+RESOURCE TBUF   r_qtn_search_subfolders_anni
+                { buf = qtn_search_subfolders_anni; }
+                
+RESOURCE TBUF   r_qtn_search_subfolders_meetings
+                { buf = qtn_search_subfolders_meetings; }
+
+RESOURCE TBUF   r_qtn_search_subfolders_memo
+                { buf = qtn_search_subfolders_memo; }
+
+RESOURCE TBUF   r_qtn_search_subfolders_todos
+                { buf = qtn_search_subfolders_todos; }
+                               

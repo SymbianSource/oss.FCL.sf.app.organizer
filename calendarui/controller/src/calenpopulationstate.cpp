@@ -11,9 +11,10 @@
 *
 * Contributors:
 *
-* Description:  Calendar state machine
+* Description:   Calendar state machine
 *
 */
+
 
 
 // includes
@@ -22,25 +23,21 @@
 #include "calencontroller.h"
 #include "calenstatemachine.h"
 #include "calennotifier.h"
-#include "OstTraceDefinitions.h"
-#ifdef OST_TRACE_COMPILER_IN_USE
-#include "calenpopulationstateTraces.h"
-#endif
 
 // ----------------------------------------------------------------------------
-// CalenPopulationState::NewLC
+// CCalenPopulationState::NewLC
 // First stage construction
 // ----------------------------------------------------------------------------
 CCalenPopulationState* CCalenPopulationState::NewLC( CCalenController& aController,
                                                     RHashSet<TCalenNotification>& aOutstandingNotifications )
     {
-    OstTraceFunctionEntry0( CCALENPOPULATIONSTATE_NEWLC_ENTRY );
-    
+    TRACE_ENTRY_POINT;
+
     CCalenPopulationState* self = new( ELeave ) CCalenPopulationState( aController, aOutstandingNotifications );
     CleanupStack::PushL( self );
     self->ConstructL();
 
-    OstTraceFunctionExit0( CCALENPOPULATIONSTATE_NEWLC_EXIT );
+    TRACE_EXIT_POINT;
     return self;
     }
 
@@ -50,11 +47,10 @@ CCalenPopulationState* CCalenPopulationState::NewLC( CCalenController& aControll
 // ----------------------------------------------------------------------------
 void CCalenPopulationState::ConstructL()
     {
-    OstTraceFunctionEntry0( CCALENPOPULATIONSTATE_CONSTRUCTL_ENTRY );
-    
+    TRACE_ENTRY_POINT;
     BaseConstructL();   
     
-    OstTraceFunctionExit0( CCALENPOPULATIONSTATE_CONSTRUCTL_EXIT );
+    TRACE_EXIT_POINT;
     }
     
 // ----------------------------------------------------------------------------
@@ -65,9 +61,9 @@ CCalenPopulationState::CCalenPopulationState( CCalenController& aController,
                                                           RHashSet<TCalenNotification>&  aOutstandingNotifications )
     : CCalenState( aController, aOutstandingNotifications )
     {
-    OstTraceFunctionEntry0( CCALENPOPULATIONSTATE_CCALENPOPULATIONSTATE_ENTRY );
+    TRACE_ENTRY_POINT;
     
-    OstTraceFunctionExit0( CCALENPOPULATIONSTATE_CCALENPOPULATIONSTATE_EXIT );
+    TRACE_EXIT_POINT;
     }
     
 // ----------------------------------------------------------------------------
@@ -76,9 +72,9 @@ CCalenPopulationState::CCalenPopulationState( CCalenController& aController,
 // ----------------------------------------------------------------------------    
 CCalenPopulationState::~CCalenPopulationState()
     {
-    OstTraceFunctionEntry0( DUP1_CCALENPOPULATIONSTATE_CCALENPOPULATIONSTATE_ENTRY );
+    TRACE_ENTRY_POINT;
     
-    OstTraceFunctionExit0( DUP1_CCALENPOPULATIONSTATE_CCALENPOPULATIONSTATE_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
@@ -88,8 +84,7 @@ CCalenPopulationState::~CCalenPopulationState()
 TBool CCalenPopulationState::HandleCommandL( const TCalenCommand& aCommand,
                                             CCalenStateMachine& aStateMachine )
     {
-    OstTraceFunctionEntry0( CCALENPOPULATIONSTATE_HANDLECOMMANDL_ENTRY );
-    
+    TRACE_ENTRY_POINT;
     TInt cmd = aCommand.Command();
     MCalenCommandHandler* handler = iController.GetCommandHandlerL( cmd );
     
@@ -105,7 +100,7 @@ TBool CCalenPopulationState::HandleCommandL( const TCalenCommand& aCommand,
         cmdUsed = ETrue;
         }
 
-    OstTraceFunctionExit0( CCALENPOPULATIONSTATE_HANDLECOMMANDL_EXIT );
+    TRACE_EXIT_POINT;
     return cmdUsed;
     }
 
@@ -116,7 +111,7 @@ TBool CCalenPopulationState::HandleCommandL( const TCalenCommand& aCommand,
 void CCalenPopulationState::HandleNotificationL(const TCalenNotification& aNotification,
                                                   CCalenStateMachine& aStateMachine )
     {
-    OstTraceFunctionEntry0( CCALENPOPULATIONSTATE_HANDLENOTIFICATIONL_ENTRY );
+    TRACE_ENTRY_POINT;
     
     switch ( aNotification )
         {
@@ -133,7 +128,7 @@ void CCalenPopulationState::HandleNotificationL(const TCalenNotification& aNotif
             break;
         }
     
-    OstTraceFunctionExit0( CCALENPOPULATIONSTATE_HANDLENOTIFICATIONL_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 

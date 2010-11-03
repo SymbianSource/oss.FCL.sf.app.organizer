@@ -1,0 +1,39 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  hrh file
+*
+*/
+
+
+//
+// nmake.hlp.hrh
+//
+
+//
+// File generated on 11:7:46 24/10/2002
+// by cshlpcmp Version 010
+//
+
+#ifndef __NMAKE_HLP_HRH__
+#define __NMAKE_HLP_HRH__
+
+
+_LIT(KNMAKE_HLP_MEMO_LIST,"NMAKE_HLP_MEMO_LIST"); //List of saved memos state
+_LIT(KNMAKE_HLP_MEMO_EDITOR,"NMAKE_HLP_MEMO_EDITOR"); //Notepad editor state
+_LIT(KNMAKE_HLP_TEMPLATE_EDITOR,"NMAKE_HLP_TEMPLATE_EDITOR"); //Notepad template editor state
+_LIT(KNMAKE_HLP_MEMO_VIEWER,"NMAKE_HLP_MEMO_VIEWER"); //Notepad memo viewer state
+_LIT(KNMAKE_HLP_MEMO_VIEWER_EDIT,"NMAKE_HLP_MEMO_VIEWER_EDIT"); //Notepad editable viewer state
+_LIT(KNMAKE_HLP_MEMO_EDITOR_APPS,"NMAKE_HLP_MEMO_EDITOR_APPS"); //Notepad called from 3rd party aplications should use this
+
+#endif

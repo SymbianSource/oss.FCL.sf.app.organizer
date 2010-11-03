@@ -1,0 +1,99 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Project specification file for preview pane plugin
+*
+*/
+
+
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+
+#include "../inc/bcpreviewpluginuids.h"
+
+TARGET          bcpreviewpaneplugin.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D KBCPREVIEWPLUGINIMPLUID
+
+CAPABILITY  CAP_ECOM_PLUGIN
+VENDORID    VID_DEFAULT
+USERINCLUDE     ../inc
+APP_LAYER_SYSTEMINCLUDE
+
+
+SOURCEPATH      ../data
+    START RESOURCE bcpreviewpaneplugin.rss
+END
+
+SOURCEPATH      ../data
+START RESOURCE  bcpreviewpaneplugingui.rss
+HEADER
+TARGET          bcpreviewpaneplugingui.rsc
+TARGETPATH      RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END
+
+
+SOURCEPATH      ../src
+SOURCE dllmain.cpp
+SOURCE bcpreviewpanecontainer.cpp
+SOURCE bcpreviewpanedata.cpp
+SOURCE bcpreviewlistbox.cpp
+SOURCE bcpreviewpaneentry.cpp
+SOURCE bcpreviewplugin.cpp
+SOURCE bcpreviewlistboxitemdrawer.cpp
+SOURCE bcpreviewlistboxdata.cpp
+SOURCE bcpreviewlistboxview.cpp
+SOURCE bcpreviewlongtaphandler.cpp
+
+
+LIBRARY         aknicon.lib
+LIBRARY         aknskins.lib
+LIBRARY         aknpictograph.lib
+LIBRARY         apgrfx.lib
+LIBRARY         apparc.lib
+LIBRARY         avkon.lib
+LIBRARY         bafl.lib
+LIBRARY         bitgdi.lib
+LIBRARY         calinterimapi.lib
+LIBRARY         cdlengine.lib
+LIBRARY         cenrepnotifhandler.lib
+LIBRARY         centralrepository.lib
+LIBRARY         charconv.lib
+LIBRARY         commonengine.lib
+LIBRARY         commonui.lib
+LIBRARY         cone.lib
+LIBRARY         ecom.lib
+LIBRARY         efsrv.lib
+LIBRARY         egul.lib
+LIBRARY         eikctl.lib
+LIBRARY         fepbase.lib
+LIBRARY         eikcoctl.lib
+LIBRARY         eikcore.lib
+LIBRARY         eikdlg.lib
+LIBRARY         estor.lib
+LIBRARY         etext.lib
+LIBRARY         euser.lib
+LIBRARY         aknlayout2scalable.lib
+LIBRARY         calencommonutils.lib
+LIBRARY         gesturehelper.lib
+LIBRARY         ws32.lib
+LIBRARY         gdi.lib
+LIBRARY         touchfeedback.lib
+
+// End of File
+
+
+
+

@@ -72,8 +72,7 @@ EXPORT_C TBool TAgnFilter::IsValid(const CAgnSimpleEntry& aElement) const
 		return EFalse;
 	if (aElement.Type() == CCalEntry::EAnniv && !AreAnnivsIncluded())
 		return EFalse;
-	if (aElement.Type() == CCalEntry::ENote && !AreNotesIncluded())
-		return EFalse;
+	
 	if(aElement.Priority() > iLowPriority ||
 			aElement.Priority() <  iHighPriority)
 		{

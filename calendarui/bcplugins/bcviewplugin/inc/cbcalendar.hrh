@@ -1,0 +1,133 @@
+/*
+* Copyright (c) 2009-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+*
+*/
+
+
+#ifndef __CBCALENDAR_HRH__
+#define __CBCALENDAR_HRH__
+
+/**
+ * Enumeration of texture IDs. These are needed, when you want to load
+ * bitmaps into textures.
+ */
+enum TBCalenTextureId
+    {
+    ETextureUnassigned = 0,
+    ETextureEventHiddenArrowUp,
+    ETextureEventHiddenArrowDown,
+    ETextureIndiAnniversary,
+    ETextureIndiTodo,
+    ETextureIndiMemo,
+    ETextureControlBarBg,
+    ETextureIndiRecurrence,
+    ETextureIndiRecurrenceException,
+    ETextureIndiPriorityHigh,
+    ETextureIndiPriorityLow,
+    ETextureIndiAlarm,
+    ETextureIndiCdrActionArrowUp,
+    ETextureIndiCdrActionArrowUpSelected,
+    ETextureIndiCdrActionArrowDown,
+    ETextureIndiCdrActionArrowDownSelected,
+    ETextureLast
+    };
+
+/** Brush id enumeration */
+enum TBCalendarBrushId
+    {
+    // Null brush has no effect
+    ECalendarNullBrush = 0,
+
+    // Common for all views
+    EDaySelector,
+    EDaySelectorPressed,
+    ETodoImage,
+    EMemoImage,
+    EAnnivImage,
+    EControlBarBg,
+
+    EMeetingBg,
+    EHourGridBorder,
+    EHourBorder,
+    EHalfHourBorder,
+    EUnvisibleEventsArrowUp,
+    EUnvisibleEventsArrowDown,    
+
+    // Day view
+    EDayViewGridBg,
+    EDayViewTimeGridBg,
+    EDayViewVisualSelectionBg,
+    EDayViewVisualSelectionArrowUp,
+    EDayViewVisualSelectionArrowDown,
+    EDayViewVisualSelectionArrowUpSelected,
+    EDayViewVisualSelectionArrowDownSelected,
+
+    // PreviewPopup
+    EPreviewPopupAlarm,
+    EPreviewPopupRecurrence,
+    EPreviewPopupRecurrenceException,
+    EPreviewPopupPriorityHigh,
+    EPreviewPopupPriorityLow,
+
+    //TODO border shadowbrush
+    EBorderShadow,
+    ELastBrushId
+    };
+
+/** Screen resolutions */
+enum TBCalenScreenResolution
+    {
+    ELowResPortrait,    // 176 x 208
+    ELowResLandscape,   // 208 x 176
+    EQvgaPortrait,      // 240 x 320
+    EQvgaLandscape,     // 320 x 240
+    EDrPortrait,        // 352 x 416
+    EDrLandscape,       // 416 x 352
+    EVgaPortrait,       // 480 x 640
+    EVgaLandscape,      // 640 x 480
+    EHvgaPortrait,      // 320 x 480
+    EHvgaLandscape,     // 480 x 320
+    EWideLandscape      // 800 x 352
+    };
+
+/** Text element ids */
+enum TBCalenTextId
+    {
+    // Day view
+    EDaySelectorText,
+    EControlBarText,
+    EMeetingText,
+    EFocusedDayGridText,
+    EDayViewTimeGridText
+    };
+
+/** Scrolling directions **/
+enum TScrollDirection
+    {
+    EScrollUp,
+    EScrollDown,
+    EScrollLeft,
+    EScrollRight
+    };
+
+/** Selector's state **/
+enum TSelectorState
+    {
+    ESelectorOff,
+    ESelectorNormal,
+    ESelectorPressed
+    };
+
+#endif // __FSCalendar_HRH__

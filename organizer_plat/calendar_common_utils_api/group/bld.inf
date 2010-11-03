@@ -1,0 +1,38 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   File that exports the files belonging to 
+:                Agenda Entry Ui interface API
+*
+*/
+
+
+// INCLUDES
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../inc/CalenStatusPaneUtils.h			APP_LAYER_PLATFORM_EXPORT_PATH( CalenStatusPaneUtils.h )
+../inc/calennavilabel.h				APP_LAYER_PLATFORM_EXPORT_PATH( calennavilabel.h )
+../inc/calendateutils.h				APP_LAYER_PLATFORM_EXPORT_PATH( calendateutils.h )
+../inc/calenagendautils.h			APP_LAYER_PLATFORM_EXPORT_PATH( calenagendautils.h )
+../inc/calenactionuiutils.h			APP_LAYER_PLATFORM_EXPORT_PATH( calenactionuiutils.h )
+../inc/calenconstants.h				APP_LAYER_PLATFORM_EXPORT_PATH( calenconstants.h )
+../inc/calenviewutils.h				APP_LAYER_PLATFORM_EXPORT_PATH( calenviewutils.h )
+../inc/calenmulticalutil.h				APP_LAYER_PLATFORM_EXPORT_PATH( calenmulticalutil.h )
+../inc/calenmulticaluids.hrh				APP_LAYER_PLATFORM_EXPORT_PATH( calenmulticaluids.hrh ) 
+../inc/calenlocationutil.h				APP_LAYER_PLATFORM_EXPORT_PATH( calenlocationutil.h )
+
+// End of file

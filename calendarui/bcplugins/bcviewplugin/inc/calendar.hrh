@@ -1,0 +1,247 @@
+/*
+* Copyright (c) 2009-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  This file contains declarations for resources of Calendar.
+*
+*/
+
+
+#ifndef CALENDAR_HRH
+#define CALENDAR_HRH
+
+#include <avkon.hrh>
+
+
+enum TCalenExternalCommands
+    {
+    ECalenExtAiwCommandId = 100000
+    };
+
+// Command ID of menu pane. 
+// e.g "Edit", "Erase", "Settings", "Send as" etc.
+enum TCalenMenuPaneCommands
+    {
+    /* Note Commands */
+    ECalenCmdMakeNote = 10100,
+    ECalenCmdMakeMeetingNote,
+    ECalenCmdMakeMeetingRequestNote,
+    ECalenCmdMakeAnnivNote,
+    ECalenCmdMakeDayNote,
+    ECalenCmdMakeToDoNote,
+    ECalenCmdViewNote,
+    ECalenCmdEditNote,
+    ECalenCmdSelect,
+	
+    //always hidden, allows easy adding of items to beginning of menu
+    ECalenCmdFirstMenuItem, 
+
+    /* Description data commands */
+    ECalenCmdAddDescription,
+    ECalenCmdAddDescriptionNew,
+    ECalenCmdAddDescriptionExisting,
+    ECalenCmdShowDescription,
+    ECalenCmdRemoveDescription,
+
+    /* View commands */ 
+    ECalenCmdOpenWeekView,
+    ECalenCmdOpenMonthView,
+    ECalenCmdOpenDayView,
+    ECalenCmdOpenToDoView,
+    /* List commands */
+    ECalenCmdMark,
+    ECalenMarkOne,
+    ECalenUnmarkOne,
+    ECalenMarkAll,
+    ECalenUnmarkAll,
+
+    ECalenCmdIntoDayView, 
+    ECalenCmdChangeView,
+    ECalenCmdIntoWeekView,
+    ECalenCmdIntoTodoView,
+    ECalenCmdBackFromAnyView,
+    ECalenCmdBackFromDayView,
+
+    ECalenCmdCycleToDayView,
+    ECalenCmdCycleToWeekView,
+    ECalenCmdCycleToMonthView,
+    ECalenCmdCycleToToDoView,
+    ECalenCmdCycleToAgendaView,
+    ECalenCmdOpenAgendaView,
+    ECalenCreateNewTodo,
+
+#ifdef RD_SCALABLE_UI_V2
+    //ECalenCmdCycleNext,
+    //ECalenCmdCyclePrev,
+    //ECalenCmdChangeView,
+#endif
+
+    /* Delete commands */
+    ECalenCmdDeleteSubMenu,
+    ECalenCmdDelete,
+    ECalenCmdDeleteBefore,
+    ECalenCmdDeleteAllNotes,
+
+    /* Go To commands */
+    ECalenCmdGotoToday,
+    ECalenCmdGotoDate,
+
+    /* Settings view */
+    ECalenCmdSetting,
+    ECalenCmdChange,
+
+    /* Misc commands */
+
+
+    /* Meeting request commands*/
+    ECalenCmdSendResponse,
+    ECalenCmdShowAttendees,
+    ECalenCmdSendAccept,
+    ECalenCmdSendTentative,
+    ECalenCmdSendDecline,
+    ECmdAiwHelpPlaceHolder,
+    ECmdAiwHelp,
+
+    /* End of common commands */ 
+    ECalenCmdLast, 
+    // START CSW change
+    /* For Printing Framework */
+    ECalenCmdPrint = 100155,
+    ECalenCmdPrint_Reserved1,
+    ECalenCmdPrint_Reserved2,
+    ECalenCmdPrint_Reserved3,
+    ECalenCmdPrint_Reserved4,
+    // END CSW change
+    ECalenRegionalVariantCmdFirst = 100160 
+    };
+
+// Do not use this directly but through ItemToArrayIndex,
+// because regional variator can add their own setting items between
+// these setting items
+enum TSettingListItemId
+    {
+    ECalenSettingListItemIdHead = 6000,
+    ECalenAlarmToneItemId,
+    ECalenSnoozeTimeItemId,
+    ECalenDefaultViewItemId,
+    ECalenWeekFormatItemId,
+    ECalenWeekTitleItemId,
+    ECalenExtCalendarItemId,
+    ECalenDefaultMailboxId,
+    ECalenToolbarItemId,
+    ECalenShortcutsInUse,
+    ECalenRegionalVariantSettingListItemIdFirst = 6020
+    };
+
+
+// Assume there are less than 1000 Uikon controls, 
+// and they can't be defined anywhere else.
+
+enum TCustomControl
+    {
+    ECalenCtrlTypeSettingItemList = 1000,
+    ECalenRegionalVariantCustomControlFirst
+    };
+
+
+enum TCalenSettingFormCtls
+    {
+    ECalenSettingItemList = 10100
+    };
+
+
+/* Constants */
+
+enum TCalenMinTime
+    {
+    ECalenMinDay = 0,
+    ECalenMinMonth = 0,
+    ECalenMinYear = 1900,
+    ECalenMinSecond = 0,
+    ECalenMinMinute = 0,
+    ECalenMinHour = 0,
+    ECalenMinAnnivYear = 1900
+    };
+
+enum TCalenMaxTime
+    {
+    ECalenMaxDay = 29,
+    ECalenMaxMonth = 11,
+    ECalenMaxYear = 2100,
+    ECalenMaxSecond = 59,
+    ECalenMaxMinute = 59,
+    ECalenMaxHour = 23,
+    ECalenMaxAnnivYear = 2100
+    };
+
+enum TCalenOthers
+    {
+    ECalenCharsInLine = 200
+    };
+
+
+enum // TCalenRepeat
+    {
+    ECalenRepeatThis,
+    ECalenRepeatAll,
+    ECalenRepeatThisFuture,
+    ECalenRepeatThisPast
+    };
+
+enum // TTodoPriority
+    {
+    ETodoPriorityHigh = 1,
+    ETodoPriorityNormal,
+    ETodoPriorityLow
+    };
+
+enum // CBA constants
+    {
+    ECalenSoftkeyNewMeeting = 4000
+    };
+
+#define CALENDAR_SHORTCUT_MONTH_VIEW 'm'
+#define CALENDAR_SHORTCUT_MONTH_VIEW_UPPER 'M'
+#define CALENDAR_SHORTCUT_WEEK_VIEW 'w'
+#define CALENDAR_SHORTCUT_WEEK_VIEW_UPPER 'W'
+#define CALENDAR_SHORTCUT_WEEK_VIEW_LANDSCAPE_NUM '2'
+#define CALENDAR_SHORTCUT_DAY_VIEW 'd'
+#define CALENDAR_SHORTCUT_DAY_VIEW_UPPER 'D'
+#define CALENDAR_SHORTCUT_AGENDA_VIEW 'a'
+#define CALENDAR_SHORTCUT_AGENDA_VIEW_UPPER 'A'
+#define CALENDAR_SHORTCUT_TODO_VIEW 't'
+#define CALENDAR_SHORTCUT_TODO_VIEW_UPPER 'T'
+#define CALENDAR_SHORTCUT_TODO_VIEW_LANDSCAPE_NUM '5'
+#define CALENDAR_SHORTCUT_NEW_MEETING 'n'
+#define CALENDAR_SHORTCUT_NEW_MEETING_UPPER 'N'
+    
+
+#define CALEN_VIEW_CYCLING_NEXT '#'
+#define CALEN_VIEW_CYCLING_PREV '*'
+
+// Event colours
+#define cell_cale_public_event_c   210  // blue
+#define cell_cale_private_event_c   35  // red
+#define cell_cale_unsynch_event_c   14  // light red (dimmed 35)
+#define cell_cale_many_event_c     107  // dark red
+#define cell_cale_grayed_event_c   221
+
+//Meeting Request Colours
+#define cell_cale_accepted_mr       210 // blue, RGB (0, 0, 255)
+#define cell_cale_tentative_mr      114 // light blue, RGB (102, 204, 255)
+#define cell_cale_cancelled_mr       35 // red, RGB (255, 0, 0)
+
+
+#endif // end of CALENDAR_HRH
+
+
+// End of File

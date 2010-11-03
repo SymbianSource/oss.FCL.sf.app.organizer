@@ -35,7 +35,7 @@
 #include <asshdalarm.h>
 #endif
 #ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
-#include <asshdalarmcal.h>
+#include <ASShdAlarmCal.h>
 #endif //SYMBIAN_ENABLE_SPLIT_HEADERS
 
 CCalInstanceViewImpl* CCalInstanceViewImpl::NewL(CCalSession& aSession, MCalProgressCallBack* aProgressCallBack)

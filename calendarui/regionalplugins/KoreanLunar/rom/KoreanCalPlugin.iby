@@ -1,0 +1,50 @@
+/*
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+
+#ifndef KOREANCALPLUGIN_IBY
+#define KOREANCALPLUGIN_IBY
+
+#ifdef __SERIES60_LUNAR_CALENDAR
+
+#ifdef RD_CALENDAR_PLUGIN_FW
+
+#ifdef __LOCALES_65_IBY__
+
+ECOM_PLUGIN( CalenKoreanLunarPlugin.dll , CalenKoreanLunarPlugin.rsc )
+data=DATAZ_\private\10005901\KoreanSolarItems private\10005901\KoreanSolarItems
+
+// this cenrep file should be generated to image automatically by confml files but for some reason it is not so taken here
+// apparently it was generated with full s60 build so now it is removed
+//data=DATAZ_\private\10202be9\2001843E.txt private\10202be9\2001843E.txt
+
+//data=DATAZ_\resource\CalenKoreanLunarPluginData.rsc            APP_RESOURCE_DIR\CalenKoreanLunarPluginData.rsc
+
+#define USER_RESOURCE_FILES_LOCALIZED CalenKoreanLunarPluginData
+#define LANGUAGE_01
+#define LANGUAGE_65
+#include <Variant/localized_resources.iby>
+//#include <..\..\..\Variant\localized_resources.iby>
+
+#endif //__LOCALES_65_IBY__
+
+#endif /* RD_CALENDAR_PLUGIN_FW */
+
+#endif /* __SERIES60_LUNAR_CALENDAR */
+
+#endif /* KOREANCALPLUGIN_IBY */
+
+//  End of File

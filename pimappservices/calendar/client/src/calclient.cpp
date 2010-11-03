@@ -1806,18 +1806,11 @@ void RAgendaServ::GetChangesSinceLastNotificationL(RArray<TCalChangeEntry>& aCha
 				{
 				if (type == CCalEntry::ETodo)
 					{
-					changeItem.iEntryType =
-							MCalChangeCallBack2::EChangeEntryTodo;
-					}
-				else if (type == CCalEntry::ENote)
-					{
-					changeItem.iEntryType =
-							MCalChangeCallBack2::EChangeEntryNote;
+					changeItem.iEntryType = MCalChangeCallBack2::EChangeEntryTodo;
 					}
 				else
 					{
-					changeItem.iEntryType =
-							MCalChangeCallBack2::EChangeEntryEvent;
+					changeItem.iEntryType = MCalChangeCallBack2::EChangeEntryEvent;
 					}
 				}
 			aChangeItems.AppendL(changeItem);

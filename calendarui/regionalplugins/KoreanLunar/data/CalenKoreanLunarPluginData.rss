@@ -1,0 +1,297 @@
+/*
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+
+#include <calenkoreanlunar.loc>
+
+#include <calendar.loc>
+#include <calendar.rsg>
+#include <eikon.rh>
+#include <avkon.hrh>
+#include <avkon.rh>
+#include <avkon.rsg>
+
+NAME KLU1
+RESOURCE RSS_SIGNATURE { }
+
+// ---------------------------------------------------------
+// ---------------------------------------------------------
+// one version exits in calendar.rsg
+RESOURCE TBUF R_CALEN_LUNAR_SETTING_TITLE2
+    {
+    buf = qtn_kor_cale_sett_lunar_cale;
+    }
+
+// ---------------------------------------------------------
+// ---------------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_calen_lunar_setting_page
+    {
+    label = qtn_kor_cale_sett_lunar_cale;
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL;
+    type = EAknCtPopupSettingList;
+    editor_resource_id = R_CALEN_SETTING_LISTBOX;
+    }
+
+// ---------------------------------------------------------
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_calen_lunar_setting_choicelist
+    {
+    items =
+        {
+        LBUF
+            {
+            txt = qtn_kor_cale_lunar_cale_off;
+            },
+        LBUF
+            {
+            txt = qtn_kor_cale_lunar_cale_on;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//----------------------------------------------------
+//
+RESOURCE ARRAY r_calen_lunar_setting_array
+    {
+    items =
+        {
+        AVKON_ENUMERATED_TEXT
+            {
+            value = 0;
+            text = qtn_kor_cale_lunar_cale_off;
+            },
+        AVKON_ENUMERATED_TEXT
+            {
+            value = 1;
+            text = qtn_kor_cale_lunar_cale_on;
+            }
+        };
+    }
+
+//----------------------------------------------------
+//----------------------------------------------------
+//
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_calen_lunar_setting_texts
+    {
+    setting_texts_resource = r_calen_lunar_setting_array;
+    popped_up_texts_resource = r_calen_lunar_setting_choicelist;
+    }
+
+
+//----------------------------------------------------
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_calen_lunar_details_dialog
+     {
+     flags = EGeneralQueryFlags;
+     buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
+     items =
+         {
+         DLG_LINE
+             {
+             type = EAknCtPopupHeadingPane;
+             id = EAknMessageQueryHeaderId;
+             control = AVKON_HEADING
+                {
+                 label = qtn_kor_cale_lunar_calendar;
+                 headinglayout = R_AVKON_LIST_HEADING_PANE;
+                };
+             },
+         DLG_LINE
+             {
+             type = EAknCtMessageQuery;
+             id = EAknMessageQueryContentId;
+             control = AVKON_MESSAGE_QUERY
+                 {
+                 };
+             }
+         };
+     }
+
+
+//----------------------------------------------------
+// Menu item text "Show lunar details"
+//----------------------------------------------------
+//
+RESOURCE TBUF r_calendar_show_lunar_data
+    {
+    buf = qtn_kor_cale_lunar_data;
+    }
+
+
+//----------------------------------------------------
+// Details dialog item headers
+//----------------------------------------------------
+//
+RESOURCE TBUF r_calendar_lunar_info_festival
+    {
+    buf = qtn_cale_lunar_info_festival;
+    }
+
+RESOURCE TBUF r_calendar_lunar_info_solar
+    {
+    buf = qtn_cale_lunar_info_solar;
+    }
+
+RESOURCE TBUF r_calendar_lunar_info_date
+    {
+    buf = qtn_cale_info_lunar_date;
+    }
+
+RESOURCE TBUF r_calendar_lunar_info_western_date
+    {
+    buf = qtn_cale_info_western_date;
+    }
+
+RESOURCE TBUF r_kor_cale_extra_row_lunar
+    {
+    buf = qtn_kor_cale_extra_row_lunar;
+    }
+
+RESOURCE TBUF r_cale_lunar_separator
+    {
+    buf = qtn_cale_lunar_separator;
+    }
+
+RESOURCE TBUF r_cale_lunar_full_date
+    {
+    buf = qtn_cale_lunar_full_date;
+    }
+
+RESOURCE TBUF r_cale_lunar_date
+    {
+    buf = qtn_cale_lunar_date;
+    }
+
+RESOURCE TBUF r_cale_lunar_leap_date
+    {
+    buf = qtn_cale_lunar_leap_date;
+    }
+
+RESOURCE TBUF r_cale_lunar_year
+    {
+    buf = qtn_cale_lunar_year;
+    }
+
+//test
+RESOURCE TBUF r_cale_kor_lunar_date
+    {
+    buf = qtn_cale_kor_lunar_date;
+    }
+
+RESOURCE TBUF r_cale_kor_lunar_indicator
+    {
+    buf = qtn_lunar_indicator;
+    }
+
+RESOURCE TBUF r_cale_kor_leap_year_indicator
+    {
+    buf = qtn_lunar_leap_year_indicator;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_kor_festivals
+//    Descriptor array for Korean festivals
+//
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_calen_kor_festivals
+    {
+    items =
+        {
+        LBUF { txt = qtn_kor_cale_festival_name_1; },
+        LBUF { txt = qtn_kor_cale_festival_name_2; },
+        LBUF { txt = qtn_kor_cale_festival_name_3; },
+        LBUF { txt = qtn_kor_cale_festival_name_4; },
+        LBUF { txt = qtn_kor_cale_festival_name_5; },
+        LBUF { txt = qtn_kor_cale_festival_name_6; },
+        LBUF { txt = qtn_kor_cale_festival_name_7; },
+        LBUF { txt = qtn_kor_cale_festival_name_8; },
+        LBUF { txt = qtn_kor_cale_festival_name_9; },
+        LBUF { txt = qtn_kor_cale_festival_name_10; },
+        LBUF { txt = qtn_kor_cale_festival_name_11; }
+        };
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_kor_solar_items
+//    Descriptor array for Korean solar items
+//
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_calen_kor_solar_items
+    {
+    items =
+        {
+        LBUF { txt = qtn_kor_cale_solar_item_1;  },
+        LBUF { txt = qtn_kor_cale_solar_item_2;  },
+        LBUF { txt = qtn_kor_cale_solar_item_3;  },
+        LBUF { txt = qtn_kor_cale_solar_item_4;  },
+        LBUF { txt = qtn_kor_cale_solar_item_5;  },
+        LBUF { txt = qtn_kor_cale_solar_item_6;  },
+        LBUF { txt = qtn_kor_cale_solar_item_7;  },
+        LBUF { txt = qtn_kor_cale_solar_item_8;  },
+        LBUF { txt = qtn_kor_cale_solar_item_9;  },
+        LBUF { txt = qtn_kor_cale_solar_item_10; },
+        LBUF { txt = qtn_kor_cale_solar_item_11; },
+        LBUF { txt = qtn_kor_cale_solar_item_12; },
+        LBUF { txt = qtn_kor_cale_solar_item_13; },
+        LBUF { txt = qtn_kor_cale_solar_item_14; },
+        LBUF { txt = qtn_kor_cale_solar_item_15; },
+        LBUF { txt = qtn_kor_cale_solar_item_16; },
+        LBUF { txt = qtn_kor_cale_solar_item_17; },
+        LBUF { txt = qtn_kor_cale_solar_item_18; },
+        LBUF { txt = qtn_kor_cale_solar_item_19; },
+        LBUF { txt = qtn_kor_cale_solar_item_20; },
+        LBUF { txt = qtn_kor_cale_solar_item_21; },
+        LBUF { txt = qtn_kor_cale_solar_item_22; },
+        LBUF { txt = qtn_kor_cale_solar_item_23; },
+        LBUF { txt = qtn_kor_cale_solar_item_24; }
+        };
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_kor_solar_anniversary_items
+//    Descriptor array for Korean solar anniversary items
+//
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_calen_kor_solar_anniversary_items
+    {
+    items =
+        {
+        LBUF { txt = qtn_kor_cale_solar_anniversary_item_1;  },
+        LBUF { txt = qtn_kor_cale_solar_anniversary_item_2;  },
+        LBUF { txt = qtn_kor_cale_solar_anniversary_item_3;  },
+        LBUF { txt = qtn_kor_cale_solar_anniversary_item_4;  },
+        LBUF { txt = qtn_kor_cale_solar_anniversary_item_5;  },
+        LBUF { txt = qtn_kor_cale_solar_anniversary_item_6;  },
+        LBUF { txt = qtn_kor_cale_solar_anniversary_item_7;  },
+        LBUF { txt = qtn_kor_cale_solar_anniversary_item_8;  },
+        LBUF { txt = qtn_kor_cale_solar_anniversary_item_9;  },
+        LBUF { txt = qtn_kor_cale_solar_anniversary_item_10; },
+        LBUF { txt = qtn_kor_cale_solar_anniversary_item_11; },
+        LBUF { txt = qtn_kor_cale_solar_anniversary_item_12; }
+        };
+    }
+
+

@@ -1,0 +1,52 @@
+/*
+* Copyright (c) 2006-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Resource file used to register ecom dll's with registry.
+*
+*/
+
+
+
+
+#include <ecom/registryinfo.rh>
+#include <searchcommon.hrh>
+RESOURCE REGISTRY_INFO  theinfo
+	{
+		//UID of the dll
+		dll_uid = KSearchCClassNotes; // temp
+		//Declare array of interface info
+		interfaces = 
+			{
+				INTERFACE_INFO
+					{
+					   interface_uid = 0x102823F6; //
+					   
+					   implementations=
+					   	{
+					   	   IMPLEMENTATION_INFO
+					   	   	{
+					   	   	  //info for notes search implementation 
+								implementation_uid = 0x102823FA;
+								version_no         = 1;
+								display_name       = "Notes";
+								default_data       = "0x102823FA";      //KNotesSearchContentTypeUid
+								opaque_data		   = "Opaque notes data";
+					   	   		
+					   	   	}
+					   	 };
+					   	
+					   	
+					}
+			};
+		
+	}

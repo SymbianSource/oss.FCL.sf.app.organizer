@@ -1,0 +1,74 @@
+/*
+* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:      project specification file for GS SearchSettingsPlugin.
+*
+*/
+
+
+
+
+ 
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+CAPABILITY          CAP_ECOM_PLUGIN
+TARGET              searchsettingsplugin.dll
+TARGETTYPE          PLUGIN
+UID                 0x10009D8D 0x10282E07
+VENDORID            VID_DEFAULT
+
+SOURCEPATH          ../src
+SOURCE              searchsettingspluginimplementationtable.cpp
+SOURCE              searchsettingsplugin.cpp
+SOURCE              searchsettingscontainer.cpp
+
+USERINCLUDE         ../inc
+USERINCLUDE         ../data
+
+SYSTEMINCLUDE   /epoc32/include/ecom
+SYSTEMINCLUDE 	/epoc32/include/cshelp
+APP_LAYER_SYSTEMINCLUDE
+
+SOURCEPATH          ../data
+ 
+//ECOM resource definition
+START RESOURCE      searchsettingsplugin.rss
+TARGET              searchsettingsplugin.rsc
+END //  ECOM resource definition
+
+//View resources
+START RESOURCE      searchsettingspluginrsc.rss
+HEADER
+LANGUAGE_IDS
+END // AppsPlugin resources
+
+
+LIBRARY             euser.lib
+LIBRARY             ecom.lib
+LIBRARY             efsrv.lib
+LIBRARY             avkon.lib
+LIBRARY             bafl.lib 
+LIBRARY             cone.lib 
+LIBRARY             eikctl.lib
+LIBRARY             eikcoctl.lib 
+LIBRARY             eikcore.lib 
+LIBRARY             commonengine.lib//For RConeResourceLoader
+LIBRARY             GSFramework.lib
+LIBRARY             egul.lib // CGulIcon
+LIBRARY             aknskins.lib // AknsUtils.h
+LIBRARY             flogger.lib
+LIBRARY             GSEcomPlugin.lib
+LIBRARY             centralrepository.lib
+
+// End of File

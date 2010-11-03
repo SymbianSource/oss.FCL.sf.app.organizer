@@ -1,0 +1,94 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Project specification file for Meeting Request Utils.
+*
+*/
+
+
+
+#include        "../../inc/ICalUILogDef.h"
+#include        <data_caging_paths.hrh>
+#include        <platform_paths.hrh>
+
+TARGET          meetingrequestutils.dll
+TARGETTYPE      PLUGIN
+
+// TODO: replace 0x101f8869 with KMeetingRequestUtilsDllUID3 when meetingrequestuids.hrh can be included
+UID             0x10009D8D 0x101f8869
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src
+SOURCE          main.cpp         
+SOURCE          CMRUtilsImpl.cpp
+SOURCE          CMRUtilsEmailSender.cpp
+SOURCE          CMRUtilsCalDbMgr.cpp
+SOURCE          CMRUtilsCalDbBase.cpp
+SOURCE          CMRUtilsCalDbNormal.cpp
+SOURCE          CMRUtilsCalDbTombs.cpp
+SOURCE          CMRUtilsCmdIterationAO.cpp
+SOURCE          CMRUtilsGraveyardCleaner.cpp
+SOURCE          MRUtilsFactory.cpp
+SOURCE          CMRUtilsUiServices.cpp
+SOURCE          CMREditBeforeSendingViewForm.cpp
+// Common ICalUi functionality
+SOURCE          MRHelpers.cpp
+SOURCE          MREntryConsultant.cpp
+SOURCE          ICalUILog.cpp
+
+USERINCLUDE     ../inc ../data ../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   ../../../inc // organizer includes
+SYSTEMINCLUDE   ../../inc // meetingui includes
+
+SOURCEPATH      ../group
+START RESOURCE  101f8869.rss // KMeetingRequestUtilsDllUID3 == 0x101f8869
+TARGET          meetingrequestutils.rsc
+END
+
+SOURCEPATH  ../data
+START RESOURCE meetingrequestutilsuires.rss
+HEADER
+TARGETPATH  RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END
+
+LIBRARY         euser.lib
+LIBRARY     	ecom.lib
+LIBRARY         estor.lib // RWriteStream
+LIBRARY         bafl.lib // BaflUtils
+LIBRARY         calinterimapi.lib
+LIBRARY         msgs.lib // CMsvSession
+LIBRARY         cone.lib
+LIBRARY         sendui.lib
+LIBRARY         efsrv.lib // RFs
+LIBRARY         commonengine.lib // CStringResourceReader
+LIBRARY         meetingrequestsender.lib
+LIBRARY         calenimp.lib
+LIBRARY         etext.lib
+LIBRARY         eikcore.lib
+LIBRARY	        avkon.lib
+LIBRARY         eikdlg.lib
+LIBRARY	        eikcoctl.lib 
+LIBRARY         featmgr.lib
+LIBRARY         hlplch.lib
+LIBRARY         CalenInterimUtils2.lib
+LIBRARY         imcm.lib
+
+#ifdef ICALUI_LOG_TO_FILE
+LIBRARY	flogger.lib		// Only in debug builds
+#endif // ICALUI_LOG_TO_FILE
+
+// End of file

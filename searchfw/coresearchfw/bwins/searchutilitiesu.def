@@ -1,0 +1,124 @@
+EXPORTS
+	??1CSearchCondition@@UAE@XZ @ 1 NONAME ; CSearchCondition::~CSearchCondition(void)
+	?AddChildL@CSearchContent@@QAEXPAV1@@Z @ 2 NONAME ; void CSearchContent::AddChildL(class CSearchContent *)
+	?AddConditionL@CSearchBooleanCondition@@QAEXPAVCSearchCondition@@W4TBooleanClause@1@@Z @ 3 NONAME ; void CSearchBooleanCondition::AddConditionL(class CSearchCondition *, enum CSearchBooleanCondition::TBooleanClause)
+	?Caption@CSearchContent@@QBEABVTDesC16@@XZ @ 4 NONAME ; class TDesC16 const & CSearchContent::Caption(void) const
+	?Cleanup@CSearchTextSearcher@@QAEXXZ @ 5 NONAME ; void CSearchTextSearcher::Cleanup(void)
+	?Condition@CSearchQuery@@QBEABVCSearchCondition@@XZ @ 6 NONAME ; class CSearchCondition const & CSearchQuery::Condition(void) const
+	?ConstructL@CSearchField@@AAEXAAVRReadStream@@@Z @ 7 NONAME ; void CSearchField::ConstructL(class RReadStream &)
+	?ContentClassId@CSearchLightResult@@QBE?AVTUid@@XZ @ 8 NONAME ; class TUid CSearchLightResult::ContentClassId(void) const
+	?ContentFolderId@CSearchLightResult@@QBE?AVTUid@@XZ @ 9 NONAME ; class TUid CSearchLightResult::ContentFolderId(void) const
+	?ContentId@CSearchContent@@QBE?AVTUid@@XZ @ 10 NONAME ; class TUid CSearchContent::ContentId(void) const
+	?ContentType@CSearchContent@@QBE?AW4TSearchContentType@1@XZ @ 11 NONAME ; enum CSearchContent::TSearchContentType CSearchContent::ContentType(void) const
+	?CreateTextSnippetL@CSearchSnippetCreator@@QAEPAVCSearchTextSnippet@@ABVTDesC16@@H@Z @ 12 NONAME ; class CSearchTextSnippet * CSearchSnippetCreator::CreateTextSnippetL(class TDesC16 const &, int)
+	?CreateTextSnippetL@CSearchSnippetCreator@@QAEPAVCSearchTextSnippet@@ABVTDesC8@@H@Z @ 13 NONAME ; class CSearchTextSnippet * CSearchSnippetCreator::CreateTextSnippetL(class TDesC8 const &, int)
+	?DataType@CSearchField@@QBE?AW4TSearchFieldDataType@@XZ @ 14 NONAME ; enum TSearchFieldDataType CSearchField::DataType(void) const
+	?DocumentId@CSearchDocumentId@@QBE?BHXZ @ 15 NONAME ; int const CSearchDocumentId::DocumentId(void) const
+	?DocumentId@CSearchLightResult@@QBEABVCSearchDocumentId@@XZ @ 16 NONAME ; class CSearchDocumentId const & CSearchLightResult::DocumentId(void) const
+	?ExternalizeL@CSearchBooleanCondition@@UBEXAAVRWriteStream@@@Z @ 17 NONAME ; void CSearchBooleanCondition::ExternalizeL(class RWriteStream &) const
+	?ExternalizeL@CSearchCondition@@UBEXAAVRWriteStream@@@Z @ 18 NONAME ; void CSearchCondition::ExternalizeL(class RWriteStream &) const
+	?ExternalizeL@CSearchContent@@QBEXAAVRWriteStream@@@Z @ 19 NONAME ; void CSearchContent::ExternalizeL(class RWriteStream &) const
+	?ExternalizeL@CSearchDocumentId@@QBEXAAVRWriteStream@@@Z @ 20 NONAME ; void CSearchDocumentId::ExternalizeL(class RWriteStream &) const
+	?ExternalizeL@CSearchField@@QBEXAAVRWriteStream@@@Z @ 21 NONAME ; void CSearchField::ExternalizeL(class RWriteStream &) const
+	?ExternalizeL@CSearchIconInfo@@QBEXAAVRWriteStream@@@Z @ 22 NONAME ; void CSearchIconInfo::ExternalizeL(class RWriteStream &) const
+	?ExternalizeL@CSearchLightResult@@QBEXAAVRWriteStream@@@Z @ 23 NONAME ; void CSearchLightResult::ExternalizeL(class RWriteStream &) const
+	?ExternalizeL@CSearchQuery@@QBEXAAVRWriteStream@@@Z @ 24 NONAME ; void CSearchQuery::ExternalizeL(class RWriteStream &) const
+	?ExternalizeL@CSearchResult@@QBEXAAVRWriteStream@@@Z @ 25 NONAME ; void CSearchResult::ExternalizeL(class RWriteStream &) const
+	?ExternalizeL@CSearchSingleCondition@@UBEXAAVRWriteStream@@@Z @ 26 NONAME ; void CSearchSingleCondition::ExternalizeL(class RWriteStream &) const
+	?FieldId@CSearchField@@QBE?AW4TSearchFieldId@@XZ @ 27 NONAME ; enum TSearchFieldId CSearchField::FieldId(void) const
+	?FindChildL@CSearchContent@@QBEPBV1@VTUid@@@Z @ 28 NONAME ; class CSearchContent const * CSearchContent::FindChildL(class TUid) const
+	?FindSubContentL@CSearchContent@@QBEPBV1@ABVCSearchLightResult@@@Z @ 29 NONAME ; class CSearchContent const * CSearchContent::FindSubContentL(class CSearchLightResult const &) const
+	?GetChildrenL@CSearchContent@@QBEXAAV?$RPointerArray@$$CBVCSearchContent@@@@@Z @ 30 NONAME ; void CSearchContent::GetChildrenL(class RPointerArray<class CSearchContent const > &) const
+	?GetConditions@CSearchBooleanCondition@@QBEXAAV?$RPointerArray@VCSearchCondition@@@@AAV?$RArray@W4TBooleanClause@CSearchBooleanCondition@@@@@Z @ 31 NONAME ; void CSearchBooleanCondition::GetConditions(class RPointerArray<class CSearchCondition> &, class RArray<enum CSearchBooleanCondition::TBooleanClause> &) const
+	?GetData@CSearchField@@QBEHAAH@Z @ 32 NONAME ; int CSearchField::GetData(int &) const
+	?GetData@CSearchField@@QBEHAAN@Z @ 33 NONAME ; int CSearchField::GetData(double &) const
+	?GetData@CSearchField@@QBEHAAVTPtrC8@@@Z @ 34 NONAME ; int CSearchField::GetData(class TPtrC8 &) const
+	?GetData@CSearchField@@QBEHAAVTTime@@@Z @ 35 NONAME ; int CSearchField::GetData(class TTime &) const
+	?GetIconFile@CSearchIconInfo@@QBEABVTDesC16@@XZ @ 36 NONAME ; class TDesC16 const & CSearchIconInfo::GetIconFile(void) const
+	?GetIconIndex@CSearchIconInfo@@QBEHXZ @ 37 NONAME ; int CSearchIconInfo::GetIconIndex(void) const
+	?GetIconMaskIndex@CSearchIconInfo@@QBEHXZ @ 38 NONAME ; int CSearchIconInfo::GetIconMaskIndex(void) const
+	?GetTargetContent@CSearchQuery@@QBEXAAV?$RArray@VTUid@@@@@Z @ 39 NONAME ; void CSearchQuery::GetTargetContent(class RArray<class TUid> &) const
+	?HasIconMask@CSearchIconInfo@@QBEHXZ @ 40 NONAME ; int CSearchIconInfo::HasIconMask(void) const
+	?IconInfo@CSearchContent@@QBEPBVCSearchIconInfo@@XZ @ 41 NONAME ; class CSearchIconInfo const * CSearchContent::IconInfo(void) const
+	?IsSkinnableIcon@CSearchIconInfo@@QBEHXZ @ 42 NONAME ; int CSearchIconInfo::IsSkinnableIcon(void) const
+	?NewL@CSearchBooleanCondition@@SAPAV1@AAVRReadStream@@@Z @ 43 NONAME ; class CSearchBooleanCondition * CSearchBooleanCondition::NewL(class RReadStream &)
+	?NewL@CSearchBooleanCondition@@SAPAV1@XZ @ 44 NONAME ; class CSearchBooleanCondition * CSearchBooleanCondition::NewL(void)
+	?NewL@CSearchContent@@SAPAV1@AAVRReadStream@@@Z @ 45 NONAME ; class CSearchContent * CSearchContent::NewL(class RReadStream &)
+	?NewL@CSearchContent@@SAPAV1@W4TSearchContentType@1@@Z @ 46 NONAME ; class CSearchContent * CSearchContent::NewL(enum CSearchContent::TSearchContentType)
+	?NewL@CSearchDocumentId@@SAPAV1@AAVRReadStream@@@Z @ 47 NONAME ; class CSearchDocumentId * CSearchDocumentId::NewL(class RReadStream &)
+	?NewL@CSearchDocumentId@@SAPAV1@ABV1@@Z @ 48 NONAME ; class CSearchDocumentId * CSearchDocumentId::NewL(class CSearchDocumentId const &)
+	?NewL@CSearchDocumentId@@SAPAV1@HVTUid@@@Z @ 49 NONAME ; class CSearchDocumentId * CSearchDocumentId::NewL(int, class TUid)
+	?NewL@CSearchField@@SAPAV1@AAVRReadStream@@@Z @ 50 NONAME ; class CSearchField * CSearchField::NewL(class RReadStream &)
+	?NewL@CSearchField@@SAPAV1@XZ @ 51 NONAME ; class CSearchField * CSearchField::NewL(void)
+	?NewL@CSearchIconInfo@@SAPAV1@AAVRReadStream@@@Z @ 52 NONAME ; class CSearchIconInfo * CSearchIconInfo::NewL(class RReadStream &)
+	?NewL@CSearchIconInfo@@SAPAV1@XZ @ 53 NONAME ; class CSearchIconInfo * CSearchIconInfo::NewL(void)
+	?NewL@CSearchLightResult@@SAPAV1@AAVRReadStream@@@Z @ 54 NONAME ; class CSearchLightResult * CSearchLightResult::NewL(class RReadStream &)
+	?NewL@CSearchLightResult@@SAPAV1@ABV1@@Z @ 55 NONAME ; class CSearchLightResult * CSearchLightResult::NewL(class CSearchLightResult const &)
+	?NewL@CSearchLightResult@@SAPAV1@ABVCSearchDocumentId@@@Z @ 56 NONAME ; class CSearchLightResult * CSearchLightResult::NewL(class CSearchDocumentId const &)
+	?NewL@CSearchLightResult@@SAPAV1@PAVCSearchDocumentId@@@Z @ 57 NONAME ; class CSearchLightResult * CSearchLightResult::NewL(class CSearchDocumentId *)
+	?NewL@CSearchQuery@@SAPAV1@AAVRReadStream@@@Z @ 58 NONAME ; class CSearchQuery * CSearchQuery::NewL(class RReadStream &)
+	?NewL@CSearchQuery@@SAPAV1@XZ @ 59 NONAME ; class CSearchQuery * CSearchQuery::NewL(void)
+	?NewL@CSearchResult@@SAPAV1@AAVRReadStream@@@Z @ 60 NONAME ; class CSearchResult * CSearchResult::NewL(class RReadStream &)
+	?NewL@CSearchResult@@SAPAV1@ABV1@@Z @ 61 NONAME ; class CSearchResult * CSearchResult::NewL(class CSearchResult const &)
+	?NewL@CSearchResult@@SAPAV1@PAVCSearchLightResult@@@Z @ 62 NONAME ; class CSearchResult * CSearchResult::NewL(class CSearchLightResult *)
+	?NewL@CSearchSingleCondition@@SAPAV1@AAVRReadStream@@@Z @ 63 NONAME ; class CSearchSingleCondition * CSearchSingleCondition::NewL(class RReadStream &)
+	?NewL@CSearchSingleCondition@@SAPAV1@PAVCSearchField@@@Z @ 64 NONAME ; class CSearchSingleCondition * CSearchSingleCondition::NewL(class CSearchField *)
+	?NewL@CSearchSnippetCreator@@SAPAV1@XZ @ 65 NONAME ; class CSearchSnippetCreator * CSearchSnippetCreator::NewL(void)
+	?NewL@CSearchTextSearcher@@SAPAV1@AAVMSearchTextSearcherObserver@@@Z @ 66 NONAME ; class CSearchTextSearcher * CSearchTextSearcher::NewL(class MSearchTextSearcherObserver &)
+	?NewL@CSearchTextSnippet@@SAPAV1@HH@Z @ 67 NONAME ; class CSearchTextSnippet * CSearchTextSnippet::NewL(int, int)
+	?NewL@CSearchTextSnippet@@SAPAV1@XZ @ 68 NONAME ; class CSearchTextSnippet * CSearchTextSnippet::NewL(void)
+	?NewLC@CSearchIconInfo@@SAPAV1@AAVRReadStream@@@Z @ 69 NONAME ; class CSearchIconInfo * CSearchIconInfo::NewLC(class RReadStream &)
+	?NewLC@CSearchTextSearcher@@SAPAV1@AAVMSearchTextSearcherObserver@@@Z @ 70 NONAME ; class CSearchTextSearcher * CSearchTextSearcher::NewLC(class MSearchTextSearcherObserver &)
+	?PackL@CSearchTextSnippet@@QBEPAVHBufC8@@XZ @ 71 NONAME ; class HBufC8 * CSearchTextSnippet::PackL(void) const
+	?PluginId@CSearchContent@@QBE?AVTUid@@XZ @ 72 NONAME ; class TUid CSearchContent::PluginId(void) const
+	?PluginId@CSearchDocumentId@@QBE?AVTUid@@XZ @ 73 NONAME ; class TUid CSearchDocumentId::PluginId(void) const
+	?RepositoryId@CSearchDocumentId@@QBE?BJXZ @ 74 NONAME ; long const CSearchDocumentId::RepositoryId(void) const
+	?Result@CSearchResult@@QBEABVCSearchLightResult@@XZ @ 75 NONAME ; class CSearchLightResult const & CSearchResult::Result(void) const
+	?SearchEmailAddress@CSearchTextSearcher@@QAEXH@Z @ 76 NONAME ; void CSearchTextSearcher::SearchEmailAddress(int)
+	?SearchL@CSearchTextSearcher@@QAEXABVTDesC16@@@Z @ 77 NONAME ; void CSearchTextSearcher::SearchL(class TDesC16 const &)
+	?SearchL@CSearchTextSearcher@@QAEXABVTDesC8@@@Z @ 78 NONAME ; void CSearchTextSearcher::SearchL(class TDesC8 const &)
+	?ServiceId@CSearchLightResult@@QBE?AVTUid@@XZ @ 79 NONAME ; class TUid CSearchLightResult::ServiceId(void) const
+	?SetCaptionL@CSearchContent@@QAEXABVTDesC16@@@Z @ 80 NONAME ; void CSearchContent::SetCaptionL(class TDesC16 const &)
+	?SetCondition@CSearchQuery@@QAEXPAVCSearchCondition@@@Z @ 81 NONAME ; void CSearchQuery::SetCondition(class CSearchCondition *)
+	?SetContentClassId@CSearchLightResult@@QAEXVTUid@@@Z @ 82 NONAME ; void CSearchLightResult::SetContentClassId(class TUid)
+	?SetContentFolderId@CSearchLightResult@@QAEXVTUid@@@Z @ 83 NONAME ; void CSearchLightResult::SetContentFolderId(class TUid)
+	?SetContentId@CSearchContent@@QAEXVTUid@@@Z @ 84 NONAME ; void CSearchContent::SetContentId(class TUid)
+	?SetDataL@CSearchField@@QAEXAAVTDesC8@@W4TSearchFieldDataType@@@Z @ 85 NONAME ; void CSearchField::SetDataL(class TDesC8 &, enum TSearchFieldDataType)
+	?SetFieldId@CSearchField@@QAEXW4TSearchFieldId@@@Z @ 86 NONAME ; void CSearchField::SetFieldId(enum TSearchFieldId)
+	?SetIconFileL@CSearchIconInfo@@QAEXABVTDesC16@@@Z @ 87 NONAME ; void CSearchIconInfo::SetIconFileL(class TDesC16 const &)
+	?SetIconIndex@CSearchIconInfo@@QAEXH@Z @ 88 NONAME ; void CSearchIconInfo::SetIconIndex(int)
+	?SetIconInfo@CSearchContent@@QAEXPAVCSearchIconInfo@@@Z @ 89 NONAME ; void CSearchContent::SetIconInfo(class CSearchIconInfo *)
+	?SetIconMaskIndex@CSearchIconInfo@@QAEXH@Z @ 90 NONAME ; void CSearchIconInfo::SetIconMaskIndex(int)
+	?SetParametersL@CSearchTextSearcher@@QAEXABVCSearchCondition@@@Z @ 91 NONAME ; void CSearchTextSearcher::SetParametersL(class CSearchCondition const &)
+	?SetParametersL@CSearchTextSearcher@@QAEXABVMDesC16Array@@W4TSearchCriteriaOperator@1@H@Z @ 92 NONAME ; void CSearchTextSearcher::SetParametersL(class MDesC16Array const &, enum CSearchTextSearcher::TSearchCriteriaOperator, int)
+	?SetPluginId@CSearchContent@@QAEXVTUid@@@Z @ 93 NONAME ; void CSearchContent::SetPluginId(class TUid)
+	?SetRepositoryIdL@CSearchDocumentId@@QAEXJ@Z @ 94 NONAME ; void CSearchDocumentId::SetRepositoryIdL(long)
+	?SetServiceId@CSearchLightResult@@QAEXVTUid@@@Z @ 95 NONAME ; void CSearchLightResult::SetServiceId(class TUid)
+	?SetShortCaptionL@CSearchContent@@QAEXABVTDesC16@@@Z @ 96 NONAME ; void CSearchContent::SetShortCaptionL(class TDesC16 const &)
+	?SetSkinId@CSearchIconInfo@@QAEXABVTAknsItemID@@@Z @ 97 NONAME ; void CSearchIconInfo::SetSkinId(class TAknsItemID const &)
+	?SetSnippetEndIncomplete@CSearchTextSnippet@@QAEXH@Z @ 98 NONAME ; void CSearchTextSnippet::SetSnippetEndIncomplete(int)
+	?SetSnippetFormatL@CSearchContent@@QAEXABVTDesC8@@@Z @ 99 NONAME ; void CSearchContent::SetSnippetFormatL(class TDesC8 const &)
+	?SetSnippetFormatL@CSearchResult@@QAEXABVTDesC8@@@Z @ 100 NONAME ; void CSearchResult::SetSnippetFormatL(class TDesC8 const &)
+	?SetSnippetL@CSearchResult@@QAEXABVTDesC8@@@Z @ 101 NONAME ; void CSearchResult::SetSnippetL(class TDesC8 const &)
+	?SetSnippetL@CSearchTextSnippet@@QAEXABVTDesC8@@@Z @ 102 NONAME ; void CSearchTextSnippet::SetSnippetL(class TDesC8 const &)
+	?SetSnippetStartIncomplete@CSearchTextSnippet@@QAEXH@Z @ 103 NONAME ; void CSearchTextSnippet::SetSnippetStartIncomplete(int)
+	?SetSubContentId@CSearchContent@@QAEXJ@Z @ 104 NONAME ; void CSearchContent::SetSubContentId(long)
+	?SetSubContentId@CSearchLightResult@@QAEXJ@Z @ 105 NONAME ; void CSearchLightResult::SetSubContentId(long)
+	?SetTargetContent@CSearchQuery@@QAEXABV?$RArray@VTUid@@@@@Z @ 106 NONAME ; void CSearchQuery::SetTargetContent(class RArray<class TUid> const &)
+	?SetTargetService@CSearchQuery@@QAEXVTUid@@@Z @ 107 NONAME ; void CSearchQuery::SetTargetService(class TUid)
+	?SetTitleL@CSearchResult@@QAEXABVTDesC16@@@Z @ 108 NONAME ; void CSearchResult::SetTitleL(class TDesC16 const &)
+	?SkinId@CSearchIconInfo@@QBEABVTAknsItemID@@XZ @ 109 NONAME ; class TAknsItemID const & CSearchIconInfo::SkinId(void) const
+	?Snippet@CSearchResult@@QBEABVTDesC8@@XZ @ 110 NONAME ; class TDesC8 const & CSearchResult::Snippet(void) const
+	?Snippet@CSearchTextSnippet@@QBEABVTDesC8@@XZ @ 111 NONAME ; class TDesC8 const & CSearchTextSnippet::Snippet(void) const
+	?SnippetEndIncomplete@CSearchTextSnippet@@QBEHXZ @ 112 NONAME ; int CSearchTextSnippet::SnippetEndIncomplete(void) const
+	?SnippetFormat@CSearchContent@@QBEABVTDesC8@@XZ @ 113 NONAME ; class TDesC8 const & CSearchContent::SnippetFormat(void) const
+	?SnippetFormat@CSearchResult@@QBEABVTDesC8@@XZ @ 114 NONAME ; class TDesC8 const & CSearchResult::SnippetFormat(void) const
+	?SnippetStartIncomplete@CSearchTextSnippet@@QBEHXZ @ 115 NONAME ; int CSearchTextSnippet::SnippetStartIncomplete(void) const
+	?SubContentId@CSearchContent@@QBEJXZ @ 116 NONAME ; long CSearchContent::SubContentId(void) const
+	?SubContentId@CSearchLightResult@@QBEJXZ @ 117 NONAME ; long CSearchLightResult::SubContentId(void) const
+	?TargetService@CSearchQuery@@QBE?AVTUid@@XZ @ 118 NONAME ; class TUid CSearchQuery::TargetService(void) const
+	?Term@CSearchSingleCondition@@QBEABVCSearchField@@XZ @ 119 NONAME ; class CSearchField const & CSearchSingleCondition::Term(void) const
+	?Title@CSearchResult@@QBEABVTDesC16@@XZ @ 120 NONAME ; class TDesC16 const & CSearchResult::Title(void) const
+	?Type@CSearchCondition@@QBE?AW4TConditionType@1@XZ @ 121 NONAME ; enum CSearchCondition::TConditionType CSearchCondition::Type(void) const
+	?SearchKeyword@CSearchTextSearcher@@QAEPAVCDesC16ArrayFlat@@XZ @ 122 NONAME ; class CDesC16ArrayFlat * CSearchTextSearcher::SearchKeyword(void)
+

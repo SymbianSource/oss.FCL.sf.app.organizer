@@ -32,6 +32,7 @@
 // USER INCLUDE
 #include "alarmcontextfwsupport.h"
 #include "AlmAlarmControl.h"
+#include "alarmutils.h"
 
 #include "pim_trace.h"
 
@@ -87,9 +88,11 @@ void CAlarmContextFwSupport::ContextIndicationL(const CCFContextIndication& aCha
             {
             // snooze alarm
             if(iAlarmControl->CanSnooze())
-	            {
-	            iAlarmControl->ExternalSnoozeAlarm();
-	            }
+              iAlarmControl->ExternalSnoozeAlarm();
+            }
+        else if( contextObject.Value() == TPtrC( KAlarmUISourceCommandValues[ECommandAlarmSilence] ) )
+            {
+            SilenceAlarm();
             }
         else
             {
@@ -114,9 +117,13 @@ void CAlarmContextFwSupport::ActionIndicationL(const CCFActionIndication& aActio
     if( aActionToExecute.Identifier() == TPtrC( KAlarmUIActions[EActionSnooze] ) )
         {
         // snooze the alarm
-		if(iAlarmControl->CanSnooze())
-        	iAlarmControl->ExternalSnoozeAlarm();
+        if(iAlarmControl->CanSnooze())
+          iAlarmControl->ExternalSnoozeAlarm();
         }
+    else if( aActionToExecute.Identifier() == TPtrC( KAlarmUIActions[EActionSilence] ) )
+        {
+        SilenceAlarm();
+        }    
     else if( aActionToExecute.Identifier() == TPtrC( KAlarmUIActions[EActionStop] ) )
         {
         //Do not stop the alarm internally but force the user to stop the alarm manually.
@@ -183,6 +190,7 @@ void CAlarmContextFwSupport::ConstructL()
 
     // define actions(s)
     DefineActionL( EActionSnooze );
+    DefineActionL( EActionSilence );    
 
     //Stop action definition should not be defined as the alarm component should not automatically stop the alarm on observing context events
     // but continue to expire the alarm and force the user to manually stop the alarm
@@ -299,6 +307,7 @@ void CAlarmContextFwSupport::StartL(const TAlarmSourceStateValues aEvent)
 
     // subscribe for action(s)
     SubscribeActionL( EActionSnooze );
+    SubscribeActionL( EActionSilence );
 
     //Subscription to stop action definition from the context events should not be defined as the alarm component should not automatically stop the alarm on observing context events
     // but continue to expire the alarm and force the user to manually stop the alarm
@@ -451,5 +460,11 @@ void CAlarmContextFwSupport :: UnsubscribeContexts()
     TRACE_EXIT_POINT;	
 	}
 
-
+void CAlarmContextFwSupport::SilenceAlarm()
+    {
+    if( iAlarmControl->AlarmUtils() )
+        {
+        iAlarmControl->AlarmUtils()->DoSilence();
+        }
+    }
 // End of File

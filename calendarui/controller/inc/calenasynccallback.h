@@ -11,9 +11,10 @@
 *
 * Contributors:
 *
-* Description:  Calendar's async callback
+* Description:   Calendar's async callback
 *
 */
+
 
 
 #ifndef CALENASYNCCALLBACK_H
@@ -27,17 +28,17 @@
 /**
  * Calendar async Callback
  */	
-class CalenAsyncCallBack : public CAsyncCallBack
+NONSHARABLE_CLASS(CCalenAsyncCallBack) : public CAsyncCallBack
 	{
 	public: 
-		static CalenAsyncCallBack* NewL(TCallBack& aCallBack, CActive::TPriority aPriority,
+		static CCalenAsyncCallBack* NewL(TCallBack& aCallBack, CActive::TPriority aPriority,
                                              CCalenController& aController);
 		void BaseConstructL();
 
-		virtual ~CalenAsyncCallBack();
+		virtual ~CCalenAsyncCallBack();
 	
 	private:    
-	    CalenAsyncCallBack(TCallBack& aCallBack, CActive::TPriority  aPriority,
+      CCalenAsyncCallBack(TCallBack& aCallBack, CActive::TPriority  aPriority,
                           CCalenController& aController);
       
 	public: // Function from base class

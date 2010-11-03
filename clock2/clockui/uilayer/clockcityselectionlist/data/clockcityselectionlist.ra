@@ -1,0 +1,105 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   This file contains all the resources for the module clockcityselectionlist.
+*
+*/
+
+// System includes
+
+// User includes
+#include "clockcityselectionlist.hrh"
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_clock_city_selection_list_menubar
+// The menubar.
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_clock_city_selection_list_menubar
+    {           
+    titles =
+        {
+        MENU_TITLE
+            {
+	     menu_pane = R_AVKON_MENUPANE_EMPTY;	
+            } 
+        };
+    }
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_clock_city_selection_list_dialog
+// Resource for string 
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_clock_city_selection_list_dialog
+    {
+    flags = EAknDialogSelectionList;
+    title = qtn_clk_country_title;
+    
+    buttons = R_AVKON_SOFTKEYS_SELECT_CANCEL;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtSingleGraphicListBox;
+            id = EClockCityListBoxID;
+            control = LISTBOX
+                {
+                flags = EAknListBoxSelectionList;
+                };
+            },
+        DLG_LINE
+            {
+            itemflags = EEikDlgItemNonFocusing;
+            id = EClockCityQueryID;
+            type = EAknCtSelectionListFixedFind;
+            }
+        };
+    }
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_clock_city_selection_list_title
+// Resource for string "Cities"
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_clock_city_selection_list_title
+    {
+    buf = qtn_clk_city_title;
+    }
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_clock_city_selection_list_country_title
+// Resource for string "Locations"
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_clock_city_selection_list_country_title 
+    {
+    buf = qtn_clk_country_title;
+    }    
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_clock_city_selection_list_select_city
+// Resource for string "Select city"
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_clock_city_selection_list_select_city
+	{
+	buf = qtn_clk_qtl_select_city;
+	}
+	
+//End of File

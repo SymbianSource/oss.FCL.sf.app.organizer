@@ -22,11 +22,10 @@
 
 #include <e32base.h>
 #include <badesca.h>
-#include "CalenLunarLocalizedInfo.h"
-#include "CalendarVariant.hrh"
+#include "calenlunarlocalizedinfo.h"
+#include "calendarvariant.hrh"
 #include "calendarui_debug.h"
 
-class QStringList;
 class CEikonEnv;
 class TCalenLunarInfo;
 class TChineseDate;
@@ -42,7 +41,11 @@ public: // public API
     
     IMPORT_C virtual CCalenLunarLocalizedInfo* LocalizeL( TCalenLunarInfo& aInfo );
     
-    IMPORT_C virtual TPtrC GetExtraRowTextL( CCalenLunarLocalizedInfo& aLocInfo );
+    IMPORT_C virtual TPtrC GetExtraRowTextL( CCalenLunarLocalizedInfo& aLocInfo, 
+                                    TInt aMaxWidth, 
+                                    const CFont& aFont,
+									TBool aTwoLines
+                                  );
     
 
 protected:
@@ -65,40 +68,49 @@ protected: // data
      * Localized names of lunar festivals
      * Own.
      */
-    QStringList iFestivalNames;
-
+    CDesCArray* iFestivalNames;
+    
     /**
      * Localized names of solar terms 
      * Own.
      */
-    QStringList iSolarTermNames;
+    CDesCArray* iSolarTermNames;
 
     /**
      * Localized names of animal years
      * Own.
      */
-    QStringList iAnimalYearNames;
+    CDesCArray* iAnimalYearNames;
 
     /**
      * Localized names of heavenly stems
      * Own.
      */
-    QStringList iHeavenlyStemNames;
+    CDesCArray* iHeavenlyStemNames;
 
     /**
      * Localized names of terrestial branches
      * Own.
      */
-    QStringList iTerrestialBranchNames;
+    CDesCArray* iTerrestialBranchNames;
 
+
+    /**
+     * Format string for western date.
+     * Own.
+     */
+    HBufC* iGregorianDateFormat;
 
     TBuf<1000> iLunarExtraRowText;
+
 
     /**
      * Language independent formatter of extra row information.
      */
     CCalenExtraRowFormatter* iRowFormatter;
     
+    TInt  iResourceFileOffset;
+
     };
 
 #endif // __CALENLUNARLOCALIZER_H__

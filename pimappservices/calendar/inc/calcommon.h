@@ -110,9 +110,6 @@ public:
 		*/
 		EInstanceEndTimeWithinRange=0x200,
 		
-		/** Include text notes **/
-		EIncludeNotes=0x300,
-		
 		/** By default all instances which adjoin the search range are found. Use the EExcludeInstanceAdjoiningRange
 		flag to exclude instances that are outside, but adjoin the search range.
 		
@@ -124,7 +121,7 @@ public:
 		
 		/** Include all entries (appointments, day events, reminders, anniversaries and todos). */
 		EIncludeAll=EIncludeAppts|EIncludeReminder|EIncludeEvents|EIncludeAnnivs|
-		EIncludeCompletedTodos|EIncludeIncompletedTodos|EIncludeNotes,
+		EIncludeCompletedTodos|EIncludeIncompletedTodos,
 		};
 		
 	/** The range of instances referred to in a recurrence ID or instance view. 
@@ -266,26 +263,6 @@ public:
 		TUint iLowestPriority;
 		};
 	
-	/** Class to implement the filter on favourite entries.
-	This is used to filter entries according the value of the favourite property
-	when using CCalFindInstanceSettings.
-	@publishedAll
-	@released
-	*/
-	class TCalFavouriteFilter
-		{
-	public:
-		IMPORT_C TCalFavouriteFilter();
-		IMPORT_C TCalFavouriteFilter(TUint32 aValue, TUint32 aMask);
-		
-		IMPORT_C TUint32 Value() const;
-		IMPORT_C TUint32 Mask() const;
-		
-	private:
-		TUint32 iValue;
-		TUint32 iMask;
-		};
-
 	/** Enumeration to define the sort-able attributes that can be sorted on in the
 	 * instance view 
 	@publishedAll

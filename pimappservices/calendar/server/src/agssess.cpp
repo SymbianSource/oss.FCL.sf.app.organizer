@@ -142,24 +142,7 @@ TBool TAgnChangeFilter::IsValidChangeL(const TAgnChange& aChange) const
 			{
 			return EFalse;
 			}
-
-		// Check for the requested entry type and the change type.
-		// Don't notify clients which are listening for event and
-		// to-do notifictaions when note event is modified.
-		if ( ((iEntryType == MCalChangeCallBack2::EChangeEntryEvent) ||
-			(iEntryType == MCalChangeCallBack2::EChangeEntryTodo)) &&
-			(aChange.iEntryType == CCalEntry::ENote))
-			{
-			return EFalse;
-			}
-
-		// Notify clients which are listening for event type note modifications.
-		if (iEntryType == MCalChangeCallBack2::EChangeEntryNote &&
-			aChange.iEntryType == CCalEntry::ENote)
-			{
-			return ETrue;
-			}
-
+		
 		// Check the entry is within the time range specified by the filter
 		// aChange.iRepeatRule gives the repeat data for the newly stored entry. If this operation is an update,
 		// then aChange.iOriginalRepeatRule gives the repeat data for the old entry.
@@ -298,7 +281,7 @@ CAgnServerSession::~CAgnServerSession()
 */
 TBool CAgnServerSession::CheckBackupRestore()
     {
-    if(iBackupRestoreLock  
+    if((iBackupRestoreLock || iAgnServer.BackupRestoreInProgress()) 
     //All opeerations apart from the following ones are not allowed when Backup\Restore is in progress. 
     && iMessage.Function() != ECloseAgenda
     && iMessage.Function() != ECancelChangeNotification
@@ -2082,6 +2065,16 @@ void CAgnServerSession::RequestChangeNotificationParametersL()
 	
 	// Restore length
 	const TInt KBufferSize = iMessage.GetDesLength(KSlot2);
+	
+    if (KBufferSize == KErrArgument)
+        {
+        PanicClientL(EIndexError);
+        }
+    else if (KBufferSize == KErrBadDescriptor)
+        {
+        PanicClientL(EBadDescriptor);
+        }
+    User::LeaveIfError(KBufferSize);
 	
 	// Restore buffer
 	CBufFlat* buffer = CBufFlat::NewL(KBufferSize);
@@ -4063,7 +4056,7 @@ void CAgnSessionFile::AddFileChangeToBufferL(CAgnFileChangeInfo& aFileChangeInfo
             {
              // Clear all the notifications in the buffer
             iFileBufferedNotification->Reset();
-            iFileBufferedNotificationStream.Open(*iBufferedNotification);       
+            iFileBufferedNotificationStream.Open(*iFileBufferedNotification);       
         
             // Add a single 'Undefined Change' notification to the notification buffer
             CAgnFileChangeInfo* fileChang = CAgnFileChangeInfo::NewL(NULL, MCalFileChangeObserver::ECalendarInfoUpdated);

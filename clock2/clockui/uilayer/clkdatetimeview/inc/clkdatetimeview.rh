@@ -1,0 +1,47 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   This file contains declarations for resources of clkdatetimeview.
+*                The file can be included only in resource file.
+*
+*/
+
+// ------------------------------------------------------------
+// CLK_SETTINGS
+// This is used for Date & Time settings view.
+// ------------------------------------------------------------
+//
+STRUCT CLK_SETTINGS
+    {
+    LTEXT date = "";
+    LTEXT datefrmt = "";
+    LTEXT datesepar = "";
+    LTEXT time = "";
+    LTEXT timefrmt = "";
+    LTEXT timesepar = "";
+    LTEXT nitz = "";
+    LTEXT clocktype = "";
+    LTEXT abbrev24h = "";
+    LTEXT abbrev12h = "";
+    LTEXT nitzon = "";
+    LTEXT nitzoff = "";
+    LTEXT analog = "";
+    LTEXT digital = "";
+    LTEXT alarmtone = "";
+    LTEXT timezone = "";
+    LTEXT dsttoggle = "";
+	LTEXT dston = "";
+	LTEXT dstoff = "";
+    }
+
+// End of file

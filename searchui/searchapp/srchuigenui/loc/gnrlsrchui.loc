@@ -1,0 +1,158 @@
+/*
+* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    Localisation strings.  
+*
+*/
+
+
+
+
+
+
+//  APPLICATION INFORMATION
+
+//d:Title of search main view
+//l:title_pane_t2/opt9
+//w:
+//
+#define qtn_title_search				  "Search"
+
+//d:Command in options menu.
+//d:Used in srchui main view / result folder view
+//d: Opens In-device main view in case of of srchui main view
+//d: Opens focused content class or subfolder to the Single result view in case of result folder view
+//l: list_single_pane_t1_cp2
+//w:
+//
+#define qtn_options_open							  "Open"
+
+//d:Command in options menu.
+//d:Used in srchui main view / In-device service view
+//d:for making empty search without keyword
+//l:list_single_pane_t1_cp2
+//w:
+//
+#define qtn_options_empty_search						  "Search"
+
+//d:Text in Soft Key 1
+//d:Used in srchui main view / In-device service view
+//d:when first letter is inserted to the search box, then soft key 1 changes to search
+//d:for making search with keyword
+//l:control_pane_t1/opt7
+//w:
+//
+#define qtn_softkey_search					  "Search"
+
+//d:Command in options menu.
+//d:opens srchui settings view / In-device service view
+//l:list_single_pane_t1_cp2
+//w:
+//
+#define qtn_search_settings                       "Settings"
+
+//d:Command in options menu.
+//d:Used in srchui main view / In-device service view
+//d:opens a Topic view of Help application
+//l:list_single_pane_t1_cp2
+//w:
+//
+#define qtn_options_help							  "Help"
+
+//d:Command in options menu.
+//d:Used in srchui main view / In-device service view
+//d:Closes application
+//l:list_single_pane_t1_cp2
+//w:
+//
+#define qtn_options_exit							  "Exit"
+
+//d:Command in options menu.
+//d:Used in srchui In-device serview view
+//d:for marking the selected item in the list box
+//l:list_single_pane_t1_cp2
+//w:
+//
+#define qtn_options_mark							  "Mark"
+
+//d:Command in options menu.
+//d:Used in srchui In-device serview view
+//d:for un-marking the selected item in the list box
+//l:list_single_pane_t1_cp2
+//w:
+//
+#define qtn_options_unmark						  "UnMark"
+
+//d:Command in options menu.
+//d:Used in srchui result folder view
+//d:Opens In-device main view
+//l:list_single_pane_t1_cp2
+//w:
+//
+#define qtn_options_new_search				      "New Search"
+
+//d:Item is for marking/unmarking all items
+//l:list_single_graphic_pane_t1_cp2
+//w:
+//
+#define qtn_search_types_all                        "All"
+
+//d:Command in options menu.
+//d:Item is for navigating to main view
+//l:list_single_pane_t1_cp2
+//w:
+//
+#define qtn_search_option_goto_main	              "Go to Search main view"
+
+//d:For Navipane text when only one 
+//d:result is found
+//l:navi_navi_text_pane_t1
+//
+#define qtn_search_one_result				  "(1 Result)"
+
+//d:When there are no results and
+//d:only one content class is selected  
+//d:this text is displayed
+//l:main_pane_empty_t1/opt2
+//
+#define qtn_search_no_results						  "Search Completed.No Results"
+
+//d:For Navipane text 
+//d:this text is displayed
+//d:when more than one results are found
+//l:navi_navi_text_pane_t1
+//
+#define qtn_search_multiple_results			  "(%N Results)"
+
+//d:For Navipane text 
+//d:this text is displayed
+//d:while search is in progress
+//l:navi_navi_text_pane_t1
+//
+#define qtn_search_inprogress			            "Searching"
+
+
+//d:this text is displayed
+//d:When results found are more than the specified threshold
+//l:popup_note_window
+//
+#define qtn_search_info_max                   "Too many results found. Clarify your search criteria"
+
+//d:this text is displayed if 
+//d:the entry is not found when trying to launch
+//l:popup_note_window
+//
+#define qtn_search_error_missing            "Result does not exist."
+
+
+

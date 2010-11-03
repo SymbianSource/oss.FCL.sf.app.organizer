@@ -11,9 +11,10 @@
 *
 * Contributors:
 *
-* Description:
+* Description: TCalenThaiPanic Class to show panics.
 *
 */
+
 
 #ifndef CALENTHAIPANIC_H
 #define CALENTHAIPANIC_H

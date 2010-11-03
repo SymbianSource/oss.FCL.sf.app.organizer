@@ -21,26 +21,21 @@
 //debug
 #include "calendarui_debug.h"
 
-#include "CalenSolarTerms.h"
+#include "calensolarterms.h"
 
-#include "CalenLunarPaths.h"
+#include "calenlunarpaths.h"
 
 #include <f32file.h>
 #include <s32file.h>
-#include "OstTraceDefinitions.h"
-#ifdef OST_TRACE_COMPILER_IN_USE
-#include "calensolartermsTraces.h"
-#endif
-
 
 
 // CONSTANTS
 _LIT(KSolarTermsFile, "SolarItems");
 // search path for solar item file
 //Uncomment for emulator
-_LIT( KSolarTermsPath, "\\private\\10005901\\" );
+_LIT( KSolarTermsPath, "//private//10005901//" );  
 
-//_LIT( KSolarTermsPath, "\\data\\" );
+//_LIT( KSolarTermsPath, "//Data//calenlunarchinese//" );
 const TInt KFirstSolarTermYear(1900);
 const TInt KLastSolarTermYear(2100);
 
@@ -52,15 +47,16 @@ const TInt KLastSolarTermYear(2100);
 // 
 // ---------------------------------------------------------------------------
 //
-EXPORT_C CCalenSolarTerms* CCalenSolarTerms::NewL(RFs& aFs)
+CCalenSolarTerms* CCalenSolarTerms::NewL(RFs& aFs)
     {
-    OstTraceFunctionEntry0( CCALENSOLARTERMS_NEWL_ENTRY );
+    TRACE_ENTRY_POINT;
+    
     CCalenSolarTerms* self = new (ELeave) CCalenSolarTerms(aFs);
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
     
-    OstTraceFunctionExit0( CCALENSOLARTERMS_NEWL_EXIT );
+    TRACE_EXIT_POINT;
     return self;
     }
 
@@ -69,10 +65,10 @@ EXPORT_C CCalenSolarTerms* CCalenSolarTerms::NewL(RFs& aFs)
 //
 // ---------------------------------------------------------------------------
 //
-EXPORT_C CCalenSolarTerms::~CCalenSolarTerms()
+CCalenSolarTerms::~CCalenSolarTerms()
     {
-    OstTraceFunctionEntry0( CCALENSOLARTERMS_CCALENSOLARTERMS_ENTRY );
-    OstTraceFunctionExit0( CCALENSOLARTERMS_CCALENSOLARTERMS_EXIT );
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
     }
 
 
@@ -80,9 +76,10 @@ EXPORT_C CCalenSolarTerms::~CCalenSolarTerms()
 // 
 // ---------------------------------------------------------------------------
 //
-EXPORT_C TInt CCalenSolarTerms::CheckSolarTermDateL( const TDateTime& aDate )
+TInt CCalenSolarTerms::CheckSolarTermDateL( const TDateTime& aDate )
     {
-    OstTraceFunctionEntry0( CCALENSOLARTERMS_CHECKSOLARTERMDATEL_ENTRY );
+    TRACE_ENTRY_POINT;
+    
     ReadSolarTermsL( aDate );
     if ( HasSolarTermDataAvailable( aDate ) )
         {
@@ -106,17 +103,17 @@ EXPORT_C TInt CCalenSolarTerms::CheckSolarTermDateL( const TDateTime& aDate )
                 i += KSolarTermCount - 2;
                 TInt foundIndex = i % KSolarTermCount;
                 
-                OstTraceFunctionExit0( CCALENSOLARTERMS_CHECKSOLARTERMDATEL_EXIT );
+                TRACE_EXIT_POINT;
                 return foundIndex;
                 }
             }
-        OstTraceFunctionExit0( DUP1_CCALENSOLARTERMS_CHECKSOLARTERMDATEL_EXIT );
+        TRACE_EXIT_POINT;
         return KErrNotFound;
         }
     else
         {
         // Solar festival data is NOT available for this date 
-        OstTraceFunctionExit0( DUP2_CCALENSOLARTERMS_CHECKSOLARTERMDATEL_EXIT );
+        TRACE_EXIT_POINT;
         return KErrNotSupported;
         }
     }
@@ -129,8 +126,8 @@ EXPORT_C TInt CCalenSolarTerms::CheckSolarTermDateL( const TDateTime& aDate )
 //
 CCalenSolarTerms::CCalenSolarTerms(RFs& aFs) : iFs( aFs )
     {
-    OstTraceFunctionEntry0( DUP1_CCALENSOLARTERMS_CCALENSOLARTERMS_ENTRY );
-    OstTraceFunctionExit0( DUP1_CCALENSOLARTERMS_CCALENSOLARTERMS_EXIT );
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
     }
 
 
@@ -140,8 +137,8 @@ CCalenSolarTerms::CCalenSolarTerms(RFs& aFs) : iFs( aFs )
 //
 void CCalenSolarTerms::ConstructL()
     {
-    OstTraceFunctionEntry0( CCALENSOLARTERMS_CONSTRUCTL_ENTRY );
-    OstTraceFunctionExit0( CCALENSOLARTERMS_CONSTRUCTL_EXIT );
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
     }
 
 
@@ -151,11 +148,13 @@ void CCalenSolarTerms::ConstructL()
 //
 TBool CCalenSolarTerms::HasSolarTermDataAvailable(const TDateTime& aDate) const
     {
-    OstTraceFunctionEntry0( CCALENSOLARTERMS_HASSOLARTERMDATAAVAILABLE_ENTRY );
+    TRACE_ENTRY_POINT;
+    
     // Note: day parameter for TDateTime starts from 0, not from 1
     const TDateTime KMinAvailable( KFirstSolarTermYear, EJanuary, 0, 0, 0, 0, 0 );
     const TDateTime KMaxAvailable( KLastSolarTermYear, EDecember, 31 - 1, 23, 59, 59, 0 );
     
+    TRACE_EXIT_POINT;
     return TTime(KMinAvailable) <= TTime(aDate) &&
            TTime(aDate) <= TTime(KMaxAvailable);
     }
@@ -168,11 +167,11 @@ TBool CCalenSolarTerms::HasSolarTermDataAvailable(const TDateTime& aDate) const
 //
 void CCalenSolarTerms::ReadSolarTermsL(TDateTime aDate)
     {
-    OstTraceFunctionEntry0( CCALENSOLARTERMS_READSOLARTERMSL_ENTRY );
+    TRACE_ENTRY_POINT;
+    
     // Caches one year of solar items
     if ( ! HasSolarTermDataAvailable( aDate ) )
         {
-        OstTraceFunctionExit0( CCALENSOLARTERMS_READSOLARTERMSL_EXIT );
         return;
         }
 
@@ -181,11 +180,10 @@ void CCalenSolarTerms::ReadSolarTermsL(TDateTime aDate)
     if (iCachedYear != year)
         {
         RFile file;
-        TFindFile ffile(iFs);
+        RFs& fs = iFs;
+        TFindFile ffile(fs);
         User::LeaveIfError(ffile.FindByDir(KSolarTermsFile, KSolarTermsPath));
-       // User::LeaveIfError(ffile.FindByPath(KSolarTermsFile, KSolarTermsPath));
-        
-        User::LeaveIfError(file.Open(iFs,
+        User::LeaveIfError(file.Open(fs,
                                      ffile.File(), EFileRead));
         CleanupClosePushL(file);
 
@@ -206,5 +204,6 @@ void CCalenSolarTerms::ReadSolarTermsL(TDateTime aDate)
         CleanupStack::PopAndDestroy(2); // readStream, file
         iCachedYear = year;
         }
-    OstTraceFunctionExit0( DUP1_CCALENSOLARTERMS_READSOLARTERMSL_EXIT );
+    
+    TRACE_EXIT_POINT;
     }

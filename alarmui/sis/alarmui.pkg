@@ -30,17 +30,17 @@
 
 
 ;Alarm UI part
-"\epoc32\release\armv5\urel\AlmAlert.dll" 											- "!:\sys\bin\AlmAlert.dll"
+"\epoc32\release\armv5\urel\AlmAlert.dll" 								- "!:\sys\bin\AlmAlert.dll"
 "\epoc32\release\armv5\urel\AknAlarmService.dll" 								- "!:\sys\bin\AknAlarmService.dll"
-"\epoc32\release\armv5\urel\alarmalertwidget.dll"               - "!:\sys\bin\alarmalertwidget.dll"
 
-"\epoc32\data\Z\private\10282BC4\Rules\alarmuisnooze.rul"    - "!:\private\10282BC4\Rules\alarmuisnooze.rul"
+"\epoc32\data\Z\private\10282BC4\Rules\alarmui_snooze.rul"    - "!:\private\10282BC4\Rules\alarmui_snooze.rul"
+"\epoc32\data\Z\private\10282BC4\Rules\alarmui_stop.rul"    - "!:\private\10282BC4\Rules\alarmui_stop.rul"
+"\epoc32\data\Z\private\10282BC4\Rules\alarmui_activate.rul"    - "!:\private\10282BC4\Rules\alarmui_activate.rul"
+"\epoc32\data\Z\private\10282BC4\Rules\alarmui_silence.rul"    - "!:\private\10282BC4\Rules\alarmui_silence.rul"
+
 "\epoc32\data\z\resource\AlmAlert.rsc"                        - "!:\resource\AlmAlert.rsc"
-"\epoc32\data\z\resource\qt\translations\alarmui_en.qm"            	- "!:\resource\qt\translations\alarmui_en.qm"
+"\epoc32\data\z\resource\AlmAlert.r01"                        - "!:\resource\AlmAlert.r01"
 
-;Qt plugin files to be installed
-"\epoc32\release\armv5\urel\alarmalertplugin.dll"                       - "!:\sys\bin\alarmalertplugin.dll"
-"\epoc32\data\z\resource\plugins\devicedialogs\alarmalertplugin.qtplugin"       - "!:\resource\plugins\devicedialogs\alarmalertplugin.qtplugin"
 
 ;"\epoc32\data\z\data\sounds\digital\clock.aac"     data\sounds\digital\clock.aac
 ;"\epoc32\data\z\data\sounds\digital\alarm.aac"     data\sounds\digital\alarm.aac

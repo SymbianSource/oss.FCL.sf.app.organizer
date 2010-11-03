@@ -23,7 +23,7 @@
 #include "CalenExporter.h"
 
 #include "AgnExternalInterface.h"
-#include <AgnExportObserver.h>
+#include <agnexportobserver.h>
 
 #include <caldataexchange.h>
 #include <calsession.h>

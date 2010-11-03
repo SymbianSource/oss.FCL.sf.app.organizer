@@ -1,0 +1,49 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   IBY file for non-localizable elements of Calendar.app
+*
+*/
+
+
+
+#ifndef CALENDAR_IBY
+#define CALENDAR_IBY
+
+
+S60_APP_EXE( Calendar )
+S60_APP_BITMAP( Calendar )
+
+// Backup registration file
+data = ZPRIVATE\10005901\backup_registration.xml  PRIVATE\10005901\backup_registration.xml
+
+// AIF icons/files
+#ifdef __SCALABLE_ICONS
+    data=DATAZ_\APP_BITMAP_DIR\CALENDAR_AIF.MIF            APP_BITMAP_DIR\Calendar_aif.mif
+#else
+    AUTO-BITMAP=DATAZ_\APP_BITMAP_DIR\CALENDAR_AIF.MBM     APP_BITMAP_DIR\Calendar_aif.mbm
+#endif
+
+// Application registration file.
+data=DATAZ_\private\10003a3f\apps\CALENDAR_REG.RSC		\private\10003a3f\import\apps\CALENDAR_REG.RSC
+
+//data = DATAZ_\private\10202be9\101F874B.txt   private\10202be9\101F874B.txt
+//Calendar Application Specific Alarm behaviour file
+data = DATAZ_\private\10202be9\10003a5b.cre  private\10202be9\10003a5b.cre
+
+// Stub sis
+data=DATAZ_\system\install\calendar_stub.sis             \System\Install\calendar_stub.sis
+
+#endif // CALENDAR_IBY
+
+//  End of File

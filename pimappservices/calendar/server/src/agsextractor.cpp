@@ -103,6 +103,8 @@ void CAgnInstanceExtractor::FindInstancesL(CArrayFix<TAgnSortInstance>& aInstanc
 	TTime searchRangeStartLocal(aSearchParams.iRangeStart.LocalL());
 	TTime searchRangeEndLocal(aSearchParams.iRangeEnd.LocalL());
 	
+	TTime startTime(searchRangeStartLocal);	
+	
 #ifdef SYMBIAN_SKIPPED_CALENDAR_ALARMS
 	TBool alarmInstanceSearch(EFalse);		
 	alarmInstanceSearch = aSearchParams.iFilter.IsAlarmedInstanceSearch();
@@ -170,9 +172,7 @@ void CAgnInstanceExtractor::FindInstancesL(CArrayFix<TAgnSortInstance>& aInstanc
    			}
 		}
 	
-#else
-	TTime startTime(searchRangeStartLocal);	
-	
+#else	
 	for (iIterator->GotoL(startTime); !iIterator->AtEnd() && ( (iIterator->CurrentElement().ValidFromTimeLocalL() == Time::NullTTime()) || iIterator->CurrentElement().ValidFromTimeLocalL() <= searchRangeEndLocal) ; iIterator->NextL())
 		{
 		const CAgnSimpleEntry& KSimpleEntry(iIterator->CurrentElement());

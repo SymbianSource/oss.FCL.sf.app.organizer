@@ -1,0 +1,68 @@
+<script xmlns="http://www.nokia.com/ns/cep/script/1.0/" xmlns:cep="http://www.nokia.com/ns/cep/1.0/">
+    <!-- If sensor settings are off, nothing needs to be done -->
+    <if>
+        <or>
+            <!-- Sensor settings are disabled -->
+            <not>
+	            <equals>
+	                <contextRef source='Sensor' type='Setting.Active' value='On'/>
+	            </equals>
+            </not>
+	        <!-- Turning interaction is disabled -->
+	        <not>
+	            <equals>
+	                <contextRef source='Sensor' type='Setting.TurningInteraction.SilenceAlarm' value='On'/>
+	            </equals>
+	        </not>
+        </or>
+        <actions>
+            <!-- Do nothing -->
+        </actions>
+    </if>
+    
+    <!-- Enable sensor services -->
+    <elseIf>
+		 <!-- Alarm is active -->
+        <or>
+            <contextUpdated>
+                <contextRef source='AlarmUI' type='State' value='Clock'/>
+            </contextUpdated>
+            <contextUpdated>
+                <contextRef source='AlarmUI' type='State' value='Calendar'/>
+            </contextUpdated>
+            <contextUpdated>
+                <contextRef source='AlarmUI' type='State' value='Unknown'/>
+            </contextUpdated>
+        
+        </or>
+
+	    <actions>
+	            <!-- Activate orientation channel (0x01) from sensor source (0x10282DF0) -->
+	            <sourceCommand uid='0x10282DF0'>
+	                <sensorCommand channelId='0x01' id='activate'/>
+	            </sourceCommand>
+	            <!-- Publish context that indicates that alarm is active -->
+	            <publishContext define='true'>
+	                <contextRef source='Alarm' type='Status.Active' value='true'/>
+	            </publishContext>
+	    </actions>
+    </elseIf>
+
+    <!-- Disable sensor services -->
+    <elseIf>
+        <!-- Alarm is not active -->
+        <contextUpdated>
+            <contextRef source='AlarmUI' type='State' value='Inactive'/>
+        </contextUpdated>
+	    <actions>
+	            <!-- Activate orientation channel (0x01) from sensor source (0x10282DF0) -->
+	            <sourceCommand uid='0x10282DF0'>
+	                <sensorCommand channelId='0x01' id='deactivate'/>
+	            </sourceCommand>
+	            <!-- Publish context that indicates that alarm is not active -->
+	            <publishContext define='true'>
+	                <contextRef source='Alarm' type='Status.Active' value='false'/>
+	            </publishContext>
+	    </actions>
+    </elseIf>
+</script>

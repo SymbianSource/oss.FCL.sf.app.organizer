@@ -1,0 +1,5 @@
+EXPORTS
+	??1CClockAlarmEditor@@UAE@XZ @ 1 NONAME ; CClockAlarmEditor::~CClockAlarmEditor(void)
+	?LaunchL@CClockAlarmEditor@@QAEHXZ @ 2 NONAME ; int CClockAlarmEditor::LaunchL(void)
+	?NewL@CClockAlarmEditor@@SAPAV1@H@Z @ 3 NONAME ; class CClockAlarmEditor * CClockAlarmEditor::NewL(int)
+

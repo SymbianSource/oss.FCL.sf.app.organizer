@@ -1,0 +1,1794 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  This file contains form resources for the module.
+*
+*/
+
+
+//  RESOURCE IDENTIFIER
+NAME    CALE
+
+//  INCLUDES
+#include <calendar.loc>
+#include <eikon.rh>
+#include <eikon.rsg>
+#include <avkon.hrh>
+#include <avkon.rh>
+#include <avkon.rsg>
+#include <avkon.mbg>
+#include <avkon.loc>
+#include <calencommands.hrh>            // Calendar commands
+
+#include "KoreanLunarDateEditor.rh"
+#include <calenkoreanlunar.loc>
+#include "CalenDefaultEditors.hrh"
+#include "CalendarVariant.hrh"
+#include "calendar.hrh"
+
+RESOURCE RSS_SIGNATURE { }
+
+
+//  RESOURCE DEFINITIONS
+
+
+// ---------------------------------------------------------
+//
+//    r_calen_alarm_popup_items
+//    Define items of "Alarm" popup list.
+//
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_calen_alarm_popup_items
+    {
+    items=
+        {
+        LBUF
+            {
+            txt = qtn_cale_alarm_off;
+            },
+        LBUF
+            {
+            txt = qtn_cale_alarm_active;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_confident_popup_items
+//    Define items of "Confidentiality:" popup list.
+//
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_calen_confident_popup_items
+    {
+    items=
+        {
+        LBUF
+            {
+            txt = qtn_cale_confident_private;
+            },
+        LBUF
+            {
+            txt = qtn_cale_confident_public;
+            },
+        LBUF
+            {
+            txt = qtn_cale_confident_none;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_repeat_popup_items
+//    Define items of "Repeat:" popup list.
+//
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_calen_repeat_popup_items
+    {
+    items=
+        {
+        LBUF
+            {
+            txt = qtn_cale_not_repeated;
+            },
+        LBUF
+            {
+            txt = text_calendar_every_day;
+            },
+        LBUF
+            {
+            txt = text_calendar_every_week;
+            },
+        LBUF
+            {
+            txt = text_calendar_bi_weekly;
+            },
+        LBUF
+            {
+            txt = qtn_cale_repeat_monthly;
+            },
+        LBUF
+            {
+            txt = text_calendar_every_year;
+            },
+        LBUF
+            {
+            txt = qtn_cale_other;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//
+//    r_korean_lunar_type_popup_items
+//    Define items of "Solar/lunar:" popup list.
+//
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_korean_lunar_type_popup_items
+    {
+    items=
+        {
+        LBUF
+            {
+            txt = qtn_kor_cale_note_type_solar;
+            },
+        LBUF
+            {
+            txt = qtn_kor_cale_note_type_lunar;
+            },
+        LBUF
+            {
+            txt = qtn_kor_cale_note_type_leap;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_noteview_menubar
+//    Menubar for NoteView
+//    The upper menu title is defined in , the lower display position is.
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_calen_noteview_menubar
+    {
+    titles=
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_calen_noteview_menupane;
+            txt = " "; // Dummy
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_noteview_menupane
+//    This is empty menupane. 
+//    Editor implementation dynamically adds all parts
+//    of menu pane to this. 
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_calen_noteview_menupane
+    {
+    items=
+        {
+        };
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_noteview_menu_pane
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_calen_noteview_default_menu_pane
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = ECalenCmdCancel;
+            txt = qtn_cale_om_cancel_changes;
+            },
+        MENU_ITEM
+            {
+            command = ECalenGetLocation;
+            txt = qtn_cale_om_assign_from_map;
+            },
+        MENU_ITEM
+            {
+            command = ECalenDeleteCurrentEntry;
+            txt = qtn_cale_om_delete;
+            },
+        MENU_ITEM
+            {
+            command = ECalenSend;
+            txt = qtn_options_send_via;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = EAknSoftkeyExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+// Description data related Options-menu items
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_calen_description_menu_pane
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = ECalenCmdAddDescription;
+            txt = qtn_cale_om_add_descript;
+            cascade = r_calen_description_add_sub_menupane;
+            },
+        MENU_ITEM
+            {
+            command = ECalenCmdShowDescription;
+            txt = qtn_cale_om_desc_show;
+            },
+        MENU_ITEM
+            {
+            command = ECalenCmdRemoveDescription;
+            txt = qtn_cale_om_desc_remove;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+// ---------------------------------------------------------
+//
+//    r_calen_noteview_menu_pane
+//
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_calen_noteview_location_menu_pane
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = ECalenGetLocation;
+            txt = qtn_cale_om_assign_from_map;
+            },
+        MENU_ITEM
+            {
+            command = ECalenCmdCancel;
+            txt = qtn_cale_om_cancel_changes;
+            },
+        MENU_ITEM
+            {
+            command = ECalenDeleteCurrentEntry;
+            txt = qtn_cale_om_delete;
+            },
+        MENU_ITEM
+            {
+            command = ECalenSend;
+            txt = qtn_options_send_via;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = EAknSoftkeyExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }         
+// ---------------------------------------------------------
+// Submenu for 'Add description' menu item.
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_calen_description_add_sub_menupane
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = ECalenCmdAddDescriptionNew;
+            txt = qtn_cale_om_descript_new;
+            },
+        MENU_ITEM
+            {
+            command = ECalenCmdAddDescriptionExisting; 
+            txt = qtn_cale_om_descript_exist;
+            }
+        };
+    }
+
+RESOURCE TBUF r_qtn_cale_note_title
+    {
+    buf = qtn_cale_note_title;
+    }
+
+RESOURCE TBUF r_qtn_cale_q_del_notep_desc
+    {
+    buf = qtn_cale_q_del_notep_desc;
+    }
+
+RESOURCE DIALOG r_calen_remove_description_confirmation_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items = 
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                label = qtn_cale_query_remove_descr;
+                };
+            }
+        };
+    }
+
+RESOURCE DIALOG r_calen_db_conflict_dialog
+    {
+    flags = EAknWarningNoteFlags | EEikDialogFlagWait;
+    buttons = R_AVKON_SOFTKEYS_OK_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGeneralQuery;
+            control = AVKON_NOTE
+                {
+                layout = EGeneralLayout;
+                animation = R_QGN_NOTE_WARNING_ANIM;
+                };
+            }
+        };
+    }
+
+RESOURCE DIALOG r_calen_cancel_changes_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items = 
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                label = qtn_cale_query_cancel_changes;
+                };
+            }
+        };
+    }
+    RESOURCE DIALOG r_calen_db_change_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items = 
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationQueryLayout;
+                label = qtn_calen_db_change_del_exeptions;
+                };
+            }
+        };
+    }
+
+
+RESOURCE TBUF r_qtn_cale_inote_desc_del_memo
+    {
+    buf = qtn_cale_inote_desc_del_memo;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_todo_todonote_title
+//    To-Do's note view identify id.
+//    32 characters is not exceeded.
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF32 r_todo_todonote_title
+    { 
+    buf = qtn_todo_note_header;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_todo_delete_wait_note
+//    Wait note for deleting marked items
+//
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_todo_delete_wait_note
+    {
+    flags = EAknWaitNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = ETodoNoteWait;
+            control = AVKON_NOTE
+                { 
+                layout = EWaitLayout;
+                singular_label = qtn_todo_wait_deleting_notes;
+                imagefile = AVKON_ICON_FILE;
+                imageid = EMbmAvkonQgn_note_erased;
+                imagemask = EMbmAvkonQgn_note_erased_mask;
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                ///animation = R_QGN_NOTE_ERASED_ANIM;
+                };
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//
+//    r_qtn_cale_info_note_ends_before
+//    This error message is shown
+//    when end date/time is earlier than start.
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_cale_info_note_ends_before
+    {
+    buf = qtn_cale_info_note_ends_before;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_qtn_cale_date_alarm_past
+//    This message is shown if alarm date is 1000 days or more past
+//    to note date.
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_cale_date_alarm_past
+    {
+    buf = qtn_cale_date_alarm_past;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_qtn_cale_later_date
+//    This message is shown if alarm time is later than note.
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_cale_later_date
+    {
+    buf = qtn_cale_later_date;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_qtn_cale_not_expired
+//    This message is shown if alarm is set to past note.
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_cale_not_expired
+    {
+    buf = qtn_cale_not_expired;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_qtn_cale_info_repeat_invalid
+//    This message is shown if date of Repeat until is past
+//    to note date.
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_cale_info_repeat_invalid
+    {
+    buf = qtn_cale_info_repeat_invalid;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_qtn_cale_info_note_duration_too_long_for_daily
+//    This message is shown if repeat is set to daily and
+//    the duration of the entry is greater than one day
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_cale_info_note_duration_too_long_for_daily
+    {
+    buf = qtn_cale_note_cannot_occur_daily;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_qtn_cale_info_note_duration_too_long_for_weekly
+//    This message is shown if repeat is set to weekly and
+//    the duration of the entry is greater than one week
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_cale_info_note_duration_too_long_for_weekly
+    {
+    buf = qtn_cale_note_cannot_occur_weekly;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_qtn_cale_info_note_duration_too_long_for_biweekly
+//    This message is shown if repeat is set to biweekly and
+//    the duration of the entry is greater than two weeks
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_cale_info_note_duration_too_long_for_biweekly
+    {
+    buf = qtn_cale_note_cannot_occur_fortnightly;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_qtn_cale_info_note_duration_too_long_for_monthly
+//    This message is shown if repeat is set to monthly and
+//    the duration of the entry is greater than one month
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_cale_info_note_duration_too_long_for_monthly
+    {
+    buf = qtn_cale_note_cannot_occur_monthly;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_qtn_cale_info_note_duration_too_long_for_yearly
+//    This message is shown if repeat is set to yearly and
+//    the duration of the entry is greater than one year
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_cale_info_note_duration_too_long_for_yearly
+    {
+    buf = qtn_cale_note_cannot_occur_yearly;
+    }
+
+
+RESOURCE TBUF r_qtn_cale_note_child_out_of_sequence
+    {
+    buf = qtn_cale_note_child_out_of_sequence;
+    }
+
+RESOURCE TBUF r_qtn_cale_note_child_same_day
+    {
+    buf = qtn_cale_note_child_same_day;
+    }
+
+RESOURCE TBUF r_qtn_cale_note_child_overlap
+    {
+    buf = qtn_cale_note_child_overlap;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_qtn_allday_event_yes
+//    String to display 'Yes' in AllDay field in UnifiedEditor
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_allday_event_yes
+    {
+    buf = qtn_cale_item_yes;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_qtn_allday_event_no
+//    String to display 'NO' in AllDay field in UnifiedEditor
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_allday_event_no
+    {
+    buf = qtn_cale_item_no;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_qtn_cale_note_db_conflict
+//    Shown if another application causes a database conflict
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_cale_note_db_conflict
+    {
+    buf = qtn_cale_note_db_conflict;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_qtn_cale_note_db_modified
+//    Shown if another application causes a database conflict
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_cale_note_db_modified
+    {
+    buf = qtn_cale_note_db_modified;
+    }
+
+//    r_calen_repeat_note_start_changed
+//    This message is shown if date of Start Date is updated
+//    to old repeat note.
+//
+// ---------------------------------------------------------
+//
+RESOURCE DIALOG r_calen_repeat_note_start_changed
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationLayout;
+                label = qtn_cale_quest_change_start_day;
+                };
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_meeting_note_title
+//    Define title of meeting note
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_meeting_note_title
+    {
+    buf = text_calendar_title_meeting;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_anniv_note_title
+//    Define title of birthday note
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_anniv_note_title
+    {
+    buf = qtn_cale_anniversary_title;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_calen_day_note_title
+//    Define title of day note
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_day_note_title
+    {
+    buf = qtn_cale_title_daynote;
+    }
+
+
+
+
+// ---------------------------------------------------------
+//
+//    r_calen_msk_change_cba
+//    CBA with MSK button "Change"
+//
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_calen_msk_change_cba
+    {
+    buttons =
+        {
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyOptions;
+            txt=text_softkey_option;
+            },
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyDone;
+            txt=text_softkey_done;
+            },
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyChange;
+            txt=qtn_msk_change;
+            }
+           
+       };
+    
+    }    
+
+// ---------------------------------------------------------
+//
+//    r_calen_msk_open_cba
+//    CBA with MSK button "Open"
+//
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_calen_msk_open_cba
+    {
+    buttons =
+        {
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyOptions;
+            txt=text_softkey_option;
+            },
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyDone;
+            txt=text_softkey_done;
+            },
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyOpen; 
+            txt=qtn_msk_open;
+            }
+       };
+    }    
+
+// ---------------------------------------------------------
+//
+//    r_calen_msk_empty_cba
+//    CBA with empty MSK button 
+//
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_calen_msk_empty_cba
+    {
+    buttons =
+        {
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyOptions;
+            txt=text_softkey_option;
+            },
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyDone;
+            txt=text_softkey_done;
+            },
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyEmpty; 
+            txt=text_softkey_empty;
+            }
+       };
+    }    
+
+// ---------------------------------------------------------
+//
+//    r_calen_msk_empty_cba
+//    CBA with frommap MSK button 
+//
+// ---------------------------------------------------------
+//
+RESOURCE CBA r_calen_msk_frommap_cba
+    {
+    buttons =
+        {
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyOptions;
+            txt=text_softkey_option;
+            },
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyDone;
+            txt=text_softkey_done;
+            },
+        CBA_BUTTON
+            {
+            id=ECalenGetLocation; 
+            txt=text_softkey_from_map;
+            }
+       };
+    }   
+
+//----------------------------------------------------
+//
+//    r_calen_geovalues_removal_note
+//    Geo Values Removal query
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_calen_geovalues_removal_note
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO__YES;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationLayout;
+                };
+            }
+        };
+    }
+    
+// ---------------------------------------------------------
+//
+//    r_calen_qtn_todo_quest_delete_marked_notes
+//    Remove GeoValues
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_calen_qtn_geovalues_removal
+    {
+    buf = qtn_cale_confirm_keep_coordinates;
+    }
+
+// ---------------------------------------------------------
+//
+//    r_qtn_alarm_active
+//    Define "On" to "Alarm:" line of Note Form
+//
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_alarm_active
+    {
+    buf = qtn_cale_alarm_active;
+    }
+// ---------------------------------------------------------
+//
+//    r_qtn_alarm_off
+//    Define "Off" to "Alarm:" line of Note Form
+//
+// ---------------------------------------------------------
+//
+ RESOURCE TBUF r_qtn_alarm_off
+    {
+    buf = qtn_cale_alarm_off;
+    }
+
+    
+// ---------------------------------------------------------
+// r_calen_unified_editor
+// resource definition for unified editor 
+// ---------------------------------------------------------
+//
+ RESOURCE DIALOG r_calen_unified_editor
+     {
+     flags = EEikDialogFlagNoDrag 
+         |   EEikDialogFlagFillAppClientRect 
+         |   EEikDialogFlagButtonsRight 
+         |   EEikDialogFlagCbaButtons
+         |   EEikDialogFlagWait 
+         |   EEikDialogFlagNoTitleBar
+         |   EEikDialogFlagDontEatUpDownEvents
+         |   EEikDialogFlagNotifyEsc;
+
+     buttons = R_AVKON_SOFTKEYS_OPTIONS_DONE;
+     form = r_calen_unified_editor_form;
+     }
+
+// ---------------------------------------------------------
+// r_calen_unified_editor_form
+// Define items of unified editor
+// ---------------------------------------------------------
+//
+ RESOURCE FORM r_calen_unified_editor_form
+     {
+     flags = EEikFormUseDoubleSpacedFormat;
+     items =
+         {
+         DLG_LINE_INDIRECT
+             {
+             line = r_calen_editor_event_type_item;
+             },
+         DLG_LINE_INDIRECT
+             {
+             line = r_calen_editor_subject_item;
+             }
+         };
+     }
+ 
+// ---------------------------------------------------------
+// r_calen_editor_subject_item
+// Define "Subject" line in unified editor 
+// ---------------------------------------------------------
+//
+ RESOURCE DLG_LINE r_calen_editor_subject_item
+     {
+     type = EEikCtEdwin;
+     prompt = qtn_cale_note_subject;
+     id = ECalenEditorSubject;
+     itemflags = EEikDlgItemTakesEnterKey;
+     control = EDWIN
+         {
+         flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable |
+                 EEikEdwinNoAutoSelection | EEikEdwinJustAutoCurEnd;
+         maxlength = ECalenAbsoluteMaxTextEditorLength;
+         default_case = EAknEditorTextCase;
+         allowed_case_modes = EAknEditorAllCaseModes;
+         numeric_keymap = EAknEditorStandardNumberModeKeymap;
+         special_character_table = R_AVKON_SPECIAL_CHARACTER_TABLE_DIALOG;
+         avkon_flags = EAknEditorFlagUseSCTNumericCharmap |
+                       EAknEditorFlagDefault |
+                       EAknEditorFlagEnablePictographInput;
+         // let Avkon decide which is maximum number of lines
+         // It's based on layout.
+         max_view_height_in_lines = 0;
+         };
+     }
+ 
+// ---------------------------------------------------------
+// r_calen_editor_event_type_item
+// Define "Event Type" line in unified editor 
+// ---------------------------------------------------------
+//
+ RESOURCE DLG_LINE r_calen_editor_event_type_item
+     {
+     type = EAknCtPopupField;
+     prompt = qtn_cale_label_event_type;
+     id = ECalenEditorEventType;
+     itemflags = EEikDlgItemTakesEnterKey | EEikDlgItemOfferAllHotKeys;
+     control = POPUP_FIELD
+         {
+         flags = 0;
+         width = 15;
+         other = " ";
+         };
+     }
+ 
+// ---------------------------------------------------------
+// r_calen_editor_all_day_item
+// Define "All Day" line in unified editor 
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_all_day_item
+    {
+    type = EEikCtEdwin;
+    prompt = qtn_cale_label_all_day;
+    id = ECalenEditorAllDayItem;
+    itemflags = EEikDlgItemTakesEnterKey;
+    control = EDWIN
+        {
+        flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable |
+                EEikEdwinNoAutoSelection | EEikEdwinReadOnly|
+                EEikEdwinAvkonDisableCursor|EEikEdwinAvkonNotEditable |EEikEdwinDisplayOnly ;
+        maxlength = ECalenAbsoluteMaxTextEditorLength;
+        default_case = EAknEditorTextCase;
+        allowed_case_modes = EAknEditorAllCaseModes;
+        numeric_keymap = EAknEditorStandardNumberModeKeymap;
+        special_character_table = R_AVKON_SPECIAL_CHARACTER_TABLE_DIALOG;
+        avkon_flags = EAknEditorFlagUseSCTNumericCharmap |
+                      EAknEditorFlagDefault | 
+                      EAknEditorFlagEnablePictographInput;
+        // let Avkon decide which is maximum number of lines
+        // It's based on layout.
+        max_view_height_in_lines = 0;
+        };
+    
+    
+    }
+ 
+// ---------------------------------------------------------
+// r_calen_editor_due_date_item
+// Define "Due date" line in unified editor 
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_due_date_item
+    {
+    type = EEikCtDateEditor;
+    prompt = qtn_cale_viewer_due_date;
+    id = ECalenEditorDueDate;
+    control = DATE_EDITOR 
+        {
+        minDate = DATE
+            {
+            day = ECalenMinDay;
+            month = ECalenMinMonth;
+            year = ECalenMinYear;
+            };
+        maxDate = DATE
+            {
+            day = ECalenMaxDay;
+            month = ECalenMaxMonth;
+            year = ECalenMaxYear;
+            };
+        };
+    }
+ 
+// ---------------------------------------------------------
+// r_qtn_calen_editor_due_date
+// To define "Due Date" string for To-Do Entry in unified editor 
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_calen_editor_due_date
+    {
+    buf = qtn_todo_note_duedate;
+    }
+
+// ---------------------------------------------------------
+// r_qtn_calen_editor_date_of_birth
+// To define "Date of Birth" string for Birthday Entry in unified editor 
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_calen_editor_date_of_birth
+    {
+    buf = qtn_cale_viewer_date; 
+    }
+
+// ---------------------------------------------------------
+// r_calen_editor_start_time_item
+// Define the "Start time" line in unified editor 
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_start_time_item
+    {
+    type = EEikCtTimeEditor;
+    prompt = qtn_cale_label_start_time;
+    id = ECalenEditorStartTime;
+    control = TIME_EDITOR
+        {
+        minTime = TIME
+            {
+            minute = ECalenMinMinute;
+            hour = ECalenMinHour;
+            };
+        maxTime = TIME
+            {
+            minute = ECalenMaxMinute;
+            hour = ECalenMaxHour;
+            };
+        flags = EEikTimeWithoutSecondsField;
+        };
+    }
+
+// ---------------------------------------------------------
+// r_calen_editor_end_time_item
+// Define "End time" line in unified editor 
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_end_time_item
+    {
+    type = EEikCtTimeEditor;
+    prompt = qtn_cale_note_end_meet_time;
+    id = ECalenEditorEndTime;
+    control = TIME_EDITOR
+        {
+        minTime = TIME
+            {
+            minute = ECalenMinMinute;
+            hour = ECalenMinHour;
+            };
+        maxTime = TIME
+            {
+            minute = ECalenMaxMinute;
+            hour = ECalenMaxHour;
+            };
+        flags = EEikTimeWithoutSecondsField;
+        };
+    }
+
+// ---------------------------------------------------------
+// r_calen_editor_start_date_item
+// Define "Start Date" line in unified editor 
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_start_date_item
+    {
+    type = EEikCtDateEditor;
+    prompt = qtn_cale_label_start_date;
+    id = ECalenEditorStartDate;
+    control = DATE_EDITOR
+        {
+        minDate = DATE
+            {
+            day = ECalenMinDay;
+            month = ECalenMinMonth;
+            year = ECalenMinYear;
+            };
+        maxDate = DATE
+            {
+            day = ECalenMaxDay;
+            month = ECalenMaxMonth;
+            year = ECalenMaxYear;
+            };
+        };
+    }
+
+// ---------------------------------------------------------
+// r_calen_editor_end_date_item
+// Define "End Date" line in unified editor 
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_end_date_item
+    {
+    type = EEikCtDateEditor;
+    prompt = qtn_cale_day_end_date;
+    id = ECalenEditorEndDate;
+    control = DATE_EDITOR
+        {
+        minDate = DATE
+            {
+            day = ECalenMinDay;
+            month = ECalenMinMonth;
+            year = ECalenMinYear;
+            };
+        maxDate = DATE
+            {
+            day = ECalenMaxDay;
+            month = ECalenMaxMonth;
+            year = ECalenMaxYear;
+            };
+        };
+    }
+ 
+// ---------------------------------------------------------
+// r_calen_editor_birthday_year_item
+// Define "Date and Year" line in unified editor 
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_birthday_year_item
+    {
+    type = EEikCtDateEditor;
+    prompt = r_calen_editor_birthday_year_item;
+    id = ECalenEditorBirthDayYear;
+    control = DATE_EDITOR 
+        {
+        minDate = DATE
+            {
+            day = ECalenMinDay;
+            month = ECalenMinMonth;
+            year = ECalenMinYear;
+            };
+        maxDate = DATE
+            {
+            day = ECalenMaxDay;
+            month = ECalenMaxMonth;
+            year = ECalenMaxYear;
+            };
+        };
+    } 
+
+// ---------------------------------------------------------
+// r_calen_editor_place_item
+// Define "Place" in unified editor
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_place_item
+    {
+    type = EEikCtRichTextEditor;
+    prompt = qtn_cale_label_place;
+    id = ECalenEditorPlace;
+    itemflags = EEikDlgItemTakesEnterKey |EEikDlgItemAsLabel |
+                EEikEdwinAlwaysShowSelection | EEikEdwinUserSuppliedText |
+                EEikRTedNoTextParsers;
+    control = RTXTED
+        {
+        flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable |
+                EEikEdwinNoAutoSelection | EEikEdwinJustAutoCurEnd
+                | EEikEdwinAllowPictures;
+        width = 0;  // These 0's are not really needed
+        height = 0; 
+        numlines = 0;
+        textlimit = ECalenAbsoluteMaxTextEditorLength;
+        default_case = EAknEditorTextCase;
+        allowed_case_modes = EAknEditorAllCaseModes;
+        numeric_keymap = EAknEditorStandardNumberModeKeymap;
+        special_character_table = R_AVKON_SPECIAL_CHARACTER_TABLE_DIALOG;
+        
+        max_view_height_in_lines = 0;
+        };
+    }
+
+
+// ---------------------------------------------------------
+// r_calen_editor_reminder_item
+// Define "reminder" line in unified editor 
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_reminder_item
+    {
+    type = EEikCtEdwin;
+    prompt = qtn_cale_label_reminder;
+    id = ECalenEditorReminder;
+    itemflags = EEikDlgItemTakesEnterKey;
+    control = EDWIN
+        {
+        flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable |
+                EEikEdwinNoAutoSelection | EEikEdwinReadOnly|
+                EEikEdwinAvkonDisableCursor|EEikEdwinAvkonNotEditable |EEikEdwinDisplayOnly ;
+        maxlength = ECalenAbsoluteMaxTextEditorLength;
+        default_case = EAknEditorTextCase;
+        allowed_case_modes = EAknEditorAllCaseModes;
+        numeric_keymap = EAknEditorStandardNumberModeKeymap;
+        special_character_table = R_AVKON_SPECIAL_CHARACTER_TABLE_DIALOG;
+        avkon_flags = EAknEditorFlagUseSCTNumericCharmap |
+                      EAknEditorFlagDefault | 
+                      EAknEditorFlagEnablePictographInput;
+        // let Avkon decide which is maximum number of lines
+        // It's based on layout.
+        max_view_height_in_lines = 0;
+        };
+    }
+   
+// ---------------------------------------------------------
+// r_calen_editor_reminder_time_item
+// Define the "Reminder Time" line in unified editor 
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_reminder_time_item
+    {
+    type = EEikCtTimeEditor;
+    prompt = qtn_cale_label_reminder_time;
+    id = ECalenEditorReminderTime;
+    control = TIME_EDITOR
+        {
+        minTime = TIME
+            {
+            minute = ECalenMinMinute;
+            hour = ECalenMinHour;
+            };
+        maxTime = TIME
+            {
+            minute = ECalenMaxMinute;
+            hour = ECalenMaxHour;
+            };
+        flags = EEikTimeWithoutSecondsField;
+        };
+    }
+   
+// ---------------------------------------------------------
+// r_calen_editor_reminder_date_item
+// Define "Reminder Date" line in unified editor 
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_reminder_date_item
+    {
+    type = EEikCtDateEditor;
+    prompt = qtn_cale_label_reminder_date;
+    id = ECalenEditorReminderDate;
+    control = DATE_EDITOR
+        {
+        minDate = DATE
+            {
+            day = ECalenMinDay;
+            month = ECalenMinMonth;
+            year = ECalenMinYear;
+            };
+        maxDate = DATE
+            {
+            day = ECalenMaxDay;
+            month = ECalenMaxMonth;
+            year = ECalenMaxYear;
+            };
+        };
+    }
+
+// ---------------------------------------------------------
+// r_calen_editor_repeat_item
+// Define "Repeat" line in unified editor 
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_repeat_item
+    {
+    type = EAknCtPopupField;
+    prompt = qtn_cale_note_meeting_repeat;
+    id = ECalenEditorRepeat;
+    itemflags = EEikDlgItemTakesEnterKey | EEikDlgItemOfferAllHotKeys;
+    control = POPUP_FIELD
+        {
+        flags = 0;
+        width = 15;
+        other = " ";
+        };
+    }
+
+// ---------------------------------------------------------
+// r_calen_editor_repeat_until_item
+// Define "Repeat until" line in unified editor
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_repeat_until_item
+    {
+    type = EEikCtDateEditor;
+    prompt = qtn_cale_note_meeting_until;
+    id = ECalenEditorRepeatUntil;
+    control = DATE_EDITOR
+        {
+        minDate = DATE
+            {
+            day = ECalenMinDay;
+            month = ECalenMinMonth;
+            year = ECalenMinYear;
+            };
+        maxDate = DATE
+            {
+            day = ECalenForeverDay;
+            month = ECalenForeverMonth;
+            year = ECalenForeverYear;
+            };
+        };
+    }
+
+// ---------------------------------------------------------
+// r_calen_editor_priority_item
+// Define "Priority" line in unified editor
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_priority_item
+    {
+    type = EAknCtPopupField;
+    prompt = qtn_todo_note_view_priority;
+    id = ECalenEditorPriority;
+    itemflags = EEikDlgItemTakesEnterKey | EEikDlgItemOfferAllHotKeys;
+    control = POPUP_FIELD
+        {
+        flags = 0;
+        width = 15;
+        other = " ";
+        };
+    }
+
+// ---------------------------------------------------------
+// r_calen_editor_people_item
+// Define "People" in unified editor
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_people_item
+    {
+    type = EEikCtRichTextEditor;
+    prompt = qtn_cale_label_people;
+    id = ECalenEditorPeople;
+    itemflags = EEikDlgItemAsLabel | EEikEdwinAlwaysShowSelection | 
+                EEikEdwinUserSuppliedText | EEikRTedNoTextParsers;
+    control = RTXTED
+        {
+        flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable |
+                EEikEdwinNoAutoSelection | EEikEdwinJustAutoCurEnd
+                | EEikEdwinAllowPictures;
+        width = 0;  // These 0's are not really needed
+        height = 0; 
+        numlines = 0;
+        default_case = EAknEditorTextCase;
+        allowed_case_modes = EAknEditorAllCaseModes;
+        numeric_keymap = EAknEditorStandardNumberModeKeymap;
+        special_character_table = R_AVKON_SPECIAL_CHARACTER_TABLE_DIALOG;
+        
+        max_view_height_in_lines = 0;
+        };
+    }  
+    
+// ---------------------------------------------------------
+// r_calen_editor_db_name_item
+// Define "Entry Belongs To" line in unified editor 
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_db_name_item
+    {
+    type = EAknCtPopupField;
+    prompt = qtn_cale_db_entry_belongs_to;
+    id = ECalenEditorDBName;
+    itemflags = EEikDlgItemTakesEnterKey | EEikDlgItemOfferAllHotKeys | 
+                EAknPopupFieldFlagInitialised;
+    control = POPUP_FIELD
+        {
+        flags = 0;
+        width = 15;
+        other = " ";
+        };
+    }    
+
+// ---------------------------------------------------------
+// r_calen_editor_attachment_item
+// Define "Attachment" in unified editor
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_attachment_item
+    {
+    type = EEikCtRichTextEditor;
+    prompt = qtn_cale_label_attachment;
+    id = ECalenEditorAttachment;
+    itemflags = EEikDlgItemAsLabel | EEikEdwinAlwaysShowSelection | 
+                EEikEdwinUserSuppliedText | /*EEikEdwinAvkonDisableCursor |*/
+                EEikEdwinAvkonNotEditable | EEikRTedNoTextParsers;
+    control = RTXTED
+        {
+        flags = EEikEdwinNoHorizScrolling | EEikEdwinResizable |
+                EEikEdwinNoAutoSelection | EEikEdwinReadOnly /*|
+                EEikEdwinAvkonDisableCursor*/ | EEikEdwinAvkonNotEditable |
+                EEikEdwinIgnoreVirtualCursor | EEikEdwinJustAutoCurEnd;
+        width = 0;  // These 0's are not really needed
+        height = 0; 
+        numlines = 0;
+        default_case = EAknEditorTextCase;
+        allowed_case_modes = EAknEditorAllCaseModes;
+        numeric_keymap = EAknEditorStandardNumberModeKeymap;
+        special_character_table = R_AVKON_SPECIAL_CHARACTER_TABLE_DIALOG;
+         
+        max_view_height_in_lines = 0;
+        };
+    }
+ 
+// ---------------------------------------------------------
+// r_calen_editor_description_item
+// Define "Description" line of Note Form
+// Description can't be edited
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_calen_editor_description_item
+    {
+    type = ECalenCtDescriptionField;
+    prompt = qtn_cale_label_description;
+    id = ECalenEditorDescription;
+    itemflags = EEikDlgItemTakesEnterKey |
+                EEikDlgItemOfferAllHotKeys;
+    control = EDWIN
+        {
+        flags = EEikEdwinNoAutoSelection |
+                EEikEdwinNoWrap |
+                EEikEdwinNoHorizScrolling |
+                EEikEdwinReadOnly |
+                EEikEdwinAvkonNotEditable |
+                EEikEdwinAvkonDisableCursor;
+        maxlength = ECalenAbsoluteMaxTextEditorLength;
+        lines = 1;
+        max_view_height_in_lines = 1;
+        avkon_flags = EAknEditorFlagDefault |
+                      EAknEditorFlagNoEditIndicators |
+                      EAknEditorFlagNoLRNavigation;
+
+        };
+    }
+
+// ---------------------------------------------------------
+// r_calen_editor_event_type_popup_items
+// Define items of "Event Type" popup list.
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_calen_editor_event_type_popup_items
+    {
+    items=
+        {
+        LBUF
+            {
+            txt = qtn_cale_item_meeting;
+            },
+        LBUF
+            {
+            txt = qtn_cale_note_anniversary;
+            },
+        LBUF
+            {
+            txt = qtn_cale_item_todo;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+// r_calen_editor_priority_popup_items
+// Define items of "priority" popup list.
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_calen_editor_priority_popup_items
+    {
+    items=
+        {
+        LBUF
+            {
+            txt = qtn_cale_viewer_prio_high;
+            },
+        LBUF
+            {
+            txt = qtn_cale_viewer_prio_normal ;
+            },
+        LBUF
+            {
+            txt = qtn_cale_viewer_prio_low;
+            }
+        };
+    }
+// ---------------------------------------------------------
+// r_calen_editor_reminder_popup_items
+// Define items of "Reminder" popup list.
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_calen_editor_reminder_popup_items
+    {
+    items=
+        {
+        LBUF
+            {
+            txt = qtn_chi_cale_lunar_cale_on;
+            },
+        LBUF
+            {
+            txt = qtn_cale_alarm_off;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+// r_calen_editor_repeat_popup_items
+// Define items of "Repeat" popup list.
+// ---------------------------------------------------------
+//
+RESOURCE ARRAY r_calen_editor_repeat_popup_items
+    {
+    items=
+        {
+        LBUF
+            {
+            txt = qtn_calen_does_not_repeat;
+            },
+        LBUF
+            {
+            txt = qtn_calen_repeat_daily ;
+            },
+        LBUF
+            {
+            txt = qtn_calen_repeat_weekdays;
+            },
+        LBUF
+            {
+            txt = qtn_calen_repeat_weekly;
+            },
+        LBUF
+            {
+            txt = qtn_calen_repeat_forthnightly;
+            },
+        LBUF
+            {
+            txt = qtn_cale_repeat_monthly;
+            },
+        LBUF
+            {
+            txt = qtn_calen_repeat_yearly;
+            }
+        };
+    }
+
+RESOURCE TBUF r_qtn_cale_unified_editor_title
+    {
+    buf = qtn_cale_title_calendar;
+    }
+
+// ---------------------------------------------------------
+// r_calen_unified_editor_menubar
+// Menubar for unified editor
+// ---------------------------------------------------------
+//
+RESOURCE MENU_BAR r_calen_unified_editor_menubar
+    {
+    titles=
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_calen_unified_editor_menupane;
+            txt = " "; // Dummy
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+// r_calen_unified_editor_menupane
+// Editor implementation dynamically adds all parts
+// of menu pane to this. 
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_calen_unified_editor_menupane
+    {
+    items=
+        {
+        };
+    }
+
+// ---------------------------------------------------------
+// r_calen_unified_editor_default_menupane
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_calen_unified_editor_default_menupane
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = ECalenCmdCancel;
+            txt = qtn_cale_om_cancel_changes;
+            },
+        MENU_ITEM
+            {
+            command = ECalenCmdAddPeople;
+            txt = qtn_calen_add_people_from_contact_book;
+            },
+        MENU_ITEM
+            {
+            command = ECalenGetLocation;
+            txt = qtn_cale_om_assign_from_map;
+            },
+        MENU_ITEM
+            {
+            command = ECalenDeleteCurrentEntry;
+            txt = qtn_cale_om_delete;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = EAknSoftkeyExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+RESOURCE TBUF r_qtn_cale_attachment_none
+    {
+    buf = qtn_cale_confident_none;
+    }
+
+// ---------------------------------------------------------
+// Attachments Options-menu items
+// ---------------------------------------------------------
+//
+RESOURCE MENU_PANE r_calen_editor_attachments_menupane
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = ECalenCmdAddAttachment;
+            txt = qtn_calen_editor_opt_add_attachment;
+            },
+        MENU_ITEM
+            {
+            command = ECalenCmdRemoveAttachment;
+            txt = qtn_cale_opt_remove_attachment;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+// Description list query
+// List query for the description types
+// ---------------------------------------------------------
+RESOURCE AVKON_MULTISELECTION_LIST_QUERY r_description_list_query
+    {
+    flags = EGeneralQueryFlags;
+    softkeys = R_AVKON_SOFTKEYS_SELECT_CANCEL__SELECT;
+    items =
+        {
+        AVKON_MULTISELECTION_LIST_QUERY_DLG_LINE
+            {
+            control = AVKON_LIST_QUERY_CONTROL
+                {
+                listtype = EAknCtSinglePopupMenuListBox;
+                listbox = AVKON_LIST_QUERY_LIST
+                    {
+                    array_id = r_description_list_query_array;
+                    };
+                heading = text_softkey_select;
+                };
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+// Description list query array
+// List of the description types
+// ---------------------------------------------------------
+RESOURCE ARRAY r_description_list_query_array
+    {
+    items=
+        {
+        LBUF { txt = qtn_cale_om_descript_new; },
+        LBUF { txt = qtn_cale_om_descript_exist; }
+        };
+    }
+    
+// ---------------------------------------------------------
+//
+//    r_korean_lunar_date_editor_line
+//    Define Lunar "Date:" line
+//
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_korean_lunar_date_editor_line
+    {
+    type = ECalenCtLunarDateEditor;
+    prompt = qtn_cale_anniversary_start_date;
+    id = EKoreanLunarAniversityStart; // was ecalendata tms.
+    control = KOREAN_LUNAR_DATE_EDITOR
+        {
+	    flags = 0;
+        };
+    }
+
+// ---------------------------------------------------------
+//
+//    r_korean_lunar_noteview_type_line
+//    Define "solar/lunar/leap:" line of Note Form
+//
+// ---------------------------------------------------------
+//
+RESOURCE DLG_LINE r_korean_lunar_noteview_type_line
+    {
+    type = EAknCtPopupField;
+    prompt = qtn_kor_cale_note_type;
+    id = EKoreanLunarTypeSelectSolarLunarLeap;
+    // means that OK-Key works - IMPORTANT!
+    itemflags = EEikDlgItemTakesEnterKey | EEikDlgItemOfferAllHotKeys;
+    control = POPUP_FIELD
+        {
+        flags = 0;
+        width = 8; // in characters  
+        other = " "; // Dummy
+        };
+    }
+
+RESOURCE TBUF r_kor_cale_note_offset_unit
+    {
+    buf = qtn_kor_cale_note_offset_unit;
+    }
+
+RESOURCE TBUF r_qtn_kor_cale_viewer_alarm_offset
+    {
+    buf = qtn_kor_cale_viewer_alarm_offset;
+    }
+
+RESOURCE TBUF r_qtn_kor_cale_viewer_alarm_offset_time
+    {
+    buf = qtn_kor_cale_viewer_alarm_offset_time;
+    }
+
+// End of File

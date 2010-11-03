@@ -49,7 +49,8 @@ public:
 	
 	void SetPhoneOwnerL(const CCalUser* aOwner);
 	CCalUser* OrganizerL();
-	CCalUser* PhoneOwnerL();	
+	CCalUser* PhoneOwnerL();
+	void ClearMRSpecificDataL();
 	
 	void SetAlarmSoundNameL(const TDesC& aAlarmSoundName);
 	CTzRules* GetTzRulesL();
@@ -151,6 +152,9 @@ public:
 
 	TUint8 ShortFileIdL();
 	
+    void SetUserInt32L( TUint32 aUserInt );
+    TUint32 UserInt32L();
+
 private:
 	CCalEntryImpl();
 	CCalEntryImpl(CAgnEntry& aEntry, CCalSessionImpl& aSessionImpl);

@@ -1,0 +1,68 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description:	Pkg file for the clock components.
+;
+
+; Languages
+&EN
+
+; Header
+#{"Clock2"}, (0x200159A2), 1, 0, 1, TYPE = SA,RU
+
+; Localised Vendor name
+%{"Nokia"}
+
+; Unique Vendor name
+:"Nokia"
+
+; Clock engine components
+"\epoc32\release\armv5\urel\clockserver.exe"							-"!:\sys\bin\clockserver.exe"
+"\epoc32\release\armv5\urel\clockserverclient.dll"						-"!:\sys\bin\clockserverclient.dll"
+"\epoc32\release\armv5\urel\clocktimezoneresolver.dll"					-"!:\sys\bin\clocktimezoneresolver.dll"
+"\epoc32\release\armv5\urel\clocktimesourceinterface.dll"				-"!:\sys\bin\clocktimesourceinterface.dll"
+"\epoc32\release\armv5\urel\clockecomlistener.dll"						-"!:\sys\bin\clockecomlistener.dll"
+
+; Clock application
+"\epoc32\release\armv5\urel\clock.exe"									-"!:\sys\bin\clock.exe"
+"\epoc32\release\armv5\urel\clkdatetimeview.dll"						-"!:\sys\bin\clkdatetimeview.dll"
+"\epoc32\release\armv5\urel\clockalarmeditor.dll"						-"!:\sys\bin\clockalarmeditor.dll"
+"\epoc32\release\armv5\urel\clkuimodel.dll"								-"!:\sys\bin\clkuimodel.dll"
+"\epoc32\release\armv5\urel\clockcityselectionlist.dll"					-"!:\sys\bin\clockcityselectionlist.dll"
+
+; Clock application resource files
+"\epoc32\data\Z\private\10003a3f\import\apps\clock_reg.rsc"				-"!:\private\10003a3f\import\apps\clock_reg.rsc"
+"\epoc32\data\Z\resource\apps\clock.rsc"								-"!:\resource\apps\clock.rsc"
+"\epoc32\data\Z\resource\apps\clock_loc.rsc"							-"!:\resource\apps\clock_loc.rsc"
+"\epoc32\data\Z\resource\apps\clockapp.mif"								-"!:\resource\apps\clockapp.mif"
+"\epoc32\data\Z\resource\apps\clockapp_aif.mif"							-"!:\resource\apps\clockapp_aif.mif"
+"\epoc32\data\Z\resource\apps\clockapp_tab.mif"							-"!:\resource\apps\clockapp_tab.mif"
+"\epoc32\data\Z\resource\mcc\mcc.rsc"									-"!:\resource\mcc\mcc.rsc"
+"\epoc32\data\Z\resource\timezonelocalization\timezones.rsc"			-"!:\resource\timezonelocalization\timezones.rsc"
+"\epoc32\data\Z\resource\timezonelocalization\timezonegroups.rsc"		-"!:\resource\timezonelocalization\timezonegroups.rsc"
+
+; Date time view plugin
+"\epoc32\release\armv5\urel\clkdatetimeviewplugin.dll"					-"!:\sys\bin\clkdatetimeviewplugin.dll"
+"\epoc32\data\Z\resource\plugins\clkdatetimeviewplugin.rsc"				-"!:\resource\plugins\clkdatetimeviewplugin.rsc"
+
+; Predictive application
+"\epoc32\release\armv5\urel\adtupdater.exe"								-"!:\sys\bin\adtupdater.exe"
+"\epoc32\data\Z\private\10003a3f\import\apps\adtupdater_reg.rsc"		-"!:\private\10003a3f\import\apps\adtupdater_reg.rsc"
+"\epoc32\data\Z\resource\apps\adtupdater.rsc"							-"!:\resource\apps\adtupdater.rsc"
+"\epoc32\data\Z\resource\apps\adtupdater_loc.rsc"						-"!:\resource\apps\adtupdater_loc.rsc"
+
+; Alarmeditor application
+"\epoc32\release\armv5\urel\alarmeditorapp.exe"								-"!:\sys\bin\alarmeditorapp.exe"
+"\epoc32\data\Z\private\10003a3f\import\apps\alarmeditorapp_reg.rsc"		-"!:\private\10003a3f\import\apps\alarmeditorapp_reg.rsc"
+"\epoc32\data\Z\resource\apps\alarmeditorapp.rsc"							-"!:\resource\apps\alarmeditorapp.rsc"
+"\epoc32\data\Z\resource\apps\alarmeditorapp_loc.rsc"						-"!:\resource\apps\alarmeditorapp_loc.rsc"

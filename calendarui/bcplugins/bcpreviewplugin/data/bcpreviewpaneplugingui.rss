@@ -1,0 +1,157 @@
+/*
+* Copyright (c) 2009-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for gui.
+*
+*/
+
+
+// Includes
+#include <eikon.rh>
+#include <avkon.rh>
+#include <calendar.loc>
+#include <calencommands.hrh>
+#include <bcpreviewpane.loc>
+
+NAME    BVPL
+
+RESOURCE RSS_SIGNATURE { }
+
+// ---------------------------------------------------------------------------
+// R_CALENDAR_DISPLAY_PREVIEWPANE_SETTING_TEXTS
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_POPUP_SETTING_TEXTS r_calendar_display_previewpane_setting_texts
+    {
+    setting_texts_resource = r_calendar_on_off_texts;
+    popped_up_texts_resource = r_calendar_popped_up_on_off_texts;
+    }
+
+// ---------------------------------------------------------------------------
+// R_CALENDAR_ON_OFF_TEXTS
+// Texts are shown on "Display preview pane" setting item indicating item is on
+// or off.
+// ---------------------------------------------------------------------------
+//
+RESOURCE ARRAY r_calendar_on_off_texts
+    {
+    items =
+        {
+        AVKON_ENUMERATED_TEXT { value = 1; text = qtn_calendar_display_previewpane_on; },
+        AVKON_ENUMERATED_TEXT { value = 0; text = qtn_calendar_display_previewpane_off; }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// R_CALENDAR_POPPED_UP_ON_OFF_TEXTS
+// Texts are shown on popup setting page.
+// ---------------------------------------------------------------------------
+//
+RESOURCE ARRAY r_calendar_popped_up_on_off_texts
+    {
+    items =
+        {
+        LBUF { txt = qtn_calendar_popup_display_previewpane_enabled; },
+        LBUF { txt = qtn_calendar_popup_display_previewpane_disabled; }
+        };
+    }
+
+// ---------------------------------------------------------------------------
+// R_QTN_CALENDAR_SETTING_DISPLAY_PREVIEWPANE_TITLE
+// Title of "Display preview pane" setting item.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_calendar_setting_display_previewpane_title
+    {
+    buf = qtn_calendar_display_previewpane_setting_item;
+    }
+
+// ---------------------------------------------------------------------------
+// R_CALENDAR_BINARY_SETTING_PAGE
+// Defines setting page for "Display preview pane" setting item.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_calendar_binary_setting_page
+    {
+    label = qtn_calendar_display_previewpane_setting_item;
+    type = EAknCtPopupSettingList;
+    editor_resource_id = r_calendar_binary_popup_setting_list;
+    }
+
+// ---------------------------------------------------------------------------
+// R_CALENDAR_BINARY_POPUP_SETTING_LIST
+// ---------------------------------------------------------------------------
+//
+RESOURCE POPUP_SETTING_LIST r_calendar_binary_popup_setting_list
+    {
+    flags= 0;
+    }
+
+// ---------------------------------------------------------------------------
+// R_QTN_CALENDAR_MULTIPLE_TODOS
+// Todo text in preview pane view if several todos.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_calendar_multiple_todos
+    {
+    buf = qtn_calendar_multiple_todos;
+    }
+
+// ---------------------------------------------------------------------------
+// R_QTN_CALENDAR_PREVIEW_PANE_EVENT_UNNAMED
+// Text that is shown in preview pane if the meeting does not have a name.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_calendar_preview_pane_event_unnamed
+    {
+    buf = qtn_calendar_preview_pane_event_unnamed;
+    }
+
+// ---------------------------------------------------------------------------
+// R_PREVIEW_PANE_STYLUS_MENU
+// Stylus popup menu - is shown when long tap on list box item occurs 
+// ---------------------------------------------------------------------------
+//
+RESOURCE STYLUS_POPUP_MENU r_preview_pane_stylus_menu
+	{
+	items =
+		{
+		STYLUS_POPUP_MENU_ITEM
+			{
+			txt = qtn_todo_cmd_task_completed;
+			command = ECalenCompleteTodo;
+			},
+		// TODO: 			
+		//        STYLUS_POPUP_MENU_ITEM 
+		//            {
+		//            txt = qtn_calen_copy_to_calendars; 
+		//            command = ECalenCopyToCalendars; 
+		//            },
+		STYLUS_POPUP_MENU_ITEM
+			{
+			txt = qtn_cale_om_find_on_map;
+			command = ECalenGetLocationAndReplace;
+			},
+		STYLUS_POPUP_MENU_ITEM
+			{
+			txt = qtn_cale_om_show_on_map;
+			command = ECalenShowLocation;
+			},
+		STYLUS_POPUP_MENU_ITEM
+			{
+			txt = qtn_cale_om_delete;
+			command = ECalenDeleteCurrentEntry;
+			}
+		// ECalenSend item is added dynamically via SendUI				
+		};
+	}

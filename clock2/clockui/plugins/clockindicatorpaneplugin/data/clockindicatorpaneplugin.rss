@@ -1,0 +1,52 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   The resource definition file.
+*
+*/
+
+// Resource identifier
+NAME CIPP
+
+// System includes
+#include <eikon.rh>
+#include <avkon.loc>
+#include <clkindicatorpaneplugin.loc>
+
+// User includes
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf=""; }
+
+// Resource definitions
+// ---------------------------------------------------------
+// The EIK app info.
+// ---------------------------------------------------------
+//
+RESOURCE EIK_APP_INFO
+	{
+	}
+
+// Resource definitions
+// ---------------------------------------------------------
+// r_qtn_clk_stylus_popup_alarms_set
+// Resource for string "%0U at %1U"
+// ---------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_clk_stylus_popup_alarms_set
+	{
+	buf = qtn_clk_stylus_popup_alarms_set;		
+	}
+
+// End of file

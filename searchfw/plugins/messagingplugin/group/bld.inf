@@ -1,0 +1,52 @@
+/*
+* Copyright (c) 2006-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   This file provides the information required 
+*               for building messagingplugin.
+*
+*/
+
+
+
+
+PRJ_EXPORTS
+
+../loc/messagessearchplugin.loc 				APP_LAYER_LOC_EXPORT_PATH(messagessearchplugin.loc)
+
+
+../rom/messagessearchplugin.iby 				CORE_APP_LAYER_IBY_EXPORT_PATH(messagessearchplugin.iby)
+../rom/messagessearchpluginresources.iby 		LANGUAGE_APP_LAYER_IBY_EXPORT_PATH(messagessearchpluginresources.iby)
+
+
+
+PRJ_MMPFILES
+messagessearchplugin.mmp
+
+PRJ_MMPFILES
+//../msgviewerlaunchapp/group/msgviewerlaunchapp.mmp
+
+
+PRJ_EXTENSIONS
+
+START EXTENSION s60/mifconv
+OPTION TARGETFILE messagessearchplugin.mif
+OPTION HEADERFILE messagessearchplugin.mbg
+OPTION SOURCES    -c8,8  qgn_prop_wml_sms \
+                  -c8,8  qgn_prop_mce_inbox_small \
+                  -c8,8  qgn_prop_mce_outbox_small \
+                  -c8,8  qgn_prop_mce_sent\
+                  -c8,8  qgn_prop_mce_drafts
+
+END
+
+//  End of File

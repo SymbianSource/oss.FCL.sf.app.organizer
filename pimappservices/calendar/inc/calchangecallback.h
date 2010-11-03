@@ -145,9 +145,7 @@ public:
 		/** Entry type is event. */
 		EChangeEntryEvent,
 		/** All entry types. */
-		EChangeEntryAll,
-		/** Entry type is note */
-		EChangeEntryNote
+		EChangeEntryAll
 		};
 
 	/**

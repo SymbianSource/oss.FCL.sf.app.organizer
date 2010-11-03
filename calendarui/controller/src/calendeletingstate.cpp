@@ -11,9 +11,10 @@
 *
 * Contributors:
 *
-* Description:  Calendar state machine
+* Description:   Calendar state machine
 *
 */
+
 
 
 // includes
@@ -22,10 +23,6 @@
 #include "calencontroller.h"
 #include "calenstatemachine.h"
 #include "calennotifier.h"
-#include "OstTraceDefinitions.h"
-#ifdef OST_TRACE_COMPILER_IN_USE
-#include "calendeletingstateTraces.h"
-#endif
 
 // ----------------------------------------------------------------------------
 // CCalenDeletingState::NewLC
@@ -34,14 +31,14 @@
 CCalenDeletingState* CCalenDeletingState::NewLC( CCalenController& aController,
                                                       RHashSet<TCalenNotification>&  aOutstandingNotifications )
     {
-    OstTraceFunctionEntry0( CCALENDELETINGSTATE_NEWLC_ENTRY );
-    
+    TRACE_ENTRY_POINT;
+
     CCalenDeletingState* self = new( ELeave ) CCalenDeletingState( aController,aOutstandingNotifications );
 
     CleanupStack::PushL( self );
     self->ConstructL();
 
-    OstTraceFunctionExit0( CCALENDELETINGSTATE_NEWLC_EXIT );
+    TRACE_EXIT_POINT;
     return self;
     }
 
@@ -51,11 +48,10 @@ CCalenDeletingState* CCalenDeletingState::NewLC( CCalenController& aController,
 // ----------------------------------------------------------------------------
 void CCalenDeletingState::ConstructL()
     {
-    OstTraceFunctionEntry0( CCALENDELETINGSTATE_CONSTRUCTL_ENTRY );
-    
+    TRACE_ENTRY_POINT;
     BaseConstructL();
   
-    OstTraceFunctionExit0( CCALENDELETINGSTATE_CONSTRUCTL_EXIT );
+    TRACE_EXIT_POINT;
     }
     
 // ----------------------------------------------------------------------------
@@ -66,9 +62,9 @@ CCalenDeletingState::CCalenDeletingState( CCalenController& aController,
                                                     RHashSet<TCalenNotification>&  aOutstandingNotifications )
     : CCalenState( aController, aOutstandingNotifications )
     {
-    OstTraceFunctionEntry0( CCALENDELETINGSTATE_CCALENDELETINGSTATE_ENTRY );
+    TRACE_ENTRY_POINT;
     
-    OstTraceFunctionExit0( CCALENDELETINGSTATE_CCALENDELETINGSTATE_EXIT );
+    TRACE_EXIT_POINT;
     }
     
 // ----------------------------------------------------------------------------
@@ -77,19 +73,19 @@ CCalenDeletingState::CCalenDeletingState( CCalenController& aController,
 // ----------------------------------------------------------------------------    
 CCalenDeletingState::~CCalenDeletingState()
     {
-    OstTraceFunctionEntry0( DUP1_CCALENDELETINGSTATE_CCALENDELETINGSTATE_ENTRY );
-
-    OstTraceFunctionExit0( DUP1_CCALENDELETINGSTATE_CCALENDELETINGSTATE_EXIT );
+    TRACE_ENTRY_POINT;
+    
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
 // CCalenDeletingState::HandleCommandL
-// From CCCalenState
+// From CCalenState
 // ----------------------------------------------------------------------------    
 TBool CCalenDeletingState::HandleCommandL( const TCalenCommand& aCommand,
                                          CCalenStateMachine& aStateMachine )
     {
-    OstTraceFunctionEntry0( CCALENDELETINGSTATE_HANDLECOMMANDL_ENTRY );
+    TRACE_ENTRY_POINT;
     
     TInt cmd = aCommand.Command();
     MCalenCommandHandler* handler = iController.GetCommandHandlerL( cmd );
@@ -98,31 +94,47 @@ TBool CCalenDeletingState::HandleCommandL( const TCalenCommand& aCommand,
     
     TBool cmdUsed = EFalse;
     
-    if( cmd == ECalenDeleteEntryWithoutQuery )
+    if(ECalenDeleteEntryWithoutQuery == cmd)
         {
         RequestCallbackL( handler, aCommand );
         cmdUsed = ETrue;
         }
-    else if( ECalenFasterAppExit == cmd )
+    else if(ECalenFasterAppExit == cmd)
     	{
         SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
         ActivateCurrentStateL(aStateMachine);
         RequestCallbackL( handler, aCommand );
         cmdUsed = ETrue;
     	}
+    else if(ECalenStartActiveStep == cmd)
+        {
+        RequestCallbackL( handler, aCommand );
+        cmdUsed = ETrue;
+        }
+    
+    else if(ECalenMissedEventViewFromIdle == cmd)
+        {
+        RequestCallbackL( handler, aCommand );
+        cmdUsed = ETrue;
+        }
+    else if(ECalenMissedAlarmsViewFromIdle == cmd)
+        {
+        RequestCallbackL( handler, aCommand );
+        cmdUsed = ETrue;
+        }
 
-    OstTraceFunctionExit0( CCALENDELETINGSTATE_HANDLECOMMANDL_EXIT );
+    TRACE_EXIT_POINT;
     return cmdUsed;
     }
 
 // ----------------------------------------------------------------------------
 // CCalenDeletingState::HandleNotificationL
-// From CCCalenState
+// From CCalenState
 // ----------------------------------------------------------------------------        
 void CCalenDeletingState::HandleNotificationL(const TCalenNotification& aNotification,
                                               CCalenStateMachine& aStateMachine )
     {
-    OstTraceFunctionEntry0( CCALENDELETINGSTATE_HANDLENOTIFICATIONL_ENTRY );
+    TRACE_ENTRY_POINT;
     
     switch( aNotification )
         {
@@ -155,7 +167,7 @@ void CCalenDeletingState::HandleNotificationL(const TCalenNotification& aNotific
             break;
         }
 
-    OstTraceFunctionExit0( CCALENDELETINGSTATE_HANDLENOTIFICATIONL_EXIT );
+    TRACE_EXIT_POINT;
     }
  
  // end of file

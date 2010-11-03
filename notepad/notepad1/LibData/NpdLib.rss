@@ -1,0 +1,1637 @@
+/*
+* Copyright (c) 2002 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resources of Notepad Library.
+*
+*/
+
+
+//  RESOURCE IDENTIFIER
+NAME    NPDL // 4 letter ID
+
+//  INCLUDES
+#include <eikon.rh>
+#include <avkon.rh>
+#include <avkon.mbg>
+#include <avkon.loc>
+#include <uikon.hrh>
+#include <finditem.hrh>
+#include <AvkonIcons.hrh>
+#include <npdlib.mbg>
+#include "NpdLib.hrh"
+#include "NpdLib.rh"
+#include <npdlib.loc>
+#include <npdtemp.loc>
+#include <data_caging_paths_strings.hrh>
+#include <AiwCommon.rh>
+#include <AknFep.rsg>
+#include <avkon.hrh>
+
+//  CONSTANTS  
+#define NOTEPAD_DATABASE "c:Notepad.dat"
+#define TEMPLATE_DATABASE "c:Template.nsc"
+#define NPDLIB_MBM_FILE  APP_BITMAP_DIR"\\npdlib.mif"
+
+// Constants
+#define NOTEPAD_MARGINS_LEFT 2
+#define NOTEPAD_MARGINS_RIGHT 3
+#define NOTEPAD_EDITOR_LINES 10
+#define NOTEPAD_VIEWER_LINES 7
+#define NOTEPAD_CURSOR_COLOR 210
+
+//  RESOURCE DEFINITIONS 
+// -----------------------------------------------------------------------------
+//   
+// Signature of this resource.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE RSS_SIGNATURE
+    {
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_datafile_name
+// Name of a data file of memos.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_datafile_name
+    {
+    buf = NOTEPAD_DATABASE;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_template_datafile_name
+// Name of a data file of templates.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_template_datafile_name
+    {
+    buf = TEMPLATE_DATABASE;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_the_first_listbox_item
+// the first notepad item, New note.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_the_first_listbox_item
+	{
+	buf = qtn_nmake_om_add_new;
+	}
+	
+// -----------------------------------------------------------------------------
+//   
+// r_notepad_model
+// Model of Notepad application.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE NOTEPAD_MODEL r_notepad_model
+    {
+    data_file = r_notepad_datafile_name;
+    listing_style = ENotepadListingStyleNP;
+    date_format = R_QTN_DATE_SHORT_WITH_ZERO;
+    time_format = R_QTN_TIME_USUAL_WITH_ZERO;
+    first_note = r_notepad_the_first_listbox_item;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+// r_notepad_list_dialog
+// List Dialog of Notepad application.
+//
+// -----------------------------------------------------------------------------
+//    iFindItemMenu = CFindItemMenu::NewL(EXample4CmdFindItemMenu);
+
+RESOURCE NOTEPAD_LIST_DIALOG r_notepad_list_dialog
+    {
+    menubar = r_notepad_list_menubar;
+    dialog = r_notepad_list_dialog_org;
+    model = r_notepad_model;
+    editor_dialog = r_notepad_editor_dialog;
+    title = qtn_nmake_title_notepad;
+    }
+
+// -----------------------------------------------------------------------------
+//   
+// r_notepad_softkeys_options_open_exit
+// CBA Keys. 
+//
+// -----------------------------------------------------------------------------
+//
+
+RESOURCE CBA R_NOTEPAD_SOFTKEYS_OPTIONS_OPEN_EXIT
+    {
+    flags = 0;
+    buttons = 
+        {
+        CBA_BUTTON {id=EAknSoftkeyOptions; txt = text_softkey_option;},
+        CBA_BUTTON {id=EAknSoftkeyExit; txt=text_softkey_exit;},
+	CBA_BUTTON {id=ENotepadCmdOpen; txt= qtn_msk_open;}
+        };
+    }
+
+
+// -----------------------------------------------------------------------------
+//   
+// r_notepad_softkeys_options_open_back
+// CBA Keys. 
+//
+// -----------------------------------------------------------------------------
+//
+
+RESOURCE CBA R_NOTEPAD_SOFTKEYS_OPTIONS_OPEN_BACK
+    {
+    flags = 0;
+    buttons = 
+        {
+        CBA_BUTTON {id=EAknSoftkeyOptions; txt = text_softkey_option;},
+        CBA_BUTTON {id=EAknSoftkeyBack; txt=text_softkey_back;},
+	    CBA_BUTTON {id=ENotepadCmdOpen; txt= qtn_msk_open;}
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//   
+// r_notepad_softkeys_options_exit_contextoptions
+// CBA Keys.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE CBA R_NOTEPAD_SOFTKEYS_OPTIONS_EXIT_CONTEXTOPTIONS
+    {
+    flags = 0;
+    buttons = 
+        {
+        CBA_BUTTON {id=EAknSoftkeyOptions; txt = text_softkey_option;},
+        CBA_BUTTON {id=EAknSoftkeyExit; txt=text_softkey_exit;},
+	CBA_BUTTON {id=EAknSoftkeyContextOptions; txt = text_softkey_option;}
+        };
+    }
+ 
+// -----------------------------------------------------------------------------
+//   
+// r_notepad_softkeys_options_done_contextoptions
+// CBA Keys.
+//
+// -----------------------------------------------------------------------------
+//   
+RESOURCE CBA R_NOTEPAD_SOFTKEYS_OPTIONS_DONE_CONTEXTOPTIONS
+    {
+    flags = 0;
+    buttons = 
+        {
+        CBA_BUTTON {id=EAknSoftkeyOptions; txt = text_softkey_option;},
+        CBA_BUTTON {id=EAknSoftkeyDone; txt= text_softkey_done;},
+	CBA_BUTTON {id=EAknSoftkeyContextOptions; txt = text_softkey_option;}
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//   
+// r_notepad_softkeys_options_back_contextoptions
+// CBA Keys.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE CBA R_NOTEPAD_SOFTKEYS_OPTIONS_BACK_CONTEXTOPTIONS
+    {
+    flags = 0;
+    buttons = 
+        {
+        CBA_BUTTON {id=EAknSoftkeyOptions; txt = text_softkey_option;},
+        CBA_BUTTON {id=EAknSoftkeyBack; txt= text_softkey_back;},
+	CBA_BUTTON {id=EAknSoftkeyContextOptions; txt = text_softkey_option;}
+        };
+    }    
+    
+// -----------------------------------------------------------------------------
+//   
+// r_notepad_softkeys_options_exit_newnote
+// CBA Keys.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE CBA R_NOTEPAD_SOFTKEYS_OPTIONS_EXIT_NEW
+    {
+    flags = 0;
+    buttons = 
+        {
+        CBA_BUTTON {id=EAknSoftkeyOptions; txt = text_softkey_option;},
+        CBA_BUTTON {id=EAknSoftkeyExit; txt= text_softkey_exit;},
+	    CBA_BUTTON {id=ENotepadCmdAdd; txt = qtn_msk_new;}
+        };
+    }      
+
+// -----------------------------------------------------------------------------
+//   
+// r_notepad_softkeys_options_back_new
+// CBA Keys.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE CBA R_NOTEPAD_SOFTKEYS_OPTIONS_BACK_NEW
+    {
+    flags = 0;
+    buttons = 
+        {
+        CBA_BUTTON {id=EAknSoftkeyOptions; txt = text_softkey_option;},
+        CBA_BUTTON {id=EAknSoftkeyBack; txt= text_softkey_back;},
+	    CBA_BUTTON {id=ENotepadCmdAdd; txt = qtn_msk_new;}
+        };
+    }
+    
+// -----------------------------------------------------------------------------
+//
+// r_notepad_list_dialog_org
+// CEikDialog resource of 'list of memos'.
+// 
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_notepad_list_dialog_org
+    {
+    flags = EEikDialogFlagNoDrag 
+        | EEikDialogFlagModeless
+        | EEikDialogFlagNoTitleBar 
+        | EEikDialogFlagFillAppClientRect
+        | EEikDialogFlagCbaButtons 
+        | EEikDialogFlagDontEatUpDownEvents
+        ; 
+    pages = 0;
+  buttons = R_NOTEPAD_SOFTKEYS_OPTIONS_EXIT_CONTEXTOPTIONS ;
+    items =
+        {
+        DLG_LINE
+            {
+            type = ENotepadCtListBox;
+            id = ENotepadIdListBox;
+            itemflags = EEikDlgItemTakesEnterKey 
+                | EEikDlgItemOfferAllHotKeys
+                ;
+            control= LISTBOX
+                {
+                flags = EAknListBoxStylusMarkableList; //EAknListBoxMarkableList;
+                };   
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_editor_dialog
+// Editor dialog of Notepad application
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE NOTEPAD_EDITOR_DIALOG r_notepad_editor_dialog
+    {
+    menubar = r_notepad_editor_menubar;
+    dialog = r_notepad_editor_dialog_org;
+    title = qtn_nmake_title_notepad;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_editor_dialog_org
+// CEikDialog resource of memo editor
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_notepad_editor_dialog_org
+    {
+    flags = EEikDialogFlagNoDrag 
+        | EEikDialogFlagModeless
+        | EEikDialogFlagNoTitleBar 
+        | EEikDialogFlagFillAppClientRect 
+        | EEikDialogFlagCbaButtons
+        ;
+   buttons = R_NOTEPAD_SOFTKEYS_OPTIONS_DONE_CONTEXTOPTIONS ;
+    items =
+        {
+        DLG_LINE
+            {
+            type = ENotepadCtEdwin;
+            id = ENotepadIdEdwin;
+            itemflags = EEikDlgItemTakesEnterKey 
+                | EEikDlgItemOfferAllHotKeys |EEikDlgItemCtlRefusesStrecth
+                ;
+            control= EDWIN
+                {
+                flags =
+                    EEikEdwinOwnsWindow
+                    | EEikEdwinInclusiveSizeFixed
+                    | EEikEdwinNoAutoSelection 
+                    ;
+                lines = NOTEPAD_EDITOR_LINES; // indispensable
+                avkon_flags = EAknEditorFlagEnableScrollBars
+				| EAknEditorFlagAllowEntersWithScrollDown 
+				| EAknEditorFlagUseSCTNumericCharmap
+				| EAknEditorFlagEnablePictographInput  
+                    ;
+                };
+            },
+        DLG_LINE
+            {
+            type = ENotepadCtEdwinLines;
+            id = ENotepadIdEdwinLines;
+            itemflags = EEikDlgItemNonFocusing| EEikDlgItemCtlRefusesStrecth;
+            control= NOTEPAD_EDWIN_LINES_CONTROL
+                {
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_list_menubar
+// Menu bar of Notepad list mode.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_notepad_list_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_notepad_list_menu_second;
+            txt = "";
+            },
+        MENU_TITLE
+            {
+            menu_pane = r_notepad_list_menu_first;
+            txt = "";
+            },
+        MENU_TITLE
+            {
+            menu_pane = R_AVKON_MENUPANE_MARK_MULTIPLE;
+            }                 
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_list_menu_first
+// 1st menu pane of Notepad list mode menu.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_notepad_list_menu_first
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = ENotepadCmdOpen;
+            txt = qtn_nmake_om_open_memo;
+            flags = EEikMenuItemAction;
+            },
+        // 'Send' is added by SendUi.
+        MENU_ITEM
+            {
+            command = ENotepadCmdDelete;
+            txt = qtn_nmake_om_delete_memo;
+            flags = EEikMenuItemSpecific;
+            },
+        MENU_ITEM
+            {
+            command = ENotepadCmdAdd;
+            txt = qtn_nmake_om_add_new;
+            },            
+        // START CSW change
+        MENU_ITEM
+            {
+            command = ENotepadCmdPrint; // Same ID as in interest. 
+            txt = ""; // AIW plugin will set the text.
+            cascade = AIW_INTELLIGENT_CASCADE_ID; // No submenu if only one item in it
+            }
+        // END CSW change
+        };
+    }
+
+// START CSW change
+//-----------------------------------------------------------------------------
+//   
+//    r_ps_aiw_interest
+//    AIW Interest
+//
+//-----------------------------------------------------------------------------
+//
+RESOURCE AIW_INTEREST r_ps_aiw_interest
+    {
+    items =
+        {
+        // This application is interested in calling from menu.
+        AIW_CRITERIA_ITEM      
+            {
+            id = ENotepadCmdPrint; 
+            serviceCmd = KAiwCmdPrint;
+            serviceClass = KAiwClassMenu;
+            contentType = "text/*";
+            }
+        };
+    }
+// END CSW change
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_list_menu_second
+// Second menu pane of Notepad list mode menu.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_notepad_list_menu_second
+    {
+    items =
+        {
+        MENU_ITEM
+			{
+			command = ECmdAiwPlaceholder;
+			txt = "";
+			cascade = AIW_CASCADE_ID;
+			},
+        MENU_ITEM
+            {
+            command = EAknCmdHelp; 
+            txt = qtn_options_help; 
+            },
+        MENU_ITEM 
+            {
+            command = EAknCmdExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_editor_menubar
+// Menu bar of Notepad editor mode.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_notepad_editor_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_notepad_editor_menu;
+            txt = "";
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_editor_menu
+// Menu pane of Notepad editor mode menu.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_notepad_editor_menu
+    {
+    items =
+        {
+        // 'Send' is added by SendUi.
+        MENU_ITEM
+            {
+            command = ENotepadCmdAdd; 
+            txt = qtn_nmake_om_add_new; 
+            },
+      
+        MENU_ITEM 
+            { 
+            command = ENotepadCmdDelete; 
+            txt = qtn_nmake_om_delete_memo; 
+            },
+        MENU_ITEM
+            {
+            command = ENotepadCmdNextMemo;
+            txt = qtn_nmake_om_next_memo;
+            },
+        MENU_ITEM
+            { 
+            command = ENotepadCmdPreviousMemo; 
+            txt = qtn_nmake_om_previous_memo; 
+            },
+       MENU_ITEM 
+            { 
+           command = EAknCmdInputMethod ; 
+           txt = qtn_chi_pup_option_input_method;
+	       cascade = R_AVKON_INPUT_MODE_SUB_MENU; 
+           },
+        MENU_ITEM 
+            { 
+            command = EAknCmdInputLanguage; 
+            txt = text_pup_option_input_language; 
+            },
+       MENU_ITEM 
+            { 
+            command = EAknCmdEditTextMenu; 
+            cascade = R_AKNFEP_EDIT_SUBMENU;
+            txt = qtn_options_edit; 
+            },      
+        // START CSW change
+        MENU_ITEM
+            {
+            command = ENotepadCmdPrint; // Same ID as in interest. 
+            txt = ""; // AIW plugin will set the text.
+            cascade = AIW_INTELLIGENT_CASCADE_ID; // No submenu if only one item in it
+            },
+        // END CSW change
+        MENU_ITEM 
+            { 
+            command = EAknCmdHelp; 
+            txt = qtn_options_help; 
+            },
+        MENU_ITEM 
+            { 
+            command = EAknCmdExit; 
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+
+
+
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_save_memo
+// Model resource for SaveAsMemo API.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE NOTEPAD_MODEL r_notepad_save_memo
+    {
+    data_file = r_notepad_datafile_name;
+    listing_style = ENotepadListingStyleNone;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_fetch_memo_model
+// Model resource for FetchMemo API.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE NOTEPAD_MODEL r_notepad_fetch_memo_model
+    {
+    data_file = r_notepad_datafile_name;
+    listing_style = ENotepadListingStyleFetch;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_viewer
+// Viewer dialog of NpdViewer application.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE NOTEPAD_VIEWER_DIALOG r_notepad_viewer
+    {
+    menubar = r_notepad_viewer_menubar;
+    dialog = r_notepad_viewer_dialog_org;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_delete_progress_note
+// Resource of progress dialog.
+// Refer to Notes spec.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_notepad_delete_progress_note
+    {
+    flags = EAknProgressNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_CANCEL;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = ENotepadIdProgressNote;
+            control = AVKON_NOTE 
+                { 
+                layout = EProgressLayout;
+                singular_label = qtn_nmake_delete_prog_note;
+                imagefile = AVKON_ICON_FILE;
+                imageid = EMbmAvkonQgn_note_erased;
+                imagemask = EMbmAvkonQgn_note_erased_mask;
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_viewer_menubar
+// Menu bar of NpdViewer.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_notepad_viewer_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_notepad_viewer_menu;
+            txt = "";
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_viewer_menu
+// Menu pane of NpdViewer.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_notepad_viewer_menu
+    {
+    items=
+        {
+        MENU_ITEM 
+            {
+            command = ENotepadCmdViewerEdit;
+            txt = qtn_nmake_opt_edit;
+            },	
+        MENU_ITEM 
+            {
+            command = ENotepadCmdViewerDelete;
+            txt = qtn_nmake_om_delete_memo;
+            },	
+        MENU_ITEM 
+            {
+            command = ENotepadCmdViewerSave; 
+            txt = qtn_nmake_save_mail_atta;
+            },	
+		MENU_ITEM
+			{
+			command = EFindItemMenuPlaceHolder;
+			txt = "Automatic HL";
+			},
+        MENU_ITEM 
+            { 
+            command = EAknCmdHelp; 
+            txt = qtn_options_help; 
+            },
+        MENU_ITEM 
+            {
+            command = EAknCmdExit; 
+            txt = qtn_options_exit; 
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_viewer_dialog_org
+// CEikDialog resource of NpdViewer.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_notepad_viewer_dialog_org
+    {
+    flags = EEikDialogFlagNoDrag 
+        | EEikDialogFlagModeless
+        | EEikDialogFlagNoTitleBar 
+        | EEikDialogFlagFillAppClientRect 
+        | EEikDialogFlagCbaButtons
+        ;
+     buttons =  R_NOTEPAD_SOFTKEYS_OPTIONS_BACK_CONTEXTOPTIONS;
+    items =
+        {
+        DLG_LINE
+            {
+            type = ENotepadCtRichTextEditor;
+            id = ENotepadIdRichTextEditor;
+            itemflags = EEikDlgItemTakesEnterKey
+                | EEikDlgItemOfferAllHotKeys | EEikDlgItemCtlRefusesStrecth
+                ;
+            control = RTXTED
+                {
+                flags = EEikEdwinOwnsWindow 
+                    | EEikEdwinInclusiveSizeFixed
+                    | EEikEdwinReadOnly
+                    | EEikEdwinAvkonDisableCursor
+                    | EEikEdwinNoAutoSelection 
+                    | EEikEdwinDisplayOnly
+                    ;
+                numlines = NOTEPAD_VIEWER_LINES; // indispensable
+                avkon_flags = EAknEditorFlagEnableScrollBars;
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_template_model
+// Model resource for ExecTemplates (list of templates) API 
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE NOTEPAD_MODEL r_notepad_template_model
+    {
+    data_file = r_notepad_template_datafile_name;
+    listing_style = ENotepadListingStyleMC;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_template_list_dialog
+// List dialog for 'list of templates'
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE NOTEPAD_LIST_DIALOG r_notepad_template_list_dialog
+    {
+    menubar = r_notepad_template_list_menubar;
+    dialog = r_notepad_template_list_dialog_org;
+    model = r_notepad_template_model;
+    editor_dialog = r_notepad_template_editor_dialog;
+    title = qtn_mce_title_temp;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_template_list_dialog_org
+// CEikDialog resource for template list.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_notepad_template_list_dialog_org
+    {
+    flags = EEikDialogFlagNoDrag  
+        | EEikDialogFlagNoTitleBar 
+        | EEikDialogFlagFillAppClientRect 
+        | EEikDialogFlagCbaButtons 
+        | EEikDialogFlagDontEatUpDownEvents
+        | EEikDialogFlagWait
+        ;
+    buttons =  R_NOTEPAD_SOFTKEYS_OPTIONS_BACK_CONTEXTOPTIONS;
+    items =
+        {
+        DLG_LINE
+            {
+            type = ENotepadCtTemplateListBox;
+            id = ENotepadIdListBox;
+            itemflags = EEikDlgItemTakesEnterKey 
+                | EEikDlgItemOfferAllHotKeys
+                ;
+            control= LISTBOX
+                {
+                flags = EAknListBoxStylusMarkableList;//EAknListBoxMarkableList
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_template_editor_dialog
+// Template Editor resource.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE NOTEPAD_EDITOR_DIALOG r_notepad_template_editor_dialog
+    {
+    menubar = r_notepad_template_editor_menubar;
+    dialog = r_notepad_template_editor_dialog_org;
+    title = qtn_nmake_title_template;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_template_editor_dialog_org
+// CEikDialog resource for template editor.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_notepad_template_editor_dialog_org
+    {
+    flags = EEikDialogFlagNoDrag  
+        | EEikDialogFlagNoTitleBar 
+        | EEikDialogFlagFillAppClientRect 
+        | EEikDialogFlagCbaButtons 
+        | EEikDialogFlagNotifyEsc
+        ;
+    pages = 0;
+   buttons =  R_NOTEPAD_SOFTKEYS_OPTIONS_DONE_CONTEXTOPTIONS;
+    items =
+        {
+        DLG_LINE
+            {
+            type = ENotepadCtEdwin;
+            id = ENotepadIdEdwin;
+            itemflags = EEikDlgItemTakesEnterKey 
+                | EEikDlgItemOfferAllHotKeys
+                ;
+            control = EDWIN
+                {
+                flags = 
+                    EEikEdwinOwnsWindow
+                    | EEikEdwinInclusiveSizeFixed
+                    | EEikEdwinNoAutoSelection
+                    ;
+                lines = NOTEPAD_EDITOR_LINES; // indispensable
+                avkon_flags = EAknEditorFlagEnableScrollBars
+                	| EAknEditorFlagUseSCTNumericCharmap
+			| EAknEditorFlagAllowEntersWithScrollDown 
+			| EAknEditorFlagEnablePictographInput  
+                    ;
+                };
+            },
+        DLG_LINE
+            {
+            type = ENotepadCtEdwinLines;
+            id = ENotepadIdEdwinLines;
+            itemflags = EEikDlgItemNonFocusing;
+            control= NOTEPAD_EDWIN_LINES_CONTROL
+                {
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_template_list_menubar
+// Menu bar of template list.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_notepad_template_list_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_notepad_template_list_menu_second;
+            txt = "";
+            },
+        MENU_TITLE
+            {
+            menu_pane = r_notepad_template_list_menu_first;
+            txt = "";
+            },
+        MENU_TITLE
+            {
+            menu_pane = R_AVKON_MENUPANE_MARK_MULTIPLE;
+            }             
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_template_list_menu_first
+// First menu pane of template list.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_notepad_template_list_menu_first
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = ENotepadCmdOpen;
+            txt = qtn_mce_open;
+            flags = EEikMenuItemAction;
+            },
+        // 'Send' item is added by SendUi API
+        MENU_ITEM
+            {
+            command = ENotepadCmdAdd;
+            txt = qtn_mce_org_new;
+            },
+        MENU_ITEM
+            {
+            command = ENotepadCmdDelete;
+            txt = qtn_mce_delete;
+            flags = EEikMenuItemSpecific;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_template_list_menu_second
+// Second menu pane for template list
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_notepad_template_list_menu_second
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help;
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_template_editor_menubar
+// Menu bar of Template Editor.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_notepad_template_editor_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_notepad_template_editor_menu;
+            txt = "";
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_template_editor_menu
+// Menu pane of Template Editor.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_notepad_template_editor_menu
+    {
+    items =
+        {
+        MENU_ITEM
+            {
+            command = ENotepadCmdDelete; 
+            txt = qtn_nmake_delete_template; 
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdHelp;
+            txt = qtn_options_help; 
+            },
+        MENU_ITEM
+            {
+            command = EAknCmdExit;
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_fetch_template_model
+// Model resource for FetchTemplate API.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE NOTEPAD_MODEL r_notepad_fetch_template_model
+    {
+    data_file = r_notepad_template_datafile_name;
+    listing_style = ENotepadListingStyleFetchMC;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_mce_empty_list
+// "No templates"
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_mce_empty_list
+    {
+    buf = qtn_mce_no_templates;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_icon_array
+// Icon array for Notepad listbox.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AKN_ICON_ARRAY r_notepad_icon_array
+    {
+    bmpfile = AVKON_ICON_FILE;
+    icons = 
+        {
+        AKN_ICON
+            {
+            iconId = EMbmAvkonQgn_indi_marked_add;
+            maskId = EMbmAvkonQgn_indi_marked_add_mask;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_template_icon_array
+// Icon array for Templates listbox.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AKN_ICON_ARRAY r_notepad_template_icon_array
+    {
+    bmpfile = NPDLIB_MBM_FILE;
+    icons = 
+        {
+        AKN_ICON
+            {
+            iconId = EMbmNpdlibQgn_prop_mce_template;
+            maskId = EMbmNpdlibQgn_prop_mce_template_mask;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_viewer_waiting
+// Viewer Dialog of NpdViewer.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE NOTEPAD_VIEWER_DIALOG r_notepad_viewer_waiting
+    {
+    menubar = r_notepad_viewer_menubar;
+    dialog = r_notepad_viewer_waiting_dialog_org;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_viewer_waiting_dialog_org
+// CEikDialog resource of NpdViewer.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_notepad_viewer_waiting_dialog_org
+    {
+    flags = EEikDialogFlagNoDrag 
+        | EEikDialogFlagNoTitleBar 
+        | EEikDialogFlagFillAppClientRect 
+        | EEikDialogFlagCbaButtons
+        | EEikDialogFlagWait
+        ;
+    buttons =  R_NOTEPAD_SOFTKEYS_OPTIONS_BACK_CONTEXTOPTIONS;
+    items =
+        {
+        DLG_LINE
+            {
+            type = ENotepadCtRichTextEditor;
+            id = ENotepadIdRichTextEditor;
+            itemflags = EEikDlgItemTakesEnterKey
+                | EEikDlgItemOfferAllHotKeys
+                ;
+            control = RTXTED
+                {
+                flags = EEikEdwinOwnsWindow 
+                    | EEikEdwinInclusiveSizeFixed
+                    | EEikEdwinReadOnly
+                    | EEikEdwinDisplayOnly
+                    | EEikEdwinAvkonDisableCursor
+                    | EEikEdwinNoAutoSelection 
+                    ;
+                numlines = NOTEPAD_VIEWER_LINES; // indispensable
+                avkon_flags = EAknEditorFlagEnableScrollBars;
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_query_delete_memo
+// Delete confirmation query in deleting one memo.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF  r_notepad_query_delete_memo
+    {
+    buf = qtn_nmake_note_delete_memo;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_query_delete_template
+// Delete confirmation query in deleting one template in Template Editor.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_query_delete_template
+    {
+    buf = qtn_nmake_note_del_template;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_query_delete_te
+// Delete confirmation query in deleting one template in list of templates.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_query_delete_te
+    {
+    buf = qtn_query_common_conf_delete_te;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_query_delete_memos
+// Delete confirmation query in deleting multiple memos.
+// added 09/Mar/2001
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_query_delete_memos 
+    {
+    buf = qtn_nmake_note_delete_memos;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_query_delete_templates
+// Delete confirmation query in deleting multiple templates.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_query_delete_templates
+    {
+    buf = qtn_query_common_conf_delete_ts;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_fetch_memo_prmpt
+// Prompt text of FetchMemo popup list.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_fetch_memo_prmpt
+    {
+    buf = qtn_nmake_fetch_memo_prmpt;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_margins
+// Margins of 1st column of Notepad listbox.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE NOTEPAD_MARGINS r_notepad_margins
+    {
+    left = NOTEPAD_MARGINS_LEFT; // 1;
+    right = NOTEPAD_MARGINS_RIGHT; // 1;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_cursor_color
+// Cursor color of Notepad Editor.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE NUMBER_INT16 r_notepad_cursor_color
+    {
+    value = NOTEPAD_CURSOR_COLOR; // 210
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_memo_atta_saved
+// Text of information note after file was saved as memo in NpdViewer.
+// "Attachment saved"
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_memo_atta_saved
+    {
+    buf = qtn_nmake_memo_atta_saved;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_memo_atta_saved
+// An information note text shown when all content of a previous 
+// created memo are erased in editor and Done.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_text_deleted_empty_memo
+    {
+    buf = qtn_nmake_deleted_empty_memo;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_text_deleted_empty_template
+// An information note text shown when all content of a previous 
+// created template are erased in editor and Done.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_text_deleted_empty_template
+    {
+    buf = qtn_nmake_deleted_empty_template;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_mce_wait_note_delete_template
+// Text for Progress Note in deleting a template.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_mce_wait_note_delete_template
+    {
+    buf = qtn_mce_wait_delete_temp;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_mce_wait_note_delete_templates
+// Text for Progress Note in deleting multiple templates.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_mce_wait_note_delete_templates
+    {
+    buf = qtn_mce_wait_delete_templates;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_editor_decoration
+// Icon array for Notepad Editor decoration bitmaps.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE AKN_ICON_ARRAY r_notepad_editor_decoration
+    {
+    bmpfile = NPDLIB_MBM_FILE;
+    icons = 
+        {
+        AKN_ICON
+            {
+            iconId = EMbmNpdlibQsn_fr_notepad_side_t;
+            maskId = EMbmNpdlibQsn_fr_notepad_side_t_mask ;
+            },
+        AKN_ICON
+            {
+            iconId = EMbmNpdlibQsn_fr_notepad_cont_side_t;
+            maskId = EMbmNpdlibQsn_fr_notepad_cont_side_t_mask ;
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_fetch_template_prmpt
+// Prompt text of FetchTemplate popup list.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_fetch_template_prmpt
+    {
+    buf = qtn_sms_select_template;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_qtn_memlo_database_corrupted
+// Message used when the corrupted database is reconstructed.
+// Defined in "Low memory and error handling" draft 2.8 section 1.9.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_qtn_memlo_database_corrupted
+    {
+    buf = qtn_memlo_database_corrupted;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_default_document_name
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_default_document_name
+    {
+    buf = qtn_dochui_default_docname; // temporary
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_qtn_file_corrupted
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_qtn_file_corrupted
+    {
+    buf = qtn_mail_info_atta_encrypted;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_editor_dialog
+// Editor dialog of Notepad application
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE NOTEPAD_EDITOR_DIALOG r_notepad_text_editor
+    {
+    menubar = r_notepad_text_editor_menubar;
+    dialog = r_notepad_text_dialog;
+    title = qtn_nmake_title_notepad;
+    }
+
+
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_editor_dialog_org
+// CEikDialog resource of memo editor
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_notepad_text_dialog
+    {
+    flags = EEikDialogFlagNoDrag 
+        | EEikDialogFlagWait 
+        | EEikDialogFlagNoTitleBar 
+        | EEikDialogFlagFillAppClientRect 
+        | EEikDialogFlagCbaButtons
+        ;
+   buttons =  R_NOTEPAD_SOFTKEYS_OPTIONS_DONE_CONTEXTOPTIONS;
+    items =
+        {
+        DLG_LINE
+            {
+            type = ENotepadCtEdwin;
+            id = ENotepadIdEdwin;
+            itemflags = EEikDlgItemTakesEnterKey 
+                | EEikDlgItemOfferAllHotKeys
+                ;
+            control= EDWIN
+                {
+                flags =
+                    EEikEdwinOwnsWindow
+                    | EEikEdwinInclusiveSizeFixed
+                    | EEikEdwinNoAutoSelection
+                    ;
+                lines = NOTEPAD_EDITOR_LINES; // indispensable
+                avkon_flags = EAknEditorFlagEnableScrollBars
+                    	| EAknEditorFlagUseSCTNumericCharmap
+			| EAknEditorFlagAllowEntersWithScrollDown 
+			| EAknEditorFlagEnablePictographInput  
+                    ;
+                };
+            },
+        DLG_LINE
+            {
+            type = ENotepadCtEdwinLines;
+            id = ENotepadIdEdwinLines;
+            itemflags = EEikDlgItemNonFocusing;
+            control= NOTEPAD_EDWIN_LINES_CONTROL
+                {
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_text_editor_menubar
+// Menu bar of Notepad editor mode.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_notepad_text_editor_menubar
+    {
+    titles =
+        {
+        MENU_TITLE
+            {
+            menu_pane = r_notepad_text_editor_menu;
+            txt = "";
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_editor_menu
+// Menu pane of Notepad editor mode menu.
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_notepad_text_editor_menu
+    {
+    items =
+        {
+        MENU_ITEM 
+            { 
+            command = ENotepadCmdDelete; 
+            txt = qtn_nmake_om_delete_memo; 
+            },
+        MENU_ITEM 
+            { 
+            command = EAknCmdHelp; 
+            txt = qtn_options_help; 
+            },
+        MENU_ITEM 
+            { 
+            command = EAknCmdExit; 
+            txt = qtn_options_exit;
+            }
+        };
+    }
+
+// ---------------------------------------------------------
+//   
+//    For AIW: r_notepad_app_interest
+//
+// ---------------------------------------------------------
+//
+RESOURCE AIW_INTEREST r_notepad_app_interest
+    {
+    items=
+        {
+        // This application is interested in calling from menu.
+        AIW_CRITERIA_ITEM      
+            {
+            id              = ECmdAiwPlaceholder; 
+            serviceCmd      = KAiwCmdSynchronize;
+            serviceClass    = KAiwClassMenu;
+            contentType     = "*";
+            defaultProvider = 0x101F871F;
+            maxProviders    = 1;
+            }
+        };
+    }    
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_empty_list
+// "No Memos"
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_empty_list
+    {
+    buf = qtn_nmake_no_memos;    
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_empty_list_primary_text
+// Empty list primary text
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_empty_list_primary_text
+    {
+    buf = qtn_nmake_no_memos_primary_text;    
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_empty_list_secondary_text
+// Empty list Secondary text
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_notepad_empty_list_secondary_text
+    {
+    buf = qtn_nmake_no_memos_secondary_text;    
+    }
+// -----------------------------------------------------------------------------
+//
+// r_send_notepad_note
+// the resource process dialog when send notes via message and bluetooth
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_send_notepad_note
+    {
+    flags = EAknWaitNoteFlags;
+    buttons=R_AVKON_SOFTKEYS_CANCEL;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = ESendNotepadAttach;
+            control= AVKON_NOTE
+                {
+                layout = EWaitLayout;
+               	singular_label = qtn_gen_note_processing; 
+                animation =R_QGN_GRAF_WAIT_BAR_ANIM;
+                };
+            }
+        };
+    }
+    
+//----------------------------------------------------
+//
+//    r_notepad_delete_query
+//    Delete confirmation query
+//
+//----------------------------------------------------
+//
+RESOURCE DIALOG r_notepad_delete_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO__YES;
+    items=
+        {
+        DLG_LINE
+            {
+            type = EAknCtQuery;
+            id = EGeneralQuery;
+            control = AVKON_CONFIRMATION_QUERY
+                {
+                layout = EConfirmationLayout;
+                };
+            }
+        };
+    }
+
+// -----------------------------------------------------------------------------
+//
+// r_notepad_empty_list_secondary_text_nontouch
+// Empty list Secondary text for non touch
+//
+// -----------------------------------------------------------------------------
+//
+
+ RESOURCE TBUF r_notepad_empty_list_secondary_text_nontouch
+  {
+     buf = qtn_nmake_no_memos_secondary_text_nontouch ;
+  } 
+ 
+ // -----------------------------------------------------------------------------
+ //
+ // r_notepad_loadfile_progress_dialog
+ // progress dialog for load file
+ //
+ // -----------------------------------------------------------------------------
+ //
+
+ RESOURCE DIALOG r_notepad_loadfile_progress_dialog
+     {
+     flags = EAknWaitNoteFlags;
+     buttons = R_AVKON_SOFTKEYS_CANCEL;
+     items=
+         {
+         DLG_LINE
+             {
+             type = EAknCtNote;
+             id = EGeneralQuery;
+             control= AVKON_NOTE 
+                 { 
+                 layout = EWaitLayout;
+                 singular_label = qtn_nmake_om_open_memo;
+                 animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                 };
+             }
+         };
+     }
+ 
+// Default templates
+//
+#include "NpdDefaultTemplates.ra"
+
+// End of File
+

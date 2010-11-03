@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<api id="ff0b11f24cd518d2f1d3f475a9cb5220" dataversion="2.0">
+<name>Agenda entry Ui API</name>
+<description>Agenda Entry Ui interface API
+</description>
+<type>c++</type>
+<collection>meetingui</collection>
+<libs></libs>
+<release category="domain"/>
+<attributes>
+<htmldocprovided>no</htmldocprovided>
+<adaptation>no</adaptation>
+</attributes>
+</api>

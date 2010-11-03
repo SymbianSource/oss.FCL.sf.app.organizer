@@ -111,7 +111,7 @@ void CVCalToAgendaEntryConverter::ImportVCalL(CVersitParser& aParser, RPointerAr
 	CleanupStack::PushL(guid16);
 	
 	// the UID is stored as an 8-bit descriptor, so convert from 16-bit to 8-bit
-	HBufC8* guid8= CnvUtfConverter::ConvertFromUnicodeToUtf8L(guid16->Des());
+	HBufC8* guid8= CnvUtfConverter::ConvertFromUnicodeToUtf8L(guid16->Des());				 
 	CleanupStack::PopAndDestroy(guid16);  
 	CleanupStack::PushL(guid8);		
 		
@@ -179,8 +179,7 @@ void CVCalToAgendaEntryConverter::ImportVCalL(CVersitParser& aParser, RPointerAr
 	// Import X-Recurrence-Id
 	TVersitDateTime::TRelativeTime relativeTime = TVersitDateTime::EIsUTC;
 	TTime recurrenceId;
-	TBool isRecurrenceIdPresent = ImportDateTimePropertyL(aParser,
-			KVersitTokenXRECURRENCEID, recurrenceId, relativeTime);
+	TBool isRecurrenceIdPresent = ImportDateTimePropertyL(aParser, KVersitTokenXRECURRENCEID, recurrenceId, relativeTime);
 	if (!isRecurrenceIdPresent)
 		{
 		iEntry = CCalEntry::NewL(entryType,guid8, methodStatus, seqNumber);
@@ -197,61 +196,21 @@ void CVCalToAgendaEntryConverter::ImportVCalL(CVersitParser& aParser, RPointerAr
 			caltime.SetTimeUtcL(recurrenceId);
 			}
 	
-		iEntry = CCalEntry::NewL(entryType, guid8, methodStatus, seqNumber,
-				caltime, CalCommon::EThisOnly);
+		iEntry = CCalEntry::NewL(entryType,guid8, methodStatus, seqNumber, caltime, CalCommon::EThisOnly);
 		}
 		
 	CleanupStack::Pop(guid8); // ownership was passed to calGSData	
 	// Fill in the entry description from the SUMMARY property
 	// If this doesn't exist, use the DESCRIPTION property, and if this
 	// doesn't exist, return a NULL entry
-	
-	if (entryType != CCalEntry::ENote)
-		{
-		ImportVCalendarL(aParser, relativeTime, entryType);
-		}
-	else
-		{
-		ImportNoteL(aParser,relativeTime);
-		}
-	
-	// Import favourite property. The type will be converted to an usigned integer
-	// implicitly. 
-	TInt favourite = 0;
-	TBool integerFound = ImportIntegerPropertyL( 
-			aParser, KVCalTokenXFavourite, favourite );
-	
-	if(integerFound)
-		{
-		iEntry->SetFavouriteL(favourite);
-		}
-	
-	aEntryArray.AppendL(iEntry); // takes ownership of entry
-	iEntry = NULL;
-	}
 
-// -----------------------------------------------------------------------------
-// CVCalToAgendaEntryConverter::ImportVCalendarL
-// Imports vcalendar for calendar types EAppt/EReminder/EAnniv/ETodo/EEvent
-// -----------------------------------------------------------------------------
-// 
-void CVCalToAgendaEntryConverter::ImportVCalendarL(CVersitParser& aParser,
-		TVersitDateTime::TRelativeTime& aRelativeTime,
-		CCalEntry::TType& aEntryType)
-	{
-	// Fill in the entry description from the SUMMARY property
-	// If this doesn't exist, use the DESCRIPTION property, and if this
-	// doesn't exist, return a NULL entry
-	
-	// get properties but don't take ownership of the elements of the array
-	CArrayPtr<CParserProperty>* properties = aParser.PropertyL(
-			KVersitTokenSUMMARY, TUid::Uid(KVersitPropertyHBufCUid), EFalse);
-	
+ 	// get properties but don't take ownership of the elements of the array
+ 	CArrayPtr<CParserProperty>* properties = aParser.PropertyL(KVersitTokenSUMMARY, TUid::Uid(KVersitPropertyHBufCUid), EFalse);
+
 	if (!properties)
 		{
 		// get properties but don't take ownership of the elements of the array
-		properties = aParser.PropertyL(KVersitTokenDESCRIPTION,
-				TUid::Uid(KVersitPropertyHBufCUid), EFalse);
+		properties = aParser.PropertyL(KVersitTokenDESCRIPTION, TUid::Uid(KVersitPropertyHBufCUid), EFalse);
 		}
 	CleanupStack::PushL(properties);
 	
@@ -262,8 +221,7 @@ void CVCalToAgendaEntryConverter::ImportVCalendarL(CVersitParser& aParser,
 	TPtrC summary;
 	if (properties)
 		{
-		summary.Set(static_cast<CParserPropertyValueHBufC*>(
-				(*properties)[0]->Value())->Value());
+		summary.Set(static_cast<CParserPropertyValueHBufC*>((*properties)[0]->Value())->Value());
 		}
 		
 	HBufC* summaryBuf = AgnConvertUtil::EncodeL(summary,KUidTextToEtextNoTrim);
@@ -273,7 +231,7 @@ void CVCalToAgendaEntryConverter::ImportVCalendarL(CVersitParser& aParser,
 		iEntry->SetSummaryL(*summaryBuf);
 		}
 	CleanupStack::PopAndDestroy(summaryBuf);
-	
+
 	HBufC* description =ImportDesPropertyL(aParser,KVersitTokenDESCRIPTION);
 	CleanupStack::PushL(description);
 	if (description != NULL)
@@ -281,9 +239,9 @@ void CVCalToAgendaEntryConverter::ImportVCalendarL(CVersitParser& aParser,
 		iEntry->SetDescriptionL(*description); // Takes ownership
 		}
 	CleanupStack::PopAndDestroy(description);
-	
+
 	TBool validEntry = EFalse;
-	if (aEntryType == CCalEntry::ETodo)
+	if (entryType == CCalEntry::ETodo)
 		{
 		validEntry = ImportTodoPropertiesL(aParser);
 		}
@@ -299,7 +257,7 @@ void CVCalToAgendaEntryConverter::ImportVCalendarL(CVersitParser& aParser,
 		iEntry = NULL;
 		return;
 		}
-	
+
 	// Import CLASS property
 	HBufC* property=ImportDesPropertyL(aParser, KVersitTokenCLASS);
 	if (property)
@@ -313,19 +271,17 @@ void CVCalToAgendaEntryConverter::ImportVCalendarL(CVersitParser& aParser,
 			iEntry->SetReplicationStatusL(CCalEntry::ERestricted);
 		CleanupStack::PopAndDestroy(property);
 		}
-	
 	// Import LOCATION property
-	HBufC* locationProperty=ImportDesPropertyL(aParser, KVersitTokenLOCATION);
-	if (locationProperty)
+	property=ImportDesPropertyL(aParser, KVersitTokenLOCATION);
+	if (property)
 		{
-		CleanupStack::PushL(locationProperty);
-		iEntry->SetLocationL(*locationProperty);
-		CleanupStack::PopAndDestroy(locationProperty);
+		CleanupStack::PushL(property);
+		iEntry->SetLocationL(*property);
+		CleanupStack::PopAndDestroy(property);
 		}
 	// Import DTSTAMP
 	TTime timeProperty;
-	if (ImportDateTimePropertyL(aParser, KVersitTokenXDTSTAMP, timeProperty,
-			aRelativeTime))
+	if (ImportDateTimePropertyL(aParser, KVersitTokenXDTSTAMP, timeProperty, relativeTime))
 		{
 		TCalTime caltimeProperty;
 		caltimeProperty.SetTimeUtcL(timeProperty);
@@ -333,12 +289,13 @@ void CVCalToAgendaEntryConverter::ImportVCalendarL(CVersitParser& aParser,
 		}
 	
 	// Attendee property
-	ImportAttendeePropertiesL(aParser, KVersitTokenATTENDEE);
-	
+ 	ImportAttendeePropertiesL(aParser, KVersitTokenATTENDEE);
+
 	// Categories property
 	ImportCategoriesPropertyL(aParser, KVersitTokenCATEGORIES);
+
 	
-	
+		
 	TInt localId;
 	if (ImportIntegerPropertyL(aParser, KVersitTokenXLOCALUID, localId))
 		{
@@ -351,25 +308,23 @@ void CVCalToAgendaEntryConverter::ImportVCalendarL(CVersitParser& aParser,
 	TInt priority;
 	if (ImportIntegerPropertyL(aParser, KVersitTokenPRIORITY, priority))
 		{
-		iEntry->SetPriorityL(priority);	
+		iEntry->SetPriorityL(priority);  
 		}
-	
+
 	// All entries have a status - will default to Needs Action if cannot be read
 	CCalEntry::TStatus entryStatus=CCalEntry::ENullStatus;
 	ImportStatusPropertyL(aParser, entryStatus);
 	//Now sync completed and ECompleted status to keep entry consistenty 
-	if (aEntryType == CCalEntry::ETodo
-			&& (iEntry->CompletedTimeL().TimeUtcL()) != Time::NullTTime())
+	if(entryType==CCalEntry::ETodo && (iEntry->CompletedTimeL().TimeUtcL()) != Time::NullTTime())
 		{
 		iEntry->SetCompletedL(ETrue, iEntry->CompletedTimeL());
 		}
 	iEntry->SetStatusL(entryStatus);
 	
 	//Get last changed date from vcal
-	if (ImportDateTimePropertyL(aParser, KVersitTokenLASTMODIFIED,
-			timeProperty, aRelativeTime))
+	if (ImportDateTimePropertyL(aParser, KVersitTokenLASTMODIFIED, timeProperty, relativeTime))
 			{
-			if (iTzZone && (aRelativeTime == TVersitDateTime::EIsVCardLocal))
+			if (iTzZone && (relativeTime == TVersitDateTime::EIsVCardLocal))
 				{
 				iTzZone->ConvertToUtcL(timeProperty);
 				}
@@ -396,8 +351,7 @@ void CVCalToAgendaEntryConverter::ImportVCalendarL(CVersitParser& aParser,
 	if (geoString != NULL)
 		{
 		CleanupStack::PushL(geoString);
-		// Determine the position of the delimiter for extraction of the 
-		// geo latitude and longitude values
+		// Determine the position of the delimiter for extraction of the geo latitude and longitude values
 		TInt delimiterPos = geoString->Locate(KVersitTokenCommaVal);
 		
 		if(delimiterPos!=KErrNotFound)
@@ -410,8 +364,7 @@ void CVCalToAgendaEntryConverter::ImportVCalendarL(CVersitParser& aParser,
 			TReal geoLatitude;
 			TReal geoLongitude;
 			
-			if ((geoLatitudeLex.Val(geoLatitude) == KErrNone)
-					&& (geoLongitudeLex.Val(geoLongitude) == KErrNone))
+			if((geoLatitudeLex.Val(geoLatitude)==KErrNone) && (geoLongitudeLex.Val(geoLongitude)==KErrNone))
 				{
 				CCalGeoValue* importedGeoValue=CCalGeoValue::NewL();
 				CleanupStack::PushL(importedGeoValue);
@@ -426,83 +379,18 @@ void CVCalToAgendaEntryConverter::ImportVCalendarL(CVersitParser& aParser,
 		CleanupStack::PopAndDestroy(geoString);
 		}
 	
+    TInt intProperty( 0 );
+    //Import UserDataInt
+    TBool integerFound = ImportIntegerPropertyL( aParser, KVersitExtUserInt,       
+                            intProperty );       
+    
+    if ( integerFound )       
+        {       
+        iEntry->SetUserInt32L( intProperty );       
+        }       
 	CleanupStack::PopAndDestroy(properties);
-	}
-
-// -----------------------------------------------------------------------------
-// CVCalToAgendaEntryConverter::ImportNoteL
-// Imports note from vcal and maps it to CCalEntry::ENote
-// -----------------------------------------------------------------------------
-// 
-void CVCalToAgendaEntryConverter::ImportNoteL(CVersitParser& aParser,
-		TVersitDateTime::TRelativeTime& aRelativeTime)
-	{
-	
-	// set description to entry from vcal
-	// if description property is not present,look for summary property and
-	// set the summary as description field for the note
-	CArrayPtr<CParserProperty>* properties = aParser.PropertyL(
-		KVersitTokenDESCRIPTION, TUid::Uid(KVersitPropertyHBufCUid),EFalse);
-	if(!properties)
-		{
-		properties = aParser.PropertyL(KVersitTokenSUMMARY, TUid::Uid(
-				KVersitPropertyHBufCUid), EFalse);
-		CleanupStack::PushL(properties);
-		TPtrC summary;
-		if (properties)
-			{
-			summary.Set(static_cast<CParserPropertyValueHBufC*>(
-					(*properties)[0]->Value())->Value());
-			}
-			
-		HBufC* summaryBuf = AgnConvertUtil::EncodeL(summary,
-				KUidTextToEtextNoTrim);
-		CleanupStack::PushL(summaryBuf);
-		if (summaryBuf)
-			{
-			iEntry->SetDescriptionL(*summaryBuf);
-			}
-		CleanupStack::PopAndDestroy(summaryBuf);
-		CleanupStack::PopAndDestroy(properties);
-		}
-	else
-		{
-		HBufC* description = ImportDesPropertyL(aParser,KVersitTokenDESCRIPTION);
-		CleanupStack::PushL(description);
-		if (description != NULL)
-			{
-			iEntry->SetDescriptionL(*description); // Takes ownership
-			}
-		CleanupStack::PopAndDestroy(description);
-		}
-	
-	// get local uid from vcal
-	TInt localId;
-	if (ImportIntegerPropertyL(aParser, KVersitTokenXLOCALUID, localId))
-		{
-		iEntry->SetLocalUidL(localId);
-		}
-	
-	// get last changed date from vcal
-	TTime timeProperty;
-	if (ImportDateTimePropertyL(aParser, KVersitTokenLASTMODIFIED,
-			timeProperty, aRelativeTime))
-		{
-		if (iTzZone && (aRelativeTime == TVersitDateTime::EIsVCardLocal))
-			{
-			iTzZone->ConvertToUtcL(timeProperty);
-			}
-		TCalTime lastModifiedDate;
-		lastModifiedDate.SetTimeUtcL(timeProperty);
-		iEntry->SetLastModifiedDateL(lastModifiedDate);
-		}
-	else
-		{
-		iEntry->SetLastModifiedDateL(); //set changed date to now
-		}
-	
-	// get attachments from the vcal
-	ImportAttachmentPropertyL(aParser);
+	aEntryArray.AppendL(iEntry); // takes ownership of entry
+	iEntry = NULL;
 	}
 
 CVCalToAgendaEntryConverter::~CVCalToAgendaEntryConverter()
@@ -597,11 +485,6 @@ CCalEntry::TType CVCalToAgendaEntryConverter::GetEntryTypeL(CVersitParser& aPars
 		if (type == KVCalTokenTypeREMINDER)
 			{
 			return CCalEntry::EReminder;
-			}
-		
-		if (type == KVCalTokenTypeNOTE)
-			{
-			return CCalEntry::ENote;
 			}
 		
 		}

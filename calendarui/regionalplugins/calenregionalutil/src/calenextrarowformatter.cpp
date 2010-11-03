@@ -15,22 +15,15 @@
  *
 */
 
-#include <qstringlist.h>
-#include <hbglobal.h>
-
-#include <badesca.h> 
-#include <eikenv.h>
-#include <hbparameterlengthlimiter.h>
 
 #include "calendarui_debug.h"
-#include "CalenExtraRowFormatter.h"
-#include "OstTraceDefinitions.h"
-#ifdef OST_TRACE_COMPILER_IN_USE
-#include "calenextrarowformatterTraces.h"
-#endif
+#include "calenextrarowformatter.h"
+#include <calenregionalutil.rsg>
+#include <AknBidiTextUtils.h>
+#include <badesca.h> 
+#include <eikenv.h>
+#include <StringLoader.h>
 
-// Constants
-const TInt KZero( 0 );
 
 // -----------------------------------------------------------------------------
 // CollapseDuplicatesL
@@ -38,25 +31,25 @@ const TInt KZero( 0 );
 //
 void CollapseDuplicatesL( TDes& aStr, TInt aPos, const TDesC& aSub )
     {
-    OstTraceFunctionEntry0( _COLLAPSEDUPLICATESL_ENTRY );
+    TRACE_ENTRY_POINT;
+    
     const TInt sublen = aSub.Length();
-    if (aStr.Length() == KZero || sublen == KZero || aPos < KZero || (aPos >aStr.Length()))
+    if (aStr.Length() == 0 || sublen == 0)
         {
-        OstTraceFunctionExit0( _COLLAPSEDUPLICATESL_EXIT );
         return;
         }
 
     TPtrC remaining = aStr.Mid( aPos );
     TInt fstInRemaining = remaining.Find( aSub );
     
-    if ( fstInRemaining >= KZero )
+    if ( fstInRemaining >= 0 )
         {
         TInt restPos = fstInRemaining + sublen;
         TPtrC rest = remaining.Mid( restPos );
         TInt sndInRest = rest.Find( aSub );
 
         // 1) two substrings found in sequence 
-        if (sndInRest == KZero)
+        if (sndInRest == 0)
             { 
             // replace second substring with empty string
             TInt fst = aPos + fstInRemaining;
@@ -66,7 +59,7 @@ void CollapseDuplicatesL( TDes& aStr, TInt aPos, const TDesC& aSub )
             CollapseDuplicatesL( aStr, fst, aSub );
             }
         // 2) substring found later in string 
-        else if (sndInRest > KZero)
+        else if (sndInRest > 0)
             {         
             // continue collapsing from this second substring
             TInt snd = aPos + restPos + sndInRest;
@@ -75,17 +68,16 @@ void CollapseDuplicatesL( TDes& aStr, TInt aPos, const TDesC& aSub )
         // 3) No second substring found -> nothing to collapse
         else             
             {
-            OstTraceFunctionExit0( DUP1__COLLAPSEDUPLICATESL_EXIT );
+            TRACE_EXIT_POINT; 
             return;
             }
         }
     // No substring found 
     else
         {
-        OstTraceFunctionExit0( DUP2__COLLAPSEDUPLICATESL_EXIT );
+        TRACE_EXIT_POINT;
         return;
         }
-    OstTraceFunctionExit0( DUP3__COLLAPSEDUPLICATESL_EXIT );
     }
 
 // -----------------------------------------------------------------------------
@@ -94,21 +86,22 @@ void CollapseDuplicatesL( TDes& aStr, TInt aPos, const TDesC& aSub )
 //
 void RemoveLeadingAndTrailingL( TDes& aStr, const TDesC& aSub )
     {
-    OstTraceFunctionEntry0( _REMOVELEADINGANDTRAILINGL_ENTRY );
+    TRACE_ENTRY_POINT;
+    
     // Trailing
     const TInt sublen = aSub.Length();
-    if ( aStr.Right( sublen ).Find( aSub ) == KZero )
+    if ( aStr.Right( sublen ).Find( aSub ) == 0 )
         {
         aStr.Replace( aStr.Length() - sublen, sublen, KNullDesC );
         }
 
     // Leading 
-    if ( aStr.Left( sublen ).Find( aSub ) == KZero )
+    if ( aStr.Left( sublen ).Find( aSub ) == 0 )
         {
-        aStr.Replace( KZero, sublen, KNullDesC );
+        aStr.Replace( 0, sublen, KNullDesC );
         }
         
-    OstTraceFunctionExit0( _REMOVELEADINGANDTRAILINGL_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
@@ -117,13 +110,14 @@ void RemoveLeadingAndTrailingL( TDes& aStr, const TDesC& aSub )
 //
 EXPORT_C CCalenExtraRowFormatter* CCalenExtraRowFormatter::NewL()
     {
-    OstTraceFunctionEntry0( CCALENEXTRAROWFORMATTER_NEWL_ENTRY );
+    TRACE_ENTRY_POINT;
+    
     CCalenExtraRowFormatter* self = new (ELeave) CCalenExtraRowFormatter;
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop(self);
     
-    OstTraceFunctionExit0( CCALENEXTRAROWFORMATTER_NEWL_EXIT );
+    TRACE_EXIT_POINT;
     return self;
     }
 
@@ -133,8 +127,8 @@ EXPORT_C CCalenExtraRowFormatter* CCalenExtraRowFormatter::NewL()
 //
 EXPORT_C CCalenExtraRowFormatter::~CCalenExtraRowFormatter()
     {
-    OstTraceFunctionEntry0( CCALENEXTRAROWFORMATTER_CCALENEXTRAROWFORMATTER_ENTRY );
-    OstTraceFunctionExit0( CCALENEXTRAROWFORMATTER_CCALENEXTRAROWFORMATTER_EXIT );
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
@@ -143,8 +137,8 @@ EXPORT_C CCalenExtraRowFormatter::~CCalenExtraRowFormatter()
 //
 CCalenExtraRowFormatter::CCalenExtraRowFormatter()
     {
-    OstTraceFunctionEntry0( DUP1_CCALENEXTRAROWFORMATTER_CCALENEXTRAROWFORMATTER_ENTRY );
-    OstTraceFunctionExit0( DUP1_CCALENEXTRAROWFORMATTER_CCALENEXTRAROWFORMATTER_EXIT );
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
     }
 
 // -----------------------------------------------------------------------------
@@ -153,8 +147,8 @@ CCalenExtraRowFormatter::CCalenExtraRowFormatter()
 //
 void CCalenExtraRowFormatter::ConstructL()
     {
-    OstTraceFunctionEntry0( CCALENEXTRAROWFORMATTER_CONSTRUCTL_ENTRY );
-    OstTraceFunctionExit0( CCALENEXTRAROWFORMATTER_CONSTRUCTL_EXIT );
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
     }
 
 
@@ -164,94 +158,207 @@ void CCalenExtraRowFormatter::ConstructL()
 //
 EXPORT_C TPtrC CCalenExtraRowFormatter::FormatExtraRowInformationL( 
     CCalenLunarLocalizedInfo& aLocInfo, 
-    RArray<CCalenLunarLocalizedInfo::TField>& aPrioritizedFields )
-{
-	OstTraceFunctionEntry0( CCALENEXTRAROWFORMATTER_FORMATEXTRAROWINFORMATIONL_ENTRY );
-	if ( aPrioritizedFields.Count() == KZero)
-	{
-		iText = KNullDesC;
+    RArray<CCalenLunarLocalizedInfo::TField>& aPrioritizedFields,
+    TInt aMaxWidth,
+    const CFont& aFont
+    ,TBool aTwoLines
+    )
+    {
+    TRACE_ENTRY_POINT;
+    
+    
+    if ( aPrioritizedFields.Count() == 0)
+        {
+        iText = KNullDesC;
+        
+        TRACE_EXIT_POINT;
+        return iText;
+        }
 
-		OstTraceFunctionExit0( CCALENEXTRAROWFORMATTER_FORMATEXTRAROWINFORMATIONL_EXIT );
-		return iText;
-	}
+    // Initialize substring labels
+    RArray<CCalenLunarLocalizedInfo::TField> subLabels;
+    CleanupClosePushL( subLabels );
+    subLabels.AppendL( CCalenLunarLocalizedInfo::EAnimalYear );
+    subLabels.AppendL( CCalenLunarLocalizedInfo::ELunarYear );
+    subLabels.AppendL( CCalenLunarLocalizedInfo::ELunarMonthAndDay );
+    subLabels.AppendL( CCalenLunarLocalizedInfo::EFestival );
+    subLabels.AppendL( CCalenLunarLocalizedInfo::ESolarTerm );
+    
+    // ASSERT that all prioritized fields can be found from subLabels
+    for ( TInt i=0; i < aPrioritizedFields.Count(); i++)
+        {
+        ASSERT( subLabels.Find( aPrioritizedFields[i] ) >= 0 ); 
+        }
 
-	// Initialize substring labels
-	RArray<CCalenLunarLocalizedInfo::TField> subLabels;
-	CleanupClosePushL( subLabels );
-	subLabels.AppendL( CCalenLunarLocalizedInfo::EAnimalYear );
-	subLabels.AppendL( CCalenLunarLocalizedInfo::ELunarYear );
-	subLabels.AppendL( CCalenLunarLocalizedInfo::ELunarMonthAndDay );
-	subLabels.AppendL( CCalenLunarLocalizedInfo::EFestival );
-	subLabels.AppendL( CCalenLunarLocalizedInfo::ESolarTerm );
+    TBool fits = EFalse;
 
-	// ASSERT that all prioritized fields can be found from subLabels
-	for ( TInt i=0; i < aPrioritizedFields.Count(); i++)
-	{
-		ASSERT( subLabels.Find( aPrioritizedFields[i] ) >= KZero );
-	}
+    do 
+        {
+        // Initialize substring array 
+        CPtrCArray* subs = new (ELeave) CPtrCArray(10);
+        CleanupStack::PushL( subs );
+        for ( TInt i = 0; i < subLabels.Count(); i++) 
+            {
+            subs->AppendL( TPtrC( KNullDesC ) );
+            }
+        // subs->InsertL( 0, TPtrC( KNullDesC ), 5 );
+        
+        // Set wanted fields to substring array
+        for ( TInt i = 0; i < aPrioritizedFields.Count(); i++)
+            {
+            CCalenLunarLocalizedInfo::TField field = aPrioritizedFields[i];        
+            TInt subIx = subLabels.Find( field );
+            // Replace 
+            subs->Delete(subIx);
+#ifdef _DEBUG
+            RDebug::Print( _L("A sub count  %d"), subs->Count() );         
+#endif
+            subs->InsertL(subIx, TPtrC( aLocInfo.GetField( field ) ) );
+#ifdef _DEBUG
+            RDebug::Print( _L("B sub count %d"), subs->Count() );                       
+            RDebug::Print( _L("B field %S"), &(subs->At(subIx)) );
+#endif
+            
+            }
+        
+        // Format all fields to extra row     
+        HBufC* extraRowFmt = StringLoader::LoadLC( R_CALE_EXTRA_ROW_LUNAR );
+        
+#ifdef _DEBUG
+        RDebug::RawPrint( *extraRowFmt );
+#endif
+        
+        TBuf<1000> fmt = *extraRowFmt;
+        for (TInt i=0; i < subLabels.Count(); i++)
+            {
+#ifdef _DEBUG
+            RDebug::Print( _L("Before Format") );
+            RDebug::RawPrint( fmt );
+#endif
+            StringLoader::Format( iText, 
+                                  fmt,
+                                  i + 1, // %0U is a separator 
+                                  subs->At( i ) );
+            fmt = iText;
+#ifdef _DEBUG
+            RDebug::Print( _L("After Format") );
+            RDebug::RawPrint( fmt );
+#endif
+            }
+        
+        // Now we have something like "Year of Dog%0U%0U6/11%0U%0U" 
+        // First We need to remove multiple occurences of %0U
+        _LIT(KSeparatorFmt, "%0U");
+        
+        CollapseDuplicatesL( iText, 0, KSeparatorFmt );
+#ifdef _DEBUG
+        RDebug::Print( _L("After collapse") );
+        RDebug::RawPrint( iText );
+#endif
 
-	// Initialize substring array 
-	CPtrCArray* subs = new (ELeave) CPtrCArray(10);
-	CleanupStack::PushL( subs );
-	for ( TInt i = 0; i < subLabels.Count(); i++) 
-	{
-		subs->AppendL( TPtrC( KNullDesC ) );
-	}
+        // Remove leading and trailing %0U
+        // By now, we are sure that there is max 1 %0U in the beginning
+        // and in the end of string.
+        RemoveLeadingAndTrailingL( iText, KSeparatorFmt );
+#ifdef _DEBUG
+        RDebug::Print( _L("After leading and trailing removal") );
+        RDebug::RawPrint( iText );
+#endif
+        
 
-	// Set wanted fields to substring array
-	for ( TInt i = 0; i < aPrioritizedFields.Count(); i++)
-	{
-		CCalenLunarLocalizedInfo::TField field = aPrioritizedFields[i];
-		TInt subIx = subLabels.Find( field );
-		// Replace 
-		subs->Delete(subIx);
-		RDebug::Print( _L("A sub count  %d"), subs->Count() );
-		subs->InsertL(subIx, TPtrC( aLocInfo.GetField( field ) ) );
-		RDebug::Print( _L("B sub count %d"), subs->Count() );
-		RDebug::Print( _L("B field %S"), &(subs->At(subIx)) );
+        // If there are now separators anymore, then do not fill them
+        TBool hasSeparators = iText.Find( KSeparatorFmt ) >= 0;
+        
+        if ( hasSeparators ) 
+            {
+        
+            // fill in separators
+            HBufC* separator = StringLoader::LoadLC( R_CALE_LUNAR_SEPARATOR );
+            fmt = iText;
+            StringLoader::Format( iText, 
+                                  fmt,
+                                  0, // %0U is a separator 
+                                  *separator );
+        
+#ifdef _DEBUG
+            RDebug::Print( _L("After separator insert") );
+            RDebug::RawPrint( iText );
+#endif
+            CleanupStack::PopAndDestroy( separator );
+            }
 
-	}
-	TBuf<100> textBuf;
-	QStringList textDataStringList;
-	for (TInt i=0; i < subLabels.Count(); i++) {
-		textBuf = subs->At( i );
-		textDataStringList.append(
-							QString((QChar*)textBuf.Ptr(),textBuf.Length()));
-	}
-	// Get the locale specific separator
-	QString separator = hbTrId("txt_calendar_preview_title_cale_separator");
-	
-	// Format all fields to single row 
-	QString textDataString;
-	textDataString = HbParameterLengthLimiter(
-							hbTrId("txt_calendar_preview_title_123242526")).arg(
-							textDataStringList.at(0)).arg(
-							separator).arg(textDataStringList.at(1)).arg(
-							separator).arg(textDataStringList.at(2)).arg(
-							separator).arg(textDataStringList.at(3)).arg(
-							separator).arg(textDataStringList.at(4));
-	
-	iText = static_cast<const TUint16*> (
-							textDataString.utf16()), textDataString.length();
 
-	// Now we have something like "Year of Dog%2GengYin%2%2"
-	// where %2 is the separator txt_calendar_preview_title_cale_separator
-	// First We need to remove multiple occurences of separator
-	textBuf = static_cast<const TUint16*> (
-										separator.utf16()), separator.length();
-	CollapseDuplicatesL( iText, 0, textBuf);
-	
-	// Remove leading and trailing separators
-	// Leading separator won't be there but trailing one is there for sure
-	RemoveLeadingAndTrailingL( iText, textBuf );
-	
-	// CleanUp
-	CleanupStack::PopAndDestroy( subs );
-	CleanupStack::PopAndDestroy( &subLabels );
-	
-	OstTraceFunctionExit0( DUP1_CCALENEXTRAROWFORMATTER_FORMATEXTRAROWINFORMATIONL_EXIT );
-	return iText;
-}
+        CleanupStack::PopAndDestroy( extraRowFmt );
+        CleanupStack::PopAndDestroy( subs );
+        
+        fits = TryToFitL( iText, aMaxWidth, aFont
+
+                          , aTwoLines
+
+                          ); 
+        if ( ! fits )
+            {
+            iText = KNullDesC;
+            TInt last = aPrioritizedFields.Count() - 1;
+            if ( last >= 0 )
+                {
+                aPrioritizedFields.Remove( last );
+                }
+            }
+
+        
+        } while ( ! fits && aPrioritizedFields.Count() );
+
+    CleanupStack::PopAndDestroy( &subLabels );
+    
+    
+    
+    TRACE_EXIT_POINT;
+    return iText;
+    }
+
+// -----------------------------------------------------------------------------
+// CCalenExtraRowFormatter::TryToFitL
+// -----------------------------------------------------------------------------
+//
+TBool CCalenExtraRowFormatter::TryToFitL( const TDesC& aStr, TInt aMaxWidth, const CFont& aFont
+                                           , TBool aTwoLines )
+    {
+    TRACE_ENTRY_POINT;
+    
+    TBool result(EFalse);
+    if(aTwoLines)
+        {
+        CArrayFixFlat<TPtrC>* textLines = new(ELeave)CArrayFixFlat<TPtrC>( 3 );
+        CleanupStack::PushL( textLines );
+        
+        CArrayFixFlat<TInt>* lineWidths = new( ELeave )CArrayFixFlat<TInt>( 1 );
+        CleanupStack::PushL( lineWidths );
+        
+        lineWidths->AppendL( aMaxWidth );
+        
+        HBufC* visualText = AknBidiTextUtils::ConvertToVisualAndWrapToArrayWholeTextL(
+            aStr,
+            *lineWidths,
+            aFont,
+            *textLines);
+
+        result = (textLines->Count() <= 2);
+            
+        CleanupStack::PopAndDestroy( lineWidths );
+        CleanupStack::PopAndDestroy( textLines );
+        delete visualText;
+        }
+    else
+        {
+        CFont::TMeasureTextInput::TFlags logicalOrder = static_cast<CFont::TMeasureTextInput::TFlags>(0);
+        TInt textW = AknBidiTextUtils::MeasureTextBoundsWidth( aFont, aStr, logicalOrder );
+        result = (textW <= aMaxWidth);
+        }   
+    
+    TRACE_EXIT_POINT;
+    return result;
+    }
 
 //EOF
 

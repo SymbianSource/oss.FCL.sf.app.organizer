@@ -1,0 +1,59 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   This is project specification file for the clkuimodel.
+*
+*/
+
+// System includes
+#include <platform_paths.hrh>
+
+// Target information
+TARGET				clkuimodel.dll
+TARGETTYPE			dll
+TARGETPATH			/sys/bin
+
+// Uid and Capability information
+UID					0x1000008d 0x10005904
+CAPABILITY			CAP_GENERAL_DLL
+
+// Source information
+SOURCEPATH			../src
+SOURCE				clkuimdlpanic.cpp
+SOURCE				clkuimdlbase.cpp
+SOURCE				clkuialarmmodel.cpp
+SOURCE				clkuialarmlistener.cpp
+SOURCE				clkuialarmidleobserver.cpp
+SOURCE				clkuiclksrvmodel.cpp
+SOURCE				clkuiclksrvlistener.cpp
+SOURCE				clkuiclksrvidleobserver.cpp
+SOURCE				clkuilistenerbase.cpp
+SOURCE				clkuiintermediateobserver.cpp
+SOURCE				clkuiidleobserver.cpp
+
+// System include information
+APP_LAYER_SYSTEMINCLUDE
+
+// User include information
+USERINCLUDE			../inc
+USERINCLUDE			../../inc
+USERINCLUDE			../../../clockengines/clockserver/client/inc
+USERINCLUDE			../../../clockengines/inc
+
+// Library information
+LIBRARY				euser.lib
+LIBRARY				alarmclient.lib
+LIBRARY				alarmshared.lib
+LIBRARY				clockserverclient.lib
+
+// End of file

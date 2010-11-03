@@ -408,13 +408,7 @@ EXPORTS
 	_ZN16CCalCalendarInfo15RemovePropertyLERK6TDesC8 @ 407 NONAME
 	_ZNK16CCalCalendarInfo13PropertyKeysLEv @ 408 NONAME
 	_ZNK16CCalCalendarInfo14PropertyValueLERK6TDesC8 @ 409 NONAME
-	_ZN24CCalFindInstanceSettings18SetFavouriteFilterERKN9CalCommon19TCalFavouriteFilterE @ 410 NONAME
-	_ZN9CCalEntry10FavouriteLEv @ 411 NONAME
-	_ZN9CCalEntry13SetFavouriteLEm @ 412 NONAME
-	_ZN9CalCommon19TCalFavouriteFilterC1Emm @ 413 NONAME
-	_ZN9CalCommon19TCalFavouriteFilterC1Ev @ 414 NONAME
-	_ZN9CalCommon19TCalFavouriteFilterC2Emm @ 415 NONAME
-	_ZN9CalCommon19TCalFavouriteFilterC2Ev @ 416 NONAME
-	_ZNK9CalCommon19TCalFavouriteFilter4MaskEv @ 417 NONAME
-	_ZNK9CalCommon19TCalFavouriteFilter5ValueEv @ 418 NONAME
+	_ZN9CCalEntry10UserInt32LEv @ 410 NONAME
+	_ZN9CCalEntry13SetUserInt32LEm @ 411 NONAME
+	_ZN9CCalEntry20ClearMRSpecificDataLEv @ 412 NONAME
 

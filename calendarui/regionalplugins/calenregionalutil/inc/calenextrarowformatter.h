@@ -21,8 +21,8 @@
 
 #include <e32base.h>
 
-#include "CalenLunarLocalizedInfo.h"
-#include "CalendarVariant.hrh"
+#include "calenlunarlocalizedinfo.h"
+#include "calendarvariant.hrh"
 #include "calendarui_debug.h"
 
 class CFont;
@@ -34,10 +34,22 @@ public: // public API
 
     IMPORT_C virtual ~CCalenExtraRowFormatter();
 
-    IMPORT_C TPtrC FormatExtraRowInformationL( 
-					CCalenLunarLocalizedInfo& aLocInfo, 
-					RArray<CCalenLunarLocalizedInfo::TField>& aPrioritizedFields 
-					);
+    IMPORT_C TPtrC FormatExtraRowInformationL( CCalenLunarLocalizedInfo& aLocInfo, 
+                                      RArray<CCalenLunarLocalizedInfo::TField>& aPrioritizedFields,
+                                      TInt aMaxWidth,
+                                      const CFont& aFont
+
+                                      , TBool aTwoLines
+
+                                      );   
+    
+private:
+    TBool TryToFitL( const TDesC& aStr, TInt aMaxWidth, const CFont& aFont
+
+                     , TBool aTwoLines
+
+                     );
+
 
 private: // own methods
     CCalenExtraRowFormatter();

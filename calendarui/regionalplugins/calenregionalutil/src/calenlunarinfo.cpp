@@ -18,21 +18,17 @@
 
 
 #include "calendarui_debug.h"
-#include "CalenLunarInfo.h"
-#include "OstTraceDefinitions.h"
-#ifdef OST_TRACE_COMPILER_IN_USE
-#include "calenlunarinfoTraces.h"
-#endif
-
+#include "calenlunarinfo.h"
 
 // -----------------------------------------------------------------------------
 // TCalenLunarInfo::HasFestival
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TBool TCalenLunarInfo::HasFestival()
+TBool TCalenLunarInfo::HasFestival()
     {
-    OstTraceFunctionEntry0( TCALENLUNARINFO_HASFESTIVAL_ENTRY );
-    OstTraceFunctionExit0( TCALENLUNARINFO_HASFESTIVAL_EXIT );
+    TRACE_ENTRY_POINT;
+    
+    TRACE_EXIT_POINT;
     return iFestival >= 0;
     }
 
@@ -40,10 +36,11 @@ EXPORT_C TBool TCalenLunarInfo::HasFestival()
 // TCalenLunarInfo::HasSolarTerm
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TBool TCalenLunarInfo::HasSolarTerm()
+TBool TCalenLunarInfo::HasSolarTerm()
     {
-    OstTraceFunctionEntry0( TCALENLUNARINFO_HASSOLARTERM_ENTRY );
-    OstTraceFunctionExit0( TCALENLUNARINFO_HASSOLARTERM_EXIT );
+    TRACE_ENTRY_POINT;
+    
+    TRACE_EXIT_POINT;
     return iSolarTerm >= 0;
     }
 
@@ -54,11 +51,13 @@ EXPORT_C TBool TCalenLunarInfo::HasSolarTerm()
 
 EXPORT_C TCalenLunarInfo::TAnimalYear TCalenLunarInfo::AnimalYear()
     {
-    OstTraceFunctionEntry0( TCALENLUNARINFO_ANIMALYEAR_ENTRY );
+    TRACE_ENTRY_POINT;
+    
     ASSERT( EYearOfRat < EYearOfPig );
     ASSERT( EYearOfRat <= iTerrestialBranch );
     ASSERT( iTerrestialBranch <= EYearOfPig );
     
     // Ordering is same for animal years and terrestial branches
+    TRACE_EXIT_POINT;
     return static_cast<TCalenLunarInfo::TAnimalYear>( iTerrestialBranch );
     }

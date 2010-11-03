@@ -1,0 +1,45 @@
+/*
+* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:      Image description file for project ?myapp
+*
+*/
+
+
+
+
+
+
+#ifndef __SEARCHAPPRESOURCES_IBY__
+#define __SEARCHAPPRESOURCES_IBY__
+
+#ifdef __GENERAL_SEARCH_UI
+#ifdef RD_GENERAL_SEARCH  
+
+data=DATAZ_\ECOM_RESOURCE_DIR\srchuiindevice.rsc					ECOM_RESOURCE_DIR\srchuiindevice.rsc
+//data=DATAZ_\ECOM_RESOURCE_DIR\searchsettingspluginrsc.rsc					ECOM_RESOURCE_DIR\searchsettingspluginrsc.rsc
+//data=DATAZ_\ECOM_RESOURCE_DIR\srchuisettingsview.rsc					ECOM_RESOURCE_DIR\srchuisettingsview.rsc
+data=DATAZ_\ECOM_RESOURCE_DIR\srchaiwprovidermenu.rsc					ECOM_RESOURCE_DIR\srchaiwprovidermenu.rsc
+data=DATAZ_\APP_RESOURCE_DIR\srchuiresultview.rsc				APP_RESOURCE_DIR\srchuiresultview.rsc
+
+data=DATAZ_\APP_RESOURCE_DIR\srchui.rsc 						APP_RESOURCE_DIR\srchui.rsc
+
+
+data=DATAZ_\APP_RESOURCE_DIR\srchuiapp.rsc							APP_RESOURCE_DIR\srchuiapp.rsc
+data=DATAZ_\APP_RESOURCE_DIR\srchuiapp_loc.rsc							APP_RESOURCE_DIR\srchuiapp_loc.rsc
+
+#endif //RD_GENERAL_SEARCH
+#endif //__GENERAL_SEARCH_UI
+
+
+#endif //__SEARCHAPPRESOURCES_IBY__

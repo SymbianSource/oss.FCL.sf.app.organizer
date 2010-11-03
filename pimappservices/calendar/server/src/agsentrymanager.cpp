@@ -685,8 +685,7 @@ void CAgnEntryManager::StoreBufferL(const TStreamId& aStreamId,
 		CAgnEntry* entry = ((*aBuffer)[jj]).Entry();
 		__ASSERT_ALWAYS(entry->Type()==CCalEntry::EAppt || entry->Type()==CCalEntry::EEvent ||
 					entry->Type()==CCalEntry::EAnniv || entry->Type()==CCalEntry::ETodo || 
-					entry->Type()==CCalEntry::EReminder ||
-					entry->Type() == CCalEntry::ENote, Panic(EAgmErrBadTypeEntry));
+					entry->Type()==CCalEntry::EReminder, Panic(EAgmErrBadTypeEntry));
 
 		out.WriteUint8L(entry->Type());
 		entry->ExternalizeL(out);

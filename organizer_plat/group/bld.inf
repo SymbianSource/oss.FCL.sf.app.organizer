@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -16,6 +16,27 @@
 *
 */
 
+
+
+#include "../meeting_request_mailbox_utilities_api/group/bld.inf"
+#include "../meeting_request_uids_api/group/bld.inf"
+#include "../calendar_exporter_api/group/bld.inf"
 #include "../agenda_versit_2_api/group/bld.inf"
 #include "../calendar_importer_api/group/bld.inf"
-#include "../calendar_exporter_api/group/bld.inf"
+#include "../calendar_launcher_api/group/bld.inf"
+#include "../calendar_common_utils_api/group/bld.inf"
+#include "../searchfw_launcher_api/group/bld.inf"
+#include "../alarm_const_api/group/bld.inf"
+#include "../alarm_ui_external_control_api/group/bld.inf"
+#include "../calendar_settings_keys_api/group/bld.inf"
+#include "../calendar_tones_settings_keys_api/group/bld.inf"
+#include "../clock_settings_api/group/bld.inf"
+#include "../common_alarm_editor_api/group/bld.inf"
+#include "../alarm_ui_secondary_display_api/group/bld.inf"
+#include "../searchui_launcher_api/group/bld.inf"
+
+
+#include "../agenda_entry_ui_api/group/bld.inf"
+#include "../meeting_request_utillities_api/group/bld.inf"
+#include "../meeting_request_viewer_api/group/bld.inf"
+#include "../calendar_custamization_api/group/bld.inf"

@@ -21,7 +21,7 @@
 NAME ALRT
 
 #include <eikon.rh>
-#include <AlmAlert.loc>
+#include <almalert.loc>
 #include "AlmAlertVariant.hrh"
 
 

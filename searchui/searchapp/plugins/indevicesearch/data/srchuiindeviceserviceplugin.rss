@@ -1,0 +1,46 @@
+/*
+* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:      resource for indevicesearchplugin
+*
+*/
+
+
+
+
+
+
+#include <ecom/registryinfo.rh>
+
+RESOURCE REGISTRY_INFO theInfo
+{
+dll_uid = 0x10282408;   //srch service view Plugin dll UID3 (security UID)  
+interfaces = 
+    {
+    INTERFACE_INFO
+        {
+        interface_uid               = 0x10282407; // srch Interface for service UID   
+        implementations = 
+            {
+            IMPLEMENTATION_INFO
+                {
+                implementation_uid  = 0x10282409;
+                version_no          = 1;
+                display_name        = "Search Service Plugin";
+                default_data        = "0x00000009"; 
+                opaque_data         = "1";         // Order number 
+                }
+            };
+        }
+    };
+}

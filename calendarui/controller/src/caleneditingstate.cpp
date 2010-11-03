@@ -22,25 +22,22 @@
 #include "calencontroller.h"
 #include "calenstatemachine.h"
 #include "calennotifier.h"
-#include "OstTraceDefinitions.h"
-#ifdef OST_TRACE_COMPILER_IN_USE
-#include "caleneditingstateTraces.h"
-#endif
 
 // ----------------------------------------------------------------------------
 // CCalenEditingState::NewLC
 // First stage construction
 // ----------------------------------------------------------------------------
 CCalenEditingState* CCalenEditingState::NewLC( CCalenController& aController,
-                                                            RHashSet<TCalenNotification>& aOutstandingNotifications )
+                    RHashSet<TCalenNotification>& aOutstandingNotifications )
     {
-    OstTraceFunctionEntry0( CCALENEDITINGSTATE_NEWLC_ENTRY );
-    
-    CCalenEditingState* self = new( ELeave ) CCalenEditingState( aController, aOutstandingNotifications );
+    TRACE_ENTRY_POINT;
+
+    CCalenEditingState* self = new( ELeave ) CCalenEditingState( aController,
+                                                    aOutstandingNotifications );
     CleanupStack::PushL( self );
     self->ConstructL();
 
-    OstTraceFunctionExit0( CCALENEDITINGSTATE_NEWLC_EXIT );
+    TRACE_EXIT_POINT;
     return self;
     }
 
@@ -50,11 +47,10 @@ CCalenEditingState* CCalenEditingState::NewLC( CCalenController& aController,
 // ----------------------------------------------------------------------------
 void CCalenEditingState::ConstructL()
     {
-    OstTraceFunctionEntry0( CCALENEDITINGSTATE_CONSTRUCTL_ENTRY );
-    
+    TRACE_ENTRY_POINT;
     BaseConstructL();
     
-    OstTraceFunctionExit0( CCALENEDITINGSTATE_CONSTRUCTL_EXIT );
+    TRACE_EXIT_POINT;
     }
     
 // ----------------------------------------------------------------------------
@@ -62,12 +58,12 @@ void CCalenEditingState::ConstructL()
 // C++ Constructor
 // ----------------------------------------------------------------------------
 CCalenEditingState::CCalenEditingState( CCalenController& aController,
-                                                        RHashSet<TCalenNotification>& aOutstandingNotifications )
+            RHashSet<TCalenNotification>& aOutstandingNotifications )
     : CCalenState( aController, aOutstandingNotifications )
     {
-    OstTraceFunctionEntry0( CCALENEDITINGSTATE_CCALENEDITINGSTATE_ENTRY );
-    
-    OstTraceFunctionExit0( CCALENEDITINGSTATE_CCALENEDITINGSTATE_EXIT );
+    TRACE_ENTRY_POINT;
+
+    TRACE_EXIT_POINT;
     }
     
 // ----------------------------------------------------------------------------
@@ -76,9 +72,9 @@ CCalenEditingState::CCalenEditingState( CCalenController& aController,
 // ----------------------------------------------------------------------------    
 CCalenEditingState::~CCalenEditingState()
     {
-    OstTraceFunctionEntry0( DUP1_CCALENEDITINGSTATE_CCALENEDITINGSTATE_ENTRY );
+    TRACE_ENTRY_POINT;
     
-    OstTraceFunctionExit0( DUP1_CCALENEDITINGSTATE_CCALENEDITINGSTATE_EXIT );
+    TRACE_EXIT_POINT;
     }
 
 // ----------------------------------------------------------------------------
@@ -88,7 +84,7 @@ CCalenEditingState::~CCalenEditingState()
 TBool CCalenEditingState::HandleCommandL( const TCalenCommand& aCommand,
                               CCalenStateMachine& aStateMachine )
     {
-    OstTraceFunctionEntry0( CCALENEDITINGSTATE_HANDLECOMMANDL_ENTRY );
+    TRACE_ENTRY_POINT
     
     TInt cmd = aCommand.Command();
     MCalenCommandHandler* handler = iController.GetCommandHandlerL( cmd );
@@ -97,7 +93,7 @@ TBool CCalenEditingState::HandleCommandL( const TCalenCommand& aCommand,
      
     TBool cmdUsed = EFalse;
     switch( cmd )
-    {
+        {
     	case ECalenDeleteCurrentEntry:
     	case ECalenDeleteSeries:
     	case ECalenDeleteCurrentOccurrence:
@@ -110,7 +106,6 @@ TBool CCalenEditingState::HandleCommandL( const TCalenCommand& aCommand,
 	        cmdUsed = ETrue;
 	        break;
     		}
-    		
     	case ECalenSend: // For handling send in viewer
     		{
     		CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
@@ -121,7 +116,6 @@ TBool CCalenEditingState::HandleCommandL( const TCalenCommand& aCommand,
 	        cmdUsed = ETrue;
 	        break;	
     		}
-    		
     	case ECalenFasterAppExit:
     		{
 	        SetCurrentState( aStateMachine, CCalenStateMachine::ECalenIdleState );
@@ -129,22 +123,51 @@ TBool CCalenEditingState::HandleCommandL( const TCalenCommand& aCommand,
 	        cmdUsed = ETrue;
 	        break;
         	}
-        	
     	case ECalenGetLocation:
     	case ECalenShowLocation:
-    		{       	
-    		}	
-	
+    		{
+    		CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
+	        SetCurrentState( aStateMachine, CCalenStateMachine::ECalenMapState );
+	        SetCurrentPreviousState( aStateMachine, cachedState );
+	        ActivateCurrentStateL(aStateMachine);        
+	        cmdUsed = ETrue;
+	        break;	
+    		}
+    	case ECalenAddAttachment:
+    	case ECalenRemoveAttachment:
+    	case ECalenViewAttachmentList:
+    	case ECalenAddAttachmentFromViewer:
+            {
+            CCalenStateMachine::TCalenStateIndex cachedState = GetCurrentState(aStateMachine);
+            SetCurrentState( aStateMachine, CCalenStateMachine::ECalenAttachmentState );
+            SetCurrentPreviousState( aStateMachine, cachedState );
+            ActivateCurrentStateL(aStateMachine);        
+            cmdUsed = ETrue;
+            }
+            break;
+    	case ECalenMissedEventViewFromIdle:
+    	    {
+    	    cmdUsed = ETrue;
+    	    break;
+    	    }
+    	case ECalenEventViewFromAlarm:
+    	case ECalenEventViewFromAlarmStopOnly:
+    	    {
+    	    cmdUsed = ETrue;
+    	    break;
+    	    }   
     	default:
     		break;
     		
-    }
+        }
     
 	if(cmdUsed)
-		RequestCallbackL( handler, aCommand );
+	    {
+	    RequestCallbackL( handler, aCommand );
+	    }
 	
+    TRACE_EXIT_POINT;
     
-    OstTraceFunctionExit0( CCALENEDITINGSTATE_HANDLECOMMANDL_EXIT );
     return cmdUsed;
     }
 
@@ -155,7 +178,7 @@ TBool CCalenEditingState::HandleCommandL( const TCalenCommand& aCommand,
 void CCalenEditingState::HandleNotificationL(const TCalenNotification& aNotification,
                                               CCalenStateMachine& aStateMachine )
     {
-    OstTraceFunctionEntry0( CCALENEDITINGSTATE_HANDLENOTIFICATIONL_ENTRY );
+    TRACE_ENTRY_POINT;
     
     switch( aNotification )
         {
@@ -164,7 +187,7 @@ void CCalenEditingState::HandleNotificationL(const TCalenNotification& aNotifica
         case ECalenNotifyInstanceSaved:
         case ECalenNotifyDialogClosed:
         case ECalenNotifyEntryDeleted:
-        case ECalenNotifyEditorClosedFromViewer:
+        case ECalenNotifyMarkedEntryCompleted:
             {
             SetCurrentState( aStateMachine, iPreviousState );
             // Let new state does the broadcast
@@ -172,12 +195,23 @@ void CCalenEditingState::HandleNotificationL(const TCalenNotification& aNotifica
 			ActivateCurrentStateL(aStateMachine);
             }
             break;
+        case ECalenNotifyCancelStatusUpdation:
+              {
+              SetCurrentState( aStateMachine, iPreviousState);
+              SetCurrentPreviousState( aStateMachine, GetCurrentState(aStateMachine) );
+
+              iOutstandingNotifications.InsertL(aNotification);
+              ActivateCurrentStateL(aStateMachine);
+              
+              CancelPreviousCmd(aStateMachine);
+              }
+            break;
         default:
-        	iOutstandingNotifications.InsertL(aNotification);
-			break;
+           CCalenState::HandleNotificationL( aNotification, aStateMachine );
+            break;
         }
-    	
-    OstTraceFunctionExit0( CCALENEDITINGSTATE_HANDLENOTIFICATIONL_EXIT );
+        
+    TRACE_EXIT_POINT;
     }
 
 // end of file

@@ -20,8 +20,8 @@
 #ifndef CALENDAR_HRH
 #define CALENDAR_HRH
 
-//#include <avkon.hrh>
-//#include "CalendarVariant.hrh"
+#include <avkon.hrh>
+#include "CalendarVariant.hrh"
 
 
 
@@ -44,6 +44,9 @@ enum TCalenMenuPaneCommands
     ECalenMarkAll,
     ECalenUnmarkAll,
 
+    ECalenCmdComplete,
+    ECalenMarkDone,
+    ECalenMarkUnDone,
 
     ECalenCmdChangeView,
 
@@ -51,11 +54,15 @@ enum TCalenMenuPaneCommands
     /* Settings view */
     //ECalenCmdSetting,
     ECalenCmdChange,
+		
+	/* Event view From alarm commands */
+    ECalenStopAlarm,
+    ECalenSnoozeAlarm,
 
     /* Misc commands */
-//#ifdef RD_CALEN_ENHANCED_MSK 
-	//ECalenCmdOpenMskDialog,
-//#endif //RD_CALEN_ENHANCED_MSK
+#ifdef RD_CALEN_ENHANCED_MSK 
+	ECalenCmdOpenMskDialog,
+#endif //RD_CALEN_ENHANCED_MSK
 
     /* Meeting request commands*/
     ECalenCmdSendResponse,
@@ -69,6 +76,11 @@ enum TCalenMenuPaneCommands
     ECalenRegionalVariantCmdFirst = 100160 
     };
 
+enum TCalenDayViewCommands
+    {
+    ECalenCopyToCalendars = 100161
+    };
+
 // Do not use this directly but through ItemToArrayIndex,
 // because regional variator can add their own setting items between
 // these setting items
@@ -79,11 +91,13 @@ enum TSettingListItemId
     ECalenSnoozeTimeItemId,
     ECalenDefaultViewItemId,
     ECalenWeekFormatItemId,
+    ECalenWeekNumberItemId,
     ECalenWeekTitleItemId,
     ECalenExtCalendarItemId,
     ECalenDefaultMailboxId,
     ECalenToolbarItemId,
     ECalenPluginListItemId,
+    ECalenInfoBarPluginsItemId,
     ECalenRegionalVariantSettingListItemIdFirst = 6020
     };
 
@@ -148,8 +162,62 @@ enum // TTodoPriority
     ETodoPriorityNormal,
     ETodoPriorityLow
     };
-    
+enum //
+    {
+    ECalenCmdEdit = 1,
+    ECalenCmdAdd,
+    ECalenCmdDelete,
+    ECalenCmdItemSelect,
+    ECalenCmdItemDeselect,
+    ECalenCmdShow,
+    ECalenCmdHide
+    };
 
+enum
+    {
+    ECalenMultiDbName = 5000,
+    ECalenMultiDbColor,
+    ECalenMultiDbPublicPrivate,
+    ECalenMultiDbHiddenVisible,
+    ECalenMultiDbSyncStatus
+    };
+
+ enum
+    {
+    ECalenMultiDbHelp = 1,
+    ECalenMultiDbExit
+    };
+ 
+ enum TCalenAttachmentCommands
+     {
+     ECalenAddImage,
+     ECalenAddNote,
+     ECalenAddAudio,
+     ECalenAddVideo,
+     ECalenAddOtherFiles,
+     ECalenViewAttachmentCmdOpen,
+     ECalenViewAttachmentCmdSave,
+     ECalenViewAttachmentCmdRemove,
+     ECalenViewAttachmentAdd,
+     ECalenViewAttachmentCmdFetch,
+     ECalenViewerCmdAttachmentCmdExit
+     };
+ 
+ // dialog control ids.
+ enum TCalenAttachmentDlgCtrlIds
+     {
+     ECalenAttachmentListBoxId = 1,
+     ECalenCannotOpenNoteId,
+     ECalenSavedNoteId,
+     ECalenWaitNoteId
+     };
+ 
+ // custom control types.
+ enum TCalenAttachmentDlgCustomControls
+     {
+     ECalenAttachmentListBox = 0x2001
+     };
+ 
 #define CALEN_VIEW_CYCLING_NEXT '#'
 #define CALEN_VIEW_CYCLING_PREV '*'
 
@@ -165,7 +233,29 @@ enum // TTodoPriority
 #define cell_cale_tentative_mr      114 // light blue, RGB (102, 204, 255)
 #define cell_cale_cancelled_mr       35 // red, RGB (255, 0, 0)
 
+ enum
+     {
+     /// Enable Ok button for calender selection dialog
+     ECalenSelectCmdOk = 3000
+     };
 
+//Colors of color grid in Muliple calendars view
+#define KCalenDarkBlue      TRgb(0x792B00)
+#define KCalenBlue          TRgb(0xC0580F)
+#define KCalenCyan          TRgb(0xB0A157)
+#define KCalenlightBlue     TRgb(0xF5D8B3)
+#define KCalenDarkGreen     TRgb(0x1C4C02)
+#define KCalenGreen         TRgb(0x359C50)
+#define KCalenlightGreen    TRgb(0x53D292)
+#define KCalenGold          TRgb(0x5BDDDC)
+#define KCalenDarkRed       TRgb(0x0A12B8)
+#define KCalenOrange        TRgb(0x009DFF)
+#define KCalenYellow        TRgb(0x05E8FF)
+#define KCalenDarkOrange    TRgb(0x2D63D4)
+#define KCalenMegenta       TRgb(0xA4006D)
+#define KCalenlightMagenta  TRgb(0xE68DA7)
+#define KCalenlightPink     TRgb(0xCFACFF)
+#define KCalenPink          TRgb(0x8217E0)
 #endif // end of CALENDAR_HRH
 
 

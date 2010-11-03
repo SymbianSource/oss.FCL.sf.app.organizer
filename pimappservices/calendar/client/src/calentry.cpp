@@ -28,7 +28,7 @@ The entry takes ownership of the Uid descriptor.
 Note that this function will not work unless a CCalSession has been created
 by calling CCalSession::NewL().
 
-@param aType One of: EAppt, ETodo, EEvent, EReminder, EAnniv, ENote to create
+@param aType One of: EAppt, ETodo, EEvent, EReminder, EAnniv to create
 an appointment, a todo, an event, a reminder or an anniversary entry.
 @param aUid The Global UID of the entry. This field is mandatory. NewL takes ownership of the global UID.
 @param aMethod The Method value describing the entry. Default value is EGSMethodNone.
@@ -52,7 +52,7 @@ sequence number and recurrence ID.
 
 The entry takes ownership of the Uid descriptor.
 
-@param aType One of: EAppt, ETodo, EEvent, EReminder, EAnniv, ENote to create
+@param aType One of: EAppt, ETodo, EEvent, EReminder, EAnniv to create
 an appointment, a todo, an event, a reminder or an anniversary entry.
 @param aUid The Global UID of the entry. This field is mandatory. NewL takes ownership of the global UID.
 @param aMethod The Method value describing the entry.
@@ -513,7 +513,7 @@ EXPORT_C const TDesC& CCalEntry::DescriptionL() const
 
 /** Gets the type of entry.
 
-@return The entry type. One of: EAppt, ETodo, EEvent, EReminder, EAnniv, ENote.
+@return The entry type. One of: EAppt, ETodo, EEvent, EReminder, EAnniv.
 
 @publishedAll
 @released
@@ -895,6 +895,19 @@ EXPORT_C void CCalEntry::SetPhoneOwnerL(const CCalUser* aOwner)
 	iImpl->SetPhoneOwnerL(aOwner);
 	}
 
+/** Clears the Organizer and phone owner.
+@pre None.
+@post The entry's organizer and phone owner is cleared.
+@publishedPartner
+@released
+@capability None
+*/
+EXPORT_C void CCalEntry::ClearMRSpecificDataL()
+    {
+    iImpl->ClearMRSpecificDataL();
+    }
+
+
 /** Gets the organizer for this entry.
 This function creates a new CCalUser object containing the organizer data.
 
@@ -1143,32 +1156,29 @@ TUint8 CCalEntry::ShortFileIdL()
 	return iImpl->ShortFileIdL();
 	}
 
-/** Set the entry as favourite
-   
-@param aFavourite value for favourite
-	positive integer for setting entry as favourite
-	zero for unmarking as favourite
-	
-@pre None
-@post None
-@capability None
- */
-EXPORT_C void CCalEntry::SetFavouriteL(TUint32 aFavourite)
-	{
-	iImpl->SetUserIntL(aFavourite);
-	}
+/** Sets the user data field.
 
-/** Get favourite property from the entry
-
-@return TUint32 return value for favourite
-	positive integer if entry is favourite
-	zero if entry is not favourite 
+@param aUserInt The userdata to be set
 @capability None
- */
-EXPORT_C TUint32 CCalEntry::FavouriteL()
-	{
-	return iImpl->UserIntL();
-	}
+@publishedAll
+@released
+*/
+EXPORT_C void CCalEntry::SetUserInt32L( TUint32 aUserInt )    
+    {       
+    iImpl->SetUserInt32L( aUserInt );       
+    }       
+
+/** Fetches the userdata field
+
+@publishedAll
+@released
+@capability None
+@return The Userdata field.
+*/
+EXPORT_C TUint32 CCalEntry::UserInt32L()       
+    {       
+    return iImpl->UserInt32L();       
+    }       
 
 // CCalEntryId //
 

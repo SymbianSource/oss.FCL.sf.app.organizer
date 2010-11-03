@@ -35,6 +35,20 @@ class TCalRRule;
 class CCalInstance;
 class CCalenEComWatcher;    // Watches for installed MR solutions
 
+
+/**
+* This structure contains UUID info
+*/
+typedef struct
+    {
+    TUint32 time_low; 
+    TUint16 time_mid;
+    TUint16 time_high_and_version;    
+    TUint8 clock_seq_hi_and_reserved;
+    TUint8 clock_seq_low;   
+    TUint8 node[6];
+    } SUuid;
+
 // CLASS DECLARATION
 
 /**
@@ -248,6 +262,9 @@ NONSHARABLE_CLASS(CCalenInterimUtils2Impl) : public CBase,
         
         // Just a wrapper for leaves
         void DoMRViewersEnabledL();
+        
+        // get system time
+        void GetSystemTime(TInt64& aTimeStamp);       
 	
 private: 
     //Default Constructor
@@ -268,6 +285,11 @@ private: // Member data
     TInt64 iImeiNode;
     TBool iMrEnabled;
     TBool iMrEnabledCheck;
+    
+    TUint64 iTimeLast;    
+    TUint16 iThisTick;
+    TBool iInited ; 
+    
     };
 
 #endif // __CALENINTERIMUTILS2IMPL_H__

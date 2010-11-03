@@ -1,0 +1,42 @@
+/*
+* Copyright (c) 2007-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource headers for project calendarui. Exported and hence
+*                common data for calendar components.
+*
+*/
+
+
+
+#ifndef BCALENCOMMON_HRH
+#define BCALENCOMMON_HRH
+
+/** Priorities for meeting request entries. */
+enum TBCalenMRPriority
+    {
+    EBCalenMRPriorityUnknown = 0,      // Unknown priority
+    EBCalenMRPriorityHigh = 1,         // High priority
+    EBCalenMRPriorityNormal = 5,       // Normal priority
+    EBCalenMRPriorityLow = 9           // Low priority
+    };
+
+/** Priorities for todo items */
+enum TBCalenTodoPriority
+    {
+    EBCalenTodoPriorityHigh = 1,
+    EBCalenTodoPriorityNormal,
+    EBCalenTodoPriorityLow
+    };
+
+
+#endif // BCALENCOMMON_HRH

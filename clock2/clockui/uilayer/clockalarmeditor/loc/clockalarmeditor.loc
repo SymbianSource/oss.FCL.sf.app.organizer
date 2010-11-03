@@ -1,0 +1,136 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   The localization file for the alarm editor.
+*
+*/
+
+/*
+* Syntax of a logical name entry in this file is the following:
+*
+* // d:context description (line 1)
+* // d:context description (line N)
+* // l:P_No
+* //
+* #define qtn_?feature/?module_name_?freetext "?text"
+* #define text_?feature/?module_name_?freetext "?text"
+*
+*   where
+*         "qtn_" or "text_" starts a logical name, which does not
+*          contain dots.
+*         "d:" starts description line(s), which
+*              clarify entry's context with information like:
+*              1. Is a word a verb in imperative or is it a noun ?
+*                   - what does text "Set" mean ?
+*              2. What will replace %U (unicode text parameter) or
+*                 %N (number parameter) included in texts ?
+*                   - is it phone number or email address ?
+*         "l:" starts a layout information (one line).r_wsui_city_selection_menubar
+*              "P" and "No" are symbols in LAF's information table
+*                 - "P" is parent pane or current pane
+*                 - "No" is reference number in table
+*
+*/
+
+//d: Alarm Editor default alarm description.
+//l: list_form_graphic_pane_t1/opt1
+//w:
+//r: 3.1
+//
+#define qtn_clk_alarm_description_default		"Alarm"
+
+//d: Popup field, pre-defined data only
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 5.1
+//
+#define qtn_clk_alarm_label_occur				"Occurrance"
+
+//d: Popup field, pre-defined data only
+//l: form_field_data_wide_pane_t1
+//w:
+//r: 5.1
+//
+#define qtn_clk_alarm_label_day					"Alarm Day"
+
+//d: Alarm view title  
+//l: title_pane_t2/opt9
+//w:
+//r: 3.1
+//
+#define qtn_clk_title_create_alarm				"Alarm"
+
+//d: Popup field choice (Alarm editor form)
+//l: list_set_graphic_pane_t1
+//w:
+//r: 3.1
+//
+#define qtn_clk_alarm_occ_once					"Once only"
+
+//d: Popup field choice (Alarm editor form)
+//l: list_set_graphic_pane_t1
+//w:
+//r: 3.1
+//
+#define qtn_clk_alarm_24h						"Next 24 hours"
+
+//d: DUPLICATE of: text_calendar_every_day/Calendar.loc
+//l: list_set_graphic_pane_t1
+//w:
+//r: 3.1
+//
+#define text_calendar_every_day					"Daily"
+
+//d: Popup field choice (Alarm editor form)
+//l: list_set_graphic_pane_t1
+//w:
+//r: 3.1
+//
+#define qtn_clk_alarm_occ_workd					"Workdays"
+
+//d: DUPLICATE of: text_calendar_every_week/Calendar.loc
+//l: list_set_graphic_pane_t1
+//w:
+//r: 3.1
+//
+#define text_calendar_every_week				"Weekly"
+
+//d: Header of the pop-up page for alarm ocurance
+//l: list_setting_pane_t1
+//w:
+//r: 3.1
+//
+#define qtn_clk_alarm_occur						"Occurrance"
+
+//d: Header of the pop-up page for alarm day
+//l: list_setting_pane_t1
+//w:
+//r: 3.1
+//
+#define qtn_clk_alarm_edit_day					"Alarm Day"
+
+//d: Command in options menu in alarm editor.
+//l: list_single_pane_t1_cp2
+//w:
+//r: 5.1
+//
+#define qtn_alarm_editor_options_delete			"Delete"
+
+//d: Command in options menu in alarm editor.
+//l: list_single_pane_t1_cp2
+//w:
+//r: 5.1
+//
+#define qtn_alarm_editor_options_discard_chg	"Discard changes"
+
+// End of file

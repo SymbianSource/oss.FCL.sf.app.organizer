@@ -1,0 +1,285 @@
+/*
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for gui.
+*
+*/
+
+
+// Includes
+#include <eikon.rh>
+#include <avkon.rh>
+#include <avkon.rsg>
+#include <avkon.hrh>
+#include <avkon.mbg>
+#include <calendar.rsg>
+#include <calencommands.hrh>
+#include <calendar_business.loc>
+#include <calendar.loc>
+#include <avkon.loc>
+#include "calendar.hrh"
+
+
+
+NAME    TVPL
+
+RESOURCE RSS_SIGNATURE { }
+
+// ---------------------------------------------------------------------------
+// R_VIEWPLUGIN_DAY_VIEW
+// Avkon view for day view plugin.
+// ---------------------------------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_viewplugin_day_view
+    {
+    menubar = r_viewplugin_dayview_menubar;    
+    cba = r_calen_normal_cba_back_rsk;
+    }
+
+// ---------------------------------------------------------------------------
+// R_VIEWPLUGIN_DAYVIEW_MENUBAR
+// Menubar for day view plugin.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_BAR r_viewplugin_dayview_menubar
+    {
+    titles=
+        {
+        MENU_TITLE 
+            {
+            menu_pane= r_viewplugin_dayview_menu;
+            }
+        };
+    }
+// ---------------------------------------------------------------------------
+// R_CALEN_NORMAL_CBA_BACK_RSK
+// Define CBA for month, week and day view.
+// ---------------------------------------------------------------------------
+//
+RESOURCE CBA r_calen_normal_cba_back_rsk
+    {
+    buttons =
+        {
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyOptions;
+            txt=text_softkey_option;
+            },
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyBack;
+            txt=text_softkey_back;
+            },
+        CBA_BUTTON
+            {
+            id=EAknSoftkeyOpen;
+            txt=qtn_msk_open;
+            }
+       };
+    }
+
+// ---------------------------------------------------------------------------
+// R_VIEWPLUGIN_DAYVIEW_MENU
+// Menupane for dayview, includes the menu item.
+// ---------------------------------------------------------------------------
+//
+RESOURCE MENU_PANE r_viewplugin_dayview_menu
+    {
+    items =
+            {
+            MENU_ITEM
+                {
+                command = ECalenViewCurrentEntry;
+                txt = qtn_cale_opt_open;
+                flags = EEikMenuItemAction;
+                },     
+            MENU_ITEM
+                {
+                command = ECalenCmdSelect;
+                txt = qtn_calendar_opt_select;
+                flags = EEikMenuItemAction;
+                },
+            MENU_ITEM
+                {
+                command = ECalenNewMeeting;
+                txt = qtn_cale_opt_make_note;
+                },
+            MENU_ITEM
+                {
+                command = ECalenCompleteTodo;
+                txt = qtn_todo_cmd_task_completed;
+                flags = EEikMenuItemSpecific;
+                },
+            MENU_ITEM
+                {
+                command = ECalenMissedAlarmsView;
+                txt = qtn_cale_opt_mav;
+                },
+            MENU_ITEM
+                {
+                command = ECalenSwitchView;
+                txt = qtn_cale_opt_change_view;
+                },
+            MENU_ITEM
+                {
+                command = ECalenShowLocation;
+                txt = qtn_cale_om_show_on_map;
+                flags = EEikMenuItemSpecific;
+                },
+            MENU_ITEM
+                {
+                command = ECalenGetLocationAndReplace;
+                txt = qtn_cale_om_find_on_map;
+                flags = EEikMenuItemSpecific;
+                },
+            MENU_ITEM
+                {
+                command = ECalenDeleteCurrentEntry;
+                txt = qtn_cale_om_delete;
+                flags = EEikMenuItemSpecific;
+                },
+            MENU_ITEM
+                {
+                command = ECalenGotoDate;
+                txt = text_calendar_goto_date;
+                },
+            MENU_ITEM
+                {
+                command = ECalenSend;
+                txt = qtn_options_send_via;
+                flags = EEikMenuItemSpecific;
+                },
+            MENU_ITEM
+                {
+                command = ECalenShowSettings;
+                txt = text_calendar_settings;
+                },
+            MENU_ITEM
+                {
+                command = ECalenShowCalendars;
+                txt = qtn_cale_opt_calendars;
+                },
+            MENU_ITEM
+                {
+                command = EAknCmdHelp;
+                txt = qtn_options_help;
+                },
+            MENU_ITEM
+                {
+                command = EAknSoftkeyExit;
+                txt = qtn_options_exit;
+                }
+            };
+    }
+
+// ---------------------------------------------------------------------------
+// R_VIEWPLUGIN__DAYVIEW_TIMEFORMAT24_1
+// A time format on the left side of DayView.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_viewplugin__dayview_timeformat24_1
+    {
+    buf = "%*J%:1%T";
+    }
+   
+// ---------------------------------------------------------------------------
+// R_VIEWPLUGIN_DAYVIEW_TIMEFORMAT
+// A time format on the left side of DayView.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_viewplugin_dayview_timeformat
+    {
+    buf = "%I%*A";
+    }
+
+// ---------------------------------------------------------------------------
+// R_QTN_CALENDAR_UNCOMPLETED_TASKS
+// TTodo text in day view if several todos.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_calendar_uncompleted_tasks
+    {
+    buf = qtn_calendar_tasks_today;
+    }
+
+// ---------------------------------------------------------------------------
+// R_QTN_CALENDAR_ALL_DAY_EXPANDED
+// All day event indication for preview popup.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_calendar_all_day_expanded
+    {
+    buf = qtn_calendar_all_day_expanded;
+    }
+
+// ---------------------------------------------------------------------------
+// R_QTN_CALENDAR_DAY_EVENT_UNNAMED
+// Text that is shown in preview popup if the meeting does not have a name.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_calendar_day_event_unnamed
+    {
+    buf = qtn_calendar_day_event_unnamed;
+    }
+
+// ---------------------------------------------------------------------------
+// R_QTN_CALENDAR_LOCATION_PARENTHESIS
+// Format for showing location information preview pane of day and week view.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_calendar_location_parenthesis
+    {
+    buf = qtn_calendar_location_parenthesis;
+    }
+
+// ---------------------------------------------------------------------------
+// R_QTN_CALENDAR_LOCATION_PARENTHESIS
+// Format for showing location information preview pane of day and week view.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_calendar_time_separator
+    {
+    buf = "%0U - %1U";
+    }
+
+// ---------------------------------------------------------------------------
+// R_QTN_CALENDAR_LOCATION_PARENTHESIS
+// Format for showing location information preview pane of day and week view.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_calendar_day_unnamed
+    {
+    buf = qtn_calendar_day_unnamed;
+    }    
+
+// ---------------------------------------------------------------------------
+// R_QTN_BC_CALENDAR_CANCEL
+// Action menu item for cancel item.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_bc_calendar_cancel
+    {
+    buf = qtn_bc_calendar_cancel;
+    }
+
+// ---------------------------------------------------------------------------
+// R_QTN_BC_CALENDAR_DAY_NEW_ENTRY
+// New entry text for visual selection.
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF r_qtn_bc_calendar_day_new_entry
+    {
+    buf = qtn_calendar_day_new_entry;
+    }
+
+//End of file

@@ -359,8 +359,6 @@ _LIT8(KVersitTokenChildren,					"X-CHILDREN");
 _LIT8(KVersitTokenClass,					"X-CLASS");
 _LIT8(KVersitAttachLabel, 					"X-NAME");
 _LIT8(KVersitAttachMimeType, 				"X-FMTTYPE");
-
-// favourite property
-_LIT8(KVCalTokenXFavourite,					"X-FAVOURITE");
+_LIT8(KVersitExtUserInt,                    "X-USERDATA-INT");  
 
 #endif

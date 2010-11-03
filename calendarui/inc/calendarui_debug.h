@@ -11,9 +11,10 @@
 *
 * Contributors:
 *
-* Description:
+* Description: Calendar debug file.
 *
 */
+
 /**
 *
 **/
@@ -25,17 +26,75 @@
 #ifndef PIM_TRACE_H
 #define PIM_TRACE_H
 
-#if defined (_DEBUG) || defined (_PIM_FILE_LOG) 
+#if defined (_DEBUG) || defined (_PIM_FILE_LOG) || defined (_DISPLAY_WARNINGS) 
     //Includes
     #include <e32base.h>
     #include <e32std.h>
     #include <flogger.h>
     #include <e32svr.h>
     #include <f32file.h>
-	
+    #include <AknGlobalConfirmationQuery.h>
     const TInt KMaxLogLineLength = 512;
 #endif
-#if defined( _DEBUG ) 
+
+/**
+* Define our own trap and assert macros to prevent compiler warnings.
+*/
+#if defined (_DISPLAY_WARNINGS)
+    _LIT( KWarningFormat, " error %d trapped %S line %d");
+    inline void DisplayWarningNote( TInt aError, const TDesC8& aFile, TInt aWarningNote )
+        {
+        if ( aError )
+            {
+            TRAP_IGNORE(
+            CAknGlobalConfirmationQuery* cq = CAknGlobalConfirmationQuery::NewL();
+            CleanupStack::PushL( cq );
+            
+            TBuf<KMaxLogLineLength> text;
+            TBuf<128> fileName;
+            fileName.Copy( aFile );
+            text.Format( KWarningFormat, aError, &fileName, aWarningNote );
+            
+            TRequestStatus stat = KRequestPending;
+            cq->ShowConfirmationQueryL( stat, text, R_AVKON_SOFTKEYS_YES_NO );
+            User::WaitForRequest( stat );
+            
+            CleanupStack::PopAndDestroy( cq );
+            );
+            }       
+        }
+
+    inline void DisplayWarningNote( const TDesC& aNote )
+        {
+        TRAP_IGNORE(
+            CAknGlobalConfirmationQuery* cq = CAknGlobalConfirmationQuery::NewL();
+            CleanupStack::PushL( cq );
+           
+            
+            TRequestStatus stat = KRequestPending;
+            cq->ShowConfirmationQueryL( stat, aNote, R_AVKON_SOFTKEYS_YES_NO );
+            User::WaitForRequest( stat );
+            
+            CleanupStack::PopAndDestroy( cq );
+            );
+        }
+        
+    #undef TRAP_INSTRUMENTATION_LEAVE
+    #define TRAP_INSTRUMENTATION_LEAVE(aResult) DisplayWarningNote( aResult,TPtrC8( ( TText8* )__FILE__), __LINE__);
+
+    #define PIM_TRAP_HANDLE( _err, _s ) \
+    { \
+        TRAP( _err, _s; ); \
+        DisplayWarningNote( _err,TPtrC8( ( TText8* )__FILE__),__LINE__ ); \
+    }
+    #define PIM_TRAPD_HANDLE( _s ) \
+    { \
+        TRAPD( _err, _s; ); \
+        DisplayWarningNote( _err, TPtrC8( ( TText8* )__FILE__), __LINE__ ); \
+    }
+    #define WARNING_NOTE( _s ) DisplayWarningNote( _s );
+    
+#elif defined( _DEBUG ) 
     #define PIM_TRAP_HANDLE( _err, _s ) \
     { \
         TRAP( _err, _s; ); \
@@ -47,11 +106,18 @@
         ASSERT( !_err ); \
     }
     #define WARNING_NOTE( _s )
+    #define PIM_ASSERT( _s ) \
+    { \
+        const TInt _err = _s; \
+        if( _err ) RDebug::Print( _L("### PIM_ASSERT: %d"), _err ); \
+        ASSERT( !_err ); \
+    }
 #else 
 // urel
     #define PIM_TRAP_HANDLE( _err, _s )   TRAP_IGNORE( _s; );
     #define PIM_TRAPD_HANDLE( _s )  TRAP_IGNORE( _s; );
     #define WARNING_NOTE( _s )
+    #define PIM_ASSERT( _s )  _s;
 #endif // _DEBUG
 
 #if defined (_DEBUG) || defined (_PIM_FILE_LOG) 
@@ -117,10 +183,10 @@
         TRefByValue<const TDesC> tmpFmt( _L("%S") );
  #if defined (_PIM_FILE_LOG)  
         _LIT( KLogDir, "CalenUi");
-        _LIT( KLogDir2, "c:\\CalenUi");
+        _LIT( KLogDir2, "c://CalenUi");
         _LIT( KLogFile, "log.txt");
-        _LIT( KDir, "c:\\logs\\CalenUi" );
-        _LIT( KDir2, "c:\\logs\\CalenUi" );
+        _LIT( KDir, "c://logs//CalenUi" );
+        _LIT( KDir2, "c://logs//CalenUi" );
         
         RFs fs;
         fs.Connect();

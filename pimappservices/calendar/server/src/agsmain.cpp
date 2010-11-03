@@ -264,7 +264,7 @@ void CAgnServer::ConstructL()
 	User::LeaveIfError(iAlarmServer.Connect());
 	iFileMgr = CAgnServFileMgr::NewL(iFs, *this);
 	iFileMgr->CreatePermanentDataL();
-	iBackupRestoreAgent = CAgnServBackupRestoreAgent::NewL(*iFileMgr);
+	iBackupRestoreAgent = CAgnServBackupRestoreAgent::NewL(*iFileMgr,iBackupRestoreInProgress);
 	iBackupRestoreAgent->Start();
 	iAlarmServerChangeListener = CAgnAlarmServerChangeListener::NewL(iAlarmServer, *iFileMgr);
 
@@ -384,3 +384,10 @@ const CCAgnSystemStateObserver& CAgnServer::SystemStateObserver() const
     return *iSystemStateObserver;
     }
 #endif
+
+TBool CAgnServer::BackupRestoreInProgress()
+    {
+    return iBackupRestoreInProgress;
+    }
+	
+

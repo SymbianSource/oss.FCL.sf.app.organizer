@@ -405,11 +405,6 @@ void CAgendaEntryToVCalConverter::AddEntryPropertiesL(CCalEntry* aEntry, CVersit
 			AddDesPropertyL(aParser, KVCalToken8ENTRYTYPE, KVCalTokenTypeTODO);
 			break;
 			}
-		case CCalEntry::ENote:
-			{
-			AddDesPropertyL(aParser,KVCalToken8ENTRYTYPE, KVCalTokenTypeNOTE);
-			break;
-			}
 		default: break;
 		}
 
@@ -437,10 +432,9 @@ void CAgendaEntryToVCalConverter::AddEntryPropertiesL(CCalEntry* aEntry, CVersit
 
 	// DTSTAMP
 	TCalTime dTStamp = aEntry->DTStampL();
-
-	if ( dTStamp.TimeUtcL() != Time::NullTTime() &&
-		CCalEntry::ENote != aEntry->EntryTypeL() )
-		{
+		
+   	if ( dTStamp.TimeUtcL() != Time::NullTTime() )
+      	{	
 		AddDateTimePropertyL(aParser, KVersitTokenXDTSTAMP, dTStamp.TimeUtcL(), TVersitDateTime::EIsUTC, iTimeFlag);
       	}
 	
@@ -671,16 +665,9 @@ void CAgendaEntryToVCalConverter::AddEntryPropertiesL(CCalEntry* aEntry, CVersit
 		CCalAttachment* attach = aEntry->AttachmentL(ii);
 		AddAttachmentPropertyL(aParser, *attach);
 		}
-		
-	// Add the X-FAVOURITE property. Versit only exports signed ints but
-	// can't handle the '-' sign when importing. Therefore it must be exported
-	// as a string to ensure there is no '-' sign. When importing the value
-	// would incorrectly become 0.
-	//AddIntegerPropertyL( aParser, KVCalTokenXFavourite, aEntry->FavouriteL());
-	TBuf<10> favouriteString;  
-	TUint32 favourite = aEntry->FavouriteL();
-	favouriteString.Num( favourite );
-	AddDesPropertyL( aParser, KVCalTokenXFavourite, favouriteString );
+	
+    TInt userDataInt = aEntry->UserInt32L();       
+    AddIntegerPropertyL( aParser, KVersitExtUserInt, userDataInt );       
 	}
 
 

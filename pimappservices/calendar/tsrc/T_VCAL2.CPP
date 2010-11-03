@@ -388,6 +388,27 @@ _LIT8(KAlarmVCal,     "BEGIN:VCALENDAR\r\n"
                         "END:VTODO\r\n"
                         "END:VCALENDAR\r\n");
 
+_LIT8(KUserDataEntry,"BEGIN:VCALENDAR\r\n"     
+                     "VERSION:1.0\r\n"       
+                     "BEGIN:VEVENT\r\n"       
+                     "UID:ZB0tN9634EH8l818X2GVU2\r\n"       
+                     "SUMMARY:importing\r\n"       
+                     "DTSTART:20090720T070000Z\r\n"       
+                     "DTEND:20090720T070000Z\r\n"       
+                     "X-EPOCAGENDAENTRYTYPE:APPOINTMENT\r\n"       
+                     "CLASS:PRIVATE\r\n"       
+                     "SEQUENCE:0\r\n"       
+                     "X-METHOD:NONE\r\n"       
+                     "LAST-MODIFIED:20090720T154714Z\r\n"       
+                     "PRIORITY:2\r\n"       
+                     "X-SYMBIAN-LUID:5\r\n"       
+                     "TRANSP:0\r\n"       
+                     "X-USERDATA-INT:125\r\n"       
+                     "X-STRING:london\r\n"       
+                     "X-TEXTPROPERTY:class property\r\n"       
+                     "X-INTPROPERTY:521\r\n"       
+                     "END:VEVENT\r\n"       
+                     "END:VCALENDAR\r\n");          
 class CTestApp : public CBase , public MCalTestOomCallBack
 	{
 public:
@@ -686,6 +707,8 @@ static void DoMainL()
 	test.Printf(_L("Import a vcal with alarm information\n"));
 	testApp->DoImportL(KAlarmVCal);
 	
+	test.Printf(_L("Import with  userdata attribute \n"));       
+	testApp->DoImportL( KUserDataEntry ); 
 	CleanupStack::PopAndDestroy(testApp);
 	}
 

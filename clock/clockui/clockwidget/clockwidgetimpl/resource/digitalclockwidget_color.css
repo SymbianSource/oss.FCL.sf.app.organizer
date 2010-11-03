@@ -1,9 +1,0 @@
-
-
-DigitalClockWidget::clockLabel{
-    color: var(qtc_view_normal);
-}
-
-DigitalClockWidget::amPmLabel{
-    color: var(qtc_view_normal);
-}

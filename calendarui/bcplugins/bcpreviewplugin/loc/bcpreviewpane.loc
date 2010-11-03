@@ -1,0 +1,68 @@
+/*
+* Copyright (c) 2002-2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   This is a localisation file for BC preview pane
+*                A loc file is the one and only place where the logical
+*                strings to be localised are defined
+*
+*/
+
+
+// d: To-do text in preview pane if several todos
+// d: %N is the number of todos
+// l: list_double_graphic_pane_t1
+// r: TB9.2
+//
+#define qtn_calendar_multiple_todos  "%N pending to-dos" 
+
+
+// d: If meeting does not have a name specified this text is displayed
+// d: in the preview pane
+// l: list_double_graphic_pane_t2
+// r: TB9.2
+//
+#define qtn_calendar_preview_pane_event_unnamed  "Unnamed"
+
+// d: Calendar Settings "Display preview pane" item. This text is shown on popup 
+// d: setting page
+// l: list_set_graphic_pane_t1
+// r: TB9.2
+//
+#define qtn_calendar_popup_display_previewpane_enabled "Enabled"
+
+// d: Calendar Settings "Display preview pane" item. This text is shown on popup 
+// d: setting page
+// l: list_set_graphic_pane_t1
+// r: TB9.2
+//
+#define qtn_calendar_popup_display_previewpane_disabled "Disabled"
+
+// d: Calendar Settings "Display preview pane" item. This text is shown when item
+// d: is On
+// l: list_set_graphic_pane_t1
+// r: TB9.2
+//
+#define qtn_calendar_display_previewpane_on "On"
+
+// d: Calendar Settings "Display preview pane" item. This text is shown when item
+// d: is Off
+// l: list_set_graphic_pane_t1
+// r: TB9.2
+//
+#define qtn_calendar_display_previewpane_off "Off"
+
+// d: Title in "Display preview pane" setting item
+// l: list_setting_pane_t1
+// r: TB9.2
+//
+#define qtn_calendar_display_previewpane_setting_item "Display preview pane"

@@ -33,7 +33,7 @@ to allow the backup and restore engine to access these files.
 class CAgnServBackupRestoreAgent : public CActive
 	{
 public:
- 	static CAgnServBackupRestoreAgent* NewL(CAgnServFileMgr& aFileMgr);
+ 	static CAgnServBackupRestoreAgent* NewL(CAgnServFileMgr& aFileMgr ,TBool& aBackupRestoreInProgress);
 	~CAgnServBackupRestoreAgent();
 	
 	TBool BackupInProgress() const;
@@ -41,7 +41,7 @@ public:
 	void Start();
 	
 private:
-	CAgnServBackupRestoreAgent(CAgnServFileMgr& aFileMgr);
+	CAgnServBackupRestoreAgent(CAgnServFileMgr& aFileMgr , TBool& aBackupRestoreInProgress);
 	
 private:	// from CActive
 	void RunL();
@@ -57,6 +57,7 @@ private:
 	RProperty iBackupRestoreNotification;
 	TInt iCurrentState;
 	CAgnServFileMgr& iFileMgr;
+	TBool& iBackupRestoreInProgress;
 	};
 
 #endif

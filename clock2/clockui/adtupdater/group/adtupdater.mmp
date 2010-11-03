@@ -1,0 +1,98 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   This is project specification file for the adtupdater.
+*
+*/
+
+// System includes
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+
+// Target information
+TARGET				adtupdater.exe
+TARGETTYPE			exe
+TARGETPATH			/sys/bin
+
+// Uid and Capability information
+UID					0x100039CE 0x2001114C
+CAPABILITY          CAP_APPLICATION
+
+// Stack options
+EPOCSTACKSIZE		0x10000
+
+// Source information
+SOURCEPATH			../src
+SOURCE				adtupdater.cpp
+SOURCE				adtupdaterapplication.cpp
+SOURCE				adtupdaterappui.cpp
+SOURCE				adtupdaterdocument.cpp
+SOURCE				adtupdatercontainer.cpp
+SOURCE				adtupdaterlistener.cpp
+SOURCE				adtupdaterquerydialog.cpp
+SOURCE				adtupdaterpopuplist.cpp
+
+// System include information
+APP_LAYER_SYSTEMINCLUDE
+
+// User include information
+USERINCLUDE			../inc
+USERINCLUDE			../../../clockengines/clockserver/client/inc
+USERINCLUDE			../../../clockengines/inc
+USERINCLUDE			../../../clockengines/clocktimezoneresolver/inc
+
+// Resource information
+START RESOURCE		../data/adtupdater.rss
+HEADER
+TARGETPATH			APP_RESOURCE_DIR
+TARGET				adtupdater.rsc
+LANGUAGE_IDS
+END
+
+START RESOURCE		../data/adtupdater_loc.rss
+TARGETPATH			APP_RESOURCE_DIR
+LANGUAGE_IDS
+END
+
+START RESOURCE		../data/adtupdater_reg.rss
+TARGETPATH			/private/10003a3f/import/apps
+END
+
+// Library information
+LIBRARY				euser.lib
+LIBRARY				avkon.lib
+LIBRARY				cone.lib
+LIBRARY				apparc.lib
+LIBRARY				bafl.lib
+LIBRARY				eikcore.lib
+LIBRARY         	eikcoctl.lib
+LIBRARY				eikctl.lib
+LIBRARY 		  	eikdlg.lib 
+LIBRARY				eiksrv.lib
+LIBRARY				aknskins.lib
+LIBRARY				aknskinsrv.lib
+LIBRARY				aknswallpaperutils.lib
+LIBRARY				aknnotify.lib
+LIBRARY				commonengine.lib
+LIBRARY				clockserverclient.lib
+LIBRARY				timezonelocalization.lib
+LIBRARY				tzclient.lib
+LIBRARY				apgrfx.lib
+LIBRARY				ws32.lib 
+LIBRARY				flogger.lib
+LIBRARY 			centralrepository.lib
+LIBRARY				clocktimezoneresolver.lib
+LIBRARY             		starterclient.lib
+LIBRARY 			eiksrvui.lib 			// To supress the application key
+
+// End of file

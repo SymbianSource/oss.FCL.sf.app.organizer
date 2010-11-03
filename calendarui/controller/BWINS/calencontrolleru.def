@@ -1,0 +1,25 @@
+EXPORTS
+	?ReleaseCustomisations@CCalenController@@QAEXXZ @ 1 NONAME ; void CCalenController::ReleaseCustomisations(void)
+	?Infobar@CCalenController@@QAEABVTDesC16@@XZ @ 2 NONAME ; class TDesC16 const & CCalenController::Infobar(void)
+	?Infobar@CCalenController@@QAEPAVCCoeControl@@ABVTRect@@@Z @ 3 NONAME ; class CCoeControl * CCalenController::Infobar(class TRect const &)
+	?NewL@CCalenLocationUi@@SAPAV1@AAVCCalenController@@@Z @ 4 NONAME ; class CCalenLocationUi * CCalenLocationUi::NewL(class CCalenController &)
+	?BroadcastNotification@CCalenController@@QAEXW4TCalenNotification@@@Z @ 5 NONAME ; void CCalenController::BroadcastNotification(enum TCalenNotification)
+	?CreateDayWeekToDoViewIconsL@CCalenIcons@@QBEPAVCAknIconArray@@XZ @ 6 NONAME ; class CAknIconArray * CCalenIcons::CreateDayWeekToDoViewIconsL(void) const
+	?ProcessCommandParametersL@CCalenController@@QAEXW4TApaCommand@@AAV?$TBuf@$0BAA@@@ABVTDesC8@@@Z @ 7 NONAME ; void CCalenController::ProcessCommandParametersL(enum TApaCommand, class TBuf<256> &, class TDesC8 const &)
+	?NewL@CCalenController@@SAPAV1@AAVCAknViewAppUi@@@Z @ 8 NONAME ; class CCalenController * CCalenController::NewL(class CAknViewAppUi &)
+	?PreviewPane@CCalenController@@QAEPAVCCoeControl@@AAVTRect@@@Z @ 9 NONAME ; class CCoeControl * CCalenController::PreviewPane(class TRect &)
+	?CancelNotifications@CCalenController@@QAEXPAVMCalenNotificationHandler@@@Z @ 10 NONAME ; void CCalenController::CancelNotifications(class MCalenNotificationHandler *)
+	?IconIndexFromEntryL@CCalenIcons@@SA?AW4TCalenIcons@MCalenServices@@AAVCCalEntry@@@Z @ 11 NONAME ; enum MCalenServices::TCalenIcons CCalenIcons::IconIndexFromEntryL(class CCalEntry &)
+	?InstanceL@CCalenController@@SAPAV1@XZ @ 12 NONAME ; class CCalenController * CCalenController::InstanceL(void)
+	?OfferMenuPaneL@CCalenController@@QAEXHPAVCEikMenuPane@@@Z @ 13 NONAME ; void CCalenController::OfferMenuPaneL(int, class CEikMenuPane *)
+	?IssueCommandL@CCalenController@@QAEHH@Z @ 14 NONAME ; int CCalenController::IssueCommandL(int)
+	?Release@CCalenController@@QAEXXZ @ 15 NONAME ; void CCalenController::Release(void)
+	?RegisterForNotificationsL@CCalenController@@QAEXPAVMCalenNotificationHandler@@W4TCalenNotification@@@Z @ 16 NONAME ; void CCalenController::RegisterForNotificationsL(class MCalenNotificationHandler *, enum TCalenNotification)
+	?CreateOutOfRangeIconsL@CCalenIcons@@QBEPAVCAknIconArray@@XZ @ 17 NONAME ; class CAknIconArray * CCalenIcons::CreateOutOfRangeIconsL(void) const
+	?CreateMonthViewIconsL@CCalenIcons@@QBEPAVCAknIconArray@@XZ @ 18 NONAME ; class CAknIconArray * CCalenIcons::CreateMonthViewIconsL(void) const
+	?GetIconL@CCalenIcons@@QBEPAVCGulIcon@@W4TCalenIcons@MCalenServices@@H@Z @ 19 NONAME ; class CGulIcon * CCalenIcons::GetIconL(enum MCalenServices::TCalenIcons, int) const
+	?CreateItemNotShownIconL@CCalenIcons@@QBEPAVCGulIcon@@XZ @ 20 NONAME ; class CGulIcon * CCalenIcons::CreateItemNotShownIconL(void) const
+	?RegisterForNotificationsL@CCalenController@@QAEXPAVMCalenNotificationHandler@@AAV?$RArray@W4TCalenNotification@@@@@Z @ 21 NONAME ; void CCalenController::RegisterForNotificationsL(class MCalenNotificationHandler *, class RArray<enum TCalenNotification> &)
+	?NewServicesL@CCalenController@@UAEPAVMCalenServices@@XZ @ 22 NONAME ; class MCalenServices * CCalenController::NewServicesL(void)
+	?CustomPreviewPaneL@CCalenController@@QAEPAVMCalenPreview@@AAVTRect@@@Z @ 23 NONAME ; class MCalenPreview * CCalenController::CustomPreviewPaneL(class TRect &)
+

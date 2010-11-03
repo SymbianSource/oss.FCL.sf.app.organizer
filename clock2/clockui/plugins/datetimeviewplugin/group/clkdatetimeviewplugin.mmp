@@ -1,0 +1,88 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   This is project specification file for the clkdatetimeviewplugin.
+*
+*/
+
+// System includes
+#include <defaultcaps.hrh>
+#include <data_caging_paths.hrh>
+#include <platform_paths.hrh>
+
+// Target information
+TARGET				clkdatetimeviewplugin.dll
+TARGETTYPE			PLUGIN
+
+// Uid, Vendor and Capability information
+UID					0x10009D8D 0x102818E9
+CAPABILITY			CAP_ECOM_PLUGIN
+VENDORID	    	VID_DEFAULT
+
+// Source information
+SOURCEPATH			../src
+SOURCE				clkdatetimeviewplugininterface.cpp
+
+// System include information
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE		/epoc32/include/ecom
+
+// User include information
+USERINCLUDE			../inc
+USERINCLUDE         ../../../uimodel/inc 
+USERINCLUDE         ../../../uilayer/clkdatetimeview/inc
+USERINCLUDE			../../../../clockengines/inc
+USERINCLUDE			../../../../clockengines/clockserver/client/inc
+
+// Plugin registration resource
+SOURCEPATH      	../data
+START RESOURCE		102818E9.rss
+TARGET				clkdatetimeviewplugin.rsc
+END
+
+// Library information
+LIBRARY				ecom.lib
+LIBRARY				edbms.lib
+LIBRARY				sysutil.lib
+LIBRARY				clkdatetimeview.lib
+LIBRARY         	gsecomplugin.lib
+LIBRARY         	gsframework.lib
+LIBRARY				gdi.lib
+LIBRARY				aknskins.lib
+LIBRARY				aknskinsrv.lib 
+LIBRARY         	aknicon.lib
+LIBRARY         	egul.lib
+LIBRARY         	fbscli.lib 
+LIBRARY         	euser.lib
+LIBRARY         	cone.lib
+LIBRARY         	eikcore.lib
+LIBRARY         	eikcoctl.lib
+LIBRARY         	bafl.lib
+LIBRARY         	clkuimodel.lib
+LIBRARY         	filelist.lib
+LIBRARY	   			estor.lib 
+LIBRARY         	centralrepository.lib
+LIBRARY				starterclient.lib
+LIBRARY				cdlengine.lib
+LIBRARY         	aknlayout2scalable.lib 
+LIBRARY 			eikdlg.lib 
+LIBRARY 			commonengine.lib
+LIBRARY				efsrv.lib
+LIBRARY				avkon.lib
+LIBRARY         	hlplch.lib
+LIBRARY         	featmgr.lib
+LIBRARY				drmhelper.lib
+LIBRARY 			tzclient.lib
+LIBRARY				timezonelocalization.lib
+
+// End of file

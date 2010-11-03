@@ -17,7 +17,7 @@
 
 PRJ_TESTMMPFILES
 ../../tsrc/TCCn.mmp
-../../OriginalTsrc/TCCnoriginal.mmp manual
+../../originaltsrc/TCCnoriginal.mmp manual
 cconoriginal.mmp manual
 calcontable.mmp manual
 

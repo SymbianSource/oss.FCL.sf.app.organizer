@@ -1,0 +1,67 @@
+/*
+* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Resources of contactsplugin.
+*
+*/
+
+
+
+//  RESOURCE IDENTIFIER
+NAME    FLPN // 4 letter ID
+
+//  Includes
+#include <eikon.rh>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.mbg>
+#include <avkon.loc>
+#include <contactssearchplugin.loc>
+
+// Resource identifiers 
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { }
+
+// ---------------------------------------------------------------------------
+// Resource EIK_APP_INFO
+// ---------------------------------------------------------------------------
+//
+RESOURCE EIK_APP_INFO
+    {
+    }
+    
+// ---------------------------------------------------------------------------
+// r_qtn_search_types_contacts
+// Localization string for caption for Contacts
+// ---------------------------------------------------------------------------
+//
+RESOURCE TBUF   r_qtn_search_types_contacts
+                { buf = qtn_search_types_contacts; }
+                
+// ---------------------------------------------------------------------------
+// r_qtn_search_subfolders_phone
+// Localization string for caption for Phone contacts
+// ---------------------------------------------------------------------------
+//                
+RESOURCE TBUF   r_qtn_search_subfolders_phone
+                { buf = qtn_search_subfolders_phone; }
+          
+// ---------------------------------------------------------------------------
+// r_qtn_search_subfolders_sim
+// Localization string for caption for Sim contacts
+// ---------------------------------------------------------------------------
+//                
+RESOURCE TBUF   r_qtn_search_subfolders_sim
+                { buf = qtn_search_subfolders_sim; } 
+                                          

@@ -1,0 +1,258 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Resources file for meeting request utilities
+*
+*/
+
+
+
+
+//  RESOURCE IDENTIFIER
+NAME    OMRU
+
+//  INCLUDES
+#include <eikon.rh>
+#include <eikon.rsg>
+#include <avkon.hrh>
+#include <avkon.rh>
+#include <avkon.rsg>
+#include <avkon.mbg>
+#include <avkon.loc>
+#include <messaging.loc>
+#include <data_caging_paths_strings.hrh>
+#include "meetingrequestutils.hrh"
+#include <MeetingRequest.loc>
+
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF 
+    { 
+    buf = "mrutils"; 
+    }
+    
+	
+RESOURCE TBUF r_qtn_mail_mtg_sub_accepted
+	{
+	buf = qtn_mail_mtg_sub_accepted;
+	}
+
+RESOURCE TBUF r_qtn_mail_mtg_sub_tentative
+	{
+	buf = qtn_mail_mtg_sub_tentative;
+	}
+
+RESOURCE TBUF r_qtn_mail_mtg_sub_declined
+	{
+	buf = qtn_mail_mtg_sub_declined;
+	}
+
+RESOURCE TBUF r_qtn_cale_response_description
+	{
+	buf = qtn_cale_response_description;
+	}
+	
+RESOURCE TBUF r_qtn_cale_to_invited_attendees
+	{
+	buf = qtn_cale_to_invited_attendees;
+	}
+
+RESOURCE AVKON_LIST_QUERY r_send_response_list_query
+	{
+	flags = EGeneralQueryFlags;
+	softkeys = R_AVKON_SOFTKEYS_SELECT_CANCEL;
+	
+	items =
+		{
+		AVKON_LIST_QUERY_DLG_LINE
+			{
+			control = AVKON_LIST_QUERY_CONTROL
+				{
+				listtype = EAknCtSinglePopupMenuListBox;
+				
+				listbox = AVKON_LIST_QUERY_LIST
+					{
+					array_id = r_send_response_list_query_item_list_array;
+					};
+                                heading = "dummy"; // replaced with correct heading in run-time
+				};
+			}
+		};
+	}
+	
+RESOURCE ARRAY r_send_response_list_query_item_list_array
+	{
+	items =
+		{
+		LBUF {txt = qtn_mail_mtg_edit_and_send;},
+		LBUF {txt = qtn_mail_mtg_send_response;},
+		LBUF {txt = qtn_mail_mtg_dont_send_response;}
+		};
+	}
+	
+RESOURCE DIALOG r_edit_before_sending_view_form_dialog
+    {
+    flags = EEikDialogFlagNoDrag |
+            EEikDialogFlagFillAppClientRect |
+            EEikDialogFlagButtonsRight |
+            EEikDialogFlagCbaButtons |
+            EEikDialogFlagWait |
+            EEikDialogFlagNoTitleBar |
+            EEikDialogFlagDontEatUpDownEvents |
+            EEikDialogFlagNotifyEsc; 
+    buttons = R_AVKON_SOFTKEYS_OPTIONS_CANCEL;    
+    form = r_edit_before_sending_view_form;
+    }
+
+RESOURCE FORM r_edit_before_sending_view_form
+    {
+    flags = EEikFormUseDoubleSpacedFormat;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_cale_to_organizer;
+            id = EToEditor;
+            itemflags  = EEikDlgItemNonFocusing;
+            control=EDWIN
+	       	{
+	       	flags = EEikEdwinDisplayOnly;
+                default_case = EAknEditorTextCase;
+                allowed_case_modes = EAknEditorAllCaseModes;
+    		max_view_height_in_lines = 2;
+		maxlength = 255;
+		width = 255;
+		lines = 2;
+	    	};
+            },
+
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_cale_note_subject;
+            id = ESubjectEditor;
+            itemflags  = EEikDlgItemNonFocusing;
+            control = EDWIN
+	       	{
+	       	flags = EEikEdwinDisplayOnly;
+                default_case = EAknEditorTextCase;
+                allowed_case_modes = EAknEditorAllCaseModes;
+    		max_view_height_in_lines = 2;
+		maxlength = 255;
+		width = 255;
+		lines = 2;
+	    	};
+	    },
+        DLG_LINE
+            {
+            type = EEikCtEdwin;
+            prompt = qtn_cale_response_description;
+            id = EDescriptionEditor;
+            itemflags = EEikDlgItemTakesEnterKey;
+	        control = EDWIN
+	    	{
+	       	flags = EEikEdwinAllowUndo | 
+                        EEikEdwinNoHorizScrolling |
+                        EEikEdwinResizable | 
+                        EEikEdwinAutoSelection | 
+                        EEikEdwinNoAutoSelection | 
+                        EEikEdwinJustAutoCurEnd;
+                default_case = EAknEditorTextCase;
+                allowed_case_modes = EAknEditorAllCaseModes;
+                numeric_keymap = EAknEditorStandardNumberModeKeymap;
+                default_input_mode = EAknEditorAlphaInputMode;
+    		max_view_height_in_lines = 10;
+    		lines = 2;
+		maxlength = 700;
+		width = 255;
+	    	};            
+	    }
+	};
+    }
+    
+RESOURCE MENU_BAR r_edit_before_sending_view_menubar
+    {
+    titles =
+        {
+        MENU_TITLE  { menu_pane = r_edit_before_sending_view_options; } 
+        };
+    }
+    
+RESOURCE MENU_PANE r_edit_before_sending_view_options
+    {
+    items=
+        {
+        MENU_ITEM { command = EEditBeforeSendingCmdSend;	txt = qtn_cale_send_menu_item; },
+        MENU_ITEM { command = EAknCmdHelp;			txt = qtn_options_help; },
+        MENU_ITEM { command = EAknCmdExit;			txt = qtn_options_exit; }
+        };
+    }
+
+RESOURCE DIALOG r_edit_before_sending_cancel_response_query
+    {
+    flags = EGeneralQueryFlags;
+    buttons = R_AVKON_SOFTKEYS_YES_NO;
+    items =
+    	{
+    	DLG_LINE
+    	    {
+    	    type = EAknCtQuery;
+    	    id = EGeneralQuery;
+    	    control = AVKON_CONFIRMATION_QUERY
+    	    	{
+    	    	layout = EConfirmationQueryLayout;
+                label = qtn_cale_query_cancel_response;
+    	    	};
+    	    }
+    	};
+    }
+
+RESOURCE AVKON_LIST_QUERY r_cancel_list_query
+	{
+	flags = EGeneralQueryFlags;
+	softkeys = R_AVKON_SOFTKEYS_SELECT_CANCEL;	
+	items =
+		{
+		AVKON_LIST_QUERY_DLG_LINE
+			{
+			control = AVKON_LIST_QUERY_CONTROL
+				{
+				listtype = EAknCtSinglePopupMenuListBox;				
+				listbox = AVKON_LIST_QUERY_LIST
+					{
+					array_id = r_cancel_item_list_array;
+					};
+                                heading = "dummy"; // replaced with correct heading in run-time
+				};
+			}
+		};
+	}
+	
+RESOURCE ARRAY r_cancel_item_list_array
+	{
+	items =
+		{
+		LBUF {txt = qtn_cale_cancel_edit_and_send;},
+		LBUF {txt = qtn_cale_cancel_send;},
+		LBUF {txt = qtn_cale_cancel_do_not_send;}
+		};
+	}
+
+RESOURCE TBUF r_qtn_cale_meetin_request_cancelled
+	{
+	buf = qtn_cale_meeting_request_cancelled;
+	}
+
+// End of File

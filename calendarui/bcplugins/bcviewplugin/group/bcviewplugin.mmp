@@ -1,0 +1,111 @@
+/*
+* Copyright (c) 2009-2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project BCViewPlugin
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+#include "../inc/bcviewpluginuids.h"
+
+TARGET      bcviewplugin.dll
+TARGETTYPE  PLUGIN
+
+UID         0x10009D8D KBCVIEWPLUGINIMPLUID
+CAPABILITY  CAP_ECOM_PLUGIN
+VENDORID    VID_DEFAULT
+DEFFILE     bcviewplugin.def
+
+SOURCEPATH  ../src
+SOURCE dllmain.cpp
+SOURCE cbcviewplugin.cpp
+SOURCE calentitlepane.cpp
+SOURCE cbcviewbase.cpp
+SOURCE cbccontainerbase.cpp
+// views
+SOURCEPATH ../views/src
+SOURCE cbcdaycontainer.cpp
+SOURCE cbcdayview.cpp
+SOURCE cbcpreviewpopup.cpp
+// utils
+SOURCEPATH ../utils/src
+SOURCE cbcslotinfostorage.cpp
+SOURCE cbcdayphysicshandler.cpp
+SOURCE cbcskinchangeobserver.cpp
+//resource managers
+SOURCEPATH ../resourcemanagers/src
+SOURCE cbcbitmapprovider.cpp
+SOURCE cbcbrushmanager.cpp
+SOURCE cbclayouthandler.cpp
+SOURCE cbcresourcemanager.cpp
+SOURCE cbctextstylemanager.cpp
+SOURCE cbcuienv.cpp
+
+// RESOURCE MANAGER CLASSES
+
+USERINCLUDE ../inc
+USERINCLUDE ../resourcemanagers/inc	
+USERINCLUDE ../views/inc
+USERINCLUDE ../utils/inc
+
+
+APP_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   /epoc32/include/ecom
+
+SOURCEPATH      .
+START RESOURCE  bcviewplugin.rss
+TARGET          bcviewplugin.rsc
+END
+
+SOURCEPATH      .
+START RESOURCE  bcviewplugingui.rss
+HEADER
+TARGETPATH      RESOURCE_FILES_DIR
+//LANG            SC
+LANGUAGE_IDS
+END
+
+LIBRARY euser.lib
+LIBRARY ecom.lib
+LIBRARY eikcore.lib
+LIBRARY calinterimapi.lib
+LIBRARY avkon.lib
+LIBRARY cone.lib
+LIBRARY eikcoctl.lib
+LIBRARY bafl.lib
+
+LIBRARY calencommonutils.lib // CalenDayUtils, etc.
+LIBRARY caleninterimutils2.lib
+LIBRARY alfclient.lib
+LIBRARY	aknskins.lib
+LIBRARY aknicon.lib 
+LIBRARY apgrfx.lib // RApaLsSession
+LIBRARY efsrv.lib // TParse
+LIBRARY apparc.lib // TApaAppInfo
+LIBRARY cdlengine.lib
+LIBRARY aknlayout2scalable.lib // taknwindowlinelayout
+LIBRARY aknlayout2.lib
+LIBRARY servicehandler.lib // AIW
+LIBRARY featmgr.lib
+LIBRARY CommonEngine.lib // StringLoader
+LIBRARY ws32.lib // RWindowGroup
+LIBRARY centralrepository.lib 
+LIBRARY gdi.lib
+LIBRARY hlplch.lib
+LIBRARY aknphysics.lib  //kinetic scrolling
+LIBRARY gesturehelper.lib //gesture helper
+LIBRARY touchfeedback.lib //haptic feedback
+
+// End of file

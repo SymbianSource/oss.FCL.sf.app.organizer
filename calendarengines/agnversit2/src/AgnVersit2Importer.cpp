@@ -46,7 +46,7 @@
 #include "ICalValue.h"			// For CICalValue
 
 // AgnVersit2 includes.
-#include "AgnImportObserver.h"			// For MAgnImportObserver
+#include "agnimportobserver.h"			// For MAgnImportObserver
 #include "AgnVersit2StringProvider.h"	// For CAgnVersit2StringProvider
 #include "CleanupPointerArray.h"		// For TCleanupPointerArray
 

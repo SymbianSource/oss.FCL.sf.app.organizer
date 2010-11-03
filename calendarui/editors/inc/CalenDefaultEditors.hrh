@@ -1,0 +1,147 @@
+/*
+* Copyright (c) 2004 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Calendar editor common definitions for resource and c++ files.
+*
+*/
+
+
+#ifndef __CALENDEFAULTEDITORS_HRH__
+#define __CALENDEFAULTEDITORS_HRH__
+
+#include <avkon.hrh>
+
+//  CONSTANTS
+
+#define KToDoMaxEditorLength            160     // Maximum length
+#define KToDoMaxEditorWidth             20
+#define KToDoEditorLines                3
+
+#define KToDoMinSecond                  0
+#define KToDoMinMinute                  0
+#define KToDoMinHour                    0
+#define KToDoMaxSecond                  59
+#define KToDoMaxMinute                  59
+#define KToDoMaxHour                    23
+
+enum TCalenEditorMenuPaneCommands
+    {
+    // THIS RANGE SHOULD NOT OVERLAP WITH CALENDAR RANGE
+    //always hidden, allows easy adding of items to beginning of menu
+    ECalenCommandFirstMenuItem = 5000, 
+
+    /* Description data commands */
+    ECalenCmdAddDescription,
+    ECalenCmdAddDescriptionNew,
+    ECalenCmdAddDescriptionExisting,
+    ECalenCmdShowDescription,
+    ECalenCmdRemoveDescription,
+
+    ECalenCmdCancel,
+    
+#ifdef RD_CALEN_VIEWERS_LEFT_RIGHT_NAVI
+    /* Viewer cycling commands */
+    ECalenCmdPrevInstance,
+    ECalenCmdNextInstance,
+#endif // RD_CALEN_VIEWERS_LEFT_RIGHT_NAVI
+
+    /* Close the viewer or editor due to command line launch */
+    ECalenCmdCloseDialog,
+
+    ECalenLastFreeEditorCommand,
+    
+    ECalenCmdAddPeople,
+    ECalenCmdRemovePeople,
+    ECalenCmdAddAttachment,
+    ECalenCmdRemoveAttachment,
+    ECalenCmdViewAttachmentList
+    };
+
+    /* todo related commands */
+
+enum //TTodoPopupMenuCommands
+    {
+    ECalenTodoCmdAdd = ECalenLastFreeEditorCommand,
+    ECalenTodoCmdDelete,
+    ECalenTodoCmdSave,
+    ECalenTodoCmdViewHighlightedItem,
+    ECalenTodoCmdTaskCompleted,
+    ECalenTodoCmdRestoreTask
+    };
+
+
+enum //TCalenNoteCustomControls
+    {
+    ECalenCtDescriptionField = KAknCtLastControlId + 1,
+    ECalenCtLunarDateEditor
+    };
+
+enum //TCalenNoteFormConstant
+    {
+    // This is absolute maximum length for text editors.
+    // Actual maximum depends on layout variant. 
+    // This value can be used for compile-time size definitions, but 
+    // do not use it, when actual maximum is needed (e.g. when extracting text)
+    // Use e.g. MaxTextEditorLength in CalenNoteForm. 
+    ECalenAbsoluteMaxTextEditorLength = 160 
+    };
+    
+    /* Constants */
+
+/**
+ * Date representing forever value in Repeat until field.
+ */
+enum
+    {
+    ECalenForeverDay    = 30,   // 31   - 1
+    ECalenForeverMonth  = 11,   // 12   - 1
+    ECalenForeverYear   = 2100  // 2100 
+    };
+
+// FIXME: remove ?
+enum // TTodoNotedId
+    {
+    ETodoNoteWait = 6500
+    };
+
+enum //TCalenUnifiedEditorItem
+    {
+    ECalenEditorEventType = 20200, 
+    ECalenEditorSubject,
+    ECalenEditorAllDayItem,
+    ECalenEditorDueDate,
+    ECalenEditorStartDate,
+    ECalenEditorStartTime,
+    ECalenEditorEndDate,
+    ECalenEditorEndTime,
+    ECalenEditorBirthDayYear,
+    ECalenEditorPlace,
+    ECalenEditorReminder,
+    ECalenEditorReminderTime,
+    ECalenEditorReminderDate,
+    ECalenEditorRepeat,
+    ECalenEditorRepeatUntil,
+    ECalenEditorPriority,
+    ECalenEditorPeople,
+    ECalenEditorDBName,
+    ECalenEditorAttachment,
+    ECalenEditorDescription,
+    EKoreanLunarAniversityStart,
+    EKoreanLunarTypeSelectSolarLunarLeap
+    };
+
+
+#endif // __CALENDEFAULTEDITORS_HRH__
+
+
+// End of File

@@ -15,38 +15,36 @@
  *
 */
 
-#include <QtGui>
 
 #include "calendarui_debug.h"
 
 #include <eikenv.h>
-#include <aknutils.h>
+#include <AknUtils.h>
 #include <eiklabel.h>
 #include <avkon.hrh>
 #include <StringLoader.h>
+#include <aknsettingitemlist.h>
+#include <aknmessagequerydialog.h>
 #include <data_caging_path_literals.hrh>
 #include <bautils.h>
-#include <aknbiditextutils.h>
+#include <AknBidiTextUtils.h>
 #include <CalenLunarVietnamesePluginData.rsg>
 #include <layoutmetadata.cdl.h>
+#include <mcalenpreview.h>
 
-#include <hblabel.h>
-#include <hbwidget.h>
-#include <qstring.h>
-#include <hbaction.h>
-#include <hbtextedit.h>
-#include <hbmainwindow.h>
-#include <hbview.h>
-#include <hbmenu.h>
+#include <AknsSkinInstance.h>
+#include <AknsUtils.h>
+#include <gulcolor.h>
+
 #include "calendarui_debug.h" 
-#include "CalenLunarVietnamesePlugin.h"
-#include "CalenLunarVietnameseLocalizer.h"
-#include "CalenLunarPanic.h"
-#include "CalenLunarLocalizedInfo.h"
-#include "CalenLunarLocalizer.h"
-#include "CalenLunarInfoProvider.h"
+#include "calenlunarvietnameseplugin.h"
+#include "calenlunarvietnameselocalizer.h"
+#include "calenlunarpanic.h"
+#include "calenlunarlocalizedinfo.h"
+#include "calenlunarlocalizer.h"
+#include "calenlunarinfoprovider.h"
 
-#include "hb_calencommands.hrh"
+#include "calencommands.hrh"
 
 //CONSTANTS
 _LIT( KFieldSeparator, "\n" );
@@ -73,7 +71,6 @@ CCalenLunarVietnamesePlugin::CCalenLunarVietnamesePlugin(MCalenServices* aServic
 	{
 	TRACE_ENTRY_POINT;
 	iLabelControl = NULL;
-	setFlag(QGraphicsItem::ItemHasNoContents, false);
 	TRACE_EXIT_POINT;
 	}
 	
@@ -152,25 +149,107 @@ void CCalenLunarVietnamesePlugin::ConstructL()
 	iServices->GetCommandRange( iStart, iEnd );
 	
 	iInfoProvider = CCalenLunarInfoProvider::NewL(CEikonEnv::Static()->FsSession());
-			
+	
+	iLabelControl = CCalenPluginLabel::NewL(*this);
+	
     iLocalizer = CCalenLunarVietnameseLocalizer::NewL();
     
-	iLabelControl = new CalenPluginLabel(*this);
     
     TRACE_EXIT_POINT;	
 	}
 	
+	
+// -----------------------------------------------------------------------------
+// CCalenLunarVietnamesePlugin::SetLabelContentExtraL
+// -----------------------------------------------------------------------------
+//
+void CCalenLunarVietnamesePlugin::SetLabelContentExtraL( CEikLabel& aLabel ,TRect& aRect) 
+    {
+    TRACE_ENTRY_POINT;
+    
+    TRect nullRect;
+    aLabel.SetRect(nullRect);
+    
+    FormatExtraRowStringL( aLabel, ETrue );
+
+    CArrayFixFlat<TPtrC>* textLines = new(ELeave)CArrayFixFlat<TPtrC>( 2 );
+    CleanupStack::PushL( textLines );
+    
+    CArrayFixFlat<TInt>* lineWidths = new( ELeave )CArrayFixFlat<TInt>( 1 );
+    CleanupStack::PushL( lineWidths );
+    
+    TInt maxWidth = aRect.Size().iWidth;
+    lineWidths->AppendL( maxWidth );
+    
+    const CFont* fontLabel = AknLayoutUtils::FontFromId(EAknLogicalFontPrimarySmallFont,NULL);
+    
+    HBufC* visualText = AknBidiTextUtils::ConvertToVisualAndWrapToArrayWholeTextL(
+        iExtraRowText,
+        *lineWidths,
+        *fontLabel,
+        *textLines);
+        
+    if(textLines->Count() < 3 && textLines->Count() > 0)
+    	{
+    	 TInt nH =	textLines->Count();
+    	 aRect.iBr.iY = aRect.iBr.iY * nH;
+    	}
+       
+    HBufC* newLinedText = HBufC::NewLC( iExtraRowText.Length() + 4);
+        
+    for(TInt i = 0 ; i < textLines->Count();i++)
+    	{
+    	newLinedText->Des().Append(textLines->At(i));
+    	newLinedText->Des().Append( KFieldSeparator );
+    	}
+   
+    aLabel.UseLogicalToVisualConversion(ETrue);
+    aLabel.SetLabelAlignment(ELayoutAlignCenter); 
+    aLabel.SetTextL( *newLinedText);
+    
+    // Query the text colour based on the theme and update the label text
+    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
+    TRgb color;
+    TInt error = AknsUtils::GetCachedColor(skin, color,
+            KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6);
+    if (error == KErrNone)
+        {
+        aLabel.OverrideColorL(EColorLabelText, color);
+        }
+    
+    CleanupStack::PopAndDestroy( newLinedText );
+    CleanupStack::PopAndDestroy( lineWidths );
+    CleanupStack::PopAndDestroy( textLines );
+    delete visualText;
+
+    TRACE_EXIT_POINT;
+    }
+
 // -----------------------------------------------------------------------------
 // CCalenLunarVietnamesePlugin::SetLabelContentL
 // -----------------------------------------------------------------------------
 //
-void CCalenLunarVietnamesePlugin::SetLabelContentL( HbLabel& aLabel ) 
+void CCalenLunarVietnamesePlugin::SetLabelContentL( CEikLabel& aLabel, 
+														const TRect&  /*aRect*/ ) 
     {
     TRACE_ENTRY_POINT;
+    TRect nullRect;
+    aLabel.SetRect(nullRect);
     
-    FormatExtraRowStringL( aLabel, EFalse );    
-    QString text = QString::fromUtf16(iExtraRowText.Ptr(),iExtraRowText.Length());
-    aLabel.setPlainText(text);
+    FormatExtraRowStringL( aLabel, EFalse );
+    aLabel.UseLogicalToVisualConversion(ETrue);
+    aLabel.SetLabelAlignment(ELayoutAlignCenter);
+    aLabel.SetTextL(  iExtraRowText );
+    
+    // Query the text colour based on the theme and update the label text
+    MAknsSkinInstance* skin = AknsUtils::SkinInstance();
+    TRgb color;
+    TInt error = AknsUtils::GetCachedColor(skin, color,
+            KAknsIIDQsnTextColors, EAknsCIQsnTextColorsCG6);
+    if (error == KErrNone)
+        {
+        aLabel.OverrideColorL(EColorLabelText, color);
+        }
     
     TRACE_EXIT_POINT;
     }
@@ -180,11 +259,11 @@ void CCalenLunarVietnamesePlugin::SetLabelContentL( HbLabel& aLabel )
 // CCalenLunarVietnamesePlugin::FormatExtraRowStringL
 // -----------------------------------------------------------------------------
 //	
-void CCalenLunarVietnamesePlugin::FormatExtraRowStringL(HbLabel& aLabel,TBool aTwoLines)
+void CCalenLunarVietnamesePlugin::FormatExtraRowStringL( CEikLabel& aLabel,
+																TBool aTwoLines)
     {
     TRACE_ENTRY_POINT;
     
-    Q_UNUSED(aLabel);
     const CFont*  labelFont = NULL;
     
     if( aTwoLines ) 
@@ -196,16 +275,16 @@ void CCalenLunarVietnamesePlugin::FormatExtraRowStringL(HbLabel& aLabel,TBool aT
     	labelFont = AknLayoutUtils::FontFromId(EAknLogicalFontSecondaryFont,NULL);	
     	}
     
-    //aLabel.SetFont( labelFont );
+    aLabel.SetFont( labelFont );
     TInt maxWidth = 0;
     if(iRect.IsEmpty())
-    	{
-    	maxWidth = 450; //For hitch we take max value
-    	}
-    else 
-    	{
-    	maxWidth = iRect.Size().iWidth;
-    	}
+        {
+        maxWidth = 450;
+        }
+    else
+        {
+        maxWidth = iRect.Size().iWidth;
+        }
     
     if ( labelFont && iLocInfo )
         {
@@ -227,14 +306,24 @@ void CCalenLunarVietnamesePlugin::FormatExtraRowStringL(HbLabel& aLabel,TBool aT
 // CCalenLunarVietnamesePlugin::InfobarL
 // -----------------------------------------------------------------------------
 //	
-HbWidget* CCalenLunarVietnamesePlugin::InfobarL( )
+CCoeControl* CCalenLunarVietnamesePlugin::InfobarL( const TRect&  aRect )
 	{
 	TRACE_ENTRY_POINT;
 
 	UpdateLocalizerInfoL();
+	iRect = aRect;
+	
+	if(iLabelControl)
+	    {
+		delete iLabelControl;
+		iLabelControl = NULL;
+	    }
+	
+	iLabelControl = CCalenPluginLabel::NewL(*this);
     
-	SetLabelContentL(*iLabelControl);
-		 
+	SetLabelContentL(*iLabelControl,aRect);
+	iLabelControl->SetRect(aRect);
+	 
 	return iLabelControl;
 	
     TRACE_EXIT_POINT;	
@@ -245,7 +334,7 @@ HbWidget* CCalenLunarVietnamesePlugin::InfobarL( )
 // This function is called in case of Hitchcock views
 // ----------------------------------------------------------------------------
 //
-QString* CCalenLunarVietnamesePlugin::InfobarTextL( )
+const TDesC& CCalenLunarVietnamesePlugin::InfobarL( )
     {
     TRACE_ENTRY_POINT;
     TRect nullRect(0,0,0,0);
@@ -258,30 +347,87 @@ QString* CCalenLunarVietnamesePlugin::InfobarTextL( )
     //Update the local information based on current context
     //from framework.
     UpdateLocalizerInfoL(); 
-    SetLabelContentL(*iLabelControl);        
+    
+    //Dummy label for formatting the iExtraRowText
+    CEikLabel* dummyLabel = new(ELeave) CEikLabel;
+    CleanupStack::PushL(dummyLabel);
+    SetLabelContentL(*dummyLabel,TRect());
+    CleanupStack::PopAndDestroy();
+    
     iInfoBarText = iExtraRowText.AllocLC();
     CleanupStack::Pop();
     
     TRACE_EXIT_POINT;
-    return  (new QString((QChar*)iInfoBarText->Des().Ptr(),iInfoBarText->Length()));
+    return *iInfoBarText;
     }
 
-// ----------------------------------------------------------------------------
-// CCalenThaiPlugin::InfobarL
-// This function is called to add menuitem 
-// ----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// CCalenLunarVietnamesePlugin::CustomPreviewPaneL
+// -----------------------------------------------------------------------------
 //
+MCalenPreview* CCalenLunarVietnamesePlugin::CustomPreviewPaneL( TRect& /*aRect*/ )
+	{
+	TRACE_ENTRY_POINT
+	TRACE_EXIT_POINT
+	return NULL;
+	}
 
-void CCalenLunarVietnamesePlugin::CustomiseMenu(HbMenu* aHbMenu)
-    {
-    HbAction* lunarAction = new HbAction("Show Lunar Data");
-    QList<QAction*> actionList = aHbMenu->actions();     
-    TInt count = actionList.count() - 1;  
-    if(count >= 0)
-    aHbMenu->insertAction(actionList[count], lunarAction);
-    QObject::connect(lunarAction, SIGNAL(triggered()), iLabelControl, SLOT(showLunarData()));
-    }
+// -----------------------------------------------------------------------------
+// CCalenLunarVietnamesePlugin::PreviewPaneL
+// -----------------------------------------------------------------------------
+//
+CCoeControl* CCalenLunarVietnamesePlugin::PreviewPaneL(  TRect&  aRect )
+	{
+	TRACE_ENTRY_POINT;
+    
+    UpdateLocalizerInfoL();
+	iRect = aRect;
+	if (iLabelControl)
+	    {
+		delete iLabelControl;
+		iLabelControl = NULL;
+	    }
 
+	iLabelControl = CCalenPluginLabel::NewL(*this);
+	
+	if(!Layout_Meta_Data::IsLandscapeOrientation()) //Portriat
+		{
+		SetLabelContentL(*iLabelControl, aRect);
+		}
+	else
+		{
+		SetLabelContentExtraL(*iLabelControl,aRect);	
+		}
+	
+	
+    return iLabelControl;
+	TRACE_EXIT_POINT;	
+	}
+
+// -----------------------------------------------------------------------------
+// CCalenLunarVietnamesePlugin::CustomiseMenuPaneL
+// -----------------------------------------------------------------------------
+//
+TBool CCalenLunarVietnamesePlugin::CustomiseMenuPaneL( TInt /*aResourceId*/, 
+												CEikMenuPane* aMenuPane )
+	{
+	TRACE_ENTRY_POINT;
+	HBufC* itemText = StringLoader::LoadLC(R_CALENDAR_SHOW_LUNAR_DATA);
+    
+    CEikMenuPaneItem::SData menuItem;
+    menuItem.iCommandId = iStart; 
+    menuItem.iCascadeId = 0;
+    menuItem.iFlags = 0;
+    menuItem.iText = *itemText;
+    menuItem.iExtraText = KNullDesC;
+    
+    aMenuPane->InsertMenuItemL( menuItem, 1 );
+    
+    CleanupStack::PopAndDestroy(itemText);
+	TRACE_EXIT_POINT;
+	return ETrue;
+	}
+	
 // -----------------------------------------------------------------------------
 // CCalenLunarVietnamesePlugin::HandleCommandL
 // -----------------------------------------------------------------------------
@@ -328,6 +474,55 @@ MCalenCommandHandler* CCalenLunarVietnamesePlugin::CommandHandlerL( TInt aComman
    
     return commandHandler;
 	TRACE_EXIT_POINT;	
+	}
+
+// -----------------------------------------------------------------------------
+// CCalenLunarVietnamesePlugin::RemoveViewsFromCycle
+// -----------------------------------------------------------------------------
+//
+void CCalenLunarVietnamesePlugin::RemoveViewsFromCycle( RArray<TInt>& /*aViews*/ )
+	{
+	TRACE_ENTRY_POINT;
+	TRACE_EXIT_POINT;	
+	}
+
+// -----------------------------------------------------------------------------
+// CCalenLunarVietnamesePlugin::CanBeEnabledDisabled
+// -----------------------------------------------------------------------------
+//
+TBool CCalenLunarVietnamesePlugin::CanBeEnabledDisabled()
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    return ETrue;
+    }
+
+TAny* CCalenLunarVietnamesePlugin::CalenCustomisationExtensionL( TUid /*aExtensionUid*/ )
+    {
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;
+    return NULL;
+    }
+// -----------------------------------------------------------------------------
+// CCalenLunarVietnamesePlugin::GetCustomSettingsL
+// -----------------------------------------------------------------------------
+//
+void CCalenLunarVietnamesePlugin::GetCustomSettingsL( RPointerArray<CAknSettingItem>&  
+														/*aCustomSettingArray*/)
+	{
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;		
+	}
+
+// -----------------------------------------------------------------------------
+// CCalenLunarVietnamesePlugin::GetCustomViewsL
+// -----------------------------------------------------------------------------
+//	
+void CCalenLunarVietnamesePlugin::GetCustomViewsL(  RPointerArray<CCalenView>& 
+															/*aCustomViewArray*/ )
+	{
+	TRACE_ENTRY_POINT;
+	TRACE_EXIT_POINT;		
 	}
  	
 
@@ -435,94 +630,93 @@ void CCalenLunarVietnamesePlugin::ShowDetailsL( )
 //    
 void CCalenLunarVietnamesePlugin::ExecuteMessageDialogL(TDesC& aMsgText)
 	{
-	TRACE_ENTRY_POINT;	
-	QString text = QString::fromUtf16(aMsgText.Ptr(),aMsgText.Length());
+	TRACE_ENTRY_POINT;
 	
-    // Instantiate a popup
-    HbPopup popup;
-
-    // Set dismiss policy that determines what tap events will cause the popup
-    // to be dismissed
-    popup.setDismissPolicy(HbPopup::NoDismiss);
-    popup.setTimeout(HbPopup::NoTimeout);
-    
-    // Set the label as heading widget    
-    popup.setHeadingWidget(new HbLabel("Lunar Calendar"));
-    HbTextEdit* contentWidget = new HbTextEdit (text);
-    contentWidget->setReadOnly(true);
-    contentWidget->setCursorHidden(true);
-    QSizeF size = contentWidget->maximumSize();
-    contentWidget->setMinimumSize(200,250);    
-    popup.setContentWidget(contentWidget);
-    
-    // Sets the primary action 
-    popup.setPrimaryAction(new HbAction("Ok",&popup));  
-
-    // Launch popup syncronously
-    popup.exec();
+	CAknMessageQueryDialog* dlg = CAknMessageQueryDialog::NewL(aMsgText);
+    CleanupStack::PushL(dlg);
+    dlg->PrepareLC(R_CALEN_LUNAR_DETAILS_DIALOG);
+    CleanupStack::Pop(dlg);
+    dlg->RunLD();
     
    	TRACE_EXIT_POINT;
 	}
 
+// -----------------------------------------------------------------------------
+// CCalenPluginLabel::NewL
+// -----------------------------------------------------------------------------
+//     
+CCalenPluginLabel* CCalenPluginLabel::NewL(CCalenLunarVietnamesePlugin& aPlugin)
+	{
+	TRACE_ENTRY_POINT;
+	CCalenPluginLabel* self = new(ELeave)CCalenPluginLabel(aPlugin);
+	CleanupStack::PushL(self);
+	self->ConstructL();
+	CleanupStack::Pop(self);
+	TRACE_EXIT_POINT;
+	return self;
+	}
+	
+// -----------------------------------------------------------------------------
+// CPluginLabel::CCalenLunarVietnamesePlugin
+// -----------------------------------------------------------------------------
+// 	
+CCalenPluginLabel::CCalenPluginLabel(CCalenLunarVietnamesePlugin& aPlugin) : 
+				   iPlugin(aPlugin) 
+	{
+    TRACE_ENTRY_POINT;
+    TRACE_EXIT_POINT;	
+	}
+	
+	
+// -----------------------------------------------------------------------------
+// CPluginLabel::ConstructL
+// -----------------------------------------------------------------------------
+// 
+void CCalenPluginLabel::ConstructL()
+	{
+	TRACE_ENTRY_POINT;
+    SetContainerWindowL(*this);
+    TRACE_EXIT_POINT;
+	}
 
-CalenPluginLabel::CalenPluginLabel(CCalenLunarVietnamesePlugin& aPlugin , QGraphicsItem* parent)
-    :HbLabel(parent),iPlugin(aPlugin)
-    {
+// -----------------------------------------------------------------------------
+// CCalenPluginLabel::~CCalenPluginLabel
+// -----------------------------------------------------------------------------
+// 
+CCalenPluginLabel::~CCalenPluginLabel()
+	{
+	TRACE_ENTRY_POINT;
+	TRACE_EXIT_POINT;	
+	}
+
+// -----------------------------------------------------------------------------
+// CCalenPluginLabel::Draw
+// -----------------------------------------------------------------------------
+// 
+void CCalenPluginLabel::Draw( const TRect& aRect) const
+	{
+	TRACE_ENTRY_POINT;
+	CEikLabel::Draw(aRect);
+	TRACE_EXIT_POINT;
+	}	
+
+// -----------------------------------------------------------------------------
+// CCalenPluginLabel::HandlePointerEventL
+// -----------------------------------------------------------------------------
+//
+void CCalenPluginLabel::HandlePointerEventL(const TPointerEvent& 
+                                            aPointerEvent)
+	{
 	TRACE_ENTRY_POINT;
 	
-	setAlignment(Qt::AlignHCenter);
-	setTextColor(Qt::blue);    
-    QFont font("Times", 9, QFont::Bold);    
-    setFont(font);
-    setTextWrapping(Hb::TextWrapping);
-    setOpacity(12);
-	    
-    TRACE_EXIT_POINT;    
-    }
-
-CalenPluginLabel::~CalenPluginLabel()
-    {
-    TRACE_ENTRY_POINT;
-    TRACE_EXIT_POINT;
-    }
-
-void CalenPluginLabel::showLunarData()
-    {
-    TRACE_ENTRY_POINT;
-    iPlugin.ShowDetailsL(); 
-    TRACE_EXIT_POINT;
-    }
-void CalenPluginLabel::paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget )
-    {
-	TRACE_ENTRY_POINT;
-   
-    HbLabel::paint(painter,option,widget);
-    QPen pen;//
-    pen.setStyle(Qt::SolidLine);
-    pen.setWidth(1);
-    pen.setBrush(Qt::gray);
-    
-    // Store the old pen
-    QPen oldPen = painter->pen();
-        
-    painter->setPen(pen);
-    QRectF rect = this->rect();
-    painter->eraseRect(rect);
-    painter->drawRect(rect);
-    painter->fillRect(rect,Qt::gray);
-    
-    // Set the old pen back
-    painter->setPen(oldPen);
-        
-    TRACE_EXIT_POINT;    
-    }
+	if( AknLayoutUtils::PenEnabled() &&
+	     aPointerEvent.iType == TPointerEvent::EButton1Down )
+	        {
+	        iPlugin.ShowDetailsL();
+	        }
 	
-void CalenPluginLabel::mousePressEvent(QGraphicsSceneMouseEvent* event)
-    {
-	TRACE_ENTRY_POINT;
-	Q_UNUSED(event);
-	iPlugin.ShowDetailsL();	
-	TRACE_EXIT_POINT;    
-    }
-		
-//EOF	
+	TRACE_EXIT_POINT;
+	}
+
+
+//EOF
