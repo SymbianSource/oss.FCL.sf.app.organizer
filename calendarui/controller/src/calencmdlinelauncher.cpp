@@ -354,6 +354,9 @@ TBool CCalenCmdLineLauncher::ProcessCommandParametersL(
                     else
                         {
                         iController.ViewManager().ActivateDefaultViewL( KUidCalenEventView);
+                        // Comment the following line when the the calendar.exe file is removed
+                        // from the startup list.
+                        iController.ViewManager().ActivateLocalViewL(KUidCalenEventView);
                         }
                     }
 		        }

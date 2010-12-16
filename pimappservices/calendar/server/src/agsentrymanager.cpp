@@ -656,6 +656,36 @@ const CAgnEntry* CAgnEntryManager::operator[](TInt aIndex) const
 	}
 
 
+TInt CAgnEntryManager::EntryCount() const
+//
+// Returns the entry count of the current used buffer.
+//
+    {    
+    TInt aEntryCount = 0;
+    
+    if(iUseIteratorBuffer)
+        {
+        aEntryCount = iIteratorBuffer->Count();
+        }
+    else
+        {
+        switch (iLastRestored)
+            {
+            case EGeneral:
+                aEntryCount = iGeneralBuffer->Count();
+                break;
+            case ETodo:
+                aEntryCount = iTodoBuffer->Count();
+                break; 
+            case ERpt:
+                aEntryCount = iRptBuffer->Count();
+                break;
+        default: 
+                break;
+            }
+        }
+    return aEntryCount;
+    }
 
 void CAgnEntryManager::StoreBufferL(const TStreamId& aStreamId,
 									const CBuffer* aBuffer, TBufferType aType)

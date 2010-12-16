@@ -547,12 +547,33 @@ void CCalenLunarVietnamesePlugin::UpdateLocalizerInfoL()
 void CCalenLunarVietnamesePlugin::HandleNotification(const TCalenNotification aNotification)
 	{
 	TRACE_ENTRY_POINT;
-	if (aNotification == ECalenNotifyContextChanged)
-        {
-        TRAP_IGNORE(UpdateLocalizerInfoL());
-        }
+	
+	TRAP_IGNORE(HandleNotificationL(aNotification));
+	
 	TRACE_EXIT_POINT;	
 	}
+
+// -----------------------------------------------------------------------------
+// CCalenLunarVietnamesePlugin::HandleNotificationL
+// For calling all the leave functions
+// -----------------------------------------------------------------------------
+//  
+void CCalenLunarVietnamesePlugin::HandleNotificationL(const TCalenNotification aNotification)
+    {
+    TRACE_ENTRY_POINT;
+    if (aNotification == ECalenNotifyContextChanged)
+        {
+        UpdateLocalizerInfoL();
+        
+        // to add the updated string to the infobar.
+        if ( iLabelControl )
+            {
+            FormatExtraRowStringL(*iLabelControl,EFalse );
+            iLabelControl->SetTextL( iExtraRowText );
+            }
+        }
+    TRACE_EXIT_POINT;   
+    }
 
 // -----------------------------------------------------------------------------
 // CCalenLunarVietnamesePlugin::ShowDetailsL

@@ -728,7 +728,9 @@ TInt CCalenEventViewContainer::RequestInstanceViewL()
         CCalInstance* instance = FindPossibleInstanceL( instanceId,*instanceView );
         if(instance)
             {
+            CleanupStack::PushL( instance );
             instanceStartTime = instance->StartTimeL().TimeLocalL();
+            CleanupStack::PopAndDestroy( instance );
             }
         }
     colIdArray.Reset();

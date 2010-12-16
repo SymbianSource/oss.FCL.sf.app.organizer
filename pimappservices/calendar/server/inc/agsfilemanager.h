@@ -328,6 +328,7 @@ private:
 	RFs& iFs;
 	TFileName iPrivatePath;
 	CAgnPermanentData* iPermanentData;
+	TBool isFirstBoot;
 	};
 
 

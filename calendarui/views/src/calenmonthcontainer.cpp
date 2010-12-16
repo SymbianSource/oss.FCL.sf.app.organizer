@@ -1219,21 +1219,18 @@ TBool CCalenMonthContainer::UseWeeksL() const
     
     TBool useWeeks( EFalse );
     
-    // Week numbers are not shown if layout is mirrored
-    // or monday isn't the default week start day
-    if( !AknLayoutUtils::LayoutMirrored() )
-        {
+
         CCalenSetting* setting(NULL);
         setting = CCalenSetting::InstanceL();
  
         CleanupReleasePushL( *setting ) ;
-
+    // Week numbers are not shown if monday isn't the default week start day
         if( setting->WeekFormat() == EMonday && setting->WeekNumberEnable() )
             {
             useWeeks = ETrue;
             }
         CleanupStack::PopAndDestroy( setting );
-        }
+
 
     TRACE_EXIT_POINT;
     return useWeeks;

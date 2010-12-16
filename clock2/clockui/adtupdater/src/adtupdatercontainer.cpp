@@ -881,7 +881,12 @@ TInt CAdtUpdaterContainer::ShowCountryListL()
             {
             // Get the selected item index in the list.
             selectedItem = countryListBox->CurrentItemIndex();
+            isCountrySelected = ETrue;
             }
+	    else
+	        {
+            isCountrySelected = EFalse;
+	        }
 	    }
 		// Get the text of the selected item.
 		TPtrC selectedCountryName = countryListBox->Model()->ItemText( selectedItem );
@@ -939,7 +944,7 @@ TInt CAdtUpdaterContainer::ShowCityListL( TInt aGroupId )
 	CleanupStack::PushL( cityList );
 
 	// We have only one city.
-	if( KSingleCity == cityList->Count() )
+	if( KSingleCity == cityList->Count() || !isCountrySelected)
 		{        
 		CTzLocalizedCity& localizedCity = cityList->At( KZero );
 		
@@ -953,7 +958,10 @@ TInt CAdtUpdaterContainer::ShowCityListL( TInt aGroupId )
 		// Set this id as the current zone.
 		tzLocalizer->SetTimeZoneL( timeZoneId );
 		tzLocalizer->SetFrequentlyUsedZoneL( *tzLocalizedCity, CTzLocalizedTimeZone::ECurrentZone );
-
+		
+		//reset the flag
+		isCountrySelected = ETrue;
+		
 		// Cleanup.
 		CleanupStack::PopAndDestroy( tzLocalizedCity );
 		CleanupStack::PopAndDestroy( cityList );

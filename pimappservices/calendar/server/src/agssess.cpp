@@ -4109,7 +4109,13 @@ TBool CAgnSessionFile::IsEntryAvailableAtIteratorL()
 CAgnEntry* CAgnSessionFile::FetchEntryAtIteratorL()
 	{
 	__ASSERT_ALWAYS(iEntryIter, User::Leave(KErrCorrupt));
-	return iModel->FetchEntryL(iEntryIter->At());
+	TAgnEntryId entryId;
+	TRAPD(err, entryId = iEntryIter->At());
+    if(err == KErrCorrupt)
+        {
+        return NULL;
+        }
+	return iModel->FetchEntryL(entryId);
 	}
 
 void CAgnSessionFile::ResetModel(const CAgnServFile& aServFile)

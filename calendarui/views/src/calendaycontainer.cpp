@@ -1492,7 +1492,7 @@ void CCalenDayContainer::HandlePointerEventL( const TPointerEvent& aPointerEvent
         CCalenDayListBoxView* view =
             static_cast<CCalenDayListBoxView*>( iListBox->View() );
         TInt pointerItemIndex( view->FirstLineOfCell( pointerIndex ) );
-        if ( iListBox->CurrentItemIndex() != pointerItemIndex )
+        if ( iListBox->CurrentItemIndex() != pointerItemIndex || iHighlightedRowNumber != pointerItemIndex )
             {
             HandleVerticalScrollL( pointerItemIndex );
             }

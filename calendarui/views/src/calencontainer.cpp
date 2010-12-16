@@ -367,6 +367,8 @@ void CCalenContainer::UpdateStatusPaneAndExtensionsL()
     CCoeControl* control = iLayoutManager->ControlOrNull();
     if ( control )
         {
+        // Activate the controls before calling a draw method, else draw method will fail.
+        control->ActivateL();
         control->DrawDeferred();
         }
 

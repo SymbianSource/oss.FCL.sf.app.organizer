@@ -1728,7 +1728,7 @@ void CAlarmUtils::DoSilence()
 //
 TBool CAlarmUtils::CheckForDuplicateAlarm()
     {
-	TRACE_ENTRY_POINT;
+    TRACE_ENTRY_POINT;
     TBool ret = EFalse;
     if(IsCalendarAlarm())
         {
@@ -1738,14 +1738,14 @@ TBool CAlarmUtils::CheckForDuplicateAlarm()
 			&& !iPrevCalFileName.CompareF(iAlarmData.iCalFileName) )
             {    
             TInt& count = iAlarmData.iAlarm.ClientData1();
-            if( (count >= KAlmAlertMinSnooze && 
+            if( !(count >= KAlmAlertMinSnooze && 
                 count <= KAlmAlertMaxSnooze ))
                 {
                 ret = ETrue;
                 }
             }
         }
-	TRACE_EXIT_POINT;
+    TRACE_EXIT_POINT;
     return ret;
     }
 

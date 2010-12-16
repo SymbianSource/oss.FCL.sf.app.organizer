@@ -70,6 +70,8 @@ NONSHARABLE_CLASS(CCalenInterimUtils2) : public CBase
          * Checks to see if Meeting Request Viewer functionality
          * is enabled and is available to use
          * @return current state of MR Viewers implementation
+         * @param aForceCheck is by default EFalse and ETrue only when
+         * it is absolutely needed as it has performance overhead.  
          */
         IMPORT_C TBool MRViewersEnabledL(TBool aForceCheck = EFalse);
 

@@ -440,6 +440,11 @@ class CAdtUpdaterContainer : public CCoeControl, public MStartupUIPhaseObserver
 		 */
 		TBool iNitzTimerActive;
 		
+		/*
+		 * @var isCountrySelected
+		 * @brief If country is selected in country pop up list, this is ETrue, if cancelled, EFalse.
+		 */
+		TBool isCountrySelected;
 		
 	};	
 

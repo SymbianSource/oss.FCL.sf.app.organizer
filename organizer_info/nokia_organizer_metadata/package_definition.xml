@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SystemDefinition xmlns:sf="http://www.symbian.org/system-definition" schema="3.0.0" id-namespace="http://www.nokia.com/schema/drd/system-definition">
+ <package id="sf:organizer" name="Organizer Application Suite" levels="support services engine ui app">
+    <collection id="sf:pimappsupport" name="PIM Application Support" level="support">
+     <component id="chinesecalendaralg" name="Chinese Calendar Algorithm" introduced="^2" purpose="optional" class="plugin">
+      <unit bldFile="../../pimappsupport/chinesecalendaralg/group" mrp="../../pimappsupport/chinesecalendaralg/group/app-services_chinesecalendaralgorithm.mrp"/>
+     </component>
+    </collection>
+   <collection id="sf:organizer_info" name="Organizer Application Suite Info" level="app">
+   <component id="nokia_organizer_metadata" name="Nokia Organizer Application Suite Metadata" class="config" introduced="^2" purpose="development" target="desktop">
+    <unit mrp="nokia_organizer_metadata.mrp"/>
+   </component>
+  </collection>
+     <collection id="organizerdataproviders" name="Organizer Data Providers" level="support">
+     	<component id="mtppimproxy" name="MTP PIM Proxy" introduced="^3" purpose="optional" class="plugin">
+      <unit bldFile="../../organizerdataproviders/mtppimproxy/group" mrp="../../organizerdataproviders/mtppimproxy/group/mtp_pimproxy.mrp"/>
+     </component>
+     <component id="mtptaskdp" name="MTP Task Provider" introduced="^3" purpose="optional" class="plugin">
+      <unit bldFile="../../organizerdataproviders/mtptaskdp/group" mrp="../../organizerdataproviders/mtptaskdp/group/mtp_taskdp.mrp"/>
+     </component>
+     <component id="mtpcalendardp" name="MTP Calendar Provider" introduced="^3" purpose="optional" class="plugin">
+      <unit bldFile="../../organizerdataproviders/mtpcalendardp/group" mrp="../../organizerdataproviders/mtpcalendardp/group/mtp_calendardp.mrp"/>
+     </component>
+  </collection>
+ </package>
+</SystemDefinition>

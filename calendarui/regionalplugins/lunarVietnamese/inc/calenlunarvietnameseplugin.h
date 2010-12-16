@@ -82,6 +82,7 @@ NONSHARABLE_CLASS(CCalenLunarVietnamesePlugin) :public CCalenCustomisation,
     
     public://From MCalenNotificationHandler 
         void HandleNotification(const TCalenNotification aNotification );
+        void HandleNotificationL(const TCalenNotification aNotification );
         
     private:
         void SetLabelContentL( CEikLabel& aLabel ,const TRect& aRect);

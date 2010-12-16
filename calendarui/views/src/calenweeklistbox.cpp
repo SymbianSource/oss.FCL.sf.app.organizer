@@ -524,6 +524,8 @@ TInt CCalenWeekListbox::PointerEventColumn(TPoint aPos)
     TRACE_ENTRY_POINT;
     
     TRect rect = iWeekContainer.ReducePreview( iWeekContainer.Rect() );
+    TInt newColumn = 0;
+    TBool mirrored(AknLayoutUtils::LayoutMirrored());
     TWeekListBoxLayout lay( iWeekContainer.UseInfobar(), 
                             iWeekContainer.UseToolbar(),
                             iWeekContainer.UsePreview(),
@@ -534,9 +536,18 @@ TInt CCalenWeekListbox::PointerEventColumn(TPoint aPos)
         {
         ++cellWidth;
         }
-
+    newColumn = ((aPos.iX - lay.WeekGridRect().iTl.iX) / cellWidth);
+    
+    if(mirrored)
+        {
+        return  (KCalenDaysInWeek - newColumn -1);
+        }
+    else
+        {
+        return newColumn;
+        }
+    
     TRACE_EXIT_POINT;
-    return  ((aPos.iX - lay.WeekGridRect().iTl.iX) / cellWidth);
     }
 
 // ---------------------------------------------------------

@@ -548,12 +548,33 @@ void CCalenLunarChinesePlugin::UpdateLocalizerInfoL()
 void CCalenLunarChinesePlugin::HandleNotification(const TCalenNotification aNotification)
 	{
 	TRACE_ENTRY_POINT;
-	if (aNotification == ECalenNotifyContextChanged)
-        {
-        TRAP_IGNORE(UpdateLocalizerInfoL());
-        }
+	
+	TRAP_IGNORE(HandleNotificationL(aNotification));
+	
 	TRACE_EXIT_POINT;	
 	}
+
+// -----------------------------------------------------------------------------
+// CCalenLunarChinesePlugin::HandleNotificationL
+// For calling all the leave functions
+// -----------------------------------------------------------------------------
+//  
+void CCalenLunarChinesePlugin::HandleNotificationL(const TCalenNotification aNotification)
+    {
+    TRACE_ENTRY_POINT;
+    if (aNotification == ECalenNotifyContextChanged)
+        {
+        UpdateLocalizerInfoL();
+        
+        // to add the updated string to the infobar.
+        if ( iLabelControl )
+            {
+            FormatExtraRowStringL(*iLabelControl,EFalse );
+            iLabelControl->SetTextL( iExtraRowText );
+            }
+        }
+    TRACE_EXIT_POINT;   
+    }
 
 // -----------------------------------------------------------------------------
 // CCalenLunarChinesePlugin::ShowDetailsL

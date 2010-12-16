@@ -114,7 +114,7 @@ CCalenTodoView::~CCalenTodoView()
         {
         delete iCmdCallback;
         }
-    iMarkedInstances.Reset();
+    iMarkedInstances.ResetAndDestroy();
     iMarkedInstances.Close();
     
     if(iMarkedTodoItems)
@@ -631,7 +631,7 @@ void CCalenTodoView::DynInitMenuPaneL(TInt aResourceId,          // Resource Id
                         }
                     }
                 }
-            if( !iServices.InterimUtilsL().MRViewersEnabledL( ETrue ) )
+            if( !iServices.InterimUtilsL().MRViewersEnabledL() )
                 {
                 aMenuPane->DeleteMenuItem( ECalenNewMeetingRequest );
                 }

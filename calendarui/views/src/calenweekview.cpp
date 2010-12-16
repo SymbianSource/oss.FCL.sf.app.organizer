@@ -329,7 +329,7 @@ void CCalenWeekView::DynInitMenuPaneL(TInt aResourceId,
                 {
                 aMenuPane->DeleteMenuItem(EAknCmdHelp);
                 }
-            if( !iServices.InterimUtilsL().MRViewersEnabledL( ETrue ) )
+            if( !iServices.InterimUtilsL().MRViewersEnabledL() )
                 {
                 aMenuPane->DeleteMenuItem( ECalenNewMeetingRequest );
                 }

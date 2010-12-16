@@ -186,7 +186,7 @@ void CCalenDayView::DoActivateImplL( const TVwsViewId& aPrevViewId,
         iShowBackButtonOnCba = EFalse;
         }
     //UpdateCbaL();
-
+    UpdateMapsAvailability();
     iEventViewCommandHandled = EFalse;
     TRACE_EXIT_POINT;
     }
@@ -356,7 +356,7 @@ void CCalenDayView::DynInitMenuPaneL( TInt aResourceId, CEikMenuPane* aMenuPane 
                     aMenuPane->DeleteMenuItem( ECalenCompleteTodo );
                     }
                 }
-            if(!iDayContainer->IsEmptyView() && CCalenLocationUtil::IsMapProviderAvailableL())
+            if(!iDayContainer->IsEmptyView() && IsMapsAvailable())
             	{
 	            if(iDayContainer->IsEventHasMapLocationL() || iDayContainer->IsEventHasNoLocationTextL())
 		            {
@@ -373,7 +373,7 @@ void CCalenDayView::DynInitMenuPaneL( TInt aResourceId, CEikMenuPane* aMenuPane 
 	            aMenuPane->DeleteMenuItem( ECalenShowLocation );	
 	            }
             
-            if( !iServices.InterimUtilsL().MRViewersEnabledL( ETrue ) )
+            if( !iServices.InterimUtilsL().MRViewersEnabledL() )
                 {
                 aMenuPane->DeleteMenuItem( ECalenNewMeetingRequest );
                 }
@@ -711,5 +711,34 @@ void CCalenDayView::UpdateDateFromContextL()
     
     TRACE_EXIT_POINT;
     }
+
+
+// ----------------------------------------------------------------------------
+// CCalenNativeView::UpdateMapsAvailability
+// Check if Maps provider is available
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+void CCalenDayView::UpdateMapsAvailability()
+	{
+	TRACE_ENTRY_POINT;
+    iMapsProviderAvailable = CCalenLocationUtil::IsMapProviderAvailableL();
+	TRACE_EXIT_POINT;
+	}
+
+
+  
+// ----------------------------------------------------------------------------
+// CCalenNativeView::IsMapsAvailable
+// Return  if Maps provider is available
+// (other items were commented in a header).
+// ----------------------------------------------------------------------------
+//
+TBool CCalenDayView::IsMapsAvailable()
+	{
+  	TRACE_ENTRY_POINT;
+  	TRACE_EXIT_POINT;
+	return iMapsProviderAvailable;
+  	}
 
 // End of File

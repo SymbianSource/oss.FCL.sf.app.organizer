@@ -46,7 +46,7 @@
 ; None
 
 ; Install files
-"/epoc32/release/armv5/udeb/CalendarCommonUtilsTest.dll"   -   "!:/Sys/Bin/CalendarCommonUtilsTest.dll"
+"/epoc32/release/armv5/udeb/caleninterimutils2test.dll"   -   "!:/Sys/Bin/caleninterimutils2test.dll"
 "/epoc32/winscw/C/testframework/caleninterimutils2test.cfg"	-	"c:/testframework/caleninterimutils2test.cfg"
 ;"/epoc32/winscw/C/testframework/TestFramework.ini"	-	"c:/testframework/TestFramework.ini"
   

@@ -385,11 +385,14 @@ TAgnEntryId TAgnEntryIter::At()
 @return The ID of the entry at the current iterator position. */
 	{
 
-//	__ASSERT_DEBUG(iEntryIter < iEntryManager.EntryCount() && iEntryIter >= 0,
-//				Panic(_L("Invalid index into entry cluster")));
-
 	//tell the Entry Manager to use the iterator buffer
 	iEntryManager.iUseIteratorBuffer = ETrue;
+	
+	//Check for boundary conditions of entry iterator.
+	if(iEntryIter >= iEntryManager.EntryCount() || iEntryIter < 0)
+	    {
+        User::Leave(KErrCorrupt);
+	    }
 	
 	TAgnEntryId entryId = iEntryManager[iEntryIter]->EntryId();
 

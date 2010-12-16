@@ -1606,6 +1606,7 @@ void CAgnServFileMgr::ConstructL()
 	const TInt KFileListGranularity = 1; // usually only one Calendar file opened at any one time
 	iFileList = new (ELeave) CArrayFixFlat<CAgnServFile*>(KFileListGranularity);
 	User::LeaveIfError(iFs.PrivatePath(iPrivatePath));
+	isFirstBoot = EFalse;
 	}
 
 void CAgnServFileMgr::CreatePermanentDataL()
@@ -1704,6 +1705,10 @@ CFileStore* CAgnServFileMgr::CreateAgendaFileLC(const TDesC& aFileName)
 		}	
 
 	CFileStore* fileStore = CPermanentFileStore::ReplaceL(iFs, *resolvedFileName, EFileWrite); //Create the file
+	if((0 == iFileList->Count()) && (aFileName.Compare(KDefaultSecureAgendaFileName)))
+	    {
+		isFirstBoot = ETrue;
+	    }
 	CleanupStack::PopAndDestroy(resolvedFileName);
 	CleanupStack::PushL(fileStore);
 	return fileStore;
@@ -1895,7 +1900,11 @@ void CAgnServFileMgr::RequeueAlarmsForShutdownCancellation()
 		CAgnServFile* servFile = (*iFileList)[count];
 		if(servFile)
 			{
-			servFile->DeleteAlarmsAndRequeueSessionAlarm();
+            if(!isFirstBoot)
+                {
+                servFile->DeleteAlarmsAndRequeueSessionAlarm();                
+                }
+            isFirstBoot = EFalse;
 			servFile->SetShutdownFlag(EFalse);
 			}
 		}

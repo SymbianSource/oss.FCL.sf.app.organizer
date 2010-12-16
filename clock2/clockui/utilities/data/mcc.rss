@@ -63,7 +63,7 @@ RESOURCE MCC_ARRAY r_array
 		// Ghana
 		MOBILE_COUNTRY_CODE
 			{
-			tzid	= 96;
+			tzid	= 104;
 			mcc		= 620;
 			},
 		// Africa/Addis_Ababa
@@ -3710,7 +3710,7 @@ RESOURCE MCC_ARRAY r_array
 		// Calcutta [Kolkata], West Bengal, India
 		MOBILE_COUNTRY_CODE
 			{
-			tzid	= 1800;
+			tzid	= 1944;
 			mcc		= 405;
 			},
 		// Asia/Tokyo

@@ -37,6 +37,7 @@
 #include <calsession.h>
 #include <calcalendarinfo.h>
 #include <calenmulticaluids.hrh>
+#include <app/CalenInterimUtils2.h>
 
 #include "calendarui_debug.h"
 #include "calennotifier.h"            // CCalenNotifier
@@ -767,6 +768,7 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
                CRepository* cenRep = CRepository::NewLC(KCRUidCalendar); 
                User::LeaveIfError( cenRep->Set( KCalendarLastUsedCalendar, lastCreatedFileName ) );
                CleanupStack::PopAndDestroy( cenRep );
+               PIM_TRAPD_HANDLE( iController.Services().InterimUtilsL().MRViewersEnabledL(ETrue) );
 			    }
 			case MCalFileChangeObserver::ECalendarInfoCreated:
 				{
@@ -805,6 +807,7 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
 
                 CleanupStack::PopAndDestroy(calendarInfo);
 
+                //remove calendar except default calendar
                 if (err == KErrNone && markAsdelete && aCalendarInfoChangeEntries[index]->FileNameL().CompareF(
                                KCalendarDatabaseFilePath))
                     {
@@ -812,7 +815,8 @@ void CCalenNotifier::CalendarInfoChangeNotificationL(
                     BroadcastNotification(ECalenNotifyDeleteInstanceView);
                     iGlobalData->RemoveCalendarL(iFilnameDeleted->Des());
                     BroadcastNotification(ECalenNotifyCalendarFileDeleted);
-                                       
+                    PIM_TRAPD_HANDLE( iController.Services().InterimUtilsL().MRViewersEnabledL(ETrue) );    
+                    
                     delete iFilnameDeleted;
                     iFilnameDeleted = NULL;
                     }				

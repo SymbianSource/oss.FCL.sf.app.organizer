@@ -315,7 +315,7 @@ void CCalenMonthView::DynInitMenuPaneL(TInt aResourceId,
                 {
                 aMenuPane->DeleteMenuItem( ECalenDeleteAllEntries );
                 }
-            if( !iServices.InterimUtilsL().MRViewersEnabledL( ETrue ) )
+            if( !iServices.InterimUtilsL().MRViewersEnabledL() )
                 {
                 aMenuPane->DeleteMenuItem( ECalenNewMeetingRequest );
                 }

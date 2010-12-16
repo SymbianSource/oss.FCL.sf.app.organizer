@@ -243,8 +243,6 @@ void CCalenAttachmentUi::DoHandleNotificationL(const TCalenNotification aNotific
             {
             if(iAddAttachmentFromViewer)
                 {
-                
-                
                 // Do not reset the model if the attachment list has been opened from the editor.
                 if(!iController.IsEditorActive())
                     {
@@ -254,12 +252,11 @@ void CCalenAttachmentUi::DoHandleNotificationL(const TCalenNotification aNotific
                     RemoveTemporaryFiles();
                     
                     iAttachmentModel->Reset();
+                    
+                    // refresh the event view when editor is not active only.
+                    iController.ViewManager().StartActiveStepL();
                     }
-                
                 iAddAttachmentFromViewer = EFalse;
-                
-                // refresh the event view
-                iController.ViewManager().StartActiveStepL();
                 }
             MCalenToolbar* toolbar = iController.Services().ToolbarOrNull();
             if(toolbar)

@@ -145,6 +145,16 @@ private:
      * Returns ETrue if the vsd is null.
      */
     TBool IsViewSpecificDataNullL();
+
+	/**
+    * @brief Check if Maps provider is available
+    */
+	void UpdateMapsAvailability();
+
+	  /**
+    * @brief Return  if Maps provider is available
+    */
+	TBool IsMapsAvailable();
     
 private:   // Data
 
@@ -168,6 +178,8 @@ private:
     TInt iHighlightedRowNumber;     // The row number highlighted.
     TInt iFirstEntryOnScreenIndex;  // The offset of the topmost item on screen to the first entry.
     TInt iEventViewCommandHandled;
+	//Availablity of map provider
+	TBool iMapsProviderAvailable;
     };
 
 #endif  // CALENDAYVIEW_H

@@ -54,6 +54,7 @@ public:
 	void InternalizeL(RReadStream& aStream);
 	void ExternalizeL(RWriteStream& aStream) const;
 	void CopyStreamIds(const CAgnEntryManager& aOriginalManager);
+	TInt EntryCount() const;
 private:
 	class TBufItem
 	/**

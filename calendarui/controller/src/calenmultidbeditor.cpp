@@ -439,11 +439,38 @@ TKeyResponse CCalenMultiDBEditor::OfferKeyEventL(const TKeyEvent& aKeyEvent, TEv
     {
     TRACE_ENTRY_POINT;
     TKeyResponse keyResponse(EKeyWasNotConsumed);
+    TInt ctrlid=IdOfFocusControl();
 
     if (aType == EEventKey)
        {
        switch (aKeyEvent.iCode)
         	{
+            case EKeyOK:
+            case EKeyEnter:
+                {
+                if( ctrlid == ECalenMultiDbColor)
+                    {
+                    GetColorL();
+                    }
+                else if ( ctrlid == ECalenMultiDbHiddenVisible )
+                    {
+                    iCalendarStatus = iCalendarInfo.Enabled();
+                    if( ECalenMultiDbHidden == iCalendarStatus )
+                        {
+                        SetVisiblityFieldL( ECalenMultiDbVisible ); 
+                        iCalendarStatus = ECalenMultiDbVisible;
+                        iCalendarInfo.SetEnabled(iCalendarStatus);
+                        }
+                    else
+                        {
+                        SetVisiblityFieldL( ECalenMultiDbHidden );
+                        iCalendarStatus = ECalenMultiDbHidden;
+                        iCalendarInfo.SetEnabled(iCalendarStatus);
+                        }
+                    }
+                keyResponse = EKeyWasConsumed;
+                }
+                break;
         	case EKeyEscape:
 			    TryExitL( EAknCmdExit );
         		keyResponse = EKeyWasConsumed;

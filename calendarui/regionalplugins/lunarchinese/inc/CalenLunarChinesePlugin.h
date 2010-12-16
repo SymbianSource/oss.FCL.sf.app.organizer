@@ -80,12 +80,15 @@ NONSHARABLE_CLASS(CCalenLunarChinesePlugin) : 	public CCalenCustomisation,
     public://From MCalenNotificationHandler 
         void HandleNotification( const TCalenNotification aNotification );
         
+        void HandleNotificationL( const TCalenNotification aNotification );
+        
     private:
         void SetLabelContentL( CEikLabel& aLabel ,const TRect& aRect);
         void SetLabelContentExtraL( CEikLabel& aLabel, TRect& aRect);
         void FormatExtraRowStringL( CEikLabel& aLabel,TBool aTwoLines);
         void UpdateLocalizerInfoL();
         void ExecuteMessageDialogL( TDesC& aMsgText );
+        
        
     public:
         void ShowDetailsL();

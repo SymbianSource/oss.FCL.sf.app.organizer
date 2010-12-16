@@ -310,7 +310,7 @@ void CCalenNativeView::DynInitMenuPaneL(TInt aResourceId, CEikMenuPane* aMenuPan
         {
         case R_CALENDAR_NOTETYPE_MENUPANE:
             {
-            if( !iServices.InterimUtilsL().MRViewersEnabledL( ETrue ) )
+            if( !iServices.InterimUtilsL().MRViewersEnabledL() )
                 {
                 aMenuPane->DeleteMenuItem( ECalenNewMeetingRequest );
                 }

@@ -387,20 +387,7 @@ TKeyResponse CCalenMissedEventContainer::OfferKeyEventL(const TKeyEvent& aKeyEve
     				keyResponse = EKeyWasConsumed;		
 					}
                 break;
-              }
-            case EKeyApplication0:
-            	{
-            	TPtrC location = iEntry->LocationL();
-				if(location.Length() || iEntry->GeoValueL())
-					{
-					if(CCalenLocationUtil::IsMapProviderAvailableL())	
-    					{
-    					iServices.IssueCommandL(ECalenShowLocation);
-        				keyResponse = EKeyWasConsumed;		
-    					}
-					}	
              	}
-                break;
             case EKeyBackspace:  /* fall through... */
             case EKeyDelete:
             	{            
